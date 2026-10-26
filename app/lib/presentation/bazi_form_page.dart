@@ -3,32 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
+import '../domain/cities.dart';
+import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
+import 'design.dart';
+import 'profiles_page.dart';
 
-class City {
-  const City(this.names, this.timezone, this.longitude);
-  final Map<String, String> names;
-  final String timezone;
-  final double longitude;
-  String name(String apiLocale) => names[apiLocale] ?? names['en']!;
-}
-
-/// Launch-market birthplaces. Longitude drives 真太陽時; timezone drives historical DST.
-const cities = [
-  City({'zh-Hant': '香港', 'zh-Hans': '香港', 'en': 'Hong Kong'}, 'Asia/Hong_Kong', 114.1694),
-  City({'zh-Hant': '台北', 'zh-Hans': '台北', 'en': 'Taipei'}, 'Asia/Taipei', 121.5654),
-  City({'zh-Hant': '新加坡', 'zh-Hans': '新加坡', 'en': 'Singapore'}, 'Asia/Singapore', 103.8198),
-  City({'zh-Hant': '吉隆坡', 'zh-Hans': '吉隆坡', 'en': 'Kuala Lumpur'}, 'Asia/Kuala_Lumpur', 101.6869),
-  City({'zh-Hant': '上海', 'zh-Hans': '上海', 'en': 'Shanghai'}, 'Asia/Shanghai', 121.4737),
-  City({'zh-Hant': '廣州', 'zh-Hans': '广州', 'en': 'Guangzhou'}, 'Asia/Shanghai', 113.2644),
-  City({'zh-Hant': '紐約', 'zh-Hans': '纽约', 'en': 'New York'}, 'America/New_York', -74.006),
-  City({'zh-Hant': '溫哥華', 'zh-Hans': '温哥华', 'en': 'Vancouver'}, 'America/Vancouver', -123.1207),
-  City({'zh-Hant': '多倫多', 'zh-Hans': '多伦多', 'en': 'Toronto'}, 'America/Toronto', -79.3832),
-  City({'zh-Hant': '倫敦', 'zh-Hans': '伦敦', 'en': 'London'}, 'Europe/London', -0.1278),
-  City({'zh-Hant': '悉尼', 'zh-Hans': '悉尼', 'en': 'Sydney'}, 'Australia/Sydney', 151.2093),
-];
-
+/// 八字 input. Starts from the default profile; pick another person from
+/// 「為誰排盤」, and adjust fields for this chart only.
 class BaziFormPage extends ConsumerStatefulWidget {
   const BaziFormPage({super.key});
 
@@ -37,30 +20,29 @@ class BaziFormPage extends ConsumerStatefulWidget {
 }
 
 class _BaziFormPageState extends ConsumerState<BaziFormPage> {
-  DateTime _date = DateTime(1990, 3, 15);
-  TimeOfDay _time = const TimeOfDay(hour: 14, minute: 30);
-  City _city = cities.first;
-  String _gender = 'male';
-  bool _trueSolar = true;
+  BirthProfile? _draft;
+  String? _profileId;
   bool _busy = false;
 
-  String get _local =>
-      '${DateFormat('yyyy-MM-dd').format(_date)}T${_time.hour.toString().padLeft(2, '0')}:${_time.minute.toString().padLeft(2, '0')}';
+  BirthProfile _fallback(String name) => sampleProfile(name).copyWith(name: name);
 
-  Future<void> _submit() async {
+  Future<void> _submit(BirthProfile p) async {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
+      final city = cityByKey(p.cityKey);
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'bazi',
-        'local': _local,
-        'timezone': _city.timezone,
-        'longitude': _city.longitude,
-        'gender': _gender,
-        'options': {'trueSolarTime': _trueSolar},
+        'local': DateFormat("yyyy-MM-dd'T'HH:mm").format(p.birthLocal),
+        'timezone': city.timezone,
+        'longitude': city.longitude,
+        'gender': p.gender,
+        'options': {'trueSolarTime': p.trueSolarTime},
       });
-      await navigator.push(MaterialPageRoute<void>(builder: (_) => BaziChartPage(chart: chart)));
+      // The name stays on the device: label the chart locally for history.
+      if (p.name.isNotEmpty) await ref.read(profilesProvider.notifier).labelChart(chart.chartId, p.name);
+      await navigator.push(MaterialPageRoute<void>(builder: (_) => BaziChartPage(chart: chart, personName: p.name)));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
     } finally {
@@ -71,71 +53,79 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final locale = ref.watch(settingsProvider).apiLocaleCode;
+    final book = ref.watch(profilesProvider).value;
+    final profiles = book?.profiles ?? const <BirthProfile>[];
+    final selected = profiles.where((p) => p.id == _profileId).firstOrNull ?? book?.defaultProfile;
+    final draft = _draft ?? selected ?? _fallback('');
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homeBazi)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: Space.page,
         children: [
-          Text(l10n.birthTime, style: Theme.of(context).textTheme.labelLarge),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.calendar_today),
-                  label: Text(DateFormat('yyyy-MM-dd').format(_date)),
-                  onPressed: () async {
-                    final d = await showDatePicker(
-                      context: context,
-                      initialDate: _date,
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (d != null) setState(() => _date = d);
-                  },
-                ),
+          FadeSlideIn(
+            child: AppCard(
+              title: l10n.profileFor,
+              icon: Icons.people_alt_outlined,
+              trailing: TextButton.icon(
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: Text(l10n.profiles),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfilesPage())),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.schedule),
-                  label: Text(_time.format(context)),
-                  onPressed: () async {
-                    final t = await showTimePicker(context: context, initialTime: _time);
-                    if (t != null) setState(() => _time = t);
-                  },
-                ),
+              child: profiles.isEmpty
+                  ? OutlinedButton.icon(
+                      icon: const Icon(Icons.person_add_alt_1),
+                      label: Text(l10n.createProfile),
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfileEditPage())),
+                    )
+                  : DropdownMenu<String>(
+                      key: const Key('profile-picker'),
+                      expandedInsets: EdgeInsets.zero,
+                      initialSelection: selected?.id,
+                      leadingIcon: const Icon(Icons.person_outline),
+                      dropdownMenuEntries: [
+                        for (final p in profiles)
+                          DropdownMenuEntry(
+                            value: p.id,
+                            label: p.name,
+                            trailingIcon: p.id == book?.defaultProfile?.id ? const Icon(Icons.star, size: 16) : null,
+                          ),
+                      ],
+                      onSelected: (id) => setState(() {
+                        _profileId = id;
+                        _draft = null; // switching person resets this-run edits
+                      }),
+                    ),
+            ),
+          ),
+          FadeSlideIn(
+            index: 1,
+            child: AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (profiles.isNotEmpty) ...[
+                    Text(
+                      l10n.profileHint,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: Space.m),
+                  ],
+                  BirthFields(value: draft, onChanged: (p) => setState(() => _draft = p)),
+                ],
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<City>(
-            initialValue: _city,
-            decoration: InputDecoration(labelText: l10n.city),
-            items: [for (final c in cities) DropdownMenuItem(value: c, child: Text(c.name(locale)))],
-            onChanged: (c) => setState(() => _city = c ?? _city),
-          ),
-          const SizedBox(height: 16),
-          Text(l10n.gender, style: Theme.of(context).textTheme.labelLarge),
-          SegmentedButton<String>(
-            segments: [
-              ButtonSegment(value: 'male', label: Text(l10n.male)),
-              ButtonSegment(value: 'female', label: Text(l10n.female)),
-            ],
-            selected: {_gender},
-            onSelectionChanged: (s) => setState(() => _gender = s.first),
-          ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.trueSolarTime),
-            value: _trueSolar,
-            onChanged: (v) => setState(() => _trueSolar = v),
-          ),
-          const SizedBox(height: 8),
-          FilledButton(
-            key: const Key('compute-chart'),
-            onPressed: _busy ? null : _submit,
-            child: Text(l10n.compute),
+          FadeSlideIn(
+            index: 2,
+            child: FilledButton.icon(
+              key: const Key('compute-chart'),
+              onPressed: _busy ? null : () => _submit(draft),
+              icon: _busy
+                  ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.auto_awesome),
+              label: Text(l10n.compute),
+            ),
           ),
         ],
       ),

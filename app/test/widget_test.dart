@@ -24,8 +24,8 @@ void main() {
   testWidgets('home shows both entries in 繁體 by default', (tester) async {
     await tester.pumpWidget(testApp(FakeApi()));
     await settle(tester);
-    expect(find.text('命理大師'), findsOneWidget);
-    expect(find.text('八字排盤'), findsOneWidget);
+    expect(find.text('命理大師'), findsWidgets); // app bar + greeting banner
+    expect(find.byKey(const Key('entry-bazi')), findsOneWidget);
     expect(find.text('塔羅'), findsOneWidget);
   });
 
@@ -35,7 +35,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('entry-bazi')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('compute-chart')));
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
     await settle(tester);
 
     final body = jsonDecode(api.requests.singleWhere((r) => r.url.path == '/v1/charts').body) as Map<String, dynamic>;
@@ -58,13 +58,13 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('entry-bazi')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('compute-chart')));
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
     await settle(tester);
     await scrollAndTap(tester, find.byKey(const Key('generate-report')));
     await settle(tester);
     await settle(tester);
 
-    final createReport = api.requests.firstWhere((r) => r.url.path == '/v1/reports');
+    final createReport = api.requests.firstWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports');
     expect((jsonDecode(createReport.body) as Map)['locale'], 'zh-Hant');
     expect(find.byKey(const Key('ai-label')), findsOneWidget);
     expect(find.text('命盤事實 · 引擎計算，非 AI'), findsOneWidget);
@@ -78,7 +78,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('entry-bazi')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('compute-chart')));
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
     await settle(tester);
     await scrollAndTap(tester, find.byKey(const Key('generate-report')));
     await settle(tester);
@@ -92,11 +92,11 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('entry-tarot')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('draw')));
+    await scrollAndTap(tester, find.byKey(const Key('draw')));
     await settle(tester);
     expect(find.byKey(const Key('generate-report')), findsNothing);
     for (final pos in ['過去', '現在', '未來']) {
-      await tester.tap(find.text(pos));
+      await scrollAndTap(tester, find.text(pos));
       await settle(tester);
     }
     await tester.scrollUntilVisible(find.byKey(const Key('generate-report')), 300, scrollable: mainScrollable);

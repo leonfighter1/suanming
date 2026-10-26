@@ -111,6 +111,7 @@
       "required": [
         "time_basis",
         "pillars",
+        "lunar",
         "day_master",
         "month_command",
         "wuxing_count",
@@ -119,6 +120,33 @@
         "liunian"
       ],
       "properties": {
+        "lunar": {
+          "description": "農曆 date of the civil birth date. The 農曆 year turns at 春節, the year pillar at 立春.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "basis",
+            "year",
+            "year_ganzhi",
+            "shengxiao",
+            "month",
+            "is_leap_month",
+            "month_name",
+            "day",
+            "day_name"
+          ],
+          "properties": {
+            "basis": { "enum": ["civil_local_date"] },
+            "year": { "type": "integer" },
+            "year_ganzhi": { "type": "string", "minLength": 2, "maxLength": 2 },
+            "shengxiao": { "type": "string", "minLength": 1, "maxLength": 1 },
+            "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+            "is_leap_month": { "type": "boolean" },
+            "month_name": { "type": "string" },
+            "day": { "type": "integer", "minimum": 1, "maximum": 30 },
+            "day_name": { "type": "string" }
+          }
+        },
         "day_master": {
           "type": "object",
           "additionalProperties": false,

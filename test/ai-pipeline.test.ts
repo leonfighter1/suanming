@@ -293,3 +293,10 @@ it("every 纳音 and 十神/十二长生 name the engine can emit is in the prot
   const stages = ["长生", "沐浴", "冠带", "临官", "帝旺", "绝", "养"];
   expect([...nayin, ...tenGods, ...stages].filter((k) => !terms[k])).toEqual([]);
 });
+
+it("facts layer shows the 農曆 date in the reader's script", async () => {
+  const { factsLayer } = await import("../src/ai/index.js");
+  expect(factsLayer(chart, "zh-Hant", 2026)[1]).toBe("農曆：庚午年二月十九（生肖馬）");
+  expect(factsLayer(chart, "zh-Hans", 2026)[1]).toBe("农历：庚午年二月十九（生肖马）");
+  expect(factsLayer(chart, "en", 2026)[1]).toBe("Lunar date: month 2, day 19, 庚午 year (Horse)");
+});

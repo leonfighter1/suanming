@@ -62,6 +62,14 @@ export interface PipelineDeps {
   now?: () => Date;
   maxRetries?: number;
   newId?: () => string;
+  /** Called when an agent starts an attempt, so callers can show live progress. */
+  onProgress?: (p: Progress) => void | Promise<void>;
+}
+
+export interface Progress {
+  stage: AgentName;
+  /** 1-based; > 1 means a regeneration after a rejected attempt */
+  attempt: number;
 }
 
 interface AgentTrace {
@@ -153,6 +161,7 @@ async function runAgent<T>(args: {
   payload: unknown;
   check: (data: T) => CheckResult<T>;
   maxRetries: number;
+  onProgress?: PipelineDeps["onProgress"];
 }): Promise<AgentOutcome<T>> {
   const prompt = PROMPTS[args.agent];
   const trace: AgentTrace = {
@@ -168,6 +177,7 @@ async function runAgent<T>(args: {
 
   for (let attempt = 0; attempt <= args.maxRetries; attempt++) {
     trace.attempts++;
+    await args.onProgress?.({ stage: args.agent, attempt: attempt + 1 });
     const res = await args.provider.generateJson({
       agent: args.agent,
       model: args.route.model,
@@ -289,6 +299,7 @@ export async function generateReport(
     schema: narrativeSchema(topics),
     payload: { topics, system: chart.system },
     maxRetries,
+    onProgress: deps.onProgress,
     user: (feedback) =>
       narrativeUser({
         system: chart.system,
@@ -355,6 +366,7 @@ export async function generateReport(
       schema: actionSchema(topics),
       payload: { topics },
       maxRetries,
+      onProgress: deps.onProgress,
       user: (feedback) =>
         actionUser({
           interpretation: narrative.value.sections,
@@ -400,6 +412,7 @@ export async function generateReport(
         schema: guardSchema,
         payload: draft,
         maxRetries: 0,
+        onProgress: deps.onProgress,
         user: () =>
           guardUser({
             facts,

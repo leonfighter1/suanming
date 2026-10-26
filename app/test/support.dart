@@ -9,6 +9,7 @@ import 'package:http/testing.dart';
 import 'package:mingli_app/app.dart';
 import 'package:mingli_app/application/providers.dart';
 import 'package:mingli_app/data/api_client.dart';
+import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/data/token_store.dart';
 import 'package:mingli_app/domain/terms.dart';
 
@@ -27,8 +28,19 @@ final mainScrollable = find.byType(Scrollable).first;
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
 /// fixtures; reports go pending → [finalReport].
 class FakeApi {
-  FakeApi({Map<String, dynamic>? finalReport, this.pendingPolls = 1, this.expireAccessOnce = false})
-      : finalReport = finalReport ?? fixture('report_passed');
+  FakeApi({
+    Map<String, dynamic>? finalReport,
+    this.pendingPolls = 1,
+    this.expireAccessOnce = false,
+    this.email = 'me@example.com',
+    this.pendingStage,
+  }) : finalReport = finalReport ?? fixture('report_passed');
+
+  /// The signed-in user's email (`test…` accounts get a seeded default profile).
+  final String email;
+
+  /// Stage reported while pending (null = none yet).
+  final String? pendingStage;
 
   final Map<String, dynamic> finalReport;
   int pendingPolls;
@@ -39,7 +51,13 @@ class FakeApi {
   int _tokenSerial = 0;
   String access = 'access-0';
 
-  Map<String, dynamic> get _pending => {...finalReport, 'status': 'pending', 'layers': null, 'ai_disclosure': null};
+  Map<String, dynamic> get _pending => {
+        ...finalReport,
+        'status': 'pending',
+        'layers': null,
+        'ai_disclosure': null,
+        if (pendingStage != null) 'progress': {'stage': pendingStage, 'attempt': 1, 'updated_at': '2026-10-26T00:00:00Z'},
+      };
 
   Map<String, dynamic> _tokens() {
     _tokenSerial++;
@@ -50,6 +68,9 @@ class FakeApi {
   late final client = MockClient((req) async {
     requests.add(req);
     final path = req.url.path;
+    if (req.method == 'GET' && path == '/v1/calendar/lunar') {
+      return _json({'date': req.url.queryParameters['date'], 'lunar': fixture('chart_bazi')['chart_fact']['facts']['lunar']}, 200);
+    }
     switch ((req.method, path)) {
       case ('POST', '/v1/auth/register'):
         return _json(_tokens(), 201);
@@ -69,7 +90,23 @@ class FakeApi {
       return _json({'title': 'Authentication failed', 'status': 401}, 401);
     }
     if (req.method == 'GET' && path == '/v1/me') {
-      return _json({'id': 'u1', 'email': 'me@example.com', 'country': 'HK', 'locale': 'zh-Hant', 'sign_in_methods': ['password'], 'created_at': '2026-10-26T00:00:00Z'}, 200);
+      return _json({'id': 'u1', 'email': email, 'country': 'HK', 'locale': 'zh-Hant', 'sign_in_methods': ['password'], 'created_at': '2026-10-26T00:00:00Z'}, 200);
+    }
+    if (req.method == 'GET' && path == '/v1/reports') {
+      return _json({
+        'items': [
+          {
+            'report_id': finalReport['report_id'],
+            'chart_id': '22222222-2222-4222-8222-222222222222',
+            'status': 'passed',
+            'created_at': '2026-10-25T00:00:00.000Z',
+            'updated_at': '2026-10-25T00:00:00.000Z',
+            'locale': 'zh-Hant',
+            'topics': ['wuxing'],
+            'chart': {'system': 'bazi', 'four_pillars': '庚午 己卯 己卯 辛未', 'civil_local': '1990-03-15T14:30:00'},
+          },
+        ],
+      }, 200);
     }
     if (req.method == 'DELETE' && path == '/v1/account') {
       return _json({'deleted': {'account': true, 'charts': 1, 'reports': 1}, 'completed_at': '2026-10-26T00:00:00Z'}, 200);
@@ -80,8 +117,9 @@ class FakeApi {
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
     if (req.method == 'GET' && path.startsWith('/v1/reports/')) {
-      if (pendingPolls > 0) {
-        pendingPolls--;
+      // pendingPolls < 0: stay pending forever.
+      if (pendingPolls != 0) {
+        if (pendingPolls > 0) pendingPolls--;
         return _json(_pending, 200);
       }
       return _json(finalReport, 200);
@@ -96,11 +134,20 @@ class FakeApi {
       );
 }
 
-Widget testApp(FakeApi api, {bool signedIn = true, TokenStore? tokens}) {
+/// [pollInterval] must be non-zero when a report never leaves pending, or the
+/// poller spins forever without letting fake time advance.
+Widget testApp(
+  FakeApi api, {
+  bool signedIn = true,
+  TokenStore? tokens,
+  ProfileStore? profiles,
+  Duration pollInterval = Duration.zero,
+}) {
   final store = tokens ?? InMemoryTokenStore(signedIn ? Tokens(api.access, 'refresh-0') : null);
   return ProviderScope(
     overrides: [
       tokenStoreProvider.overrideWithValue(store),
+      profileStoreProvider.overrideWithValue(profiles ?? InMemoryProfileStore()),
       apiClientProvider.overrideWith(
         (ref) => ApiClient(
           baseUrl: 'http://api.test',
@@ -109,7 +156,7 @@ Widget testApp(FakeApi api, {bool signedIn = true, TokenStore? tokens}) {
           onSignedOut: () => ref.invalidate(authProvider),
         ),
       ),
-      pollIntervalProvider.overrideWithValue(Duration.zero),
+      pollIntervalProvider.overrideWithValue(pollInterval),
       // rootBundle caches asset futures across tests, and a future created in a
       // previous test's fake-async zone never completes in the next one.
       termsProvider.overrideWithValue(AsyncValue.data(testTerms)),

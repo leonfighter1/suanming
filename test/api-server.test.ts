@@ -162,3 +162,82 @@ describe("v1 API", () => {
     await new Promise<void>((r) => down.close(() => r()));
   });
 });
+
+describe("GET /v1/calendar/lunar", () => {
+  it("returns the 農曆 date without auth and validates input", async () => {
+    const ok = await fetch(base + "/v1/calendar/lunar?date=2023-03-22");
+    expect(ok.status).toBe(200);
+    expect((await ok.json()).lunar).toMatchObject({ month_name: "闰二月", day_name: "初一" });
+    expect((await fetch(base + "/v1/calendar/lunar?date=2023-02-30")).status).toBe(400);
+    expect((await fetch(base + "/v1/calendar/lunar?date=x")).status).toBe(400);
+  });
+});
+
+describe("history and live progress", () => {
+  it("lists the owner's readings and charts newest first, and reopens a chart", async () => {
+    const h = H("HK", "hist");
+    const c1 = await (await post("/v1/charts", bazi, h)).json();
+    const c2 = await (
+      await post("/v1/charts", { system: "tarot", spread: "three_card" }, h)
+    ).json();
+    const r1 = await (
+      await post("/v1/reports", { chart_id: c1.chart_id, locale: "zh-Hant" }, h)
+    ).json();
+    await api.drain();
+
+    const reports = (await (await get("/v1/reports", h)).json()).items;
+    expect(reports).toHaveLength(1);
+    expect(reports[0]).toMatchObject({
+      report_id: r1.report_id,
+      status: "passed",
+      chart_id: c1.chart_id,
+    });
+    expect(reports[0].chart).toMatchObject({ system: "bazi", four_pillars: "庚午 己卯 己卯 辛未" });
+    expect(reports[0]).not.toHaveProperty("layers"); // list stays light; open the report for content
+
+    const charts = (await (await get("/v1/charts", h)).json()).items;
+    expect(charts.map((c: { chart_id: string }) => c.chart_id)).toEqual([c2.chart_id, c1.chart_id]);
+    expect(charts[0].chart.cards).toHaveLength(3);
+
+    const again = await (await get(`/v1/charts/${c1.chart_id}`, h)).json();
+    expect(again.chart_fact.system).toBe("bazi");
+    expect((await get(`/v1/charts/${c1.chart_id}`, H("HK", "someone-else"))).status).toBe(404);
+    expect((await (await get("/v1/reports", H("HK", "someone-else"))).json()).items).toEqual([]);
+  });
+
+  it("a pending report exposes the stage the pipeline is in", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const slow = {
+      name: "slow",
+      generateJson: async (req: Parameters<MockProvider["generateJson"]>[0]) => {
+        if (req.agent === "action") await gate;
+        return mock.generateJson(req);
+      },
+    };
+    const s = createApiServer({
+      secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
+      providers: { deepseek: slow, anthropic: slow },
+      devMode: true,
+      log: () => {},
+    });
+    await new Promise<void>((r) => s.listen(0, "127.0.0.1", r));
+    const url = `http://127.0.0.1:${(s.address() as AddressInfo).port}`;
+    const p = (path: string, body: unknown) =>
+      fetch(url + path, { method: "POST", headers: H(), body: JSON.stringify(body) });
+    const { chart_id } = await (await p("/v1/charts", bazi)).json();
+    const { report_id } = await (await p("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
+    let view: { status: string; progress?: { stage: string; attempt: number } } = { status: "" };
+    for (let i = 0; i < 50 && view.progress?.stage !== "action"; i++) {
+      view = await (await fetch(`${url}/v1/reports/${report_id}`, { headers: H() })).json();
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    expect(view).toMatchObject({ status: "pending", progress: { stage: "action", attempt: 1 } });
+    release();
+    await s.drain();
+    const done = await (await fetch(`${url}/v1/reports/${report_id}`, { headers: H() })).json();
+    expect(done.status).toBe("passed");
+    expect(done).not.toHaveProperty("progress");
+    await new Promise<void>((r) => s.close(() => r()));
+  });
+});

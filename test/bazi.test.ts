@@ -205,3 +205,38 @@ it("yearGanZhi anchors", () => {
   expect(yearGanZhi(2024)).toBe("甲辰");
   expect(yearGanZhi(1900)).toBe("庚子");
 });
+
+describe("農曆 對照", () => {
+  it("known dates (Spring Festival 1984, leap 2nd month 2023)", async () => {
+    const { lunarDate } = await import("../src/engines/bazi/index.js");
+    expect(lunarDate(1990, 3, 15)).toMatchObject({
+      year_ganzhi: "庚午",
+      shengxiao: "马",
+      month: 2,
+      month_name: "二月",
+      day: 19,
+      day_name: "十九",
+      is_leap_month: false,
+    });
+    expect(lunarDate(1984, 2, 2)).toMatchObject({
+      year_ganzhi: "甲子",
+      month: 1,
+      month_name: "正月",
+      day_name: "初一",
+    });
+    expect(lunarDate(2023, 3, 22)).toMatchObject({
+      month: 2,
+      is_leap_month: true,
+      month_name: "闰二月",
+      day_name: "初一",
+    });
+  });
+
+  it("農曆 year (春節) and 八字 year (立春) can differ", async () => {
+    const { lunarDate } = await import("../src/engines/bazi/index.js");
+    // 2024-02-05: after 立春 (Feb 4) but before 春節 (Feb 10)
+    const f = computeBazi({ ...base, local: "2024-02-05T12:00" }, ctx).facts as unknown as Facts;
+    expect(gz(f.pillars.year)).toBe("甲辰");
+    expect(lunarDate(2024, 2, 5).year_ganzhi).toBe("癸卯");
+  });
+});

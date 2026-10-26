@@ -291,6 +291,128 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get captchaRequired => '尝试次数过多，请稍等几分钟再试。';
+
+  @override
+  String get profiles => '个人资料';
+
+  @override
+  String get profileFor => '为谁排盘';
+
+  @override
+  String get addProfile => '新增资料';
+
+  @override
+  String get editProfile => '编辑资料';
+
+  @override
+  String get name => '姓名';
+
+  @override
+  String get setDefault => '设为默认';
+
+  @override
+  String get isDefault => '默认';
+
+  @override
+  String get deleteProfile => '删除资料';
+
+  @override
+  String get profileHint => '以下修改只用于本次排盘；要永久修改请编辑资料。';
+
+  @override
+  String get noProfileTitle => '填写你的出生资料';
+
+  @override
+  String get noProfileBody => '保存一次，之后每次排盘都会自动带入。也可以为他人新增资料。';
+
+  @override
+  String get createProfile => '建立资料';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get saved => '已保存';
+
+  @override
+  String get lunarCompare => '农历对照';
+
+  @override
+  String get gregorian => '公历';
+
+  @override
+  String get lunarLabel => '农历';
+
+  @override
+  String get zodiac => '生肖';
+
+  @override
+  String get lunarYearNote => '农历年以春节为界，八字年柱以立春为界。';
+
+  @override
+  String get history => '历史记录';
+
+  @override
+  String get historyEmpty => '还没有解读记录，生成后会显示在这里。';
+
+  @override
+  String get recent => '最近记录';
+
+  @override
+  String get viewAll => '查看全部';
+
+  @override
+  String get analyzing => 'AI 正在深度分析中';
+
+  @override
+  String get stageNarrative => '深度解读命盘';
+
+  @override
+  String get stageAction => '整理行动建议';
+
+  @override
+  String get stageGuard => '内容合规审查';
+
+  @override
+  String get stageWaiting => '排队中';
+
+  @override
+  String elapsed(String time) {
+    return '已用时 $time';
+  }
+
+  @override
+  String retrying(int n) {
+    return '上一稿未通过检查，正在重写（第 $n 次）';
+  }
+
+  @override
+  String get download => '下载';
+
+  @override
+  String get copyAll => '复制全文';
+
+  @override
+  String get copied => '已复制';
+
+  @override
+  String get more => '更多';
+
+  @override
+  String chartOf(String name) {
+    return '$name 的命盘';
+  }
+
+  @override
+  String greeting(String name) {
+    return '你好，$name';
+  }
+
+  @override
+  String get reportTitle => '命理大师 AI 解读';
+
+  @override
+  String get openChart => '查看命盘';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -579,4 +701,126 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get captchaRequired => '嘗試次數過多，請稍候幾分鐘再試。';
+
+  @override
+  String get profiles => '個人資料';
+
+  @override
+  String get profileFor => '為誰排盤';
+
+  @override
+  String get addProfile => '新增資料';
+
+  @override
+  String get editProfile => '編輯資料';
+
+  @override
+  String get name => '姓名';
+
+  @override
+  String get setDefault => '設為預設';
+
+  @override
+  String get isDefault => '預設';
+
+  @override
+  String get deleteProfile => '刪除資料';
+
+  @override
+  String get profileHint => '以下修改只用於本次排盤；要永久修改請編輯資料。';
+
+  @override
+  String get noProfileTitle => '填寫你的出生資料';
+
+  @override
+  String get noProfileBody => '儲存一次，之後每次排盤都會自動帶入。也可以為他人新增資料。';
+
+  @override
+  String get createProfile => '建立資料';
+
+  @override
+  String get save => '儲存';
+
+  @override
+  String get saved => '已儲存';
+
+  @override
+  String get lunarCompare => '農曆對照';
+
+  @override
+  String get gregorian => '公曆';
+
+  @override
+  String get lunarLabel => '農曆';
+
+  @override
+  String get zodiac => '生肖';
+
+  @override
+  String get lunarYearNote => '農曆年以春節為界，八字年柱以立春為界。';
+
+  @override
+  String get history => '歷史紀錄';
+
+  @override
+  String get historyEmpty => '還沒有解讀紀錄，生成後會顯示在這裡。';
+
+  @override
+  String get recent => '最近紀錄';
+
+  @override
+  String get viewAll => '查看全部';
+
+  @override
+  String get analyzing => 'AI 正在深度分析中';
+
+  @override
+  String get stageNarrative => '深度解讀命盤';
+
+  @override
+  String get stageAction => '整理行動建議';
+
+  @override
+  String get stageGuard => '內容合規審查';
+
+  @override
+  String get stageWaiting => '排隊中';
+
+  @override
+  String elapsed(String time) {
+    return '已用時 $time';
+  }
+
+  @override
+  String retrying(int n) {
+    return '上一稿未通過檢查，正在重寫（第 $n 次）';
+  }
+
+  @override
+  String get download => '下載';
+
+  @override
+  String get copyAll => '複製全文';
+
+  @override
+  String get copied => '已複製';
+
+  @override
+  String get more => '更多';
+
+  @override
+  String chartOf(String name) {
+    return '$name 的命盤';
+  }
+
+  @override
+  String greeting(String name) {
+    return '你好，$name';
+  }
+
+  @override
+  String get reportTitle => '命理大師 AI 解讀';
+
+  @override
+  String get openChart => '查看命盤';
 }

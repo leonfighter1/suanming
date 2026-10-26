@@ -200,6 +200,27 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
 
   /v1/charts:
+    get:
+      tags: [charts]
+      operationId: listCharts
+      summary: The user's charts, newest first (history)
+      parameters:
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 20 },
+          }
+      responses:
+        "200":
+          description: chart_id, created_at and a chart summary per item
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { type: object } }
+        "401": { $ref: "#/components/responses/Problem" }
     post:
       tags: [charts]
       operationId: createChart
@@ -235,6 +256,27 @@ paths:
         "451": { $ref: "#/components/responses/Unavailable" }
 
   /v1/reports:
+    get:
+      tags: [reports]
+      operationId: listReports
+      summary: The user's readings, newest first (history)
+      parameters:
+        - {
+            name: limit,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 20 },
+          }
+      responses:
+        "200":
+          description: Report views without layers, plus chart_id and a chart summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { type: object } }
+        "401": { $ref: "#/components/responses/Problem" }
     post:
       tags: [reports]
       operationId: createReport
@@ -281,6 +323,47 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/calendar/lunar:
+    get:
+      tags: [charts]
+      operationId: lunarDate
+      summary: 農曆 equivalent of a Gregorian date (public, stateless)
+      security: []
+      parameters:
+        - { name: date, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        "200":
+          description: Lunar date (same fields as ChartFact facts.lunar)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [date, lunar]
+                properties:
+                  date: { type: string, format: date }
+                  lunar: { type: object }
+        "400": { $ref: "#/components/responses/Problem" }
+
+  /v1/charts/{chart_id}:
+    get:
+      tags: [charts]
+      operationId: getChart
+      summary: Reopen one of the user's charts
+      parameters:
+        - { name: chart_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: The chart
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chart_id, chart_fact]
+                properties:
+                  chart_id: { type: string, format: uuid }
+                  chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
+        "404": { $ref: "#/components/responses/Problem" }
 
   /v1/reports/{report_id}:
     get:
@@ -462,6 +545,13 @@ components:
         message:
           description: User-safe explanation when status is not passed or pending
           type: string
+        progress:
+          description: Present while pending; the pipeline stage currently running
+          type: object
+          properties:
+            stage: { type: string, enum: [narrative, action, guard] }
+            attempt: { type: integer, minimum: 1 }
+            updated_at: { type: string, format: date-time }
         layers:
           description: Present only when status = passed
           type: object

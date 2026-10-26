@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'design.dart';
 import 'widgets/report_request.dart';
 
 class TarotPage extends ConsumerStatefulWidget {
@@ -44,46 +45,70 @@ class _TarotPageState extends ConsumerState<TarotPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homeTarot)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: Space.page,
         children: [
-          DropdownButtonFormField<String>(
-            initialValue: _spread,
-            decoration: InputDecoration(labelText: l10n.spread),
-            items: [
-              DropdownMenuItem(value: 'single', child: Text(l10n.spreadSingle)),
-              DropdownMenuItem(value: 'three_card', child: Text(l10n.spreadThree)),
-              DropdownMenuItem(value: 'celtic_cross', child: Text(l10n.spreadCeltic)),
-            ],
-            onChanged: (v) => setState(() => _spread = v ?? _spread),
+          FadeSlideIn(
+            child: HeroBanner(title: l10n.homeTarot, subtitle: l10n.homeTarotDesc, icon: Icons.style_rounded),
           ),
-          const SizedBox(height: 8),
-          FilledButton.icon(
-            key: const Key('draw'),
-            onPressed: _busy ? null : _draw,
-            icon: const Icon(Icons.style),
-            label: Text(l10n.draw),
-          ),
-          if (chart != null) ...[
-            const SizedBox(height: 16),
-            Text(l10n.tapToReveal, textAlign: TextAlign.center),
-            const SizedBox(height: 8),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final c in chart.tarot.cards)
-                  _FlipCard(
-                    card: c,
-                    revealed: _revealed.contains(c.position),
-                    onTap: () => setState(() => _revealed.add(c.position)),
+          FadeSlideIn(
+            index: 1,
+            child: AppCard(
+              title: l10n.spread,
+              icon: Icons.dashboard_customize_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DropdownMenu<String>(
+                    key: const Key('spread'),
+                    expandedInsets: EdgeInsets.zero,
+                    initialSelection: _spread,
+                    dropdownMenuEntries: [
+                      DropdownMenuEntry(value: 'single', label: l10n.spreadSingle),
+                      DropdownMenuEntry(value: 'three_card', label: l10n.spreadThree),
+                      DropdownMenuEntry(value: 'celtic_cross', label: l10n.spreadCeltic),
+                    ],
+                    onSelected: (v) => setState(() => _spread = v ?? _spread),
                   ),
-              ],
+                  const SizedBox(height: Space.l),
+                  FilledButton.icon(
+                    key: const Key('draw'),
+                    onPressed: _busy ? null : _draw,
+                    icon: const Icon(Icons.style),
+                    label: Text(l10n.draw),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            if (_revealed.length == chart.tarot.cards.length)
-              ReportRequest(chartId: chart.chartId, system: 'tarot'),
-          ],
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            child: chart == null
+                ? const SizedBox.shrink()
+                : AppCard(
+                    key: ValueKey(chart.chartId),
+                    child: Column(
+                      children: [
+                        Text(l10n.tapToReveal, textAlign: TextAlign.center),
+                        const SizedBox(height: Space.l),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: Space.m,
+                          runSpacing: Space.l,
+                          children: [
+                            for (final c in chart.tarot.cards)
+                              _FlipCard(
+                                card: c,
+                                revealed: _revealed.contains(c.position),
+                                onTap: () => setState(() => _revealed.add(c.position)),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+          if (chart != null && _revealed.length == chart.tarot.cards.length)
+            FadeSlideIn(child: ReportRequest(chartId: chart.chartId, system: 'tarot', title: l10n.homeTarot)),
         ],
       ),
     );
@@ -118,13 +143,23 @@ class _FlipCard extends ConsumerWidget {
                   ..setEntry(3, 2, 0.001)
                   ..rotateY(pi * v),
                 child: Container(
-                  width: 96,
-                  height: 150,
-                  padding: const EdgeInsets.all(8),
+                  width: 104,
+                  height: 164,
+                  padding: const EdgeInsets.all(Space.s + 2),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: showFace ? scheme.surfaceContainerHigh : scheme.primary,
-                    border: Border.all(color: scheme.outlineVariant),
+                    borderRadius: BorderRadius.circular(Radii.field),
+                    color: showFace ? scheme.surfaceContainerHighest : null,
+                    gradient: showFace
+                        ? null
+                        : LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [scheme.primary, scheme.tertiary],
+                          ),
+                    border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+                    boxShadow: [
+                      BoxShadow(color: scheme.shadow.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 6)),
+                    ],
                   ),
                   // Mirror the face back so text reads correctly after the flip,
                   // and turn it upside down for a reversed card.

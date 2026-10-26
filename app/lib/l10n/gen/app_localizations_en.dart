@@ -300,4 +300,129 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get captchaRequired =>
       'Too many attempts. Please wait a few minutes and try again.';
+
+  @override
+  String get profiles => 'Profiles';
+
+  @override
+  String get profileFor => 'Chart for';
+
+  @override
+  String get addProfile => 'Add profile';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get setDefault => 'Set as default';
+
+  @override
+  String get isDefault => 'Default';
+
+  @override
+  String get deleteProfile => 'Delete profile';
+
+  @override
+  String get profileHint =>
+      'Changes below apply to this chart only. Edit the profile to change it everywhere.';
+
+  @override
+  String get noProfileTitle => 'Add your birth details';
+
+  @override
+  String get noProfileBody =>
+      'Save them once and every chart starts from them. You can add profiles for others too.';
+
+  @override
+  String get createProfile => 'Create profile';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get saved => 'Saved';
+
+  @override
+  String get lunarCompare => 'Lunar calendar';
+
+  @override
+  String get gregorian => 'Gregorian';
+
+  @override
+  String get lunarLabel => 'Lunar';
+
+  @override
+  String get zodiac => 'Zodiac';
+
+  @override
+  String get lunarYearNote =>
+      'The lunar year turns at Spring Festival; the year pillar turns at Li Chun.';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get historyEmpty => 'No readings yet. Your readings will appear here.';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get viewAll => 'View all';
+
+  @override
+  String get analyzing => 'AI is analysing in depth';
+
+  @override
+  String get stageNarrative => 'Reading the chart';
+
+  @override
+  String get stageAction => 'Drafting suggestions';
+
+  @override
+  String get stageGuard => 'Content review';
+
+  @override
+  String get stageWaiting => 'Queued';
+
+  @override
+  String elapsed(String time) {
+    return 'Elapsed $time';
+  }
+
+  @override
+  String retrying(int n) {
+    return 'A draft didn\'t pass our checks; rewriting (attempt $n)';
+  }
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get copyAll => 'Copy all';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String get more => 'More';
+
+  @override
+  String chartOf(String name) {
+    return '$name\'s chart';
+  }
+
+  @override
+  String greeting(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String get reportTitle => 'Mingli Master AI reading';
+
+  @override
+  String get openChart => 'Open chart';
 }

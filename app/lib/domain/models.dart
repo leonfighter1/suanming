@@ -91,9 +91,43 @@ class Liunian {
   final List<BranchRelation> relations;
 }
 
+class LunarDate {
+  const LunarDate({
+    required this.yearGanzhi,
+    required this.shengxiao,
+    required this.month,
+    required this.isLeapMonth,
+    required this.monthName,
+    required this.day,
+    required this.dayName,
+  });
+
+  factory LunarDate.fromJson(Json j) => LunarDate(
+        yearGanzhi: j['year_ganzhi'] as String,
+        shengxiao: j['shengxiao'] as String,
+        month: j['month'] as int,
+        isLeapMonth: j['is_leap_month'] as bool,
+        monthName: j['month_name'] as String,
+        day: j['day'] as int,
+        dayName: j['day_name'] as String,
+      );
+
+  final String yearGanzhi;
+  final String shengxiao;
+  final int month;
+  final bool isLeapMonth;
+
+  /// Engine form (simplified), e.g. 闰二月 — display through the term table.
+  final String monthName;
+  final int day;
+  final String dayName;
+}
+
 class BaziChart {
   const BaziChart({
     required this.pillars,
+    required this.lunar,
+    required this.civilLocal,
     required this.dayMasterGan,
     required this.dayMasterWuxing,
     required this.dayMasterYinYang,
@@ -112,6 +146,8 @@ class BaziChart {
       pillars: {
         for (final k in pillarOrder) k: Pillar.fromJson(p[k] as Json),
       },
+      lunar: LunarDate.fromJson(f['lunar'] as Json),
+      civilLocal: (f['time_basis'] as Json)['civil_local'] as String,
       dayMasterGan: dm['gan'] as String,
       dayMasterWuxing: dm['wuxing'] as String,
       dayMasterYinYang: dm['yin_yang'] as String,
@@ -127,6 +163,10 @@ class BaziChart {
   static const pillarOrder = ['year', 'month', 'day', 'hour'];
 
   final Map<String, Pillar> pillars;
+  final LunarDate lunar;
+
+  /// Birth wall-clock time as entered (YYYY-MM-DDTHH:mm:ss).
+  final String civilLocal;
   final String dayMasterGan;
   final String dayMasterWuxing;
   final String dayMasterYinYang;
@@ -259,6 +299,9 @@ class ReportView {
     this.message,
     this.layers,
     this.model,
+    this.progressStage,
+    this.progressAttempt = 1,
+    this.createdAt,
   });
 
   factory ReportView.fromJson(Json j) => ReportView(
@@ -268,6 +311,9 @@ class ReportView {
         message: j['message'] as String?,
         layers: j['layers'] == null ? null : ReportLayers.fromJson(j['layers'] as Json),
         model: (j['ai_disclosure'] as Json?)?['model'] as String?,
+        progressStage: (j['progress'] as Json?)?['stage'] as String?,
+        progressAttempt: ((j['progress'] as Json?)?['attempt'] as int?) ?? 1,
+        createdAt: DateTime.tryParse(j['created_at'] as String? ?? ''),
       );
 
   final String id;
@@ -279,5 +325,44 @@ class ReportView {
   final ReportLayers? layers;
   final String? model;
 
+  /// While pending: narrative | action | guard (null until the first stage starts).
+  final String? progressStage;
+  final int progressAttempt;
+  final DateTime? createdAt;
+
   bool get isTerminal => status != 'pending';
+}
+
+/// One row of GET /v1/reports (history).
+class HistoryItem {
+  const HistoryItem({
+    required this.reportId,
+    required this.chartId,
+    required this.status,
+    required this.createdAt,
+    required this.system,
+    this.fourPillars,
+    this.cardIds = const [],
+  });
+
+  factory HistoryItem.fromJson(Json j) {
+    final chart = (j['chart'] as Json?) ?? const {};
+    return HistoryItem(
+      reportId: j['report_id'] as String,
+      chartId: j['chart_id'] as String,
+      status: j['status'] as String,
+      createdAt: DateTime.parse(j['created_at'] as String),
+      system: chart['system'] as String? ?? 'bazi',
+      fourPillars: chart['four_pillars'] as String?,
+      cardIds: _list(chart['cards'], (c) => c['card_id'] as String),
+    );
+  }
+
+  final String reportId;
+  final String chartId;
+  final String status;
+  final DateTime createdAt;
+  final String system;
+  final String? fourPillars;
+  final List<String> cardIds;
 }

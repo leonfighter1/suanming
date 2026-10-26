@@ -21,6 +21,15 @@ export function term(key: string, locale: Locale): string {
   return loadTerms().terms[key]?.[locale] ?? key;
 }
 
+/**
+ * Character-wise display of a short engine string (e.g. 农历 month "闰二月" → "閏二月").
+ * Only for short fixed vocabularies like month names and 生肖, never free text.
+ */
+export function termChars(text: string, locale: Locale): string {
+  if (locale === "en") return text;
+  return [...text].map((ch) => loadTerms().terms[ch]?.[locale] ?? ch).join("");
+}
+
 /** Glossary of the protected terms that occur in `text`, for prompt injection. */
 export function glossaryFor(text: string, locale: Locale): Record<string, string> {
   const out: Record<string, string> = {};

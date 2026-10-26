@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
 import '../data/api_client.dart';
+import '../data/profile_store.dart';
 import '../data/token_store.dart';
 import '../domain/models.dart';
+import '../domain/profile.dart';
 import '../domain/terms.dart';
 
 const zhHant = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
@@ -86,7 +88,10 @@ class AuthNotifier extends AsyncNotifier<AppUser?> {
   }
 
   Future<void> deleteAccount() async {
+    final id = state.value?.id;
     await _api.deleteAccount();
+    // The account is gone: its on-device profiles go too.
+    if (id != null) await ref.read(profileStoreProvider).delete(id);
     state = const AsyncData(null);
   }
 }
@@ -94,6 +99,79 @@ class AuthNotifier extends AsyncNotifier<AppUser?> {
 final authProvider = AsyncNotifierProvider<AuthNotifier, AppUser?>(AuthNotifier.new);
 
 final termsProvider = FutureProvider<Terms>((ref) => Terms.load(rootBundle));
+
+// ---- personal profiles (device only) ----
+
+final profileStoreProvider = Provider<ProfileStore>((ref) => SecureProfileStore());
+
+/// The editable sample the test account starts with.
+BirthProfile sampleProfile(String name) => BirthProfile(
+      id: 'default',
+      name: name,
+      gender: 'male',
+      birthLocal: DateTime(1990, 3, 15, 14, 30),
+      cityKey: 'hk',
+    );
+
+/// Test accounts get a ready-made default profile so testing starts at once.
+bool isTestAccount(AppUser u) => (u.email ?? '').toLowerCase().startsWith('test');
+
+class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
+  String? _userId;
+  ProfileStore get _store => ref.read(profileStoreProvider);
+
+  @override
+  Future<ProfileBook> build() async {
+    final user = await ref.watch(authProvider.future);
+    _userId = user?.id;
+    if (user == null) return const ProfileBook();
+    var book = ProfileBook.decode(await _store.read(user.id));
+    if (book.profiles.isEmpty && isTestAccount(user)) {
+      book = ProfileBook(profiles: [sampleProfile('測試用戶')], defaultId: 'default');
+      await _store.write(user.id, book.encode());
+    }
+    return book;
+  }
+
+  Future<void> _save(ProfileBook book) async {
+    state = AsyncData(book);
+    if (_userId != null) await _store.write(_userId!, book.encode());
+  }
+
+  ProfileBook get _book => state.value ?? const ProfileBook();
+
+  Future<void> upsert(BirthProfile p, {bool makeDefault = false}) async {
+    final list = [..._book.profiles];
+    final i = list.indexWhere((x) => x.id == p.id);
+    i >= 0 ? list[i] = p : list.add(p);
+    final first = _book.profiles.isEmpty;
+    await _save(_book.copyWith(profiles: list, defaultId: makeDefault || first ? p.id : null));
+  }
+
+  Future<void> remove(String id) async {
+    final list = _book.profiles.where((p) => p.id != id).toList();
+    final def = _book.defaultId == id ? (list.isEmpty ? null : list.first.id) : _book.defaultId;
+    await _save(ProfileBook(profiles: list, defaultId: def, chartLabels: _book.chartLabels));
+  }
+
+  Future<void> setDefault(String id) => _save(_book.copyWith(defaultId: id));
+
+  Future<void> labelChart(String chartId, String name) =>
+      _save(_book.copyWith(chartLabels: {..._book.chartLabels, chartId: name}));
+}
+
+final profilesProvider = AsyncNotifierProvider<ProfilesNotifier, ProfileBook>(ProfilesNotifier.new);
+
+// ---- history & calendar ----
+
+final historyProvider = FutureProvider.autoDispose<List<HistoryItem>>(
+  (ref) => ref.watch(apiClientProvider).listReports(),
+);
+
+/// 農曆 equivalent of a date (y-m-d only), for the date pickers.
+final lunarPreviewProvider = FutureProvider.autoDispose.family<LunarDate, DateTime>(
+  (ref, d) => ref.watch(apiClientProvider).lunarDate(DateTime(d.year, d.month, d.day)),
+);
 
 final pollIntervalProvider = Provider<Duration>((ref) => AppConfig.pollInterval);
 

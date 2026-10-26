@@ -28,6 +28,8 @@ export interface ReportRecord {
   updated_at: string;
   report?: Report;
   error?: string;
+  /** Live stage while pending (pipeline onProgress). */
+  progress?: { stage: "narrative" | "action" | "guard"; attempt: number; updated_at: string };
 }
 
 export interface Store {
@@ -35,6 +37,10 @@ export interface Store {
   getChart(id: string): Promise<ChartRecord | undefined>;
   putReport(r: ReportRecord): Promise<void>;
   getReport(id: string): Promise<ReportRecord | undefined>;
+  /** Newest first. */
+  listCharts(owner: string, limit: number): Promise<ChartRecord[]>;
+  /** Newest first. */
+  listReports(owner: string, limit: number): Promise<ReportRecord[]>;
   /** Account deletion: remove everything the user owns. Returns counts for the receipt. */
   deleteOwnerData(owner: string): Promise<{ charts: number; reports: number }>;
 }
@@ -56,6 +62,18 @@ export class InMemoryStore implements Store {
     const r = this.reports.get(id);
     return r && structuredClone(r);
   }
+  async listCharts(owner: string, limit: number) {
+    return newest(
+      [...this.charts.values()].filter((c) => c.owner === owner),
+      limit,
+    );
+  }
+  async listReports(owner: string, limit: number) {
+    return newest(
+      [...this.reports.values()].filter((r) => r.owner === owner),
+      limit,
+    );
+  }
   async deleteOwnerData(owner: string) {
     let charts = 0;
     let reports = 0;
@@ -63,4 +81,11 @@ export class InMemoryStore implements Store {
     for (const [id, r] of this.reports) if (r.owner === owner && this.reports.delete(id)) reports++;
     return { charts, reports };
   }
+}
+
+function newest<T extends { created_at: string }>(rows: T[], limit: number): T[] {
+  return rows
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0))
+    .slice(0, limit)
+    .map((r) => structuredClone(r));
 }

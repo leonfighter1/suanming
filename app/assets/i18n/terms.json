@@ -242,6 +242,101 @@
       "zh-Hans": "大海水",
       "en": "Great Sea Water"
     },
+    "农历": {
+      "zh-Hant": "農曆",
+      "zh-Hans": "农历",
+      "en": "Lunar calendar"
+    },
+    "生肖": {
+      "zh-Hant": "生肖",
+      "zh-Hans": "生肖",
+      "en": "Zodiac animal"
+    },
+    "春节": {
+      "zh-Hant": "春節",
+      "zh-Hans": "春节",
+      "en": "Spring Festival"
+    },
+    "立春": {
+      "zh-Hant": "立春",
+      "zh-Hans": "立春",
+      "en": "Start of Spring (Li Chun)"
+    },
+    "时": {
+      "zh-Hant": "時",
+      "zh-Hans": "时",
+      "en": " hour"
+    },
+    "闰": {
+      "zh-Hant": "閏",
+      "zh-Hans": "闰",
+      "en": "leap "
+    },
+    "腊": {
+      "zh-Hant": "臘",
+      "zh-Hans": "腊",
+      "en": "12th"
+    },
+    "鼠": {
+      "zh-Hant": "鼠",
+      "zh-Hans": "鼠",
+      "en": "Rat"
+    },
+    "牛": {
+      "zh-Hant": "牛",
+      "zh-Hans": "牛",
+      "en": "Ox"
+    },
+    "虎": {
+      "zh-Hant": "虎",
+      "zh-Hans": "虎",
+      "en": "Tiger"
+    },
+    "兔": {
+      "zh-Hant": "兔",
+      "zh-Hans": "兔",
+      "en": "Rabbit"
+    },
+    "龙": {
+      "zh-Hant": "龍",
+      "zh-Hans": "龙",
+      "en": "Dragon"
+    },
+    "蛇": {
+      "zh-Hant": "蛇",
+      "zh-Hans": "蛇",
+      "en": "Snake"
+    },
+    "马": {
+      "zh-Hant": "馬",
+      "zh-Hans": "马",
+      "en": "Horse"
+    },
+    "羊": {
+      "zh-Hant": "羊",
+      "zh-Hans": "羊",
+      "en": "Goat"
+    },
+    "猴": {
+      "zh-Hant": "猴",
+      "zh-Hans": "猴",
+      "en": "Monkey"
+    },
+    "鸡": {
+      "zh-Hant": "雞",
+      "zh-Hans": "鸡",
+      "en": "Rooster"
+    },
+    "狗": {
+      "zh-Hant": "狗",
+      "zh-Hans": "狗",
+      "en": "Dog"
+    },
+    "猪": {
+      "zh-Hant": "豬",
+      "zh-Hans": "猪",
+      "en": "Pig"
+    },
     "五行": {
       "zh-Hant": "五行",
       "zh-Hans": "五行",

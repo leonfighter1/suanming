@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'design.dart';
 
 /// Regions offered at sign-up (geo_rule_matrix: served regions). The server
 /// re-checks Geo-Rule and refuses unserved ones with 451.
@@ -76,23 +77,31 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.appTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.xxl),
         children: [
-          Text(_register ? l10n.createAccount : l10n.signIn, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 16),
+          HeroBanner(
+            title: _register ? l10n.createAccount : l10n.signIn,
+            subtitle: l10n.disclaimerShort,
+            icon: Icons.auto_awesome,
+          ),
           TextField(
             key: const Key('email'),
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.email],
-            decoration: InputDecoration(labelText: l10n.email),
+            decoration: InputDecoration(labelText: l10n.email, prefixIcon: const Icon(Icons.mail_outline)),
           ),
+          const SizedBox(height: Space.m),
           TextField(
             key: const Key('password'),
             controller: _password,
             obscureText: true,
             autofillHints: [_register ? AutofillHints.newPassword : AutofillHints.password],
-            decoration: InputDecoration(labelText: l10n.password, helperText: _register ? l10n.passwordHint : null),
+            decoration: InputDecoration(
+              labelText: l10n.password,
+              prefixIcon: const Icon(Icons.lock_outline),
+              helperText: _register ? l10n.passwordHint : null,
+            ),
           ),
           if (_register) ...[
             const SizedBox(height: 12),

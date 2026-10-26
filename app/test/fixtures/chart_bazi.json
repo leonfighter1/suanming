@@ -85,6 +85,17 @@
           "nayin": "路旁土"
         }
       },
+      "lunar": {
+        "basis": "civil_local_date",
+        "year": 1990,
+        "year_ganzhi": "庚午",
+        "shengxiao": "马",
+        "month": 2,
+        "is_leap_month": false,
+        "month_name": "二月",
+        "day": 19,
+        "day_name": "十九"
+      },
       "day_master": {
         "gan": "己",
         "wuxing": "土",
@@ -331,6 +342,11 @@
         "path": "/dayun",
         "source_level": "traditional_text",
         "note": "三日折一年，分钟级换算 (lunar-javascript sect 2)"
+      },
+      {
+        "path": "/lunar",
+        "source_level": "derived",
+        "note": "农历按出生地民用日期换算（寿星天文历）；农历年以春节为界，八字年柱以立春为界"
       },
       {
         "path": "/day_master",

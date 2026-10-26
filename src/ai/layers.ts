@@ -6,11 +6,20 @@
  */
 import type { ChartFact } from "../chart-fact/index.js";
 import { DECK, POSITION_LABELS } from "../engines/tarot/deck.js";
-import { term, type Locale } from "./terms.js";
+import { term, termChars, type Locale } from "./terms.js";
 
 type Pillar = { gan: string; zhi: string };
 interface BaziFacts {
   pillars: Record<"year" | "month" | "day" | "hour", Pillar>;
+  lunar: {
+    year_ganzhi: string;
+    shengxiao: string;
+    month: number;
+    is_leap_month: boolean;
+    month_name: string;
+    day: number;
+    day_name: string;
+  };
   day_master: { gan: string; wuxing: string; yin_yang: string };
   month_command: { zhi: string; wuxing: string };
   wuxing_weighted: { scores: Record<string, number> };
@@ -121,8 +130,14 @@ export function factsLayer(chart: ChartFact, locale: Locale, nowYear: number): s
     const p = f.pillars;
     const gz = (x: Pillar) => x.gan + x.zhi;
     const current = [...f.dayun.cycles].reverse().find((c) => c.start_year <= nowYear);
+    const lu = f.lunar;
+    const lunarLine =
+      locale === "en"
+        ? `Lunar date: month ${lu.is_leap_month ? `${lu.month} (leap)` : lu.month}, day ${lu.day}, ${lu.year_ganzhi} year (${tr(lu.shengxiao)})`
+        : `${tr("农历")}：${lu.year_ganzhi}年${termChars(lu.month_name, locale)}${lu.day_name}（${tr("生肖")}${tr(lu.shengxiao)}）`;
     const lines = [
       `${t.pillars}：${[p.year, p.month, p.day, p.hour].map(gz).join(" ")}`,
+      lunarLine,
       `${t.dm}：${f.day_master.gan}${tr(f.day_master.wuxing)}（${tr(f.day_master.yin_yang)}）${t.sep}${t.mc}：${f.month_command.zhi}${tr(f.month_command.wuxing)}`,
       `${t.wx}：${Object.entries(f.wuxing_weighted.scores)
         .map(([k, v]) => `${tr(k)} ${v}`)

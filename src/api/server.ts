@@ -21,9 +21,10 @@ import {
   type RoutingTable,
   type Topic,
 } from "../ai/index.js";
-import { SCHEMA_VERSION } from "../chart-fact/index.js";
+import { SCHEMA_VERSION, type ChartFact } from "../chart-fact/index.js";
 import { loadGeoMatrix, loadRuleSet, resolveRegion } from "../compliance/index.js";
 import { AuthError, AuthService, publicUser } from "../auth/service.js";
+import { lunarDate } from "../engines/bazi/index.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { upstreamMessage } from "../service/runtime.js";
@@ -48,6 +49,30 @@ interface Caller {
   country: string;
 }
 
+/** Short, locale-neutral description of a chart for history lists. */
+export function chartSummary(fact: ChartFact) {
+  const f = fact.facts as Record<string, unknown>;
+  if (fact.system === "bazi") {
+    const p = f.pillars as Record<string, { gan: string; zhi: string }>;
+    return {
+      system: "bazi",
+      four_pillars: ["year", "month", "day", "hour"].map((k) => p[k]!.gan + p[k]!.zhi).join(" "),
+      civil_local: (f.time_basis as { civil_local: string }).civil_local,
+    };
+  }
+  if (fact.system === "tarot") {
+    return {
+      system: "tarot",
+      spread: f.spread_id as string,
+      cards: (f.cards as { card_id: string; reversed: boolean }[]).map((c) => ({
+        card_id: c.card_id,
+        reversed: c.reversed,
+      })),
+    };
+  }
+  return { system: fact.system };
+}
+
 /** What the user may see of a report. Drafts, traces and rule details stay internal. */
 export function publicReport(r: ReportRecord) {
   const base = {
@@ -58,7 +83,7 @@ export function publicReport(r: ReportRecord) {
     locale: r.locale,
     topics: r.topics,
   };
-  if (r.status === "pending") return base;
+  if (r.status === "pending") return r.progress ? { ...base, progress: r.progress } : base;
   if (r.status === "failed") return { ...base, message: "generation failed; please retry" };
   const rep = r.report!;
   if (r.status !== "passed") {
@@ -114,7 +139,20 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       const report: Report = await generateReport(
         fact,
         { locale: record.locale, country: c.country, topics: record.topics, question },
-        { providers: opts.providers, routing: opts.routing, now },
+        {
+          providers: opts.providers,
+          routing: opts.routing,
+          now,
+          // Live stage for clients polling the pending report.
+          onProgress: async ({ stage, attempt }) => {
+            const current = await store.getReport(record.id);
+            if (current?.status !== "pending") return;
+            await store.putReport({
+              ...current,
+              progress: { stage, attempt, updated_at: now().toISOString() },
+            });
+          },
+        },
       );
       next = { ...record, status: report.status, report, updated_at: now().toISOString() };
     } catch (e) {
@@ -190,6 +228,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
     }
 
+    // ---- calendar lookup: public, stateless (date pickers show the 農曆 equivalent) ----
+    if (req.method === "GET" && path === "/v1/calendar/lunar") {
+      const date = new URL(req.url ?? "/", "http://localhost").searchParams.get("date") ?? "";
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+      const [y, mo, d] = m ? [Number(m[1]), Number(m[2]), Number(m[3])] : [0, 0, 0];
+      const valid =
+        m && y >= 1900 && y <= 2100 && new Date(Date.UTC(y, mo - 1, d)).getUTCDate() === d;
+      if (!valid) throw new InputError("date must be a valid YYYY-MM-DD between 1900 and 2100");
+      return send(res, 200, { date, lunar: lunarDate(y, mo, d) });
+    }
+
     // ---- auth (no caller yet) ----
     if (req.method === "POST" && path.startsWith("/v1/auth/")) {
       if (!auth) throw new HttpError(404, "auth not configured");
@@ -243,6 +292,45 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           view,
           aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
         );
+      }
+      const limit = Math.min(
+        Math.max(
+          Number(new URL(req.url ?? "/", "http://localhost").searchParams.get("limit") ?? 20) || 20,
+          1,
+        ),
+        100,
+      );
+      // History: the user's earlier readings (newest first) with a chart summary each.
+      if (path === "/v1/reports") {
+        const rows = await store.listReports(c.user, limit);
+        const items = await Promise.all(
+          rows.map(async (r) => {
+            const chart = await store.getChart(r.chart_id);
+            const {
+              layers: _l,
+              ai_disclosure: _a,
+              ...view
+            } = publicReport(r) as Record<string, unknown>;
+            return { ...view, chart_id: r.chart_id, chart: chart && chartSummary(chart.fact) };
+          }),
+        );
+        return send(res, 200, { items });
+      }
+      if (path === "/v1/charts") {
+        const rows = await store.listCharts(c.user, limit);
+        return send(res, 200, {
+          items: rows.map((r) => ({
+            chart_id: r.id,
+            created_at: r.created_at,
+            chart: chartSummary(r.fact),
+          })),
+        });
+      }
+      const cm = /^\/v1\/charts\/([^/]+)$/.exec(path);
+      if (cm) {
+        const ch = UUID_RE.test(cm[1]!) ? await store.getChart(cm[1]!) : undefined;
+        if (!ch || ch.owner !== c.user) throw new HttpError(404, "chart not found");
+        return send(res, 200, { chart_id: ch.id, chart_fact: ch.fact });
       }
     }
 

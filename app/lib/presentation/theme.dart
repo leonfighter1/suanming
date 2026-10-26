@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'design.dart';
+
 class AppColors {
   static const accent = Color(0xFF8A3B2E);
   static const wood = Color(0xFF3F7D4E);
@@ -33,11 +35,53 @@ Color wuxingColor(String elementOrChar) {
 }
 
 ThemeData buildTheme(Brightness brightness) {
-  final scheme = ColorScheme.fromSeed(seedColor: AppColors.accent, brightness: brightness);
+  final scheme = ColorScheme.fromSeed(
+    seedColor: AppColors.accent,
+    brightness: brightness,
+    dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+  );
+  final rounded = RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.field));
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
-    cardTheme: const CardThemeData(margin: EdgeInsets.symmetric(vertical: 6)),
+    scaffoldBackgroundColor: scheme.surface,
+    // One transition everywhere: shared-axis style zoom + fade.
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: {
+        for (final p in TargetPlatform.values) p: const ZoomPageTransitionsBuilder(),
+      },
+    ),
+    appBarTheme: AppBarTheme(
+      centerTitle: false,
+      backgroundColor: scheme.surface,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 2,
+    ),
+    cardTheme: CardThemeData(
+      margin: const EdgeInsets.only(bottom: Space.m),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.card)),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      contentPadding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m + 2),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.field), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.field), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(Radii.field),
+        borderSide: BorderSide(color: scheme.primary, width: 1.5),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), shape: rounded),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48), shape: rounded),
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(style: SegmentedButton.styleFrom(shape: rounded)),
+    chipTheme: ChipThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.chip))),
+    dividerTheme: DividerThemeData(color: scheme.outlineVariant.withValues(alpha: 0.5), space: Space.xl),
+    listTileTheme: const ListTileThemeData(contentPadding: EdgeInsets.symmetric(horizontal: Space.l)),
   );
 }
 

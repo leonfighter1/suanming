@@ -210,6 +210,7 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       zi_hour_sect: sect,
     },
     pillars: natal,
+    lunar: lunarDate(civil.y, civil.m, civil.d),
     day_master: {
       gan: day.gan,
       wuxing: GAN_WUXING[day.gan]!,
@@ -258,6 +259,11 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       source_level: "traditional_text",
       note: "三日折一年，分钟级换算 (lunar-javascript sect 2)",
     },
+    {
+      path: "/lunar",
+      source_level: "derived",
+      note: "农历按出生地民用日期换算（寿星天文历）；农历年以春节为界，八字年柱以立春为界",
+    },
     { path: "/day_master", source_level: "traditional_text", note: "日干为日主" },
     { path: "/month_command", source_level: "traditional_text", note: "月支本气为月令" },
     {
@@ -284,6 +290,35 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     computed_at: now.toISOString(),
     facts,
     provenance,
+  };
+}
+
+/**
+ * 農曆 date for a civil calendar date (the date people know as their 農曆生日).
+ * Note the 農曆 year turns at 春節, while the 八字 year pillar turns at 立春.
+ */
+export function lunarDate(y: number, m: number, d: number) {
+  const l = Solar.fromYmdHms(y, m, d, 12, 0, 0).getLunar() as unknown as {
+    getYear(): number;
+    getYearInGanZhi(): string;
+    getYearShengXiao(): string;
+    getMonth(): number;
+    getMonthInChinese(): string;
+    getDay(): number;
+    getDayInChinese(): string;
+  };
+  const leap = l.getMonth() < 0;
+  return {
+    basis: "civil_local_date" as const,
+    year: l.getYear(),
+    year_ganzhi: l.getYearInGanZhi(),
+    shengxiao: l.getYearShengXiao(),
+    month: Math.abs(l.getMonth()),
+    is_leap_month: leap,
+    // lunar-javascript already prefixes 闰 for leap months
+    month_name: `${l.getMonthInChinese()}月`,
+    day: l.getDay(),
+    day_name: l.getDayInChinese(),
   };
 }
 

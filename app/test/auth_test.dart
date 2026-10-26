@@ -62,6 +62,9 @@ void main() {
     api.expireAccessOnce = true;
     await tester.tap(find.byKey(const Key('entry-bazi')));
     await settle(tester);
+    await tester.scrollUntilVisible(find.byKey(const Key('compute-chart')), 300, scrollable: mainScrollable);
+    await tester.ensureVisible(find.byKey(const Key('compute-chart')));
+    await settle(tester);
     await tester.tap(find.byKey(const Key('compute-chart')));
     await settle(tester);
 
@@ -75,7 +78,7 @@ void main() {
     final tokens = InMemoryTokenStore(Tokens(api.access, 'refresh-0'));
     await tester.pumpWidget(testApp(api, tokens: tokens));
     await settle(tester);
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.tap(find.byKey(const Key('more-menu')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('open-account')));
     await settle(tester);

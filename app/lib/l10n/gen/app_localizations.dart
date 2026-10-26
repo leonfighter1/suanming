@@ -656,6 +656,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many attempts. Please wait a few minutes and try again.'**
   String get captchaRequired;
+
+  /// No description provided for @profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get profiles;
+
+  /// No description provided for @profileFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart for'**
+  String get profileFor;
+
+  /// No description provided for @addProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add profile'**
+  String get addProfile;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @setDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get setDefault;
+
+  /// No description provided for @isDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get isDefault;
+
+  /// No description provided for @deleteProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete profile'**
+  String get deleteProfile;
+
+  /// No description provided for @profileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes below apply to this chart only. Edit the profile to change it everywhere.'**
+  String get profileHint;
+
+  /// No description provided for @noProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your birth details'**
+  String get noProfileTitle;
+
+  /// No description provided for @noProfileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save them once and every chart starts from them. You can add profiles for others too.'**
+  String get noProfileBody;
+
+  /// No description provided for @createProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Create profile'**
+  String get createProfile;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @lunarCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunar calendar'**
+  String get lunarCompare;
+
+  /// No description provided for @gregorian.
+  ///
+  /// In en, this message translates to:
+  /// **'Gregorian'**
+  String get gregorian;
+
+  /// No description provided for @lunarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunar'**
+  String get lunarLabel;
+
+  /// No description provided for @zodiac.
+  ///
+  /// In en, this message translates to:
+  /// **'Zodiac'**
+  String get zodiac;
+
+  /// No description provided for @lunarYearNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The lunar year turns at Spring Festival; the year pillar turns at Li Chun.'**
+  String get lunarYearNote;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No readings yet. Your readings will appear here.'**
+  String get historyEmpty;
+
+  /// No description provided for @recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAll;
+
+  /// No description provided for @analyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is analysing in depth'**
+  String get analyzing;
+
+  /// No description provided for @stageNarrative.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the chart'**
+  String get stageNarrative;
+
+  /// No description provided for @stageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafting suggestions'**
+  String get stageAction;
+
+  /// No description provided for @stageGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'Content review'**
+  String get stageGuard;
+
+  /// No description provided for @stageWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get stageWaiting;
+
+  /// No description provided for @elapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Elapsed {time}'**
+  String elapsed(String time);
+
+  /// No description provided for @retrying.
+  ///
+  /// In en, this message translates to:
+  /// **'A draft didn\'t pass our checks; rewriting (attempt {n})'**
+  String retrying(int n);
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @copyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all'**
+  String get copyAll;
+
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @chartOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s chart'**
+  String chartOf(String name);
+
+  /// No description provided for @greeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String greeting(String name);
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mingli Master AI reading'**
+  String get reportTitle;
+
+  /// No description provided for @openChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Open chart'**
+  String get openChart;
 }
 
 class _AppLocalizationsDelegate

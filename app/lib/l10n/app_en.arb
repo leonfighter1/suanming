@@ -106,5 +106,71 @@
   "confirmDelete": "Delete",
   "accountDeleted": "Your account and data have been deleted.",
   "signInMethods": "Sign-in methods",
-  "captchaRequired": "Too many attempts. Please wait a few minutes and try again."
+  "captchaRequired": "Too many attempts. Please wait a few minutes and try again.",
+  "profiles": "Profiles",
+  "profileFor": "Chart for",
+  "addProfile": "Add profile",
+  "editProfile": "Edit profile",
+  "name": "Name",
+  "setDefault": "Set as default",
+  "isDefault": "Default",
+  "deleteProfile": "Delete profile",
+  "profileHint": "Changes below apply to this chart only. Edit the profile to change it everywhere.",
+  "noProfileTitle": "Add your birth details",
+  "noProfileBody": "Save them once and every chart starts from them. You can add profiles for others too.",
+  "createProfile": "Create profile",
+  "save": "Save",
+  "saved": "Saved",
+  "lunarCompare": "Lunar calendar",
+  "gregorian": "Gregorian",
+  "lunarLabel": "Lunar",
+  "zodiac": "Zodiac",
+  "lunarYearNote": "The lunar year turns at Spring Festival; the year pillar turns at Li Chun.",
+  "history": "History",
+  "historyEmpty": "No readings yet. Your readings will appear here.",
+  "recent": "Recent",
+  "viewAll": "View all",
+  "analyzing": "AI is analysing in depth",
+  "stageNarrative": "Reading the chart",
+  "stageAction": "Drafting suggestions",
+  "stageGuard": "Content review",
+  "stageWaiting": "Queued",
+  "elapsed": "Elapsed {time}",
+  "retrying": "A draft didn't pass our checks; rewriting (attempt {n})",
+  "download": "Download",
+  "copyAll": "Copy all",
+  "copied": "Copied",
+  "more": "More",
+  "chartOf": "{name}'s chart",
+  "greeting": "Hello, {name}",
+  "reportTitle": "Mingli Master AI reading",
+  "openChart": "Open chart",
+  "@elapsed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@retrying": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@chartOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

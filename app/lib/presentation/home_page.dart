@@ -5,7 +5,13 @@ import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'account_page.dart';
 import 'bazi_form_page.dart';
+import 'design.dart';
+import 'history_page.dart';
+import 'profiles_page.dart';
 import 'tarot_page.dart';
+
+void push(BuildContext context, Widget page) =>
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -13,100 +19,143 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final book = ref.watch(profilesProvider).value;
+    final me = book?.defaultProfile;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            tooltip: l10n.settings,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => showModalBottomSheet<void>(context: context, builder: (_) => const _SettingsSheet()),
+            key: const Key('open-history'),
+            tooltip: l10n.history,
+            icon: const Icon(Icons.history),
+            onPressed: () => push(context, const HistoryPage()),
           ),
+          const _MoreMenu(),
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: Space.page,
         children: [
-          _Entry(
-            key: const Key('entry-bazi'),
-            icon: Icons.grid_view,
-            title: l10n.homeBazi,
-            subtitle: l10n.homeBaziDesc,
-            page: const BaziFormPage(),
+          FadeSlideIn(
+            child: HeroBanner(
+              title: me == null ? l10n.appTitle : l10n.greeting(me.name),
+              subtitle: l10n.disclaimerShort,
+              icon: Icons.auto_awesome,
+            ),
           ),
-          _Entry(
-            key: const Key('entry-tarot'),
-            icon: Icons.style,
-            title: l10n.homeTarot,
-            subtitle: l10n.homeTarotDesc,
-            page: const TarotPage(),
+          if (book != null && me == null)
+            FadeSlideIn(
+              index: 1,
+              child: AppCard(
+                key: const Key('create-profile-prompt'),
+                title: l10n.noProfileTitle,
+                icon: Icons.person_add_alt_1,
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                onTap: () => push(context, const ProfileEditPage()),
+                child: Text(l10n.noProfileBody),
+              ),
+            ),
+          FadeSlideIn(
+            index: 2,
+            child: _Entry(
+              key: const Key('entry-bazi'),
+              icon: Icons.grid_view_rounded,
+              title: l10n.homeBazi,
+              subtitle: l10n.homeBaziDesc,
+              onTap: () => push(context, const BaziFormPage()),
+            ),
           ),
-          const SizedBox(height: 16),
-          Text(l10n.disclaimerShort, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+          FadeSlideIn(
+            index: 3,
+            child: _Entry(
+              key: const Key('entry-tarot'),
+              icon: Icons.style_rounded,
+              title: l10n.homeTarot,
+              subtitle: l10n.homeTarotDesc,
+              onTap: () => push(context, const TarotPage()),
+            ),
+          ),
+          const FadeSlideIn(index: 4, child: RecentHistory()),
         ],
       ),
     );
   }
 }
 
-class _Entry extends StatelessWidget {
-  const _Entry({super.key, required this.icon, required this.title, required this.subtitle, required this.page});
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Widget page;
-
-  @override
-  Widget build(BuildContext context) => Card(
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(16),
-          leading: Icon(icon, size: 36),
-          title: Text(title, style: Theme.of(context).textTheme.titleLarge),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page)),
-        ),
-      );
-}
-
-class _SettingsSheet extends ConsumerWidget {
-  const _SettingsSheet();
+/// The 「更多」 drop-down menu: profiles, history, account, language.
+class _MoreMenu extends ConsumerWidget {
+  const _MoreMenu();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(settingsProvider);
-    final notifier = ref.read(settingsProvider.notifier);
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return PopupMenuButton<String>(
+      key: const Key('more-menu'),
+      tooltip: l10n.more,
+      icon: const Icon(Icons.more_vert),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.field)),
+      onSelected: (v) => switch (v) {
+        'profiles' => push(context, const ProfilesPage()),
+        'history' => push(context, const HistoryPage()),
+        'account' => push(context, const AccountPage()),
+        'zh-Hant' => ref.read(settingsProvider.notifier).setLocale(zhHant),
+        'zh-Hans' => ref.read(settingsProvider.notifier).setLocale(zhHans),
+        'en' => ref.read(settingsProvider.notifier).setLocale(const Locale('en')),
+        _ => null,
+      },
+      itemBuilder: (_) => [
+        _item('profiles', Icons.people_alt_outlined, l10n.profiles, key: const Key('menu-profiles')),
+        _item('history', Icons.history, l10n.history),
+        _item('account', Icons.person_outline, l10n.account, key: const Key('open-account')),
+        const PopupMenuDivider(),
+        for (final (code, label) in [('zh-Hant', '繁體中文'), ('zh-Hans', '简体中文'), ('en', 'English')])
+          CheckedPopupMenuItem(value: code, checked: settings.apiLocaleCode == code, child: Text(label)),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _item(String v, IconData icon, String label, {Key? key}) => PopupMenuItem(
+        key: key,
+        value: v,
+        child: Row(children: [Icon(icon, size: 20), const SizedBox(width: Space.m), Text(label)]),
+      );
+}
+
+class _Entry extends StatelessWidget {
+  const _Entry({super.key, required this.icon, required this.title, required this.subtitle, required this.onTap});
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return AppCard(
+      onTap: onTap,
+      child: Row(
         children: [
-          Text(l10n.language, style: Theme.of(context).textTheme.labelLarge),
-          SegmentedButton<Locale>(
-            segments: const [
-              ButtonSegment(value: zhHant, label: Text('繁體')),
-              ButtonSegment(value: zhHans, label: Text('简体')),
-              ButtonSegment(value: Locale('en'), label: Text('EN')),
-            ],
-            selected: {settings.locale},
-            onSelectionChanged: (s) => notifier.setLocale(s.first),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(Radii.field + 2)),
+            child: Icon(icon, size: 30, color: scheme.onPrimaryContainer),
           ),
-          const SizedBox(height: 8),
-          // The region is fixed on the account at sign-up (Geo-Rule), not a setting.
-          ListTile(
-            key: const Key('open-account'),
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.person_outline),
-            title: Text(l10n.account),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.of(context)
-                ..pop()
-                ..push(MaterialPageRoute<void>(builder: (_) => const AccountPage()));
-            },
+          const SizedBox(width: Space.l),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: Space.xs),
+                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+              ],
+            ),
           ),
+          Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
         ],
       ),
     );

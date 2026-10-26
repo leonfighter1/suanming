@@ -114,6 +114,21 @@ class ApiClient {
 
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 
+  Future<ChartResult> getChart(String id) async => ChartResult.fromJson(await _authed('GET', '/v1/charts/$id'));
+
+  /// The user's readings, newest first.
+  Future<List<HistoryItem>> listReports({int limit = 30}) async {
+    final j = await _authed('GET', '/v1/reports?limit=$limit');
+    return (j['items'] as List).cast<Json>().map(HistoryItem.fromJson).toList();
+  }
+
+  /// 農曆 equivalent of a Gregorian date (public endpoint, no sign-in).
+  Future<LunarDate> lunarDate(DateTime d) async {
+    final ymd = '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final j = await _send('GET', '/v1/calendar/lunar?date=$ymd');
+    return LunarDate.fromJson(j['lunar'] as Json);
+  }
+
   // ---- transport ----
 
   Future<void> _storeTokens(Future<Json> response) async {

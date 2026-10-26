@@ -15,6 +15,13 @@ CCPA, UK GDPR, EU GDPR).
 | Logs                                 | yes                                                | no PII by rule (security-baseline.md)                                          | 30 days hot, 1 year cold                                                      |
 | Deletion evidence                    | yes                                                | no PII (`subject_hash`, counts)                                                | 5 years                                                                       |
 
+## Personal profiles (decided 2026-10-26)
+
+Names and saved birth details ("profiles") live **only on the device**, encrypted
+(Keychain/Keystore via flutter_secure_storage), keyed by account and deleted with
+the account. The server receives birth fields only inside a single chart request
+and never receives names. History labels (chart → person name) are device-only too.
+
 ## Product consequence
 
 Because raw birth data isn't stored, the app cannot "re-run" a chart with a
