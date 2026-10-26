@@ -259,5 +259,25 @@
   "remedyPrint": "Print",
   "remedyHeld": "This plan is held for review and is not available yet.",
   "remedyFailed": "Generation failed. Retry; you won't be charged again.",
-  "remedyDemoPaid": "Demo payment (not billed)"
+  "remedyDemoPaid": "Demo payment (not billed)",
+  "placePick": "Choose birthplace",
+  "placeCountry": "Country or region",
+  "placeRegion": "Province / state",
+  "placeCity": "City",
+  "placeSearch": "Search",
+  "placeCommon": "Common",
+  "placeAll": "All",
+  "placeNone": "No match",
+  "placeDetail": "Time zone {tz} · longitude {lon}",
+  "@placeDetail": {
+    "placeholders": {
+      "tz": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
+  "placeSource": "Place data: GeoNames (CC BY 4.0)"
 }

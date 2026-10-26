@@ -24,7 +24,8 @@
     "sync:app": "tsx scripts/sync-app-assets.ts",
     "verify:bazi": "tsx scripts/verify-bazi.ts",
     "verify:tarot": "tsx scripts/verify-tarot.ts",
-    "eval:ai": "tsx scripts/eval-ai.ts"
+    "eval:ai": "tsx scripts/eval-ai.ts",
+    "build:places": "tsx scripts/build-places.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",
@@ -41,6 +42,7 @@
     "@gitstrology/engine": "0.1.0",
     "@redocly/cli": "^2.0.0",
     "@types/node": "^22.0.0",
+    "opencc-js": "1.4.2",
     "prettier": "^3.6.0",
     "sweph": "2.10.3-8",
     "tsx": "^4.20.0",

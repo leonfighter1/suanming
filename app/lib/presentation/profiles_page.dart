@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
-import '../domain/cities.dart';
 import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'place_picker.dart';
 
 /// Profiles kept on this device: the user's own (default ★) and people they help.
 class ProfilesPage extends ConsumerWidget {
@@ -75,7 +75,7 @@ class ProfilesPage extends ConsumerWidget {
                                 ]),
                                 const SizedBox(height: Space.xs),
                                 Text(
-                                  '${DateFormat('yyyy-MM-dd HH:mm').format(p.birthLocal)} · ${cityByKey(p.cityKey).name(locale)} · ${p.gender == 'male' ? l10n.male : l10n.female}',
+                                  '${DateFormat('yyyy-MM-dd HH:mm').format(p.birthLocal)} · ${p.birthPlace.label(locale)} · ${p.gender == 'male' ? l10n.male : l10n.female}',
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ],
@@ -192,7 +192,6 @@ class BirthFields extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final locale = ref.watch(settingsProvider).apiLocaleCode;
     final d = value.birthLocal;
     final lunarMode = value.dateMode == 'lunar';
     final shichenMode = value.timeMode == 'shichen';
@@ -273,15 +272,8 @@ class BirthFields extends ConsumerWidget {
                 ),
         ),
         const SizedBox(height: Space.l),
-        DropdownMenu<String>(
-          key: const Key('city'),
-          expandedInsets: EdgeInsets.zero,
-          initialSelection: value.cityKey,
-          label: Text(l10n.city),
-          leadingIcon: const Icon(Icons.place_outlined),
-          dropdownMenuEntries: [for (final c in cities) DropdownMenuEntry(value: c.key, label: c.name(locale))],
-          onSelected: (k) => k == null ? null : onChanged(value.copyWith(cityKey: k)),
-        ),
+        // Country/region → province/state → city (timezone + longitude for 真太陽時).
+        PlaceField(value: value.birthPlace, onChanged: (p) => onChanged(value.copyWith(place: p))),
         const SizedBox(height: Space.l),
         Text(l10n.gender, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Space.s),

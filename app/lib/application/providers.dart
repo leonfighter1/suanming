@@ -7,6 +7,7 @@ import '../data/api_client.dart';
 import '../data/profile_store.dart';
 import '../data/token_store.dart';
 import '../domain/models.dart';
+import '../domain/places.dart';
 import '../domain/profile.dart';
 import '../domain/terms.dart';
 
@@ -215,6 +216,16 @@ final calendarDayProvider = FutureProvider.autoDispose.family<CalendarDay, DateT
 /// Months of a 農曆 year (incl. 閏月), for the 農曆 date picker.
 final lunarMonthsProvider = FutureProvider.autoDispose.family<List<LunarMonthInfo>, int>(
   (ref, year) => ref.watch(apiClientProvider).lunarMonths(year),
+);
+
+/// Birthplace countries (static server data; cached for the session).
+final placeCountriesProvider = FutureProvider<List<PlaceCountryInfo>>(
+  (ref) => ref.watch(apiClientProvider).placeCountries(),
+);
+
+/// Regions with their cities for one country.
+final placeRegionsProvider = FutureProvider.family<List<PlaceRegion>, String>(
+  (ref, country) => ref.watch(apiClientProvider).placeRegions(country),
 );
 
 final pollIntervalProvider = Provider<Duration>((ref) => AppConfig.pollInterval);

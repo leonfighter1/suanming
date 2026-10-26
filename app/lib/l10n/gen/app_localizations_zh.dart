@@ -532,6 +532,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get remedyDemoPaid => '示范付款（未实际收费）';
+
+  @override
+  String get placePick => '选择出生地';
+
+  @override
+  String get placeCountry => '国家和地区';
+
+  @override
+  String get placeRegion => '省／州';
+
+  @override
+  String get placeCity => '城市';
+
+  @override
+  String get placeSearch => '搜索';
+
+  @override
+  String get placeCommon => '常用';
+
+  @override
+  String get placeAll => '全部';
+
+  @override
+  String get placeNone => '没有符合的结果';
+
+  @override
+  String placeDetail(String tz, String lon) {
+    return '时区 $tz · 经度 $lon';
+  }
+
+  @override
+  String get placeSource => '地点数据：GeoNames（CC BY 4.0）';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1061,4 +1093,36 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get remedyDemoPaid => '示範付款（未實際收費）';
+
+  @override
+  String get placePick => '選擇出生地';
+
+  @override
+  String get placeCountry => '國家和地區';
+
+  @override
+  String get placeRegion => '省／州／縣市';
+
+  @override
+  String get placeCity => '城市';
+
+  @override
+  String get placeSearch => '搜尋';
+
+  @override
+  String get placeCommon => '常用';
+
+  @override
+  String get placeAll => '全部';
+
+  @override
+  String get placeNone => '沒有符合的結果';
+
+  @override
+  String placeDetail(String tz, String lon) {
+    return '時區 $tz · 經度 $lon';
+  }
+
+  @override
+  String get placeSource => '地點資料：GeoNames（CC BY 4.0）';
 }

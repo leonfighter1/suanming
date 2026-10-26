@@ -18,6 +18,7 @@ import {
   shichenOptions,
 } from "../src/engines/bazi/index.js";
 import { DECK, DECK_ID, POSITION_LABELS } from "../src/engines/tarot/deck.js";
+import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
 const root = new URL("../", import.meta.url);
@@ -104,6 +105,22 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     },
     "app/test/fixtures/report_passed.json": view,
     "app/test/fixtures/remedy_passed.json": remedyView,
+    // Birthplace data for the fake API: four countries; CN trimmed to 廣東.
+    "app/test/fixtures/places.json": {
+      index: {
+        ...placeIndex(),
+        countries: placeIndex().countries.filter((c) => ["CN", "HK", "TW", "US"].includes(c.code)),
+      },
+      countries: {
+        CN: {
+          country: "CN",
+          regions: placeCountry("CN")!
+            .regions.filter((r) => r.names.en === "Guangdong")
+            .map((r) => ({ ...r, cities: r.cities.slice(0, 8) })),
+        },
+        HK: placeCountry("HK"),
+      },
+    },
     // Real calendar data for the fake API: one day, its 農曆 year, and 農曆 → 公曆 lookups.
     "app/test/fixtures/calendar.json": {
       day: { lunar: lunarDate(1990, 3, 15), shichen: shichenOptions(1990, 3, 15) },

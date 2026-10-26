@@ -1,0 +1,1839 @@
+{
+  "index": {
+    "source": "GeoNames cities15000 (CC BY 4.0, https://www.geonames.org), built by scripts/build-places.ts",
+    "countries": [
+      {
+        "code": "CN",
+        "names": {
+          "zh-Hant": "中國",
+          "zh-Hans": "中国",
+          "en": "China"
+        },
+        "cities": 2105
+      },
+      {
+        "code": "HK",
+        "names": {
+          "zh-Hant": "香港",
+          "zh-Hans": "香港",
+          "en": "Hong Kong"
+        },
+        "cities": 136
+      },
+      {
+        "code": "TW",
+        "names": {
+          "zh-Hant": "台灣",
+          "zh-Hans": "台湾",
+          "en": "Taiwan"
+        },
+        "cities": 67
+      },
+      {
+        "code": "US",
+        "names": {
+          "zh-Hant": "美國",
+          "zh-Hans": "美国",
+          "en": "United States"
+        },
+        "cities": 3122
+      }
+    ]
+  },
+  "countries": {
+    "CN": {
+      "country": "CN",
+      "regions": [
+        {
+          "code": "30",
+          "names": {
+            "zh-Hant": "廣東",
+            "zh-Hans": "广东",
+            "en": "Guangdong"
+          },
+          "cities": [
+            {
+              "id": 1809858,
+              "names": {
+                "zh-Hant": "廣州市",
+                "zh-Hans": "广州市",
+                "en": "Guangzhou"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 113.25,
+              "lat": 23.1167
+            },
+            {
+              "id": 1795565,
+              "names": {
+                "zh-Hant": "深圳",
+                "zh-Hans": "深圳",
+                "en": "Shenzhen"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 114.0683,
+              "lat": 22.5455
+            },
+            {
+              "id": 1812545,
+              "names": {
+                "zh-Hant": "東莞市",
+                "zh-Hans": "东莞市",
+                "en": "Dongguan"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 113.7487,
+              "lat": 23.018
+            },
+            {
+              "id": 1811103,
+              "names": {
+                "zh-Hant": "佛山市",
+                "zh-Hans": "佛山市",
+                "en": "Foshan"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 113.1315,
+              "lat": 23.0268
+            },
+            {
+              "id": 13308620,
+              "names": {
+                "zh-Hant": "Bao'an",
+                "zh-Hans": "Bao'an",
+                "en": "Bao'an"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 113.8829,
+              "lat": 22.5521
+            },
+            {
+              "id": 6986104,
+              "names": {
+                "zh-Hant": "中山",
+                "zh-Hans": "中山",
+                "en": "Zhongshan"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 113.3791,
+              "lat": 22.5231
+            },
+            {
+              "id": 1795940,
+              "names": {
+                "zh-Hant": "汕頭市",
+                "zh-Hans": "汕头市",
+                "en": "Shantou"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 116.6788,
+              "lat": 23.3549
+            },
+            {
+              "id": 1806776,
+              "names": {
+                "zh-Hant": "惠州",
+                "zh-Hans": "惠州",
+                "en": "Huizhou"
+              },
+              "tz": "Asia/Shanghai",
+              "lon": 114.4152,
+              "lat": 23.1115
+            }
+          ]
+        }
+      ]
+    },
+    "HK": {
+      "country": "HK",
+      "regions": [
+        {
+          "code": "NYL",
+          "names": {
+            "zh-Hant": "Yuen Long",
+            "zh-Hans": "Yuen Long",
+            "en": "Yuen Long"
+          },
+          "cities": [
+            {
+              "id": 1818558,
+              "names": {
+                "zh-Hant": "天水圍",
+                "zh-Hans": "天水围",
+                "en": "Tin Shui Wai"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0023,
+              "lat": 22.4568
+            },
+            {
+              "id": 1818222,
+              "names": {
+                "zh-Hant": "元朗新墟",
+                "zh-Hans": "元朗新墟",
+                "en": "Yuen Long San Hui"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0333,
+              "lat": 22.4333
+            },
+            {
+              "id": 1818225,
+              "names": {
+                "zh-Hant": "元朗",
+                "zh-Hans": "元朗",
+                "en": "Yuen Long"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0262,
+              "lat": 22.4452
+            },
+            {
+              "id": 1818223,
+              "names": {
+                "zh-Hant": "元朗舊墟",
+                "zh-Hans": "元朗旧墟",
+                "en": "Yuen Long Kau Hui"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.032,
+              "lat": 22.4483
+            },
+            {
+              "id": 12719430,
+              "names": {
+                "zh-Hant": "Shap Pat Heung",
+                "zh-Hans": "Shap Pat Heung",
+                "en": "Shap Pat Heung"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0358,
+              "lat": 22.4248
+            },
+            {
+              "id": 1819101,
+              "names": {
+                "zh-Hant": "屏山",
+                "zh-Hans": "屏山",
+                "en": "Ping Shan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0061,
+              "lat": 22.4411
+            },
+            {
+              "id": 12689063,
+              "names": {
+                "zh-Hant": "Pat Heung",
+                "zh-Hans": "Pat Heung",
+                "en": "Pat Heung"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0923,
+              "lat": 22.4461
+            },
+            {
+              "id": 1819685,
+              "names": {
+                "zh-Hant": "錦田",
+                "zh-Hans": "锦田",
+                "en": "Kam Tin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0602,
+              "lat": 22.4412
+            },
+            {
+              "id": 1819775,
+              "names": {
+                "zh-Hant": "廈村市",
+                "zh-Hans": "厦村市",
+                "en": "Ha Tsuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.9916,
+              "lat": 22.4472
+            },
+            {
+              "id": 12689069,
+              "names": {
+                "zh-Hant": "Fairview Park",
+                "zh-Hans": "Fairview Park",
+                "en": "Fairview Park"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0477,
+              "lat": 22.4674
+            },
+            {
+              "id": 1818996,
+              "names": {
+                "zh-Hant": "新田",
+                "zh-Hans": "新田",
+                "en": "San Tin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0693,
+              "lat": 22.5017
+            }
+          ]
+        },
+        {
+          "code": "NST",
+          "names": {
+            "zh-Hant": "沙田區",
+            "zh-Hans": "沙田区",
+            "en": "Sha Tin"
+          },
+          "cities": [
+            {
+              "id": 1818920,
+              "names": {
+                "zh-Hant": "沙田",
+                "zh-Hans": "沙田",
+                "en": "Sha Tin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1833,
+              "lat": 22.3833
+            },
+            {
+              "id": 1819400,
+              "names": {
+                "zh-Hant": "馬鞍山村",
+                "zh-Hans": "马鞍山村",
+                "en": "Ma On Shan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2408,
+              "lat": 22.4061
+            },
+            {
+              "id": 1818916,
+              "names": {
+                "zh-Hant": "沙田圍",
+                "zh-Hans": "沙田围",
+                "en": "Sha Tin Wai"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1975,
+              "lat": 22.3776
+            },
+            {
+              "id": 1818781,
+              "names": {
+                "zh-Hant": "小瀝源",
+                "zh-Hans": "小沥源",
+                "en": "Siu Lek Yuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2126,
+              "lat": 22.3817
+            },
+            {
+              "id": 12719443,
+              "names": {
+                "zh-Hant": "Wu Kai Sha",
+                "zh-Hans": "Wu Kai Sha",
+                "en": "Wu Kai Sha"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2421,
+              "lat": 22.4302
+            },
+            {
+              "id": 1819855,
+              "names": {
+                "zh-Hant": "火炭",
+                "zh-Hans": "火炭",
+                "en": "Fo Tan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1929,
+              "lat": 22.3985
+            },
+            {
+              "id": 1818628,
+              "names": {
+                "zh-Hant": "大圍",
+                "zh-Hans": "大围",
+                "en": "Tai Wai"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.179,
+              "lat": 22.3729
+            },
+            {
+              "id": 12687143,
+              "names": {
+                "zh-Hant": "Shui Chuen O",
+                "zh-Hans": "Shui Chuen O",
+                "en": "Shui Chuen O"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1978,
+              "lat": 22.3716
+            },
+            {
+              "id": 12719547,
+              "names": {
+                "zh-Hant": "Keng Hau",
+                "zh-Hans": "Keng Hau",
+                "en": "Keng Hau"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1747,
+              "lat": 22.3651
+            },
+            {
+              "id": 1818654,
+              "names": {
+                "zh-Hant": "大水坑",
+                "zh-Hans": "大水坑",
+                "en": "Tai Shui Hang"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2239,
+              "lat": 22.4063
+            },
+            {
+              "id": 1818349,
+              "names": {
+                "zh-Hant": "禾輋",
+                "zh-Hans": "禾𪨶",
+                "en": "Wo Che"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1922,
+              "lat": 22.3902
+            },
+            {
+              "id": 12719445,
+              "names": {
+                "zh-Hant": "Kam Ying",
+                "zh-Hans": "Kam Ying",
+                "en": "Kam Ying"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2366,
+              "lat": 22.4229
+            },
+            {
+              "id": 1818992,
+              "names": {
+                "zh-Hant": "新田",
+                "zh-Hans": "新田",
+                "en": "San Tin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1839,
+              "lat": 22.3719
+            },
+            {
+              "id": 12689062,
+              "names": {
+                "zh-Hant": "Sun Tin Wai",
+                "zh-Hans": "Sun Tin Wai",
+                "en": "Sun Tin Wai"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.187,
+              "lat": 22.3706
+            },
+            {
+              "id": 12687141,
+              "names": {
+                "zh-Hant": "Pok Hong",
+                "zh-Hans": "Pok Hong",
+                "en": "Pok Hong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1958,
+              "lat": 22.3756
+            },
+            {
+              "id": 12719444,
+              "names": {
+                "zh-Hant": "Lee On",
+                "zh-Hans": "Lee On",
+                "en": "Lee On"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2413,
+              "lat": 22.4264
+            },
+            {
+              "id": 12640679,
+              "names": {
+                "zh-Hant": "第一城",
+                "zh-Hans": "第一城",
+                "en": "City One"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2028,
+              "lat": 22.3868
+            }
+          ]
+        },
+        {
+          "code": "HCW",
+          "names": {
+            "zh-Hant": "中西區",
+            "zh-Hans": "中西区",
+            "en": "Central and Western"
+          },
+          "cities": [
+            {
+              "id": 1931681,
+              "names": {
+                "zh-Hant": "Victoria",
+                "zh-Hans": "Victoria",
+                "en": "Victoria"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1442,
+              "lat": 22.2875
+            },
+            {
+              "id": 1819638,
+              "names": {
+                "zh-Hant": "堅尼地城",
+                "zh-Hans": "坚尼地城",
+                "en": "Kennedy Town"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1295,
+              "lat": 22.2828
+            },
+            {
+              "id": 12640687,
+              "names": {
+                "zh-Hant": "山頂",
+                "zh-Hans": "山顶",
+                "en": "The Peak"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1565,
+              "lat": 22.262
+            },
+            {
+              "id": 1819339,
+              "names": {
+                "zh-Hant": "Mount Davis",
+                "zh-Hans": "Mount Davis",
+                "en": "Mount Davis"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1178,
+              "lat": 22.2786
+            },
+            {
+              "id": 1819361,
+              "names": {
+                "zh-Hant": "Mid Levels",
+                "zh-Hans": "Mid Levels",
+                "en": "Mid Levels"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1496,
+              "lat": 22.284
+            }
+          ]
+        },
+        {
+          "code": "KKC",
+          "names": {
+            "zh-Hant": "九龍城區",
+            "zh-Hans": "九龙城区",
+            "en": "Kowloon City"
+          },
+          "cities": [
+            {
+              "id": 1819607,
+              "names": {
+                "zh-Hant": "九龍城",
+                "zh-Hans": "九龙城",
+                "en": "Kowloon City"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1922,
+              "lat": 22.3305
+            },
+            {
+              "id": 12640684,
+              "names": {
+                "zh-Hant": "啟德",
+                "zh-Hans": "启德",
+                "en": "Kai Tak"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1974,
+              "lat": 22.3243
+            },
+            {
+              "id": 12689057,
+              "names": {
+                "zh-Hant": "Whampoa",
+                "zh-Hans": "Whampoa",
+                "en": "Whampoa"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1902,
+              "lat": 22.305
+            },
+            {
+              "id": 12719843,
+              "names": {
+                "zh-Hant": "Whampoa Garden",
+                "zh-Hans": "Whampoa Garden",
+                "en": "Whampoa Garden"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1894,
+              "lat": 22.3053
+            },
+            {
+              "id": 1818501,
+              "names": {
+                "zh-Hant": "尖沙嘴",
+                "zh-Hans": "尖沙嘴",
+                "en": "Tsim Sha Tsui"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1667,
+              "lat": 22.3
+            },
+            {
+              "id": 1819394,
+              "names": {
+                "zh-Hant": "古瑾圍",
+                "zh-Hans": "古瑾围",
+                "en": "Ma Tau Wai"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1874,
+              "lat": 22.3207
+            },
+            {
+              "id": 1819731,
+              "names": {
+                "zh-Hant": "何文田",
+                "zh-Hans": "何文田",
+                "en": "Ho Man Tin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1818,
+              "lat": 22.3158
+            },
+            {
+              "id": 12640671,
+              "names": {
+                "zh-Hant": "宋皇臺",
+                "zh-Hans": "宋皇台",
+                "en": "Sung Wong Toi"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1915,
+              "lat": 22.3247
+            },
+            {
+              "id": 1819602,
+              "names": {
+                "zh-Hant": "九龍塘",
+                "zh-Hans": "九龙塘",
+                "en": "Kowloon Tong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1797,
+              "lat": 22.3331
+            },
+            {
+              "id": 12719848,
+              "names": {
+                "zh-Hant": "Tak Long Estate",
+                "zh-Hans": "Tak Long Estate",
+                "en": "Tak Long Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2034,
+              "lat": 22.3302
+            },
+            {
+              "id": 12719439,
+              "names": {
+                "zh-Hant": "Hok Yuen",
+                "zh-Hans": "Hok Yuen",
+                "en": "Hok Yuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1882,
+              "lat": 22.3103
+            },
+            {
+              "id": 12719440,
+              "names": {
+                "zh-Hant": "Laguna Verde",
+                "zh-Hans": "Laguna Verde",
+                "en": "Laguna Verde"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1907,
+              "lat": 22.3072
+            },
+            {
+              "id": 12640682,
+              "names": {
+                "zh-Hant": "嘉道理",
+                "zh-Hans": "嘉道理",
+                "en": "Kadoorie"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1756,
+              "lat": 22.3225
+            },
+            {
+              "id": 12719847,
+              "names": {
+                "zh-Hant": "Oi Man Estate",
+                "zh-Hans": "Oi Man Estate",
+                "en": "Oi Man Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1785,
+              "lat": 22.312
+            },
+            {
+              "id": 1818365,
+              "names": {
+                "zh-Hant": "Wang Tau Hom",
+                "zh-Hans": "Wang Tau Hom",
+                "en": "Wang Tau Hom"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1873,
+              "lat": 22.3401
+            },
+            {
+              "id": 1818544,
+              "names": {
+                "zh-Hant": "土瓜灣",
+                "zh-Hans": "土瓜湾",
+                "en": "To Kwa Wan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1905,
+              "lat": 22.3169
+            },
+            {
+              "id": 12687144,
+              "names": {
+                "zh-Hant": "Prince Edward",
+                "zh-Hans": "Prince Edward",
+                "en": "Prince Edward"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1794,
+              "lat": 22.3236
+            }
+          ]
+        },
+        {
+          "code": "KSS",
+          "names": {
+            "zh-Hant": "Sham Shui Po District",
+            "zh-Hans": "Sham Shui Po District",
+            "en": "Sham Shui Po District"
+          },
+          "cities": [
+            {
+              "id": 1818953,
+              "names": {
+                "zh-Hant": "深水埗區",
+                "zh-Hans": "深水埗区",
+                "en": "Sham Shui Po"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1595,
+              "lat": 22.3302
+            },
+            {
+              "id": 12689055,
+              "names": {
+                "zh-Hant": "Nam Cheong",
+                "zh-Hans": "Nam Cheong",
+                "en": "Nam Cheong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1539,
+              "lat": 22.328
+            },
+            {
+              "id": 12640681,
+              "names": {
+                "zh-Hant": "美孚",
+                "zh-Hans": "美孚",
+                "en": "Mei Foo"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1386,
+              "lat": 22.3372
+            },
+            {
+              "id": 12719566,
+              "names": {
+                "zh-Hant": "Mei Foo Sun Chuen",
+                "zh-Hans": "Mei Foo Sun Chuen",
+                "en": "Mei Foo Sun Chuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1402,
+              "lat": 22.3364
+            },
+            {
+              "id": 12719555,
+              "names": {
+                "zh-Hant": "Shek Kip Mei Estate",
+                "zh-Hans": "Shek Kip Mei Estate",
+                "en": "Shek Kip Mei Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1653,
+              "lat": 22.3341
+            },
+            {
+              "id": 12640674,
+              "names": {
+                "zh-Hant": "蘇屋",
+                "zh-Hans": "苏屋",
+                "en": "So Uk"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1568,
+              "lat": 22.3413
+            },
+            {
+              "id": 12719581,
+              "names": {
+                "zh-Hant": "So Uk Estate",
+                "zh-Hans": "So Uk Estate",
+                "en": "So Uk Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1565,
+              "lat": 22.3415
+            },
+            {
+              "id": 12719552,
+              "names": {
+                "zh-Hant": "Un Chau Estate",
+                "zh-Hans": "Un Chau Estate",
+                "en": "Un Chau Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1562,
+              "lat": 22.3363
+            },
+            {
+              "id": 1818905,
+              "names": {
+                "zh-Hant": "石硤尾",
+                "zh-Hans": "石硖尾",
+                "en": "Shek Kip Mei"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.168,
+              "lat": 22.3315
+            },
+            {
+              "id": 12719553,
+              "names": {
+                "zh-Hant": "Pak Tin Estate",
+                "zh-Hans": "Pak Tin Estate",
+                "en": "Pak Tin Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1667,
+              "lat": 22.3371
+            },
+            {
+              "id": 12719569,
+              "names": {
+                "zh-Hant": "Hoi Lai Estate",
+                "zh-Hans": "Hoi Lai Estate",
+                "en": "Hoi Lai Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1467,
+              "lat": 22.3318
+            },
+            {
+              "id": 12719572,
+              "names": {
+                "zh-Hant": "Fu Cheong Estate",
+                "zh-Hans": "Fu Cheong Estate",
+                "en": "Fu Cheong Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.154,
+              "lat": 22.3289
+            }
+          ]
+        },
+        {
+          "code": "KWT",
+          "names": {
+            "zh-Hant": "Wong Tai Sin District",
+            "zh-Hans": "Wong Tai Sin District",
+            "en": "Wong Tai Sin District"
+          },
+          "cities": [
+            {
+              "id": 1818304,
+              "names": {
+                "zh-Hant": "黃大仙",
+                "zh-Hans": "黄大仙",
+                "en": "Wong Tai Sin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1833,
+              "lat": 22.35
+            },
+            {
+              "id": 12689060,
+              "names": {
+                "zh-Hant": "Choi Wan",
+                "zh-Hans": "Choi Wan",
+                "en": "Choi Wan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2137,
+              "lat": 22.3339
+            },
+            {
+              "id": 1818447,
+              "names": {
+                "zh-Hant": "慈雲山",
+                "zh-Hans": "慈云山",
+                "en": "Tsz Wan Shan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2002,
+              "lat": 22.3525
+            },
+            {
+              "id": 12746539,
+              "names": {
+                "zh-Hant": "Lower Wong Tai Sin Estate (I & II)",
+                "zh-Hans": "Lower Wong Tai Sin Estate (I & II)",
+                "en": "Lower Wong Tai Sin Estate (I & II)"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1944,
+              "lat": 22.3392
+            },
+            {
+              "id": 1819923,
+              "names": {
+                "zh-Hant": "竹園",
+                "zh-Hans": "竹园",
+                "en": "Chuk Yuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1933,
+              "lat": 22.3454
+            },
+            {
+              "id": 12746532,
+              "names": {
+                "zh-Hant": "Choi Wan Estate (I & II)",
+                "zh-Hans": "Choi Wan Estate (I & II)",
+                "en": "Choi Wan Estate (I & II)"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2133,
+              "lat": 22.3334
+            },
+            {
+              "id": 12746541,
+              "names": {
+                "zh-Hant": "Tsz Ching Estate",
+                "zh-Hans": "Tsz Ching Estate",
+                "en": "Tsz Ching Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2006,
+              "lat": 22.351
+            },
+            {
+              "id": 1819003,
+              "names": {
+                "zh-Hant": "新蒲崗",
+                "zh-Hans": "新蒲岗",
+                "en": "San Po Kong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1967,
+              "lat": 22.3355
+            },
+            {
+              "id": 12746531,
+              "names": {
+                "zh-Hant": "Choi Hung Estate",
+                "zh-Hans": "Choi Hung Estate",
+                "en": "Choi Hung Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2058,
+              "lat": 22.3364
+            },
+            {
+              "id": 12746517,
+              "names": {
+                "zh-Hant": "Chuk Yuen North Estate",
+                "zh-Hans": "Chuk Yuen North Estate",
+                "en": "Chuk Yuen North Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.192,
+              "lat": 22.3459
+            },
+            {
+              "id": 12746547,
+              "names": {
+                "zh-Hant": "Wang Tau Hom Estate",
+                "zh-Hans": "Wang Tau Hom Estate",
+                "en": "Wang Tau Hom Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1867,
+              "lat": 22.3401
+            },
+            {
+              "id": 12746524,
+              "names": {
+                "zh-Hant": "Tung Tau Estate",
+                "zh-Hans": "Tung Tau Estate",
+                "en": "Tung Tau Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1928,
+              "lat": 22.3321
+            }
+          ]
+        },
+        {
+          "code": "NKT",
+          "names": {
+            "zh-Hant": "葵青區",
+            "zh-Hans": "葵青区",
+            "en": "Kwai Tsing District"
+          },
+          "cities": [
+            {
+              "id": 1819595,
+              "names": {
+                "zh-Hant": "葵涌",
+                "zh-Hans": "葵涌",
+                "en": "Kwai Chung"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1388,
+              "lat": 22.3683
+            },
+            {
+              "id": 1818483,
+              "names": {
+                "zh-Hant": "青衣",
+                "zh-Hans": "青衣",
+                "en": "Tsing Yi Town"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1,
+              "lat": 22.35
+            },
+            {
+              "id": 1818892,
+              "names": {
+                "zh-Hant": "石梨",
+                "zh-Hans": "石梨",
+                "en": "Shek Lei"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1398,
+              "lat": 22.3661
+            },
+            {
+              "id": 1818614,
+              "names": {
+                "zh-Hant": "大窩口",
+                "zh-Hans": "大窝口",
+                "en": "Tai Wo Hau"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1235,
+              "lat": 22.3672
+            }
+          ]
+        },
+        {
+          "code": "NTM",
+          "names": {
+            "zh-Hant": "屯門區",
+            "zh-Hans": "屯门区",
+            "en": "Tuen Mun"
+          },
+          "cities": [
+            {
+              "id": 1818446,
+              "names": {
+                "zh-Hant": "屯門",
+                "zh-Hans": "屯门",
+                "en": "Tuen Mun"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.9716,
+              "lat": 22.3917
+            },
+            {
+              "id": 1818444,
+              "names": {
+                "zh-Hant": "屯門新墟",
+                "zh-Hans": "屯门新墟",
+                "en": "Tuen Mun San Hui"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.976,
+              "lat": 22.3988
+            },
+            {
+              "id": 12719540,
+              "names": {
+                "zh-Hant": "Sam Shing",
+                "zh-Hans": "Sam Shing",
+                "en": "Sam Shing"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.9787,
+              "lat": 22.3813
+            },
+            {
+              "id": 12689065,
+              "names": {
+                "zh-Hant": "Butterfly",
+                "zh-Hans": "Butterfly",
+                "en": "Butterfly"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.9625,
+              "lat": 22.3759
+            }
+          ]
+        },
+        {
+          "code": "NSK",
+          "names": {
+            "zh-Hant": "Sai Kung District",
+            "zh-Hans": "Sai Kung District",
+            "en": "Sai Kung District"
+          },
+          "cities": [
+            {
+              "id": 1818506,
+              "names": {
+                "zh-Hant": "Tseung Kwan O",
+                "zh-Hans": "Tseung Kwan O",
+                "en": "Tseung Kwan O"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2499,
+              "lat": 22.3279
+            },
+            {
+              "id": 12719433,
+              "names": {
+                "zh-Hant": "LOHAS Park",
+                "zh-Hans": "LOHAS Park",
+                "en": "LOHAS Park"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2725,
+              "lat": 22.2932
+            },
+            {
+              "id": 1819791,
+              "names": {
+                "zh-Hant": "坑口",
+                "zh-Hans": "坑口",
+                "en": "Hang Hau"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2699,
+              "lat": 22.3181
+            },
+            {
+              "id": 1819050,
+              "names": {
+                "zh-Hant": "西貢",
+                "zh-Hans": "西贡",
+                "en": "Sai Kung"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2667,
+              "lat": 22.3833
+            }
+          ]
+        },
+        {
+          "code": "HSO",
+          "names": {
+            "zh-Hant": "Southern District",
+            "zh-Hans": "Southern District",
+            "en": "Southern District"
+          },
+          "cities": [
+            {
+              "id": 1819757,
+              "names": {
+                "zh-Hant": "香港仔",
+                "zh-Hans": "香港仔",
+                "en": "Aberdeen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1529,
+              "lat": 22.248
+            },
+            {
+              "id": 1819091,
+              "names": {
+                "zh-Hant": "Pok Fu Lam",
+                "zh-Hans": "Pok Fu Lam",
+                "en": "Pok Fu Lam"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1292,
+              "lat": 22.2686
+            },
+            {
+              "id": 12719432,
+              "names": {
+                "zh-Hant": "South Horizons",
+                "zh-Hans": "South Horizons",
+                "en": "South Horizons"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1483,
+              "lat": 22.2438
+            },
+            {
+              "id": 12719791,
+              "names": {
+                "zh-Hant": "South Horizons (Estate)",
+                "zh-Hans": "South Horizons (Estate)",
+                "en": "South Horizons (Estate)"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1462,
+              "lat": 22.2441
+            },
+            {
+              "id": 12640693,
+              "names": {
+                "zh-Hant": "利東",
+                "zh-Hans": "利东",
+                "en": "Lei Tung"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1576,
+              "lat": 22.2405
+            },
+            {
+              "id": 1818385,
+              "names": {
+                "zh-Hant": "華富邨",
+                "zh-Hans": "华富邨",
+                "en": "Wah Fu"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1362,
+              "lat": 22.2547
+            },
+            {
+              "id": 1818883,
+              "names": {
+                "zh-Hant": "石澳",
+                "zh-Hans": "石澳",
+                "en": "Shek O"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2512,
+              "lat": 22.2334
+            },
+            {
+              "id": 1819980,
+              "names": {
+                "zh-Hant": "赤柱",
+                "zh-Hans": "赤柱",
+                "en": "Chek Chue"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2124,
+              "lat": 22.2185
+            },
+            {
+              "id": 12719787,
+              "names": {
+                "zh-Hant": "Lei Tung Estate",
+                "zh-Hans": "Lei Tung Estate",
+                "en": "Lei Tung Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1552,
+              "lat": 22.2412
+            },
+            {
+              "id": 1818557,
+              "names": {
+                "zh-Hant": "田灣",
+                "zh-Hans": "田湾",
+                "en": "Tin Wan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1473,
+              "lat": 22.2511
+            },
+            {
+              "id": 9172583,
+              "names": {
+                "zh-Hant": "Wong Chuk Hang",
+                "zh-Hans": "Wong Chuk Hang",
+                "en": "Wong Chuk Hang"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.17,
+              "lat": 22.2398
+            }
+          ]
+        },
+        {
+          "code": "NTW",
+          "names": {
+            "zh-Hant": "Tsuen Wan",
+            "zh-Hans": "Tsuen Wan",
+            "en": "Tsuen Wan"
+          },
+          "cities": [
+            {
+              "id": 1818209,
+              "names": {
+                "zh-Hant": "荃灣",
+                "zh-Hans": "荃湾",
+                "en": "Tsuen Wan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1133,
+              "lat": 22.3714
+            },
+            {
+              "id": 1818950,
+              "names": {
+                "zh-Hant": "深井",
+                "zh-Hans": "深井",
+                "en": "Sham Tseng"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.05,
+              "lat": 22.3667
+            },
+            {
+              "id": 12689054,
+              "names": {
+                "zh-Hant": "Discovery Park",
+                "zh-Hans": "Discovery Park",
+                "en": "Discovery Park"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1114,
+              "lat": 22.3762
+            },
+            {
+              "id": 1818574,
+              "names": {
+                "zh-Hant": "汀九",
+                "zh-Hans": "汀九",
+                "en": "Ting Kau"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0791,
+              "lat": 22.3696
+            },
+            {
+              "id": 1818259,
+              "names": {
+                "zh-Hant": "Yeung Uk Tsuen",
+                "zh-Hans": "Yeung Uk Tsuen",
+                "en": "Yeung Uk Tsuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0167,
+              "lat": 22.45
+            }
+          ]
+        },
+        {
+          "code": "NTP",
+          "names": {
+            "zh-Hant": "Tai Po",
+            "zh-Hans": "Tai Po",
+            "en": "Tai Po"
+          },
+          "cities": [
+            {
+              "id": 1818673,
+              "names": {
+                "zh-Hant": "大埔墟",
+                "zh-Hans": "大埔墟",
+                "en": "Tai Po"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1688,
+              "lat": 22.4501
+            },
+            {
+              "id": 1818817,
+              "names": {
+                "zh-Hant": "船灣",
+                "zh-Hans": "船湾",
+                "en": "Shuen Wan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2081,
+              "lat": 22.4677
+            },
+            {
+              "id": 1819726,
+              "names": {
+                "zh-Hant": "康樂園",
+                "zh-Hans": "康乐园",
+                "en": "Hong Lok Yuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1552,
+              "lat": 22.4632
+            },
+            {
+              "id": 1818695,
+              "names": {
+                "zh-Hant": "大埔海濱",
+                "zh-Hans": "大埔海滨",
+                "en": "Tai Mei Tuk"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2346,
+              "lat": 22.4745
+            }
+          ]
+        },
+        {
+          "code": "NNO",
+          "names": {
+            "zh-Hant": "北區",
+            "zh-Hans": "北区",
+            "en": "North District"
+          },
+          "cities": [
+            {
+              "id": 1819873,
+              "names": {
+                "zh-Hant": "Fanling",
+                "zh-Hans": "Fanling",
+                "en": "Fanling"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1395,
+              "lat": 22.4949
+            },
+            {
+              "id": 1818845,
+              "names": {
+                "zh-Hant": "上水",
+                "zh-Hans": "上水",
+                "en": "Sheung Shui"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1167,
+              "lat": 22.5167
+            }
+          ]
+        },
+        {
+          "code": "NIS",
+          "names": {
+            "zh-Hant": "離島區",
+            "zh-Hans": "离岛区",
+            "en": "Islands"
+          },
+          "cities": [
+            {
+              "id": 1819283,
+              "names": {
+                "zh-Hant": "新東涌坑",
+                "zh-Hans": "新东涌坑",
+                "en": "San Tung Chung Hang"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.9431,
+              "lat": 22.2788
+            },
+            {
+              "id": 11101593,
+              "names": {
+                "zh-Hant": "Tung Chung",
+                "zh-Hans": "Tung Chung",
+                "en": "Tung Chung"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 113.9424,
+              "lat": 22.2878
+            },
+            {
+              "id": 1819968,
+              "names": {
+                "zh-Hant": "Cheung Chau",
+                "zh-Hans": "Cheung Chau",
+                "en": "Cheung Chau"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0279,
+              "lat": 22.2109
+            },
+            {
+              "id": 1819894,
+              "names": {
+                "zh-Hant": "愉景灣",
+                "zh-Hans": "愉景湾",
+                "en": "Discovery Bay"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.0167,
+              "lat": 22.3
+            }
+          ]
+        },
+        {
+          "code": "HEA",
+          "names": {
+            "zh-Hant": "東區",
+            "zh-Hans": "东区",
+            "en": "Eastern District"
+          },
+          "cities": [
+            {
+              "id": 10170102,
+              "names": {
+                "zh-Hant": "Tai Koo",
+                "zh-Hans": "Tai Koo",
+                "en": "Tai Koo"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2163,
+              "lat": 22.2841
+            },
+            {
+              "id": 12719589,
+              "names": {
+                "zh-Hant": "Taikoo Shing",
+                "zh-Hans": "Taikoo Shing",
+                "en": "Taikoo Shing"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2187,
+              "lat": 22.2861
+            },
+            {
+              "id": 12719587,
+              "names": {
+                "zh-Hant": "Siu Sai Wan Estate",
+                "zh-Hans": "Siu Sai Wan Estate",
+                "en": "Siu Sai Wan Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2488,
+              "lat": 22.2616
+            },
+            {
+              "id": 1819029,
+              "names": {
+                "zh-Hant": "西灣河",
+                "zh-Hans": "西湾河",
+                "en": "Sai Wan Ho"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2232,
+              "lat": 22.2845
+            },
+            {
+              "id": 12719592,
+              "names": {
+                "zh-Hant": "Heng Fa Chuen",
+                "zh-Hans": "Heng Fa Chuen",
+                "en": "Heng Fa Chuen"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2408,
+              "lat": 22.2767
+            },
+            {
+              "id": 12719542,
+              "names": {
+                "zh-Hant": "Aldrich Bay",
+                "zh-Hans": "Aldrich Bay",
+                "en": "Aldrich Bay"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2247,
+              "lat": 22.282
+            },
+            {
+              "id": 12719438,
+              "names": {
+                "zh-Hant": "Braemar Hill",
+                "zh-Hans": "Braemar Hill",
+                "en": "Braemar Hill"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2003,
+              "lat": 22.2828
+            },
+            {
+              "id": 7778986,
+              "names": {
+                "zh-Hant": "炮台山",
+                "zh-Hans": "炮台山",
+                "en": "Fortress Hill"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1942,
+              "lat": 22.2886
+            },
+            {
+              "id": 12719544,
+              "names": {
+                "zh-Hant": "City Garden",
+                "zh-Hans": "City Garden",
+                "en": "City Garden"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1926,
+              "lat": 22.29
+            },
+            {
+              "id": 12719635,
+              "names": {
+                "zh-Hant": "Yiu Tung Estate",
+                "zh-Hans": "Yiu Tung Estate",
+                "en": "Yiu Tung Estate"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.223,
+              "lat": 22.2785
+            }
+          ]
+        },
+        {
+          "code": "KKT",
+          "names": {
+            "zh-Hant": "觀塘",
+            "zh-Hans": "观塘",
+            "en": "Kwun Tong District"
+          },
+          "cities": [
+            {
+              "id": 1818972,
+              "names": {
+                "zh-Hant": "秀茂坪",
+                "zh-Hans": "秀茂坪",
+                "en": "Sau Mau Ping"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.235,
+              "lat": 22.3202
+            },
+            {
+              "id": 1818550,
+              "names": {
+                "zh-Hant": "調景嶺",
+                "zh-Hans": "调景岭",
+                "en": "Tiu Keng Leng"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2512,
+              "lat": 22.2985
+            },
+            {
+              "id": 1818266,
+              "names": {
+                "zh-Hant": "油塘",
+                "zh-Hans": "油塘",
+                "en": "Yau Tong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.236,
+              "lat": 22.2957
+            },
+            {
+              "id": 12689059,
+              "names": {
+                "zh-Hant": "Laguna City",
+                "zh-Hans": "Laguna City",
+                "en": "Laguna City"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2286,
+              "lat": 22.3055
+            },
+            {
+              "id": 1819554,
+              "names": {
+                "zh-Hant": "藍田",
+                "zh-Hans": "蓝田",
+                "en": "Lam Tin"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2363,
+              "lat": 22.3093
+            },
+            {
+              "id": 1819577,
+              "names": {
+                "zh-Hant": "觀塘",
+                "zh-Hans": "观塘",
+                "en": "Kwun Tong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.2218,
+              "lat": 22.3118
+            }
+          ]
+        },
+        {
+          "code": "HWC",
+          "names": {
+            "zh-Hant": "灣仔區",
+            "zh-Hans": "湾仔区",
+            "en": "Wan Chai"
+          },
+          "cities": [
+            {
+              "id": 1818379,
+              "names": {
+                "zh-Hant": "灣仔",
+                "zh-Hans": "湾仔",
+                "en": "Wan Chai"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1726,
+              "lat": 22.2814
+            },
+            {
+              "id": 1819529,
+              "names": {
+                "zh-Hant": "禮頓山",
+                "zh-Hans": "礼顿山",
+                "en": "Leighton Hill"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.184,
+              "lat": 22.2761
+            }
+          ]
+        },
+        {
+          "code": "KYT",
+          "names": {
+            "zh-Hant": "油尖旺區",
+            "zh-Hans": "油尖旺区",
+            "en": "Yau Tsim Mong District"
+          },
+          "cities": [
+            {
+              "id": 1819353,
+              "names": {
+                "zh-Hant": "旺角",
+                "zh-Hans": "旺角",
+                "en": "Mong Kok"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1714,
+              "lat": 22.3194
+            },
+            {
+              "id": 8224045,
+              "names": {
+                "zh-Hant": "佐敦",
+                "zh-Hans": "佐敦",
+                "en": "Jordan"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.17,
+              "lat": 22.3054
+            },
+            {
+              "id": 1818721,
+              "names": {
+                "zh-Hant": "大角咀",
+                "zh-Hans": "大角咀",
+                "en": "Tai Kok Tsui"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.163,
+              "lat": 22.3215
+            },
+            {
+              "id": 1818268,
+              "names": {
+                "zh-Hant": "油麻地",
+                "zh-Hans": "油麻地",
+                "en": "Yau Ma Tei"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1686,
+              "lat": 22.3138
+            },
+            {
+              "id": 12689056,
+              "names": {
+                "zh-Hant": "Olympic",
+                "zh-Hans": "Olympic",
+                "en": "Olympic"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1574,
+              "lat": 22.3194
+            }
+          ]
+        },
+        {
+          "code": "",
+          "names": {
+            "zh-Hant": "其他地區",
+            "zh-Hans": "其他地区",
+            "en": "Other"
+          },
+          "cities": [
+            {
+              "id": 1819729,
+              "names": {
+                "zh-Hant": "香港",
+                "zh-Hans": "香港",
+                "en": "Hong Kong"
+              },
+              "tz": "Asia/Hong_Kong",
+              "lon": 114.1747,
+              "lat": 22.2783
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

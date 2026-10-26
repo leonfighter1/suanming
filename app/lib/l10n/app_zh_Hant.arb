@@ -165,5 +165,15 @@
   "remedyPrint": "列印",
   "remedyHeld": "方案正在審核中，暫時無法顯示。",
   "remedyFailed": "生成失敗，請重試（不會重複收費）。",
-  "remedyDemoPaid": "示範付款（未實際收費）"
+  "remedyDemoPaid": "示範付款（未實際收費）",
+  "placePick": "選擇出生地",
+  "placeCountry": "國家和地區",
+  "placeRegion": "省／州／縣市",
+  "placeCity": "城市",
+  "placeSearch": "搜尋",
+  "placeCommon": "常用",
+  "placeAll": "全部",
+  "placeNone": "沒有符合的結果",
+  "placeDetail": "時區 {tz} · 經度 {lon}",
+  "placeSource": "地點資料：GeoNames（CC BY 4.0）"
 }

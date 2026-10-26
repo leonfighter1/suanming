@@ -5,3 +5,4 @@ docs/poc/*-results.json
 docs/agent
 app/
 docs/verification/*-results.json
+data/places

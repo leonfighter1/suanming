@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
-import '../domain/cities.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
@@ -31,12 +30,12 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      final city = cityByKey(p.cityKey);
+      final place = p.birthPlace;
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'bazi',
         'local': DateFormat("yyyy-MM-dd'T'HH:mm").format(p.birthLocal),
-        'timezone': city.timezone,
-        'longitude': city.longitude,
+        'timezone': place.timezone,
+        'longitude': place.longitude,
         'gender': p.gender,
         'options': {'trueSolarTime': p.trueSolarTime, 'inputBasis': p.inputBasis},
       });

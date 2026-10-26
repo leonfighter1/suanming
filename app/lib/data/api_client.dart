@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../domain/models.dart';
+import '../domain/places.dart';
 import 'token_store.dart';
 
 class ApiException implements Exception {
@@ -115,6 +116,18 @@ class ApiClient {
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 
   Future<ChartResult> getChart(String id) async => ChartResult.fromJson(await _authed('GET', '/v1/charts/$id'));
+
+  // ---- birthplaces (public) ----
+
+  Future<List<PlaceCountryInfo>> placeCountries() async {
+    final j = await _send('GET', '/v1/places');
+    return (j['countries'] as List).cast<Json>().map(PlaceCountryInfo.fromJson).toList();
+  }
+
+  Future<List<PlaceRegion>> placeRegions(String country) async {
+    final j = await _send('GET', '/v1/places/$country');
+    return (j['regions'] as List).cast<Json>().map(PlaceRegion.fromJson).toList();
+  }
 
   // ---- 破除運勢 plans (paid per topic) ----
 

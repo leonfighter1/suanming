@@ -165,5 +165,15 @@
   "remedyPrint": "打印",
   "remedyHeld": "方案正在审核中，暂时无法显示。",
   "remedyFailed": "生成失败，请重试（不会重复收费）。",
-  "remedyDemoPaid": "示范付款（未实际收费）"
+  "remedyDemoPaid": "示范付款（未实际收费）",
+  "placePick": "选择出生地",
+  "placeCountry": "国家和地区",
+  "placeRegion": "省／州",
+  "placeCity": "城市",
+  "placeSearch": "搜索",
+  "placeCommon": "常用",
+  "placeAll": "全部",
+  "placeNone": "没有符合的结果",
+  "placeDetail": "时区 {tz} · 经度 {lon}",
+  "placeSource": "地点数据：GeoNames（CC BY 4.0）"
 }

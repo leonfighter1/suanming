@@ -2,6 +2,12 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (i): birthplace picker (國家和地區 → 省／州 → 城市)
+
+- Owner request: birthplace by country/region, then province, then city.
+- `npm run build:places` builds data/places from GeoNames cities15000 (CC BY 4.0): 244 countries, 31 780 places, each with IANA timezone and longitude. Country names from Node ICU; Chinese province/city names from GeoNames for 20 main countries, 繁↔简 by OpenCC so both scripts agree; Taiwan grouped by 直轄市/縣市 (admin2); HK/MO short names.
+- API: public `GET /v1/places` and `GET /v1/places/{country}` (cacheable). App: PlaceField + PlacePickerPage (search at every step, common countries first, one-region countries skip the region step); profiles store the picked place; older profiles fall back to their city key.
+
 ## 2026-10-26 (h): report UI, trend scores, 破除運勢, web test
 
 - CI fix: the app fixture embedded the runner's Node tzdb (2026c vs 2024b local), which changed input_digest. `BaziContext.tzdb` pins it for fixtures.

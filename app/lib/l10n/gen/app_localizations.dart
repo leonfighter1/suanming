@@ -1094,6 +1094,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Demo payment (not billed)'**
   String get remedyDemoPaid;
+
+  /// No description provided for @placePick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose birthplace'**
+  String get placePick;
+
+  /// No description provided for @placeCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country or region'**
+  String get placeCountry;
+
+  /// No description provided for @placeRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Province / state'**
+  String get placeRegion;
+
+  /// No description provided for @placeCity.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get placeCity;
+
+  /// No description provided for @placeSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get placeSearch;
+
+  /// No description provided for @placeCommon.
+  ///
+  /// In en, this message translates to:
+  /// **'Common'**
+  String get placeCommon;
+
+  /// No description provided for @placeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get placeAll;
+
+  /// No description provided for @placeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No match'**
+  String get placeNone;
+
+  /// No description provided for @placeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone {tz} · longitude {lon}'**
+  String placeDetail(String tz, String lon);
+
+  /// No description provided for @placeSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Place data: GeoNames (CC BY 4.0)'**
+  String get placeSource;
 }
 
 class _AppLocalizationsDelegate

@@ -33,6 +33,7 @@ import {
   shichenOptions,
 } from "../engines/bazi/index.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
+import { placeCountry, placeIndex } from "../places/index.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { upstreamMessage } from "../service/runtime.js";
 import { InMemoryStore, type RemedyRecord, type ReportRecord, type Store } from "./store.js";
@@ -391,6 +392,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         if (e instanceof CalendarInputError) throw new InputError(e.message);
         throw e;
       }
+    }
+
+    // ---- birthplaces: public, static (country → region → city with timezone + longitude) ----
+    if (req.method === "GET" && path === "/v1/places") {
+      return send(res, 200, placeIndex(), { "cache-control": "public, max-age=86400" });
+    }
+    const pm = /^\/v1\/places\/([^/]+)$/.exec(path);
+    if (req.method === "GET" && pm) {
+      const data = placeCountry(pm[1]!.toUpperCase());
+      if (!data) throw new HttpError(404, "unknown country code");
+      return send(res, 200, data, { "cache-control": "public, max-age=86400" });
     }
 
     // ---- auth (no caller yet) ----

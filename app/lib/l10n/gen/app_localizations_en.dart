@@ -549,4 +549,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remedyDemoPaid => 'Demo payment (not billed)';
+
+  @override
+  String get placePick => 'Choose birthplace';
+
+  @override
+  String get placeCountry => 'Country or region';
+
+  @override
+  String get placeRegion => 'Province / state';
+
+  @override
+  String get placeCity => 'City';
+
+  @override
+  String get placeSearch => 'Search';
+
+  @override
+  String get placeCommon => 'Common';
+
+  @override
+  String get placeAll => 'All';
+
+  @override
+  String get placeNone => 'No match';
+
+  @override
+  String placeDetail(String tz, String lon) {
+    return 'Time zone $tz · longitude $lon';
+  }
+
+  @override
+  String get placeSource => 'Place data: GeoNames (CC BY 4.0)';
 }

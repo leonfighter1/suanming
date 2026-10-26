@@ -6,3 +6,4 @@ coverage/
 *.pem
 *.key
 report.json
+.cache/

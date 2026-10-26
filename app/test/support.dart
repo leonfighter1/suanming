@@ -87,6 +87,12 @@ class FakeApi {
           ? _json({'title': 'Invalid request', 'status': 400}, 400)
           : _json({'date': date, 'lunar': (cal['day'] as Map)['lunar']}, 200);
     }
+    // Birthplaces: real server data (places.json; CN trimmed to 廣東).
+    if (req.method == 'GET' && path == '/v1/places') return _json(fixture('places')['index'] as Object, 200);
+    if (req.method == 'GET' && path.startsWith('/v1/places/')) {
+      final c = (fixture('places')['countries'] as Map)[path.split('/').last.toUpperCase()];
+      return c == null ? _json({'title': 'not found', 'status': 404}, 404) : _json(c as Object, 200);
+    }
     switch ((req.method, path)) {
       case ('POST', '/v1/auth/register'):
         return _json(_tokens(), 201);

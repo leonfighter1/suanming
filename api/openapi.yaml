@@ -398,6 +398,75 @@ paths:
               schema: { type: object }
         "400": { $ref: "#/components/responses/Problem" }
 
+  /v1/places:
+    get:
+      tags: [charts]
+      operationId: listPlaceCountries
+      summary: Birthplace countries and regions (public, cacheable)
+      description: GeoNames cities15000 (CC BY 4.0), built by `npm run build:places`.
+      security: []
+      responses:
+        "200":
+          description: Countries with names in zh-Hant, zh-Hans and en
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [source, countries]
+                properties:
+                  source: { type: string }
+                  countries:
+                    type: array
+                    items:
+                      type: object
+                      required: [code, names, cities]
+                      properties:
+                        code: { type: string, description: ISO 3166-1 alpha-2 }
+                        names: { $ref: "#/components/schemas/PlaceNames" }
+                        cities: { type: integer }
+
+  /v1/places/{country}:
+    get:
+      tags: [charts]
+      operationId: getPlaceCountry
+      summary: Regions (省 / 州 / 縣市) and cities of one country, with timezone and longitude
+      security: []
+      parameters:
+        - name: country
+          in: path
+          required: true
+          schema: { type: string, pattern: "^[A-Za-z]{2}$" }
+      responses:
+        "200":
+          description: Regions by population, cities by population
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [country, regions]
+                properties:
+                  country: { type: string }
+                  regions:
+                    type: array
+                    items:
+                      type: object
+                      required: [code, names, cities]
+                      properties:
+                        code: { type: string }
+                        names: { $ref: "#/components/schemas/PlaceNames" }
+                        cities:
+                          type: array
+                          items:
+                            type: object
+                            required: [id, names, tz, lon, lat]
+                            properties:
+                              id: { type: integer, description: GeoNames id }
+                              names: { $ref: "#/components/schemas/PlaceNames" }
+                              tz: { type: string, description: IANA timezone }
+                              lon: { type: number }
+                              lat: { type: number }
+        "404": { $ref: "#/components/responses/Problem" }
+
   /v1/charts/{chart_id}:
     get:
       tags: [charts]
@@ -788,6 +857,14 @@ components:
                 total: { type: integer, minimum: 0, maximum: 100 }
                 method_note: { type: string }
         ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
+
+    PlaceNames:
+      type: object
+      required: [zh-Hant, zh-Hans, en]
+      properties:
+        zh-Hant: { type: string }
+        zh-Hans: { type: string }
+        en: { type: string }
 
     TrendPoint:
       type: object

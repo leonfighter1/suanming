@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'cities.dart';
+import 'places.dart';
+
 /// A person charts are computed for: the user ("我") or someone they help.
 /// Stored on the device only (encrypted) — never sent to the server except the
 /// birth fields needed for a single chart computation; the name never leaves.
@@ -14,6 +17,7 @@ class BirthProfile {
     this.dateMode = 'gregorian',
     this.timeMode = 'exact',
     this.shichen,
+    this.place,
   });
 
   factory BirthProfile.fromJson(Map<String, dynamic> j) => BirthProfile(
@@ -26,6 +30,7 @@ class BirthProfile {
         dateMode: j['date_mode'] as String? ?? 'gregorian',
         timeMode: j['time_mode'] as String? ?? 'exact',
         shichen: j['shichen'] as String?,
+        place: j['place'] == null ? null : BirthPlace.fromJson(j['place'] as Map<String, dynamic>),
       );
 
   final String id;
@@ -37,8 +42,14 @@ class BirthProfile {
   /// Civil wall-clock time at the birthplace (no time zone).
   final DateTime birthLocal;
 
-  /// Key into [cities] (presentation/bazi_form_page.dart).
+  /// Legacy key into [cities]; used only when [place] is null.
   final String cityKey;
+
+  /// Birthplace picked as country → region → city (GET /v1/places).
+  final BirthPlace? place;
+
+  /// The birthplace in effect: the picked place, else the legacy city.
+  BirthPlace get birthPlace => place ?? BirthPlace.legacy(cityByKey(cityKey));
   final bool trueSolarTime;
 
   /// gregorian | lunar — how the date was entered (birthLocal is always 公曆).
@@ -69,6 +80,7 @@ class BirthProfile {
         'date_mode': dateMode,
         'time_mode': timeMode,
         'shichen': shichen,
+        if (place != null) 'place': place!.toJson(),
       };
 
   BirthProfile copyWith({
@@ -80,6 +92,7 @@ class BirthProfile {
     String? dateMode,
     String? timeMode,
     String? shichen,
+    BirthPlace? place,
   }) =>
       BirthProfile(
         id: id,
@@ -91,6 +104,7 @@ class BirthProfile {
         dateMode: dateMode ?? this.dateMode,
         timeMode: timeMode ?? this.timeMode,
         shichen: shichen ?? this.shichen,
+        place: place ?? this.place,
       );
 }
 
