@@ -1,0 +1,148 @@
+{
+  "report_id": "11111111-1111-4111-8111-111111111111",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "locale": "zh-Hant",
+  "topics": [
+    "wuxing",
+    "personality",
+    "career_wealth",
+    "relationships",
+    "dayun_liunian",
+    "health"
+  ],
+  "layers": {
+    "facts": [
+      "四柱：庚午 己卯 己卯 辛未",
+      "日主：己土（陰）；月令：卯木",
+      "五行（加權，簡化計分）：木 2.1 · 火 1 · 土 2.9 · 金 2 · 水 0",
+      "大運：順行；起運 1997-02-19；目前大運 壬午（2017 起）",
+      "流年 2026 丙午：正印 / 偏印；與時支六合",
+      "流年 2027 丁未：偏印 / 比肩；與年支六合",
+      "流年 2028 戊申：劫財 / 傷官；與原局無六沖六合"
+    ],
+    "interpretation": [
+      {
+        "topic": "wuxing",
+        "paragraphs": [
+          {
+            "text": "（示範）依命盤的日主、月令與加權五行分數，傳統上會從五行的偏旺與偏弱來看整體平衡。此分數為簡化計分。",
+            "source_level": "simplified_rule",
+            "fact_refs": [
+              "/day_master",
+              "/month_command",
+              "/wuxing_weighted"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "personality",
+        "paragraphs": [
+          {
+            "text": "（示範）傳統上認為日主的五行屬性會反映處事風格，可作為自我觀察的參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/day_master",
+              "/pillars/day"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "career_wealth",
+        "paragraphs": [
+          {
+            "text": "（示範）月柱的十神常被用來談工作方式與合作傾向，僅供規劃時參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/pillars/month"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "relationships",
+        "paragraphs": [
+          {
+            "text": "（示範）日支在傳統上與親密關係的相處模式有關，可多留意溝通節奏。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/pillars/day"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "dayun_liunian",
+        "paragraphs": [
+          {
+            "text": "（示範）目前大運與今年流年的十神組合，可視為這段時間值得關注的主題。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/dayun",
+              "/liunian/0"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "health",
+        "paragraphs": [
+          {
+            "text": "（示範）傳統五行說法會把作息與情緒平衡連結起來。以上不構成醫療建議，如有不適請就醫。",
+            "source_level": "simplified_rule",
+            "fact_refs": [
+              "/wuxing_weighted"
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "topic": "wuxing",
+        "text": "（示範）本週花十分鐘寫下與「五行」相關的一個觀察。",
+        "horizon": "this_week"
+      },
+      {
+        "topic": "personality",
+        "text": "（示範）本週花十分鐘寫下與「性格」相關的一個觀察。",
+        "horizon": "this_week"
+      },
+      {
+        "topic": "career_wealth",
+        "text": "（示範）本週花十分鐘寫下與「事業財運」相關的一個觀察。",
+        "horizon": "this_week"
+      },
+      {
+        "topic": "relationships",
+        "text": "（示範）本週花十分鐘寫下與「婚姻感情」相關的一個觀察。",
+        "horizon": "this_week"
+      },
+      {
+        "topic": "dayun_liunian",
+        "text": "（示範）本週花十分鐘寫下與「大運流年」相關的一個觀察。",
+        "horizon": "this_week"
+      },
+      {
+        "topic": "health",
+        "text": "（示範）本週花十分鐘寫下與「健康」相關的一個觀察。",
+        "horizon": "this_week"
+      }
+    ],
+    "expectation": {
+      "text": "命理內容屬文化參考與自我反思，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
+      "ai_label": "本解讀由 AI 依據命盤資料生成，僅供參考與自我反思。",
+      "label_required": false
+    }
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "narrative@1,action@1,guard@1",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

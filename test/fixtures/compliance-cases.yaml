@@ -1,0 +1,62 @@
+# Rule-layer cases. `block` must be caught by the named rule in the given groups;
+# `allow` must produce zero violations. Add a case for every false positive found
+# in production before changing a pattern.
+block:
+  - { text: "如果不化解，今年必然会破财。", groups: [], rule: G001 }
+  - { text: "不轉運的話，下半年就會出事。", groups: [], rule: G001 }
+  - { text: "不付費解鎖，感情恐怕會惡化。", groups: [], rule: G001 }
+  - { text: "不做法事后果自负。", groups: [], rule: G002 }
+  - { text: "不化解後果很嚴重。", groups: [], rule: G002 }
+  - { text: "你注定会失去这段感情。", groups: [], rule: G003 }
+  - { text: "明年一定會發生大事。", groups: [], rule: G003 }
+  - { text: "命盘显示阳寿只有六十岁。", groups: [], rule: G004 }
+  - { text: "佩戴此物可治愈失眠症。", groups: [], rule: G005 }
+  - { text: "You are destined to find love this year.", groups: [en_common], rule: E001 }
+  - { text: "Success is guaranteed if you follow the cards.", groups: [en_common], rule: E001 }
+  - {
+      text: "Unless you pay for the full reading, bad luck will follow you.",
+      groups: [en_common, us],
+      rule: US001,
+    }
+  - {
+      text: "The most accurate prediction you will ever get.",
+      groups: [en_common, uk],
+      rule: UK001,
+    }
+  - { text: "A new job will happen in March.", groups: [en_common, au], rule: AU001 }
+  - { text: "This crystal can cure chronic illness.", groups: [en_common, eu], rule: EU001 }
+  - { text: "明年你一定会发财。", groups: [], rule: G003 }
+  - { text: "你今年容易得心脏病。", groups: [], rule: G006 }
+  - { text: "命主將罹患腫瘤。", groups: [], rule: G006 }
+  - { text: "建議下月買入科技股。", groups: [], rule: G007 }
+  - { text: "建议现在加仓基金。", groups: [], rule: G007 }
+  - { text: "You are prone to develop heart disease after 40.", groups: [en_common], rule: E002 }
+allow:
+  - { text: "五行火旺之人，傳統上建議注意作息與心情，如有不適請就醫。", groups: [] }
+  - { text: "传统命理的健康推断仅供参考，不构成医疗诊断，如有不适请及时就医。", groups: [] }
+  - { text: "财运起伏属于传统视角，请勿据此做投资决定。", groups: [] }
+  - { text: "財運的說法僅為文化參考，投資前請諮詢持牌顧問。", groups: [] }
+  - {
+      text: "This is not medical advice; please see a doctor if you feel unwell.",
+      groups: [en_common],
+    }
+  - { text: "不付费也会看到基础解读。", groups: [] }
+  - { text: "不化解也没关系，这只是一种文化视角。", groups: [] }
+  - { text: "沒有什麼是注定會發生的，選擇權在你。", groups: [] }
+  - { text: "命理并非注定，结果取决于你的行动。", groups: [] }
+  - { text: "建议本月多运动，保持规律作息。", groups: [] }
+  - { text: "四柱：庚午 己卯 己卯 辛未。日主己土。", groups: [] }
+  - {
+      text: "No outcome is guaranteed. This reading is for reflection only.",
+      groups: [en_common, us],
+    }
+  - {
+      text: "Results are not guaranteed and should not replace professional advice.",
+      groups: [en_common, uk],
+    }
+  - { text: "This is not an accurate prediction of the future.", groups: [en_common, uk] }
+  - { text: "Nothing here will happen automatically; you decide.", groups: [en_common, au] }
+  - {
+      text: "Tarot is not a treatment for any illness. Please consult a doctor.",
+      groups: [en_common, eu],
+    }

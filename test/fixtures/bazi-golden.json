@@ -1,0 +1,17 @@
+{
+  "_readme": "Golden cases for scripts/poc-bazi-golden.ts. Expected values MUST come from a named authoritative 排盘 tool, configured to the same 真太阳时 / 子时流派 options as `input.options`. Target mix: >=15 jieqi_boundary (within 30 min of a 节, incl. 立春), >=10 zi_hour (23:00-01:00), >=10 true_solar_time (far from zone meridian, e.g. Urumqi, Kashgar, Vancouver), >=5 dst (Shanghai 1986-91, HK/TW historical), rest ordinary.",
+  "_example": {
+    "id": "jb-001",
+    "category": "jieqi_boundary",
+    "input": {
+      "local": "YYYY-MM-DDTHH:mm",
+      "timezone": "Asia/Hong_Kong",
+      "longitude": 114.17,
+      "gender": "male",
+      "options": { "trueSolarTime": true, "ziHourSect": 2 }
+    },
+    "expected": { "pillars": "甲辰 丙寅 X X X X", "dayun_start_date": "YYYY-MM-DD" },
+    "source": "<tool name, version, settings, date checked, checker>"
+  },
+  "cases": []
+}

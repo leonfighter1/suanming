@@ -1,0 +1,764 @@
+{
+  "generated_at": "2026-10-26T03:10:13.191Z",
+  "reference": "Swiss Ephemeris 2.10 via sweph, Moshier ephemeris (SEFLG_MOSEPH), geocentric apparent tropical",
+  "candidates": [
+    "@gitstrology/engine@0.1.0",
+    "astronomy-engine@2.1.19"
+  ],
+  "gate_deg": 0.01,
+  "cases": 20,
+  "summary": {
+    "@gitstrology/engine@0.1.0": {
+      "sun": {
+        "max_abs_deg": 0.0134,
+        "mean_abs_deg": 0.0064,
+        "pass": false
+      },
+      "moon": {
+        "max_abs_deg": 8.1297,
+        "mean_abs_deg": 4.7446,
+        "pass": false
+      },
+      "mercury": {
+        "max_abs_deg": 0.0179,
+        "mean_abs_deg": 0.0088,
+        "pass": false
+      },
+      "venus": {
+        "max_abs_deg": 0.02,
+        "mean_abs_deg": 0.0093,
+        "pass": false
+      },
+      "mars": {
+        "max_abs_deg": 1.0739,
+        "mean_abs_deg": 0.3397,
+        "pass": false
+      },
+      "jupiter": {
+        "max_abs_deg": 0.1597,
+        "mean_abs_deg": 0.0779,
+        "pass": false
+      },
+      "saturn": {
+        "max_abs_deg": 1.4845,
+        "mean_abs_deg": 0.628,
+        "pass": false
+      },
+      "uranus": {
+        "max_abs_deg": 2.8293,
+        "mean_abs_deg": 1.166,
+        "pass": false
+      },
+      "neptune": {
+        "max_abs_deg": 2.9211,
+        "mean_abs_deg": 1.2405,
+        "pass": false
+      },
+      "pluto": {
+        "max_abs_deg": 4.442,
+        "mean_abs_deg": 1.8725,
+        "pass": false
+      }
+    },
+    "astronomy-engine@2.1.19": {
+      "sun": {
+        "max_abs_deg": 0.0005,
+        "mean_abs_deg": 0.0001,
+        "pass": true
+      },
+      "moon": {
+        "max_abs_deg": 0.0006,
+        "mean_abs_deg": 0.0002,
+        "pass": true
+      },
+      "mercury": {
+        "max_abs_deg": 0.0029,
+        "mean_abs_deg": 0.0006,
+        "pass": true
+      },
+      "venus": {
+        "max_abs_deg": 0.0026,
+        "mean_abs_deg": 0.0004,
+        "pass": true
+      },
+      "mars": {
+        "max_abs_deg": 0.0008,
+        "mean_abs_deg": 0.0003,
+        "pass": true
+      },
+      "jupiter": {
+        "max_abs_deg": 0.0022,
+        "mean_abs_deg": 0.001,
+        "pass": true
+      },
+      "saturn": {
+        "max_abs_deg": 0.0023,
+        "mean_abs_deg": 0.0008,
+        "pass": true
+      },
+      "uranus": {
+        "max_abs_deg": 0.0029,
+        "mean_abs_deg": 0.0011,
+        "pass": true
+      },
+      "neptune": {
+        "max_abs_deg": 0.0049,
+        "mean_abs_deg": 0.0029,
+        "pass": true
+      },
+      "pluto": {
+        "max_abs_deg": 0.0008,
+        "mean_abs_deg": 0.0003,
+        "pass": true
+      }
+    }
+  },
+  "gitstrology_ascendant_sign_agreement": "20/20",
+  "houses_note": "gitstrology: whole-sign houses only, ascendant ~1° per its docs. astronomy-engine: no house systems (must be implemented in-house).",
+  "gate_pass": {
+    "@gitstrology/engine@0.1.0": false,
+    "astronomy-engine@2.1.19": true
+  },
+  "rows": [
+    {
+      "place": "Hong Kong",
+      "utc": "1940-01-01T00:00:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0105,
+          "moon": -3.1215,
+          "mercury": 0.0137,
+          "venus": 0.0116,
+          "mars": 0.7878,
+          "jupiter": -0.0469,
+          "saturn": 1.2309,
+          "uranus": -2.8293,
+          "neptune": 2.9211,
+          "pluto": 4.442
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0005,
+          "moon": -0.0001,
+          "mercury": 0.0005,
+          "venus": 0.0004,
+          "mars": 0.0003,
+          "jupiter": 0.0014,
+          "saturn": -0.0023,
+          "uranus": 0.0012,
+          "neptune": 0.0005,
+          "pluto": 0.0002
+        }
+      },
+      "asc_ref_sign": "capricorn",
+      "asc_lib_sign": "capricorn"
+    },
+    {
+      "place": "Taipei",
+      "utc": "1944-06-12T07:13:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0134,
+          "moon": 0.0347,
+          "mercury": 0.0179,
+          "venus": 0.0169,
+          "mars": 0.6124,
+          "jupiter": -0.1556,
+          "saturn": 1.1953,
+          "uranus": -2.4128,
+          "neptune": 2.7133,
+          "pluto": 3.9556
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0001,
+          "moon": 0.0003,
+          "mercury": 0.0006,
+          "venus": 0.0002,
+          "mars": 0,
+          "jupiter": 0.0011,
+          "saturn": -0.0022,
+          "uranus": 0.0009,
+          "neptune": -0.0002,
+          "pluto": 0.0002
+        }
+      },
+      "asc_ref_sign": "scorpio",
+      "asc_lib_sign": "scorpio"
+    },
+    {
+      "place": "Singapore",
+      "utc": "1949-11-23T14:26:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0092,
+          "moon": -8.1297,
+          "mercury": 0.0157,
+          "venus": 0.0069,
+          "mars": 0.6593,
+          "jupiter": -0.0826,
+          "saturn": 1.3339,
+          "uranus": -2.374,
+          "neptune": 2.3631,
+          "pluto": 3.6564
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0001,
+          "moon": 0.0002,
+          "mercury": -0.0001,
+          "venus": -0.0004,
+          "mars": 0.0007,
+          "jupiter": -0.0022,
+          "saturn": -0.0005,
+          "uranus": 0.0001,
+          "neptune": -0.0018,
+          "pluto": 0.0002
+        }
+      },
+      "asc_ref_sign": "cancer",
+      "asc_lib_sign": "cancer"
+    },
+    {
+      "place": "Kuala Lumpur",
+      "utc": "1953-04-07T21:39:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.008,
+          "moon": 7.568,
+          "mercury": 0.0058,
+          "venus": 0.02,
+          "mars": 0.4539,
+          "jupiter": -0.1597,
+          "saturn": 1.4845,
+          "uranus": -2.1018,
+          "neptune": 2.3281,
+          "pluto": 3.4536
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0001,
+          "moon": -0.0001,
+          "mercury": 0.0004,
+          "venus": -0.0026,
+          "mars": 0.0004,
+          "jupiter": 0.0004,
+          "saturn": 0.0011,
+          "uranus": -0.0006,
+          "neptune": -0.0023,
+          "pluto": 0.0003
+        }
+      },
+      "asc_ref_sign": "pisces",
+      "asc_lib_sign": "pisces"
+    },
+    {
+      "place": "New York",
+      "utc": "1958-09-18T04:52:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0009,
+          "moon": -7.0164,
+          "mercury": 0.0064,
+          "venus": 0.0054,
+          "mars": 1.0739,
+          "jupiter": -0.1048,
+          "saturn": 1.1104,
+          "uranus": -1.7938,
+          "neptune": 1.9384,
+          "pluto": 2.9325
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0002,
+          "moon": 0.0002,
+          "mercury": -0.0002,
+          "venus": -0.0001,
+          "mars": 0.0001,
+          "jupiter": 0.0008,
+          "saturn": -0.0006,
+          "uranus": 0.0011,
+          "neptune": -0.0028,
+          "pluto": 0.0002
+        }
+      },
+      "asc_ref_sign": "cancer",
+      "asc_lib_sign": "cancer"
+    },
+    {
+      "place": "Vancouver",
+      "utc": "1962-02-02T11:05:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0107,
+          "moon": 5.6731,
+          "mercury": 0.0007,
+          "venus": 0.0157,
+          "mars": 0.3593,
+          "jupiter": -0.1292,
+          "saturn": 0.8715,
+          "uranus": -1.7911,
+          "neptune": 1.8156,
+          "pluto": 2.8593
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0001,
+          "moon": 0,
+          "mercury": -0.0029,
+          "venus": 0,
+          "mars": 0,
+          "jupiter": -0.0009,
+          "saturn": 0.0003,
+          "uranus": 0.0005,
+          "neptune": -0.0037,
+          "pluto": 0.0003
+        }
+      },
+      "asc_ref_sign": "sagittarius",
+      "asc_lib_sign": "sagittarius"
+    },
+    {
+      "place": "Sydney",
+      "utc": "1967-07-13T18:18:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0075,
+          "moon": 1.2344,
+          "mercury": 0.0004,
+          "venus": 0.0021,
+          "mars": 0.5769,
+          "jupiter": -0.0824,
+          "saturn": 0.7602,
+          "uranus": -1.3811,
+          "neptune": 1.5965,
+          "pluto": 2.3836
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0003,
+          "moon": -0.0004,
+          "mercury": -0.002,
+          "venus": -0.0011,
+          "mars": 0.0006,
+          "jupiter": -0.0006,
+          "saturn": -0.0007,
+          "uranus": -0.0018,
+          "neptune": -0.0046,
+          "pluto": 0.0005
+        }
+      },
+      "asc_ref_sign": "gemini",
+      "asc_lib_sign": "gemini"
+    },
+    {
+      "place": "London",
+      "utc": "1971-12-24T01:31:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0017,
+          "moon": 4.0837,
+          "mercury": -0.0025,
+          "venus": 0.0055,
+          "mars": 0.4186,
+          "jupiter": -0.1241,
+          "saturn": 0.8347,
+          "uranus": -1.223,
+          "neptune": 1.3101,
+          "pluto": 2.1013
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0002,
+          "moon": 0.0001,
+          "mercury": -0.0007,
+          "venus": 0,
+          "mars": 0.0007,
+          "jupiter": 0.0011,
+          "saturn": 0.0009,
+          "uranus": -0.0007,
+          "neptune": -0.004,
+          "pluto": 0.0006
+        }
+      },
+      "asc_ref_sign": "libra",
+      "asc_lib_sign": "libra"
+    },
+    {
+      "place": "Toronto",
+      "utc": "1976-05-08T08:44:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0009,
+          "moon": 8.1009,
+          "mercury": -0.0049,
+          "venus": 0.0061,
+          "mars": 0.2936,
+          "jupiter": -0.0868,
+          "saturn": 0.7626,
+          "uranus": -1.093,
+          "neptune": 1.1634,
+          "pluto": 1.8568
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0002,
+          "moon": -0.0004,
+          "mercury": 0.0004,
+          "venus": 0.0003,
+          "mars": 0.0005,
+          "jupiter": 0.0004,
+          "saturn": -0.002,
+          "uranus": -0.0007,
+          "neptune": -0.0041,
+          "pluto": 0.0006
+        }
+      },
+      "asc_ref_sign": "aries",
+      "asc_lib_sign": "aries"
+    },
+    {
+      "place": "Reykjavik",
+      "utc": "1980-10-19T15:57:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.007,
+          "moon": 7.4094,
+          "mercury": 0.0026,
+          "venus": 0.0114,
+          "mars": 0.2063,
+          "jupiter": -0.1037,
+          "saturn": 0.6715,
+          "uranus": -0.7734,
+          "neptune": 0.926,
+          "pluto": 1.4647
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0001,
+          "moon": 0.0001,
+          "mercury": 0.0001,
+          "venus": 0,
+          "mars": 0.0004,
+          "jupiter": 0.0005,
+          "saturn": -0.001,
+          "uranus": -0.0013,
+          "neptune": -0.0037,
+          "pluto": 0.0007
+        }
+      },
+      "asc_ref_sign": "capricorn",
+      "asc_lib_sign": "capricorn"
+    },
+    {
+      "place": "Hong Kong",
+      "utc": "1985-03-03T22:10:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0056,
+          "moon": 6.8581,
+          "mercury": 0.0134,
+          "venus": -0.001,
+          "mars": 0.1537,
+          "jupiter": -0.03,
+          "saturn": 0.5571,
+          "uranus": -0.6435,
+          "neptune": 0.7103,
+          "pluto": 1.2103
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0003,
+          "moon": 0.0002,
+          "mercury": -0.0001,
+          "venus": 0.0001,
+          "mars": 0,
+          "jupiter": -0.001,
+          "saturn": 0.0005,
+          "uranus": -0.0013,
+          "neptune": -0.0024,
+          "pluto": 0.0008
+        }
+      },
+      "asc_ref_sign": "pisces",
+      "asc_lib_sign": "pisces"
+    },
+    {
+      "place": "Taipei",
+      "utc": "1989-08-14T05:23:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.003,
+          "moon": 5.3474,
+          "mercury": 0.006,
+          "venus": 0.0048,
+          "mars": 0.1118,
+          "jupiter": 0.0291,
+          "saturn": 0.3112,
+          "uranus": -0.4722,
+          "neptune": 0.5014,
+          "pluto": 0.8723
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0001,
+          "moon": -0.0001,
+          "mercury": 0.0003,
+          "venus": 0.0005,
+          "mars": 0.0001,
+          "jupiter": -0.0002,
+          "saturn": 0,
+          "uranus": -0.0013,
+          "neptune": -0.0007,
+          "pluto": 0.0007
+        }
+      },
+      "asc_ref_sign": "sagittarius",
+      "asc_lib_sign": "sagittarius"
+    },
+    {
+      "place": "Singapore",
+      "utc": "1994-01-25T12:36:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": -0.0007,
+          "moon": 4.687,
+          "mercury": 0.0044,
+          "venus": 0.0067,
+          "mars": 0.0647,
+          "jupiter": -0.1415,
+          "saturn": 0.0192,
+          "uranus": -0.2258,
+          "neptune": 0.2847,
+          "pluto": 0.5559
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0001,
+          "moon": 0,
+          "mercury": 0.0002,
+          "venus": 0.0001,
+          "mars": -0.0001,
+          "jupiter": -0.0007,
+          "saturn": -0.0006,
+          "uranus": -0.0021,
+          "neptune": 0.0006,
+          "pluto": 0.0005
+        }
+      },
+      "asc_ref_sign": "leo",
+      "asc_lib_sign": "leo"
+    },
+    {
+      "place": "Kuala Lumpur",
+      "utc": "1998-06-09T19:49:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0049,
+          "moon": 3.6139,
+          "mercury": 0.015,
+          "venus": 0.0095,
+          "mars": 0.0237,
+          "jupiter": 0.085,
+          "saturn": -0.1657,
+          "uranus": -0.0718,
+          "neptune": 0.0666,
+          "pluto": 0.2436
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0001,
+          "moon": 0.0002,
+          "mercury": -0.0005,
+          "venus": -0.0001,
+          "mars": 0.0001,
+          "jupiter": 0.0008,
+          "saturn": -0.0002,
+          "uranus": -0.0029,
+          "neptune": 0.0023,
+          "pluto": 0.0002
+        }
+      },
+      "asc_ref_sign": "aries",
+      "asc_lib_sign": "aries"
+    },
+    {
+      "place": "New York",
+      "utc": "2003-11-20T02:02:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0129,
+          "moon": 7.1459,
+          "mercury": 0.0167,
+          "venus": 0.0183,
+          "mars": -0.091,
+          "jupiter": -0.0345,
+          "saturn": -0.1369,
+          "uranus": 0.1877,
+          "neptune": -0.1758,
+          "pluto": -0.1166
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0,
+          "moon": -0.0001,
+          "mercury": -0.0009,
+          "venus": 0.0001,
+          "mars": 0.0008,
+          "jupiter": 0.0015,
+          "saturn": 0,
+          "uranus": -0.0013,
+          "neptune": 0.0039,
+          "pluto": 0
+        }
+      },
+      "asc_ref_sign": "leo",
+      "asc_lib_sign": "leo"
+    },
+    {
+      "place": "Vancouver",
+      "utc": "2007-04-04T09:15:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0054,
+          "moon": 2.746,
+          "mercury": 0.0092,
+          "venus": 0.0049,
+          "mars": -0.0578,
+          "jupiter": 0.0132,
+          "saturn": -0.0749,
+          "uranus": 0.3425,
+          "neptune": -0.3261,
+          "pluto": -0.3807
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": -0.0001,
+          "moon": 0.0003,
+          "mercury": 0.0005,
+          "venus": -0.0008,
+          "mars": 0.0002,
+          "jupiter": -0.0006,
+          "saturn": 0.0011,
+          "uranus": -0.0004,
+          "neptune": 0.0044,
+          "pluto": 0
+        }
+      },
+      "asc_ref_sign": "sagittarius",
+      "asc_lib_sign": "sagittarius"
+    },
+    {
+      "place": "Sydney",
+      "utc": "2012-09-15T16:28:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0032,
+          "moon": 2.583,
+          "mercury": 0.011,
+          "venus": 0.0031,
+          "mars": -0.1336,
+          "jupiter": -0.0479,
+          "saturn": -0.0104,
+          "uranus": 0.6043,
+          "neptune": -0.6414,
+          "pluto": -0.7917
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0,
+          "moon": -0.0001,
+          "mercury": 0.0005,
+          "venus": 0.0001,
+          "mars": 0.0005,
+          "jupiter": 0.0009,
+          "saturn": -0.0001,
+          "uranus": -0.0007,
+          "neptune": 0.0049,
+          "pluto": 0
+        }
+      },
+      "asc_ref_sign": "cancer",
+      "asc_lib_sign": "cancer"
+    },
+    {
+      "place": "London",
+      "utc": "2016-02-26T23:41:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0071,
+          "moon": 2.0379,
+          "mercury": 0.011,
+          "venus": 0.0106,
+          "mars": -0.2857,
+          "jupiter": -0.0452,
+          "saturn": -0.1087,
+          "uranus": 0.7282,
+          "neptune": -0.7359,
+          "pluto": -0.9951
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0,
+          "moon": -0.0002,
+          "mercury": -0.0001,
+          "venus": 0.0001,
+          "mars": 0.0007,
+          "jupiter": 0.0019,
+          "saturn": 0.0001,
+          "uranus": 0.0006,
+          "neptune": 0.0044,
+          "pluto": -0.0001
+        }
+      },
+      "asc_ref_sign": "scorpio",
+      "asc_lib_sign": "scorpio"
+    },
+    {
+      "place": "Toronto",
+      "utc": "2021-07-10T06:54:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0117,
+          "moon": 3.4333,
+          "mercury": 0.0121,
+          "venus": 0.0159,
+          "mars": -0.1987,
+          "jupiter": -0.041,
+          "saturn": -0.3832,
+          "uranus": 1.0123,
+          "neptune": -1.0363,
+          "pluto": -1.4702
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0001,
+          "moon": 0.0006,
+          "mercury": -0.0007,
+          "venus": 0.0002,
+          "mars": 0.0001,
+          "jupiter": -0.0012,
+          "saturn": 0.0004,
+          "uranus": 0.0011,
+          "neptune": 0.0041,
+          "pluto": -0.0002
+        }
+      },
+      "asc_ref_sign": "gemini",
+      "asc_lib_sign": "gemini"
+    },
+    {
+      "place": "Reykjavik",
+      "utc": "2025-12-21T13:07:00.000Z",
+      "errors_deg": {
+        "@gitstrology/engine@0.1.0": {
+          "sun": 0.0045,
+          "moon": 4.0671,
+          "mercury": 0.0072,
+          "venus": 0.0102,
+          "mars": -0.2317,
+          "jupiter": 0.0156,
+          "saturn": -0.5372,
+          "uranus": 1.2593,
+          "neptune": -1.2567,
+          "pluto": -1.7078
+        },
+        "astronomy-engine@2.1.19": {
+          "sun": 0.0001,
+          "moon": 0.0004,
+          "mercury": -0.0009,
+          "venus": 0.0007,
+          "mars": 0.0002,
+          "jupiter": -0.0009,
+          "saturn": -0.0022,
+          "uranus": -0.0004,
+          "neptune": 0.0034,
+          "pluto": -0.0002
+        }
+      },
+      "asc_ref_sign": "aquarius",
+      "asc_lib_sign": "aquarius"
+    }
+  ]
+}

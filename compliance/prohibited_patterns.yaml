@@ -1,0 +1,97 @@
+# Compliance Guard — rule layer, v0.1 (Phase 0 draft, pending legal review)
+#
+# Group selection is driven by compliance/geo_rule_matrix.json → regions.*.rule_groups.
+# `global` always applies. Chinese patterns must cover BOTH simplified and traditional
+# glyphs (launch market is zh-Hant).
+#
+# Fields:
+#   id       stable rule id, referenced in violation reports and audit snapshots
+#   pattern  ECMAScript regex source (flag "u" always on; add "i" via flags)
+#   unless   optional regex; if it matches the SENTENCE containing the hit, the hit
+#            is exempt (used for negations, e.g. "results are not guaranteed")
+#   action   block | review
+#
+# Test cases live in test/fixtures/compliance-cases.yaml. Every rule needs at least
+# one block case and one allow case.
+version: 0.1.0
+
+groups:
+  global:
+    - id: G001
+      description: 付费/化解恐吓 — 不付费/不化解则有坏后果
+      # Doc draft was: 不(付费|化解|转运).{0,12}(会|将|必然)
+      # That blocks benign copy ("不付费也会看到基础解读") and misses zh-Hant.
+      # Refined: require a negative-consequence term after the modal verb.
+      pattern: "不(付费|付費|化解|转运|轉運|处理|處理|做法事|开运|開運)(的话|的話)?.{0,12}(会|會|将|將|必然|必定|就).{0,8}(灾|災|祸|禍|破财|破財|血光|厄运|厄運|倒霉|倒楣|不顺|不順|失去|离婚|離婚|分手|生病|大病|出事|恶化|惡化|应验|應驗)"
+      action: block
+    - id: G002
+      description: 不化解后果自负类
+      pattern: "不(付费|付費|化解|转运|轉運|处理|處理|做法事).{0,6}(后果|後果)"
+      action: block
+    - id: G003
+      description: 宿命论确定性断言
+      pattern: "(注定|註定|一定会|一定會|必然|必定)(会|會)?.{0,4}(发生|發生|出现|出現|失去|离婚|離婚|破产|破產|死亡|生病|分手|失败|失敗|发财|發財|暴富|中奖|中獎)"
+      unless: "(并非|並非|不是|沒有|没有|不一定|未必|无所谓|無所謂)[^。！？]{0,6}(注定|註定|一定|必然|必定)"
+      action: block
+    - id: G004
+      description: 寿命/死亡时间预测
+      pattern: "(寿命|壽命|阳寿|陽壽|活不过|活不過|大限).{0,8}([0-9]+|[一二三四五六七八九十百]+)(岁|歲|年)"
+      action: block
+    - id: G005
+      description: 医疗功效宣称（中文）
+      pattern: "(治愈|治癒|根治|治好|治疗|治療).{0,10}(病|癌|症|疾)"
+      action: block
+    - id: G006
+      description: 疾病预测/诊断（健康主题只能给一般养生建议）
+      pattern: "(会|會|将|將|必|一定|容易)(得|患上|患|罹患|染上)[^。！？，,]{0,6}(癌|病|症|中风|中風|糖尿|肿瘤|腫瘤)"
+      action: block
+    - id: G007
+      description: 具体投资建议（事业财运主题）
+      pattern: "(买入|買入|卖出|賣出|加仓|加倉|抄底|梭哈|重仓|重倉)[^。！？]{0,8}(股票|股|基金|币|幣|期货|期貨|房产|房產)?"
+      action: review
+
+  en_common:
+    - id: E001
+      description: Deterministic outcome claims
+      pattern: "\\b(guaranteed|destined to|will definitely|will certainly)\\b"
+      flags: i
+      unless: "\\b(not|no|never|nothing|cannot|can't|isn't|aren't|without)\\b(\\s+\\S+){0,3}\\s+(guaranteed|destined|definitely|certainly)"
+      action: block
+    - id: E002
+      description: Disease prediction / diagnosis
+      pattern: "\\b(will|likely to|bound to|prone to)\\s+(get|develop|suffer from|contract)\\s+(\\w+\\s+){0,2}(cancer|disease|diabetes|illness|tumou?r|stroke)"
+      flags: i
+      action: block
+
+  us:
+    - id: US001
+      description: Paywall consequence framing ("unless you pay … bad things")
+      pattern: "\\bunless you (pay|buy|purchase|upgrade|subscribe)\\b.{0,40}\\b(misfortune|bad luck|curse|lose|suffer|danger)"
+      flags: i
+      action: block
+
+  uk:
+    - id: UK001
+      description: Accuracy claims
+      pattern: "(accurate prediction|foolproof|100% accurate)"
+      flags: i
+      unless: "\\b(not|no|never)\\b(\\s+\\S+){0,3}\\s+(an? )?(accurate prediction|foolproof|100% accurate)"
+      action: block
+
+  au:
+    - id: AU001
+      description: Future-certainty phrasing
+      pattern: "\\b(will happen|is destined)\\b"
+      flags: i
+      unless: "\\b(not|no|never|nothing)\\b(\\s+\\S+){0,3}\\s+(will happen|is destined)"
+      action: block
+
+  ca: []
+
+  eu:
+    - id: EU001
+      description: Health claims
+      pattern: "\\b(cure|heal|treat)\\w*\\b.{0,20}\\b(disease|illness)"
+      flags: i
+      unless: "\\b(not|no|never|isn't|cannot)\\b(\\s+\\S+){0,3}\\s+(cure|heal|treat)"
+      action: block

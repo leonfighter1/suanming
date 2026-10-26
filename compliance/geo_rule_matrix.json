@@ -1,0 +1,168 @@
+{
+  "$schema": "../schemas/geo-rule-matrix.schema.json",
+  "matrix_version": "0.1.0",
+  "notes": "Phase 0 draft. Every region is legal_review=pending until signed off (gate: at least US/GB/AU/CA). Unknown countries resolve to null => service refused.",
+  "defaults": {
+    "service_available": true,
+    "systems": {
+      "bazi": {
+        "available": true,
+        "entry_weight": 1
+      },
+      "tarot": {
+        "available": true,
+        "entry_weight": 1
+      },
+      "astrology": {
+        "available": true,
+        "entry_weight": 1
+      }
+    },
+    "paywall": {
+      "copy_rules": ["no_consequence_framing", "no_severity_tiering"]
+    },
+    "age_gate": {
+      "min_age": 18,
+      "enforcement": "self_declare"
+    },
+    "ai_disclosure": {
+      "visible_label": "recommended",
+      "machine_readable": true
+    }
+  },
+  "region_groups": {
+    "EU": [
+      "AT",
+      "BE",
+      "BG",
+      "HR",
+      "CY",
+      "CZ",
+      "DK",
+      "EE",
+      "FI",
+      "FR",
+      "DE",
+      "GR",
+      "HU",
+      "IE",
+      "IT",
+      "LV",
+      "LT",
+      "LU",
+      "MT",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SK",
+      "SI",
+      "ES",
+      "SE"
+    ]
+  },
+  "regions": {
+    "HK": {
+      "name": "Hong Kong",
+      "phase": 1,
+      "legal_review": "pending",
+      "locales": ["zh-Hant", "zh-Hans"],
+      "rule_groups": ["global"],
+      "systems": {
+        "bazi": {
+          "available": true,
+          "entry_weight": 1.2
+        }
+      }
+    },
+    "TW": {
+      "name": "Taiwan",
+      "phase": 1,
+      "legal_review": "pending",
+      "locales": ["zh-Hant"],
+      "rule_groups": ["global"],
+      "systems": {
+        "bazi": {
+          "available": true,
+          "entry_weight": 1.2
+        }
+      }
+    },
+    "SG": {
+      "name": "Singapore",
+      "phase": 1,
+      "legal_review": "pending",
+      "locales": ["zh-Hans", "zh-Hant"],
+      "rule_groups": ["global", "en_common"]
+    },
+    "MY": {
+      "name": "Malaysia",
+      "phase": 1,
+      "legal_review": "pending",
+      "locales": ["zh-Hans", "zh-Hant"],
+      "rule_groups": ["global", "en_common"]
+    },
+    "US": {
+      "name": "United States",
+      "phase": 2,
+      "legal_review": "pending",
+      "locales": ["zh-Hant", "zh-Hans", "en"],
+      "rule_groups": ["global", "en_common", "us"]
+    },
+    "CA": {
+      "name": "Canada",
+      "phase": 2,
+      "legal_review": "pending",
+      "locales": ["zh-Hant", "zh-Hans", "en"],
+      "rule_groups": ["global", "en_common", "ca"]
+    },
+    "AU": {
+      "name": "Australia",
+      "phase": 2,
+      "legal_review": "pending",
+      "locales": ["zh-Hant", "zh-Hans", "en"],
+      "rule_groups": ["global", "en_common", "au"]
+    },
+    "GB": {
+      "name": "United Kingdom",
+      "phase": 2,
+      "legal_review": "pending",
+      "locales": ["zh-Hant", "zh-Hans", "en"],
+      "rule_groups": ["global", "en_common", "uk"],
+      "age_gate": {
+        "min_age": 18,
+        "enforcement": "self_declare"
+      }
+    },
+    "EU": {
+      "name": "European Union",
+      "phase": 2,
+      "legal_review": "pending",
+      "locales": ["en", "zh-Hant", "zh-Hans"],
+      "rule_groups": ["global", "en_common", "eu"],
+      "ai_disclosure": {
+        "visible_label": "required",
+        "machine_readable": true
+      }
+    },
+    "KR": {
+      "name": "South Korea",
+      "phase": 2,
+      "legal_review": "pending",
+      "locales": ["en", "zh-Hant", "zh-Hans"],
+      "rule_groups": ["global", "en_common"],
+      "ai_disclosure": {
+        "visible_label": "required",
+        "machine_readable": true
+      }
+    },
+    "CN": {
+      "name": "Mainland China",
+      "phase": 0,
+      "legal_review": "pending",
+      "service_available": false,
+      "locales": [],
+      "rule_groups": ["global"]
+    }
+  }
+}

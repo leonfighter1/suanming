@@ -1,0 +1,60 @@
+{
+  "chart_id": "33333333-3333-4333-8333-333333333333",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "tarot",
+      "version": "0.1.0"
+    },
+    "system": "tarot",
+    "input_digest": "hmac-sha256:aa0a5176bdaa2f8365169fdebf9fe71a3cf17068b05638c13f643e231aefde9d",
+    "rule_versions": {
+      "deck": "rws-78/v1",
+      "rng": "hmac-sha256-drbg/v1"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "deck_id": "rws-78/v1",
+      "spread_id": "three_card",
+      "reversed_rate": 0.5,
+      "cards": [
+        {
+          "position": 1,
+          "position_key": "past",
+          "card_id": "major_09",
+          "reversed": false
+        },
+        {
+          "position": 2,
+          "position_key": "present",
+          "card_id": "major_05",
+          "reversed": true
+        },
+        {
+          "position": 3,
+          "position_key": "future",
+          "card_id": "swords_07",
+          "reversed": false
+        }
+      ],
+      "audit": {
+        "draw_id": "00000000-0000-4000-8000-000000000001",
+        "drawn_at": "2026-10-25T00:00:00.000Z",
+        "rng": "hmac-sha256-drbg/v1",
+        "result_digest": "sha256:7da376706b886075a4018f14b6aeaf38b8cadf1f73fad3b807a19690ba8acdc7"
+      }
+    },
+    "provenance": [
+      {
+        "path": "/cards",
+        "source_level": "traditional_text",
+        "note": "RWS 78 张；牌阵位置义为通行版本"
+      },
+      {
+        "path": "/cards/reversed",
+        "source_level": "common_consensus",
+        "note": "逆位概率 0.5"
+      }
+    ]
+  }
+}

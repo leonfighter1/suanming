@@ -1,0 +1,14 @@
+{
+  "gates": [
+    { "name": "lint", "run": "npm run lint" },
+    { "name": "typecheck", "run": "npm run typecheck" },
+    { "name": "test", "run": "npm test" },
+    { "name": "openapi", "run": "npm run validate:openapi" },
+    { "name": "schemas", "run": "npm run validate:schemas" },
+    { "name": "audit", "run": "npm audit --audit-level=high" },
+    {
+      "name": "app (pub get, analyze, test, build web)",
+      "run": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\AgentSkills\\harness-check\\scripts\\check.ps1 -Project app -Build web"
+    }
+  ]
+}

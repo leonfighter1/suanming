@@ -1,0 +1,47 @@
+{
+  "name": "mingli-dashi",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "npm run typecheck && npm run format:check",
+    "test": "vitest run",
+    "validate:schemas": "tsx scripts/validate-schemas.ts",
+    "validate:openapi": "redocly lint api/openapi.yaml",
+    "poc:astrology": "tsx scripts/poc-astrology.ts",
+    "poc:bazi-jieqi": "tsx scripts/poc-bazi-jieqi.ts",
+    "poc:bazi-golden": "tsx scripts/poc-bazi-golden.ts",
+    "demo": "tsx scripts/demo.ts",
+    "demo:ui": "tsx scripts/demo-server.ts",
+    "api": "tsx scripts/api-server.ts",
+    "sync:app": "tsx scripts/sync-app-assets.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.132.1",
+    "@node-rs/argon2": "2.2.2",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "astronomy-engine": "2.1.19",
+    "jose": "6.2.12",
+    "lunar-javascript": "1.7.7",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@gitstrology/engine": "0.1.0",
+    "@redocly/cli": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "prettier": "^3.6.0",
+    "sweph": "2.10.3-8",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.5"
+  }
+}

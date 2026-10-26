@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.mingli.example/geo-rule-matrix/0.1.0",
+  "title": "GeoRuleMatrix",
+  "description": "Country/region × content-dimension availability. Designed so Phase 3 can add dimensions (new systems, entry ordering, per-locale weights) without breaking readers: unknown keys under systems are allowed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["matrix_version", "defaults", "region_groups", "regions"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "matrix_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "notes": { "type": "string" },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service_available", "systems", "paywall", "age_gate", "ai_disclosure"],
+      "properties": {
+        "service_available": { "type": "boolean" },
+        "systems": { "$ref": "#/$defs/systems" },
+        "paywall": { "$ref": "#/$defs/paywall" },
+        "age_gate": { "$ref": "#/$defs/age_gate" },
+        "ai_disclosure": { "$ref": "#/$defs/ai_disclosure" }
+      }
+    },
+    "region_groups": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "pattern": "^[A-Z]{2}$" },
+        "uniqueItems": true
+      }
+    },
+    "regions": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Z]{2}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "phase", "legal_review", "locales", "rule_groups"],
+        "properties": {
+          "name": { "type": "string" },
+          "phase": { "type": "integer", "minimum": 0, "maximum": 4 },
+          "legal_review": { "enum": ["pending", "approved"] },
+          "service_available": { "type": "boolean" },
+          "locales": {
+            "type": "array",
+            "items": { "enum": ["zh-Hant", "zh-Hans", "en"] },
+            "uniqueItems": true
+          },
+          "rule_groups": {
+            "type": "array",
+            "items": { "type": "string" },
+            "contains": { "const": "global" },
+            "uniqueItems": true
+          },
+          "systems": { "$ref": "#/$defs/systems" },
+          "paywall": { "$ref": "#/$defs/paywall" },
+          "age_gate": { "$ref": "#/$defs/age_gate" },
+          "ai_disclosure": { "$ref": "#/$defs/ai_disclosure" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "systems": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["available", "entry_weight"],
+        "properties": {
+          "available": { "type": "boolean" },
+          "entry_weight": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "paywall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["copy_rules"],
+      "properties": { "copy_rules": { "type": "array", "items": { "type": "string" } } }
+    },
+    "age_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min_age", "enforcement"],
+      "properties": {
+        "min_age": { "type": "integer", "minimum": 0 },
+        "enforcement": { "enum": ["self_declare", "store_rating", "verified"] }
+      }
+    },
+    "ai_disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["visible_label", "machine_readable"],
+      "properties": {
+        "visible_label": { "enum": ["required", "recommended"] },
+        "machine_readable": { "type": "boolean" }
+      }
+    }
+  }
+}

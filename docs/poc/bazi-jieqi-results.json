@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-10-26T03:10:15.002Z",
+  "reference": "Swiss Ephemeris 2.10 swe_solcross_ut, Moshier",
+  "library": "lunar-javascript 1.7.7 getJieQiTable (UTC+8, second resolution)",
+  "samples": 2412,
+  "abs_error_minutes": {
+    "p50": 0.02,
+    "p99": 1.52,
+    "max": 1.58
+  },
+  "worst": {
+    "min": -1.58,
+    "year": 2100,
+    "name": "小暑"
+  },
+  "note": "Errors are in minutes. lunar-javascript truncates to whole seconds."
+}

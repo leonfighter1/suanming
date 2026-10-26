@@ -1,0 +1,380 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.mingli.example/chart-fact/0.1.0",
+  "title": "ChartFact",
+  "description": "Deterministic engine output. The single contract between Engine Layer and AI Interp. v0.1 is a Phase 0 draft; frozen as v1.0 at Phase 1. Additive-only after freeze.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "engine",
+    "system",
+    "input_digest",
+    "rule_versions",
+    "computed_at",
+    "facts",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "description": "Version of THIS schema. Independent of engine.version.",
+      "type": "string",
+      "pattern": "^0\\.1\\.\\d+$"
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "enum": ["bazi", "tarot", "astrology"] },
+        "version": {
+          "description": "Engine semver, including upstream library pin, e.g. 0.1.0+lunar-javascript.1.7.7",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "system": { "type": "string", "enum": ["bazi", "tarot", "astrology"] },
+    "input_digest": {
+      "description": "Keyed digest (HMAC-SHA256) of canonical input + engine version + rule versions. See src/chart-fact/digest.ts.",
+      "type": "string",
+      "pattern": "^hmac-sha256:[0-9a-f]{64}$"
+    },
+    "rule_versions": {
+      "description": "Versions of external rule data that affect output (IANA tzdb, deck definition, ...).",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "computed_at": { "type": "string", "format": "date-time" },
+    "facts": { "type": "object" },
+    "provenance": {
+      "description": "source_level per fact path. Paths are JSON Pointers into `facts`.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "source_level"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^(/[^/]*)*$" },
+          "source_level": { "$ref": "#/$defs/source_level" },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "system": { "const": "bazi" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/bazi_facts" } } }
+    },
+    {
+      "if": { "properties": { "system": { "const": "tarot" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/tarot_facts" } } }
+    },
+    {
+      "if": { "properties": { "system": { "const": "astrology" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/astrology_facts" } } }
+    }
+  ],
+  "$defs": {
+    "source_level": {
+      "description": "FROZEN in Phase 0. No new levels may be added; refine via `note` only.",
+      "type": "string",
+      "enum": ["traditional_text", "common_consensus", "simplified_rule", "derived"]
+    },
+    "gan": {
+      "type": "string",
+      "enum": ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
+    },
+    "zhi": {
+      "type": "string",
+      "enum": ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
+    },
+    "wuxing": { "type": "string", "enum": ["木", "火", "土", "金", "水"] },
+    "pillar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gan", "zhi", "hidden_gan", "shishen_gan", "shishen_zhi", "dishi", "nayin"],
+      "properties": {
+        "gan": { "$ref": "#/$defs/gan" },
+        "zhi": { "$ref": "#/$defs/zhi" },
+        "hidden_gan": { "type": "array", "items": { "$ref": "#/$defs/gan" }, "minItems": 1 },
+        "shishen_gan": { "type": "string" },
+        "shishen_zhi": { "type": "array", "items": { "type": "string" } },
+        "dishi": { "description": "十二长生 of day master at this branch", "type": "string" },
+        "nayin": { "type": "string" }
+      }
+    },
+    "bazi_facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "time_basis",
+        "pillars",
+        "day_master",
+        "month_command",
+        "wuxing_count",
+        "wuxing_weighted",
+        "dayun",
+        "liunian"
+      ],
+      "properties": {
+        "day_master": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gan", "wuxing", "yin_yang"],
+          "properties": {
+            "gan": { "$ref": "#/$defs/gan" },
+            "wuxing": { "$ref": "#/$defs/wuxing" },
+            "yin_yang": { "enum": ["阳", "阴"] }
+          }
+        },
+        "month_command": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["zhi", "wuxing"],
+          "properties": {
+            "zhi": { "$ref": "#/$defs/zhi" },
+            "wuxing": { "$ref": "#/$defs/wuxing" }
+          }
+        },
+        "wuxing_weighted": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "scores"],
+          "properties": {
+            "method": { "enum": ["stems_1_hidden_stems_by_qi"] },
+            "scores": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["木", "火", "土", "金", "水"],
+              "properties": {
+                "木": { "type": "number" },
+                "火": { "type": "number" },
+                "土": { "type": "number" },
+                "金": { "type": "number" },
+                "水": { "type": "number" }
+              }
+            }
+          }
+        },
+        "liunian": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "year",
+              "ganzhi",
+              "age",
+              "shishen_gan",
+              "shishen_zhi",
+              "dayun_index",
+              "branch_relations"
+            ],
+            "properties": {
+              "year": { "type": "integer" },
+              "ganzhi": { "type": "string", "minLength": 2, "maxLength": 2 },
+              "age": { "type": "integer" },
+              "shishen_gan": { "type": "string" },
+              "shishen_zhi": { "type": "string" },
+              "dayun_index": { "type": "integer", "minimum": 0 },
+              "branch_relations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["pillar", "type"],
+                  "properties": {
+                    "pillar": { "enum": ["year", "month", "day", "hour"] },
+                    "type": { "enum": ["六冲", "六合"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "time_basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "civil_local",
+            "utc",
+            "civil_ambiguity",
+            "true_solar_time_applied",
+            "pillar_clock",
+            "jieqi_clock",
+            "zi_hour_sect"
+          ],
+          "properties": {
+            "civil_local": { "type": "string" },
+            "utc": { "type": "string", "format": "date-time" },
+            "civil_ambiguity": {
+              "description": "ambiguous_earlier: local time fell in a DST fold; earlier instant used",
+              "type": "string",
+              "enum": ["none", "ambiguous_earlier"]
+            },
+            "true_solar_time_applied": { "type": "boolean" },
+            "equation_of_time_min": { "type": "number" },
+            "longitude_correction_min": { "type": "number" },
+            "pillar_clock": {
+              "description": "Wall clock used for day/hour pillars",
+              "type": "string"
+            },
+            "jieqi_clock": {
+              "description": "UTC+8 wall clock of the birth instant, used for year/month pillars and dayun",
+              "type": "string"
+            },
+            "zi_hour_sect": { "type": "integer", "enum": [1, 2] }
+          }
+        },
+        "pillars": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["year", "month", "day", "hour"],
+          "properties": {
+            "year": { "$ref": "#/$defs/pillar" },
+            "month": { "$ref": "#/$defs/pillar" },
+            "day": { "$ref": "#/$defs/pillar" },
+            "hour": { "$ref": "#/$defs/pillar" }
+          }
+        },
+        "wuxing_count": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "counts"],
+          "properties": {
+            "method": { "type": "string", "enum": ["stems_and_branch_main_qi"] },
+            "counts": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["木", "火", "土", "金", "水"],
+              "properties": {
+                "木": { "type": "integer" },
+                "火": { "type": "integer" },
+                "土": { "type": "integer" },
+                "金": { "type": "integer" },
+                "水": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "dayun": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gender", "direction", "start_offset", "start_date", "cycles"],
+          "properties": {
+            "gender": { "type": "string", "enum": ["male", "female"] },
+            "direction": { "type": "string", "enum": ["forward", "backward"] },
+            "start_offset": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["years", "months", "days"],
+              "properties": {
+                "years": { "type": "integer" },
+                "months": { "type": "integer" },
+                "days": { "type": "integer" },
+                "hours": { "type": "integer" }
+              }
+            },
+            "start_date": { "type": "string", "format": "date" },
+            "cycles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["index", "ganzhi", "start_year", "start_age"],
+                "properties": {
+                  "index": { "type": "integer" },
+                  "ganzhi": { "type": "string", "minLength": 2, "maxLength": 2 },
+                  "start_year": { "type": "integer" },
+                  "start_age": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tarot_facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deck_id", "spread_id", "reversed_rate", "cards", "audit"],
+      "properties": {
+        "deck_id": { "type": "string" },
+        "spread_id": { "type": "string", "enum": ["single", "three_card", "celtic_cross"] },
+        "reversed_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cards": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["position", "position_key", "card_id", "reversed"],
+            "properties": {
+              "position": { "type": "integer", "minimum": 1 },
+              "position_key": { "type": "string" },
+              "card_id": {
+                "type": "string",
+                "pattern": "^(major_\\d{2}|(wands|cups|swords|pentacles)_\\d{2})$"
+              },
+              "reversed": { "type": "boolean" }
+            }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["draw_id", "drawn_at", "rng", "result_digest"],
+          "properties": {
+            "draw_id": { "type": "string", "format": "uuid" },
+            "drawn_at": { "type": "string", "format": "date-time" },
+            "rng": { "type": "string", "enum": ["hmac-sha256-drbg/v1"] },
+            "result_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+          }
+        }
+      }
+    },
+    "astrology_facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zodiac", "bodies"],
+      "properties": {
+        "zodiac": { "type": "string", "enum": ["tropical"] },
+        "precision_tier": {
+          "description": "sun_sign_only | simplified | full — set by ADR-0001",
+          "type": "string",
+          "enum": ["sun_sign_only", "simplified", "full"]
+        },
+        "bodies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["body", "longitude", "sign"],
+            "properties": {
+              "body": { "type": "string" },
+              "longitude": { "type": "number", "minimum": 0, "exclusiveMaximum": 360 },
+              "sign": { "type": "string" },
+              "retrograde": { "type": "boolean" }
+            }
+          }
+        },
+        "aspects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["a", "b", "type", "orb"],
+            "properties": {
+              "a": { "type": "string" },
+              "b": { "type": "string" },
+              "type": { "type": "string" },
+              "orb": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

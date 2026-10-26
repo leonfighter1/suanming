@@ -1,0 +1,462 @@
+{
+  "deck_id": "rws-78/v1",
+  "cards": {
+    "major_00": {
+      "en": "The Fool",
+      "zh-Hans": "愚者",
+      "zh-Hant": "愚者"
+    },
+    "major_01": {
+      "en": "The Magician",
+      "zh-Hans": "魔术师",
+      "zh-Hant": "魔術師"
+    },
+    "major_02": {
+      "en": "The High Priestess",
+      "zh-Hans": "女祭司",
+      "zh-Hant": "女祭司"
+    },
+    "major_03": {
+      "en": "The Empress",
+      "zh-Hans": "女皇",
+      "zh-Hant": "女皇"
+    },
+    "major_04": {
+      "en": "The Emperor",
+      "zh-Hans": "皇帝",
+      "zh-Hant": "皇帝"
+    },
+    "major_05": {
+      "en": "The Hierophant",
+      "zh-Hans": "教皇",
+      "zh-Hant": "教皇"
+    },
+    "major_06": {
+      "en": "The Lovers",
+      "zh-Hans": "恋人",
+      "zh-Hant": "戀人"
+    },
+    "major_07": {
+      "en": "The Chariot",
+      "zh-Hans": "战车",
+      "zh-Hant": "戰車"
+    },
+    "major_08": {
+      "en": "Strength",
+      "zh-Hans": "力量",
+      "zh-Hant": "力量"
+    },
+    "major_09": {
+      "en": "The Hermit",
+      "zh-Hans": "隐士",
+      "zh-Hant": "隱士"
+    },
+    "major_10": {
+      "en": "Wheel of Fortune",
+      "zh-Hans": "命运之轮",
+      "zh-Hant": "命運之輪"
+    },
+    "major_11": {
+      "en": "Justice",
+      "zh-Hans": "正义",
+      "zh-Hant": "正義"
+    },
+    "major_12": {
+      "en": "The Hanged Man",
+      "zh-Hans": "倒吊人",
+      "zh-Hant": "倒吊人"
+    },
+    "major_13": {
+      "en": "Death",
+      "zh-Hans": "死神",
+      "zh-Hant": "死神"
+    },
+    "major_14": {
+      "en": "Temperance",
+      "zh-Hans": "节制",
+      "zh-Hant": "節制"
+    },
+    "major_15": {
+      "en": "The Devil",
+      "zh-Hans": "恶魔",
+      "zh-Hant": "惡魔"
+    },
+    "major_16": {
+      "en": "The Tower",
+      "zh-Hans": "高塔",
+      "zh-Hant": "高塔"
+    },
+    "major_17": {
+      "en": "The Star",
+      "zh-Hans": "星星",
+      "zh-Hant": "星星"
+    },
+    "major_18": {
+      "en": "The Moon",
+      "zh-Hans": "月亮",
+      "zh-Hant": "月亮"
+    },
+    "major_19": {
+      "en": "The Sun",
+      "zh-Hans": "太阳",
+      "zh-Hant": "太陽"
+    },
+    "major_20": {
+      "en": "Judgement",
+      "zh-Hans": "审判",
+      "zh-Hant": "審判"
+    },
+    "major_21": {
+      "en": "The World",
+      "zh-Hans": "世界",
+      "zh-Hant": "世界"
+    },
+    "wands_01": {
+      "en": "Ace of Wands",
+      "zh-Hans": "权杖王牌",
+      "zh-Hant": "權杖王牌"
+    },
+    "wands_02": {
+      "en": "Two of Wands",
+      "zh-Hans": "权杖二",
+      "zh-Hant": "權杖二"
+    },
+    "wands_03": {
+      "en": "Three of Wands",
+      "zh-Hans": "权杖三",
+      "zh-Hant": "權杖三"
+    },
+    "wands_04": {
+      "en": "Four of Wands",
+      "zh-Hans": "权杖四",
+      "zh-Hant": "權杖四"
+    },
+    "wands_05": {
+      "en": "Five of Wands",
+      "zh-Hans": "权杖五",
+      "zh-Hant": "權杖五"
+    },
+    "wands_06": {
+      "en": "Six of Wands",
+      "zh-Hans": "权杖六",
+      "zh-Hant": "權杖六"
+    },
+    "wands_07": {
+      "en": "Seven of Wands",
+      "zh-Hans": "权杖七",
+      "zh-Hant": "權杖七"
+    },
+    "wands_08": {
+      "en": "Eight of Wands",
+      "zh-Hans": "权杖八",
+      "zh-Hant": "權杖八"
+    },
+    "wands_09": {
+      "en": "Nine of Wands",
+      "zh-Hans": "权杖九",
+      "zh-Hant": "權杖九"
+    },
+    "wands_10": {
+      "en": "Ten of Wands",
+      "zh-Hans": "权杖十",
+      "zh-Hant": "權杖十"
+    },
+    "wands_11": {
+      "en": "Page of Wands",
+      "zh-Hans": "权杖侍从",
+      "zh-Hant": "權杖侍從"
+    },
+    "wands_12": {
+      "en": "Knight of Wands",
+      "zh-Hans": "权杖骑士",
+      "zh-Hant": "權杖騎士"
+    },
+    "wands_13": {
+      "en": "Queen of Wands",
+      "zh-Hans": "权杖王后",
+      "zh-Hant": "權杖王后"
+    },
+    "wands_14": {
+      "en": "King of Wands",
+      "zh-Hans": "权杖国王",
+      "zh-Hant": "權杖國王"
+    },
+    "cups_01": {
+      "en": "Ace of Cups",
+      "zh-Hans": "圣杯王牌",
+      "zh-Hant": "聖杯王牌"
+    },
+    "cups_02": {
+      "en": "Two of Cups",
+      "zh-Hans": "圣杯二",
+      "zh-Hant": "聖杯二"
+    },
+    "cups_03": {
+      "en": "Three of Cups",
+      "zh-Hans": "圣杯三",
+      "zh-Hant": "聖杯三"
+    },
+    "cups_04": {
+      "en": "Four of Cups",
+      "zh-Hans": "圣杯四",
+      "zh-Hant": "聖杯四"
+    },
+    "cups_05": {
+      "en": "Five of Cups",
+      "zh-Hans": "圣杯五",
+      "zh-Hant": "聖杯五"
+    },
+    "cups_06": {
+      "en": "Six of Cups",
+      "zh-Hans": "圣杯六",
+      "zh-Hant": "聖杯六"
+    },
+    "cups_07": {
+      "en": "Seven of Cups",
+      "zh-Hans": "圣杯七",
+      "zh-Hant": "聖杯七"
+    },
+    "cups_08": {
+      "en": "Eight of Cups",
+      "zh-Hans": "圣杯八",
+      "zh-Hant": "聖杯八"
+    },
+    "cups_09": {
+      "en": "Nine of Cups",
+      "zh-Hans": "圣杯九",
+      "zh-Hant": "聖杯九"
+    },
+    "cups_10": {
+      "en": "Ten of Cups",
+      "zh-Hans": "圣杯十",
+      "zh-Hant": "聖杯十"
+    },
+    "cups_11": {
+      "en": "Page of Cups",
+      "zh-Hans": "圣杯侍从",
+      "zh-Hant": "聖杯侍從"
+    },
+    "cups_12": {
+      "en": "Knight of Cups",
+      "zh-Hans": "圣杯骑士",
+      "zh-Hant": "聖杯騎士"
+    },
+    "cups_13": {
+      "en": "Queen of Cups",
+      "zh-Hans": "圣杯王后",
+      "zh-Hant": "聖杯王后"
+    },
+    "cups_14": {
+      "en": "King of Cups",
+      "zh-Hans": "圣杯国王",
+      "zh-Hant": "聖杯國王"
+    },
+    "swords_01": {
+      "en": "Ace of Swords",
+      "zh-Hans": "宝剑王牌",
+      "zh-Hant": "寶劍王牌"
+    },
+    "swords_02": {
+      "en": "Two of Swords",
+      "zh-Hans": "宝剑二",
+      "zh-Hant": "寶劍二"
+    },
+    "swords_03": {
+      "en": "Three of Swords",
+      "zh-Hans": "宝剑三",
+      "zh-Hant": "寶劍三"
+    },
+    "swords_04": {
+      "en": "Four of Swords",
+      "zh-Hans": "宝剑四",
+      "zh-Hant": "寶劍四"
+    },
+    "swords_05": {
+      "en": "Five of Swords",
+      "zh-Hans": "宝剑五",
+      "zh-Hant": "寶劍五"
+    },
+    "swords_06": {
+      "en": "Six of Swords",
+      "zh-Hans": "宝剑六",
+      "zh-Hant": "寶劍六"
+    },
+    "swords_07": {
+      "en": "Seven of Swords",
+      "zh-Hans": "宝剑七",
+      "zh-Hant": "寶劍七"
+    },
+    "swords_08": {
+      "en": "Eight of Swords",
+      "zh-Hans": "宝剑八",
+      "zh-Hant": "寶劍八"
+    },
+    "swords_09": {
+      "en": "Nine of Swords",
+      "zh-Hans": "宝剑九",
+      "zh-Hant": "寶劍九"
+    },
+    "swords_10": {
+      "en": "Ten of Swords",
+      "zh-Hans": "宝剑十",
+      "zh-Hant": "寶劍十"
+    },
+    "swords_11": {
+      "en": "Page of Swords",
+      "zh-Hans": "宝剑侍从",
+      "zh-Hant": "寶劍侍從"
+    },
+    "swords_12": {
+      "en": "Knight of Swords",
+      "zh-Hans": "宝剑骑士",
+      "zh-Hant": "寶劍騎士"
+    },
+    "swords_13": {
+      "en": "Queen of Swords",
+      "zh-Hans": "宝剑王后",
+      "zh-Hant": "寶劍王后"
+    },
+    "swords_14": {
+      "en": "King of Swords",
+      "zh-Hans": "宝剑国王",
+      "zh-Hant": "寶劍國王"
+    },
+    "pentacles_01": {
+      "en": "Ace of Pentacles",
+      "zh-Hans": "星币王牌",
+      "zh-Hant": "星幣王牌"
+    },
+    "pentacles_02": {
+      "en": "Two of Pentacles",
+      "zh-Hans": "星币二",
+      "zh-Hant": "星幣二"
+    },
+    "pentacles_03": {
+      "en": "Three of Pentacles",
+      "zh-Hans": "星币三",
+      "zh-Hant": "星幣三"
+    },
+    "pentacles_04": {
+      "en": "Four of Pentacles",
+      "zh-Hans": "星币四",
+      "zh-Hant": "星幣四"
+    },
+    "pentacles_05": {
+      "en": "Five of Pentacles",
+      "zh-Hans": "星币五",
+      "zh-Hant": "星幣五"
+    },
+    "pentacles_06": {
+      "en": "Six of Pentacles",
+      "zh-Hans": "星币六",
+      "zh-Hant": "星幣六"
+    },
+    "pentacles_07": {
+      "en": "Seven of Pentacles",
+      "zh-Hans": "星币七",
+      "zh-Hant": "星幣七"
+    },
+    "pentacles_08": {
+      "en": "Eight of Pentacles",
+      "zh-Hans": "星币八",
+      "zh-Hant": "星幣八"
+    },
+    "pentacles_09": {
+      "en": "Nine of Pentacles",
+      "zh-Hans": "星币九",
+      "zh-Hant": "星幣九"
+    },
+    "pentacles_10": {
+      "en": "Ten of Pentacles",
+      "zh-Hans": "星币十",
+      "zh-Hant": "星幣十"
+    },
+    "pentacles_11": {
+      "en": "Page of Pentacles",
+      "zh-Hans": "星币侍从",
+      "zh-Hant": "星幣侍從"
+    },
+    "pentacles_12": {
+      "en": "Knight of Pentacles",
+      "zh-Hans": "星币骑士",
+      "zh-Hant": "星幣騎士"
+    },
+    "pentacles_13": {
+      "en": "Queen of Pentacles",
+      "zh-Hans": "星币王后",
+      "zh-Hant": "星幣王后"
+    },
+    "pentacles_14": {
+      "en": "King of Pentacles",
+      "zh-Hans": "星币国王",
+      "zh-Hant": "星幣國王"
+    }
+  },
+  "positions": {
+    "focus": {
+      "en": "Focus",
+      "zh-Hans": "焦点",
+      "zh-Hant": "焦點"
+    },
+    "past": {
+      "en": "Past",
+      "zh-Hans": "过去",
+      "zh-Hant": "過去"
+    },
+    "present": {
+      "en": "Present",
+      "zh-Hans": "现在",
+      "zh-Hant": "現在"
+    },
+    "future": {
+      "en": "Future",
+      "zh-Hans": "未来",
+      "zh-Hant": "未來"
+    },
+    "challenge": {
+      "en": "Challenge",
+      "zh-Hans": "挑战",
+      "zh-Hant": "挑戰"
+    },
+    "foundation": {
+      "en": "Foundation",
+      "zh-Hans": "根基",
+      "zh-Hant": "根基"
+    },
+    "recent_past": {
+      "en": "Recent past",
+      "zh-Hans": "近期过去",
+      "zh-Hant": "近期過去"
+    },
+    "potential": {
+      "en": "Potential",
+      "zh-Hans": "潜能",
+      "zh-Hant": "潛能"
+    },
+    "near_future": {
+      "en": "Near future",
+      "zh-Hans": "近期未来",
+      "zh-Hant": "近期未來"
+    },
+    "self": {
+      "en": "Self",
+      "zh-Hans": "自我",
+      "zh-Hant": "自我"
+    },
+    "environment": {
+      "en": "Environment",
+      "zh-Hans": "环境",
+      "zh-Hant": "環境"
+    },
+    "hopes_fears": {
+      "en": "Hopes & fears",
+      "zh-Hans": "希望与恐惧",
+      "zh-Hant": "希望與恐懼"
+    },
+    "outcome": {
+      "en": "Outcome",
+      "zh-Hans": "结果",
+      "zh-Hant": "結果"
+    }
+  }
+}

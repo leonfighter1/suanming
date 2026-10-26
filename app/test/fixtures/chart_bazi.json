@@ -1,0 +1,357 @@
+{
+  "chart_id": "22222222-2222-4222-8222-222222222222",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "bazi",
+      "version": "0.1.0+lunar-javascript.1.7.7"
+    },
+    "system": "bazi",
+    "input_digest": "hmac-sha256:6c250b1098d74ee19a0b2f3d56e0e2112c52e662bc6dd80b70aab2b681549bd4",
+    "rule_versions": {
+      "tzdb": "2024b",
+      "jieqi_clock": "utc+8"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "time_basis": {
+        "civil_local": "1990-03-15T14:30:00",
+        "utc": "1990-03-15T06:30:00.000Z",
+        "civil_ambiguity": "none",
+        "true_solar_time_applied": true,
+        "equation_of_time_min": -9.06,
+        "longitude_correction_min": 456.68,
+        "pillar_clock": "1990-03-15T13:57:37",
+        "jieqi_clock": "1990-03-15T14:30:00",
+        "zi_hour_sect": 2
+      },
+      "pillars": {
+        "year": {
+          "gan": "庚",
+          "zhi": "午",
+          "hidden_gan": [
+            "丁",
+            "己"
+          ],
+          "shishen_gan": "伤官",
+          "shishen_zhi": [
+            "偏印",
+            "比肩"
+          ],
+          "dishi": "临官",
+          "nayin": "路旁土"
+        },
+        "month": {
+          "gan": "己",
+          "zhi": "卯",
+          "hidden_gan": [
+            "乙"
+          ],
+          "shishen_gan": "比肩",
+          "shishen_zhi": [
+            "七杀"
+          ],
+          "dishi": "病",
+          "nayin": "城头土"
+        },
+        "day": {
+          "gan": "己",
+          "zhi": "卯",
+          "hidden_gan": [
+            "乙"
+          ],
+          "shishen_gan": "日主",
+          "shishen_zhi": [
+            "七杀"
+          ],
+          "dishi": "病",
+          "nayin": "城头土"
+        },
+        "hour": {
+          "gan": "辛",
+          "zhi": "未",
+          "hidden_gan": [
+            "己",
+            "丁",
+            "乙"
+          ],
+          "shishen_gan": "食神",
+          "shishen_zhi": [
+            "比肩",
+            "偏印",
+            "七杀"
+          ],
+          "dishi": "冠带",
+          "nayin": "路旁土"
+        }
+      },
+      "day_master": {
+        "gan": "己",
+        "wuxing": "土",
+        "yin_yang": "阴"
+      },
+      "month_command": {
+        "zhi": "卯",
+        "wuxing": "木"
+      },
+      "wuxing_count": {
+        "method": "stems_and_branch_main_qi",
+        "counts": {
+          "木": 2,
+          "火": 1,
+          "土": 3,
+          "金": 2,
+          "水": 0
+        }
+      },
+      "wuxing_weighted": {
+        "method": "stems_1_hidden_stems_by_qi",
+        "scores": {
+          "木": 2.1,
+          "火": 1,
+          "土": 2.9,
+          "金": 2,
+          "水": 0
+        }
+      },
+      "dayun": {
+        "gender": "male",
+        "direction": "forward",
+        "start_offset": {
+          "years": 6,
+          "months": 11,
+          "days": 3,
+          "hours": 12
+        },
+        "start_date": "1997-02-19",
+        "cycles": [
+          {
+            "index": 1,
+            "ganzhi": "庚辰",
+            "start_year": 1997,
+            "start_age": 8
+          },
+          {
+            "index": 2,
+            "ganzhi": "辛巳",
+            "start_year": 2007,
+            "start_age": 18
+          },
+          {
+            "index": 3,
+            "ganzhi": "壬午",
+            "start_year": 2017,
+            "start_age": 28
+          },
+          {
+            "index": 4,
+            "ganzhi": "癸未",
+            "start_year": 2027,
+            "start_age": 38
+          },
+          {
+            "index": 5,
+            "ganzhi": "甲申",
+            "start_year": 2037,
+            "start_age": 48
+          },
+          {
+            "index": 6,
+            "ganzhi": "乙酉",
+            "start_year": 2047,
+            "start_age": 58
+          },
+          {
+            "index": 7,
+            "ganzhi": "丙戌",
+            "start_year": 2057,
+            "start_age": 68
+          },
+          {
+            "index": 8,
+            "ganzhi": "丁亥",
+            "start_year": 2067,
+            "start_age": 78
+          }
+        ]
+      },
+      "liunian": [
+        {
+          "year": 2026,
+          "ganzhi": "丙午",
+          "age": 36,
+          "shishen_gan": "正印",
+          "shishen_zhi": "偏印",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2027,
+          "ganzhi": "丁未",
+          "age": 37,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "比肩",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2028,
+          "ganzhi": "戊申",
+          "age": 38,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "伤官",
+          "dayun_index": 4,
+          "branch_relations": []
+        },
+        {
+          "year": 2029,
+          "ganzhi": "己酉",
+          "age": 39,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "食神",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            },
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2030,
+          "ganzhi": "庚戌",
+          "age": 40,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "劫财",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            },
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2031,
+          "ganzhi": "辛亥",
+          "age": 41,
+          "shishen_gan": "食神",
+          "shishen_zhi": "正财",
+          "dayun_index": 4,
+          "branch_relations": []
+        },
+        {
+          "year": 2032,
+          "ganzhi": "壬子",
+          "age": 42,
+          "shishen_gan": "正财",
+          "shishen_zhi": "偏财",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2033,
+          "ganzhi": "癸丑",
+          "age": 43,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "比肩",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2034,
+          "ganzhi": "甲寅",
+          "age": 44,
+          "shishen_gan": "正官",
+          "shishen_zhi": "正官",
+          "dayun_index": 4,
+          "branch_relations": []
+        },
+        {
+          "year": 2035,
+          "ganzhi": "乙卯",
+          "age": 45,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "七杀",
+          "dayun_index": 4,
+          "branch_relations": []
+        }
+      ]
+    },
+    "provenance": [
+      {
+        "path": "/time_basis",
+        "source_level": "derived",
+        "note": "IANA tzdb + Meeus equation of time"
+      },
+      {
+        "path": "/pillars",
+        "source_level": "traditional_text",
+        "note": "立春换年、节令换月、日柱干支纪日"
+      },
+      {
+        "path": "/pillars/hour",
+        "source_level": "common_consensus",
+        "note": "子时流派: sect 2; 真太阳时"
+      },
+      {
+        "path": "/wuxing_count",
+        "source_level": "simplified_rule",
+        "note": "天干+地支本气各计 1，不计藏干与月令旺衰"
+      },
+      {
+        "path": "/dayun",
+        "source_level": "traditional_text",
+        "note": "三日折一年，分钟级换算 (lunar-javascript sect 2)"
+      },
+      {
+        "path": "/day_master",
+        "source_level": "traditional_text",
+        "note": "日干为日主"
+      },
+      {
+        "path": "/month_command",
+        "source_level": "traditional_text",
+        "note": "月支本气为月令"
+      },
+      {
+        "path": "/wuxing_weighted",
+        "source_level": "simplified_rule",
+        "note": "天干各 1；地支按藏干本气/中气/余气 0.6/0.3/0.1（两藏干 0.7/0.3）；未计月令加权、通根、合化"
+      },
+      {
+        "path": "/liunian",
+        "source_level": "traditional_text",
+        "note": "流年干支以立春为界；十神对日主；地支与原局六冲、六合（不含刑害、三合）"
+      }
+    ]
+  }
+}

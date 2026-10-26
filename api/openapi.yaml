@@ -1,0 +1,528 @@
+openapi: 3.1.0
+info:
+  title: 命理大师 API
+  version: 0.1.0
+  summary: Phase 0 skeleton — charts, reports, health.
+  description: |
+    Pipeline order is a hard constraint: Geo-Rule → Engine (ChartFact) → AI Interp → Compliance Guard → client.
+    Requests from regions without a matrix entry, or with `service_available: false`, get 451.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: https://api.dev.example.invalid
+    description: dev (placeholder)
+security:
+  - bearer: []
+tags:
+  - name: auth
+    description: Sign-up, sign-in (password, Apple, Google), token rotation
+  - name: account
+    description: The signed-in user and account deletion
+  - name: charts
+    description: Deterministic engines (Engine Layer) producing ChartFact
+  - name: reports
+    description: Four-layer AI interpretation behind Compliance Guard
+  - name: ops
+    description: Operational endpoints
+
+paths:
+  /v1/health:
+    get:
+      tags: [ops]
+      operationId: getHealth
+      summary: Liveness and dependency status
+      security: []
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, versions]
+                properties:
+                  status: { type: string, enum: [ok, degraded] }
+                  versions:
+                    type: object
+                    properties:
+                      api: { type: string }
+                      chart_fact_schema: { type: string }
+                      geo_rule_matrix: { type: string }
+                      prohibited_patterns: { type: string }
+                      tzdb: { type: string }
+        "429": { $ref: "#/components/responses/Problem" }
+
+  /v1/auth/register:
+    post:
+      tags: [auth]
+      operationId: register
+      summary: Email + password sign-up (Geo-Rule and age gate checked first)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/SignupProfile"
+                - type: object
+                  required: [email, password]
+                  properties:
+                    email: { type: string, format: email }
+                    password: { type: string, minLength: 10, maxLength: 256 }
+      responses:
+        "201": { $ref: "#/components/responses/Tokens" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Email + password sign-in
+      description: |
+        After 3 failures in 15 minutes (per email and per IP) a captcha token is
+        required (problem `code: captcha_required`). After 10, the key is locked (429).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+                captcha_token: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+
+  /v1/auth/oauth:
+    post:
+      tags: [auth]
+      operationId: socialSignIn
+      summary: Sign in with Apple / Google (ID token from the platform SDK)
+      description: First sign-in creates the account and needs the sign-up profile fields.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  required: [provider, id_token]
+                  properties:
+                    provider: { type: string, enum: [apple, google] }
+                    id_token: { type: string }
+                - $ref: "#/components/schemas/SignupProfile"
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/auth/refresh:
+    post:
+      tags: [auth]
+      operationId: refresh
+      summary: Rotate a refresh token (reusing an old one revokes the session)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties: { refresh_token: { type: string } }
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/auth/logout:
+    post:
+      tags: [auth]
+      operationId: logout
+      summary: Revoke the session that owns this refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { refresh_token: { type: string } }
+      responses:
+        "204": { description: Session revoked }
+        "400": { $ref: "#/components/responses/Problem" }
+
+  /v1/me:
+    get:
+      tags: [account]
+      operationId: getMe
+      summary: The signed-in user
+      responses:
+        "200":
+          description: The signed-in user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/account:
+    delete:
+      tags: [account]
+      operationId: deleteAccount
+      summary: Delete the account and all its data now (PIPEDA / Québec Law 25)
+      responses:
+        "200":
+          description: Deletion receipt
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted, completed_at]
+                properties:
+                  deleted:
+                    type: object
+                    properties:
+                      account: { const: true }
+                      charts: { type: integer }
+                      reports: { type: integer }
+                  completed_at: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/charts:
+    post:
+      tags: [charts]
+      operationId: createChart
+      summary: Run a deterministic engine and return a ChartFact
+      description: |
+        Raw birth data is used for computation and not persisted (see docs/data-retention.md).
+        Only the ChartFact (encrypted) and its keyed `input_digest` are stored.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChartRequest" }
+      responses:
+        "201":
+          description: Chart created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chart_id, chart_fact]
+                properties:
+                  chart_id: { type: string, format: uuid }
+                  chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "422":
+          description: Input valid JSON but not computable (e.g. local time inside a DST gap)
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/reports:
+    post:
+      tags: [reports]
+      operationId: createReport
+      summary: Generate a four-layer interpretation for a chart
+      description: |
+        Asynchronous: returns 202 with `status: pending` and a Location header. Poll
+        GET /v1/reports/{report_id} (Retry-After gives the interval). Generation takes
+        minutes with thinking models. Layers appear only once Compliance Guard returns `passed`.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [chart_id, locale]
+              properties:
+                chart_id: { type: string, format: uuid }
+                locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+                topics:
+                  description: |
+                    Analysis areas; default = all available for the chart's system.
+                    wuxing and dayun_liunian are bazi-only (400 otherwise).
+                  type: array
+                  maxItems: 6
+                  uniqueItems: true
+                  items: { $ref: "#/components/schemas/Topic" }
+                question:
+                  description: Optional user question (tarot)
+                  type: string
+                  maxLength: 300
+      responses:
+        "202":
+          description: Accepted; generation running
+          headers:
+            Location: { schema: { type: string } }
+            Retry-After: { schema: { type: integer } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/reports/{report_id}:
+    get:
+      tags: [reports]
+      operationId: getReport
+      summary: Poll a report
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: |
+            Current state. `layers` and `ai_disclosure` are present only when
+            status = passed. Drafts, traces and rule details are never returned.
+          headers:
+            X-AI-Generated: { $ref: "#/components/headers/X-AI-Generated" }
+            X-AI-Model: { $ref: "#/components/headers/X-AI-Model" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema: { type: string, maxLength: 128 }
+
+  headers:
+    X-AI-Generated:
+      description: Always "true" on responses containing model-generated content (docs/ai_disclosure_spec.md)
+      schema: { type: string, enum: ["true"] }
+    X-AI-Model:
+      description: "<provider>/<model-id>[;prompt=<prompt_version>]"
+      schema: { type: string }
+
+  responses:
+    Tokens:
+      description: Access + refresh token pair
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [access_token, refresh_token, token_type, expires_in]
+            properties:
+              access_token: { type: string }
+              refresh_token: { type: string }
+              token_type: { const: Bearer }
+              expires_in: { type: integer, description: seconds }
+    Problem:
+      description: RFC 9457 problem details
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    Unavailable:
+      description: Service not offered in the caller's region (Geo-Rule)
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+
+  schemas:
+    SignupProfile:
+      type: object
+      properties:
+        country:
+          {
+            type: string,
+            pattern: "^[A-Z]{2}$",
+            description: "Stored on the account; drives Geo-Rule",
+          }
+        locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+        age_confirmed:
+          type: boolean
+          description: User confirms the region's minimum age (geo_rule_matrix age_gate)
+    User:
+      type: object
+      required: [id, country, locale, sign_in_methods, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        country: { type: string }
+        locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+        sign_in_methods:
+          type: array
+          items: { type: string, enum: [password, apple, google] }
+        created_at: { type: string, format: date-time }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+
+    ChartRequest:
+      oneOf:
+        - $ref: "#/components/schemas/BaziChartRequest"
+        - $ref: "#/components/schemas/TarotChartRequest"
+        - $ref: "#/components/schemas/AstrologyChartRequest"
+      discriminator:
+        propertyName: system
+        mapping:
+          bazi: "#/components/schemas/BaziChartRequest"
+          tarot: "#/components/schemas/TarotChartRequest"
+          astrology: "#/components/schemas/AstrologyChartRequest"
+
+    BirthMoment:
+      type: object
+      required: [local, timezone]
+      properties:
+        local:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+          description: Civil wall-clock time at birthplace
+        timezone: { type: string, description: "IANA zone, e.g. Asia/Hong_Kong" }
+
+    BaziChartRequest:
+      allOf:
+        - $ref: "#/components/schemas/BirthMoment"
+        - type: object
+          required: [system, longitude, gender]
+          properties:
+            system: { const: bazi }
+            longitude: { type: number, minimum: -180, maximum: 180 }
+            gender: { type: string, enum: [male, female] }
+            options:
+              type: object
+              additionalProperties: false
+              properties:
+                trueSolarTime: { type: boolean, default: true }
+                ziHourSect: { type: integer, enum: [1, 2], default: 2 }
+
+    TarotChartRequest:
+      type: object
+      additionalProperties: false
+      required: [system, spread]
+      properties:
+        system: { const: tarot }
+        spread: { type: string, enum: [single, three_card, celtic_cross] }
+
+    AstrologyChartRequest:
+      allOf:
+        - $ref: "#/components/schemas/BirthMoment"
+        - type: object
+          required: [system, latitude, longitude]
+          properties:
+            system: { const: astrology }
+            latitude: { type: number, minimum: -90, maximum: 90 }
+            longitude: { type: number, minimum: -180, maximum: 180 }
+
+    Report:
+      type: object
+      required: [report_id, status, created_at, updated_at, locale, topics]
+      properties:
+        report_id: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [pending, passed, blocked, manual_review, failed]
+          description: failed = provider/infra error (retry); blocked/manual_review = compliance hold
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+        topics:
+          type: array
+          items: { $ref: "#/components/schemas/Topic" }
+        message:
+          description: User-safe explanation when status is not passed or pending
+          type: string
+        layers:
+          description: Present only when status = passed
+          type: object
+          required: [facts, interpretation, actions, expectation]
+          properties:
+            facts:
+              description: Restatement of ChartFact — no model inference
+              type: array
+              items: { type: string }
+            interpretation:
+              description: AI-generated, by topic. Every paragraph cites ChartFact paths.
+              type: array
+              items:
+                type: object
+                required: [topic, paragraphs]
+                properties:
+                  topic: { $ref: "#/components/schemas/Topic" }
+                  paragraphs:
+                    type: array
+                    items:
+                      type: object
+                      required: [text, source_level, fact_refs]
+                      properties:
+                        text: { type: string }
+                        source_level:
+                          type: string
+                          enum: [traditional_text, common_consensus, simplified_rule, derived]
+                        fact_refs:
+                          description: JSON Pointers into ChartFact.facts
+                          type: array
+                          items: { type: string }
+            actions:
+              type: array
+              items:
+                type: object
+                required: [topic, text, horizon]
+                properties:
+                  topic: { $ref: "#/components/schemas/Topic" }
+                  text: { type: string }
+                  horizon: { type: string, enum: [this_week, this_month, this_year, ongoing] }
+            expectation:
+              description: Fixed expectation-management copy + AI label (not model-generated)
+              type: object
+              required: [text, ai_label, label_required]
+              properties:
+                text: { type: string }
+                ai_label: { type: string }
+                label_required: { type: boolean }
+        ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
+
+    Topic:
+      type: string
+      enum: [wuxing, personality, career_wealth, relationships, dayun_liunian, health]
+
+    AiDisclosure:
+      type: object
+      required: [generated, model, prompt_version, label_required]
+      properties:
+        generated: { const: true }
+        model: { type: string }
+        prompt_version: { type: string }
+        label_required:
+          type: boolean
+          description: From geo_rule_matrix ai_disclosure.visible_label == required
