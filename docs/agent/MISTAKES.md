@@ -10,8 +10,15 @@
 6. After touching a web-only (js_interop) file, run flutter build web before calling it done; the harness app gate does this.
 7. Buttons placed in a Row, Wrap or dialog action bar must use compactButtons() (or an explicit minimumSize); the app theme makes them full-width.
 8. Never default a client to 127.0.0.1 for anything another device may open; derive the API host from where the page was served and test the phone path.
+9. Anything meant to stay reachable from this computer must hold a keep-awake request and supervise its child processes (restart or fail loudly).
 
 ## Log
+
+### 2026-10-26: Public tunnel URL died after a while
+- **Symptom:** The trycloudflare URL from npm run public stopped working after some time
+- **Root cause:** Windows slept after 30 min idle, which cut the quick tunnel (its URL never returns); public.ts also exited when the tunnel dropped and ignored an API crash
+- **Fix:** keep-awake.ps1 (SetThreadExecutionState) while public runs; tunnel restarts and prints the new URL; API exit stops everything with a message
+- **Rule:** Anything meant to stay reachable from this computer must hold a keep-awake request and supervise its child processes (restart or fail loudly). (Rule 9)
 
 ### 2026-10-26: Phone browser could not log in (127.0.0.1)
 - **Symptom:** ClientException: Load failed uri=http://127.0.0.1:8787/v1/auth/login on a phone browser

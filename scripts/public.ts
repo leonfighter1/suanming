@@ -68,7 +68,9 @@ async function cloudflared(): Promise<string> {
 }
 
 const children: ChildProcess[] = [];
+let stopping = false;
 function stopAll(code = 0) {
+  stopping = true;
   for (const c of children) c.kill();
   process.exit(code);
 }
@@ -94,30 +96,53 @@ await new Promise<void>((ready, fail) => {
   });
   api.on("exit", (code) => fail(new Error(`API exited (${code})`)));
 });
-
-const tunnel = spawn(
-  await cloudflared(),
-  ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${port}`],
-  {
-    stdio: ["ignore", "pipe", "pipe"],
-  },
-);
-children.push(tunnel);
-let announced = false;
-const scan = (d: Buffer) => {
-  const m = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/.exec(d.toString());
-  if (m && !announced) {
-    announced = true;
-    console.log("\n================================================================");
-    console.log(`  Public test URL: ${m[0]}`);
-    console.log("  Open it on any phone or computer. Keep this window running.");
-    console.log("  Ctrl+C stops the API and the tunnel.");
-    console.log("================================================================\n");
-  }
-};
-tunnel.stdout!.on("data", scan);
-tunnel.stderr!.on("data", scan);
-tunnel.on("exit", (code) => {
-  console.error(`tunnel exited (${code})`);
+// After start-up: if the API stops, the public URL is useless; stop everything.
+api.on("exit", (code) => {
+  if (stopping) return;
+  console.error(`\nAPI stopped (exit ${code}); stopping the tunnel. Run npm run public again.`);
   stopAll(1);
 });
+
+// A sleeping computer drops the tunnel, and a quick tunnel's URL dies with it.
+if (win) {
+  const awake = spawn(
+    "powershell",
+    ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", join(root, "scripts", "keep-awake.ps1")],
+    { stdio: ["ignore", "inherit", "inherit"] },
+  );
+  children.push(awake);
+}
+
+const bin = await cloudflared();
+let runs = 0;
+/** Starts a quick tunnel; when it drops, starts another (new URL) after a pause. */
+function startTunnel() {
+  runs++;
+  const tunnel = spawn(bin, ["tunnel", "--no-autoupdate", "--url", `http://127.0.0.1:${port}`], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  children.push(tunnel);
+  let announced = false;
+  const scan = (d: Buffer) => {
+    const m = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/.exec(d.toString());
+    if (m && !announced) {
+      announced = true;
+      const at = new Date().toLocaleTimeString();
+      console.log("\n================================================================");
+      console.log(`  Public test URL${runs > 1 ? " (NEW: the tunnel restarted)" : ""}: ${m[0]}`);
+      console.log(`  since ${at}. Open it on any phone or computer. Keep this window running.`);
+      console.log("  Ctrl+C stops the API and the tunnel.");
+      console.log("================================================================\n");
+    }
+  };
+  tunnel.stdout!.on("data", scan);
+  tunnel.stderr!.on("data", scan);
+  tunnel.on("exit", (code) => {
+    if (stopping) return;
+    console.error(
+      `\ntunnel dropped (exit ${code}); starting a new one in 5 s (the URL will change)…`,
+    );
+    setTimeout(startTunnel, 5000);
+  });
+}
+startTunnel();

@@ -46,6 +46,18 @@ npm run public            # --skip-build to reuse app/build/web
    open it on any network. It works while the command runs; the URL changes each run.
    The first run downloads the official `cloudflared` release into `.cache/bin`.
 
+Staying up:
+
+- while it runs, the computer is kept awake (`scripts/keep-awake.ps1`, the standard
+  Windows "system required" request; no admin, no settings changed). Before this, the
+  30-minute sleep timer cut the tunnel and the URL died. Closing a laptop lid can still
+  sleep it, depending on the lid setting;
+- if the tunnel drops anyway (network change), a new one starts by itself and the new
+  URL is printed. A quick tunnel's URL never comes back: share the new one;
+- if the API stops, the command stops and says so.
+
+A fixed address needs a named tunnel on your own domain (see below).
+
 Public mode protections:
 
 - the `X-Dev-User` shortcut is off: everyone signs in;
