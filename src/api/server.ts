@@ -53,6 +53,16 @@ export interface ApiOptions {
    * ("https://leonfighter1.github.io"). devMode always allows http://localhost.
    */
   corsOrigins?: string[];
+  /**
+   * LAN testing (phones on the same Wi-Fi): also allow http origins on private
+   * addresses (10/8, 172.16/12, 192.168/16) in devMode.
+   */
+  corsPrivateNetwork?: boolean;
+  /**
+   * devMode's X-Dev-User / X-Dev-Country shortcut (default: on in devMode). Turn it
+   * off whenever the API is reachable from other machines: anyone could act as any user.
+   */
+  devHeaders?: boolean;
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
@@ -144,7 +154,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
 
   async function caller(req: IncomingMessage): Promise<Caller> {
-    if (req.headers.authorization || !opts.devMode) {
+    if (req.headers.authorization || !opts.devMode || opts.devHeaders === false) {
       if (!auth) throw new HttpError(401, "authentication not configured");
       const u = await auth.authenticate(req.headers.authorization);
       return { user: u.id, country: u.country };
@@ -554,6 +564,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     const corsOk =
       !!origin &&
       ((opts.devMode && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) ||
+        (opts.devMode &&
+          opts.corsPrivateNetwork &&
+          /^http:\/\/(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(
+            origin,
+          )) ||
         !!opts.corsOrigins?.includes(origin));
     if (origin && corsOk) {
       res.setHeader("access-control-allow-origin", origin);

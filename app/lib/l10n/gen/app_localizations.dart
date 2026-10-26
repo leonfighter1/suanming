@@ -1154,6 +1154,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Place data: GeoNames (CC BY 4.0)'**
   String get placeSource;
+
+  /// No description provided for @serverUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the server at {url}.\nOn a phone, 127.0.0.1 is the phone itself: start `npm run api:lan` on the computer and open http://<computer\'s Wi-Fi address>:5000. From an https page, add ?api=<https server address> to the page URL.'**
+  String serverUnreachable(String url);
 }
 
 class _AppLocalizationsDelegate

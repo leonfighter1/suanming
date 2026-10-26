@@ -564,6 +564,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get placeSource => '地点数据：GeoNames（CC BY 4.0）';
+
+  @override
+  String serverUnreachable(String url) {
+    return '连不上服务器 $url。\n手机上的 127.0.0.1 是手机本身：请在电脑运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。若页面是 https，请在网址后加 ?api=https 服务器地址。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1125,4 +1130,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get placeSource => '地點資料：GeoNames（CC BY 4.0）';
+
+  @override
+  String serverUnreachable(String url) {
+    return '連不上伺服器 $url。\n手機上的 127.0.0.1 是手機本身：請在電腦執行 npm run api:lan，再用手機開啟 http://電腦的區域網路位址:5000。若頁面是 https，請在網址後加 ?api=https 伺服器位址。';
+  }
 }

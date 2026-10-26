@@ -175,5 +175,6 @@
   "placeAll": "全部",
   "placeNone": "没有符合的结果",
   "placeDetail": "时区 {tz} · 经度 {lon}",
-  "placeSource": "地点数据：GeoNames（CC BY 4.0）"
+  "placeSource": "地点数据：GeoNames（CC BY 4.0）",
+  "serverUnreachable": "连不上服务器 {url}。\n手机上的 127.0.0.1 是手机本身：请在电脑运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。若页面是 https，请在网址后加 ?api=https 服务器地址。"
 }

@@ -49,6 +49,9 @@ class FakeApi {
   bool expireAccessOnce;
   final requests = <http.Request>[];
 
+  /// Every request fails without a response (server unreachable).
+  bool offline = false;
+
   /// 破除運勢 plans bought so far.
   final remedies = <Map<String, dynamic>>[];
   int _tokenSerial = 0;
@@ -70,6 +73,7 @@ class FakeApi {
 
   late final client = MockClient((req) async {
     requests.add(req);
+    if (offline) throw http.ClientException('Load failed', req.url);
     final path = req.url.path;
     // Calendar data generated from the real server functions (calendar.json).
     final cal = fixture('calendar');

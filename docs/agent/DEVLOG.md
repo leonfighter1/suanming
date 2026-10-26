@@ -2,6 +2,12 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (j): phone browsers can sign in
+
+- Cause: the web app called http://127.0.0.1:8787, which on a phone is the phone; the API listened on loopback only; dev CORS allowed only localhost.
+- Fix: app resolveApiBase (?api= > API_BASE_URL > same host :8787 for http pages > emulator > loopback); `npm run api:lan` (all interfaces, private-network CORS, X-Dev-User shortcut off); sign-in names the unreachable address and how to fix it; Pages build no longer hard-codes 127.0.0.1.
+- DeepSeek key: stays in .env on the machine running the API; never in GitHub or the Pages build (docs/web-test.md).
+
 ## 2026-10-26 (i): birthplace picker (國家和地區 → 省／州 → 城市)
 
 - Owner request: birthplace by country/region, then province, then city.

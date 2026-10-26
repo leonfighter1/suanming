@@ -581,4 +581,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placeSource => 'Place data: GeoNames (CC BY 4.0)';
+
+  @override
+  String serverUnreachable(String url) {
+    return 'Can\'t reach the server at $url.\nOn a phone, 127.0.0.1 is the phone itself: start `npm run api:lan` on the computer and open http://<computer\'s Wi-Fi address>:5000. From an https page, add ?api=<https server address> to the page URL.';
+  }
 }

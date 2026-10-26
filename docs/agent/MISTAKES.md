@@ -9,8 +9,15 @@
 5. Before treating a statistical test failure as a bug, check the test's null hypothesis matches how the process is supposed to behave.
 6. After touching a web-only (js_interop) file, run flutter build web before calling it done; the harness app gate does this.
 7. Buttons placed in a Row, Wrap or dialog action bar must use compactButtons() (or an explicit minimumSize); the app theme makes them full-width.
+8. Never default a client to 127.0.0.1 for anything another device may open; derive the API host from where the page was served and test the phone path.
 
 ## Log
+
+### 2026-10-26: Phone browser could not log in (127.0.0.1)
+- **Symptom:** ClientException: Load failed uri=http://127.0.0.1:8787/v1/auth/login on a phone browser
+- **Root cause:** The web app defaulted to http://127.0.0.1:8787, which on a phone is the phone itself; the API also listened on loopback only and dev CORS allowed only localhost
+- **Fix:** resolveApiBase(): ?api= > dart-define > same host :8787 for http pages; npm run api:lan (0.0.0.0, private-network CORS, X-Dev-User off); ApiUnreachable shows the address and the fix
+- **Rule:** Never default a client to 127.0.0.1 for anything another device may open; derive the API host from where the page was served and test the phone path. (Rule 8)
 
 ### 2026-10-26: Full-width theme buttons crashed inside Row
 - **Symptom:** BoxConstraints forces an infinite width at OutlinedButton remedy-buy-* in a Row

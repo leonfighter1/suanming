@@ -62,6 +62,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       }
     } on ApiException catch (e) {
       setState(() => _error = e.code == 'captcha_required' || e.status == 429 ? l10n.captchaRequired : e.toString());
+    } on ApiUnreachable catch (e) {
+      setState(() => _error = l10n.serverUnreachable(e.baseUrl));
     } catch (e) {
       setState(() => _error = '$e');
     } finally {

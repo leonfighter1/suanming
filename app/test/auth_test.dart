@@ -55,6 +55,18 @@ void main() {
     expect(find.byKey(const Key('entry-bazi')), findsNothing);
   });
 
+  testWidgets('an unreachable server explains the address instead of a raw ClientException', (tester) async {
+    await tester.pumpWidget(testApp(FakeApi()..offline = true, signedIn: false));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('email')), 'xumei');
+    await tester.enterText(find.byKey(const Key('password')), 'xumei');
+    await tester.tap(find.byKey(const Key('auth-submit')));
+    await settle(tester);
+    expect(find.textContaining('連不上伺服器 http://api.test'), findsOneWidget);
+    expect(find.textContaining('npm run api:lan'), findsOneWidget);
+    expect(find.textContaining('ClientException'), findsNothing);
+  });
+
   testWidgets('an expired access token is refreshed once and the call retried', (tester) async {
     final api = FakeApi();
     await tester.pumpWidget(testApp(api));

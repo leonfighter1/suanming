@@ -30,8 +30,40 @@ npm run api        # allows http://localhost and https://leonfighter1.github.io
 Then open the Pages URL and sign in with a dev account (`admin`/`admin`,
 `xumei`/`xumei`, `test@mingli.local`/`Test-12345678`). The API also answers Chrome's
 Private Network Access preflight, so the https page may call the local http API.
-Safari blocks this mixed content; use a hosted API for Safari and phones.
+Safari blocks this mixed content; for phones see below.
 To allow other origins: `MINGLI_CORS_ORIGINS=https://a.example,https://b.example npm run api`.
+
+## Phone on the same Wi-Fi (no hosting needed)
+
+`127.0.0.1` on a phone is the phone itself, so a phone can never reach the default
+address. Serve both the app and the API on the computer's Wi-Fi address instead:
+
+```
+npm run api:lan                       # prints the address, e.g. http://192.168.1.5:5000
+cd app && flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5000
+```
+
+Open the printed `http://<computer's Wi-Fi address>:5000` on the phone. The app then
+calls the API on the same host (port 8787) by itself. Windows may ask once to allow
+Node.js and Dart on private networks: allow it. In this mode the `X-Dev-User`
+shortcut is off, since other machines can reach the API: sign in with a dev account.
+
+## Pages URL with any API: `?api=`
+
+Add `?api=<API base URL>` to the page URL, e.g.
+`https://leonfighter1.github.io/suanming/?api=https://xxxx.trycloudflare.com`.
+An https page can only call an https API (browsers block http from https), so for
+phones expose the local API through an https tunnel, or host it.
+
+## The DeepSeek key
+
+The key never goes into GitHub for this. The Pages build is public static files, so a
+key in it would be readable by anyone. GitHub Actions doesn't need it either: CI runs
+the mock provider. The key belongs only to whatever runs the API:
+
+- local / LAN testing: `DEEPSEEK_API_KEY` in `.env` (git-ignored), already in place;
+- a hosted API later (Render, Fly.io, Cloud Run, …): the host's secret / environment
+  variable settings, then that API's https URL goes into `API_BASE_URL`.
 
 ## Cache
 

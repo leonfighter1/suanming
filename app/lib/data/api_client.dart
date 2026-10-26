@@ -7,6 +7,16 @@ import '../domain/models.dart';
 import '../domain/places.dart';
 import 'token_store.dart';
 
+/// The API could not be reached at all (no HTTP response).
+class ApiUnreachable implements Exception {
+  const ApiUnreachable(this.baseUrl, this.message);
+  final String baseUrl;
+  final String message;
+
+  @override
+  String toString() => 'API unreachable at $baseUrl: $message';
+}
+
 class ApiException implements Exception {
   const ApiException(this.status, this.title, [this.detail, this.code]);
   final int status;
@@ -206,11 +216,18 @@ class ApiClient {
       'content-type': 'application/json',
       if (access != null) 'authorization': 'Bearer $access',
     };
-    final res = switch (method) {
-      'GET' => await _http.get(uri, headers: headers),
-      'DELETE' => await _http.delete(uri, headers: headers),
-      _ => await _http.post(uri, headers: headers, body: jsonEncode(body)),
-    };
+    final http.Response res;
+    try {
+      res = switch (method) {
+        'GET' => await _http.get(uri, headers: headers),
+        'DELETE' => await _http.delete(uri, headers: headers),
+        _ => await _http.post(uri, headers: headers, body: jsonEncode(body)),
+      };
+    } on http.ClientException catch (e) {
+      // No HTTP response at all: wrong host (127.0.0.1 on a phone), server down,
+      // firewall, CORS refusal or an https page calling an http API.
+      throw ApiUnreachable(baseUrl, e.message);
+    }
     final text = utf8.decode(res.bodyBytes);
     if (res.statusCode >= 400) {
       try {
