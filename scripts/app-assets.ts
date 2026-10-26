@@ -8,8 +8,8 @@
  * (this module only builds; scripts/sync-app-assets.ts writes).
  */
 import { readFileSync } from "node:fs";
-import { generateReport, MockProvider, TOPICS_BY_SYSTEM } from "../src/ai/index.js";
-import { publicReport } from "../src/api/server.js";
+import { generateRemedy, generateReport, MockProvider, TOPICS_BY_SYSTEM } from "../src/ai/index.js";
+import { publicRemedy, publicReport, REMEDY_PRICE } from "../src/api/server.js";
 import {
   computeBazi,
   lunarDate,
@@ -68,6 +68,25 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     report,
   });
 
+  const remedy = await generateRemedy(
+    bazi,
+    report,
+    "career_wealth",
+    { country: "HK" },
+    { providers: { deepseek: mock, anthropic: mock }, now },
+  );
+  const remedyView = publicRemedy({
+    id: "44444444-4444-4444-8444-444444444444",
+    owner: "fixture",
+    report_id: report.report_id,
+    topic: "career_wealth",
+    status: remedy.status,
+    created_at: ts,
+    updated_at: ts,
+    payment: { status: "placeholder", ...REMEDY_PRICE },
+    remedy,
+  });
+
   return {
     "app/assets/i18n/terms.json": JSON.parse(readFileSync(at("i18n/terms.json"), "utf8")),
     "app/assets/i18n/tarot_deck.json": {
@@ -84,6 +103,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       chart_fact: tarot,
     },
     "app/test/fixtures/report_passed.json": view,
+    "app/test/fixtures/remedy_passed.json": remedyView,
     // Real calendar data for the fake API: one day, its 農曆 year, and 農曆 → 公曆 lookups.
     "app/test/fixtures/calendar.json": {
       day: { lunar: lunarDate(1990, 3, 15), shichen: shichenOptions(1990, 3, 15) },

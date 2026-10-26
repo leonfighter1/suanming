@@ -24,6 +24,19 @@ String exportReportMarkdown({
   for (final f in l.facts) {
     b.writeln('- $f');
   }
+  final t = l.trend;
+  if (t != null && headings['trend'] != null) {
+    b
+      ..writeln()
+      ..writeln('## ${headings['trend']}（${headings['total']} ${t.total}/100）')
+      ..writeln();
+    for (final p in [...t.dayun, ...t.liunian]) {
+      b.writeln('- ${p.label} ${p.ganzhi}：${p.overall} · ${p.note}');
+    }
+    b
+      ..writeln()
+      ..writeln(t.methodNote);
+  }
   b
     ..writeln()
     ..writeln('## ${headings['interpretation']}');
@@ -51,5 +64,54 @@ String exportReportMarkdown({
     ..writeln(l.expectation.text)
     ..writeln()
     ..writeln('${l.expectation.aiLabel}${report.model == null ? '' : ' (${report.model})'}');
+  return b.toString();
+}
+
+/// Plain-text (Markdown) export of a 破除運勢 plan, with the AI label.
+String exportRemedyMarkdown({
+  required RemedyView remedy,
+  required String title,
+  required String aiLabel,
+  required String Function(String horizon) horizonLabel,
+  required Map<String, String> headings,
+}) {
+  final b = StringBuffer()
+    ..writeln('# $title')
+    ..writeln()
+    ..writeln('> $aiLabel')
+    ..writeln()
+    ..writeln('## ${headings['target']}')
+    ..writeln()
+    ..writeln(remedy.target)
+    ..writeln()
+    ..writeln(remedy.summary)
+    ..writeln();
+  if (remedy.focusPeriods.isNotEmpty) {
+    b
+      ..writeln('## ${headings['focus']}')
+      ..writeln();
+    for (final p in remedy.focusPeriods) {
+      b.writeln('- $p');
+    }
+    b.writeln();
+  }
+  b
+    ..writeln('## ${headings['steps']}')
+    ..writeln();
+  var i = 1;
+  for (final s in remedy.steps) {
+    b
+      ..writeln('${i++}. **${s.title}**（${horizonLabel(s.horizon)}）')
+      ..writeln('   ${s.text}');
+  }
+  b
+    ..writeln()
+    ..writeln('## ${headings['basis']}')
+    ..writeln()
+    ..writeln(remedy.basis)
+    ..writeln()
+    ..writeln('---')
+    ..writeln()
+    ..writeln(remedy.closing);
   return b.toString();
 }

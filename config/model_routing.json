@@ -1,6 +1,6 @@
 {
   "_readme": "Model routing v1 (Phase 1 §2.2). Per agent: a default route plus optional per-locale overrides. effort is mapped per provider (DeepSeek: low|high|max). Phase 1 moves this into the model_routes table for hot updates; the shape stays the same.",
-  "version": "2",
+  "version": "3",
   "routes": {
     "narrative": {
       "default": {
@@ -11,6 +11,22 @@
       }
     },
     "action": {
+      "default": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-pro",
+        "effort": "high",
+        "max_tokens": 16000
+      }
+    },
+    "trend": {
+      "default": {
+        "provider": "deepseek",
+        "model": "deepseek-v4-pro",
+        "effort": "high",
+        "max_tokens": 16000
+      }
+    },
+    "remedy": {
       "default": {
         "provider": "deepseek",
         "model": "deepseek-v4-pro",

@@ -7,8 +7,22 @@
 3. Size fixed-height cells for the maximum number of lines they can show, and cap every line with maxLines + ellipsis.
 4. Give tests with heavy runtime start-up (WASM, browsers) an explicit timeout instead of relying on the 5 s default.
 5. Before treating a statistical test failure as a bug, check the test's null hypothesis matches how the process is supposed to behave.
+6. After touching a web-only (js_interop) file, run flutter build web before calling it done; the harness app gate does this.
+7. Buttons placed in a Row, Wrap or dialog action bar must use compactButtons() (or an explicit minimumSize); the app theme makes them full-width.
 
 ## Log
+
+### 2026-10-26: Full-width theme buttons crashed inside Row
+- **Symptom:** BoxConstraints forces an infinite width at OutlinedButton remedy-buy-* in a Row
+- **Root cause:** theme.dart sets Filled/OutlinedButton minimumSize to Size.fromHeight (infinite width)
+- **Fix:** compactButtons() wraps rows, wraps and dialogs with minimumSize Size(0, 40)
+- **Rule:** Buttons placed in a Row, Wrap or dialog action bar must use compactButtons() (or an explicit minimumSize); the app theme makes them full-width. (Rule 7)
+
+### 2026-10-26: flutter analyze passed but the web build failed
+- **Symptom:** flutter build web: Tear-offs of external extension type interop member remove are disallowed (printer_web.dart)
+- **Root cause:** Web-only files (conditional imports for dart.library.js_interop) are only fully checked by dart2js; analyze and VM tests never compile them
+- **Fix:** Used a closure () => frame.remove() instead of the tear-off
+- **Rule:** After touching a web-only (js_interop) file, run flutter build web before calling it done; the harness app gate does this. (Rule 6)
 
 ### 2026-10-26: Tarot battery tested the wrong statistical property
 - **Symptom:** 'position 1 vs 2 independent' failed (chi2 51.9 > 39.4) on a correct draw

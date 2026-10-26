@@ -71,6 +71,61 @@ const ACTION: Record<Locale, string> = {
   en: "(Demo) Spend ten minutes this week noting one observation about {t}.",
 };
 
+const TREND_NOTE: Record<Locale, string> = {
+  "zh-Hant": "（示範）依此期十神與原局刑沖合給出的參考分。",
+  "zh-Hans": "（示范）依此期十神与原局刑冲合给出的参考分。",
+  en: "(Demo) Reference score from this period's Ten God and branch relations.",
+};
+
+const REMEDY: Record<
+  Locale,
+  { target: string; summary: string; period: string; steps: [string, string][]; basis: string }
+> = {
+  "zh-Hant": {
+    target: "（示範）針對「{t}」分數最低的時期所作的調和方案。",
+    summary: "（示範）傳統上認為可透過作息、顏色與環境安排，平衡此期偏弱的五行。",
+    period: "（示範）分數最低的大運",
+    steps: [
+      ["（示範）調整作息", "（示範）每天固定時間起床，傳統上認為有助穩定節奏。"],
+      ["（示範）善用顏色", "（示範）選擇家中已有、屬喜用五行的顏色衣物或擺設。"],
+      ["（示範）整理書桌", "（示範）每週整理一次工作區，保持動線清爽。"],
+      ["（示範）記錄觀察", "（示範）每週寫下一個與此項目相關的觀察。"],
+    ],
+    basis: "（示範）依日主與加權五行分數判斷偏弱的五行。",
+  },
+  "zh-Hans": {
+    target: "（示范）针对“{t}”分数最低的时期所作的调和方案。",
+    summary: "（示范）传统上认为可透过作息、颜色与环境安排，平衡此期偏弱的五行。",
+    period: "（示范）分数最低的大运",
+    steps: [
+      ["（示范）调整作息", "（示范）每天固定时间起床，传统上认为有助稳定节奏。"],
+      ["（示范）善用颜色", "（示范）选择家中已有、属喜用五行的颜色衣物或摆设。"],
+      ["（示范）整理书桌", "（示范）每周整理一次工作区，保持动线清爽。"],
+      ["（示范）记录观察", "（示范）每周写下一个与此项目相关的观察。"],
+    ],
+    basis: "（示范）依日主与加权五行分数判断偏弱的五行。",
+  },
+  en: {
+    target: "(Demo) A balancing plan for the lowest-scoring periods of {t}.",
+    summary:
+      "(Demo) Tradition holds that routines, colours and surroundings can balance a weak element.",
+    period: "(Demo) The lowest-scoring luck pillar",
+    steps: [
+      [
+        "(Demo) Steady routine",
+        "(Demo) Wake at the same time each day; tradition links this to steadiness.",
+      ],
+      [
+        "(Demo) Use colour",
+        "(Demo) Wear or display colours you already own that match the supportive element.",
+      ],
+      ["(Demo) Clear the desk", "(Demo) Tidy your work area once a week."],
+      ["(Demo) Keep notes", "(Demo) Write down one observation about this area each week."],
+    ],
+    basis: "(Demo) Based on the Day Master and the weighted element scores.",
+  },
+};
+
 function localeOf(req: LLMJsonRequest): Locale {
   const m = /Write in (Traditional|Simplified|English)/.exec(req.user);
   return m?.[1] === "Traditional" ? "zh-Hant" : m?.[1] === "Simplified" ? "zh-Hans" : "en";
@@ -122,6 +177,39 @@ export class MockProvider implements LLMProvider {
           text: ACTION[locale].replace("{t}", TOPIC_LABELS[topic][locale]),
           horizon: "this_week",
         })),
+      };
+      return { kind: "ok", data, model, usage: USAGE };
+    }
+    if (req.agent === "trend") {
+      const p = req.payload as { topics: Topic[]; dayun: number[]; liunian: number[] };
+      // Deterministic, varied scores in 35–79 so charts have shape.
+      const scores = (seed: number) =>
+        Object.fromEntries(p.topics.map((t, i) => [t, 35 + ((seed * 7 + i * 13) % 45)]));
+      const data = {
+        dayun: p.dayun.map((index) => ({ index, scores: scores(index), note: TREND_NOTE[locale] })),
+        liunian: p.liunian.map((year) => ({
+          year,
+          scores: scores(year),
+          note: TREND_NOTE[locale],
+        })),
+      };
+      return { kind: "ok", data, model, usage: USAGE };
+    }
+    if (req.agent === "remedy") {
+      const p = req.payload as { topic: Topic; system: string };
+      const r = REMEDY[locale];
+      const label = TOPIC_LABELS[p.topic][locale];
+      const data = {
+        target: r.target.replace("{t}", label),
+        summary: r.summary,
+        focus_periods: p.system === "bazi" ? [r.period] : [],
+        steps: r.steps.map(([title, text], i) => ({
+          title,
+          text,
+          horizon: i === 0 ? "this_week" : "ongoing",
+        })),
+        basis: r.basis,
+        fact_refs: p.system === "bazi" ? ["/day_master", "/wuxing_weighted"] : ["/cards/0"],
       };
       return { kind: "ok", data, model, usage: USAGE };
     }

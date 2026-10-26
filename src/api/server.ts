@@ -9,6 +9,7 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import {
+  generateRemedy,
   generateReport,
   GeoRefusedError,
   LOCALES,
@@ -34,7 +35,7 @@ import {
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { upstreamMessage } from "../service/runtime.js";
-import { InMemoryStore, type ReportRecord, type Store } from "./store.js";
+import { InMemoryStore, type RemedyRecord, type ReportRecord, type Store } from "./store.js";
 
 export const API_VERSION = "0.2.0";
 
@@ -46,6 +47,11 @@ export interface ApiOptions {
   auth?: AuthService;
   routing?: RoutingTable;
   devMode?: boolean;
+  /**
+   * Extra browser origins allowed to call the API, e.g. the GitHub Pages web test
+   * ("https://leonfighter1.github.io"). devMode always allows http://localhost.
+   */
+  corsOrigins?: string[];
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
@@ -96,6 +102,30 @@ export function publicReport(r: ReportRecord) {
     return { ...base, message: "this report is held for review and is not available yet" };
   }
   return { ...base, layers: rep.layers, ai_disclosure: rep.ai_disclosure };
+}
+
+/**
+ * Price of one 破除運勢 plan. TODO(Phase 4 payments): take this from the store
+ * product catalogue and verify the purchase receipt before generating.
+ */
+export const REMEDY_PRICE = { amount: 18, currency: "HKD" } as const;
+
+export function publicRemedy(r: RemedyRecord) {
+  const base = {
+    remedy_id: r.id,
+    report_id: r.report_id,
+    topic: r.topic,
+    status: r.status,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+    payment: r.payment,
+  };
+  if (r.status === "pending") return r.progress ? { ...base, progress: r.progress } : base;
+  if (r.status === "failed") return { ...base, message: "generation failed; please retry" };
+  if (r.status !== "passed" || !r.remedy?.content) {
+    return { ...base, message: "this plan is held for review and is not available yet" };
+  }
+  return { ...base, content: r.remedy.content };
 }
 
 export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<void> } {
@@ -177,6 +207,97 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // The account may have been deleted while this ran; never resurrect its data.
     if (!(await store.getReport(record.id))) return;
     await store.putReport(next);
+  }
+
+  async function runRemedyJob(record: RemedyRecord, report: Report, fact: ChartFact, c: Caller) {
+    let next: RemedyRecord;
+    try {
+      const remedy = await generateRemedy(
+        fact,
+        report,
+        record.topic,
+        { country: c.country },
+        {
+          providers: opts.providers,
+          routing: opts.routing,
+          now,
+          onProgress: async ({ stage, attempt }) => {
+            const current = await store.getRemedy(record.id);
+            if (current?.status !== "pending") return;
+            await store.putRemedy({
+              ...current,
+              progress: { stage, attempt, updated_at: now().toISOString() },
+            });
+          },
+        },
+      );
+      next = { ...record, status: remedy.status, remedy, updated_at: now().toISOString() };
+    } catch (e) {
+      const upstream = upstreamMessage(e);
+      log(
+        `remedy ${record.id} failed: ${upstream ?? (e as Error).message}`,
+        upstream ? undefined : e,
+      );
+      next = {
+        ...record,
+        status: "failed",
+        error: upstream ?? "internal error",
+        updated_at: now().toISOString(),
+      };
+    }
+    if (!(await store.getRemedy(record.id))) return;
+    await store.putRemedy(next);
+  }
+
+  /** The caller's passed report and its chart, or 404 / 409. */
+  async function ownedPassedReport(id: string, c: Caller) {
+    const r = UUID_RE.test(id) ? await store.getReport(id) : undefined;
+    if (!r || r.owner !== c.user) throw new HttpError(404, "report not found");
+    if (r.status !== "passed" || !r.report) throw new HttpError(409, "report is not ready");
+    const chart = await store.getChart(r.chart_id);
+    if (!chart) throw new HttpError(404, "chart not found");
+    return { record: r, report: r.report, fact: chart.fact };
+  }
+
+  /** One plan per (report, topic): buying again returns the existing plan, never a second charge. */
+  async function createRemedy(req: IncomingMessage, reportId: string, c: Caller) {
+    const body = (await readJson(req)) as Record<string, unknown>;
+    const { record, report, fact } = await ownedPassedReport(reportId, c);
+    const topic = body.topic as Topic;
+    if (!record.topics.includes(topic)) {
+      throw new InputError(
+        `topic must be one of this report's topics: ${record.topics.join(", ")}`,
+      );
+    }
+    assertServed(c.country, fact.system);
+    const existing = (await store.listRemedies(record.id)).find(
+      (x) => x.topic === topic && x.status !== "failed",
+    );
+    if (existing) {
+      return { status: 200, body: publicRemedy(existing), headers: {} as Record<string, string> };
+    }
+
+    const ts = now().toISOString();
+    const remedy: RemedyRecord = {
+      id: randomUUID(),
+      owner: c.user,
+      report_id: record.id,
+      topic,
+      status: "pending",
+      created_at: ts,
+      updated_at: ts,
+      // TODO(Phase 4 payments): verify the store receipt here; until then every
+      // purchase is a placeholder that succeeds without charging.
+      payment: { status: "placeholder", ...REMEDY_PRICE },
+    };
+    await store.putRemedy(remedy);
+    const job = runRemedyJob(remedy, report, fact, c).finally(() => jobs.delete(job));
+    jobs.add(job);
+    return {
+      status: 202,
+      body: publicRemedy(remedy),
+      headers: { location: `/v1/remedies/${remedy.id}`, "retry-after": "5" },
+    };
   }
 
   async function createReport(req: IncomingMessage, c: Caller) {
@@ -313,6 +434,25 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
     }
 
+    // ---- 破除運勢 plans (paid per topic; payment is a Phase 4 TODO) ----
+    const rm = /^\/v1\/reports\/([^/]+)\/remedies$/.exec(path);
+    if (rm && req.method === "GET") {
+      const r = UUID_RE.test(rm[1]!) ? await store.getReport(rm[1]!) : undefined;
+      if (!r || r.owner !== c.user) throw new HttpError(404, "report not found");
+      const items = (await store.listRemedies(r.id)).map(publicRemedy);
+      return send(res, 200, { price: REMEDY_PRICE, items });
+    }
+    if (rm && req.method === "POST") {
+      const out = await createRemedy(req, rm[1]!, c);
+      return send(res, out.status, out.body, out.headers);
+    }
+    const one = /^\/v1\/remedies\/([^/]+)$/.exec(path);
+    if (one && req.method === "GET") {
+      const r = UUID_RE.test(one[1]!) ? await store.getRemedy(one[1]!) : undefined;
+      if (!r || r.owner !== c.user) throw new HttpError(404, "remedy not found");
+      return send(res, 200, publicRemedy(r));
+    }
+
     if (req.method === "GET") {
       const m = /^\/v1\/reports\/([^/]+)$/.exec(path);
       if (m) {
@@ -397,9 +537,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   }
 
   const server = createServer(async (req, res) => {
-    // Dev only: let Flutter web/desktop builds served from localhost call the API.
+    // Let Flutter web builds call the API: localhost in devMode, plus configured origins.
     const origin = req.headers.origin;
-    if (opts.devMode && origin && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    const corsOk =
+      !!origin &&
+      ((opts.devMode && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) ||
+        !!opts.corsOrigins?.includes(origin));
+    if (origin && corsOk) {
       res.setHeader("access-control-allow-origin", origin);
       res.setHeader("vary", "origin");
       res.setHeader(
@@ -411,6 +555,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         "access-control-expose-headers",
         "location, retry-after, x-ai-generated, x-ai-model",
       );
+      // Chrome Private Network Access: an https page (GitHub Pages) calling a local API.
+      if (req.headers["access-control-request-private-network"] === "true") {
+        res.setHeader("access-control-allow-private-network", "true");
+      }
       if (req.method === "OPTIONS") {
         res.writeHead(204);
         return res.end();

@@ -84,6 +84,7 @@ export function buildAuth(secrets: EngineSecrets, devMode: boolean): AuthService
 /** Test accounts seeded on every dev-mode start (the store is in-memory). */
 export const DEV_ACCOUNTS = [
   { login: "admin", password: "admin", country: "HK", locale: "zh-Hant" as const },
+  { login: "xumei", password: "xumei", country: "HK", locale: "zh-Hant" as const },
   {
     login: "test@mingli.local",
     password: "Test-12345678",

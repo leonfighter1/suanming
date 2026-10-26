@@ -116,6 +116,18 @@ class ApiClient {
 
   Future<ChartResult> getChart(String id) async => ChartResult.fromJson(await _authed('GET', '/v1/charts/$id'));
 
+  // ---- 破除運勢 plans (paid per topic) ----
+
+  Future<RemedyList> listRemedies(String reportId) async =>
+      RemedyList.fromJson(await _authed('GET', '/v1/reports/$reportId/remedies'));
+
+  /// Buys the plan for one topic. TODO(Phase 4 payments): pass the store receipt;
+  /// until then the server records a placeholder charge.
+  Future<RemedyView> buyRemedy(String reportId, String topic) async =>
+      RemedyView.fromJson(await _authed('POST', '/v1/reports/$reportId/remedies', {'topic': topic}));
+
+  Future<RemedyView> getRemedy(String id) async => RemedyView.fromJson(await _authed('GET', '/v1/remedies/$id'));
+
   /// The user's readings, newest first.
   Future<List<HistoryItem>> listReports({int limit = 30}) async {
     final j = await _authed('GET', '/v1/reports?limit=$limit');

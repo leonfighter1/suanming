@@ -48,6 +48,9 @@ class FakeApi {
   /// Answer the first authenticated call with 401 to exercise token refresh.
   bool expireAccessOnce;
   final requests = <http.Request>[];
+
+  /// 破除運勢 plans bought so far.
+  final remedies = <Map<String, dynamic>>[];
   int _tokenSerial = 0;
   String access = 'access-0';
 
@@ -129,6 +132,20 @@ class FakeApi {
       return _json(fixture(system == 'tarot' ? 'chart_tarot' : 'chart_bazi'), 201);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
+    // 破除運勢: price + bought plans; buying returns pending, polling returns the plan.
+    final remedyOf = RegExp(r'^/v1/reports/[^/]+/remedies$');
+    if (req.method == 'GET' && remedyOf.hasMatch(path)) {
+      return _json({'price': {'amount': 18, 'currency': 'HKD'}, 'items': remedies}, 200);
+    }
+    if (req.method == 'POST' && remedyOf.hasMatch(path)) {
+      final topic = (jsonDecode(req.body) as Map)['topic'];
+      final r = {...fixture('remedy_passed'), 'topic': topic, 'status': 'pending', 'content': null};
+      remedies.add({...fixture('remedy_passed'), 'topic': topic});
+      return _json(r, 202);
+    }
+    if (req.method == 'GET' && path.startsWith('/v1/remedies/')) {
+      return _json(remedies.isEmpty ? fixture('remedy_passed') : remedies.last, 200);
+    }
     if (req.method == 'GET' && path.startsWith('/v1/reports/')) {
       // pendingPolls < 0: stay pending forever.
       if (pendingPolls != 0) {

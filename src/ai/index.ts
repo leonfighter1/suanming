@@ -8,3 +8,5 @@ export { AnthropicProvider, type AnthropicLike } from "./providers/anthropic.js"
 export { MockProvider } from "./providers/mock.js";
 export { checkFaithfulness, type FaithfulnessIssue } from "./faithfulness.js";
 export { DeepSeekProvider, ProviderHttpError, type DeepSeekOptions } from "./providers/deepseek.js";
+export * from "./trend.js";
+export { generateRemedy, remedySchema, type Remedy, type RemedyContent } from "./remedy.js";

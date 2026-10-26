@@ -920,6 +920,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The hour is known to a two-hour period; readings that rely on the hour pillar are approximate.'**
   String get shichenNote;
+
+  /// No description provided for @trendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fortune trend'**
+  String get trendTitle;
+
+  /// No description provided for @trendDayun.
+  ///
+  /// In en, this message translates to:
+  /// **'By age (luck pillars)'**
+  String get trendDayun;
+
+  /// No description provided for @trendLiunian.
+  ///
+  /// In en, this message translates to:
+  /// **'By year'**
+  String get trendLiunian;
+
+  /// No description provided for @trendCombined.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined'**
+  String get trendCombined;
+
+  /// No description provided for @trendTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get trendTotal;
+
+  /// No description provided for @trendCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get trendCompare;
+
+  /// No description provided for @trendTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a period on the chart to see its scores and basis.'**
+  String get trendTapHint;
+
+  /// No description provided for @trendAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age {ages}'**
+  String trendAge(String ages);
+
+  /// No description provided for @expandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand all'**
+  String get expandAll;
+
+  /// No description provided for @collapseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse all'**
+  String get collapseAll;
+
+  /// No description provided for @remedyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fortune remedies'**
+  String get remedyTitle;
+
+  /// No description provided for @remedyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A targeted plan for one topic: it names the topic and periods it addresses and gives concrete steps. Each topic is unlocked separately.'**
+  String get remedyDesc;
+
+  /// No description provided for @remedyFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Remedy: {topic}'**
+  String remedyFor(String topic);
+
+  /// No description provided for @remedyUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock · {price}'**
+  String remedyUnlock(String price);
+
+  /// No description provided for @remedyView.
+  ///
+  /// In en, this message translates to:
+  /// **'View plan'**
+  String get remedyView;
+
+  /// No description provided for @remedyConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the {topic} remedy'**
+  String remedyConfirmTitle(String topic);
+
+  /// No description provided for @remedyConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This plan is charged separately for {topic}: {price}.\nPayments are not connected yet (TODO): confirming charges directly as a demo and nothing is actually billed.'**
+  String remedyConfirmBody(String topic, String price);
+
+  /// No description provided for @remedyPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {price}'**
+  String remedyPay(String price);
+
+  /// No description provided for @remedyGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is writing the {topic} plan…'**
+  String remedyGenerating(String topic);
+
+  /// No description provided for @remedyTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get remedyTarget;
+
+  /// No description provided for @remedyFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus periods'**
+  String get remedyFocus;
+
+  /// No description provided for @remedySteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get remedySteps;
+
+  /// No description provided for @remedyBasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Basis in the chart'**
+  String get remedyBasis;
+
+  /// No description provided for @remedySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get remedySave;
+
+  /// No description provided for @remedySend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get remedySend;
+
+  /// No description provided for @remedyPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get remedyPrint;
+
+  /// No description provided for @remedyHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'This plan is held for review and is not available yet.'**
+  String get remedyHeld;
+
+  /// No description provided for @remedyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed. Retry; you won\'t be charged again.'**
+  String get remedyFailed;
+
+  /// No description provided for @remedyDemoPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo payment (not billed)'**
+  String get remedyDemoPaid;
 }
 
 class _AppLocalizationsDelegate

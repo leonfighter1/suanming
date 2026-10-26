@@ -41,6 +41,8 @@ dependencies:
     sdk: flutter
   flutter_secure_storage: 11.2.0
   share_plus: 13.3.1
+  # Web printing of 破除運勢 plans (already a share_plus dependency).
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

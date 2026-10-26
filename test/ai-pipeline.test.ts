@@ -55,9 +55,27 @@ describe("generateReport — happy path", () => {
     expect(r.layers!.interpretation.map((s) => s.topic)).toEqual(r.topics);
     expect(r.layers!.actions.length).toBeGreaterThan(0);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
-    expect(r.ai_disclosure.prompt_version).toBe("narrative@2,action@1,guard@1");
+    expect(r.ai_disclosure.prompt_version).toBe("narrative@3,trend@1,action@2,guard@1");
     expect(r.ai_disclosure.model).toContain("deepseek-v4-pro");
-    expect(mock.calls.map((c) => c.agent)).toEqual(["narrative", "action", "guard"]);
+    // The trend agent runs in parallel with the narrative (八字 only).
+    expect(mock.calls.map((c) => c.agent).sort()).toEqual([
+      "action",
+      "guard",
+      "narrative",
+      "trend",
+    ]);
+    const trend = r.layers!.trend!;
+    expect(trend.dayun.map((d) => d.index)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(trend.liunian).toHaveLength(10);
+    for (const p of [...trend.dayun, ...trend.liunian]) {
+      const vals = r.topics.map((t) => p.scores[t]!);
+      expect(vals.every((v) => v >= 0 && v <= 100)).toBe(true);
+      expect(p.overall).toBe(Math.round(vals.reduce((a, b) => a + b, 0) / vals.length));
+    }
+    expect(trend.total).toBe(
+      Math.round(trend.dayun.reduce((a, d) => a + d.overall, 0) / trend.dayun.length),
+    );
+    expect(trend.dayun[0]).toMatchObject({ ganzhi: "庚辰", start_age: 8, end_age: 17 });
   });
 
   it("requires the visible AI label for EU users", async () => {
@@ -100,7 +118,7 @@ describe("generateReport — compliance outcomes", () => {
     const r = await generateReport(chart, { ...zhHantHK, topics: ["personality"] }, deps(mock));
     expect(r.status).toBe("passed");
     expect(r.agents[0]!.attempts).toBe(2);
-    expect(mock.calls[1]!.user).toContain("G003");
+    expect(mock.calls.filter((c) => c.agent === "narrative")[1]!.user).toContain("G003");
   });
 
   it("blocks when the rule layer is still violated after retries", async () => {
@@ -115,7 +133,10 @@ describe("generateReport — compliance outcomes", () => {
     expect(r.layers).toBeUndefined();
     expect(r.compliance.rule_violations.map((v) => v.rule_id)).toContain("G001");
     expect(r.draft!.interpretation).toBeDefined();
-    expect(mock.calls.map((c) => c.agent)).toEqual(["narrative", "narrative"]); // no action/guard calls
+    expect(mock.calls.map((c) => c.agent).filter((a) => a !== "trend")).toEqual([
+      "narrative",
+      "narrative",
+    ]); // no action/guard calls
   });
 
   it("sends review-level patterns (investment advice) to manual review", async () => {

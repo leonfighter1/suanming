@@ -1,0 +1,48 @@
+{
+  "remedy_id": "44444444-4444-4444-8444-444444444444",
+  "report_id": "11111111-1111-4111-8111-111111111111",
+  "topic": "career_wealth",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "payment": {
+    "status": "placeholder",
+    "amount": 18,
+    "currency": "HKD"
+  },
+  "content": {
+    "target": "（示範）針對「事業財運」分數最低的時期所作的調和方案。",
+    "summary": "（示範）傳統上認為可透過作息、顏色與環境安排，平衡此期偏弱的五行。",
+    "focus_periods": [
+      "（示範）分數最低的大運"
+    ],
+    "steps": [
+      {
+        "title": "（示範）調整作息",
+        "text": "（示範）每天固定時間起床，傳統上認為有助穩定節奏。",
+        "horizon": "this_week"
+      },
+      {
+        "title": "（示範）善用顏色",
+        "text": "（示範）選擇家中已有、屬喜用五行的顏色衣物或擺設。",
+        "horizon": "ongoing"
+      },
+      {
+        "title": "（示範）整理書桌",
+        "text": "（示範）每週整理一次工作區，保持動線清爽。",
+        "horizon": "ongoing"
+      },
+      {
+        "title": "（示範）記錄觀察",
+        "text": "（示範）每週寫下一個與此項目相關的觀察。",
+        "horizon": "ongoing"
+      }
+    ],
+    "basis": "（示範）依日主與加權五行分數判斷偏弱的五行。",
+    "fact_refs": [
+      "/day_master",
+      "/wuxing_weighted"
+    ],
+    "closing": "以上為傳統命理文化中的調和做法，僅供參考，不保證任何結果；涉及健康、財務或法律的決定，請諮詢相關專業人士。"
+  }
+}

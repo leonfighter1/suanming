@@ -1,0 +1,58 @@
+name: pages
+
+# Web test build of the Flutter app on GitHub Pages:
+#   https://leonfighter1.github.io/suanming/
+# The page is static. It calls the API at the repository variable API_BASE_URL
+# (Settings → Secrets and variables → Actions → Variables); without it, the API
+# on the tester's own machine (http://127.0.0.1:8787, `npm run api`). No secret
+# ever goes into this build: the DeepSeek key stays on the API server.
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.8
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test
+      - run: >-
+          flutter build web --release
+          --base-href /suanming/
+          --dart-define=API_BASE_URL=${{ vars.API_BASE_URL || 'http://127.0.0.1:8787' }}
+      # SPA fallback: deep links load the app instead of a 404.
+      - run: cp build/web/index.html build/web/404.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

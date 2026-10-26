@@ -116,12 +116,21 @@ BirthProfile sampleProfile(String name) => BirthProfile(
 /// Test accounts get ready-made profiles so testing starts at once.
 bool isTestAccount(AppUser u) {
   final e = (u.email ?? '').toLowerCase();
-  return e.startsWith('test') || e == 'admin';
+  return e.startsWith('test') || e == 'admin' || e == 'xumei';
 }
 
 /// Seeded profiles per test account (all editable).
-List<BirthProfile> testProfiles(AppUser u) => (u.email ?? '').toLowerCase() == 'admin'
-    ? [
+List<BirthProfile> testProfiles(AppUser u) => switch ((u.email ?? '').toLowerCase()) {
+      'xumei' => [
+          BirthProfile(
+            id: 'default',
+            name: 'xumei',
+            gender: 'female',
+            birthLocal: DateTime(1992, 6, 18, 10, 20),
+            cityKey: 'shanghai',
+          ),
+        ],
+      'admin' => [
         BirthProfile(
           id: 'default',
           name: '管理員',
@@ -142,8 +151,9 @@ List<BirthProfile> testProfiles(AppUser u) => (u.email ?? '').toLowerCase() == '
           timeMode: 'shichen',
           shichen: '午',
         ),
-      ]
-    : [sampleProfile('測試用戶')];
+      ],
+      _ => [sampleProfile('測試用戶')],
+    };
 
 class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
   String? _userId;
@@ -208,6 +218,23 @@ final lunarMonthsProvider = FutureProvider.autoDispose.family<List<LunarMonthInf
 );
 
 final pollIntervalProvider = Provider<Duration>((ref) => AppConfig.pollInterval);
+
+/// Price and bought 破除運勢 plans of a report.
+final remediesProvider = FutureProvider.autoDispose.family<RemedyList, String>(
+  (ref, reportId) => ref.watch(apiClientProvider).listRemedies(reportId),
+);
+
+/// Polls a 破除運勢 plan until it leaves `pending`.
+final remedyProvider = StreamProvider.autoDispose.family<RemedyView, String>((ref, id) async* {
+  final api = ref.watch(apiClientProvider);
+  final interval = ref.watch(pollIntervalProvider);
+  while (true) {
+    final r = await api.getRemedy(id);
+    yield r;
+    if (r.isTerminal) return;
+    await Future<void>.delayed(interval);
+  }
+});
 
 /// Polls a report until it leaves `pending`.
 final reportProvider = StreamProvider.autoDispose.family<ReportView, String>((ref, id) async* {

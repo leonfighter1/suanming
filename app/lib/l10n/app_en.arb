@@ -178,5 +178,86 @@
   "lunarYear": "Lunar year",
   "lunarMonth": "Month",
   "lunarDay": "Day",
-  "shichenNote": "The hour is known to a two-hour period; readings that rely on the hour pillar are approximate."
+  "shichenNote": "The hour is known to a two-hour period; readings that rely on the hour pillar are approximate.",
+  "trendTitle": "Fortune trend",
+  "trendDayun": "By age (luck pillars)",
+  "trendLiunian": "By year",
+  "trendCombined": "Combined",
+  "trendTotal": "Total",
+  "trendCompare": "Compare",
+  "trendTapHint": "Tap a period on the chart to see its scores and basis.",
+  "trendAge": "Age {ages}",
+  "@trendAge": {
+    "placeholders": {
+      "ages": {
+        "type": "String"
+      }
+    }
+  },
+  "expandAll": "Expand all",
+  "collapseAll": "Collapse all",
+  "remedyTitle": "Fortune remedies",
+  "remedyDesc": "A targeted plan for one topic: it names the topic and periods it addresses and gives concrete steps. Each topic is unlocked separately.",
+  "remedyFor": "Remedy: {topic}",
+  "@remedyFor": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "remedyUnlock": "Unlock · {price}",
+  "@remedyUnlock": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "remedyView": "View plan",
+  "remedyConfirmTitle": "Unlock the {topic} remedy",
+  "@remedyConfirmTitle": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "remedyConfirmBody": "This plan is charged separately for {topic}: {price}.\nPayments are not connected yet (TODO): confirming charges directly as a demo and nothing is actually billed.",
+  "@remedyConfirmBody": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "remedyPay": "Pay {price}",
+  "@remedyPay": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "remedyGenerating": "AI is writing the {topic} plan…",
+  "@remedyGenerating": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
+  "remedyTarget": "Target",
+  "remedyFocus": "Focus periods",
+  "remedySteps": "Steps",
+  "remedyBasis": "Basis in the chart",
+  "remedySave": "Save",
+  "remedySend": "Send",
+  "remedyPrint": "Print",
+  "remedyHeld": "This plan is held for review and is not available yet.",
+  "remedyFailed": "Generation failed. Retry; you won't be charged again.",
+  "remedyDemoPaid": "Demo payment (not billed)"
 }

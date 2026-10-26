@@ -260,8 +260,70 @@ class Expectation {
   final bool labelRequired;
 }
 
+/// One scored period of the trend chart: a 大運 (age range) or a 流年 (year).
+class TrendPoint {
+  const TrendPoint({
+    required this.label,
+    required this.ganzhi,
+    required this.scores,
+    required this.overall,
+    required this.note,
+    this.startAge,
+    this.endAge,
+    this.year,
+    this.startYear,
+  });
+
+  factory TrendPoint.fromJson(Json j) => TrendPoint(
+        label: j['year'] != null ? '${j['year']}' : '${j['start_age']}–${j['end_age']}',
+        ganzhi: j['ganzhi'] as String,
+        scores: (j['scores'] as Json).map((k, v) => MapEntry(k, (v as num).toInt())),
+        overall: (j['overall'] as num).toInt(),
+        note: j['note'] as String,
+        startAge: j['start_age'] as int?,
+        endAge: j['end_age'] as int?,
+        year: j['year'] as int?,
+        startYear: j['start_year'] as int?,
+      );
+
+  /// X-axis label: "28–37" (ages) or "2026" (year).
+  final String label;
+  final String ganzhi;
+  final Map<String, int> scores;
+  final int overall;
+  final String note;
+  final int? startAge;
+  final int? endAge;
+  final int? year;
+
+  /// 大運 only: first calendar year of the period.
+  final int? startYear;
+
+  /// Whether this period contains [y] (a 大運 spans 10 years).
+  bool covers(int y) => year != null ? year == y : (startYear != null && y >= startYear! && y < startYear! + 10);
+}
+
+/// 八字 trend scores (0–100). `overall` and `total` are computed by the server.
+class TrendLayer {
+  const TrendLayer(this.topics, this.dayun, this.liunian, this.total, this.methodNote);
+
+  factory TrendLayer.fromJson(Json j) => TrendLayer(
+        ((j['topics'] as List?) ?? const []).cast<String>(),
+        _list(j['dayun'], TrendPoint.fromJson),
+        _list(j['liunian'], TrendPoint.fromJson),
+        (j['total'] as num).toInt(),
+        j['method_note'] as String,
+      );
+
+  final List<String> topics;
+  final List<TrendPoint> dayun;
+  final List<TrendPoint> liunian;
+  final int total;
+  final String methodNote;
+}
+
 class ReportLayers {
-  const ReportLayers(this.facts, this.interpretation, this.actions, this.expectation);
+  const ReportLayers(this.facts, this.interpretation, this.actions, this.expectation, [this.trend]);
 
   factory ReportLayers.fromJson(Json j) {
     final e = j['expectation'] as Json;
@@ -286,6 +348,7 @@ class ReportLayers {
         (a) => ActionItem(a['topic'] as String, a['text'] as String, a['horizon'] as String),
       ),
       Expectation(e['text'] as String, e['ai_label'] as String, e['label_required'] as bool),
+      j['trend'] == null ? null : TrendLayer.fromJson(j['trend'] as Json),
     );
   }
 
@@ -293,6 +356,86 @@ class ReportLayers {
   final List<Section> interpretation;
   final List<ActionItem> actions;
   final Expectation expectation;
+
+  /// 八字 only; null when absent.
+  final TrendLayer? trend;
+}
+
+class RemedyStep {
+  const RemedyStep(this.title, this.text, this.horizon);
+  final String title;
+  final String text;
+  final String horizon;
+}
+
+/// A bought 破除運勢 plan for one topic (POST /v1/reports/{id}/remedies).
+class RemedyView {
+  const RemedyView({
+    required this.id,
+    required this.topic,
+    required this.status,
+    this.target,
+    this.summary,
+    this.focusPeriods = const [],
+    this.steps = const [],
+    this.basis,
+    this.closing,
+    this.message,
+    this.paymentStatus,
+  });
+
+  factory RemedyView.fromJson(Json j) {
+    final c = j['content'] as Json?;
+    return RemedyView(
+      id: j['remedy_id'] as String,
+      topic: j['topic'] as String,
+      status: j['status'] as String,
+      target: c?['target'] as String?,
+      summary: c?['summary'] as String?,
+      focusPeriods: ((c?['focus_periods'] as List?) ?? const []).cast<String>(),
+      steps: _list(
+        c?['steps'],
+        (s) => RemedyStep(s['title'] as String, s['text'] as String, s['horizon'] as String),
+      ),
+      basis: c?['basis'] as String?,
+      closing: c?['closing'] as String?,
+      message: j['message'] as String?,
+      paymentStatus: (j['payment'] as Json?)?['status'] as String?,
+    );
+  }
+
+  final String id;
+  final String topic;
+
+  /// pending | passed | blocked | manual_review | failed
+  final String status;
+  final String? target;
+  final String? summary;
+  final List<String> focusPeriods;
+  final List<RemedyStep> steps;
+  final String? basis;
+  final String? closing;
+  final String? message;
+
+  /// "placeholder" until Phase 4 payments.
+  final String? paymentStatus;
+
+  bool get isTerminal => status != 'pending';
+  bool get hasContent => status == 'passed' && target != null;
+}
+
+/// GET /v1/reports/{id}/remedies: the price and the plans already bought.
+class RemedyList {
+  const RemedyList(this.amount, this.currency, this.items);
+  factory RemedyList.fromJson(Json j) {
+    final p = j['price'] as Json;
+    return RemedyList((p['amount'] as num).toDouble(), p['currency'] as String, _list(j['items'], RemedyView.fromJson));
+  }
+  final double amount;
+  final String currency;
+  final List<RemedyView> items;
+
+  String get priceLabel => '$currency ${amount.toStringAsFixed(amount == amount.roundToDouble() ? 0 : 2)}';
 }
 
 class ReportView {

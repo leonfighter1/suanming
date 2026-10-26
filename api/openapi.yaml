@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 命理大师 API
-  version: 0.1.0
+  version: 0.2.0
   summary: Phase 0 skeleton — charts, reports, health.
   description: |
     Pipeline order is a hard constraint: Geo-Rule → Engine (ChartFact) → AI Interp → Compliance Guard → client.
@@ -23,6 +23,8 @@ tags:
     description: Deterministic engines (Engine Layer) producing ChartFact
   - name: reports
     description: Four-layer AI interpretation behind Compliance Guard
+  - name: remedies
+    description: Paid per-topic 破除運勢 plans (payment is a Phase 4 TODO)
   - name: ops
     description: Operational endpoints
 
@@ -196,6 +198,7 @@ paths:
                       account: { const: true }
                       charts: { type: integer }
                       reports: { type: integer }
+                      remedies: { type: integer }
                   completed_at: { type: string, format: date-time }
         "401": { $ref: "#/components/responses/Problem" }
 
@@ -439,6 +442,91 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
+  /v1/reports/{report_id}/remedies:
+    parameters:
+      - name: report_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [remedies]
+      operationId: listRemedies
+      summary: The price and the 破除運勢 plans already bought for this report
+      responses:
+        "200":
+          description: Oldest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [price, items]
+                properties:
+                  price: { $ref: "#/components/schemas/Price" }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Remedy" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [remedies]
+      operationId: buyRemedy
+      summary: Buy a 破除運勢 plan for one topic of a passed report (async)
+      description: |
+        Paid per topic. TODO(Phase 4 payments): the purchase receipt will be
+        verified here; until then `payment.status` is `placeholder` and nothing
+        is charged. Buying a topic that already has a plan returns that plan (200).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic]
+              properties:
+                topic: { $ref: "#/components/schemas/Topic" }
+      responses:
+        "200":
+          description: Already bought; the existing plan
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Remedy" }
+        "202":
+          description: Accepted; poll Location
+          headers:
+            Location: { schema: { type: string } }
+            Retry-After: { schema: { type: integer } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Remedy" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: The report has not passed (pending or held)
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/remedies/{remedy_id}:
+    get:
+      tags: [remedies]
+      operationId: getRemedy
+      summary: Poll a 破除運勢 plan
+      parameters:
+        - name: remedy_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Current state; `content` only when status = passed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Remedy" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
 components:
   securitySchemes:
     bearer:
@@ -610,7 +698,7 @@ components:
           description: Present while pending; the pipeline stage currently running
           type: object
           properties:
-            stage: { type: string, enum: [narrative, action, guard] }
+            stage: { type: string, enum: [narrative, action, trend, remedy, guard] }
             attempt: { type: integer, minimum: 1 }
             updated_at: { type: string, format: date-time }
         layers:
@@ -661,7 +749,123 @@ components:
                 text: { type: string }
                 ai_label: { type: string }
                 label_required: { type: boolean }
+            trend:
+              description: |
+                八字 only; absent when the trend agent failed. Per-topic scores
+                (0–100, 50 = steady) are AI reference scores; `overall` (mean of the
+                topics) and `total` (mean of the 大運 overall scores) are computed
+                by the server.
+              type: object
+              required: [topics, dayun, liunian, total, method_note]
+              properties:
+                topics:
+                  type: array
+                  items: { $ref: "#/components/schemas/Topic" }
+                dayun:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/TrendPoint"
+                      - type: object
+                        required: [index, ganzhi, start_year, start_age, end_age]
+                        properties:
+                          index: { type: integer }
+                          ganzhi: { type: string }
+                          start_year: { type: integer }
+                          start_age: { type: integer }
+                          end_age: { type: integer }
+                liunian:
+                  type: array
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/TrendPoint"
+                      - type: object
+                        required: [year, age, ganzhi]
+                        properties:
+                          year: { type: integer }
+                          age: { type: integer }
+                          ganzhi: { type: string }
+                total: { type: integer, minimum: 0, maximum: 100 }
+                method_note: { type: string }
         ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
+
+    TrendPoint:
+      type: object
+      required: [scores, overall, note]
+      properties:
+        scores:
+          description: Topic → score (0–100)
+          type: object
+          additionalProperties: { type: integer, minimum: 0, maximum: 100 }
+        overall: { type: integer, minimum: 0, maximum: 100 }
+        note: { type: string }
+
+    Price:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount: { type: number }
+        currency: { type: string, description: ISO 4217 }
+
+    Remedy:
+      type: object
+      required: [remedy_id, report_id, topic, status, created_at, updated_at, payment]
+      properties:
+        remedy_id: { type: string, format: uuid }
+        report_id: { type: string, format: uuid }
+        topic: { $ref: "#/components/schemas/Topic" }
+        status:
+          type: string
+          enum: [pending, passed, blocked, manual_review, failed]
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        payment:
+          type: object
+          required: [status, amount, currency]
+          properties:
+            status:
+              type: string
+              enum: [placeholder]
+              description: Phase 4 adds real receipt states
+            amount: { type: number }
+            currency: { type: string }
+        message: { type: string }
+        progress:
+          type: object
+          properties:
+            stage: { type: string, enum: [remedy, guard] }
+            attempt: { type: integer, minimum: 1 }
+            updated_at: { type: string, format: date-time }
+        content:
+          description: Present only when status = passed. AI-generated, Guard-reviewed.
+          type: object
+          required: [target, summary, focus_periods, steps, basis, fact_refs, closing]
+          properties:
+            target:
+              type: string
+              description: Which topic and which periods this plan addresses
+            summary: { type: string }
+            focus_periods:
+              type: array
+              items: { type: string }
+            steps:
+              type: array
+              items:
+                type: object
+                required: [title, text, horizon]
+                properties:
+                  title: { type: string }
+                  text: { type: string }
+                  horizon:
+                    type: string
+                    enum: [this_week, this_month, this_year, ongoing]
+            basis: { type: string }
+            fact_refs:
+              type: array
+              items: { type: string }
+            closing:
+              type: string
+              description: Fixed disclaimer copy (not model-generated)
 
     Topic:
       type: string

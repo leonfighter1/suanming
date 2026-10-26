@@ -3,6 +3,7 @@
 Phase 0 (engines, ChartFact, compliance) and Phase 1 in progress (AI pipeline, v1 API, Flutter app).
 **Start here: [docs/SUMMARY.md](docs/SUMMARY.md)** (what each phase delivered).
 Details: [docs/phase-0-gate.md](docs/phase-0-gate.md) · [docs/phase-1-status.md](docs/phase-1-status.md) · agent instructions in [CLAUDE.md](CLAUDE.md).
+Web test: **https://leonfighter1.github.io/suanming/** ([docs/web-test.md](docs/web-test.md)).
 
 ```
 src/chart-fact/      ChartFact types, canonical JSON, keyed input digest, schema validator

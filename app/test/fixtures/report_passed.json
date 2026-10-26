@@ -137,12 +137,314 @@
       "text": "命理內容屬文化參考與自我反思，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
       "ai_label": "本解讀由 AI 依據命盤資料生成，僅供參考與自我反思。",
       "label_required": false
+    },
+    "trend": {
+      "topics": [
+        "wuxing",
+        "personality",
+        "career_wealth",
+        "relationships",
+        "dayun_liunian",
+        "health"
+      ],
+      "dayun": [
+        {
+          "index": 1,
+          "ganzhi": "庚辰",
+          "start_year": 1997,
+          "start_age": 8,
+          "end_age": 17,
+          "scores": {
+            "wuxing": 42,
+            "personality": 55,
+            "career_wealth": 68,
+            "relationships": 36,
+            "dayun_liunian": 49,
+            "health": 62
+          },
+          "overall": 52,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 2,
+          "ganzhi": "辛巳",
+          "start_year": 2007,
+          "start_age": 18,
+          "end_age": 27,
+          "scores": {
+            "wuxing": 49,
+            "personality": 62,
+            "career_wealth": 75,
+            "relationships": 43,
+            "dayun_liunian": 56,
+            "health": 69
+          },
+          "overall": 59,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 3,
+          "ganzhi": "壬午",
+          "start_year": 2017,
+          "start_age": 28,
+          "end_age": 37,
+          "scores": {
+            "wuxing": 56,
+            "personality": 69,
+            "career_wealth": 37,
+            "relationships": 50,
+            "dayun_liunian": 63,
+            "health": 76
+          },
+          "overall": 59,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 4,
+          "ganzhi": "癸未",
+          "start_year": 2027,
+          "start_age": 38,
+          "end_age": 47,
+          "scores": {
+            "wuxing": 63,
+            "personality": 76,
+            "career_wealth": 44,
+            "relationships": 57,
+            "dayun_liunian": 70,
+            "health": 38
+          },
+          "overall": 58,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 5,
+          "ganzhi": "甲申",
+          "start_year": 2037,
+          "start_age": 48,
+          "end_age": 57,
+          "scores": {
+            "wuxing": 70,
+            "personality": 38,
+            "career_wealth": 51,
+            "relationships": 64,
+            "dayun_liunian": 77,
+            "health": 45
+          },
+          "overall": 58,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 6,
+          "ganzhi": "乙酉",
+          "start_year": 2047,
+          "start_age": 58,
+          "end_age": 67,
+          "scores": {
+            "wuxing": 77,
+            "personality": 45,
+            "career_wealth": 58,
+            "relationships": 71,
+            "dayun_liunian": 39,
+            "health": 52
+          },
+          "overall": 57,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 7,
+          "ganzhi": "丙戌",
+          "start_year": 2057,
+          "start_age": 68,
+          "end_age": 77,
+          "scores": {
+            "wuxing": 39,
+            "personality": 52,
+            "career_wealth": 65,
+            "relationships": 78,
+            "dayun_liunian": 46,
+            "health": 59
+          },
+          "overall": 57,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 8,
+          "ganzhi": "丁亥",
+          "start_year": 2067,
+          "start_age": 78,
+          "end_age": 87,
+          "scores": {
+            "wuxing": 46,
+            "personality": 59,
+            "career_wealth": 72,
+            "relationships": 40,
+            "dayun_liunian": 53,
+            "health": 66
+          },
+          "overall": 56,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        }
+      ],
+      "liunian": [
+        {
+          "year": 2026,
+          "age": 36,
+          "ganzhi": "丙午",
+          "scores": {
+            "wuxing": 42,
+            "personality": 55,
+            "career_wealth": 68,
+            "relationships": 36,
+            "dayun_liunian": 49,
+            "health": 62
+          },
+          "overall": 52,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2027,
+          "age": 37,
+          "ganzhi": "丁未",
+          "scores": {
+            "wuxing": 49,
+            "personality": 62,
+            "career_wealth": 75,
+            "relationships": 43,
+            "dayun_liunian": 56,
+            "health": 69
+          },
+          "overall": 59,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2028,
+          "age": 38,
+          "ganzhi": "戊申",
+          "scores": {
+            "wuxing": 56,
+            "personality": 69,
+            "career_wealth": 37,
+            "relationships": 50,
+            "dayun_liunian": 63,
+            "health": 76
+          },
+          "overall": 59,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2029,
+          "age": 39,
+          "ganzhi": "己酉",
+          "scores": {
+            "wuxing": 63,
+            "personality": 76,
+            "career_wealth": 44,
+            "relationships": 57,
+            "dayun_liunian": 70,
+            "health": 38
+          },
+          "overall": 58,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2030,
+          "age": 40,
+          "ganzhi": "庚戌",
+          "scores": {
+            "wuxing": 70,
+            "personality": 38,
+            "career_wealth": 51,
+            "relationships": 64,
+            "dayun_liunian": 77,
+            "health": 45
+          },
+          "overall": 58,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2031,
+          "age": 41,
+          "ganzhi": "辛亥",
+          "scores": {
+            "wuxing": 77,
+            "personality": 45,
+            "career_wealth": 58,
+            "relationships": 71,
+            "dayun_liunian": 39,
+            "health": 52
+          },
+          "overall": 57,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2032,
+          "age": 42,
+          "ganzhi": "壬子",
+          "scores": {
+            "wuxing": 39,
+            "personality": 52,
+            "career_wealth": 65,
+            "relationships": 78,
+            "dayun_liunian": 46,
+            "health": 59
+          },
+          "overall": 57,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2033,
+          "age": 43,
+          "ganzhi": "癸丑",
+          "scores": {
+            "wuxing": 46,
+            "personality": 59,
+            "career_wealth": 72,
+            "relationships": 40,
+            "dayun_liunian": 53,
+            "health": 66
+          },
+          "overall": 56,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2034,
+          "age": 44,
+          "ganzhi": "甲寅",
+          "scores": {
+            "wuxing": 53,
+            "personality": 66,
+            "career_wealth": 79,
+            "relationships": 47,
+            "dayun_liunian": 60,
+            "health": 73
+          },
+          "overall": 63,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2035,
+          "age": 45,
+          "ganzhi": "乙卯",
+          "scores": {
+            "wuxing": 60,
+            "personality": 73,
+            "career_wealth": 41,
+            "relationships": 54,
+            "dayun_liunian": 67,
+            "health": 35
+          },
+          "overall": 55,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        }
+      ],
+      "total": 57,
+      "method_note": "分數是 AI 依傳統命理（大運、流年與原局的十神、刑沖合會、五行平衡）給出的參考指數，0–100，50 為平穩；不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。"
     }
   },
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative@2,action@1,guard@1",
+    "prompt_version": "narrative@3,trend@1,action@2,guard@1",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

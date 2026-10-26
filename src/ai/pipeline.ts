@@ -22,10 +22,18 @@ import {
   type Violation,
 } from "../compliance/index.js";
 import { expectationLayer, factsLayer } from "./layers.js";
-import { actionUser, guardUser, narrativeUser, PROMPTS } from "./prompts.js";
+import { actionUser, guardUser, narrativeUser, PROMPTS, trendUser } from "./prompts.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
 import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schemas.js";
 import { glossaryFor, LOCALES, normalizeTerms, type Locale } from "./terms.js";
+import {
+  checkTrend,
+  trendLayer,
+  trendPayload,
+  trendSchema,
+  type TrendLayer,
+  type TrendOutput,
+} from "./trend.js";
 import {
   TOPICS,
   TOPICS_BY_SYSTEM,
@@ -72,7 +80,7 @@ export interface Progress {
   attempt: number;
 }
 
-interface AgentTrace {
+export interface AgentTrace {
   agent: AgentName;
   prompt_version: string;
   model: string;
@@ -95,6 +103,8 @@ export interface Report {
     interpretation: NarrativeOutput["sections"];
     actions: ActionOutput["actions"];
     expectation: { text: string; ai_label: string; label_required: boolean };
+    /** 八字 only; omitted when the trend agent fails (the rest of the report stands). */
+    trend?: TrendLayer;
   };
   draft?: { interpretation?: NarrativeOutput["sections"]; actions?: ActionOutput["actions"] };
   ai_disclosure: {
@@ -139,7 +149,7 @@ const addUsage = (a: Usage, b: Usage): Usage => ({
   cache_read_input_tokens: (a.cache_read_input_tokens ?? 0) + (b.cache_read_input_tokens ?? 0),
 });
 
-interface CheckResult<T> {
+export interface CheckResult<T> {
   value: T;
   /** Problems worth a retry */
   feedback: string[];
@@ -152,7 +162,7 @@ type AgentOutcome<T> =
   | { ok: false; reason: string; held?: T; block: Violation[]; trace: AgentTrace };
 
 /** Shared generate → check → retry loop for every agent. */
-async function runAgent<T>(args: {
+export async function runAgent<T>(args: {
   agent: AgentName;
   provider: LLMProvider;
   route: ReturnType<typeof routeFor>;
@@ -234,12 +244,25 @@ async function runAgent<T>(args: {
   };
 }
 
-function scanTexts(texts: string[], rules: CompiledRule[]) {
+export function scanTexts(texts: string[], rules: CompiledRule[]) {
   const hits = texts.flatMap((t) => scan(t, rules));
   return {
     block: hits.filter((h) => h.action === "block"),
     review: hits.filter((h) => h.action === "review"),
   };
+}
+
+/** Geo-Rule: the region's rules, or GeoRefusedError when the service/system isn't offered. */
+export function servedRegion(country: string, system: string) {
+  const matrix = loadGeoMatrix();
+  const region: RegionRule | null = resolveRegion(matrix, country);
+  if (!region || !region.service_available) {
+    throw new GeoRefusedError(`service not available in ${country}`);
+  }
+  if (region.systems[system]?.available === false) {
+    throw new GeoRefusedError(`${system} not available in ${country}`);
+  }
+  return { matrix, region };
 }
 
 // ---------- pipeline ----------
@@ -257,14 +280,7 @@ export async function generateReport(
     throw new ReportInputError(`unsupported locale ${opts.locale}`);
 
   // 1. Geo-Rule runs before any model call.
-  const matrix = loadGeoMatrix();
-  const region: RegionRule | null = resolveRegion(matrix, opts.country);
-  if (!region || !region.service_available) {
-    throw new GeoRefusedError(`service not available in ${opts.country}`);
-  }
-  if (region.systems[chart.system]?.available === false) {
-    throw new GeoRefusedError(`${chart.system} not available in ${opts.country}`);
-  }
+  const { matrix, region } = servedRegion(opts.country, chart.system);
 
   const allowed = TOPICS_BY_SYSTEM[chart.system];
   const requested = opts.topics?.length ? opts.topics : allowed;
@@ -292,7 +308,36 @@ export async function generateReport(
   let status: ReportStatus = "passed";
   let review: GuardOutput | undefined;
 
-  // 2. Narrative
+  // 2. Narrative, and for 八字 the trend scores in parallel (both read only the chart).
+  //    A trend failure drops the trend chart, never the report.
+  const periods = chart.system === "bazi" ? trendPayload(chart, topics) : undefined;
+  const trendRun = periods
+    ? runAgent<TrendOutput>({
+        agent: "trend",
+        ...providerFor("trend"),
+        schema: trendSchema(topics),
+        payload: periods,
+        maxRetries,
+        user: (feedback) => trendUser({ facts, periods, locale: opts.locale, glossary, feedback }),
+        check: (data) => {
+          const { value, feedback } = checkTrend(chart, topics, data);
+          for (const pt of [...value.dayun, ...value.liunian]) {
+            const { text, fixes } = normalizeTerms(pt.note, opts.locale);
+            termFixes.push(...fixes);
+            pt.note = text;
+          }
+          return {
+            value,
+            feedback,
+            ...scanTexts(
+              [...value.dayun, ...value.liunian].map((pt) => pt.note),
+              rules,
+            ),
+          };
+        },
+      }).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
+    : undefined;
+
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
     ...providerFor("narrative"),
@@ -316,7 +361,7 @@ export async function generateReport(
       let ungrounded = 0;
       const sections = data.sections.map((s) => ({
         topic: s.topic,
-        paragraphs: s.paragraphs.slice(0, 3).flatMap((p) => {
+        paragraphs: s.paragraphs.slice(0, 4).flatMap((p) => {
           const { text, fixes } = normalizeTerms(p.text, opts.locale);
           termFixes.push(...fixes);
           const refs = p.fact_refs.filter((r) => resolvePointer(facts, r));
@@ -347,6 +392,19 @@ export async function generateReport(
     },
   });
   traces.push(narrative.trace);
+
+  let trend: TrendOutput | undefined;
+  const trendDone = await trendRun;
+  if (trendDone instanceof Error) {
+    if (!narrative.ok) throw trendDone;
+    reasons.push(`trend omitted: ${trendDone.message}`);
+  } else if (trendDone) {
+    traces.push(trendDone.trace);
+    if (trendDone.ok) {
+      trend = trendDone.value;
+      ruleViolations.push(...trendDone.review);
+    } else reasons.push(`trend omitted: ${trendDone.reason}`);
+  }
 
   let actions: ActionOutput | undefined;
   if (narrative.ok && narrative.value.sections.length === 0) {
@@ -382,7 +440,7 @@ export async function generateReport(
           return { ...a, text };
         });
         const value = {
-          actions: list.filter((a) => topics.includes(a.topic)).slice(0, topics.length * 2),
+          actions: list.filter((a) => topics.includes(a.topic)).slice(0, topics.length * 3),
         };
         return {
           value,
@@ -405,7 +463,13 @@ export async function generateReport(
       ruleViolations.push(...action.review);
 
       // 4. Model review layer — only for drafts the rule layer already passed.
-      const draft = { interpretation: narrative.value.sections, actions: actions.actions };
+      const draft = {
+        interpretation: narrative.value.sections,
+        actions: actions.actions,
+        ...(trend && {
+          trend_notes: [...trend.dayun, ...trend.liunian].map((pt) => pt.note),
+        }),
+      };
       const guard = await runAgent<GuardOutput>({
         agent: "guard",
         ...providerFor("guard"),
@@ -482,6 +546,7 @@ export async function generateReport(
       interpretation,
       actions: actions.actions,
       expectation: expectationLayer(opts.locale, labelRequired),
+      ...(trend && { trend: trendLayer(chart, topics, trend, opts.locale) }),
     };
   } else if (opts.includeDraft) {
     report.draft = { interpretation, actions: actions?.actions };

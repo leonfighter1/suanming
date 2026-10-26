@@ -3,10 +3,10 @@
  * (db/schema_v0.sql + migrations, encrypted facts/report bodies) implements the
  * same interface later.
  */
-import type { Report } from "../ai/index.js";
+import type { Remedy, Report } from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
-import type { Topic } from "../ai/types.js";
+import type { AgentName, Topic } from "../ai/types.js";
 
 export interface ChartRecord {
   id: string;
@@ -29,7 +29,22 @@ export interface ReportRecord {
   report?: Report;
   error?: string;
   /** Live stage while pending (pipeline onProgress). */
-  progress?: { stage: "narrative" | "action" | "guard"; attempt: number; updated_at: string };
+  progress?: { stage: AgentName; attempt: number; updated_at: string };
+}
+
+/** A paid 破除運勢 plan for one topic of a report (payment: Phase 4 TODO). */
+export interface RemedyRecord {
+  id: string;
+  owner: string;
+  report_id: string;
+  topic: Topic;
+  status: ReportRecordStatus;
+  created_at: string;
+  updated_at: string;
+  payment: { status: "placeholder"; amount: number; currency: string };
+  remedy?: Remedy;
+  error?: string;
+  progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
 
 export interface Store {
@@ -41,13 +56,18 @@ export interface Store {
   listCharts(owner: string, limit: number): Promise<ChartRecord[]>;
   /** Newest first. */
   listReports(owner: string, limit: number): Promise<ReportRecord[]>;
+  putRemedy(r: RemedyRecord): Promise<void>;
+  getRemedy(id: string): Promise<RemedyRecord | undefined>;
+  /** Oldest first. */
+  listRemedies(reportId: string): Promise<RemedyRecord[]>;
   /** Account deletion: remove everything the user owns. Returns counts for the receipt. */
-  deleteOwnerData(owner: string): Promise<{ charts: number; reports: number }>;
+  deleteOwnerData(owner: string): Promise<{ charts: number; reports: number; remedies: number }>;
 }
 
 export class InMemoryStore implements Store {
   private charts = new Map<string, ChartRecord>();
   private reports = new Map<string, ReportRecord>();
+  private remedies = new Map<string, RemedyRecord>();
   async putChart(c: ChartRecord) {
     this.charts.set(c.id, structuredClone(c));
   }
@@ -61,6 +81,19 @@ export class InMemoryStore implements Store {
   async getReport(id: string) {
     const r = this.reports.get(id);
     return r && structuredClone(r);
+  }
+  async putRemedy(r: RemedyRecord) {
+    this.remedies.set(r.id, structuredClone(r));
+  }
+  async getRemedy(id: string) {
+    const r = this.remedies.get(id);
+    return r && structuredClone(r);
+  }
+  async listRemedies(reportId: string) {
+    return newest(
+      [...this.remedies.values()].filter((r) => r.report_id === reportId),
+      100,
+    ).reverse();
   }
   async listCharts(owner: string, limit: number) {
     return newest(
@@ -79,7 +112,10 @@ export class InMemoryStore implements Store {
     let reports = 0;
     for (const [id, c] of this.charts) if (c.owner === owner && this.charts.delete(id)) charts++;
     for (const [id, r] of this.reports) if (r.owner === owner && this.reports.delete(id)) reports++;
-    return { charts, reports };
+    let remedies = 0;
+    for (const [id, r] of this.remedies)
+      if (r.owner === owner && this.remedies.delete(id)) remedies++;
+    return { charts, reports, remedies };
   }
 }
 

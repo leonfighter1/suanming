@@ -53,6 +53,20 @@ Input precision: chart_facts.input_basis says how the birth moment was entered.
 - time = "shichen": the hour is known only to a two-hour window (the 時辰 in input_basis.shichen). Say once, briefly, that hour-pillar (時柱) readings rest on that window, and don't build strong claims on the hour pillar alone. If shichen_after_correction differs from shichen, mention that 真太陽時 correction moved the hour into the neighbouring 時辰.
 - date = "lunar": the user knows their 農曆 birthday; you may refer to it (chart_facts.lunar) when it helps the reader.`;
 
+/**
+ * v3 (2026-10-26): longer, more concrete readings. Owner feedback: the guidance
+ * should be detailed and specific, not generic.
+ */
+const NARRATIVE_V3 = `${NARRATIVE_V2.replace(
+  "Write only the topics requested, 1–3 paragraphs each, at most about 160 Chinese characters or 110 English words per paragraph.",
+  "Write only the topics requested, 2–4 paragraphs each, about 150–260 Chinese characters or 100–170 English words per paragraph.",
+)}
+
+Be detailed and concrete:
+- Name the exact facts and periods you rest on: the 大運 by 干支 and age range, the 流年 by year and age (from chart_facts.dayun and chart_facts.liunian).
+- Describe how the tendency may show up in everyday situations (work, study, home, close relationships), and what tends to help, so the reader can recognise it.
+- Prefer one clear, specific observation per paragraph over general statements that would fit anyone.`;
+
 const ACTION_V1 = `You write the action layer of a 命理 report: small, concrete things the reader can do, based on an interpretation that has already been written.
 
 Input: <interpretation> (sections by topic) and <chart_summary>.
@@ -64,6 +78,42 @@ Rules:
 - No urgency or fear. No promise of results.
 - horizon: this_week, this_month, this_year or ongoing.
 Use the protected terms in <glossary> exactly as given.`;
+
+/** v2 (2026-10-26): 2–3 detailed actions per topic (what, how, how often). */
+const ACTION_V2 = ACTION_V1.replace(
+  "- For each topic, give 1–2 actions. Each is one sentence, starts with a verb, can be done this week or month, costs nothing or very little, and is safe for anyone.",
+  "- For each topic, give 2–3 actions. Each is 1–2 sentences: start with a verb, say concretely what to do, how and how often (e.g. a time of day, a frequency, a first small step). It can be started this week or month, costs nothing or very little, and is safe for anyone.",
+);
+
+const TREND_V1 = `You score a 八字 chart's periods for a trend chart in a consumer 命理 app.
+
+Input: <chart_facts> (computed by a deterministic engine; the only source of truth) and <periods> (the 大運 indices from chart_facts.dayun.cycles and the 流年 years from chart_facts.liunian to score).
+
+For every listed 大運 index and every listed 流年 year, give:
+- scores: one integer from 0 to 100 per requested topic, for how supportive the traditional reading of that period is for that topic. 50 = steady/neutral, 60–80 = supportive, 30–45 = calls for more care. Use the range the facts justify (roughly 25–85); don't give everything 50. Be consistent: the same facts must give the same score.
+- note: one sentence (at most about 45 Chinese characters or 30 English words) naming the facts behind the scores: the period's 十神 relative to the day master, branch_relations with the natal pillars, and its 五行 against wuxing_weighted.
+
+Topic meanings: wuxing = how balanced the five elements are in that period; personality = ease of self-expression and inner steadiness; career_wealth = support for work, study and resources; relationships = harmony in close relationships; dayun_liunian = overall momentum; health = traditional 五行 wellbeing balance (never medical).
+
+These are symbolic reference scores, not predictions. Notes use tendency language, no fear or certainty, no disease names, no money amounts. Use the protected terms in <glossary> exactly as given.`;
+
+const REMEDY_V1 = `You write a targeted 改運 plan (traditional ways to adjust a period's tendency) for ONE topic of a 八字 / 塔羅 report that the user has unlocked.
+
+Input: <chart_facts>, <topic>, <interpretation> (what the report already said about this topic), <actions> and, for 八字, <trend> (this topic's scores per 大運 and 流年).
+
+Write:
+- target: one sentence saying exactly which topic and which periods this plan addresses. For 八字, focus on the lowest-scoring periods in <trend> for this topic and name them by 干支 with years and ages; for 塔羅, name the cards and positions it rests on.
+- summary: 2–3 sentences on what the plan aims to balance and why, in plain words.
+- focus_periods: short labels of the periods targeted (e.g. "2027–2036 癸未大運（38–47歲）", "2028 戊申年"). Empty for 塔羅.
+- steps: 4–6 steps. Each has a short title and 2–3 sentences: what to do, how and how often, and the traditional basis (五行 生剋 and 補/洩, favourable colours, directions, seasons and times of day, routines, arranging the home or desk with things the user already has, communication and planning habits). horizon: this_week, this_month, this_year or ongoing.
+- basis: one paragraph on which chart facts the plan rests on (day_master, wuxing_weighted, the period's 十神 and branch_relations, or the cards).
+- fact_refs: JSON Pointer paths into chart_facts that the plan rests on. Only cite paths that exist.
+
+Rules:
+- Every step is free or nearly free, safe, legal and doable by anyone.
+- Never suggest buying anything (charms, crystals, 風水 items, talismans, courses, readings), paid services, rituals or 法事, donations as a way to change luck, medical treatment, diets or supplements, investments, trading or gambling, or contacting or confronting a specific person.
+- No fear, urgency or threats, and no promise that luck will change: use tendency language (傳統上認為有助於…, "traditionally believed to help").
+- Use the protected terms in <glossary> exactly as given.`;
 
 const GUARD_V1 = `You are the compliance reviewer for a consumer 命理 (metaphysics / tarot / astrology) app. Review a draft report before it is shown to the user. You don't rewrite it; you decide whether it may be shown.
 
@@ -85,8 +135,10 @@ function version(agent: string, n: number, system: string): PromptVersion {
 }
 
 export const PROMPTS = {
-  narrative: version("narrative", 2, NARRATIVE_V2),
-  action: version("action", 1, ACTION_V1),
+  narrative: version("narrative", 3, NARRATIVE_V3),
+  action: version("action", 2, ACTION_V2),
+  trend: version("trend", 1, TREND_V1),
+  remedy: version("remedy", 1, REMEDY_V1),
   guard: version("guard", 1, GUARD_V1),
 } as const;
 
@@ -131,6 +183,49 @@ export function actionUser(args: {
   return [
     tag("interpretation", args.interpretation),
     tag("chart_summary", args.chartSummary.join("\n")),
+    tag("glossary", args.glossary),
+    `Write in ${LANGUAGE[args.locale]}.`,
+    feedbackBlock(args.feedback),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+export function trendUser(args: {
+  facts: unknown;
+  periods: { topics: readonly Topic[]; dayun: number[]; liunian: number[] };
+  locale: Locale;
+  glossary: Record<string, string>;
+  feedback?: string[];
+}): string {
+  return [
+    tag("chart_facts", args.facts),
+    tag("periods", { dayun_indices: args.periods.dayun, liunian_years: args.periods.liunian }),
+    tag("glossary", args.glossary),
+    `Score these topics: ${args.periods.topics.join(", ")}.`,
+    `Write the notes in ${LANGUAGE[args.locale]}.`,
+    feedbackBlock(args.feedback),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+export function remedyUser(args: {
+  facts: unknown;
+  topic: Topic;
+  interpretation: unknown;
+  actions: unknown;
+  trend?: unknown;
+  locale: Locale;
+  glossary: Record<string, string>;
+  feedback?: string[];
+}): string {
+  return [
+    tag("chart_facts", args.facts),
+    tag("topic", `${args.topic} (${TOPIC_LABELS[args.topic][args.locale]})`),
+    tag("interpretation", args.interpretation),
+    tag("actions", args.actions),
+    args.trend ? tag("trend", args.trend) : "",
     tag("glossary", args.glossary),
     `Write in ${LANGUAGE[args.locale]}.`,
     feedbackBlock(args.feedback),

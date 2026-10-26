@@ -22,10 +22,22 @@ const host = process.env.HOST ?? "127.0.0.1";
 
 const auth = buildAuth(secrets, true);
 await seedDevAccounts(auth, true);
-const server = createApiServer({ secrets, providers: providers.map, auth, devMode: true });
+// The GitHub Pages web test (docs/web-test.md) calls this API from its https origin.
+const corsOrigins = (process.env.MINGLI_CORS_ORIGINS ?? "https://leonfighter1.github.io")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+const server = createApiServer({
+  secrets,
+  providers: providers.map,
+  auth,
+  devMode: true,
+  corsOrigins,
+});
 server.listen(port, host, () => {
   console.log(`命理大师 API v1 (dev mode) on http://${host}:${port}`);
   console.log(`AI provider: ${servingProvider(providers.live)}`);
+  console.log(`CORS origins: localhost, ${corsOrigins.join(", ")}`);
   console.log(`dev accounts: ${DEV_ACCOUNTS.map((a) => `${a.login} / ${a.password}`).join(", ")}`);
   if (secrets.ephemeral) {
     console.log(

@@ -1,7 +1,7 @@
 import type { ChartSystem, SourceLevel } from "../chart-fact/index.js";
 import type { Locale } from "./terms.js";
 
-export type AgentName = "narrative" | "action" | "guard";
+export type AgentName = "narrative" | "action" | "trend" | "remedy" | "guard";
 
 /** The six analysis areas. `wuxing` and `dayun_liunian` exist only for bazi. */
 export const TOPICS = [

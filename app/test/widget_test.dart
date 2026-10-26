@@ -67,9 +67,13 @@ void main() {
     final createReport = api.requests.firstWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports');
     expect((jsonDecode(createReport.body) as Map)['locale'], 'zh-Hant');
     expect(find.byKey(const Key('ai-label')), findsOneWidget);
+    // The trend chart comes first; the facts card is below it.
+    expect(find.byKey(const Key('trend-card')), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('命盤事實 · 引擎計算，非 AI'), 300, scrollable: mainScrollable);
     expect(find.text('命盤事實 · 引擎計算，非 AI'), findsOneWidget);
     expect(find.textContaining('四柱：庚午 己卯 己卯 辛未'), findsOneWidget);
-    expect(api.requests.where((r) => r.url.path.startsWith('/v1/reports/')).length, 3); // 2 pending + 1 passed
+    final polls = RegExp(r'^/v1/reports/[^/]+$');
+    expect(api.requests.where((r) => polls.hasMatch(r.url.path)).length, 3); // 2 pending + 1 passed
   });
 
   testWidgets('report: blocked reports show no content', (tester) async {

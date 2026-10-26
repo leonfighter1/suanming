@@ -431,6 +431,107 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shichenNote => '只知道时辰：时柱只精确到两小时，相关解读会标明为参考。';
+
+  @override
+  String get trendTitle => '运势走势';
+
+  @override
+  String get trendDayun => '按年龄（大运）';
+
+  @override
+  String get trendLiunian => '按年份（流年）';
+
+  @override
+  String get trendCombined => '综合';
+
+  @override
+  String get trendTotal => '总分';
+
+  @override
+  String get trendCompare => '叠加比较';
+
+  @override
+  String get trendTapHint => '点选图上的时期，查看各项分数与依据。';
+
+  @override
+  String trendAge(String ages) {
+    return '$ages 岁';
+  }
+
+  @override
+  String get expandAll => '展开全部';
+
+  @override
+  String get collapseAll => '收起全部';
+
+  @override
+  String get remedyTitle => '破除运势';
+
+  @override
+  String get remedyDesc => '针对单一项目的改运方案：指明针对哪一项、哪些时期，并给出具体做法。每个项目单独解锁。';
+
+  @override
+  String remedyFor(String topic) {
+    return '破除运势：$topic';
+  }
+
+  @override
+  String remedyUnlock(String price) {
+    return '解锁 · $price';
+  }
+
+  @override
+  String get remedyView => '查看方案';
+
+  @override
+  String remedyConfirmTitle(String topic) {
+    return '解锁「$topic」破除运势方案';
+  }
+
+  @override
+  String remedyConfirmBody(String topic, String price) {
+    return '此方案针对「$topic」单独收费：$price。\n付款功能尚未接入（TODO）：现在按确认即直接扣款（示范，不会实际收费）。';
+  }
+
+  @override
+  String remedyPay(String price) {
+    return '确认支付 $price';
+  }
+
+  @override
+  String remedyGenerating(String topic) {
+    return 'AI 正在为「$topic」制定方案…';
+  }
+
+  @override
+  String get remedyTarget => '针对项目';
+
+  @override
+  String get remedyFocus => '重点时期';
+
+  @override
+  String get remedySteps => '具体做法';
+
+  @override
+  String get remedyBasis => '命理依据';
+
+  @override
+  String get remedySave => '保存';
+
+  @override
+  String get remedySend => '发送';
+
+  @override
+  String get remedyPrint => '打印';
+
+  @override
+  String get remedyHeld => '方案正在审核中，暂时无法显示。';
+
+  @override
+  String get remedyFailed => '生成失败，请重试（不会重复收费）。';
+
+  @override
+  String get remedyDemoPaid => '示范付款（未实际收费）';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -859,4 +960,105 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get shichenNote => '只知道時辰：時柱只精確到兩小時，相關解讀會標明為參考。';
+
+  @override
+  String get trendTitle => '運勢走勢';
+
+  @override
+  String get trendDayun => '按年齡（大運）';
+
+  @override
+  String get trendLiunian => '按年份（流年）';
+
+  @override
+  String get trendCombined => '綜合';
+
+  @override
+  String get trendTotal => '總分';
+
+  @override
+  String get trendCompare => '疊加比較';
+
+  @override
+  String get trendTapHint => '點選圖上的時期，查看各項分數與依據。';
+
+  @override
+  String trendAge(String ages) {
+    return '$ages 歲';
+  }
+
+  @override
+  String get expandAll => '展開全部';
+
+  @override
+  String get collapseAll => '收起全部';
+
+  @override
+  String get remedyTitle => '破除運勢';
+
+  @override
+  String get remedyDesc => '針對單一項目的改運方案：指明針對哪一項、哪些時期，並給出具體做法。每個項目單獨解鎖。';
+
+  @override
+  String remedyFor(String topic) {
+    return '破除運勢：$topic';
+  }
+
+  @override
+  String remedyUnlock(String price) {
+    return '解鎖 · $price';
+  }
+
+  @override
+  String get remedyView => '查看方案';
+
+  @override
+  String remedyConfirmTitle(String topic) {
+    return '解鎖「$topic」破除運勢方案';
+  }
+
+  @override
+  String remedyConfirmBody(String topic, String price) {
+    return '此方案針對「$topic」單獨收費：$price。\n付款功能尚未接入（TODO）：現在按確認即直接扣款（示範，不會實際收費）。';
+  }
+
+  @override
+  String remedyPay(String price) {
+    return '確認支付 $price';
+  }
+
+  @override
+  String remedyGenerating(String topic) {
+    return 'AI 正在為「$topic」制定方案…';
+  }
+
+  @override
+  String get remedyTarget => '針對項目';
+
+  @override
+  String get remedyFocus => '重點時期';
+
+  @override
+  String get remedySteps => '具體做法';
+
+  @override
+  String get remedyBasis => '命理依據';
+
+  @override
+  String get remedySave => '保存';
+
+  @override
+  String get remedySend => '發送';
+
+  @override
+  String get remedyPrint => '列印';
+
+  @override
+  String get remedyHeld => '方案正在審核中，暫時無法顯示。';
+
+  @override
+  String get remedyFailed => '生成失敗，請重試（不會重複收費）。';
+
+  @override
+  String get remedyDemoPaid => '示範付款（未實際收費）';
 }

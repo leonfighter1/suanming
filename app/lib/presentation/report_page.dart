@@ -29,7 +29,13 @@ class ReportPage extends ConsumerWidget {
             .join(' · '),
         topicLabel: l10n.topic,
         horizonLabel: l10n.horizon,
-        headings: {'facts': l10n.layerFacts, 'interpretation': l10n.layerInterpretation, 'actions': l10n.layerActions},
+        headings: {
+          'facts': l10n.layerFacts,
+          'interpretation': l10n.layerInterpretation,
+          'actions': l10n.layerActions,
+          'trend': l10n.trendTitle,
+          'total': l10n.trendTotal,
+        },
       );
 
   @override
@@ -96,7 +102,7 @@ class ReportPage extends ConsumerWidget {
           ),
           data: (r) => switch (r.status) {
             'pending' => _Generating(key: const ValueKey('pending'), report: r),
-            'passed' => FourLayerReport(key: const ValueKey('passed'), layers: r.layers!),
+            'passed' => FourLayerReport(key: const ValueKey('passed'), layers: r.layers!, reportId: r.id),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
             'manual_review' => _Message(key: const ValueKey('review'), icon: Icons.hourglass_top, text: l10n.statusReview),
             _ => _Message(key: const ValueKey('failed'), icon: Icons.error_outline, text: l10n.statusFailed),

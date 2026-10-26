@@ -444,4 +444,109 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shichenNote =>
       'The hour is known to a two-hour period; readings that rely on the hour pillar are approximate.';
+
+  @override
+  String get trendTitle => 'Fortune trend';
+
+  @override
+  String get trendDayun => 'By age (luck pillars)';
+
+  @override
+  String get trendLiunian => 'By year';
+
+  @override
+  String get trendCombined => 'Combined';
+
+  @override
+  String get trendTotal => 'Total';
+
+  @override
+  String get trendCompare => 'Compare';
+
+  @override
+  String get trendTapHint =>
+      'Tap a period on the chart to see its scores and basis.';
+
+  @override
+  String trendAge(String ages) {
+    return 'Age $ages';
+  }
+
+  @override
+  String get expandAll => 'Expand all';
+
+  @override
+  String get collapseAll => 'Collapse all';
+
+  @override
+  String get remedyTitle => 'Fortune remedies';
+
+  @override
+  String get remedyDesc =>
+      'A targeted plan for one topic: it names the topic and periods it addresses and gives concrete steps. Each topic is unlocked separately.';
+
+  @override
+  String remedyFor(String topic) {
+    return 'Remedy: $topic';
+  }
+
+  @override
+  String remedyUnlock(String price) {
+    return 'Unlock · $price';
+  }
+
+  @override
+  String get remedyView => 'View plan';
+
+  @override
+  String remedyConfirmTitle(String topic) {
+    return 'Unlock the $topic remedy';
+  }
+
+  @override
+  String remedyConfirmBody(String topic, String price) {
+    return 'This plan is charged separately for $topic: $price.\nPayments are not connected yet (TODO): confirming charges directly as a demo and nothing is actually billed.';
+  }
+
+  @override
+  String remedyPay(String price) {
+    return 'Pay $price';
+  }
+
+  @override
+  String remedyGenerating(String topic) {
+    return 'AI is writing the $topic plan…';
+  }
+
+  @override
+  String get remedyTarget => 'Target';
+
+  @override
+  String get remedyFocus => 'Focus periods';
+
+  @override
+  String get remedySteps => 'Steps';
+
+  @override
+  String get remedyBasis => 'Basis in the chart';
+
+  @override
+  String get remedySave => 'Save';
+
+  @override
+  String get remedySend => 'Send';
+
+  @override
+  String get remedyPrint => 'Print';
+
+  @override
+  String get remedyHeld =>
+      'This plan is held for review and is not available yet.';
+
+  @override
+  String get remedyFailed =>
+      'Generation failed. Retry; you won\'t be charged again.';
+
+  @override
+  String get remedyDemoPaid => 'Demo payment (not billed)';
 }

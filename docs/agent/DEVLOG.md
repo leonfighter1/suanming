@@ -2,6 +2,18 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (h): report UI, trend scores, 破除運勢, web test
+
+- CI fix: the app fixture embedded the runner's Node tzdb (2026c vs 2024b local), which changed input_digest. `BaziContext.tzdb` pins it for fixtures.
+- Trend agent (trend@1, 八字 only) runs in parallel with the narrative: per-topic 0–100 scores for every 大運 and 流年 with a one-line reason. Periods come from the ChartFact; combined and total are computed by the server. A trend failure drops the chart, never the report.
+- Prompts: narrative@3 (2–4 longer, concrete paragraphs naming periods), action@2 (2–3 detailed actions per topic).
+- 破除運勢: remedy@1 → Guard, one paid plan per (report, topic) naming its target periods; `/v1/reports/{id}/remedies`, `/v1/remedies/{id}`. Payment is a placeholder (TODO Phase 4); buying twice returns the same plan.
+- App: trend chart (by age / by year, topic filters to compare, tap for scores and reason, total), only the first topic open with expand/collapse all, left-aligned text, remedy module + pay popup + plan dialog with save/send/print/copy.
+- Web: no-cache index.html + cache-busting bootstrap; GitHub Pages workflow (docs/web-test.md); API allows the Pages origin and answers Private Network Access preflights.
+- Dev account xumei/xumei with its own editable profile.
+- Compliance note: selling remedies sits next to the fear_or_paywall rule. The plan text is Guard-checked and the sales copy makes no harm claims, but legal review must confirm the paid model per region before real charging.
+- Mistakes: shell-inlined scripts mangled backslashes and `$'` (global rule 16); web-only interop code only fails in `flutter build web` (rule 6); theme full-width buttons in rows (rule 7).
+
 ## 2026-10-26 (g): 八字 / 塔羅 technical verification
 
 - Plan change (owner): payments, subscriptions and push moved to Phase 4 (operations); focus on the app and on 八字 / 塔羅 verification.
