@@ -2,6 +2,12 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (d): Phase 0 gate passed provisionally
+
+- Decision (product owner): defer the 50 authoritative 八字 golden cases; pass the legal review provisionally.
+- Done: added `legal_review: provisional` (schema, type, demo label) and set it for every region; listed both deferred items in `docs/phase-0-gate.md` with what closes them. Neither is marked as done.
+- Harness: PASS (backend 147 tests; app analyze 0 issues, 13 tests, build web).
+
 ## 2026-10-26 (c): Phase 1 segment 3, sign-in and account deletion
 
 - Done: `src/auth/`: Argon2id passwords (OWASP params); 15-min HS256 access tokens; rotating refresh tokens with reuse → family revocation; Apple/Google ID-token verification (jose JWKS); captcha after 3 failures (Turnstile proposed), lock after 10; Geo-Rule and age gate at sign-up; keyed email lookup.

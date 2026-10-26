@@ -2,7 +2,7 @@
 
 A one-page view of the completed work, by phase. Details are in the linked documents.
 
-## Phase 0: technical foundation and compliance base ✅ (gate partly open)
+## Phase 0: technical foundation and compliance base ✅ (gate passed provisionally)
 
 | Area        | Delivered                                                                                                                                                                                                                                  |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -13,8 +13,9 @@ A one-page view of the completed work, by phase. Details are in the linked docum
 | Compliance  | `prohibited_patterns.yaml` (zh-Hant + zh-Hans, negation-aware), `geo_rule_matrix.json`, AI disclosure spec                                                                                                                                 |
 | Skeleton    | OpenAPI 3.1, PostgreSQL schema v0 + migration 001, CI, security baseline, data retention                                                                                                                                                   |
 
-**Gate still open:** 50 authoritative 八字 test cases and the legal review
-([phase-0-gate.md](phase-0-gate.md)).
+**Gate passed provisionally** by product-owner decision (2026-10-26). Deferred, and
+required before the first public launch: 50 authoritative 八字 test cases, and the
+formal legal review (`legal_review: provisional` for now). See [phase-0-gate.md](phase-0-gate.md).
 
 ## Phase 1: core loop for the 繁體 launch (in progress)
 

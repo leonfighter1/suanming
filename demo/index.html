@@ -1260,7 +1260,7 @@
       <dt>年齡門檻</dt><dd>${r.age_gate.min_age}+（${esc(r.age_gate.enforcement)}）</dd>
       <dt>語系</dt><dd>${r.locales.map(esc).join(", ")}</dd>
       <dt>付費文案規則</dt><dd>${r.paywall.copy_rules.map(esc).join(", ")}</dd>
-      <dt>法務審核</dt><dd>${r.legal_review === "approved" ? "已核准" : `<span style="color:var(--warn)">待審核</span>`}</dd>
+      <dt>法務審核</dt><dd>${r.legal_review === "approved" ? "已核准" : r.legal_review === "provisional" ? `<span style="color:var(--warn)">暫定通過（產品負責人，待正式法務審核）</span>` : `<span style="color:var(--warn)">待審核</span>`}</dd>
     </dl></div>`;
       });
 

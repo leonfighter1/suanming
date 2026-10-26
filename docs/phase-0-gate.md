@@ -1,4 +1,10 @@
-# Phase 0 Gate status (2026-10-25)
+# Phase 0 Gate status (updated 2026-10-26)
+
+> **Product-owner decision, 2026-10-26:** the Phase 0 gate is passed
+> provisionally so Phase 1 can continue. Two items are **deferred, not done**:
+> the 50 authoritative 八字 golden cases, and the formal legal review (recorded as
+> `legal_review: provisional` in the geo matrix). Both must be closed before the
+> first public launch; see "Deferred items" below.
 
 ## Deliverables
 
@@ -6,7 +12,7 @@
 | --- | --------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | 1   | Engine POC report + ADR                                                     | `docs/poc/README.md`, `docs/adr/0001–0003`               | done; ADRs **Proposed**                                                                                             |
 | 2   | ChartFact v0.1 + JSON Schema                                                | `schemas/chart-fact.v0.1.schema.json`, `src/chart-fact/` | done; **needs reconciling with 《总体技术文档》§1.3**, which wasn't available                                       |
-| 3   | `prohibited_patterns.yaml`, `geo_rule_matrix.json`, `ai_disclosure_spec.md` | `compliance/`                                            | done; all `legal_review: pending`                                                                                   |
+| 3   | `prohibited_patterns.yaml`, `geo_rule_matrix.json`, `ai_disclosure_spec.md` | `compliance/`                                            | done; all `legal_review: provisional` (owner sign-off)                                                              |
 | 4   | OpenAPI 3.1 skeleton + PostgreSQL schema v0                                 | `api/openapi.yaml`, `db/schema_v0.sql`                   | done; lint clean; schema applied in PGlite in tests                                                                 |
 | 5   | CI/CD + three environments                                                  | `.github/workflows/ci.yml`                               | CI written but **never run** (no GitHub remote). **Deploy and environments not started**: cloud provider not chosen |
 | 6   | Security baseline + data retention                                          | `docs/security-baseline.md`, `docs/data-retention.md`    | draft                                                                                                               |
@@ -16,10 +22,24 @@
 - [ ] **Three engine POCs passed, or downgrade decision in an ADR**
   - [x] Tarot: chi-square α=0.01 over 1,000 draws on all positions; reversal rate; reproducible replay
   - [x] Astrology: `@gitstrology/engine` **fails** (Moon up to 8.1°); `astronomy-engine` **passes** (≤0.005°). ADR-0001 proposes the switch; needs sign-off
-  - [ ] Bazi: engine, time policy (ADR-0002) and 节气 precision (≤1.6 min, 1900–2100) done; **0/50 golden cases**. These need an authoritative 排盘 tool and a named checker (`npm run poc:bazi-golden`)
+  - [~] Bazi: engine, time policy (ADR-0002) and 节气 precision (≤1.6 min, 1900–2100) done. **Golden cases deferred** (0/50) by owner decision 2026-10-26
 - [ ] ChartFact schema signed off by backend, client and 算法
-- [ ] Compliance rules confirmed by legal (US/GB/AU/CA minimum)
+- [~] Compliance rules: **provisionally approved by the product owner** 2026-10-26; formal legal review deferred
 - [ ] CI/CD build + deploy + tests green once on staging
+
+`[~]` = waived for now by the product owner; still required before launch.
+
+## Deferred items (must close before the first public launch)
+
+| Item                                                               | What closes it                                                                                                                  | How to check                                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 50 authoritative 八字 golden cases                                 | Cases from a named 排盘 tool in `test/fixtures/bazi-golden.json`, with tool settings recorded (真太阳时, 子时流派, 大运 method) | `npm run poc:bazi-golden` exits 0                                            |
+| Formal legal review (US/GB/AU/CA minimum, then each launch region) | Counsel signs off on `prohibited_patterns.yaml`, `geo_rule_matrix.json`, `ai_disclosure_spec.md` and the retention policy       | Set `legal_review: approved` per region in `compliance/geo_rule_matrix.json` |
+
+Risk accepted until then: 八字 results are verified by properties and against
+Swiss Ephemeris (节气, equation of time), but not yet case-by-case against an
+established tool. The compliance rules reflect the plan documents plus our own
+fixes, not counsel's advice.
 
 ## Local harness (2026-10-25)
 

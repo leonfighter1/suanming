@@ -40,7 +40,10 @@
         "properties": {
           "name": { "type": "string" },
           "phase": { "type": "integer", "minimum": 0, "maximum": 4 },
-          "legal_review": { "enum": ["pending", "approved"] },
+          "legal_review": {
+            "description": "provisional = product-owner sign-off pending formal legal review",
+            "enum": ["pending", "provisional", "approved"]
+          },
           "service_available": { "type": "boolean" },
           "locales": {
             "type": "array",

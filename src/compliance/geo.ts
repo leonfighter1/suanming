@@ -4,7 +4,8 @@ export interface RegionRule {
   name: string;
   phase: number;
   service_available: boolean;
-  legal_review: "pending" | "approved";
+  /** provisional = product-owner sign-off (2026-10-26); formal legal review still to come. */
+  legal_review: "pending" | "provisional" | "approved";
   locales: string[];
   rule_groups: string[];
   systems: Record<string, { available: boolean; entry_weight: number }>;
