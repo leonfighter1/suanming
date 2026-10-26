@@ -35,14 +35,38 @@ export interface BaziInput {
     ziHourSect?: 1 | 2;
     /** First 流年 year listed. Default: the year of ctx.now(). */
     liunianFrom?: number;
+    /**
+     * How the user entered the birth moment. Doesn't change the computation;
+     * it's recorded in facts.input_basis so the UI and the AI know the precision.
+     */
+    inputBasis?: InputBasis;
   };
 }
 
+export interface InputBasis {
+  date: "gregorian" | "lunar";
+  time: "exact" | "shichen";
+  /** The 時辰 branch the user picked, when time = shichen. */
+  shichen?: string;
+}
+
 type Normalized = Required<Omit<BaziInput, "options">> & {
-  options: Required<Omit<NonNullable<BaziInput["options"]>, "liunianFrom">> & {
+  options: Required<Omit<NonNullable<BaziInput["options"]>, "liunianFrom" | "inputBasis">> & {
     liunianFrom?: number;
+    inputBasis: InputBasis;
   };
 };
+
+const ZHI_ORDER = "子丑寅卯辰巳午未申酉戌亥";
+
+function normalizeInputBasis(b: InputBasis | undefined): InputBasis {
+  const date = b?.date === "lunar" ? "lunar" : "gregorian";
+  if (b?.time !== "shichen") return { date, time: "exact" };
+  if (!b.shichen || !ZHI_ORDER.includes(b.shichen) || b.shichen.length !== 1) {
+    throw new Error("inputBasis.shichen must be one 地支 when time is shichen");
+  }
+  return { date, time: "shichen", shichen: b.shichen };
+}
 
 export const LIUNIAN_YEARS = 10;
 
@@ -60,6 +84,7 @@ export function normalizeBaziInput(input: BaziInput): Normalized {
       ...(input.options?.liunianFrom !== undefined && {
         liunianFrom: input.options.liunianFrom,
       }),
+      inputBasis: normalizeInputBasis(input.options?.inputBasis),
     },
   };
 }
@@ -211,6 +236,13 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     },
     pillars: natal,
     lunar: lunarDate(civil.y, civil.m, civil.d),
+    input_basis: {
+      ...input.options.inputBasis,
+      // A 時辰 picked by the clock can land in the neighbouring one after 真太陽時.
+      ...(input.options.inputBasis.time === "shichen" && {
+        shichen_after_correction: hour.zhi,
+      }),
+    },
     day_master: {
       gan: day.gan,
       wuxing: GAN_WUXING[day.gan]!,
@@ -260,6 +292,11 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       note: "三日折一年，分钟级换算 (lunar-javascript sect 2)",
     },
     {
+      path: "/input_basis",
+      source_level: "derived",
+      note: "用户输入方式：公历/农历日期，精确时间/时辰（时辰取中点；时柱只精确到两小时）",
+    },
+    {
       path: "/lunar",
       source_level: "derived",
       note: "农历按出生地民用日期换算（寿星天文历）；农历年以春节为界，八字年柱以立春为界",
@@ -291,6 +328,84 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     facts,
     provenance,
   };
+}
+
+/** Thrown for a 農曆 date that doesn't exist (e.g. a leap month the year lacks). */
+export class CalendarInputError extends Error {}
+
+/** The months of a 農曆 year, in order, including its leap month if any. */
+export function lunarMonths(year: number) {
+  const ms = (
+    lunar as unknown as {
+      LunarYear: {
+        fromYear(y: number): {
+          getMonthsInYear(): { getMonth(): number; getDayCount(): number; isLeap(): boolean }[];
+        };
+      };
+    }
+  ).LunarYear.fromYear(year).getMonthsInYear();
+  return ms.map((m) => {
+    const month = Math.abs(m.getMonth());
+    const leap = m.isLeap();
+    return { month, is_leap: leap, days: m.getDayCount(), name: lunarMonthName(month, leap) };
+  });
+}
+
+const MONTH_ZH = ["正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "冬", "腊"];
+const lunarMonthName = (m: number, leap: boolean) => `${leap ? "闰" : ""}${MONTH_ZH[m - 1]}月`;
+
+/** 公曆 date of a 農曆 date. */
+export function lunarToSolar(year: number, month: number, day: number, leap: boolean) {
+  const info = lunarMonths(year).find((m) => m.month === month && m.is_leap === leap);
+  if (!info)
+    throw new CalendarInputError(`${year} has no ${leap ? "leap " : ""}lunar month ${month}`);
+  if (!(day >= 1 && day <= info.days)) {
+    throw new CalendarInputError(`lunar ${year}-${leap ? "L" : ""}${month} has ${info.days} days`);
+  }
+  const s = (
+    lunar as unknown as {
+      Lunar: { fromYmd(y: number, m: number, d: number): { getSolar(): { toYmd(): string } } };
+    }
+  ).Lunar.fromYmd(year, leap ? -month : month, day).getSolar();
+  return s.toYmd();
+}
+
+/**
+ * The 時辰 of a civil date with their 干支, for time pickers. 子時 straddles
+ * midnight, so it is split: 早子 (00:00–00:59, this day's 子時) and 晚子
+ * (23:00–23:59, the next day's 子時). `mid` is the time a pick resolves to.
+ */
+export function shichenOptions(y: number, m: number, d: number) {
+  const zhi = "子丑寅卯辰巳午未申酉戌亥";
+  const slots = [
+    { key: "zi_early", zhi: "子", start: "00:00", end: "00:59", mid: [0, 30] },
+    ...Array.from({ length: 11 }, (_, i) => {
+      const h = 1 + i * 2; // 丑 01:00–02:59 … 亥 21:00–22:59
+      const p = (n: number) => String(n).padStart(2, "0");
+      return {
+        key: zhi[i + 1]!,
+        zhi: zhi[i + 1]!,
+        start: `${p(h)}:00`,
+        end: `${p(h + 1)}:59`,
+        mid: [h + 1, 0],
+      };
+    }),
+    { key: "zi_late", zhi: "子", start: "23:00", end: "23:59", mid: [23, 30] },
+  ];
+  return slots.map((s) => {
+    const [h, mi] = s.mid as [number, number];
+    const l = Solar.fromYmdHms(y, m, d, h, mi, 0).getLunar() as unknown as {
+      getTimeInGanZhi(): string;
+    };
+    return {
+      key: s.key,
+      zhi: s.zhi,
+      ganzhi: l.getTimeInGanZhi(),
+      start: s.start,
+      end: s.end,
+      mid: `${String(h).padStart(2, "0")}:${String(mi).padStart(2, "0")}`,
+    };
+  });
 }
 
 /**

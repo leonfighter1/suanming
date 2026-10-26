@@ -68,7 +68,7 @@ describe("db/migrations/001_phase1_ai.sql", () => {
       );
       const h = "a".repeat(64);
       await db.query(
-        "INSERT INTO prompt_versions (id, agent, version, body, sha256, active) VALUES ('narrative@1','narrative',1,'x',$1,true)",
+        "INSERT INTO prompt_versions (id, agent, version, body, sha256, active) VALUES ('narrative@2','narrative',1,'x',$1,true)",
         [h],
       );
       await expect(

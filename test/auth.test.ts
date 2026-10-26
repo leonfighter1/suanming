@@ -266,3 +266,18 @@ describe("DELETE /v1/account", () => {
     expect(await store.getReport(r.report_id)).toBeUndefined();
   });
 });
+
+describe("dev accounts", () => {
+  it("admin / admin can sign in after seeding; seeding is refused outside dev mode", async () => {
+    const { seedDevAccounts } = await import("../src/service/runtime.js");
+    await expect(seedDevAccounts(auth, false)).rejects.toThrow(/dev mode/);
+    await seedDevAccounts(auth, true);
+    await seedDevAccounts(auth, true); // idempotent
+    const res = await post("/v1/auth/login", { email: "admin", password: "admin" });
+    expect(res.status).toBe(200);
+    const me = await (await authed((await res.json()).access_token, "/v1/me")).json();
+    expect(me).toMatchObject({ email: "admin", country: "HK" });
+    // Normal registration rules still apply to everyone else.
+    expect((await register("admin2", "admin")).status).toBe(400);
+  });
+});

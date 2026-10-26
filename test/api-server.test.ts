@@ -73,7 +73,7 @@ describe("v1 API", () => {
       "wuxing",
       "health",
     ]);
-    expect(view.ai_disclosure.prompt_version).toBe("narrative@1,action@1,guard@1");
+    expect(view.ai_disclosure.prompt_version).toBe("narrative@2,action@1,guard@1");
     // internal details never reach the client
     for (const k of ["draft", "agents", "compliance"]) expect(view).not.toHaveProperty(k);
   });
@@ -239,5 +239,38 @@ describe("history and live progress", () => {
     expect(done.status).toBe("passed");
     expect(done).not.toHaveProperty("progress");
     await new Promise<void>((r) => s.close(() => r()));
+  });
+});
+
+describe("calendar endpoints for 農曆 / 時辰 pickers", () => {
+  it("lunar-months, solar conversion and 時辰 list", async () => {
+    const months = await (await fetch(base + "/v1/calendar/lunar-months?year=2023")).json();
+    expect(months.months.map((m: { name: string }) => m.name).slice(0, 4)).toEqual([
+      "正月",
+      "二月",
+      "闰二月",
+      "三月",
+    ]);
+    const solar = await (
+      await fetch(base + "/v1/calendar/solar?year=2023&month=2&day=1&leap=true")
+    ).json();
+    expect(solar).toMatchObject({
+      date: "2023-03-22",
+      lunar: { month_name: "闰二月", day_name: "初一" },
+    });
+    expect(
+      (await fetch(base + "/v1/calendar/solar?year=2024&month=2&day=1&leap=true")).status,
+    ).toBe(400);
+    const day = await (await fetch(base + "/v1/calendar/lunar?date=1990-03-15")).json();
+    expect(day.shichen).toHaveLength(13);
+    expect(day.shichen.find((s: { zhi: string }) => s.zhi === "未").ganzhi).toBe("辛未");
+  });
+
+  it("bad inputBasis is a 400, not a 500", async () => {
+    const res = await post("/v1/charts", {
+      ...bazi,
+      options: { inputBasis: { date: "gregorian", time: "shichen", shichen: "X" } },
+    });
+    expect(res.status).toBe(400);
   });
 });

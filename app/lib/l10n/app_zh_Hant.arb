@@ -130,5 +130,11 @@
   "chartOf": "{name} 的命盤",
   "greeting": "你好，{name}",
   "reportTitle": "命理大師 AI 解讀",
-  "openChart": "查看命盤"
+  "openChart": "查看命盤",
+  "timeExact": "精確時間",
+  "timeShichen": "時辰",
+  "lunarYear": "農曆年",
+  "lunarMonth": "月",
+  "lunarDay": "日",
+  "shichenNote": "只知道時辰：時柱只精確到兩小時，相關解讀會標明為參考。"
 }

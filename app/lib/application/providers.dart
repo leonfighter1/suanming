@@ -113,8 +113,37 @@ BirthProfile sampleProfile(String name) => BirthProfile(
       cityKey: 'hk',
     );
 
-/// Test accounts get a ready-made default profile so testing starts at once.
-bool isTestAccount(AppUser u) => (u.email ?? '').toLowerCase().startsWith('test');
+/// Test accounts get ready-made profiles so testing starts at once.
+bool isTestAccount(AppUser u) {
+  final e = (u.email ?? '').toLowerCase();
+  return e.startsWith('test') || e == 'admin';
+}
+
+/// Seeded profiles per test account (all editable).
+List<BirthProfile> testProfiles(AppUser u) => (u.email ?? '').toLowerCase() == 'admin'
+    ? [
+        BirthProfile(
+          id: 'default',
+          name: '管理員',
+          gender: 'female',
+          birthLocal: DateTime(1988, 8, 8, 8),
+          cityKey: 'taipei',
+          timeMode: 'shichen',
+          shichen: '辰',
+        ),
+        BirthProfile(
+          id: 'family',
+          name: '測試家人',
+          gender: 'male',
+          // 農曆 1960 正月初一 = 1960-01-28
+          birthLocal: DateTime(1960, 1, 28, 12),
+          cityKey: 'hk',
+          dateMode: 'lunar',
+          timeMode: 'shichen',
+          shichen: '午',
+        ),
+      ]
+    : [sampleProfile('測試用戶')];
 
 class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
   String? _userId;
@@ -127,7 +156,7 @@ class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
     if (user == null) return const ProfileBook();
     var book = ProfileBook.decode(await _store.read(user.id));
     if (book.profiles.isEmpty && isTestAccount(user)) {
-      book = ProfileBook(profiles: [sampleProfile('測試用戶')], defaultId: 'default');
+      book = ProfileBook(profiles: testProfiles(user), defaultId: 'default');
       await _store.write(user.id, book.encode());
     }
     return book;
@@ -168,9 +197,14 @@ final historyProvider = FutureProvider.autoDispose<List<HistoryItem>>(
   (ref) => ref.watch(apiClientProvider).listReports(),
 );
 
-/// 農曆 equivalent of a date (y-m-d only), for the date pickers.
-final lunarPreviewProvider = FutureProvider.autoDispose.family<LunarDate, DateTime>(
-  (ref, d) => ref.watch(apiClientProvider).lunarDate(DateTime(d.year, d.month, d.day)),
+/// 農曆 equivalent and 時辰 list of a date (y-m-d only), for the pickers.
+final calendarDayProvider = FutureProvider.autoDispose.family<CalendarDay, DateTime>(
+  (ref, d) => ref.watch(apiClientProvider).calendarDay(DateTime(d.year, d.month, d.day)),
+);
+
+/// Months of a 農曆 year (incl. 閏月), for the 農曆 date picker.
+final lunarMonthsProvider = FutureProvider.autoDispose.family<List<LunarMonthInfo>, int>(
+  (ref, year) => ref.watch(apiClientProvider).lunarMonths(year),
 );
 
 final pollIntervalProvider = Provider<Duration>((ref) => AppConfig.pollInterval);

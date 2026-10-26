@@ -55,7 +55,7 @@ describe("generateReport — happy path", () => {
     expect(r.layers!.interpretation.map((s) => s.topic)).toEqual(r.topics);
     expect(r.layers!.actions.length).toBeGreaterThan(0);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
-    expect(r.ai_disclosure.prompt_version).toBe("narrative@1,action@1,guard@1");
+    expect(r.ai_disclosure.prompt_version).toBe("narrative@2,action@1,guard@1");
     expect(r.ai_disclosure.model).toContain("deepseek-v4-pro");
     expect(mock.calls.map((c) => c.agent)).toEqual(["narrative", "action", "guard"]);
   });
@@ -299,4 +299,31 @@ it("facts layer shows the 農曆 date in the reader's script", async () => {
   expect(factsLayer(chart, "zh-Hant", 2026)[1]).toBe("農曆：庚午年二月十九（生肖馬）");
   expect(factsLayer(chart, "zh-Hans", 2026)[1]).toBe("农历：庚午年二月十九（生肖马）");
   expect(factsLayer(chart, "en", 2026)[1]).toBe("Lunar date: month 2, day 19, 庚午 year (Horse)");
+});
+
+it("facts layer and narrative prompt carry the 農曆 / 時辰 input basis to the AI", async () => {
+  const { factsLayer, MockProvider: M, generateReport: gen } = await import("../src/ai/index.js");
+  const shichenChart = computeBazi(
+    {
+      local: "1990-03-15T14:00",
+      timezone: "Asia/Hong_Kong",
+      longitude: 114.17,
+      gender: "male",
+      options: { liunianFrom: 2026, inputBasis: { date: "lunar", time: "shichen", shichen: "未" } },
+    },
+    { digestPepper: PEPPER, now: FIXED_NOW },
+  );
+  const lines = factsLayer(shichenChart, "zh-Hant", 2026);
+  expect(lines).toContain("出生日期：依農曆輸入");
+  expect(lines).toContain("出生時間：依時辰輸入（未時），時柱只精確到兩小時");
+  const mock = new M();
+  await gen(
+    shichenChart,
+    { locale: "zh-Hant", country: "HK", topics: ["personality"] },
+    { providers: { deepseek: mock }, now: FIXED_NOW },
+  );
+  const narrative = mock.calls.find((c) => c.agent === "narrative")!;
+  expect(narrative.system).toContain("input_basis");
+  expect(narrative.user).toContain('"time": "shichen"');
+  expect(narrative.user).toContain('"shichen": "未"');
 });

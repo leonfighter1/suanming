@@ -413,6 +413,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get openChart => '查看命盘';
+
+  @override
+  String get timeExact => '精确时间';
+
+  @override
+  String get timeShichen => '时辰';
+
+  @override
+  String get lunarYear => '农历年';
+
+  @override
+  String get lunarMonth => '月';
+
+  @override
+  String get lunarDay => '日';
+
+  @override
+  String get shichenNote => '只知道时辰：时柱只精确到两小时，相关解读会标明为参考。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -823,4 +841,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get openChart => '查看命盤';
+
+  @override
+  String get timeExact => '精確時間';
+
+  @override
+  String get timeShichen => '時辰';
+
+  @override
+  String get lunarYear => '農曆年';
+
+  @override
+  String get lunarMonth => '月';
+
+  @override
+  String get lunarDay => '日';
+
+  @override
+  String get shichenNote => '只知道時辰：時柱只精確到兩小時，相關解讀會標明為參考。';
 }

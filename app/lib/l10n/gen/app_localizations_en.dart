@@ -425,4 +425,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openChart => 'Open chart';
+
+  @override
+  String get timeExact => 'Exact time';
+
+  @override
+  String get timeShichen => 'Shichen (2-hour period)';
+
+  @override
+  String get lunarYear => 'Lunar year';
+
+  @override
+  String get lunarMonth => 'Month';
+
+  @override
+  String get lunarDay => 'Day';
+
+  @override
+  String get shichenNote =>
+      'The hour is known to a two-hour period; readings that rely on the hour pillar are approximate.';
 }

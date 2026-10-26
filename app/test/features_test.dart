@@ -104,6 +104,65 @@ void main() {
     expect(find.byKey(const Key('report-menu')), findsOneWidget);
   });
 
+  Map chartRequest(FakeApi api) =>
+      jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body) as Map;
+
+  testWidgets('農曆 date input: pick a 農曆 month, it converts to 公曆, and the basis reaches the API', (tester) async {
+    final api = FakeApi(email: 'test@mingli.local');
+    await tester.pumpWidget(testApp(api));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('entry-bazi')));
+    await settle(tester);
+    await tester.tap(find.text('農曆').first); // date-mode segment
+    await settle(tester);
+    expect(find.byKey(const Key('lunar-year')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('lunar-month-1990')));
+    await settle(tester);
+    await tester.tap(find.text('三月').last);
+    await settle(tester);
+    final solarReq = api.requests.lastWhere((r) => r.url.path == '/v1/calendar/solar');
+    expect(solarReq.url.queryParameters, {'year': '1990', 'month': '3', 'day': '19', 'leap': 'false'});
+    expect(find.text('公曆 1990-04-14'), findsOneWidget);
+
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
+    await settle(tester);
+    final body = chartRequest(api);
+    expect(body['local'], '1990-04-14T14:30');
+    expect((body['options'] as Map)['inputBasis'], {'date': 'lunar', 'time': 'exact'});
+  });
+
+  testWidgets('時辰 input: chips show 干支, picking one sets the midpoint, and the basis reaches the API', (tester) async {
+    final api = FakeApi(email: 'test@mingli.local');
+    await tester.pumpWidget(testApp(api));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('entry-bazi')));
+    await settle(tester);
+    await scrollAndTap(tester, find.text('時辰').first); // time-mode segment
+    await settle(tester);
+    expect(find.text('辛未時'), findsOneWidget);
+    expect(find.text('甲子時'), findsOneWidget); // 早子
+    expect(find.text('丙子時'), findsOneWidget); // 晚子
+    await scrollAndTap(tester, find.byKey(const Key('shichen-未')));
+    await settle(tester);
+
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
+    await settle(tester);
+    final body = chartRequest(api);
+    expect(body['local'], '1990-03-15T14:00');
+    expect((body['options'] as Map)['inputBasis'], {'date': 'gregorian', 'time': 'shichen', 'shichen': '未'});
+  });
+
+  testWidgets('admin gets two editable test profiles', (tester) async {
+    final profiles = InMemoryProfileStore();
+    await tester.pumpWidget(testApp(FakeApi(email: 'admin'), profiles: profiles));
+    await settle(tester);
+    expect(find.text('你好，管理員'), findsOneWidget);
+    final book = ProfileBook.decode(profiles.data['u1']);
+    expect(book.profiles.map((p) => p.name), ['管理員', '測試家人']);
+    expect(book.profiles[1].inputBasis, {'date': 'lunar', 'time': 'shichen', 'shichen': '午'});
+  });
+
   test('export always carries the AI label and the disclaimer', () {
     final r = ReportView.fromJson(fixture('report_passed'));
     final md = exportReportMarkdown(

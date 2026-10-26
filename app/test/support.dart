@@ -68,8 +68,21 @@ class FakeApi {
   late final client = MockClient((req) async {
     requests.add(req);
     final path = req.url.path;
+    // Calendar data generated from the real server functions (calendar.json).
+    final cal = fixture('calendar');
+    final q = req.url.queryParameters;
     if (req.method == 'GET' && path == '/v1/calendar/lunar') {
-      return _json({'date': req.url.queryParameters['date'], 'lunar': fixture('chart_bazi')['chart_fact']['facts']['lunar']}, 200);
+      return _json({'date': q['date'], ...(cal['day'] as Map<String, dynamic>)}, 200);
+    }
+    if (req.method == 'GET' && path == '/v1/calendar/lunar-months') {
+      final months = (cal['months'] as Map)[q['year']] ?? (cal['months'] as Map)['1990'];
+      return _json({'year': int.parse(q['year']!), 'months': months}, 200);
+    }
+    if (req.method == 'GET' && path == '/v1/calendar/solar') {
+      final date = (cal['solar'] as Map)['${q['year']}-${q['month']}-${q['day']}-${q['leap']}'];
+      return date == null
+          ? _json({'title': 'Invalid request', 'status': 400}, 400)
+          : _json({'date': date, 'lunar': (cal['day'] as Map)['lunar']}, 200);
     }
     switch ((req.method, path)) {
       case ('POST', '/v1/auth/register'):

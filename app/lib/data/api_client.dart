@@ -122,11 +122,23 @@ class ApiClient {
     return (j['items'] as List).cast<Json>().map(HistoryItem.fromJson).toList();
   }
 
-  /// 農曆 equivalent of a Gregorian date (public endpoint, no sign-in).
-  Future<LunarDate> lunarDate(DateTime d) async {
-    final ymd = '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-    final j = await _send('GET', '/v1/calendar/lunar?date=$ymd');
-    return LunarDate.fromJson(j['lunar'] as Json);
+  static String ymd(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// 農曆 equivalent and the 時辰 (with 干支) of a 公曆 date. Public, no sign-in.
+  Future<CalendarDay> calendarDay(DateTime d) async =>
+      CalendarDay.fromJson(await _send('GET', '/v1/calendar/lunar?date=${ymd(d)}'));
+
+  /// Months of a 農曆 year, including its leap month.
+  Future<List<LunarMonthInfo>> lunarMonths(int year) async {
+    final j = await _send('GET', '/v1/calendar/lunar-months?year=$year');
+    return (j['months'] as List).cast<Json>().map(LunarMonthInfo.fromJson).toList();
+  }
+
+  /// 公曆 date of a 農曆 date.
+  Future<DateTime> lunarToSolar(int year, int month, int day, {required bool leap}) async {
+    final j = await _send('GET', '/v1/calendar/solar?year=$year&month=$month&day=$day&leap=$leap');
+    return DateTime.parse(j['date'] as String);
   }
 
   // ---- transport ----

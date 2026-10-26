@@ -172,5 +172,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "timeExact": "Exact time",
+  "timeShichen": "Shichen (2-hour period)",
+  "lunarYear": "Lunar year",
+  "lunarMonth": "Month",
+  "lunarDay": "Day",
+  "shichenNote": "The hour is known to a two-hour period; readings that rely on the hour pillar are approximate."
 }

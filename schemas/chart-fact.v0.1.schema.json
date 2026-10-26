@@ -112,6 +112,7 @@
         "time_basis",
         "pillars",
         "lunar",
+        "input_basis",
         "day_master",
         "month_command",
         "wuxing_count",
@@ -120,6 +121,18 @@
         "liunian"
       ],
       "properties": {
+        "input_basis": {
+          "description": "How the birth moment was entered. time=shichen means the hour is known to a 2-hour window.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["date", "time"],
+          "properties": {
+            "date": { "enum": ["gregorian", "lunar"] },
+            "time": { "enum": ["exact", "shichen"] },
+            "shichen": { "$ref": "#/$defs/zhi" },
+            "shichen_after_correction": { "$ref": "#/$defs/zhi" }
+          }
+        },
         "lunar": {
           "description": "農曆 date of the civil birth date. The 農曆 year turns at 春節, the year pillar at 立春.",
           "type": "object",

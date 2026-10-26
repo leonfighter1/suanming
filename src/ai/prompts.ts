@@ -46,6 +46,13 @@ Topic rules:
 
 Write only the topics requested, 1–3 paragraphs each, at most about 160 Chinese characters or 110 English words per paragraph. Use the protected terms in <glossary> exactly as given.`;
 
+/** v2 (2026-10-26): users can enter the birth date in 農曆 and the time as a 時辰. */
+const NARRATIVE_V2 = `${NARRATIVE_V1}
+
+Input precision: chart_facts.input_basis says how the birth moment was entered.
+- time = "shichen": the hour is known only to a two-hour window (the 時辰 in input_basis.shichen). Say once, briefly, that hour-pillar (時柱) readings rest on that window, and don't build strong claims on the hour pillar alone. If shichen_after_correction differs from shichen, mention that 真太陽時 correction moved the hour into the neighbouring 時辰.
+- date = "lunar": the user knows their 農曆 birthday; you may refer to it (chart_facts.lunar) when it helps the reader.`;
+
 const ACTION_V1 = `You write the action layer of a 命理 report: small, concrete things the reader can do, based on an interpretation that has already been written.
 
 Input: <interpretation> (sections by topic) and <chart_summary>.
@@ -78,7 +85,7 @@ function version(agent: string, n: number, system: string): PromptVersion {
 }
 
 export const PROMPTS = {
-  narrative: version("narrative", 1, NARRATIVE_V1),
+  narrative: version("narrative", 2, NARRATIVE_V2),
   action: version("action", 1, ACTION_V1),
   guard: version("guard", 1, GUARD_V1),
 } as const;

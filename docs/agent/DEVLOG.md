@@ -2,6 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (f): 農曆 date input, 時辰 time input, admin test account
+
+- Date: 公曆 / 農曆 switch; 農曆 year → month (incl. 閏月, only months that exist) → day, converted on the server (`GET /v1/calendar/lunar-months`, `GET /v1/calendar/solar`).
+- Time: 精確時間 / 時辰 switch; 13 chips with the day's 干支 (早子 00:00–00:59, 丑 … 亥, 晚子 23:00–23:59, from `GET /v1/calendar/lunar` → `shichen`); a pick sets the 時辰 midpoint.
+- To the AI: `facts.input_basis` {date, time, shichen, shichen_after_correction}; facts-layer lines; prompt `narrative@2` tells the model the hour is a two-hour window and to mention a 真太陽時 shift.
+- Dev accounts seeded on each dev-mode API start: `admin` / `admin` (bypasses sign-up rules; refused outside dev mode) and `test@mingli.local`. In the app, admin gets 管理員 (台北, 辰時) and 測試家人 (農曆 1960 正月初一, 午時).
+- Harness: PASS (backend 161 tests; app analyze 0 issues, 21 tests, build web).
+
 ## 2026-10-26 (e): profiles, 農曆, live AI progress, history, export, UI redesign
 
 - Requested by the product owner after the first local test.

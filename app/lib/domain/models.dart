@@ -93,6 +93,7 @@ class Liunian {
 
 class LunarDate {
   const LunarDate({
+    required this.year,
     required this.yearGanzhi,
     required this.shengxiao,
     required this.month,
@@ -103,6 +104,7 @@ class LunarDate {
   });
 
   factory LunarDate.fromJson(Json j) => LunarDate(
+        year: j['year'] as int,
         yearGanzhi: j['year_ganzhi'] as String,
         shengxiao: j['shengxiao'] as String,
         month: j['month'] as int,
@@ -112,6 +114,8 @@ class LunarDate {
         dayName: j['day_name'] as String,
       );
 
+  /// 農曆 year number (turns at 春節).
+  final int year;
   final String yearGanzhi;
   final String shengxiao;
   final int month;
@@ -331,6 +335,59 @@ class ReportView {
   final DateTime? createdAt;
 
   bool get isTerminal => status != 'pending';
+}
+
+/// One 時辰 of a day with its 干支 (GET /v1/calendar/lunar → shichen).
+class ShichenOption {
+  const ShichenOption({required this.key, required this.zhi, required this.ganzhi, required this.start, required this.end, required this.mid});
+
+  factory ShichenOption.fromJson(Json j) => ShichenOption(
+        key: j['key'] as String,
+        zhi: j['zhi'] as String,
+        ganzhi: j['ganzhi'] as String,
+        start: j['start'] as String,
+        end: j['end'] as String,
+        mid: j['mid'] as String,
+      );
+
+  /// zi_early | 丑 … 亥 | zi_late
+  final String key;
+  final String zhi;
+  final String ganzhi;
+  final String start;
+  final String end;
+
+  /// HH:mm the pick resolves to.
+  final String mid;
+
+  int get midHour => int.parse(mid.substring(0, 2));
+  int get midMinute => int.parse(mid.substring(3, 5));
+}
+
+class CalendarDay {
+  const CalendarDay(this.lunar, this.shichen);
+  factory CalendarDay.fromJson(Json j) => CalendarDay(
+        LunarDate.fromJson(j['lunar'] as Json),
+        _list(j['shichen'], ShichenOption.fromJson),
+      );
+  final LunarDate lunar;
+  final List<ShichenOption> shichen;
+}
+
+class LunarMonthInfo {
+  const LunarMonthInfo({required this.month, required this.isLeap, required this.days, required this.name});
+  factory LunarMonthInfo.fromJson(Json j) => LunarMonthInfo(
+        month: j['month'] as int,
+        isLeap: j['is_leap'] as bool,
+        days: j['days'] as int,
+        name: j['name'] as String,
+      );
+  final int month;
+  final bool isLeap;
+  final int days;
+
+  /// Engine form, e.g. 闰二月 — display through the term table.
+  final String name;
 }
 
 /// One row of GET /v1/reports (history).

@@ -24,7 +24,13 @@ import {
 import { SCHEMA_VERSION, type ChartFact } from "../chart-fact/index.js";
 import { loadGeoMatrix, loadRuleSet, resolveRegion } from "../compliance/index.js";
 import { AuthError, AuthService, publicUser } from "../auth/service.js";
-import { lunarDate } from "../engines/bazi/index.js";
+import {
+  CalendarInputError,
+  lunarDate,
+  lunarMonths,
+  lunarToSolar,
+  shichenOptions,
+} from "../engines/bazi/index.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { upstreamMessage } from "../service/runtime.js";
@@ -236,7 +242,34 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       const valid =
         m && y >= 1900 && y <= 2100 && new Date(Date.UTC(y, mo - 1, d)).getUTCDate() === d;
       if (!valid) throw new InputError("date must be a valid YYYY-MM-DD between 1900 and 2100");
-      return send(res, 200, { date, lunar: lunarDate(y, mo, d) });
+      return send(res, 200, {
+        date,
+        lunar: lunarDate(y, mo, d),
+        shichen: shichenOptions(y, mo, d),
+      });
+    }
+    // 農曆 date pickers: the months of a 農曆 year (incl. 閏月), and 農曆 → 公曆.
+    if (req.method === "GET" && path === "/v1/calendar/lunar-months") {
+      const year = Number(new URL(req.url ?? "/", "http://localhost").searchParams.get("year"));
+      if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+        throw new InputError("year must be an integer between 1900 and 2100");
+      }
+      return send(res, 200, { year, months: lunarMonths(year) });
+    }
+    if (req.method === "GET" && path === "/v1/calendar/solar") {
+      const q = new URL(req.url ?? "/", "http://localhost").searchParams;
+      const [year, month, day] = ["year", "month", "day"].map((k) => Number(q.get(k)));
+      if (![year, month, day].every(Number.isInteger) || year! < 1900 || year! > 2100) {
+        throw new InputError("year, month and day must be integers (year 1900–2100)");
+      }
+      try {
+        const solar = lunarToSolar(year!, month!, day!, q.get("leap") === "true");
+        const [sy, sm, sd] = solar.split("-").map(Number) as [number, number, number];
+        return send(res, 200, { date: solar, lunar: lunarDate(sy, sm, sd) });
+      } catch (e) {
+        if (e instanceof CalendarInputError) throw new InputError(e.message);
+        throw e;
+      }
     }
 
     // ---- auth (no caller yet) ----

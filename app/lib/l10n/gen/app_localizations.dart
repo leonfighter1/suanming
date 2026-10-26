@@ -884,6 +884,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open chart'**
   String get openChart;
+
+  /// No description provided for @timeExact.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact time'**
+  String get timeExact;
+
+  /// No description provided for @timeShichen.
+  ///
+  /// In en, this message translates to:
+  /// **'Shichen (2-hour period)'**
+  String get timeShichen;
+
+  /// No description provided for @lunarYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunar year'**
+  String get lunarYear;
+
+  /// No description provided for @lunarMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get lunarMonth;
+
+  /// No description provided for @lunarDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get lunarDay;
+
+  /// No description provided for @shichenNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The hour is known to a two-hour period; readings that rely on the hour pillar are approximate.'**
+  String get shichenNote;
 }
 
 class _AppLocalizationsDelegate

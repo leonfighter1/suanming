@@ -20,6 +20,12 @@ interface BaziFacts {
     day: number;
     day_name: string;
   };
+  input_basis: {
+    date: "gregorian" | "lunar";
+    time: "exact" | "shichen";
+    shichen?: string;
+    shichen_after_correction?: string;
+  };
   day_master: { gan: string; wuxing: string; yin_yang: string };
   month_command: { zhi: string; wuxing: string };
   wuxing_weighted: { scores: Record<string, number> };
@@ -122,6 +128,33 @@ const BODY_ZH: Record<string, [string, string]> = {
 const zh = (pair: [string, string] | undefined, locale: Locale, en: string) =>
   locale === "en" || !pair ? en : locale === "zh-Hant" ? pair[0] : pair[1];
 
+/** How the birth moment was entered — only when it's not the exact 公曆 default. */
+function inputBasisLines(b: BaziFacts["input_basis"], locale: Locale): string[] {
+  const out: string[] = [];
+  const zh = (hant: string, hans: string, en: string) =>
+    locale === "en" ? en : locale === "zh-Hant" ? hant : hans;
+  const shi = (z: string) => `${z}${term("时", locale)}`;
+  if (b.date === "lunar")
+    out.push(
+      zh(
+        "出生日期：依農曆輸入",
+        "出生日期：依农历输入",
+        "Birth date: entered in the lunar calendar",
+      ),
+    );
+  if (b.time === "shichen" && b.shichen) {
+    const moved = b.shichen_after_correction && b.shichen_after_correction !== b.shichen;
+    out.push(
+      zh(
+        `出生時間：依時辰輸入（${shi(b.shichen)}），時柱只精確到兩小時${moved ? `；經真太陽時校正後落在${shi(b.shichen_after_correction!)}` : ""}`,
+        `出生时间：依时辰输入（${shi(b.shichen)}），时柱只精确到两小时${moved ? `；经真太阳时校正后落在${shi(b.shichen_after_correction!)}` : ""}`,
+        `Birth time: entered as a two-hour period (${b.shichen}${moved ? `; true solar time moves it to ${b.shichen_after_correction}` : ""}), so the hour pillar is approximate`,
+      ),
+    );
+  }
+  return out;
+}
+
 export function factsLayer(chart: ChartFact, locale: Locale, nowYear: number): string[] {
   const t = L[locale];
   const tr = (k: string) => term(k, locale);
@@ -138,6 +171,7 @@ export function factsLayer(chart: ChartFact, locale: Locale, nowYear: number): s
     const lines = [
       `${t.pillars}：${[p.year, p.month, p.day, p.hour].map(gz).join(" ")}`,
       lunarLine,
+      ...inputBasisLines(f.input_basis, locale),
       `${t.dm}：${f.day_master.gan}${tr(f.day_master.wuxing)}（${tr(f.day_master.yin_yang)}）${t.sep}${t.mc}：${f.month_command.zhi}${tr(f.month_command.wuxing)}`,
       `${t.wx}：${Object.entries(f.wuxing_weighted.scores)
         .map(([k, v]) => `${tr(k)} ${v}`)

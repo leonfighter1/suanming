@@ -256,6 +256,28 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * DEV ONLY: create a fixed test account, skipping the email-format and
+   * password-length rules (so `admin` / `admin` works). Callers must only use
+   * this in dev mode; buildAuth refuses outside it. No-op if it exists.
+   */
+  async seedDevUser(u: { login: string; password: string; country: string; locale: Locale }) {
+    const lookup = this.emailLookup(u.login);
+    if (await this.users.byEmailLookup(lookup)) return;
+    const ts = this.now().toISOString();
+    await this.users.put({
+      id: randomUUID(),
+      email: u.login,
+      email_lookup: lookup,
+      password_hash: await hashPassword(u.password),
+      social: {},
+      country: u.country,
+      locale: u.locale,
+      age_confirmed_at: ts,
+      created_at: ts,
+    });
+  }
+
   /** Remove the account and revoke every session. Caller purges owned data first. */
   async deleteAccount(userId: string) {
     this.deps.tokens.revokeUser(userId);

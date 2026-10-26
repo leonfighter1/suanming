@@ -7,7 +7,7 @@
       "version": "0.1.0+lunar-javascript.1.7.7"
     },
     "system": "bazi",
-    "input_digest": "hmac-sha256:6c250b1098d74ee19a0b2f3d56e0e2112c52e662bc6dd80b70aab2b681549bd4",
+    "input_digest": "hmac-sha256:ce197bff8f44fe7ef179a977548bea50fa8557dc900bcb525c93f88c4fde394d",
     "rule_versions": {
       "tzdb": "2024b",
       "jieqi_clock": "utc+8"
@@ -95,6 +95,10 @@
         "month_name": "二月",
         "day": 19,
         "day_name": "十九"
+      },
+      "input_basis": {
+        "date": "gregorian",
+        "time": "exact"
       },
       "day_master": {
         "gan": "己",
@@ -342,6 +346,11 @@
         "path": "/dayun",
         "source_level": "traditional_text",
         "note": "三日折一年，分钟级换算 (lunar-javascript sect 2)"
+      },
+      {
+        "path": "/input_basis",
+        "source_level": "derived",
+        "note": "用户输入方式：公历/农历日期，精确时间/时辰（时辰取中点；时柱只精确到两小时）"
       },
       {
         "path": "/lunar",

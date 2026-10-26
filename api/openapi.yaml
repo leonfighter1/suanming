@@ -345,6 +345,56 @@ paths:
                   lunar: { type: object }
         "400": { $ref: "#/components/responses/Problem" }
 
+  /v1/calendar/lunar-months:
+    get:
+      tags: [charts]
+      operationId: lunarMonths
+      summary: Months of a 農曆 year, including its leap month (public)
+      security: []
+      parameters:
+        - {
+            name: year,
+            in: query,
+            required: true,
+            schema: { type: integer, minimum: 1900, maximum: 2100 },
+          }
+      responses:
+        "200":
+          description: "{year, months: [{month, is_leap, days, name}]}"
+          content:
+            application/json:
+              schema: { type: object }
+        "400": { $ref: "#/components/responses/Problem" }
+
+  /v1/calendar/solar:
+    get:
+      tags: [charts]
+      operationId: lunarToSolar
+      summary: 公曆 date of a 農曆 date (public)
+      security: []
+      parameters:
+        - { name: year, in: query, required: true, schema: { type: integer } }
+        - {
+            name: month,
+            in: query,
+            required: true,
+            schema: { type: integer, minimum: 1, maximum: 12 },
+          }
+        - {
+            name: day,
+            in: query,
+            required: true,
+            schema: { type: integer, minimum: 1, maximum: 30 },
+          }
+        - { name: leap, in: query, schema: { type: boolean, default: false } }
+      responses:
+        "200":
+          description: "{date, lunar}"
+          content:
+            application/json:
+              schema: { type: object }
+        "400": { $ref: "#/components/responses/Problem" }
+
   /v1/charts/{chart_id}:
     get:
       tags: [charts]
@@ -508,6 +558,17 @@ components:
               properties:
                 trueSolarTime: { type: boolean, default: true }
                 ziHourSect: { type: integer, enum: [1, 2], default: 2 }
+                inputBasis:
+                  description: |
+                    How the user entered the birth moment (recorded in facts.input_basis
+                    and passed to the AI). time=shichen: `local` is the 時辰 midpoint.
+                  type: object
+                  additionalProperties: false
+                  required: [date, time]
+                  properties:
+                    date: { type: string, enum: [gregorian, lunar] }
+                    time: { type: string, enum: [exact, shichen] }
+                    shichen: { type: string, description: "地支 of the chosen 時辰" }
 
     TarotChartRequest:
       type: object

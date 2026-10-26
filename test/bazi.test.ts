@@ -240,3 +240,60 @@ describe("農曆 對照", () => {
     expect(lunarDate(2024, 2, 5).year_ganzhi).toBe("癸卯");
   });
 });
+
+describe("農曆 input and 時辰 options", () => {
+  it("農曆 → 公曆, including a leap month, and rejects dates that don't exist", async () => {
+    const { lunarToSolar, lunarMonths, CalendarInputError } =
+      await import("../src/engines/bazi/index.js");
+    expect(lunarToSolar(1990, 2, 19, false)).toBe("1990-03-15");
+    expect(lunarToSolar(2023, 2, 1, true)).toBe("2023-03-22");
+    expect(() => lunarToSolar(2024, 2, 1, true)).toThrow(CalendarInputError); // 2024 has no 閏二月
+    expect(() => lunarToSolar(2023, 3, 30, false)).toThrow(CalendarInputError); // 三月 has 29 days
+    const m2023 = lunarMonths(2023);
+    expect(m2023).toHaveLength(13);
+    expect(m2023[2]).toEqual({ month: 2, is_leap: true, days: 29, name: "闰二月" });
+    expect(m2023[12]!.name).toBe("腊月");
+  });
+
+  it("13 時辰 options with 干支 for the day (早子/晚子 split)", async () => {
+    const { shichenOptions } = await import("../src/engines/bazi/index.js");
+    const s = shichenOptions(1990, 3, 15);
+    expect(s).toHaveLength(13);
+    expect(s[0]).toMatchObject({ key: "zi_early", ganzhi: "甲子", start: "00:00", end: "00:59" });
+    expect(s.find((x) => x.zhi === "午")).toMatchObject({
+      ganzhi: "庚午",
+      start: "11:00",
+      end: "12:59",
+      mid: "12:00",
+    });
+    expect(s.find((x) => x.zhi === "未")!.ganzhi).toBe("辛未");
+    expect(s[12]).toMatchObject({ key: "zi_late", ganzhi: "丙子", start: "23:00" });
+  });
+
+  it("records the input basis and flags a 時辰 moved by true solar time", () => {
+    const f = (o: object) =>
+      computeBazi(
+        {
+          ...base,
+          timezone: "Asia/Shanghai",
+          longitude: 87.6,
+          local: "2023-05-10T14:00",
+          options: o,
+        },
+        ctx,
+      ).facts as unknown as { input_basis: Record<string, string> };
+    expect(f({}).input_basis).toEqual({ date: "gregorian", time: "exact" });
+    // Urumqi: 14:00 civil (未時) is ~11:53 true solar → 午時
+    expect(
+      f({ inputBasis: { date: "lunar", time: "shichen", shichen: "未" } }).input_basis,
+    ).toEqual({
+      date: "lunar",
+      time: "shichen",
+      shichen: "未",
+      shichen_after_correction: "午",
+    });
+    expect(() => f({ inputBasis: { date: "gregorian", time: "shichen", shichen: "X" } })).toThrow(
+      /inputBasis/,
+    );
+  });
+});

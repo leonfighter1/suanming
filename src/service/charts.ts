@@ -4,7 +4,7 @@
  */
 import type { ChartFact } from "../chart-fact/index.js";
 import { computeAstrology } from "../engines/astrology/index.js";
-import { computeBazi } from "../engines/bazi/index.js";
+import { computeBazi, type InputBasis } from "../engines/bazi/index.js";
 import { SPREADS, type SpreadId } from "../engines/tarot/deck.js";
 import { computeTarot } from "../engines/tarot/index.js";
 
@@ -50,7 +50,9 @@ function asInputError<T>(fn: () => T): T {
   } catch (e) {
     if (e instanceof InputError) throw e;
     const msg = e instanceof Error ? e.message : String(e);
-    if (/invalid local datetime|DST gap|out of range|Invalid time zone|timeZone/i.test(msg)) {
+    if (
+      /invalid local datetime|DST gap|out of range|Invalid time zone|timeZone|inputBasis/i.test(msg)
+    ) {
       throw new InputError(msg);
     }
     throw e;
@@ -81,6 +83,7 @@ export function computeChart(raw: unknown, secrets: EngineSecrets, now?: () => D
               trueSolarTime: o.trueSolarTime === undefined ? true : o.trueSolarTime === true,
               ziHourSect: o.ziHourSect === 1 ? 1 : 2,
               ...(o.liunianFrom !== undefined && { liunianFrom: o.liunianFrom as number }),
+              ...(o.inputBasis !== undefined && { inputBasis: o.inputBasis as InputBasis }),
             },
           },
           { digestPepper: secrets.digestPepper, now },

@@ -11,6 +11,9 @@ class BirthProfile {
     required this.birthLocal,
     required this.cityKey,
     this.trueSolarTime = true,
+    this.dateMode = 'gregorian',
+    this.timeMode = 'exact',
+    this.shichen,
   });
 
   factory BirthProfile.fromJson(Map<String, dynamic> j) => BirthProfile(
@@ -20,6 +23,9 @@ class BirthProfile {
         birthLocal: DateTime.parse(j['birth_local'] as String),
         cityKey: j['city'] as String,
         trueSolarTime: j['true_solar_time'] as bool? ?? true,
+        dateMode: j['date_mode'] as String? ?? 'gregorian',
+        timeMode: j['time_mode'] as String? ?? 'exact',
+        shichen: j['shichen'] as String?,
       );
 
   final String id;
@@ -35,6 +41,24 @@ class BirthProfile {
   final String cityKey;
   final bool trueSolarTime;
 
+  /// gregorian | lunar — how the date was entered (birthLocal is always 公曆).
+  final String dateMode;
+
+  /// exact | shichen — with shichen, birthLocal holds the 時辰 midpoint.
+  final String timeMode;
+
+  /// 時辰 key from the server's list: zi_early, 丑 … 亥, zi_late.
+  final String? shichen;
+
+  /// The 地支 of [shichen] (早子/晚子 are both 子).
+  String? get shichenZhi => shichen == null ? null : (shichen!.startsWith('zi_') ? '子' : shichen);
+
+  Map<String, Object?> get inputBasis => {
+        'date': dateMode,
+        'time': timeMode,
+        if (timeMode == 'shichen' && shichenZhi != null) 'shichen': shichenZhi,
+      };
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
@@ -42,6 +66,9 @@ class BirthProfile {
         'birth_local': birthLocal.toIso8601String(),
         'city': cityKey,
         'true_solar_time': trueSolarTime,
+        'date_mode': dateMode,
+        'time_mode': timeMode,
+        'shichen': shichen,
       };
 
   BirthProfile copyWith({
@@ -50,6 +77,9 @@ class BirthProfile {
     DateTime? birthLocal,
     String? cityKey,
     bool? trueSolarTime,
+    String? dateMode,
+    String? timeMode,
+    String? shichen,
   }) =>
       BirthProfile(
         id: id,
@@ -58,6 +88,9 @@ class BirthProfile {
         birthLocal: birthLocal ?? this.birthLocal,
         cityKey: cityKey ?? this.cityKey,
         trueSolarTime: trueSolarTime ?? this.trueSolarTime,
+        dateMode: dateMode ?? this.dateMode,
+        timeMode: timeMode ?? this.timeMode,
+        shichen: shichen ?? this.shichen,
       );
 }
 

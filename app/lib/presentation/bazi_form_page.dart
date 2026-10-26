@@ -38,7 +38,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
         'timezone': city.timezone,
         'longitude': city.longitude,
         'gender': p.gender,
-        'options': {'trueSolarTime': p.trueSolarTime},
+        'options': {'trueSolarTime': p.trueSolarTime, 'inputBasis': p.inputBasis},
       });
       // The name stays on the device: label the chart locally for history.
       if (p.name.isNotEmpty) await ref.read(profilesProvider.notifier).labelChart(chart.chartId, p.name);
