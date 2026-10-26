@@ -21,7 +21,10 @@
     "demo": "tsx scripts/demo.ts",
     "demo:ui": "tsx scripts/demo-server.ts",
     "api": "tsx scripts/api-server.ts",
-    "sync:app": "tsx scripts/sync-app-assets.ts"
+    "sync:app": "tsx scripts/sync-app-assets.ts",
+    "verify:bazi": "tsx scripts/verify-bazi.ts",
+    "verify:tarot": "tsx scripts/verify-tarot.ts",
+    "eval:ai": "tsx scripts/eval-ai.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",

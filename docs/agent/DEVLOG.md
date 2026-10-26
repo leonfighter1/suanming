@@ -2,6 +2,15 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (g): 八字 / 塔羅 technical verification
+
+- Plan change (owner): payments, subscriptions and push moved to Phase 4 (operations); focus on the app and on 八字 / 塔羅 verification.
+- 八字: independent oracle (Swiss Ephemeris + JDN + 五虎遁/五鼠遁) vs the engine on 7000 births: 0 errors, 1 boundary case within formula precision. Mutation tests prove the comparison detects real faults.
+- 塔羅: 32-check statistical battery on 100k draws per spread: all pass. Bias-injection tests prove it detects faults.
+- AI: `checkFaithfulness` (干支, year 干支, cards, 正逆位, script) plus `eval:ai`; live DeepSeek run 6/6 passed, 0 issues; the 時辰 precision is stated in the facts layer and in the AI text.
+- verify:bazi and verify:tarot added to the harness and CI. Details: docs/verification/README.md.
+- Mistake: the tarot test assumed independence for sampling without replacement (MISTAKES rule 5).
+
 ## 2026-10-26 (f): 農曆 date input, 時辰 time input, admin test account
 
 - Date: 公曆 / 農曆 switch; 農曆 year → month (incl. 閏月, only months that exist) → day, converted on the server (`GET /v1/calendar/lunar-months`, `GET /v1/calendar/solar`).

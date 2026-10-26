@@ -6,8 +6,15 @@
 2. Exclude script-generated files from formatters and linters when the script that creates them is added.
 3. Size fixed-height cells for the maximum number of lines they can show, and cap every line with maxLines + ellipsis.
 4. Give tests with heavy runtime start-up (WASM, browsers) an explicit timeout instead of relying on the 5 s default.
+5. Before treating a statistical test failure as a bug, check the test's null hypothesis matches how the process is supposed to behave.
 
 ## Log
+
+### 2026-10-26: Tarot battery tested the wrong statistical property
+- **Symptom:** 'position 1 vs 2 independent' failed (chi2 51.9 > 39.4) on a correct draw
+- **Root cause:** Positions in a spread are drawn without replacement, so they are not independent; the test assumed sampling with replacement
+- **Fix:** Test against the without-replacement expectation P(j|i) = (N_j - [i=j]) / 77; equally strict, now passes
+- **Rule:** Before treating a statistical test failure as a bug, check the test's null hypothesis matches how the process is supposed to behave. (Rule 5)
 
 ### 2026-10-26: PGlite test timed out under parallel load
 - **Symptom:** db-schema test: Test timed out in 5000ms (took 8 s) after the Argon2 auth tests were added

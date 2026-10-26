@@ -1,0 +1,144 @@
+{
+  "generated_at": "2026-10-26T20:10:06.885Z",
+  "live": true,
+  "summary": {
+    "cases": 1,
+    "passed": 1,
+    "faithful": 1,
+    "max_seconds": 156,
+    "total_tokens": 25784
+  },
+  "results": [
+    {
+      "case": "八字 · 台北 · 農曆 + 時辰 · 繁體",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 156,
+      "attempts": {
+        "narrative": 1,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 25784,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 5,
+      "facts_layer": [
+        "四柱：戊辰 庚申 乙未 庚辰",
+        "農曆：戊辰年六月廿六（生肖龍）",
+        "出生日期：依農曆輸入",
+        "出生時間：依時辰輸入（辰時），時柱只精確到兩小時",
+        "日主：乙木（陰）；月令：申金",
+        "五行（加權，簡化計分）：木 1.7 · 火 0.3 · 土 2.9 · 金 2.6 · 水 0.5",
+        "大運：逆行；起運 1988-10-31；目前大運 丙辰（2018 起）",
+        "流年 2026 丙午：傷官 / 食神；與日支六合",
+        "流年 2027 丁未：食神 / 偏財；與原局無六沖六合",
+        "流年 2028 戊申：正財 / 正官；與原局無六沖六合"
+      ],
+      "interpretation": [
+        {
+          "topic": "personality",
+          "paragraphs": [
+            {
+              "text": "時辰為辰時（兩小時窗口），時柱訊息只作輔助，以下性格傾向以日、月柱為主。日主乙木屬陰木，傳統上像花草藤蔓，可能傾向柔韌、懂得因應環境。月干庚金為正官，月支申金亦藏正官，常顯示重規則、責任感；年干戊土正財，日支未土藏偏財，表現務實與重視穩定價值。",
+              "source_level": "derived",
+              "fact_refs": [
+                "/input_basis/time",
+                "/input_basis/shichen",
+                "/pillars/day/gan",
+                "/pillars/month/gan",
+                "/pillars/month/zhi",
+                "/pillars/year/gan"
+              ]
+            },
+            {
+              "text": "五行加權（簡化計分）中金土偏重、木次之、火水較弱，這或令你習慣在框架內努力，並重視實際成果；但日支未中藏丁火食神與乙木比肩，傳統上代表仍有細膩想法與分享意願。日主乙木在未為養地，也提醒在忙碌中保留自我滋養空間。",
+              "source_level": "derived",
+              "fact_refs": [
+                "/wuxing_weighted/scores",
+                "/pillars/day/dishi"
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "dayun_liunian",
+          "paragraphs": [
+            {
+              "text": "目前大運丙辰（2018–2027），2028年進入乙卯大運。2026丙午流年天干傷官、地支食神，與日支未六合，主題常與創作、表達有關，也需留意情緒起伏。2027丁未流年天干食神、地支偏財，較利於以技能或生活趣味處理實際事務；合作中宜守住財務界線。",
+              "source_level": "derived",
+              "fact_refs": [
+                "/dayun/cycles/4",
+                "/dayun/cycles/5",
+                "/liunian/0",
+                "/liunian/1"
+              ]
+            },
+            {
+              "text": "2028戊申至2035乙卯轉入乙卯大運。2028正財正官、2029偏財七殺，責任與壓力可轉化為行動；2030與年、時六沖，宜調整外在期望；2033與日支六沖，提醒平衡內外；2034劫財與月支六沖，合作與資源分配需清晰；2035比肩重，宜借同輩力量定長期目標。2031、2032正偏印年則宜內省與支援。",
+              "source_level": "derived",
+              "fact_refs": [
+                "/dayun/cycles/5",
+                "/liunian/2",
+                "/liunian/3",
+                "/liunian/4",
+                "/liunian/5",
+                "/liunian/6",
+                "/liunian/7",
+                "/liunian/8",
+                "/liunian/9"
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "health",
+          "paragraphs": [
+            {
+              "text": "五行加權（簡化計分）顯示金土偏重、木次之、火水較弱。傳統上金與呼吸、皮膚、大腸等相應，土與脾胃消化相應；木與筋、情緒舒展有關，火水不足則可留意身體循環與保暖。這只是簡化計量，不宜視為體質診斷；日常保持平衡作息、溫和活動即可。此為傳統文化觀點，並非醫療建議；如有不適，請諮詢醫生。",
+              "source_level": "simplified_rule",
+              "fact_refs": [
+                "/wuxing_weighted/scores"
+              ]
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "topic": "personality",
+          "text": "記錄一件你在本週框架內完成的小事，並寫下過程中的責任感或務實考量。",
+          "horizon": "this_week"
+        },
+        {
+          "topic": "personality",
+          "text": "安排一次不花錢的自我滋養時間，例如散步或安靜喝茶，並留意當下浮現的細膩想法。",
+          "horizon": "this_week"
+        },
+        {
+          "topic": "dayun_liunian",
+          "text": "選擇一項低成本的創作或表達練習（例如寫日記或畫簡單草圖），並記錄過程中的情緒起伏。",
+          "horizon": "this_month"
+        },
+        {
+          "topic": "dayun_liunian",
+          "text": "運用一項你已有的技能處理一件實際事務，並在開始前設定清晰的財務或分工界線。",
+          "horizon": "this_month"
+        },
+        {
+          "topic": "health",
+          "text": "進行十五分鐘溫和伸展或散步，並注意身體保暖。",
+          "horizon": "this_week"
+        },
+        {
+          "topic": "health",
+          "text": "記錄一週的作息與身體感受，但不作醫療判斷，僅作為自我觀察。",
+          "horizon": "this_week"
+        }
+      ]
+    }
+  ]
+}

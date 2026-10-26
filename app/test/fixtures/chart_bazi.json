@@ -7,9 +7,9 @@
       "version": "0.1.0+lunar-javascript.1.7.7"
     },
     "system": "bazi",
-    "input_digest": "hmac-sha256:ce197bff8f44fe7ef179a977548bea50fa8557dc900bcb525c93f88c4fde394d",
+    "input_digest": "hmac-sha256:60a9723f529f516ea7eb82678fbfcce685ceaf4bd78a0cca04a8880cce83d191",
     "rule_versions": {
-      "tzdb": "2024b",
+      "tzdb": "fixture",
       "jieqi_clock": "utc+8"
     },
     "computed_at": "2026-10-25T00:00:00.000Z",

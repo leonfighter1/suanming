@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-10-26T20:06:17.134Z",
+  "live": true,
+  "summary": {
+    "cases": 6,
+    "passed": 6,
+    "faithful": 6,
+    "max_seconds": 154,
+    "total_tokens": 121145
+  },
+  "results": [
+    {
+      "case": "八字 · 香港 · 精確時間 · 繁體 · 六方面",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 154,
+      "attempts": {
+        "narrative": 1,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 27530,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 16
+    },
+    {
+      "case": "八字 · 台北 · 農曆 + 時辰 · 繁體",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 128,
+      "attempts": {
+        "narrative": 1,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 22971,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 6
+    },
+    {
+      "case": "八字 · 上海 · 简体 · 立春後春節前",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 128,
+      "attempts": {
+        "narrative": 2,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 25547,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 3
+    },
+    {
+      "case": "八字 · London · English",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 89,
+      "attempts": {
+        "narrative": 1,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 17065,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 4
+    },
+    {
+      "case": "塔羅 · 三張 · 繁體",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 92,
+      "attempts": {
+        "narrative": 1,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 13481,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 7
+    },
+    {
+      "case": "塔羅 · 凱爾特十字 · 简体",
+      "status": "passed",
+      "reasons": [],
+      "seconds": 91,
+      "attempts": {
+        "narrative": 1,
+        "action": 1,
+        "guard": 1
+      },
+      "tokens": 14551,
+      "rule_hits": [],
+      "review_pass": true,
+      "term_fixes": [],
+      "dropped_ungrounded": 0,
+      "faithfulness_issues": [],
+      "paragraphs": 8
+    }
+  ]
+}

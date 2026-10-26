@@ -38,7 +38,8 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       gender: "male",
       options: { liunianFrom: 2026 },
     },
-    { digestPepper: secrets.digestPepper, now },
+    // tzdb pinned: CI runners ship a different Node tzdb, which would change the digest.
+    { digestPepper: secrets.digestPepper, now, tzdb: "fixture" },
   );
   const tarot = computeTarot(
     { spread: "three_card" },

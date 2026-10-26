@@ -1,0 +1,204 @@
+{
+  "generated_at": "2026-10-26T20:15:52.976Z",
+  "draws_per_spread": 100000,
+  "checks": [
+    {
+      "name": "single · position 1 uniform over 78 cards",
+      "statistic": 75.98,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "single · reversal rate 50 %",
+      "statistic": 0.35,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "50.06 %"
+    },
+    {
+      "name": "single · reversal independent of card",
+      "statistic": 78.63,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "single · consecutive draws independent",
+      "statistic": 21.99,
+      "critical": 39.39,
+      "pass": true
+    },
+    {
+      "name": "single · major/suit mix matches the deck",
+      "statistic": 3.5,
+      "critical": 18.72,
+      "pass": true
+    },
+    {
+      "name": "single · no repeated card within a spread",
+      "statistic": 0,
+      "critical": 0,
+      "pass": true
+    },
+    {
+      "name": "three_card · position 1 uniform over 78 cards",
+      "statistic": 75.98,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "three_card · position 2 uniform over 78 cards",
+      "statistic": 69.42,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "three_card · position 3 uniform over 78 cards",
+      "statistic": 75.81,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "three_card · reversal rate 50 %",
+      "statistic": 0.7,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "49.94 %"
+    },
+    {
+      "name": "three_card · reversal independent of card",
+      "statistic": 76.3,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "three_card · positions 1→2 match sampling without replacement",
+      "statistic": 24.62,
+      "critical": 51.29,
+      "pass": true
+    },
+    {
+      "name": "three_card · consecutive draws independent",
+      "statistic": 21.99,
+      "critical": 39.39,
+      "pass": true
+    },
+    {
+      "name": "three_card · major/suit mix matches the deck",
+      "statistic": 3.5,
+      "critical": 18.72,
+      "pass": true
+    },
+    {
+      "name": "three_card · no repeated card within a spread",
+      "statistic": 0,
+      "critical": 0,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 1 uniform over 78 cards",
+      "statistic": 75.98,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 2 uniform over 78 cards",
+      "statistic": 69.42,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 3 uniform over 78 cards",
+      "statistic": 75.81,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 4 uniform over 78 cards",
+      "statistic": 61.3,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 5 uniform over 78 cards",
+      "statistic": 81.89,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 6 uniform over 78 cards",
+      "statistic": 56.33,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 7 uniform over 78 cards",
+      "statistic": 84.42,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 8 uniform over 78 cards",
+      "statistic": 86.61,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 9 uniform over 78 cards",
+      "statistic": 100.49,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · position 10 uniform over 78 cards",
+      "statistic": 82.28,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · reversal rate 50 %",
+      "statistic": 0.18,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "50.01 %"
+    },
+    {
+      "name": "celtic_cross · reversal independent of card",
+      "statistic": 89.37,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · positions 1→2 match sampling without replacement",
+      "statistic": 24.62,
+      "critical": 51.29,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · consecutive draws independent",
+      "statistic": 21.99,
+      "critical": 39.39,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · major/suit mix matches the deck",
+      "statistic": 3.5,
+      "critical": 18.72,
+      "pass": true
+    },
+    {
+      "name": "celtic_cross · no repeated card within a spread",
+      "statistic": 0,
+      "critical": 0,
+      "pass": true
+    },
+    {
+      "name": "adjacent draw ids: same card at chance rate (1/78)",
+      "statistic": 1.49,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "1335 of 100000"
+    }
+  ],
+  "pass": true,
+  "seconds": 8
+}

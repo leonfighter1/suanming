@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-10-26T20:15:51.391Z",
+  "oracle": "Swiss Ephemeris 2.10 (Moshier) for 節 / sun / equation of time; JDN day pillar (1900-01-01 甲戌); 五虎遁 / 五鼠遁",
+  "engine": "BaziEngine (lunar-javascript 1.7.7 + tzdb + true solar time)",
+  "random": {
+    "total": 5000,
+    "match": 4999,
+    "boundary": 1,
+    "error": 0
+  },
+  "edge": {
+    "total": 2000,
+    "match": 2000,
+    "boundary": 0,
+    "error": 0
+  },
+  "mismatched_fields": {
+    "hour": 1
+  },
+  "errors": [],
+  "boundary_examples": [
+    {
+      "input": {
+        "local": "1924-01-04T05:05",
+        "timezone": "Europe/London",
+        "longitude": -0.13,
+        "gender": "male",
+        "trueSolarTime": true,
+        "ziHourSect": 1
+      },
+      "status": "boundary",
+      "diffs": [
+        "hour: engine 壬寅 vs oracle 癸卯"
+      ]
+    }
+  ],
+  "seconds": 19
+}

@@ -142,6 +142,8 @@ export interface BaziContext {
   /** >= 32 bytes, from secrets manager */
   digestPepper: Buffer;
   now?: () => Date;
+  /** Pins rule_versions.tzdb (default: Node's bundled tzdb). For reproducible fixtures. */
+  tzdb?: string;
 }
 
 /**
@@ -219,7 +221,10 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     };
   });
 
-  const rule_versions = { tzdb: process.versions.tz ?? "unknown", jieqi_clock: "utc+8" };
+  const rule_versions = {
+    tzdb: ctx.tzdb ?? process.versions.tz ?? "unknown",
+    jieqi_clock: "utc+8",
+  };
   const facts = {
     time_basis: {
       civil_local: input.local,

@@ -27,6 +27,9 @@ jobs:
       - run: npm run validate:openapi
       - run: npm run validate:schemas
       - run: npm audit --audit-level=high
+      # Technical verification: engine vs independent oracle, tarot statistics.
+      - run: npm run verify:bazi
+      - run: npm run verify:tarot
       # POC regression guards: astronomy-engine must stay within the 0.01° gate.
       - run: npm run poc:astrology
       - run: npm run poc:bazi-jieqi

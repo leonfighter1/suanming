@@ -6,6 +6,8 @@
     { "name": "openapi", "run": "npm run validate:openapi" },
     { "name": "schemas", "run": "npm run validate:schemas" },
     { "name": "audit", "run": "npm audit --audit-level=high" },
+    { "name": "verify bazi (7000 vs oracle)", "run": "npm run verify:bazi" },
+    { "name": "verify tarot (100k draws)", "run": "npm run verify:tarot" },
     {
       "name": "app (pub get, analyze, test, build web)",
       "run": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\AgentSkills\\harness-check\\scripts\\check.ps1 -Project app -Build web"
