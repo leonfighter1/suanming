@@ -2,8 +2,11 @@
  * npm run api      → http://127.0.0.1:8787 (dev mode: bearer tokens, or X-Dev-User / X-Dev-Country headers)
  * npm run api:lan  → all interfaces, for phones on the same Wi-Fi (docs/web-test.md).
  *                    Sign-in only: the X-Dev-User shortcut is off, since other machines can reach it.
+ * npm run public   → web app + API behind a public https tunnel (scripts/public.ts).
  */
+import { existsSync } from "node:fs";
 import { networkInterfaces } from "node:os";
+import { fileURLToPath } from "node:url";
 import { createApiServer } from "../src/api/server.js";
 import {
   buildAuth,
@@ -21,11 +24,26 @@ try {
 }
 
 const lan = process.argv.includes("--lan");
+/**
+ * --public: for a tunnel (npm run public). Listens on loopback only (the tunnel
+ * connects locally), serves the built web app on the same origin, trusts the
+ * tunnel's client-IP header, turns the X-Dev-User shortcut off and caps AI jobs.
+ */
+const pub = process.argv.includes("--public");
 const secrets = loadSecrets();
 const providers = buildProviders();
 const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? (lan ? "0.0.0.0" : "127.0.0.1");
-const loopbackOnly = host === "127.0.0.1" || host === "localhost";
+const loopbackOnly = !pub && (host === "127.0.0.1" || host === "localhost");
+const staticDir = fileURLToPath(new URL("../app/build/web/", import.meta.url));
+if (pub && !existsSync(staticDir)) {
+  console.error(`--public needs the built web app in ${staticDir} (npm run public builds it)`);
+  process.exit(2);
+}
+const aiQuota = {
+  perUserPerDay: Number(process.env.MINGLI_AI_DAILY_PER_USER ?? 10),
+  totalPerDay: Number(process.env.MINGLI_AI_DAILY_TOTAL ?? 100),
+};
 
 const auth = buildAuth(secrets, true);
 await seedDevAccounts(auth, true);
@@ -40,8 +58,9 @@ const server = createApiServer({
   auth,
   devMode: true,
   corsOrigins,
-  corsPrivateNetwork: !loopbackOnly,
+  corsPrivateNetwork: lan,
   devHeaders: loopbackOnly,
+  ...(pub && { trustProxy: true, staticDir, aiQuota }),
 });
 
 /** This machine's private IPv4 addresses (what a phone on the same Wi-Fi uses). */
@@ -54,7 +73,11 @@ const lanAddresses = () =>
 
 server.listen(port, host, () => {
   console.log(`命理大师 API v1 (dev mode) on http://${host}:${port}`);
-  if (!loopbackOnly) {
+  if (pub) {
+    console.log(
+      `  public mode: web app + API on this port; AI cap ${aiQuota.perUserPerDay}/account/day, ${aiQuota.totalPerDay}/day total`,
+    );
+  } else if (!loopbackOnly) {
     for (const ip of lanAddresses()) {
       console.log(`  phone on the same Wi-Fi: app http://${ip}:5000  (API http://${ip}:${port})`);
     }

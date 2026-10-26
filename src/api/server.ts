@@ -32,6 +32,7 @@ import {
   lunarToSolar,
   shichenOptions,
 } from "../engines/bazi/index.js";
+import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
@@ -63,6 +64,16 @@ export interface ApiOptions {
    * off whenever the API is reachable from other machines: anyone could act as any user.
    */
   devHeaders?: boolean;
+  /**
+   * Behind a tunnel or proxy every connection comes from 127.0.0.1: take the client
+   * IP from CF-Connecting-IP / X-Forwarded-For instead, so login limits stay per person.
+   * Only set this when the server is reachable through that proxy alone.
+   */
+  trustProxy?: boolean;
+  /** Serve this directory (the built web app) for non-/v1 GET requests. */
+  staticDir?: string;
+  /** Daily caps on AI jobs (reports + 破除運勢 plans), to bound provider spend. */
+  aiQuota?: { perUserPerDay: number; totalPerDay: number };
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
@@ -149,6 +160,38 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     { status: number; body: unknown; headers: Record<string, string> }
   >();
   const matrix = loadGeoMatrix();
+
+  function clientIp(req: IncomingMessage): string {
+    if (opts.trustProxy) {
+      const cf = req.headers["cf-connecting-ip"];
+      const xff = req.headers["x-forwarded-for"];
+      const forwarded =
+        typeof cf === "string" ? cf : typeof xff === "string" ? xff.split(",")[0] : "";
+      if (forwarded?.trim()) return forwarded.trim();
+    }
+    return req.socket.remoteAddress ?? "unknown";
+  }
+
+  /** AI jobs started today, per user and in total (UTC day). */
+  const aiUse = new Map<string, number>();
+  function takeAiQuota(user: string) {
+    const q = opts.aiQuota;
+    if (!q) return;
+    const day = now().toISOString().slice(0, 10);
+    for (const k of [...aiUse.keys()]) if (!k.startsWith(day)) aiUse.delete(k);
+    const mine = aiUse.get(`${day}:u:${user}`) ?? 0;
+    const all = aiUse.get(`${day}:all`) ?? 0;
+    if (mine >= q.perUserPerDay) {
+      throw new HttpError(
+        429,
+        `daily AI limit reached (${q.perUserPerDay} per account); try again tomorrow`,
+      );
+    }
+    if (all >= q.totalPerDay)
+      throw new HttpError(429, "the test service's daily AI limit is reached; try again tomorrow");
+    aiUse.set(`${day}:u:${user}`, mine + 1);
+    aiUse.set(`${day}:all`, all + 1);
+  }
 
   const auth = opts.auth;
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
@@ -287,6 +330,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (existing) {
       return { status: 200, body: publicRemedy(existing), headers: {} as Record<string, string> };
     }
+    takeAiQuota(c.user);
 
     const ts = now().toISOString();
     const remedy: RemedyRecord = {
@@ -328,6 +372,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (bad.length)
       throw new InputError(`topics not available for ${chart.fact.system}: ${bad.join(", ")}`);
     assertServed(c.country, chart.fact.system);
+    takeAiQuota(c.user);
     const question = typeof body.question === "string" ? body.question.slice(0, 300) : undefined;
 
     const ts = now().toISOString();
@@ -353,6 +398,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
     const path = new URL(req.url ?? "/", "http://localhost").pathname;
+    // Public test mode: the built web app on the same origin as the API.
+    if (opts.staticDir && req.method === "GET" && !path.startsWith("/v1/")) {
+      if (serveStatic(res, opts.staticDir, path)) return;
+      throw new HttpError(404, "not found");
+    }
     if (req.method === "GET" && path === "/v1/health") {
       return send(res, 200, {
         status: "ok",
@@ -419,7 +469,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (req.method === "POST" && path.startsWith("/v1/auth/")) {
       if (!auth) throw new HttpError(404, "auth not configured");
       const body = (await readJson(req)) as Record<string, unknown>;
-      const ip = req.socket.remoteAddress ?? "unknown";
+      const ip = clientIp(req);
       switch (path) {
         case "/v1/auth/register":
           return send(res, 201, await auth.register(body as never));

@@ -32,6 +32,10 @@ void main() {
       expect(resolveApiBase(web: true, page: Uri.parse('https://leonfighter1.github.io/suanming/')), 'http://127.0.0.1:8787');
     });
 
+    test('"origin": the API serves the page (public tunnel)', () {
+      expect(resolveApiBase(web: true, page: Uri.parse('https://abc.trycloudflare.com/#/'), define: 'origin'), 'https://abc.trycloudflare.com');
+    });
+
     test('local browser, Android emulator and desktop defaults', () {
       expect(resolveApiBase(web: true, page: Uri.parse('http://127.0.0.1:5000/')), 'http://127.0.0.1:8787');
       expect(resolveApiBase(web: true, page: Uri.parse('http://localhost:5000/')), 'http://127.0.0.1:8787');

@@ -33,6 +33,31 @@ Private Network Access preflight, so the https page may call the local http API.
 Safari blocks this mixed content; for phones see below.
 To allow other origins: `MINGLI_CORS_ORIGINS=https://a.example,https://b.example npm run api`.
 
+## Public test URL from this computer: `npm run public`
+
+```
+npm run public            # --skip-build to reuse app/build/web
+```
+
+1. Builds the web app with `API_BASE_URL=origin`.
+2. Starts the API in `--public` mode on 127.0.0.1:8787. It also serves the app, so app
+   and API share one https origin (no CORS, no mixed content).
+3. Opens a Cloudflare quick tunnel and prints `https://….trycloudflare.com`. Anyone can
+   open it on any network. It works while the command runs; the URL changes each run.
+   The first run downloads the official `cloudflared` release into `.cache/bin`.
+
+Public mode protections:
+
+- the `X-Dev-User` shortcut is off: everyone signs in;
+- login limits use the visitor's IP (`CF-Connecting-IP`), not the tunnel's 127.0.0.1;
+- AI jobs (reports + 破除運勢) are capped per account and in total per day:
+  `MINGLI_AI_DAILY_PER_USER` (default 10), `MINGLI_AI_DAILY_TOTAL` (default 100).
+  This bounds DeepSeek spend;
+- data is in memory: a restart clears accounts that testers registered, and their readings.
+
+The dev accounts (`admin`/`admin`, `xumei`/`xumei`) exist in public mode too. Anyone who
+knows them can use them, within the AI caps.
+
 ## Phone on the same Wi-Fi (no hosting needed)
 
 `127.0.0.1` on a phone is the phone itself, so a phone can never reach the default
