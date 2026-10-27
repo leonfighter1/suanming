@@ -60,6 +60,11 @@ const server = createApiServer({
   corsOrigins,
   corsPrivateNetwork: lan,
   devHeaders: loopbackOnly,
+  // Content review is paused by owner decision (2026-10-26) until the legal &
+  // obligations work: MINGLI_REVIEW=on turns holds, the guard and 内容审核 back on.
+  review: process.env.MINGLI_REVIEW === "on",
+  // 内容审核 reviewers: logins allowed to read and decide held content.
+  admins: (process.env.MINGLI_ADMINS ?? "admin").split(","),
   ...(pub && { trustProxy: true, staticDir, aiQuota }),
 });
 
@@ -84,6 +89,11 @@ server.listen(port, host, () => {
     console.log("  X-Dev-User shortcut is off (reachable from other machines); sign in instead.");
   }
   console.log(`AI provider: ${servingProvider(providers.live)}`);
+  console.log(
+    process.env.MINGLI_REVIEW === "on"
+      ? "content review: ON (holds, guard, 内容审核)"
+      : "content review: PAUSED (hits recorded, nothing held; MINGLI_REVIEW=on to enable)",
+  );
   console.log(
     `CORS origins: localhost${loopbackOnly ? "" : ", private-network http"}, ${corsOrigins.join(", ")}`,
   );

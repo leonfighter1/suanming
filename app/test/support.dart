@@ -52,6 +52,9 @@ class FakeApi {
   /// The server preloaded every topic's 破除運勢 plan (locked until bought).
   bool preloadRemedies = false;
 
+  /// A reviewer decided the held item (it leaves the queue).
+  bool reviewed = false;
+
   /// Every request fails without a response (server unreachable).
   bool offline = false;
 
@@ -119,7 +122,29 @@ class FakeApi {
       return _json({'title': 'Authentication failed', 'status': 401}, 401);
     }
     if (req.method == 'GET' && path == '/v1/me') {
-      return _json({'id': 'u1', 'email': email, 'country': 'HK', 'locale': 'zh-Hant', 'sign_in_methods': ['password'], 'created_at': '2026-10-26T00:00:00Z'}, 200);
+      return _json({
+        'id': 'u1',
+        'email': email,
+        'country': 'HK',
+        'locale': 'zh-Hant',
+        'sign_in_methods': ['password'],
+        'created_at': '2026-10-26T00:00:00Z',
+        // The dev reviewer (MINGLI_ADMINS default).
+        'role': email == 'admin' ? 'admin' : 'user',
+      }, 200);
+    }
+    // 内容审核: one held report (review_report.json, generated from the server).
+    if (path == '/v1/admin/reviews' && req.method == 'GET') {
+      final item = {...fixture('review_report')}..remove('content');
+      return _json({'items': reviewed ? const [] : [item]}, 200);
+    }
+    if (path.startsWith('/v1/admin/reviews/')) {
+      if (req.method == 'POST') {
+        reviewed = true;
+        final b = jsonDecode(req.body) as Map;
+        return _json({...fixture('review_report'), 'decision': {'decision': b['decision'], 'by': 'admin', 'at': '2026-10-26T00:00:00Z'}}, 200);
+      }
+      return _json(fixture('review_report'), 200);
     }
     if (req.method == 'GET' && path == '/v1/reports') {
       return _json({

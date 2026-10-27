@@ -36,6 +36,12 @@ allow:
   - { text: "传统命理的健康推断仅供参考，不构成医疗诊断，如有不适请及时就医。", groups: [] }
   - { text: "财运起伏属于传统视角，请勿据此做投资决定。", groups: [] }
   - { text: "財運的說法僅為文化參考，投資前請諮詢持牌顧問。", groups: [] }
+  - { text: "命理内容仅供娱乐和玄学学习使用，不是对未来的预测。", groups: [] }
+  - { text: "命理內容僅供娛樂和玄學學習使用，不是對未來的預測。", groups: [] }
+  - {
+      text: "This content is for entertainment and metaphysics study only. It is not a prediction of the future.",
+      groups: [en_common, us, uk, au],
+    }
   - {
       text: "This is not medical advice; please see a doctor if you feel unwell.",
       groups: [en_common],

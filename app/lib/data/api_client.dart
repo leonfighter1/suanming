@@ -35,17 +35,22 @@ class ApiException implements Exception {
 }
 
 class AppUser {
-  const AppUser({required this.id, this.email, required this.country, required this.signInMethods});
+  const AppUser({required this.id, this.email, required this.country, required this.signInMethods, this.role = 'user'});
   factory AppUser.fromJson(Json j) => AppUser(
         id: j['id'] as String,
         email: j['email'] as String?,
         country: j['country'] as String,
         signInMethods: (j['sign_in_methods'] as List).cast<String>(),
+        role: j['role'] as String? ?? 'user',
       );
   final String id;
   final String? email;
   final String country;
   final List<String> signInMethods;
+
+  /// 'admin' for 内容审核 reviewers.
+  final String role;
+  bool get isReviewer => role == 'admin';
 }
 
 /// v1 API client (api/openapi.yaml). Authenticated calls send the access token;
@@ -129,6 +134,15 @@ class ApiClient {
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 
   Future<ChartResult> getChart(String id) async => ChartResult.fromJson(await _authed('GET', '/v1/charts/$id'));
+
+  // ---- 内容审核 (reviewers only) ----
+
+  Future<List<Json>> listReviews() async => ((await _authed('GET', '/v1/admin/reviews'))['items'] as List).cast<Json>();
+
+  Future<Json> getReview(String kind, String id) => _authed('GET', '/v1/admin/reviews/$kind/$id');
+
+  Future<Json> decideReview(String kind, String id, {required bool approve, String? note}) =>
+      _authed('POST', '/v1/admin/reviews/$kind/$id', {'decision': approve ? 'approve' : 'reject', if (note != null && note.trim().isNotEmpty) 'note': note.trim()});
 
   // ---- 一生运势报告 ----
 

@@ -126,7 +126,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeTarotDesc.
   ///
   /// In en, this message translates to:
-  /// **'Draw a spread and reflect on it'**
+  /// **'Draw a spread, for entertainment and metaphysics study only'**
   String get homeTarotDesc;
 
   /// No description provided for @settings.
@@ -516,7 +516,7 @@ abstract class AppLocalizations {
   /// No description provided for @disclaimerShort.
   ///
   /// In en, this message translates to:
-  /// **'Cultural reference for self-reflection, not a prediction.'**
+  /// **'For entertainment and metaphysics study only, not a prediction.'**
   String get disclaimerShort;
 
   /// No description provided for @signIn.
@@ -1374,7 +1374,7 @@ abstract class AppLocalizations {
   /// No description provided for @lifeNote.
   ///
   /// In en, this message translates to:
-  /// **'This report follows traditional methods and is cultural reference, not scientific prediction. The three methods are worked out separately and then read together.'**
+  /// **'This report follows traditional methods and is for entertainment and metaphysics study only, not scientific prediction. The three methods are worked out separately and then read together.'**
   String get lifeNote;
 
   /// No description provided for @lifeSec1.
@@ -1754,6 +1754,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Element'**
   String get lifeWuxing;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Content review'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting for review.'**
+  String get reviewEmpty;
+
+  /// No description provided for @reviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings the compliance checks held back. Release only what is acceptable; rule-layer blocks can only be rejected.'**
+  String get reviewHint;
+
+  /// No description provided for @kindReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get kindReport;
+
+  /// No description provided for @kindRemedy.
+  ///
+  /// In en, this message translates to:
+  /// **'Remedy plan'**
+  String get kindRemedy;
+
+  /// No description provided for @kindLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Life report'**
+  String get kindLife;
+
+  /// No description provided for @reviewHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Held for review'**
+  String get reviewHeld;
+
+  /// No description provided for @reviewBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked by rules'**
+  String get reviewBlocked;
+
+  /// No description provided for @reviewReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Why it was held'**
+  String get reviewReasons;
+
+  /// No description provided for @reviewRuleHits.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule hits'**
+  String get reviewRuleHits;
+
+  /// No description provided for @reviewGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'AI reviewer\'s findings'**
+  String get reviewGuard;
+
+  /// No description provided for @reviewContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get reviewContent;
+
+  /// No description provided for @reviewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Review note (optional)'**
+  String get reviewNote;
+
+  /// No description provided for @reviewApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve and release'**
+  String get reviewApprove;
+
+  /// No description provided for @reviewReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reviewReject;
+
+  /// No description provided for @reviewBlockedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'A rule-layer block is a hard violation: it can only be rejected.'**
+  String get reviewBlockedOnly;
+
+  /// No description provided for @reviewApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Released to the user'**
+  String get reviewApproved;
+
+  /// No description provided for @reviewRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get reviewRejected;
+
+  /// No description provided for @reviewNoContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No content was kept for this item.'**
+  String get reviewNoContent;
 }
 
 class _AppLocalizationsDelegate

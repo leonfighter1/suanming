@@ -15,7 +15,13 @@ import {
   MockProvider,
   TOPICS_BY_SYSTEM,
 } from "../src/ai/index.js";
-import { publicLifeReport, publicRemedy, publicReport, REMEDY_PRICE } from "../src/api/server.js";
+import {
+  publicLifeReport,
+  publicRemedy,
+  publicReport,
+  REMEDY_PRICE,
+  reviewSummary,
+} from "../src/api/server.js";
 import {
   computeBazi,
   lunarDate,
@@ -116,6 +122,41 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     life,
   });
 
+  // A report the guard held, as the review console shows it (GET /v1/admin/reviews/report/{id}).
+  const heldMock = new MockProvider({
+    guard: [
+      {
+        kind: "ok",
+        data: {
+          pass: false,
+          violations: [
+            { quote: "（示範）月柱的十神常被用來談工作方式", category: "other", reason: "fixture" },
+          ],
+        },
+      },
+    ],
+  });
+  const held = await generateReport(
+    bazi,
+    { locale: "zh-Hant", country: "HK", topics: ["career_wealth"] },
+    {
+      providers: { deepseek: heldMock, anthropic: heldMock },
+      now,
+      newId: () => "77777777-7777-4777-8777-777777777777",
+    },
+  );
+  const heldRecord = {
+    id: held.report_id,
+    owner: "fixture-owner",
+    status: held.status,
+    created_at: ts,
+    updated_at: ts,
+  };
+  const reviewView = {
+    ...reviewSummary("report", heldRecord, held, { locale: "zh-Hant", topics: held.topics }),
+    content: held.held_layers,
+  };
+
   return {
     "app/assets/i18n/terms.json": JSON.parse(readFileSync(at("i18n/terms.json"), "utf8")),
     "app/assets/i18n/tarot_deck.json": {
@@ -134,6 +175,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     "app/test/fixtures/report_passed.json": view,
     "app/test/fixtures/remedy_passed.json": remedyView,
     "app/test/fixtures/life_passed.json": lifeView,
+    "app/test/fixtures/review_report.json": reviewView,
     "app/test/fixtures/chart_life.json": {
       chart_id: "66666666-6666-4666-8666-666666666666",
       chart_fact: lifeChart,

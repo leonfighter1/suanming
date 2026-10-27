@@ -23,7 +23,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTarot => 'Tarot';
 
   @override
-  String get homeTarotDesc => 'Draw a spread and reflect on it';
+  String get homeTarotDesc =>
+      'Draw a spread, for entertainment and metaphysics study only';
 
   @override
   String get settings => 'Settings';
@@ -227,7 +228,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disclaimerShort =>
-      'Cultural reference for self-reflection, not a prediction.';
+      'For entertainment and metaphysics study only, not a prediction.';
 
   @override
   String get signIn => 'Sign in';
@@ -699,7 +700,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lifeNote =>
-      'This report follows traditional methods and is cultural reference, not scientific prediction. The three methods are worked out separately and then read together.';
+      'This report follows traditional methods and is for entertainment and metaphysics study only, not scientific prediction. The three methods are worked out separately and then read together.';
 
   @override
   String get lifeSec1 => '1. I Ching natal hexagram';
@@ -893,4 +894,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lifeWuxing => 'Element';
+
+  @override
+  String get reviewTitle => 'Content review';
+
+  @override
+  String get reviewEmpty => 'Nothing is waiting for review.';
+
+  @override
+  String get reviewHint =>
+      'Readings the compliance checks held back. Release only what is acceptable; rule-layer blocks can only be rejected.';
+
+  @override
+  String get kindReport => 'Reading';
+
+  @override
+  String get kindRemedy => 'Remedy plan';
+
+  @override
+  String get kindLife => 'Life report';
+
+  @override
+  String get reviewHeld => 'Held for review';
+
+  @override
+  String get reviewBlocked => 'Blocked by rules';
+
+  @override
+  String get reviewReasons => 'Why it was held';
+
+  @override
+  String get reviewRuleHits => 'Rule hits';
+
+  @override
+  String get reviewGuard => 'AI reviewer\'s findings';
+
+  @override
+  String get reviewContent => 'Content';
+
+  @override
+  String get reviewNote => 'Review note (optional)';
+
+  @override
+  String get reviewApprove => 'Approve and release';
+
+  @override
+  String get reviewReject => 'Reject';
+
+  @override
+  String get reviewBlockedOnly =>
+      'A rule-layer block is a hard violation: it can only be rejected.';
+
+  @override
+  String get reviewApproved => 'Released to the user';
+
+  @override
+  String get reviewRejected => 'Rejected';
+
+  @override
+  String get reviewNoContent => 'No content was kept for this item.';
 }

@@ -1,0 +1,269 @@
+{
+  "kind": "report",
+  "id": "77777777-7777-4777-8777-777777777777",
+  "status": "manual_review",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "owner": "fixture-",
+  "locale": "zh-Hant",
+  "topics": [
+    "career_wealth"
+  ],
+  "reasons": [
+    "guard: 1 issue(s) flagged"
+  ],
+  "rule_hits": [],
+  "guard": [
+    {
+      "quote": "（示範）月柱的十神常被用來談工作方式",
+      "category": "other",
+      "reason": "fixture"
+    }
+  ],
+  "content": {
+    "facts": [
+      "四柱：庚午 己卯 己卯 辛未",
+      "農曆：庚午年二月十九（生肖馬）",
+      "日主：己土（陰）；月令：卯木",
+      "五行（加權，簡化計分）：木 2.1 · 火 1 · 土 2.9 · 金 2 · 水 0",
+      "大運：順行；起運 1997-02-19；目前大運 壬午（2017 起）",
+      "流年 2026 丙午：正印 / 偏印；與時支六合",
+      "流年 2027 丁未：偏印 / 比肩；與年支六合",
+      "流年 2028 戊申：劫財 / 傷官；與原局無六沖六合"
+    ],
+    "interpretation": [
+      {
+        "topic": "career_wealth",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）月柱的十神常被用來談工作方式與合作傾向，僅供規劃時參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/pillars/month"
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "topic": "career_wealth",
+        "text": "（示範）本週花十分鐘寫下與「事業財運」相關的一個觀察。",
+        "horizon": "this_week"
+      }
+    ],
+    "expectation": {
+      "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
+      "ai_label": "本解讀由 AI 依據命盤資料生成，僅供娛樂和玄學學習使用。",
+      "label_required": false
+    },
+    "trend": {
+      "topics": [
+        "career_wealth"
+      ],
+      "dayun": [
+        {
+          "index": 1,
+          "ganzhi": "庚辰",
+          "start_year": 1997,
+          "start_age": 8,
+          "end_age": 17,
+          "scores": {
+            "career_wealth": 42
+          },
+          "overall": 42,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 2,
+          "ganzhi": "辛巳",
+          "start_year": 2007,
+          "start_age": 18,
+          "end_age": 27,
+          "scores": {
+            "career_wealth": 49
+          },
+          "overall": 49,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 3,
+          "ganzhi": "壬午",
+          "start_year": 2017,
+          "start_age": 28,
+          "end_age": 37,
+          "scores": {
+            "career_wealth": 56
+          },
+          "overall": 56,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 4,
+          "ganzhi": "癸未",
+          "start_year": 2027,
+          "start_age": 38,
+          "end_age": 47,
+          "scores": {
+            "career_wealth": 63
+          },
+          "overall": 63,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 5,
+          "ganzhi": "甲申",
+          "start_year": 2037,
+          "start_age": 48,
+          "end_age": 57,
+          "scores": {
+            "career_wealth": 70
+          },
+          "overall": 70,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 6,
+          "ganzhi": "乙酉",
+          "start_year": 2047,
+          "start_age": 58,
+          "end_age": 67,
+          "scores": {
+            "career_wealth": 77
+          },
+          "overall": 77,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 7,
+          "ganzhi": "丙戌",
+          "start_year": 2057,
+          "start_age": 68,
+          "end_age": 77,
+          "scores": {
+            "career_wealth": 39
+          },
+          "overall": 39,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "index": 8,
+          "ganzhi": "丁亥",
+          "start_year": 2067,
+          "start_age": 78,
+          "end_age": 87,
+          "scores": {
+            "career_wealth": 46
+          },
+          "overall": 46,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        }
+      ],
+      "liunian": [
+        {
+          "year": 2026,
+          "age": 36,
+          "ganzhi": "丙午",
+          "scores": {
+            "career_wealth": 42
+          },
+          "overall": 42,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2027,
+          "age": 37,
+          "ganzhi": "丁未",
+          "scores": {
+            "career_wealth": 49
+          },
+          "overall": 49,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2028,
+          "age": 38,
+          "ganzhi": "戊申",
+          "scores": {
+            "career_wealth": 56
+          },
+          "overall": 56,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2029,
+          "age": 39,
+          "ganzhi": "己酉",
+          "scores": {
+            "career_wealth": 63
+          },
+          "overall": 63,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2030,
+          "age": 40,
+          "ganzhi": "庚戌",
+          "scores": {
+            "career_wealth": 70
+          },
+          "overall": 70,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2031,
+          "age": 41,
+          "ganzhi": "辛亥",
+          "scores": {
+            "career_wealth": 77
+          },
+          "overall": 77,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2032,
+          "age": 42,
+          "ganzhi": "壬子",
+          "scores": {
+            "career_wealth": 39
+          },
+          "overall": 39,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2033,
+          "age": 43,
+          "ganzhi": "癸丑",
+          "scores": {
+            "career_wealth": 46
+          },
+          "overall": 46,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2034,
+          "age": 44,
+          "ganzhi": "甲寅",
+          "scores": {
+            "career_wealth": 53
+          },
+          "overall": 53,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        },
+        {
+          "year": 2035,
+          "age": 45,
+          "ganzhi": "乙卯",
+          "scores": {
+            "career_wealth": 60
+          },
+          "overall": 60,
+          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+        }
+      ],
+      "total": 55,
+      "method_note": "分數是 AI 依傳統命理（大運、流年與原局的十神、刑沖合會、五行平衡）給出的參考指數，0–100，50 為平穩；不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。"
+    }
+  }
+}

@@ -41,6 +41,7 @@ import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../servic
 import { upstreamMessage } from "../service/runtime.js";
 import {
   InMemoryStore,
+  type ReviewDecision,
   type LifeReportRecord,
   type RemedyRecord,
   type ReportRecord,
@@ -80,6 +81,14 @@ export interface ApiOptions {
   trustProxy?: boolean;
   /** Serve this directory (the built web app) for non-/v1 GET requests. */
   staticDir?: string;
+  /**
+   * Content review (rule-layer holds, guard, 内容审核). Default true; false pauses it
+   * (owner decision 2026-10-26, a later legal & obligations item): outputs are
+   * scanned and hits recorded, but nothing is held and the console is closed.
+   */
+  review?: boolean;
+  /** Reviewers (内容审核): account logins / emails allowed to read and decide held content. */
+  admins?: string[];
   /** Daily caps on AI jobs (reports + 破除運勢 plans), to bound provider spend. */
   aiQuota?: { perUserPerDay: number; totalPerDay: number };
   /**
@@ -210,6 +219,47 @@ export function heldWhy(r: {
     .join(" | ");
 }
 
+export type HeldKind = "report" | "remedy" | "life_report";
+
+/** What a reviewer sees in the list: why it was held, never the user's identity. */
+export function reviewSummary(
+  kind: HeldKind,
+  r: {
+    id: string;
+    owner: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    review?: ReviewDecision;
+  },
+  out?: {
+    reasons: string[];
+    compliance: {
+      rule_violations: { rule_id: string; match: string; action: string }[];
+      review?: { violations: { category: string; quote: string; reason: string }[] };
+    };
+  },
+  extra: Record<string, unknown> = {},
+) {
+  return {
+    kind,
+    id: r.id,
+    status: r.status,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+    owner: r.owner.slice(0, 8),
+    ...extra,
+    reasons: out?.reasons ?? [],
+    rule_hits: (out?.compliance.rule_violations ?? []).map((v) => ({
+      rule_id: v.rule_id,
+      match: v.match,
+      action: v.action,
+    })),
+    guard: out?.compliance.review?.violations ?? [],
+    ...(r.review && { decision: r.review }),
+  };
+}
+
 export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<void> } {
   const store = opts.store ?? new InMemoryStore();
   const now = opts.now ?? (() => new Date());
@@ -220,6 +270,14 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     { status: number; body: unknown; headers: Record<string, string> }
   >();
   const matrix = loadGeoMatrix();
+
+  const admins = new Set((opts.admins ?? []).map((a) => a.trim().toLowerCase()).filter(Boolean));
+  /** The reviewer's login when the caller is a reviewer, else undefined. */
+  async function reviewer(c: Caller): Promise<string | undefined> {
+    const login = auth ? (await auth.users.get(c.user))?.email : undefined;
+    const name = (login ?? c.user).toLowerCase();
+    return admins.has(name) ? name : undefined;
+  }
 
   function clientIp(req: IncomingMessage): string {
     if (opts.trustProxy) {
@@ -308,6 +366,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         {
           providers: opts.providers,
           routing: opts.routing,
+          review: opts.review !== false,
           now,
           // Live stage for clients polling the pending report.
           onProgress: async ({ stage, attempt }) => {
@@ -387,6 +446,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         {
           providers: opts.providers,
           routing: opts.routing,
+          review: opts.review !== false,
           now,
           onProgress: async ({ stage, attempt }) => {
             const current = await store.getRemedy(record.id);
@@ -512,6 +572,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         {
           providers: opts.providers,
           routing: opts.routing,
+          review: opts.review !== false,
           now,
           onProgress: async ({ stage, attempt }) => {
             const current = await store.getLifeReport(record.id);
@@ -576,6 +637,136 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
+  async function heldItem(kind: string, id: string) {
+    if (!UUID_RE.test(id)) return undefined;
+    if (kind === "report") {
+      const r = await store.getReport(id);
+      return (
+        r && {
+          kind: "report" as const,
+          r,
+          summary: reviewSummary("report", r, r.report, { locale: r.locale, topics: r.topics }),
+          content: r.report?.held_layers,
+        }
+      );
+    }
+    if (kind === "remedy") {
+      const r = await store.getRemedy(id);
+      return (
+        r && {
+          kind: "remedy" as const,
+          r,
+          summary: reviewSummary("remedy", r, r.remedy, { topic: r.topic, locked: !r.unlocked }),
+          content: r.remedy?.held_content,
+        }
+      );
+    }
+    if (kind === "life_report") {
+      const r = await store.getLifeReport(id);
+      return (
+        r && {
+          kind: "life_report" as const,
+          r,
+          summary: reviewSummary("life_report", r, r.life, { locale: r.locale }),
+          content: r.life && { facts: r.life.facts, layers: r.life.held_layers },
+        }
+      );
+    }
+    return undefined;
+  }
+
+  /**
+   * GET  /v1/admin/reviews                      everything held, newest first
+   * GET  /v1/admin/reviews/{kind}/{id}          one item with its held content
+   * POST /v1/admin/reviews/{kind}/{id}          { decision: approve | reject, note? }
+   * Approve releases manual_review items only: rule-layer blocks are hard violations.
+   */
+  async function reviews(req: IncomingMessage, res: ServerResponse, path: string, who: string) {
+    if (path === "/v1/admin/reviews" && req.method === "GET") {
+      const h = await store.listHeld();
+      const items = [
+        ...h.reports.map((r) =>
+          reviewSummary("report", r, r.report, { locale: r.locale, topics: r.topics }),
+        ),
+        ...h.remedies.map((r) =>
+          reviewSummary("remedy", r, r.remedy, { topic: r.topic, locked: !r.unlocked }),
+        ),
+        ...h.life.map((r) => reviewSummary("life_report", r, r.life, { locale: r.locale })),
+      ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+      return send(res, 200, { items });
+    }
+    const m = /^\/v1\/admin\/reviews\/(report|remedy|life_report)\/([^/]+)$/.exec(path);
+    const item = m ? await heldItem(m[1]!, m[2]!) : undefined;
+    if (!item || !["manual_review", "blocked"].includes(item.r.status)) {
+      throw new HttpError(404, "no held item with that id");
+    }
+    if (req.method === "GET")
+      return send(res, 200, { ...item.summary, content: item.content ?? null });
+    if (req.method !== "POST") throw new HttpError(405, "method not allowed");
+
+    const body = (await readJson(req)) as { decision?: unknown; note?: unknown };
+    if (body.decision !== "approve" && body.decision !== "reject") {
+      throw new InputError("decision must be approve or reject");
+    }
+    if (body.decision === "approve" && item.r.status !== "manual_review") {
+      throw new HttpError(
+        409,
+        "only manual_review items can be released; rule-layer blocks can only be rejected",
+      );
+    }
+    if (body.decision === "approve" && !item.content)
+      throw new HttpError(409, "nothing to release");
+    const review: ReviewDecision = {
+      decision: body.decision,
+      by: who,
+      at: now().toISOString(),
+      ...(typeof body.note === "string" &&
+        body.note.trim() && { note: body.note.trim().slice(0, 500) }),
+    };
+    const status = body.decision === "approve" ? ("passed" as const) : ("blocked" as const);
+    const ts = now().toISOString();
+    if (item.kind === "report") {
+      const rep = item.r.report!;
+      await store.putReport({
+        ...item.r,
+        status,
+        review,
+        updated_at: ts,
+        report:
+          status === "passed"
+            ? { ...rep, status, layers: rep.held_layers, held_layers: undefined }
+            : rep,
+      });
+    } else if (item.kind === "remedy") {
+      const rem = item.r.remedy!;
+      await store.putRemedy({
+        ...item.r,
+        status,
+        review,
+        updated_at: ts,
+        remedy:
+          status === "passed"
+            ? { ...rem, status, content: rem.held_content, held_content: undefined }
+            : rem,
+      });
+    } else {
+      const life = item.r.life!;
+      await store.putLifeReport({
+        ...item.r,
+        status,
+        review,
+        updated_at: ts,
+        life:
+          status === "passed"
+            ? { ...life, status, layers: life.held_layers, held_layers: undefined }
+            : life,
+      });
+    }
+    log(`review ${item.kind} ${item.r.id}: ${review.decision} by ${who}`);
+    const after = await heldItem(item.kind, item.r.id);
+    return send(res, 200, after!.summary);
+  }
+
   async function createReport(req: IncomingMessage, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
     const chartId = body.chart_id;
@@ -636,6 +827,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           prohibited_patterns: loadRuleSet().version,
           tzdb: process.versions.tz ?? "unknown",
         },
+        // Visible so nobody mistakes a paused review for a working one.
+        content_review: opts.review === false ? "paused" : "on",
       });
     }
 
@@ -715,7 +908,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // ---- account ----
     if (path === "/v1/me" && req.method === "GET") {
       if (!auth) throw new HttpError(404, "auth not configured");
-      return send(res, 200, publicUser((await auth.users.get(c.user))!));
+      return send(res, 200, {
+        ...publicUser((await auth.users.get(c.user))!),
+        role: opts.review !== false && (await reviewer(c)) ? "admin" : "user",
+      });
     }
     if (path === "/v1/account" && req.method === "DELETE") {
       if (!auth) throw new HttpError(404, "auth not configured");
@@ -727,6 +923,14 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         deleted: { account: true, ...deleted },
         completed_at: now().toISOString(),
       });
+    }
+
+    // ---- 内容审核: reviewers only ----
+    if (path === "/v1/admin/reviews" || path.startsWith("/v1/admin/reviews/")) {
+      const who = await reviewer(c);
+      if (opts.review === false) throw new HttpError(404, "content review is paused");
+      if (!who) throw new HttpError(403, "reviewers only");
+      return reviews(req, res, path, who);
     }
 
     // ---- 一生运势报告 ----

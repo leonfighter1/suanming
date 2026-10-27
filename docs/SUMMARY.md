@@ -48,3 +48,4 @@ formal legal review (`legal_review: provisional` for now). See [phase-0-gate.md]
 3. Apple / Google developer accounts and client ids.
 4. Whether the App keeps raw birth data on the device for re-computation ([data-retention.md](data-retention.md)).
 5. The 子时 school default (`ziHourSect`) and the ADR sign-offs.
+6. **Legal & obligations (later):** re-enable content review (`MINGLI_REVIEW=on`: rule-layer holds, guard, 内容审核 console), with legal review of the paid 破除运势 / 一生运势报告 models and of serving mainland China.

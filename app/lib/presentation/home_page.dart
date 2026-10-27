@@ -8,6 +8,7 @@ import 'bazi_form_page.dart';
 import 'design.dart';
 import 'history_page.dart';
 import 'profiles_page.dart';
+import 'review_page.dart';
 import 'tarot_page.dart';
 
 void push(BuildContext context, Widget page) =>
@@ -111,6 +112,7 @@ class _MoreMenu extends ConsumerWidget {
         'profiles' => push(context, const ProfilesPage()),
         'history' => push(context, const HistoryPage()),
         'account' => push(context, const AccountPage()),
+        'review' => push(context, const ReviewPage()),
         'zh-Hant' => ref.read(settingsProvider.notifier).setLocale(zhHant),
         'zh-Hans' => ref.read(settingsProvider.notifier).setLocale(zhHans),
         'en' => ref.read(settingsProvider.notifier).setLocale(const Locale('en')),
@@ -120,6 +122,9 @@ class _MoreMenu extends ConsumerWidget {
         _item('profiles', Icons.people_alt_outlined, l10n.profiles, key: const Key('menu-profiles')),
         _item('history', Icons.history, l10n.history),
         _item('account', Icons.person_outline, l10n.account, key: const Key('open-account')),
+        // 内容审核: reviewers only (the server decides who is one).
+        if (ref.read(authProvider).value?.isReviewer ?? false)
+          _item('review', Icons.fact_check_outlined, l10n.reviewTitle, key: const Key('open-review')),
         const PopupMenuDivider(),
         for (final (code, label) in [('zh-Hans', '简体中文'), ('zh-Hant', '繁體中文'), ('en', 'English')])
           CheckedPopupMenuItem(value: code, checked: settings.apiLocaleCode == code, child: Text(label)),

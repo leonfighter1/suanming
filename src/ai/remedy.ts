@@ -43,6 +43,8 @@ export interface Remedy {
   topic: Topic;
   locale: Locale;
   created_at: string;
+  /** Kept when held, for the review console; never shown unless released. */
+  held_content?: RemedyContent & { closing: string };
   /** Only for "passed" */
   content?: RemedyContent & { closing: string };
   compliance: { rule_violations: Violation[]; review?: GuardOutput; term_fixes: string[] };
@@ -74,10 +76,10 @@ export const remedySchema = {
 
 const CLOSING: Record<Locale, string> = {
   "zh-Hant":
-    "以上為傳統命理文化中的調和做法，僅供參考，不保證任何結果；涉及健康、財務或法律的決定，請諮詢相關專業人士。",
+    "以上為傳統命理中的調和做法，僅供娛樂和玄學學習使用，不保證任何結果；涉及健康、財務或法律的決定，請諮詢相關專業人士。",
   "zh-Hans":
-    "以上为传统命理文化中的调和做法，仅供参考，不保证任何结果；涉及健康、财务或法律的决定，请咨询相关专业人士。",
-  en: "These are traditional balancing practices offered for reflection only; no outcome is guaranteed. For health, financial or legal decisions, consult a qualified professional.",
+    "以上为传统命理中的调和做法，仅供娱乐和玄学学习使用，不保证任何结果；涉及健康、财务或法律的决定，请咨询相关专业人士。",
+  en: "These are traditional balancing practices for entertainment and metaphysics study only; no outcome is guaranteed. For health, financial or legal decisions, consult a qualified professional.",
 };
 
 export async function generateRemedy(
@@ -132,6 +134,7 @@ export async function generateRemedy(
     schema: remedySchema,
     payload: { topic, system: chart.system },
     maxRetries: deps.maxRetries ?? 1,
+    enforce: deps.review !== false,
     onProgress: deps.onProgress,
     user: (feedback) =>
       remedyUser({
@@ -190,41 +193,50 @@ export async function generateRemedy(
     reasons.push(plan.reason);
     ruleViolations.push(...plan.block);
   } else {
-    ruleViolations.push(...plan.review);
-    const guard = await runAgent<GuardOutput>({
-      agent: "guard",
-      ...providerFor("guard"),
-      schema: guardSchema,
-      payload: plan.value,
-      maxRetries: 0,
-      onProgress: deps.onProgress,
-      user: () =>
-        guardUser({
-          facts,
-          region: {
-            code: opts.country.toUpperCase(),
-            name: region.name,
-            rule_groups: region.rule_groups,
-          },
-          draft: { remedy_plan: plan.value },
-          context: opts.context,
-          trend,
-          today: todayLine(now),
-        }),
-      check: (value) => ({ value, feedback: [], block: [], review: [] }),
-    });
-    traces.push(guard.trace);
-    if (!guard.ok) {
-      status = "manual_review";
-      reasons.push(guard.reason);
-    } else {
-      review = guard.value;
-      if (!review.pass) {
+    ruleViolations.push(...plan.review, ...plan.block);
+    const guard =
+      deps.review === false
+        ? undefined
+        : await runAgent<GuardOutput>({
+            agent: "guard",
+            ...providerFor("guard"),
+            schema: guardSchema,
+            payload: plan.value,
+            maxRetries: 0,
+            onProgress: deps.onProgress,
+            user: () =>
+              guardUser({
+                facts,
+                region: {
+                  code: opts.country.toUpperCase(),
+                  name: region.name,
+                  rule_groups: region.rule_groups,
+                },
+                draft: { remedy_plan: plan.value },
+                context: opts.context,
+                trend,
+                today: todayLine(now),
+              }),
+            check: (value) => ({ value, feedback: [], block: [], review: [] }),
+          });
+    if (guard) {
+      traces.push(guard.trace);
+      if (!guard.ok) {
         status = "manual_review";
-        reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
+        reasons.push(guard.reason);
+      } else {
+        review = guard.value;
+        if (!review.pass) {
+          status = "manual_review";
+          reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
+        }
       }
     }
-    if (status === "passed" && ruleViolations.some((v) => v.action === "review")) {
+    if (
+      deps.review !== false &&
+      status === "passed" &&
+      ruleViolations.some((v) => v.action === "review")
+    ) {
       status = "manual_review";
       reasons.push("rule layer: review-level patterns present");
     }
@@ -237,6 +249,10 @@ export async function generateRemedy(
     locale,
     created_at: now.toISOString(),
     ...(status === "passed" && plan.ok && { content: { ...plan.value, closing: CLOSING[locale] } }),
+    ...(status !== "passed" &&
+      (plan.ok ? plan.value : plan.held) && {
+        held_content: { ...(plan.ok ? plan.value : plan.held)!, closing: CLOSING[locale] },
+      }),
     compliance: {
       rule_violations: ruleViolations,
       ...(review && { review }),

@@ -17,6 +17,14 @@ export interface ChartRecord {
 
 export type ReportRecordStatus = "pending" | "passed" | "blocked" | "manual_review" | "failed";
 
+/** A reviewer's decision on held content (内容审核). */
+export interface ReviewDecision {
+  decision: "approve" | "reject";
+  by: string;
+  at: string;
+  note?: string;
+}
+
 export interface ReportRecord {
   id: string;
   owner: string;
@@ -30,6 +38,7 @@ export interface ReportRecord {
   error?: string;
   /** Live stage while pending (pipeline onProgress). */
   progress?: { stage: AgentName; attempt: number; updated_at: string };
+  review?: ReviewDecision;
   /** What the user told us (kept for this report's 破除運勢 plans; deleted with the account). */
   context?: UserContext;
 }
@@ -51,6 +60,7 @@ export interface RemedyRecord {
   /** Set on purchase. */
   payment?: { status: "placeholder"; amount: number; currency: string };
   remedy?: Remedy;
+  review?: ReviewDecision;
   error?: string;
   progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
@@ -65,6 +75,7 @@ export interface LifeReportRecord {
   created_at: string;
   updated_at: string;
   life?: LifeReport;
+  review?: ReviewDecision;
   error?: string;
   progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
@@ -82,6 +93,12 @@ export interface Store {
   getRemedy(id: string): Promise<RemedyRecord | undefined>;
   /** Oldest first. */
   listRemedies(reportId: string): Promise<RemedyRecord[]>;
+  /** Everything held for review (manual_review / blocked), newest first, all owners. */
+  listHeld(): Promise<{
+    reports: ReportRecord[];
+    remedies: RemedyRecord[];
+    life: LifeReportRecord[];
+  }>;
   putLifeReport(r: LifeReportRecord): Promise<void>;
   getLifeReport(id: string): Promise<LifeReportRecord | undefined>;
   /** Newest first. */
@@ -97,6 +114,23 @@ export class InMemoryStore implements Store {
   private reports = new Map<string, ReportRecord>();
   private remedies = new Map<string, RemedyRecord>();
   private lifeReports = new Map<string, LifeReportRecord>();
+  async listHeld() {
+    const held = (s: ReportRecordStatus) => s === "manual_review" || s === "blocked";
+    return {
+      reports: newest(
+        [...this.reports.values()].filter((r) => held(r.status)),
+        500,
+      ),
+      remedies: newest(
+        [...this.remedies.values()].filter((r) => held(r.status)),
+        500,
+      ),
+      life: newest(
+        [...this.lifeReports.values()].filter((r) => held(r.status)),
+        500,
+      ),
+    };
+  }
   async putLifeReport(r: LifeReportRecord) {
     this.lifeReports.set(r.id, structuredClone(r));
   }

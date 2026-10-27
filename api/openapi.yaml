@@ -417,6 +417,86 @@ paths:
               schema: { type: object }
         "400": { $ref: "#/components/responses/Problem" }
 
+  /v1/admin/reviews:
+    get:
+      tags: [ops]
+      operationId: listReviews
+      summary: 内容审核 — everything the compliance checks held (reviewers only)
+      description: |
+        Reviewers are the logins in MINGLI_ADMINS (`/v1/me` returns role=admin).
+        Items show why they were held (status reasons, rule hits, the AI
+        reviewer's findings with the quoted sentence) and a short owner id only.
+      responses:
+        "200":
+          description: Held reports, 破除运势 plans and life reports, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/ReviewItem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/reviews/{kind}/{id}:
+    parameters:
+      - name: kind
+        in: path
+        required: true
+        schema: { type: string, enum: [report, remedy, life_report] }
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [ops]
+      operationId: getReview
+      summary: One held item with the content that would be released
+      responses:
+        "200":
+          description: Item with `content`
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ReviewItem"
+                  - type: object
+                    properties:
+                      content: { type: [object, "null"] }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [ops]
+      operationId: decideReview
+      summary: Release (approve) or reject a held item
+      description: |
+        approve is allowed only for manual_review items: it releases the held
+        content to its user. Rule-layer blocks are hard violations and can only be
+        rejected (409 otherwise). Every decision records reviewer, time and note.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [approve, reject] }
+                note: { type: string, maxLength: 500 }
+      responses:
+        "200":
+          description: The item after the decision
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReviewItem" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+
   /v1/life-reports:
     post:
       tags: [reports]
@@ -765,6 +845,10 @@ components:
           type: array
           items: { type: string, enum: [password, apple, google] }
         created_at: { type: string, format: date-time }
+        role:
+          type: string
+          enum: [user, admin]
+          description: admin = 内容审核 reviewer (MINGLI_ADMINS); returned by /v1/me
     Problem:
       type: object
       required: [type, title, status]
@@ -957,6 +1041,44 @@ components:
                 total: { type: integer, minimum: 0, maximum: 100 }
                 method_note: { type: string }
         ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
+
+    ReviewItem:
+      type: object
+      required: [kind, id, status, created_at, updated_at, owner, reasons, rule_hits, guard]
+      properties:
+        kind: { type: string, enum: [report, remedy, life_report] }
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [manual_review, blocked, passed] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        owner: { type: string, description: First 8 characters of the owner id }
+        locale: { type: string }
+        topics: { type: array, items: { $ref: "#/components/schemas/Topic" } }
+        topic: { $ref: "#/components/schemas/Topic" }
+        reasons: { type: array, items: { type: string } }
+        rule_hits:
+          type: array
+          items:
+            type: object
+            properties:
+              rule_id: { type: string }
+              match: { type: string }
+              action: { type: string, enum: [block, review] }
+        guard:
+          type: array
+          items:
+            type: object
+            properties:
+              category: { type: string }
+              quote: { type: string }
+              reason: { type: string }
+        decision:
+          type: object
+          properties:
+            decision: { type: string, enum: [approve, reject] }
+            by: { type: string }
+            at: { type: string, format: date-time }
+            note: { type: string }
 
     LifeReport:
       type: object

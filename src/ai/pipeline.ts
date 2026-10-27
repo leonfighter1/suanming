@@ -72,6 +72,13 @@ export interface PipelineDeps {
   routing?: RoutingTable;
   now?: () => Date;
   maxRetries?: number;
+  /**
+   * Content review: rule-layer holds and rewrites, the guard model and manual
+   * review. Default true. false = paused (owner decision 2026-10-26, a later
+   * legal & obligations item): rule hits are still scanned and recorded on the
+   * output for audit, but nothing is held, rewritten or sent to the guard.
+   */
+  review?: boolean;
   newId?: () => string;
   /** Called when an agent starts an attempt, so callers can show live progress. */
   onProgress?: (p: Progress) => void | Promise<void>;
@@ -110,6 +117,12 @@ export interface Report {
     trend?: TrendLayer;
   };
   draft?: { interpretation?: NarrativeOutput["sections"]; actions?: ActionOutput["actions"] };
+  /**
+   * What the layers would have been, kept when the report is held (manual_review /
+   * blocked) so a reviewer can read it and, for manual_review, release it. Never
+   * sent to the user unless released.
+   */
+  held_layers?: Report["layers"];
   ai_disclosure: {
     generated: true;
     model: string;
@@ -175,6 +188,8 @@ export async function runAgent<T>(args: {
   check: (data: T) => CheckResult<T>;
   maxRetries: number;
   onProgress?: PipelineDeps["onProgress"];
+  /** false: rule hits are recorded but cause no rewrite or hold (review paused). */
+  enforce?: boolean;
 }): Promise<AgentOutcome<T>> {
   const prompt = PROMPTS[args.agent];
   const trace: AgentTrace = {
@@ -222,19 +237,31 @@ export async function runAgent<T>(args: {
     last = args.check(res.data as T);
     feedback = [
       ...last.feedback,
-      ...last.block.map(
+      ...(args.enforce === false ? [] : last.block).map(
         (v) => `The text "${v.match}" breaks content rule ${v.rule_id}. Rephrase without it.`,
       ),
     ];
     if (feedback.length === 0) {
-      return { ok: true, value: last.value, block: [], review: last.review, trace };
+      return {
+        ok: true,
+        value: last.value,
+        block: args.enforce === false ? last.block : [],
+        review: last.review,
+        trace,
+      };
     }
     trace.problems.push(...feedback);
   }
 
-  if (last && last.block.length === 0) {
-    // Only soft problems (grounding/coverage) remain: accept the cleaned value.
-    return { ok: true, value: last.value, block: [], review: last.review, trace };
+  if (last && (last.block.length === 0 || args.enforce === false)) {
+    // Only soft problems (grounding/coverage) remain, or review is paused: accept the cleaned value.
+    return {
+      ok: true,
+      value: last.value,
+      block: args.enforce === false ? last.block : [],
+      review: last.review,
+      trace,
+    };
   }
   return {
     ok: false,
@@ -277,6 +304,7 @@ export async function generateReport(
 ): Promise<Report> {
   const now = deps.now?.() ?? new Date();
   const maxRetries = deps.maxRetries ?? 1;
+  const enforce = deps.review !== false;
   const routing = deps.routing ?? loadRouting();
 
   if (!LOCALES.includes(opts.locale))
@@ -321,6 +349,7 @@ export async function generateReport(
         schema: trendSchema(topics),
         payload: periods,
         maxRetries,
+        enforce,
         user: (feedback) => trendUser({ facts, periods, locale: opts.locale, glossary, feedback }),
         check: (data) => {
           const { value, feedback } = checkTrend(chart, topics, data);
@@ -347,6 +376,7 @@ export async function generateReport(
     schema: narrativeSchema(topics),
     payload: { topics, system: chart.system },
     maxRetries,
+    enforce,
     onProgress: deps.onProgress,
     user: (feedback) =>
       narrativeUser({
@@ -411,7 +441,7 @@ export async function generateReport(
     traces.push(trendDone.trace);
     if (trendDone.ok) {
       trend = trendDone.value;
-      ruleViolations.push(...trendDone.review);
+      ruleViolations.push(...trendDone.review, ...trendDone.block);
     } else reasons.push(`trend omitted: ${trendDone.reason}`);
   }
 
@@ -424,7 +454,7 @@ export async function generateReport(
     reasons.push(narrative.reason);
     ruleViolations.push(...narrative.block);
   } else {
-    ruleViolations.push(...narrative.review);
+    ruleViolations.push(...narrative.review, ...narrative.block);
 
     // 3. Action
     const action = await runAgent<ActionOutput>({
@@ -433,6 +463,7 @@ export async function generateReport(
       schema: actionSchema(topics),
       payload: { topics },
       maxRetries,
+      enforce,
       onProgress: deps.onProgress,
       user: (feedback) =>
         actionUser({
@@ -471,9 +502,10 @@ export async function generateReport(
       ruleViolations.push(...action.block);
     } else {
       actions = action.value;
-      ruleViolations.push(...action.review);
+      ruleViolations.push(...action.review, ...action.block);
 
-      // 4. Model review layer — only for drafts the rule layer already passed.
+      // 4. Model review layer — only for drafts the rule layer already passed,
+      //    and only while review is on.
       const draft = {
         interpretation: narrative.value.sections,
         actions: actions.actions,
@@ -481,39 +513,43 @@ export async function generateReport(
           trend_notes: [...trend.dayun, ...trend.liunian].map((pt) => pt.note),
         }),
       };
-      const guard = await runAgent<GuardOutput>({
-        agent: "guard",
-        ...providerFor("guard"),
-        schema: guardSchema,
-        payload: draft,
-        maxRetries: 0,
-        onProgress: deps.onProgress,
-        user: () =>
-          guardUser({
-            facts,
-            region: {
-              code: opts.country.toUpperCase(),
-              name: region.name,
-              rule_groups: region.rule_groups,
-            },
-            draft,
-            context: opts.context,
-            today: todayLine(now),
-          }),
-        check: (value) => ({ value, feedback: [], block: [], review: [] }),
-      });
-      traces.push(guard.trace);
-      if (!guard.ok) {
-        status = "manual_review";
-        reasons.push(guard.reason);
-      } else {
-        review = guard.value;
-        if (!review.pass) {
+      const guard = !enforce
+        ? undefined
+        : await runAgent<GuardOutput>({
+            agent: "guard",
+            ...providerFor("guard"),
+            schema: guardSchema,
+            payload: draft,
+            maxRetries: 0,
+            onProgress: deps.onProgress,
+            user: () =>
+              guardUser({
+                facts,
+                region: {
+                  code: opts.country.toUpperCase(),
+                  name: region.name,
+                  rule_groups: region.rule_groups,
+                },
+                draft,
+                context: opts.context,
+                today: todayLine(now),
+              }),
+            check: (value) => ({ value, feedback: [], block: [], review: [] }),
+          });
+      if (guard) {
+        traces.push(guard.trace);
+        if (!guard.ok) {
           status = "manual_review";
-          reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
+          reasons.push(guard.reason);
+        } else {
+          review = guard.value;
+          if (!review.pass) {
+            status = "manual_review";
+            reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
+          }
         }
       }
-      if (status === "passed" && ruleViolations.some((v) => v.action === "review")) {
+      if (enforce && status === "passed" && ruleViolations.some((v) => v.action === "review")) {
         status = "manual_review";
         reasons.push("rule layer: review-level patterns present");
       }
@@ -553,16 +589,18 @@ export async function generateReport(
     },
     agents: traces,
   };
-  if (status === "passed" && interpretation && actions) {
-    report.layers = {
-      facts: chartSummary,
-      interpretation,
-      actions: actions.actions,
-      expectation: expectationLayer(opts.locale, labelRequired),
-      ...(trend && { trend: trendLayer(chart, topics, trend, opts.locale) }),
-    };
-  } else if (opts.includeDraft) {
-    report.draft = { interpretation, actions: actions?.actions };
+  const candidate = interpretation && {
+    facts: chartSummary,
+    interpretation,
+    actions: actions?.actions ?? [],
+    expectation: expectationLayer(opts.locale, labelRequired),
+    ...(trend && { trend: trendLayer(chart, topics, trend, opts.locale) }),
+  };
+  if (status === "passed" && candidate && actions) {
+    report.layers = candidate;
+  } else {
+    if (candidate) report.held_layers = candidate;
+    if (opts.includeDraft) report.draft = { interpretation, actions: actions?.actions };
   }
   return report;
 }

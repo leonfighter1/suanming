@@ -69,6 +69,8 @@ export interface LifeReport {
   created_at: string;
   /** Deterministic: what the methods computed (shown as tables and drawings). */
   facts: ReturnType<typeof lifeFacts>;
+  /** Kept when held, for the review console; never shown unless released. */
+  held_layers?: LifeReport["layers"];
   /** Only for "passed" */
   layers?: {
     methods: LifeMethods;
@@ -232,7 +234,8 @@ export async function generateLifeReport(
     return text;
   };
   const refsOk = (refs: string[]) => refs.filter((r) => resolvePointer(modelInput, r));
-  const common = { maxRetries: deps.maxRetries ?? 1, onProgress: deps.onProgress };
+  const enforce = deps.review !== false;
+  const common = { maxRetries: deps.maxRetries ?? 1, onProgress: deps.onProgress, enforce };
   const user = (part: "methods" | "topics") => (feedback: string[]) =>
     lifeUser({
       part,
@@ -341,10 +344,10 @@ export async function generateLifeReport(
       status = status === "blocked" || part.block.length ? "blocked" : "manual_review";
       reasons.push(part.reason);
       ruleViolations.push(...part.block);
-    } else ruleViolations.push(...part.review);
+    } else ruleViolations.push(...part.review, ...part.block);
   }
 
-  if (methods.ok && topics.ok) {
+  if (enforce && methods.ok && topics.ok) {
     const guard = await runAgent<GuardOutput>({
       agent: "guard",
       ...providerFor("guard"),
@@ -404,12 +407,14 @@ export async function generateLifeReport(
     },
     agents: traces,
   };
-  if (status === "passed" && methods.ok && topics.ok) {
-    report.layers = {
-      methods: methods.value,
-      topics: topics.value.topics,
+  const m = methods.ok ? methods.value : methods.held;
+  const t = topics.ok ? topics.value : topics.held;
+  const candidate = m &&
+    t && {
+      methods: m,
+      topics: t.topics,
       stages: cycles.flatMap((c, i) => {
-        const s = topics.value.stages.find((x) => x.dayun_index === c.index);
+        const s = t.stages.find((x) => x.dayun_index === c.index);
         const next = cycles[i + 1];
         return s
           ? [
@@ -423,10 +428,11 @@ export async function generateLifeReport(
             ]
           : [];
       }),
-      summary: topics.value.summary,
+      summary: t.summary,
       expectation: expectationLayer(opts.locale, labelRequired),
     };
-  }
+  if (status === "passed" && methods.ok && topics.ok && candidate) report.layers = candidate;
+  else if (candidate) report.held_layers = candidate;
   return report;
 }
 

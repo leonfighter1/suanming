@@ -496,8 +496,8 @@
       "closing": "(Demo) Tradition offers this as a prompt for self-reflection."
     },
     "expectation": {
-      "text": "命理内容属文化参考与自我反思，不是对未来的预测，也不构成医疗、财务、法律或心理专业意见。重要决定请咨询相关专业人士。",
-      "ai_label": "本解读由 AI 根据命盘数据生成，仅供参考与自我反思。",
+      "text": "命理内容仅供娱乐和玄学学习使用，不是对未来的预测，也不构成医疗、财务、法律或心理专业意见。重要决定请咨询相关专业人士。",
+      "ai_label": "本解读由 AI 根据命盘数据生成，仅供娱乐和玄学学习使用。",
       "label_required": false
     }
   },

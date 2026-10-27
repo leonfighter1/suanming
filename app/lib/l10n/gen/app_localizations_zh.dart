@@ -22,7 +22,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeTarot => '塔罗';
 
   @override
-  String get homeTarotDesc => '抽一组牌阵，作为自我反思的参考';
+  String get homeTarotDesc => '抽一组牌阵，仅供娱乐和玄学学习使用';
 
   @override
   String get settings => '设置';
@@ -221,7 +221,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get errorTitle => '请求失败';
 
   @override
-  String get disclaimerShort => '文化参考和自我反思，不是预测。';
+  String get disclaimerShort => '仅供娱乐和玄学学习使用，不是预测。';
 
   @override
   String get signIn => '登录';
@@ -679,7 +679,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lifeGanzhi => '生辰干支';
 
   @override
-  String get lifeNote => '说明：本报告依传统术数推演，属传统文化参考，不是科学预测。三种方法各自独立推演，最后再合看。';
+  String get lifeNote => '说明：本报告依传统术数推演，仅供娱乐和玄学学习使用，不是科学预测。三种方法各自独立推演，最后再合看。';
 
   @override
   String get lifeSec1 => '一、易经本命卦';
@@ -871,6 +871,63 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lifeWuxing => '五行';
+
+  @override
+  String get reviewTitle => '内容审核';
+
+  @override
+  String get reviewEmpty => '目前没有待审核的内容。';
+
+  @override
+  String get reviewHint => '这里是被合规检查拦下的内容。确认没有问题才通过；规则层拦截的只能查看或驳回。';
+
+  @override
+  String get kindReport => 'AI 解读';
+
+  @override
+  String get kindRemedy => '破除运势方案';
+
+  @override
+  String get kindLife => '一生运势报告';
+
+  @override
+  String get reviewHeld => '待审核';
+
+  @override
+  String get reviewBlocked => '规则层拦截';
+
+  @override
+  String get reviewReasons => '拦截原因';
+
+  @override
+  String get reviewRuleHits => '规则命中';
+
+  @override
+  String get reviewGuard => 'AI 审核意见';
+
+  @override
+  String get reviewContent => '内容';
+
+  @override
+  String get reviewNote => '审核备注（可选）';
+
+  @override
+  String get reviewApprove => '通过并发布';
+
+  @override
+  String get reviewReject => '驳回';
+
+  @override
+  String get reviewBlockedOnly => '规则层拦截属于硬性违规，只能驳回，不能发布。';
+
+  @override
+  String get reviewApproved => '已通过并发布给用户';
+
+  @override
+  String get reviewRejected => '已驳回';
+
+  @override
+  String get reviewNoContent => '这条没有保留内容。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -890,7 +947,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get homeTarot => '塔羅';
 
   @override
-  String get homeTarotDesc => '抽一組牌陣，作為自我反思的參考';
+  String get homeTarotDesc => '抽一組牌陣，僅供娛樂和玄學學習使用';
 
   @override
   String get settings => '設定';
@@ -1089,7 +1146,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get errorTitle => '無法完成請求';
 
   @override
-  String get disclaimerShort => '文化參考與自我反思，並非預測。';
+  String get disclaimerShort => '僅供娛樂和玄學學習使用，並非預測。';
 
   @override
   String get signIn => '登入';
@@ -1547,7 +1604,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get lifeGanzhi => '生辰干支';
 
   @override
-  String get lifeNote => '說明：本報告依傳統術數推演，屬傳統文化參考，不是科學預測。三種方法各自獨立推演，最後再合看。';
+  String get lifeNote => '說明：本報告依傳統術數推演，僅供娛樂和玄學學習使用，不是科學預測。三種方法各自獨立推演，最後再合看。';
 
   @override
   String get lifeSec1 => '一、易經本命卦';
@@ -1739,4 +1796,61 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get lifeWuxing => '五行';
+
+  @override
+  String get reviewTitle => '內容審核';
+
+  @override
+  String get reviewEmpty => '目前沒有待審核的內容。';
+
+  @override
+  String get reviewHint => '這裡是被合規檢查攔下的內容。確認沒有問題才通過；規則層攔截的只能查看或駁回。';
+
+  @override
+  String get kindReport => 'AI 解讀';
+
+  @override
+  String get kindRemedy => '破除運勢方案';
+
+  @override
+  String get kindLife => '一生運勢報告';
+
+  @override
+  String get reviewHeld => '待審核';
+
+  @override
+  String get reviewBlocked => '規則層攔截';
+
+  @override
+  String get reviewReasons => '攔截原因';
+
+  @override
+  String get reviewRuleHits => '規則命中';
+
+  @override
+  String get reviewGuard => 'AI 審核意見';
+
+  @override
+  String get reviewContent => '內容';
+
+  @override
+  String get reviewNote => '審核備註（可選）';
+
+  @override
+  String get reviewApprove => '通過並發布';
+
+  @override
+  String get reviewReject => '駁回';
+
+  @override
+  String get reviewBlockedOnly => '規則層攔截屬於硬性違規，只能駁回，不能發布。';
+
+  @override
+  String get reviewApproved => '已通過並發布給用戶';
+
+  @override
+  String get reviewRejected => '已駁回';
+
+  @override
+  String get reviewNoContent => '這條沒有保留內容。';
 }

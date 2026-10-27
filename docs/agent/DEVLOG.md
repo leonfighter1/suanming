@@ -2,6 +2,13 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (n): review console, then review paused; disclaimer wording
+
+- Asked what "团队审核" is: readings the rule layer / guard held (manual_review, blocked). There was no review tool and held text was discarded.
+- Built 内容审核: held content is kept (held_layers / held_content), reviewers (MINGLI_ADMINS) list items with reasons, rule hits and the guard's quoted findings, and approve (manual_review only) or reject with a recorded decision; app page for reviewers.
+- Owner decision right after: pause all content review until the legal & obligations work. `review: false` (default in npm run api / public; MINGLI_REVIEW=on re-enables): no guard call, rule hits recorded but never rewrite or hold, the console closed (role stays user, endpoints 404), /v1/health shows content_review: paused. Tests run with review on; review-paused.test.ts covers paused mode.
+- Disclaimer wording (owner): 「文化参考与自我反思」 → 「仅供娱乐和玄学学习使用」 in the app copy, the expectation footer, the AI label (ai_disclosure_spec.md), the 一生运势报告 note and the 破除运势 closing; the new wording is an allow-case in compliance-cases.yaml.
+
 ## 2026-10-26 (m): 一生运势报告
 
 - Owner request: a whole-life report section, downloadable as a package, modelled on the owner's sample (吴勇, 1987-11-23 03:30, 江苏靖江).
