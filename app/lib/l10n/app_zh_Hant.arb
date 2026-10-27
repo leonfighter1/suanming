@@ -2,7 +2,7 @@
   "@@locale": "zh_Hant",
   "appTitle": "命理大師",
   "homeBazi": "八字排盤",
-  "homeBaziDesc": "依出生時間排出四柱、大運與流年",
+  "homeBaziDesc": "依出生時間排出四柱、大運與流年，也可以生成一生運勢報告",
   "homeTarot": "塔羅",
   "homeTarotDesc": "抽一組牌陣，僅供娛樂和玄學學習使用",
   "settings": "設定",
@@ -294,5 +294,8 @@
   "reviewBlockedOnly": "規則層攔截屬於硬性違規，只能駁回，不能發布。",
   "reviewApproved": "已通過並發布給用戶",
   "reviewRejected": "已駁回",
-  "reviewNoContent": "這條沒有保留內容。"
+  "reviewNoContent": "這條沒有保留內容。",
+  "modeChart": "排盤解讀",
+  "addTester": "新增測試者",
+  "editCurrent": "編輯「{name}」的資料"
 }

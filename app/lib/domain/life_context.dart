@@ -52,10 +52,14 @@ class LifeContext {
       residence == null && marital == null && children == null && (occupation ?? '').isEmpty && (family ?? '').isEmpty && (concern ?? '').isEmpty;
 
   /// The request's `context`, or null when there is nothing to send.
-  Map<String, Object?>? toApi({required String name, required String locale}) {
+  ///
+  /// [birthplace] is the picked birthplace's label: the chart only receives its
+  /// timezone and longitude, so this is how the reading knows where it is.
+  Map<String, Object?>? toApi({required String name, required String locale, String? birthplace}) {
     String? t(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
     final m = <String, Object?>{
       if (useName && name.trim().isNotEmpty) 'name': name.trim(),
+      'birthplace': ?t(birthplace),
       if (residence != null) 'residence': residence!.label(locale),
       'marital': ?marital,
       'children': ?children,

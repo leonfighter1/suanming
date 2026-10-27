@@ -35,8 +35,9 @@ class LifeReportPage extends ConsumerWidget {
     final locale = ref.watch(settingsProvider).apiLocaleCode;
     final hant = locale == 'zh-Hant';
     final names = ref.watch(profilesProvider).value?.chartLabels ?? const {};
+    final places = ref.watch(profilesProvider).value?.chartPlaces ?? const {};
     final ready = view != null && view.status == 'passed' && view.layers != null && chart != null;
-    final header = ready ? _header(l10n, view, chart, names[view.chartId], hant, locale) : null;
+    final header = ready ? _header(l10n, view, chart, names[view.chartId], places[view.chartId], hant, locale) : null;
 
     Future<(String, String)> build() async {
       final lunar = chart!.bazi.lunar;
@@ -130,7 +131,7 @@ class LifeReportPage extends ConsumerWidget {
     );
   }
 
-  LifeHeader _header(AppLocalizations l10n, LifeReportView v, ChartResult chart, String? label, bool hant, String locale) {
+  LifeHeader _header(AppLocalizations l10n, LifeReportView v, ChartResult chart, String? label, String? place, bool hant, String locale) {
     final b = chart.bazi;
     final f = v.facts!;
     final hour = b.pillars['hour']!.zhi;
@@ -146,7 +147,7 @@ class LifeReportPage extends ConsumerWidget {
       lunar:
           '${b.lunar.year} 年 ${b.lunar.yearGanzhi}年 ${b.lunar.isLeapMonth ? (hant ? '閏' : '闰') : ''}${b.lunar.monthName}${b.lunar.dayName} $hour$shi（${hant ? '約' : '约'} ${two(civil.hour)}:${two(civil.minute)}）',
       solar: '${civil.year} 年 ${civil.month} 月 ${civil.day} 日',
-      place: profile?.birthPlace.label(locale) ?? '—',
+      place: profile?.birthPlace.label(locale) ?? place ?? '—',
       trueSolar: f.trueSolar ? '${hant ? '約' : '约'} $clock，${hant ? '屬' : '属'}$hour$shi（$range）' : '—',
       ganzhi: [
         '${b.pillars['year']!.ganzhi}年',
@@ -987,7 +988,7 @@ Future<void> startLifeReport(BuildContext context, WidgetRef ref, {required Char
         .createLifeReport(
           chartId: chart.chartId,
           locale: locale,
-          context: profile?.life.toApi(name: profile.name, locale: locale),
+          context: profile?.life.toApi(name: profile.name, locale: locale, birthplace: profile.birthPlace.label(locale)),
         );
     ref.invalidate(lifeReportsProvider);
     await navigator.push(

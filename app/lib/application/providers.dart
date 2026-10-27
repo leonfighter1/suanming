@@ -197,13 +197,16 @@ class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
   Future<void> remove(String id) async {
     final list = _book.profiles.where((p) => p.id != id).toList();
     final def = _book.defaultId == id ? (list.isEmpty ? null : list.first.id) : _book.defaultId;
-    await _save(ProfileBook(profiles: list, defaultId: def, chartLabels: _book.chartLabels));
+    await _save(ProfileBook(profiles: list, defaultId: def, chartLabels: _book.chartLabels, chartPlaces: _book.chartPlaces));
   }
 
   Future<void> setDefault(String id) => _save(_book.copyWith(defaultId: id));
 
-  Future<void> labelChart(String chartId, String name) =>
-      _save(_book.copyWith(chartLabels: {..._book.chartLabels, chartId: name}));
+  /// Remembers whose chart it is and where they were born (device only).
+  Future<void> labelChart(String chartId, String name, {String? place}) => _save(_book.copyWith(
+        chartLabels: {..._book.chartLabels, if (name.isNotEmpty) chartId: name},
+        chartPlaces: {..._book.chartPlaces, if (place != null && place.isNotEmpty) chartId: place},
+      ));
 }
 
 final profilesProvider = AsyncNotifierProvider<ProfilesNotifier, ProfileBook>(ProfilesNotifier.new);

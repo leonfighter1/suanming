@@ -16,7 +16,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeBazi => '八字排盘';
 
   @override
-  String get homeBaziDesc => '根据出生时间排出四柱、大运和流年';
+  String get homeBaziDesc => '根据出生时间排出四柱、大运和流年，也可以生成一生运势报告';
 
   @override
   String get homeTarot => '塔罗';
@@ -928,6 +928,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reviewNoContent => '这条没有保留内容。';
+
+  @override
+  String get modeChart => '排盘解读';
+
+  @override
+  String get addTester => '添加新的测试者';
+
+  @override
+  String editCurrent(String name) {
+    return '编辑“$name”的资料';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -941,7 +952,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get homeBazi => '八字排盤';
 
   @override
-  String get homeBaziDesc => '依出生時間排出四柱、大運與流年';
+  String get homeBaziDesc => '依出生時間排出四柱、大運與流年，也可以生成一生運勢報告';
 
   @override
   String get homeTarot => '塔羅';
@@ -1853,4 +1864,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get reviewNoContent => '這條沒有保留內容。';
+
+  @override
+  String get modeChart => '排盤解讀';
+
+  @override
+  String get addTester => '新增測試者';
+
+  @override
+  String editCurrent(String name) {
+    return '編輯「$name」的資料';
+  }
 }

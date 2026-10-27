@@ -57,7 +57,7 @@ void main() {
     expect(md, contains(view.layers!.aiLabel));
   });
 
-  testWidgets('home → 一生运势报告 → the form → the report with all six sections', (tester) async {
+  testWidgets('八字排盘 → switch to 一生运势报告 → the report with all six sections', (tester) async {
     tester.view.physicalSize = const Size(1000, 2600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -65,7 +65,12 @@ void main() {
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
     await settle(tester);
 
-    await tester.tap(find.byKey(const Key('entry-life')));
+    // The life report lives inside 八字排盘 now: no separate home card.
+    expect(find.byKey(const Key('entry-life')), findsNothing);
+    await tester.tap(find.byKey(const Key('entry-bazi')));
+    await settle(tester);
+    expect(find.text('排盘'), findsOneWidget); // chart mode first
+    await tester.tap(find.text('一生运势报告'));
     await settle(tester);
     expect(find.text('生成一生运势报告'), findsOneWidget);
     await tester.scrollUntilVisible(find.byKey(const Key('compute-chart')), 300, scrollable: mainScrollable);

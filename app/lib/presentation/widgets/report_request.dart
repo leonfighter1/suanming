@@ -10,7 +10,7 @@ import '../report_page.dart';
 
 /// Topic picker + "generate AI reading" button for a computed chart.
 class ReportRequest extends ConsumerStatefulWidget {
-  const ReportRequest({super.key, required this.chartId, required this.system, this.title, this.context});
+  const ReportRequest({super.key, required this.chartId, required this.system, this.title, this.context, this.place});
   final String chartId;
   final String system;
 
@@ -19,6 +19,9 @@ class ReportRequest extends ConsumerStatefulWidget {
 
   /// Shown on the report page and in exports (e.g. 「小明 的命盤」).
   final String? title;
+
+  /// Birthplace label, shown on the report.
+  final String? place;
 
   @override
   ConsumerState<ReportRequest> createState() => _ReportRequestState();
@@ -43,7 +46,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
           );
       ref.invalidate(historyProvider);
       await navigator.push(
-        MaterialPageRoute<void>(builder: (_) => ReportPage(reportId: report.id, title: widget.title)),
+        MaterialPageRoute<void>(builder: (_) => ReportPage(reportId: report.id, title: widget.title, place: widget.place)),
       );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));

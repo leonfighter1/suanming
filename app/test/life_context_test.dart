@@ -6,6 +6,7 @@ import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/domain/life_context.dart';
 import 'package:mingli_app/domain/models.dart';
 import 'package:mingli_app/domain/places.dart';
+import 'package:mingli_app/domain/profile.dart';
 
 import 'support.dart';
 
@@ -91,7 +92,35 @@ void main() {
 
     await scrollAndTap(tester, find.byKey(const Key('generate-report')));
     final body = jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports').body) as Map;
-    expect(body['context'], {'name': '测试用户', 'marital': 'married', 'occupation': '軟件工程師', 'concern': '明年適合轉工嗎？'});
+    expect(body['context'], {
+      'name': '测试用户',
+      // Bug fix: the birthplace name reaches the reading (the chart only gets timezone + longitude).
+      'birthplace': '香港',
+      'marital': 'married',
+      'occupation': '軟件工程師',
+      'concern': '明年適合轉工嗎？',
+    });
+    // ...and the report shows it at the top of the facts card.
+    await settle(tester);
+    await tester.scrollUntilVisible(find.text('出生地：香港'), 300, scrollable: mainScrollable);
+    expect(find.text('出生地：香港'), findsOneWidget);
+  });
+
+  testWidgets('the birthplace is remembered per chart, so history can show it', (tester) async {
+    tester.view.physicalSize = const Size(1000, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final store = InMemoryProfileStore();
+    final api = FakeApi(email: 'test@mingli.local', pendingPolls: 0);
+    await tester.pumpWidget(testApp(api, profiles: store));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('entry-bazi')));
+    await settle(tester);
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
+    final book = ProfileBook.decode(store.data['u1']);
+    final chartId = fixture('chart_bazi')['chart_id'] as String;
+    expect(book.chartLabels[chartId], '测试用户');
+    expect(book.chartPlaces[chartId], '香港');
   });
 
   testWidgets('each topic shows its plain 一句話重點, even collapsed', (tester) async {

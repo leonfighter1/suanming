@@ -17,9 +17,12 @@ import 'widgets/four_layer_report.dart';
 /// Shows a report, polling until generation finishes. While pending it shows
 /// the pipeline stage the server reports; when passed it can be exported.
 class ReportPage extends ConsumerWidget {
-  const ReportPage({super.key, required this.reportId, this.title});
+  const ReportPage({super.key, required this.reportId, this.title, this.place});
   final String reportId;
   final String? title;
+
+  /// Birthplace label (device data: the server only has timezone + longitude).
+  final String? place;
 
   String _export(AppLocalizations l10n, ReportView r) => exportReportMarkdown(
         report: r,
@@ -102,7 +105,7 @@ class ReportPage extends ConsumerWidget {
           ),
           data: (r) => switch (r.status) {
             'pending' => _Generating(key: const ValueKey('pending'), report: r),
-            'passed' => FourLayerReport(key: const ValueKey('passed'), layers: r.layers!, reportId: r.id),
+            'passed' => FourLayerReport(key: const ValueKey('passed'), layers: r.layers!, reportId: r.id, birthplace: place),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
             'manual_review' => _Message(key: const ValueKey('review'), icon: Icons.hourglass_top, text: l10n.statusReview),
             _ => _Message(key: const ValueKey('failed'), icon: Icons.error_outline, text: l10n.statusFailed),

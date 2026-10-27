@@ -14,8 +14,29 @@
 10. Validate external timezone data against the running Node tzdb at build time, and test every record, not a sample of countries.
 11. Check a gazetteer against real sample addresses (the owner's examples) before calling coverage done.
 12. Write the arithmetic for a hand-computed expectation into the test comment, so a wrong expectation is visible as such.
+13. A picker never doubles as the only place a value is shown: make it read-only and give every value the user may change its own editable field.
+14. When a field is deliberately kept off the server, check every screen and export that should show it still gets it from the device.
+15. Never run dart format on whole directories in this app; format only files you created, or none.
 
 ## Log
+
+### 2026-10-27: dart format restyled untouched files
+- **Symptom:** After dart format lib, 26 files changed (106 lines in providers.dart for a 4-line edit)
+- **Root cause:** The codebase is not dart-format clean in the current tall style; formatting the whole lib rewrote files nobody touched
+- **Fix:** Backed up, restored committed versions and re-applied only the intended edits
+- **Rule:** Never run dart format on whole directories in this app; format only files you created, or none. (Rule 15)
+
+### 2026-10-27: Birthplace name never reached any report
+- **Symptom:** Owner: the birthplace is not in the report
+- **Root cause:** Only timezone and longitude were sent (privacy design) and nothing showed or remembered the place name, so readings and history had no birthplace
+- **Fix:** birthplace label sent as reading context, shown first in the facts card and the life report header, and kept per chart on the device (chartPlaces) for history
+- **Rule:** When a field is deliberately kept off the server, check every screen and export that should show it still gets it from the device. (Rule 14)
+
+### 2026-10-27: Person picker looked like an editable name field
+- **Symptom:** Owner: after picking a person in the profile picker the name could not be edited; the input stopped being editable
+- **Root cause:** DropdownMenu shows its selection in a text field (filter/search on) while the form had no name field, so the only visible name was in a picker
+- **Fix:** Picker is read-only (requestFocusOnTap/enableFilter/enableSearch false) with add/edit actions opening a pop-up; the form has its own editable name field, rebuilt when a person is loaded
+- **Rule:** A picker never doubles as the only place a value is shown: make it read-only and give every value the user may change its own editable field. (Rule 13)
 
 ### 2026-10-26: Hand-computed test expectation was wrong (命卦 1985)
 - **Symptom:** kuaNumber(1985, male) test expected 2, engine returned 6

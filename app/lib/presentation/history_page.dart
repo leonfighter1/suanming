@@ -127,7 +127,13 @@ class HistoryTile extends ConsumerWidget {
     return AppCard(
       padding: const EdgeInsets.all(Space.l),
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => ReportPage(reportId: item.reportId, title: title)),
+        MaterialPageRoute<void>(
+          builder: (_) => ReportPage(
+            reportId: item.reportId,
+            title: title,
+            place: ref.read(profilesProvider).value?.chartPlaces[item.chartId],
+          ),
+        ),
       ),
       child: Row(
         children: [

@@ -70,16 +70,6 @@ class HomePage extends ConsumerWidget {
           FadeSlideIn(
             index: 3,
             child: _Entry(
-              key: const Key('entry-life'),
-              icon: Icons.auto_stories,
-              title: l10n.lifeEntry,
-              subtitle: l10n.lifeEntryDesc,
-              onTap: () => push(context, const BaziFormPage(lifeReport: true)),
-            ),
-          ),
-          FadeSlideIn(
-            index: 3,
-            child: _Entry(
               key: const Key('entry-tarot'),
               icon: Icons.style_rounded,
               title: l10n.homeTarot,

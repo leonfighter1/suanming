@@ -114,7 +114,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeBaziDesc.
   ///
   /// In en, this message translates to:
-  /// **'Four Pillars, luck pillars and annual pillars from your birth time'**
+  /// **'Four pillars, luck pillars and years from your birth time, or a whole-life report'**
   String get homeBaziDesc;
 
   /// No description provided for @homeTarot.
@@ -1868,6 +1868,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No content was kept for this item.'**
   String get reviewNoContent;
+
+  /// No description provided for @modeChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart & reading'**
+  String get modeChart;
+
+  /// No description provided for @addTester.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new person'**
+  String get addTester;
+
+  /// No description provided for @editCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {name}\'s details'**
+  String editCurrent(String name);
 }
 
 class _AppLocalizationsDelegate

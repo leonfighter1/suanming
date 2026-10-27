@@ -119,7 +119,7 @@ class BirthProfile {
 
 /// Everything kept per account on the device.
 class ProfileBook {
-  const ProfileBook({this.profiles = const [], this.defaultId, this.chartLabels = const {}});
+  const ProfileBook({this.profiles = const [], this.defaultId, this.chartLabels = const {}, this.chartPlaces = const {}});
 
   factory ProfileBook.decode(String? raw) {
     if (raw == null || raw.isEmpty) return const ProfileBook();
@@ -131,6 +131,7 @@ class ProfileBook {
           .toList(),
       defaultId: j['default_id'] as String?,
       chartLabels: ((j['chart_labels'] as Map?) ?? const {}).cast<String, String>(),
+      chartPlaces: ((j['chart_places'] as Map?) ?? const {}).cast<String, String>(),
     );
   }
 
@@ -139,6 +140,9 @@ class ProfileBook {
 
   /// chart_id → profile name, so history can say whose chart it was.
   final Map<String, String> chartLabels;
+
+  /// chart_id → birthplace label, so reports reopened from history still show it.
+  final Map<String, String> chartPlaces;
 
   BirthProfile? get defaultProfile {
     for (final p in profiles) {
@@ -151,12 +155,19 @@ class ProfileBook {
         'profiles': [for (final p in profiles) p.toJson()],
         'default_id': defaultId,
         'chart_labels': chartLabels,
+        'chart_places': chartPlaces,
       });
 
-  ProfileBook copyWith({List<BirthProfile>? profiles, String? defaultId, Map<String, String>? chartLabels}) =>
+  ProfileBook copyWith({
+    List<BirthProfile>? profiles,
+    String? defaultId,
+    Map<String, String>? chartLabels,
+    Map<String, String>? chartPlaces,
+  }) =>
       ProfileBook(
         profiles: profiles ?? this.profiles,
         defaultId: defaultId ?? this.defaultId,
         chartLabels: chartLabels ?? this.chartLabels,
+        chartPlaces: chartPlaces ?? this.chartPlaces,
       );
 }

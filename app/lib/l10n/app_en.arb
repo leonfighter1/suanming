@@ -2,7 +2,7 @@
   "@@locale": "en",
   "appTitle": "Mingli Master",
   "homeBazi": "Bazi chart",
-  "homeBaziDesc": "Four Pillars, luck pillars and annual pillars from your birth time",
+  "homeBaziDesc": "Four pillars, luck pillars and years from your birth time, or a whole-life report",
   "homeTarot": "Tarot",
   "homeTarotDesc": "Draw a spread, for entertainment and metaphysics study only",
   "settings": "Settings",
@@ -428,5 +428,15 @@
   "reviewBlockedOnly": "A rule-layer block is a hard violation: it can only be rejected.",
   "reviewApproved": "Released to the user",
   "reviewRejected": "Rejected",
-  "reviewNoContent": "No content was kept for this item."
+  "reviewNoContent": "No content was kept for this item.",
+  "modeChart": "Chart & reading",
+  "addTester": "Add a new person",
+  "editCurrent": "Edit {name}'s details",
+  "@editCurrent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

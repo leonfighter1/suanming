@@ -2,6 +2,13 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27: 为谁排盘 fixes, 一生运势 inside 八字排盘
+
+- Bugs (owner): the picked person's name was not editable; the picker looked like an input; no way to add or edit a person from the form.
+- Fix: read-only picker with 添加新的测试者 and 编辑“X”的资料 entries that open a pop-up editor (ProfileDialog, same fields as the profile page); saving stores the person and loads them into the form; cancel keeps the current person. The form has its own editable 姓名 field.
+- Improve: 一生运势报告 is a mode of 八字排盘 (排盘解读 / 一生运势报告 switch); the separate home card is gone.
+- Bug (owner): 出生地 was in no report. The chart only gets timezone + longitude (privacy), and nothing carried the name. Now: the birthplace label goes with the reading context (UserContext.birthplace), shows first in the facts card and in the 一生运势报告 header, and is kept per chart on the device (ProfileBook.chartPlaces) for reports reopened from history.
+
 ## 2026-10-26 (n): review console, then review paused; disclaimer wording
 
 - Asked what "团队审核" is: readings the rule layer / guard held (manual_review, blocked). There was no review tool and held text was discarded.

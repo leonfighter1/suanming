@@ -331,6 +331,7 @@ describe("remedy API", () => {
       ).json();
       const context = {
         name: "小明",
+        birthplace: "中國 · 江蘇 · 靖江市",
         residence: "中國 · 廣東 · 深圳",
         marital: "married",
         children: "has",
@@ -352,6 +353,7 @@ describe("remedy API", () => {
         const call = m.calls.find((c) => c.agent === agent)!;
         expect(call.user).toContain("<user_context>");
         expect(call.user).toContain("明年適合轉工嗎？");
+        expect(call.user).toContain("中國 · 江蘇 · 靖江市"); // birthplace name reaches the reading
       }
       expect(m.calls.find((c) => c.agent === "trend")!.user).not.toContain("<user_context>");
       // The reviewer sees the same context (and, for plans, the trend), so true

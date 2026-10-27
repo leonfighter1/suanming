@@ -14,6 +14,11 @@ export const CHILDREN = ["none", "has"] as const;
 export interface UserContext {
   /** How to address the user (not analysed: no 姓名學 engine yet) */
   name?: string;
+  /**
+   * Birthplace as the user picked it, e.g. "中国 · 江苏 · 靖江市". The chart itself only
+   * receives timezone + longitude; this is the name, so readings can mention it.
+   */
+  birthplace?: string;
   /** Current residence, e.g. "中國 · 廣東 · 深圳" */
   residence?: string;
   marital?: (typeof MARITAL)[number];
@@ -25,7 +30,14 @@ export interface UserContext {
   concern?: string;
 }
 
-const LIMITS = { name: 20, residence: 60, occupation: 40, family: 200, concern: 300 } as const;
+const LIMITS = {
+  name: 20,
+  birthplace: 60,
+  residence: 60,
+  occupation: 40,
+  family: 200,
+  concern: 300,
+} as const;
 
 /** Validates and trims a request's `context`; undefined when empty or absent. */
 export function parseUserContext(raw: unknown): UserContext | undefined {

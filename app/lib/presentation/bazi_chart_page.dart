@@ -95,7 +95,12 @@ class BaziChartPage extends ConsumerWidget {
         chartId: chart.chartId,
         system: 'bazi',
         title: title,
-        context: profile?.life.toApi(name: profile!.name, locale: ref.watch(settingsProvider).apiLocaleCode),
+        place: profile?.birthPlace.label(ref.watch(settingsProvider).apiLocaleCode),
+        context: profile?.life.toApi(
+          name: profile!.name,
+          locale: ref.watch(settingsProvider).apiLocaleCode,
+          birthplace: profile!.birthPlace.label(ref.watch(settingsProvider).apiLocaleCode),
+        ),
       ),
       Padding(
         padding: const EdgeInsets.only(top: Space.m),

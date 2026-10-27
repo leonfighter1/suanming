@@ -17,7 +17,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeBaziDesc =>
-      'Four Pillars, luck pillars and annual pillars from your birth time';
+      'Four pillars, luck pillars and years from your birth time, or a whole-life report';
 
   @override
   String get homeTarot => 'Tarot';
@@ -953,4 +953,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reviewNoContent => 'No content was kept for this item.';
+
+  @override
+  String get modeChart => 'Chart & reading';
+
+  @override
+  String get addTester => 'Add a new person';
+
+  @override
+  String editCurrent(String name) {
+    return 'Edit $name\'s details';
+  }
 }

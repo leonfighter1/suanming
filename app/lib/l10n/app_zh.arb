@@ -2,7 +2,7 @@
   "@@locale": "zh",
   "appTitle": "命理大师",
   "homeBazi": "八字排盘",
-  "homeBaziDesc": "根据出生时间排出四柱、大运和流年",
+  "homeBaziDesc": "根据出生时间排出四柱、大运和流年，也可以生成一生运势报告",
   "homeTarot": "塔罗",
   "homeTarotDesc": "抽一组牌阵，仅供娱乐和玄学学习使用",
   "settings": "设置",
@@ -294,5 +294,8 @@
   "reviewBlockedOnly": "规则层拦截属于硬性违规，只能驳回，不能发布。",
   "reviewApproved": "已通过并发布给用户",
   "reviewRejected": "已驳回",
-  "reviewNoContent": "这条没有保留内容。"
+  "reviewNoContent": "这条没有保留内容。",
+  "modeChart": "排盘解读",
+  "addTester": "添加新的测试者",
+  "editCurrent": "编辑“{name}”的资料"
 }

@@ -323,6 +323,12 @@ paths:
                   additionalProperties: false
                   properties:
                     name: { type: string, maxLength: 20, description: How to address the user }
+                    birthplace:
+                      {
+                        type: string,
+                        maxLength: 60,
+                        description: Birthplace name (the chart gets only timezone + longitude),
+                      }
                     residence: { type: string, maxLength: 60, description: Current residence }
                     marital:
                       type: string

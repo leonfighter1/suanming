@@ -11,8 +11,11 @@ import 'trend_chart.dart';
 /// 破除運勢 module below. Layer ④ (expectation + AI label) is the fixed footer
 /// [ExpectationFooter], so it stays visible however far the user scrolls.
 class FourLayerReport extends StatefulWidget {
-  const FourLayerReport({super.key, required this.layers, this.reportId});
+  const FourLayerReport({super.key, required this.layers, this.reportId, this.birthplace});
   final ReportLayers layers;
+
+  /// Shown first in the facts card when known.
+  final String? birthplace;
 
   /// Enables the 破除運勢 module (needs the report id). Null: hidden.
   final String? reportId;
@@ -56,7 +59,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final f in layers.facts)
+                for (final f in [if (widget.birthplace != null) '${l10n.city}：${widget.birthplace}', ...layers.facts])
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: Space.xs),
                     child: Row(

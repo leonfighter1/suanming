@@ -9,6 +9,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'place_picker.dart';
 import 'widgets/life_context_fields.dart';
+import 'widgets/remedy.dart' show compactButtons;
 
 /// Profiles kept on this device: the user's own (default ★) and people they help.
 class ProfilesPage extends ConsumerWidget {
@@ -179,6 +180,108 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             label: Text(l10n.save),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Opens the profile editor as a pop-up over the current page. Returns the saved
+/// person (already stored), or null when cancelled.
+Future<BirthProfile?> showProfileDialog(BuildContext context, {BirthProfile? profile}) =>
+    showDialog<BirthProfile>(context: context, builder: (_) => ProfileDialog(profile: profile));
+
+/// Add or edit a person without leaving the page (the 八字 form's 为谁排盘).
+class ProfileDialog extends ConsumerStatefulWidget {
+  const ProfileDialog({super.key, this.profile});
+  final BirthProfile? profile;
+
+  @override
+  ConsumerState<ProfileDialog> createState() => _ProfileDialogState();
+}
+
+class _ProfileDialogState extends ConsumerState<ProfileDialog> {
+  late BirthProfile _p = widget.profile ??
+      BirthProfile(
+        id: DateTime.now().microsecondsSinceEpoch.toRadixString(36),
+        name: '',
+        gender: 'male',
+        birthLocal: DateTime(1990, 1, 1, 12),
+        cityKey: 'hk',
+      );
+  late final _name = TextEditingController(text: _p.name);
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _busy = true);
+    final navigator = Navigator.of(context);
+    final saved = _p.copyWith(name: _name.text.trim());
+    await ref.read(profilesProvider.notifier).upsert(saved);
+    navigator.pop(saved);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Dialog(
+      key: const Key('profile-dialog'),
+      insetPadding: const EdgeInsets.all(Space.l),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 640, maxHeight: MediaQuery.sizeOf(context).height * 0.9),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.xl, Space.l, Space.s, 0),
+              child: Row(children: [
+                Icon(widget.profile == null ? Icons.person_add_alt_1 : Icons.edit_outlined, color: theme.colorScheme.primary),
+                const SizedBox(width: Space.s),
+                Expanded(child: Text(widget.profile == null ? l10n.addTester : l10n.editProfile, style: theme.textTheme.titleLarge)),
+                IconButton(tooltip: l10n.cancel, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+              ]),
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(Space.xl, Space.m, Space.xl, Space.m),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  TextField(
+                    key: const Key('dialog-profile-name'),
+                    controller: _name,
+                    autofocus: widget.profile == null,
+                    decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: Space.l),
+                  BirthFields(value: _p, onChanged: (p) => setState(() => _p = p)),
+                  LifeContextFields(value: _p.life, onChanged: (l) => setState(() => _p = _p.copyWith(life: l))),
+                ]),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.l, 0, Space.l, Space.l),
+              child: compactButtons(
+                context,
+                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+                  const SizedBox(width: Space.s),
+                  FilledButton.icon(
+                    key: const Key('dialog-save-profile'),
+                    onPressed: _busy || _name.text.trim().isEmpty ? null : _save,
+                    icon: const Icon(Icons.check),
+                    label: Text(l10n.save),
+                  ),
+                ]),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
