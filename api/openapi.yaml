@@ -53,6 +53,12 @@ paths:
                       geo_rule_matrix: { type: string }
                       prohibited_patterns: { type: string }
                       tzdb: { type: string }
+                  content_review: { type: string, enum: ["on", "paused"] }
+                  ai:
+                    type: string
+                    description: >-
+                      What answers AI calls right now: a provider name, or "mock" (the
+                      （示范）demo answers; IS_AI_MOCK=TRUE in the server's .env).
         "429": { $ref: "#/components/responses/Problem" }
 
   /v1/auth/register:

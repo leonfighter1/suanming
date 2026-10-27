@@ -3,6 +3,8 @@
  * and LLM providers, both from the environment.
  */
 import { randomBytes } from "node:crypto";
+import { readFileSync, statSync } from "node:fs";
+import { parseEnv } from "node:util";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   AnthropicProvider,
@@ -10,6 +12,8 @@ import {
   loadRouting,
   MockProvider,
   ProviderHttpError,
+  type LLMJsonRequest,
+  type LLMJsonResult,
   type LLMProvider,
 } from "../ai/index.js";
 import { noCaptcha, TurnstileVerifier } from "../auth/limits.js";
@@ -41,25 +45,134 @@ export function loadSecrets(): EngineSecrets & { ephemeral: boolean } {
   };
 }
 
+/** A TRUE/FALSE switch from .env (also 1/0, yes/no, on/off); undefined if unset or unclear. */
+export function envFlag(v: string | undefined): boolean | undefined {
+  const s = v?.trim().toLowerCase();
+  if (s === "true" || s === "1" || s === "yes" || s === "on") return true;
+  if (s === "false" || s === "0" || s === "no" || s === "off") return false;
+  return undefined;
+}
+
+export interface AiMode {
+  /** Every AI step answers with the mock: the（示范）demo text, no tokens spent. */
+  mock: boolean;
+  /** The setting that chose the mock. */
+  reason?: string;
+}
+
+/**
+ * The owner's AI switch. The real models run only when nothing asks for the mock;
+ * each of these does: MINGLI_AI_PROVIDER=mock (the test suite), and in .env
+ * IS_AI_MOCK=TRUE or IS_AI_MODEL=FALSE (to save tokens).
+ */
+export function aiMode(env: Record<string, string | undefined>): AiMode {
+  if (env.MINGLI_AI_PROVIDER === "mock") return { mock: true, reason: "MINGLI_AI_PROVIDER=mock" };
+  if (envFlag(env.IS_AI_MOCK) === true) return { mock: true, reason: "IS_AI_MOCK=TRUE" };
+  if (envFlag(env.IS_AI_MODEL) === false) return { mock: true, reason: "IS_AI_MODEL=FALSE" };
+  return { mock: false };
+}
+
+/**
+ * aiMode() kept current with an .env file, re-read whenever the file changes: flip
+ * IS_AI_MOCK and the next AI call follows, with no restart (so a tunnel's URL
+ * survives). `shell` is the environment from before .env was loaded; like
+ * process.loadEnvFile, it wins over the file. onChange hears every flip.
+ */
+export function watchAiMode(
+  file: string,
+  shell: Record<string, string | undefined>,
+  onChange?: (mode: AiMode) => void,
+): () => AiMode {
+  let stamp: number | undefined;
+  let mode: AiMode | undefined;
+  return () => {
+    let mtime = -1;
+    try {
+      mtime = statSync(file).mtimeMs;
+    } catch {
+      // no .env: the shell alone
+    }
+    if (mtime !== stamp || !mode) {
+      stamp = mtime;
+      let fromFile: Record<string, string | undefined> = {};
+      try {
+        fromFile = parseEnv(readFileSync(file, "utf8"));
+      } catch {
+        // missing or unreadable: the shell alone
+      }
+      const prev = mode;
+      mode = aiMode({ ...fromFile, ...shell });
+      // After storing it: a listener that reads the switch sees the new mode.
+      if (prev && (mode.mock !== prev.mock || mode.reason !== prev.reason)) onChange?.(mode);
+    }
+    return mode;
+  };
+}
+
+/** A real provider that hands each call to the mock while the AI switch says so. */
+export class SwitchedProvider implements LLMProvider {
+  constructor(
+    private readonly real: LLMProvider,
+    private readonly mock: LLMProvider,
+    private readonly useMock: () => boolean,
+  ) {}
+
+  get name() {
+    return this.useMock() ? this.mock.name : this.real.name;
+  }
+
+  generateJson(req: LLMJsonRequest): Promise<LLMJsonResult> {
+    return (this.useMock() ? this.mock : this.real).generateJson(req);
+  }
+}
+
+export interface Providers {
+  /** Providers with credentials (the ones the switch can turn on). */
+  live: string[];
+  map: Record<string, LLMProvider>;
+  mode: () => AiMode;
+  /** What answers AI calls right now: the routed provider name(s), or "mock". */
+  serving: () => string;
+}
+
 /**
  * Providers keyed by the names config/model_routing.json uses. Each is real when
- * its credentials are present and the mock otherwise. MINGLI_AI_PROVIDER=mock
- * forces the mock everywhere (the test suite sets it).
+ * its credentials are present and the AI switch (`mode`, default: aiMode of the
+ * environment) allows it, and the mock otherwise. Under MINGLI_AI_PROVIDER=mock
+ * (the test suite) no real provider is even built.
  */
-export function buildProviders(): { live: string[]; map: Record<string, LLMProvider> } {
-  const forceMock = process.env.MINGLI_AI_PROVIDER === "mock";
+export function buildProviders(mode: () => AiMode = () => aiMode(process.env)): Providers {
+  const testing = process.env.MINGLI_AI_PROVIDER === "mock";
   const mock = new MockProvider();
   const live: string[] = [];
   const map: Record<string, LLMProvider> = { deepseek: mock, anthropic: mock };
-  if (!forceMock && process.env.DEEPSEEK_API_KEY) {
-    map.deepseek = new DeepSeekProvider();
+  const useMock = () => mode().mock;
+  if (!testing && process.env.DEEPSEEK_API_KEY) {
+    map.deepseek = new SwitchedProvider(new DeepSeekProvider(), mock, useMock);
     live.push("deepseek");
   }
-  if (!forceMock && (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
-    map.anthropic = new AnthropicProvider();
+  if (!testing && (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
+    map.anthropic = new SwitchedProvider(new AnthropicProvider(), mock, useMock);
     live.push("anthropic");
   }
-  return { live, map };
+  return { live, map, mode, serving: () => (useMock() ? "mock" : servingProvider(live)) };
+}
+
+/** The .env change that turns the real model back on, per reason for the mock. */
+const UNMOCK: Record<string, string> = {
+  "IS_AI_MOCK=TRUE": "IS_AI_MOCK=FALSE",
+  "IS_AI_MODEL=FALSE": "IS_AI_MODEL=TRUE",
+};
+
+/** One console line: what answers AI calls now, and how to flip it. */
+export function describeAi(p: Providers): string {
+  const serving = p.serving();
+  if (serving !== "mock")
+    return `${serving} (real model; IS_AI_MOCK=TRUE in .env switches to the mock)`;
+  const { reason } = p.mode();
+  if (!reason) return "mock (no API key in .env)";
+  const flip = UNMOCK[reason] ? `; ${UNMOCK[reason]} in .env for the real model` : "";
+  return `mock (${reason}): demo answers marked （示范）, no tokens spent${flip}`;
 }
 
 /**

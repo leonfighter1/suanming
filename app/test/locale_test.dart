@@ -21,7 +21,7 @@ void main() {
     expect(find.text('你好，测试用户'), findsOneWidget);
     expect(supportedAppLocales.first, zhHans);
 
-    await tester.tap(find.byKey(const Key('more-menu')));
+    await tester.tap(find.byKey(const Key('language-menu')));
     await settle(tester);
     final labels = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data).whereType<String>().toList();
     expect(labels.indexOf('简体中文'), lessThan(labels.indexOf('繁體中文')));

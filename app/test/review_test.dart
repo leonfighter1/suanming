@@ -25,8 +25,9 @@ void main() {
   testWidgets('only reviewers see 内容审核', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('more-menu')));
+    await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
+    expect(find.text('邮箱'), findsOneWidget);
     expect(find.byKey(const Key('open-review')), findsNothing);
   });
 
@@ -38,7 +39,7 @@ void main() {
     await tester.pumpWidget(testApp(api, locale: zhHans));
     await settle(tester);
 
-    await tester.tap(find.byKey(const Key('more-menu')));
+    await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('open-review')));
     await settle(tester);

@@ -2,7 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
-## 2026-10-27: 为谁排盘 fixes, 一生运势 inside 八字排盘
+## 2026-10-27 (b): cleaner top bar; mock or real AI switch
+
+- Owner request: 个人资料 and 语言 straight on the bar, 设置 as its own icon instead of ⋮. Home bar now: 历史记录 · 个人资料 · 语言 (translate icon + 简/繁/EN, one-tap menu) · 设置 (gear). The gear opens the 设置 page (the old 账号 page renamed: account details, 内容审核 for reviewers, sign-out, deletion). The sign-in bar has 语言 too. The four buttons fit a 360-wide phone in all three languages (test).
+- Owner request: save tokens by showing mock answers until the owner flips a toggle. The owner's `.env` switches now decide: `IS_AI_MOCK=TRUE` (or `IS_AI_MODEL=FALSE`) puts every AI step on the mock (（示范） text, instant); otherwise the real model runs when its key is set. The API re-reads `.env` when it changes (no restart, so the public URL stays), prints `AI switched: …`, and /v1/health shows `ai`. Daily AI caps don't count while the mock answers; `eval:ai --live` refuses while the switch says mock; under the test suite no real provider is built.
+- Verified: the real start script with a throwaway `.env` (fake key, health only) flipped mock → deepseek → mock; with the owner's `.env`, a 八字 reading passed in about 0.1 s with （示范） text.
+- Mistakes: the verify script guessed the report id field (rule 16); the switch notified its listener before storing the new mode, caught in review, now tested (rule 17).
+
+## 2026-10-27 (a): 为谁排盘 fixes, 一生运势 inside 八字排盘
 
 - Bugs (owner): the picked person's name was not editable; the picker looked like an input; no way to add or edit a person from the form.
 - Fix: read-only picker with 添加新的测试者 and 编辑“X”的资料 entries that open a pop-up editor (ProfileDialog, same fields as the profile page); saving stores the person and loads them into the form; cancel keeps the current person. The form has its own editable 姓名 field.

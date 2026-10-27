@@ -5,6 +5,7 @@ import '../application/providers.dart';
 import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'widgets/language_menu.dart';
 
 /// Regions offered at sign-up (geo_rule_matrix: served regions). The server
 /// re-checks Geo-Rule and refuses unserved ones with 451.
@@ -77,7 +78,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final locale = ref.watch(settingsProvider).apiLocaleCode;
     final canSubmit = !_busy && (!_register || _ageConfirmed);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      // The language can be switched before signing in, too.
+      appBar: AppBar(title: Text(l10n.appTitle), actions: const [LanguageMenu(), SizedBox(width: Space.xs)]),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.xxl),
         children: [

@@ -37,7 +37,9 @@ Records:
    live on the server and reach the app via `npm run sync:app`. Never hand-edit
    `app/assets/i18n`, `app/test/fixtures` or `app/lib/generated`.
 5. **Secrets only in `.env`** (git-ignored) or the secrets manager. Tests force
-   the mock AI provider and never spend money.
+   the mock AI provider and never spend money. **The owner's AI switch:**
+   `IS_AI_MOCK=TRUE` in `.env` keeps every AI step on the mock to save tokens
+   (docs/web-test.md). Never flip or bypass it; only the owner turns the real model on.
 6. Write files that contain backslashes with the Write/Edit tool, not shell heredocs.
 7. Flutter/Dart tooling needs an ASCII path on this machine. harness-check
    handles it; for manual runs use a junction.

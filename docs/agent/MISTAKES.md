@@ -17,8 +17,22 @@
 13. A picker never doubles as the only place a value is shown: make it read-only and give every value the user may change its own editable field.
 14. When a field is deliberately kept off the server, check every screen and export that should show it still gets it from the device.
 15. Never run dart format on whole directories in this app; format only files you created, or none.
+16. Before scripting against the v1 API, read its response builder (publicReport, publicRemedy, publicLifeReport) for field names; reports use report_id, not id.
+17. Store new state before notifying listeners, and test it with a listener that reads the state back.
 
 ## Log
+
+### 2026-10-27: Listener notified before the new state was stored
+- **Symptom:** watchAiMode called onChange before saving the new mode, so the AI switched console line would have printed the old mode
+- **Root cause:** The listener reads the switch back, and the cached mode was assigned after the callback
+- **Fix:** Store the mode first, then notify; the test listener now reads the switch back (checked by reverting the fix: the test fails)
+- **Rule:** Store new state before notifying listeners, and test it with a listener that reads the state back. (Rule 17)
+
+### 2026-10-27: Verify script guessed the report id field
+- **Symptom:** The end-to-end check of the AI switch polled /v1/reports/undefined and got 404
+- **Root cause:** The script assumed the POST /v1/reports body has id; publicReport returns report_id
+- **Fix:** Read publicReport and used report_id
+- **Rule:** Before scripting against the v1 API, read its response builder (publicReport, publicRemedy, publicLifeReport) for field names; reports use report_id, not id. (Rule 16)
 
 ### 2026-10-27: dart format restyled untouched files
 - **Symptom:** After dart format lib, 26 files changed (106 lines in providers.dart for a 4-line edit)

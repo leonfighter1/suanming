@@ -23,12 +23,7 @@ import {
 import { DECK } from "../engines/tarot/deck.js";
 import { verifyDraw } from "../engines/tarot/index.js";
 import { computeChart, InputError, str } from "../service/charts.js";
-import {
-  buildProviders,
-  loadSecrets,
-  servingProvider,
-  upstreamMessage,
-} from "../service/runtime.js";
+import { buildProviders, loadSecrets, upstreamMessage } from "../service/runtime.js";
 
 /** Demo input errors are the service's input errors. */
 export { InputError as DemoInputError };
@@ -113,7 +108,7 @@ export function listRegions() {
 export function aiStatus() {
   const routing = loadRouting();
   return {
-    provider: servingProvider(aiProviders().live),
+    provider: aiProviders().serving(),
     routes: Object.fromEntries(
       Object.entries(routing.routes).map(([agent, r]) => [
         agent,
@@ -155,7 +150,7 @@ export async function runReport(req: ReportRequest) {
       },
       { providers: aiProviders().map },
     );
-    return { report, chart, provider: servingProvider(aiProviders().live) };
+    return { report, chart, provider: aiProviders().serving() };
   } catch (e) {
     if (e instanceof GeoRefusedError) {
       return { refused: true as const, status: 451, error: e.message };

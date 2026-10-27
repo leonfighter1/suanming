@@ -90,10 +90,10 @@ void main() {
     final tokens = InMemoryTokenStore(Tokens(api.access, 'refresh-0'));
     await tester.pumpWidget(testApp(api, tokens: tokens));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('more-menu')));
+    // The gear opens 設定 directly, with the account in it.
+    await tester.tap(find.byKey(const Key('open-settings')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-account')));
-    await settle(tester);
+    expect(find.widgetWithText(AppBar, '設定'), findsOneWidget);
     expect(find.text('me@example.com'), findsOneWidget);
     await tester.tap(find.byKey(const Key('delete-account')));
     await settle(tester);

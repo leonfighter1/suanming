@@ -4,19 +4,22 @@
  *                    Sign-in only: the X-Dev-User shortcut is off, since other machines can reach it.
  * npm run public   → web app + API behind a public https tunnel (scripts/public.ts).
  */
-import { existsSync } from "node:fs";
+import { existsSync, watchFile } from "node:fs";
 import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createApiServer } from "../src/api/server.js";
 import {
   buildAuth,
   buildProviders,
+  describeAi,
   DEV_ACCOUNTS,
   loadSecrets,
   seedDevAccounts,
-  servingProvider,
+  watchAiMode,
 } from "../src/service/runtime.js";
 
+// The shell's own variables, from before .env: they win over the file.
+const shellEnv = { ...process.env };
 try {
   process.loadEnvFile(".env");
 } catch {
@@ -31,7 +34,15 @@ const lan = process.argv.includes("--lan");
  */
 const pub = process.argv.includes("--public");
 const secrets = loadSecrets();
-const providers = buildProviders();
+/**
+ * The AI switch: IS_AI_MOCK / IS_AI_MODEL in .env, re-read when the file changes.
+ * A flip applies from the next AI call, with no restart (the public URL stays).
+ */
+const providers = buildProviders(
+  watchAiMode(".env", shellEnv, () => console.log(`AI switched: ${describeAi(providers)}`)),
+);
+// Notice a saved .env within a second, so the console confirms the flip.
+watchFile(".env", { persistent: false, interval: 1000 }, () => providers.mode());
 const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? (lan ? "0.0.0.0" : "127.0.0.1");
 const loopbackOnly = !pub && (host === "127.0.0.1" || host === "localhost");
@@ -65,6 +76,7 @@ const server = createApiServer({
   review: process.env.MINGLI_REVIEW === "on",
   // 内容审核 reviewers: logins allowed to read and decide held content.
   admins: (process.env.MINGLI_ADMINS ?? "admin").split(","),
+  aiServing: providers.serving,
   ...(pub && { trustProxy: true, staticDir, aiQuota }),
 });
 
@@ -88,7 +100,7 @@ server.listen(port, host, () => {
     }
     console.log("  X-Dev-User shortcut is off (reachable from other machines); sign in instead.");
   }
-  console.log(`AI provider: ${servingProvider(providers.live)}`);
+  console.log(`AI: ${describeAi(providers)}`);
   console.log(
     process.env.MINGLI_REVIEW === "on"
       ? "content review: ON (holds, guard, 内容审核)"

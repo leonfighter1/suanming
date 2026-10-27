@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
-import 'account_page.dart';
 import 'bazi_form_page.dart';
 import 'design.dart';
 import 'history_page.dart';
 import 'profiles_page.dart';
-import 'review_page.dart';
+import 'settings_page.dart';
 import 'tarot_page.dart';
+import 'widgets/language_menu.dart';
 
 void push(BuildContext context, Widget page) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
@@ -23,6 +23,7 @@ class HomePage extends ConsumerWidget {
     final book = ref.watch(profilesProvider).value;
     final me = book?.defaultProfile;
     return Scaffold(
+      // Everything one tap away: 历史记录, 个人资料, 语言, and the 设置 gear.
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
@@ -32,7 +33,20 @@ class HomePage extends ConsumerWidget {
             icon: const Icon(Icons.history),
             onPressed: () => push(context, const HistoryPage()),
           ),
-          const _MoreMenu(),
+          IconButton(
+            key: const Key('open-profiles'),
+            tooltip: l10n.profiles,
+            icon: const Icon(Icons.people_alt_outlined),
+            onPressed: () => push(context, const ProfilesPage()),
+          ),
+          const LanguageMenu(),
+          IconButton(
+            key: const Key('open-settings'),
+            tooltip: l10n.settings,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => push(context, const SettingsPage()),
+          ),
+          const SizedBox(width: Space.xs),
         ],
       ),
       body: ListView(
@@ -82,51 +96,6 @@ class HomePage extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// The 「更多」 drop-down menu: profiles, history, account, language.
-class _MoreMenu extends ConsumerWidget {
-  const _MoreMenu();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(settingsProvider);
-    return PopupMenuButton<String>(
-      key: const Key('more-menu'),
-      tooltip: l10n.more,
-      icon: const Icon(Icons.more_vert),
-      position: PopupMenuPosition.under,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.field)),
-      onSelected: (v) => switch (v) {
-        'profiles' => push(context, const ProfilesPage()),
-        'history' => push(context, const HistoryPage()),
-        'account' => push(context, const AccountPage()),
-        'review' => push(context, const ReviewPage()),
-        'zh-Hant' => ref.read(settingsProvider.notifier).setLocale(zhHant),
-        'zh-Hans' => ref.read(settingsProvider.notifier).setLocale(zhHans),
-        'en' => ref.read(settingsProvider.notifier).setLocale(const Locale('en')),
-        _ => null,
-      },
-      itemBuilder: (_) => [
-        _item('profiles', Icons.people_alt_outlined, l10n.profiles, key: const Key('menu-profiles')),
-        _item('history', Icons.history, l10n.history),
-        _item('account', Icons.person_outline, l10n.account, key: const Key('open-account')),
-        // 内容审核: reviewers only (the server decides who is one).
-        if (ref.read(authProvider).value?.isReviewer ?? false)
-          _item('review', Icons.fact_check_outlined, l10n.reviewTitle, key: const Key('open-review')),
-        const PopupMenuDivider(),
-        for (final (code, label) in [('zh-Hans', '简体中文'), ('zh-Hant', '繁體中文'), ('en', 'English')])
-          CheckedPopupMenuItem(value: code, checked: settings.apiLocaleCode == code, child: Text(label)),
-      ],
-    );
-  }
-
-  PopupMenuItem<String> _item(String v, IconData icon, String label, {Key? key}) => PopupMenuItem(
-        key: key,
-        value: v,
-        child: Row(children: [Icon(icon, size: 20), const SizedBox(width: Space.m), Text(label)]),
-      );
 }
 
 class _Entry extends StatelessWidget {

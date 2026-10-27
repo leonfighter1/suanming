@@ -92,6 +92,12 @@ export interface ApiOptions {
   /** Daily caps on AI jobs (reports + 破除運勢 plans), to bound provider spend. */
   aiQuota?: { perUserPerDay: number; totalPerDay: number };
   /**
+   * What answers AI calls right now: a provider name, or "mock" (the owner's
+   * IS_AI_MOCK switch in .env). Shown on /v1/health; while it is "mock" nothing is
+   * spent, so aiQuota is not counted.
+   */
+  aiServing?: () => string;
+  /**
    * Generate every topic's 破除運勢 plan (locked) right after a report passes, so a
    * purchase opens instantly. Default true. Counts against aiQuota.totalPerDay.
    */
@@ -292,9 +298,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   /** AI jobs started today, per user and in total (UTC day). */
   const aiUse = new Map<string, number>();
+  const aiFree = () => opts.aiServing?.() === "mock";
   function takeAiQuota(user: string) {
     const q = opts.aiQuota;
-    if (!q) return;
+    if (!q || aiFree()) return;
     const day = now().toISOString().slice(0, 10);
     for (const k of [...aiUse.keys()]) if (!k.startsWith(day)) aiUse.delete(k);
     const mine = aiUse.get(`${day}:u:${user}`) ?? 0;
@@ -313,7 +320,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   /** Background jobs (preloads) take only from the daily total; false = skip. */
   function takeBackgroundQuota(): boolean {
     const q = opts.aiQuota;
-    if (!q) return true;
+    if (!q || aiFree()) return true;
     const day = now().toISOString().slice(0, 10);
     const all = aiUse.get(`${day}:all`) ?? 0;
     if (all >= q.totalPerDay) return false;
@@ -829,6 +836,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         },
         // Visible so nobody mistakes a paused review for a working one.
         content_review: opts.review === false ? "paused" : "on",
+        // ...or the mock's demo answers for the real model.
+        ...(opts.aiServing && { ai: opts.aiServing() }),
       });
     }
 

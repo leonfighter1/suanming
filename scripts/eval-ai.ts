@@ -16,7 +16,7 @@ import {
 } from "../src/ai/index.js";
 import type { ChartFact } from "../src/chart-fact/index.js";
 import { computeChart } from "../src/service/charts.js";
-import { buildProviders, loadSecrets, servingProvider } from "../src/service/runtime.js";
+import { buildProviders, describeAi, loadSecrets } from "../src/service/runtime.js";
 
 try {
   process.loadEnvFile(".env");
@@ -29,6 +29,11 @@ if (!live) process.env.MINGLI_AI_PROVIDER = "mock";
 const providers = buildProviders();
 if (live && providers.live.length === 0) {
   console.error("--live needs DEEPSEEK_API_KEY (or another provider key) in .env");
+  process.exit(2);
+}
+// The owner's switch to save tokens holds here too.
+if (live && providers.serving() === "mock") {
+  console.error(`--live: ${describeAi(providers)}`);
   process.exit(2);
 }
 
@@ -109,9 +114,7 @@ const CASES: EvalCase[] = [
 
 const secrets = loadSecrets();
 const started = Date.now();
-console.log(
-  `provider: ${live ? servingProvider(providers.live) : "mock"} · ${CASES.length} cases defined`,
-);
+console.log(`provider: ${providers.serving()} · ${CASES.length} cases defined`);
 
 // --only <text>: run just the cases whose name contains <text>.
 const only = process.argv[process.argv.indexOf("--only") + 1];

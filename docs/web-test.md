@@ -102,6 +102,27 @@ the mock provider. The key belongs only to whatever runs the API:
 - a hosted API later (Render, Fly.io, Cloud Run, …): the host's secret / environment
   variable settings, then that API's https URL goes into `API_BASE_URL`.
 
+## Mock or real AI: `IS_AI_MOCK`
+
+To save tokens, the API can answer every AI step with the built-in mock: readings,
+trend scores, 破除运势 plans and the 一生运势报告 come back at once, each line marked
+（示范）. The switch is in `.env`:
+
+| `.env`                                    | AI answers with               |
+| ----------------------------------------- | ----------------------------- |
+| `IS_AI_MOCK=TRUE`                         | the mock, no tokens spent     |
+| `IS_AI_MOCK=FALSE` and `IS_AI_MODEL=TRUE` | the real model (DeepSeek key) |
+| `IS_AI_MODEL=FALSE`                       | the mock as well              |
+
+- The running API re-reads `.env` when it changes: the next reading follows, with no
+  restart, so the public URL stays the same. The API console prints `AI switched: …`,
+  and `/v1/health` shows `"ai": "mock"` or `"ai": "deepseek"`.
+- Readings made while the mock was on keep their （示范） text, preloaded 破除运势
+  plans included; make a new reading after switching.
+- While the mock answers, the daily AI caps of public mode don't count.
+- A variable set in the shell itself wins over `.env`. `npm run eval:ai -- --live`
+  refuses to run while the switch says mock.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:
