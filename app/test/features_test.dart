@@ -29,9 +29,9 @@ void main() {
     await tester.pumpWidget(testApp(api, profiles: profiles));
     await settle(tester);
 
-    expect(find.text('你好，測試用戶'), findsOneWidget);
+    expect(find.text('你好，测试用户'), findsOneWidget);
     final book = ProfileBook.decode(profiles.data['u1']);
-    expect(book.defaultProfile!.name, '測試用戶');
+    expect(book.defaultProfile!.name, '测试用户');
 
     await tester.tap(find.byKey(const Key('entry-bazi')));
     await settle(tester);
@@ -45,12 +45,12 @@ void main() {
     expect(body['local'], '1990-03-15T14:30');
     expect(body.containsKey('name'), isFalse, reason: 'names never leave the device');
 
-    expect(find.text('測試用戶 的命盤'), findsWidgets);
+    expect(find.text('测试用户 的命盤'), findsWidgets);
     await tester.scrollUntilVisible(find.byKey(const Key('lunar-card')), 300, scrollable: mainScrollable);
     expect(find.textContaining('庚午年二月十九 · 未時'), findsOneWidget);
     expect(find.text('馬'), findsOneWidget);
     // The chart is labelled locally for history.
-    expect(ProfileBook.decode(profiles.data['u1']).chartLabels.values, contains('測試用戶'));
+    expect(ProfileBook.decode(profiles.data['u1']).chartLabels.values, contains('测试用户'));
   });
 
   testWidgets('accounts without a profile are prompted to create one', (tester) async {
@@ -157,9 +157,9 @@ void main() {
     final profiles = InMemoryProfileStore();
     await tester.pumpWidget(testApp(FakeApi(email: 'admin'), profiles: profiles));
     await settle(tester);
-    expect(find.text('你好，管理員'), findsOneWidget);
+    expect(find.text('你好，管理员'), findsOneWidget);
     final book = ProfileBook.decode(profiles.data['u1']);
-    expect(book.profiles.map((p) => p.name), ['管理員', '測試家人']);
+    expect(book.profiles.map((p) => p.name), ['管理员', '测试家人']);
     expect(book.profiles[1].inputBasis, {'date': 'lunar', 'time': 'shichen', 'shichen': '午'});
   });
 
@@ -168,7 +168,7 @@ void main() {
     final md = exportReportMarkdown(
       report: r,
       title: '命理大師 AI 解讀',
-      subtitle: '測試用戶 的命盤',
+      subtitle: '测试用户 的命盤',
       topicLabel: (t) => t,
       horizonLabel: (h) => h,
       headings: {'facts': '命盤事實', 'interpretation': '解讀', 'actions': '行動建議'},

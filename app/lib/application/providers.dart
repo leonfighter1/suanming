@@ -13,7 +13,8 @@ import '../domain/terms.dart';
 
 const zhHant = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
 const zhHans = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
-const supportedAppLocales = [zhHant, zhHans, Locale('en')];
+/// 简体中文 first: the main language (Mainland usage).
+const supportedAppLocales = [zhHans, zhHant, Locale('en')];
 
 /// The API's locale code for an app locale.
 String apiLocale(Locale l) => l.languageCode == 'en'
@@ -29,8 +30,12 @@ class Settings {
 }
 
 class SettingsNotifier extends Notifier<Settings> {
+  SettingsNotifier([this._initial = zhHans]);
+  final Locale _initial;
+
+  /// 简体中文 by default.
   @override
-  Settings build() => const Settings(locale: zhHant);
+  Settings build() => Settings(locale: _initial);
   void setLocale(Locale l) => state = Settings(locale: l);
 }
 
@@ -134,7 +139,7 @@ List<BirthProfile> testProfiles(AppUser u) => switch ((u.email ?? '').toLowerCas
       'admin' => [
         BirthProfile(
           id: 'default',
-          name: '管理員',
+          name: '管理员',
           gender: 'female',
           birthLocal: DateTime(1988, 8, 8, 8),
           cityKey: 'taipei',
@@ -143,7 +148,7 @@ List<BirthProfile> testProfiles(AppUser u) => switch ((u.email ?? '').toLowerCas
         ),
         BirthProfile(
           id: 'family',
-          name: '測試家人',
+          name: '测试家人',
           gender: 'male',
           // 農曆 1960 正月初一 = 1960-01-28
           birthLocal: DateTime(1960, 1, 28, 12),
@@ -153,7 +158,7 @@ List<BirthProfile> testProfiles(AppUser u) => switch ((u.email ?? '').toLowerCas
           shichen: '午',
         ),
       ],
-      _ => [sampleProfile('測試用戶')],
+      _ => [sampleProfile('测试用户')],
     };
 
 class ProfilesNotifier extends AsyncNotifier<ProfileBook> {

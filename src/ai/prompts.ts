@@ -20,7 +20,8 @@ export interface PromptVersion {
 
 const LANGUAGE: Record<Locale, string> = {
   "zh-Hant": "Traditional Chinese (繁體中文, Hong Kong/Taiwan usage)",
-  "zh-Hans": "Simplified Chinese (简体中文)",
+  "zh-Hans":
+    "Simplified Chinese (简体中文) as written in mainland China: mainland vocabulary and grammar (e.g. 软件、信息、视频、质量、打印、跳槽、邮箱、账号), mainland punctuation (“” quotes, not 「」), no Hong Kong or Taiwan wording",
   en: "English",
 };
 

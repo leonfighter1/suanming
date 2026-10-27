@@ -2,6 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (l): 简体中文 as the main language, Mainland usage
+
+- Owner decision: the main language is 简体中文 with Mainland grammar and vocabulary.
+- App: starts in 简体 (SettingsNotifier default), 简体中文 first in the language menu, page title 命理大师, html lang zh-CN; test profiles 测试用户 / 管理员 / 测试家人; dev accounts default to zh-Hans.
+- 简体 copy reviewed for HK/TW wording left by script conversion: 账号, 邮箱, 注销账号, 添加/创建资料, 点击, 支付, 演示, “” quotes, 根据…和…, 跳槽, 无法连接服务器, 当地时间. A test fails if 「」 or those HK/TW forms come back.
+- AI: zh-Hans output must use Mainland vocabulary, grammar and “” punctuation (user-message language line).
+- Not changed: the Geo-Rule matrix still has CN service_available=false; serving mainland users is a legal decision (licensing / AI service filing), not a language one.
+
 ## 2026-10-26 (k): life context, plain language, preloaded 破除運勢
 
 - Owner feedback: readings felt generic (same chart for everyone born at the same time and place) and hard to read; plans should open faster.

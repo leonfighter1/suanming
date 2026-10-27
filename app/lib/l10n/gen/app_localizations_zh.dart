@@ -16,7 +16,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeBazi => '八字排盘';
 
   @override
-  String get homeBaziDesc => '依出生时间排出四柱、大运与流年';
+  String get homeBaziDesc => '根据出生时间排出四柱、大运和流年';
 
   @override
   String get homeTarot => '塔罗';
@@ -34,7 +34,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get region => '地区';
 
   @override
-  String get birthTime => '出生时间（当地民用时）';
+  String get birthTime => '出生时间（当地时间）';
 
   @override
   String get pickDate => '日期';
@@ -128,7 +128,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generating => '正在生成解读…';
 
   @override
-  String get generatingHint => '约需数分钟。可以先离开此页，完成后回来即可查看。';
+  String get generatingHint => '大约需要几分钟。可以先离开这个页面，完成后回来查看。';
 
   @override
   String get statusBlocked => '这份解读未通过内容审查，不会显示。请重新生成。';
@@ -218,25 +218,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get retry => '重试';
 
   @override
-  String get errorTitle => '无法完成请求';
+  String get errorTitle => '请求失败';
 
   @override
-  String get disclaimerShort => '文化参考与自我反思，并非预测。';
+  String get disclaimerShort => '文化参考和自我反思，不是预测。';
 
   @override
   String get signIn => '登录';
 
   @override
-  String get createAccount => '注册账户';
+  String get createAccount => '注册账号';
 
   @override
-  String get haveAccount => '已有账户？登录';
+  String get haveAccount => '已有账号？去登录';
 
   @override
-  String get noAccount => '新用户？注册账户';
+  String get noAccount => '新用户？立即注册';
 
   @override
-  String get email => '电子邮件';
+  String get email => '邮箱';
 
   @override
   String get password => '密码';
@@ -248,7 +248,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get regionAccount => '居住地区';
 
   @override
-  String get regionAccountHint => '决定适用的规则与内容。此版本注册后无法更改。';
+  String get regionAccountHint => '决定适用的规则和内容。当前版本注册后不能修改。';
 
   @override
   String get ageConfirm => '我确认已年满 18 岁';
@@ -263,19 +263,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get comingSoon => '即将推出';
 
   @override
-  String get account => '账户';
+  String get account => '账号';
 
   @override
   String get signOut => '退出登录';
 
   @override
-  String get deleteAccount => '删除账户与数据';
+  String get deleteAccount => '注销账号并删除数据';
 
   @override
-  String get deleteAccountTitle => '要删除账户吗？';
+  String get deleteAccountTitle => '确定注销账号吗？';
 
   @override
-  String get deleteAccountBody => '你的账户、命盘与解读会立即从服务器删除，无法恢复。';
+  String get deleteAccountBody => '你的账号、命盘和解读会立即从服务器删除，无法恢复。';
 
   @override
   String get cancel => '取消';
@@ -284,7 +284,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmDelete => '删除';
 
   @override
-  String get accountDeleted => '你的账户与数据已删除。';
+  String get accountDeleted => '账号和数据已删除。';
 
   @override
   String get signInMethods => '登录方式';
@@ -299,7 +299,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileFor => '为谁排盘';
 
   @override
-  String get addProfile => '新增资料';
+  String get addProfile => '添加资料';
 
   @override
   String get editProfile => '编辑资料';
@@ -320,13 +320,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileHint => '以下修改只用于本次排盘；要永久修改请编辑资料。';
 
   @override
-  String get noProfileTitle => '填写你的出生资料';
+  String get noProfileTitle => '填写你的出生信息';
 
   @override
-  String get noProfileBody => '保存一次，之后每次排盘都会自动带入。也可以为他人新增资料。';
+  String get noProfileBody => '保存一次，以后排盘会自动带入。也可以给家人朋友添加资料。';
 
   @override
-  String get createProfile => '建立资料';
+  String get createProfile => '创建资料';
 
   @override
   String get save => '保存';
@@ -448,10 +448,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trendTotal => '总分';
 
   @override
-  String get trendCompare => '叠加比较';
+  String get trendCompare => '叠加对比';
 
   @override
-  String get trendTapHint => '点选图上的时期，查看各项分数与依据。';
+  String get trendTapHint => '点击图上的时期，查看各项分数和依据。';
 
   @override
   String trendAge(String ages) {
@@ -468,7 +468,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get remedyTitle => '破除运势';
 
   @override
-  String get remedyDesc => '针对单一项目的改运方案：指明针对哪一项、哪些时期，并给出具体做法。每个项目单独解锁。';
+  String get remedyDesc => '针对单个项目的改运方案：写明针对哪一项、哪些时期，并给出具体做法。每个项目单独解锁。';
 
   @override
   String remedyFor(String topic) {
@@ -485,12 +485,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String remedyConfirmTitle(String topic) {
-    return '解锁「$topic」破除运势方案';
+    return '解锁“$topic”破除运势方案';
   }
 
   @override
   String remedyConfirmBody(String topic, String price) {
-    return '此方案针对「$topic」单独收费：$price。\n付款功能尚未接入（TODO）：现在按确认即直接扣款（示范，不会实际收费）。';
+    return '这个方案针对“$topic”单独收费：$price。\n支付功能尚未接入（TODO）：现在点确认会直接扣款（演示，不会真实收费）。';
   }
 
   @override
@@ -500,7 +500,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String remedyGenerating(String topic) {
-    return 'AI 正在为「$topic」制定方案…';
+    return 'AI 正在为“$topic”制定方案…';
   }
 
   @override
@@ -531,7 +531,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get remedyFailed => '生成失败，请重试（不会重复收费）。';
 
   @override
-  String get remedyDemoPaid => '示范付款（未实际收费）';
+  String get remedyDemoPaid => '演示支付（未真实扣款）';
 
   @override
   String get placePick => '选择出生地';
@@ -567,7 +567,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String serverUnreachable(String url) {
-    return '连不上服务器 $url。\n手机上的 127.0.0.1 是手机本身：请在电脑运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。若页面是 https，请在网址后加 ?api=https 服务器地址。';
+    return '无法连接服务器 $url。\n手机上的 127.0.0.1 指的是手机本身：请在电脑上运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。如果页面是 https，请在网址后面加上 ?api=https 服务器地址。';
   }
 
   @override
@@ -575,7 +575,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lifeHint =>
-      '同时同地出生的人命盘相同，填上你的实际情况，解读才会贴近你本人。资料只存在本机，只在产生解读时连同命盘送给 AI。';
+      '同时同地出生的人命盘相同，填上你的实际情况，解读才会贴近你本人。信息只保存在本机，只在生成解读时和命盘一起发给 AI。';
 
   @override
   String get lifeUseName => '解读时用名字称呼我';
@@ -623,13 +623,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lifeFamily => '家庭情况';
 
   @override
-  String get lifeFamilyHint => '例如：与父母同住、需要照顾长辈';
+  String get lifeFamilyHint => '例如：和父母同住、需要照顾老人';
 
   @override
   String get lifeConcern => '想问的事';
 
   @override
-  String get lifeConcernHint => '例如：明年适合转工作吗？';
+  String get lifeConcernHint => '例如：明年适合跳槽吗？';
 
   @override
   String get sectionSummary => '一句话重点';

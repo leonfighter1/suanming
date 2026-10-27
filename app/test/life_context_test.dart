@@ -91,7 +91,7 @@ void main() {
 
     await scrollAndTap(tester, find.byKey(const Key('generate-report')));
     final body = jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports').body) as Map;
-    expect(body['context'], {'name': '測試用戶', 'marital': 'married', 'occupation': '軟件工程師', 'concern': '明年適合轉工嗎？'});
+    expect(body['context'], {'name': '测试用户', 'marital': 'married', 'occupation': '軟件工程師', 'concern': '明年適合轉工嗎？'});
   });
 
   testWidgets('each topic shows its plain 一句話重點, even collapsed', (tester) async {

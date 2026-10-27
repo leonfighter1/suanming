@@ -195,10 +195,13 @@ Widget testApp(
   TokenStore? tokens,
   ProfileStore? profiles,
   Duration pollInterval = Duration.zero,
+  // Most widget tests assert 繁體 copy; null = the app's real default (简体).
+  Locale? locale = zhHant,
 }) {
   final store = tokens ?? InMemoryTokenStore(signedIn ? Tokens(api.access, 'refresh-0') : null);
   return ProviderScope(
     overrides: [
+      if (locale != null) settingsProvider.overrideWith(() => SettingsNotifier(locale)),
       tokenStoreProvider.overrideWithValue(store),
       profileStoreProvider.overrideWithValue(profiles ?? InMemoryProfileStore()),
       apiClientProvider.overrideWith(

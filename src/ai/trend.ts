@@ -118,7 +118,7 @@ const METHOD_NOTE: Record<Locale, string> = {
   "zh-Hant":
     "分數是 AI 依傳統命理（大運、流年與原局的十神、刑沖合會、五行平衡）給出的參考指數，0–100，50 為平穩；不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。",
   "zh-Hans":
-    "分数是 AI 依传统命理（大运、流年与原局的十神、刑冲合会、五行平衡）给出的参考指数，0–100，50 为平稳；不是预测。“综合”为所选项目的平均，“总分”为各大运综合分的平均。",
+    "分数是 AI 根据传统命理（大运、流年与原局的十神、刑冲合会、五行平衡）给出的参考指数，0–100，50 为平稳；不是预测。“综合”为所选项目的平均，“总分”为各大运综合分的平均。",
   en: "Scores are an AI reference index (0–100, 50 = steady) based on traditional readings of each luck pillar and year against the natal chart (Ten Gods, branch relations, element balance). They are not predictions. 'Combined' is the mean of the selected topics; 'total' is the mean of the luck-pillar combined scores.",
 };
 

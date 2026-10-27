@@ -111,7 +111,7 @@ class _MoreMenu extends ConsumerWidget {
         _item('history', Icons.history, l10n.history),
         _item('account', Icons.person_outline, l10n.account, key: const Key('open-account')),
         const PopupMenuDivider(),
-        for (final (code, label) in [('zh-Hant', '繁體中文'), ('zh-Hans', '简体中文'), ('en', 'English')])
+        for (final (code, label) in [('zh-Hans', '简体中文'), ('zh-Hant', '繁體中文'), ('en', 'English')])
           CheckedPopupMenuItem(value: code, checked: settings.apiLocaleCode == code, child: Text(label)),
       ],
     );
