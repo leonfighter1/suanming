@@ -8,6 +8,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
 import 'design.dart';
 import 'profiles_page.dart';
+import 'widgets/life_context_fields.dart';
 
 /// 八字 input. Starts from the default profile; pick another person from
 /// 「為誰排盤」, and adjust fields for this chart only.
@@ -41,7 +42,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
       });
       // The name stays on the device: label the chart locally for history.
       if (p.name.isNotEmpty) await ref.read(profilesProvider.notifier).labelChart(chart.chartId, p.name);
-      await navigator.push(MaterialPageRoute<void>(builder: (_) => BaziChartPage(chart: chart, personName: p.name)));
+      await navigator.push(MaterialPageRoute<void>(builder: (_) => BaziChartPage(chart: chart, personName: p.name, profile: p)));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
     } finally {
@@ -111,6 +112,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
                     const SizedBox(height: Space.m),
                   ],
                   BirthFields(value: draft, onChanged: (p) => setState(() => _draft = p)),
+                  LifeContextFields(value: draft.life, onChanged: (l) => setState(() => _draft = draft.copyWith(life: l))),
                 ],
               ),
             ),

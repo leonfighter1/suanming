@@ -36,7 +36,8 @@ export interface Paragraph {
   fact_refs: string[];
 }
 export interface NarrativeOutput {
-  sections: { topic: Topic; paragraphs: Paragraph[] }[];
+  /** summary: the topic's main point in one plain sentence (narrative@4+) */
+  sections: { topic: Topic; summary?: string; paragraphs: Paragraph[] }[];
 }
 
 export const HORIZONS = ["this_week", "this_month", "this_year", "ongoing"] as const;

@@ -1160,6 +1160,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Can\'t reach the server at {url}.\nOn a phone, 127.0.0.1 is the phone itself: start `npm run api:lan` on the computer and open http://<computer\'s Wi-Fi address>:5000. From an https page, add ?api=<https server address> to the page URL.'**
   String serverUnreachable(String url);
+
+  /// No description provided for @lifeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your situation (optional)'**
+  String get lifeTitle;
+
+  /// No description provided for @lifeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Two people born at the same time and place share a chart; your situation is what makes the reading yours. Stored on this device; sent to the AI only with a reading.'**
+  String get lifeHint;
+
+  /// No description provided for @lifeUseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Address me by name in readings'**
+  String get lifeUseName;
+
+  /// No description provided for @lifeResidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you live now'**
+  String get lifeResidence;
+
+  /// No description provided for @lifeNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get lifeNotSet;
+
+  /// No description provided for @lifeMarital.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship status'**
+  String get lifeMarital;
+
+  /// No description provided for @maritalSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get maritalSingle;
+
+  /// No description provided for @maritalDating.
+  ///
+  /// In en, this message translates to:
+  /// **'In a relationship'**
+  String get maritalDating;
+
+  /// No description provided for @maritalMarried.
+  ///
+  /// In en, this message translates to:
+  /// **'Married'**
+  String get maritalMarried;
+
+  /// No description provided for @maritalSeparated.
+  ///
+  /// In en, this message translates to:
+  /// **'Separated'**
+  String get maritalSeparated;
+
+  /// No description provided for @maritalDivorced.
+  ///
+  /// In en, this message translates to:
+  /// **'Divorced'**
+  String get maritalDivorced;
+
+  /// No description provided for @maritalWidowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Widowed'**
+  String get maritalWidowed;
+
+  /// No description provided for @lifeChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get lifeChildren;
+
+  /// No description provided for @childrenNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get childrenNone;
+
+  /// No description provided for @childrenHas.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get childrenHas;
+
+  /// No description provided for @lifeOccupation.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupation / industry'**
+  String get lifeOccupation;
+
+  /// No description provided for @lifeFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family situation'**
+  String get lifeFamily;
+
+  /// No description provided for @lifeFamilyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. live with my parents, caring for an elder'**
+  String get lifeFamilyHint;
+
+  /// No description provided for @lifeConcern.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to know?'**
+  String get lifeConcern;
+
+  /// No description provided for @lifeConcernHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. is next year good for changing jobs?'**
+  String get lifeConcernHint;
+
+  /// No description provided for @sectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'In short'**
+  String get sectionSummary;
+
+  /// No description provided for @remedyReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get remedyReady;
 }
 
 class _AppLocalizationsDelegate

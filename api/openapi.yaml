@@ -313,6 +313,25 @@ paths:
                   description: Optional user question (tarot)
                   type: string
                   maxLength: 300
+                context:
+                  description: |
+                    What the user tells us about their life, so the reading relates
+                    the chart to their real situation. All optional. Sent to the
+                    model as user information (never as chart data); kept in memory
+                    with the report for its 破除運勢 plans; deleted with the account.
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    name: { type: string, maxLength: 20, description: How to address the user }
+                    residence: { type: string, maxLength: 60, description: Current residence }
+                    marital:
+                      type: string
+                      enum: [single, dating, married, separated, divorced, widowed]
+                    children: { type: string, enum: [none, has] }
+                    occupation: { type: string, maxLength: 40 }
+                    family: { type: string, maxLength: 200, description: Family situation }
+                    concern:
+                      { type: string, maxLength: 300, description: What the user wants to know }
       responses:
         "202":
           description: Accepted; generation running
@@ -555,7 +574,9 @@ paths:
                 topic: { $ref: "#/components/schemas/Topic" }
       responses:
         "200":
-          description: Already bought; the existing plan
+          description: |
+            The plan exists: a preloaded plan is unlocked by this purchase (content
+            included when it has passed), or it was bought before (no second charge).
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Remedy" }
@@ -787,6 +808,9 @@ components:
                 required: [topic, paragraphs]
                 properties:
                   topic: { $ref: "#/components/schemas/Topic" }
+                  summary:
+                    type: string
+                    description: The topic's main point in one plain sentence (narrative@4+)
                   paragraphs:
                     type: array
                     items:
@@ -886,7 +910,7 @@ components:
 
     Remedy:
       type: object
-      required: [remedy_id, report_id, topic, status, created_at, updated_at, payment]
+      required: [remedy_id, report_id, topic, status, created_at, updated_at, locked]
       properties:
         remedy_id: { type: string, format: uuid }
         report_id: { type: string, format: uuid }
@@ -896,7 +920,13 @@ components:
           enum: [pending, passed, blocked, manual_review, failed]
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
+        locked:
+          type: boolean
+          description: |
+            Preloaded (generated right after the report passed) but not bought:
+            content is withheld until the purchase.
         payment:
+          description: Present once bought
           type: object
           required: [status, amount, currency]
           properties:

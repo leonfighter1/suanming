@@ -21,9 +21,11 @@ export function narrativeSchema(topics: readonly Topic[]) {
         items: {
           type: "object",
           additionalProperties: false,
+          // summary is asked for in the prompt but optional: a missing one never costs a regeneration.
           required: ["topic", "paragraphs"],
           properties: {
             topic: { type: "string", enum: [...topics] },
+            summary: str,
             paragraphs: {
               type: "array",
               items: {

@@ -26,6 +26,7 @@
     "interpretation": [
       {
         "topic": "wuxing",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
             "text": "（示範）依命盤的日主、月令與加權五行分數，傳統上會從五行的偏旺與偏弱來看整體平衡。此分數為簡化計分。",
@@ -40,6 +41,7 @@
       },
       {
         "topic": "personality",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
             "text": "（示範）傳統上認為日主的五行屬性會反映處事風格，可作為自我觀察的參考。",
@@ -53,6 +55,7 @@
       },
       {
         "topic": "career_wealth",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
             "text": "（示範）月柱的十神常被用來談工作方式與合作傾向，僅供規劃時參考。",
@@ -65,6 +68,7 @@
       },
       {
         "topic": "relationships",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
             "text": "（示範）日支在傳統上與親密關係的相處模式有關，可多留意溝通節奏。",
@@ -77,6 +81,7 @@
       },
       {
         "topic": "dayun_liunian",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
             "text": "（示範）目前大運與今年流年的十神組合，可視為這段時間值得關注的主題。",
@@ -90,6 +95,7 @@
       },
       {
         "topic": "health",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
             "text": "（示範）傳統五行說法會把作息與情緒平衡連結起來。以上不構成醫療建議，如有不適請就醫。",
@@ -444,7 +450,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative@3,trend@1,action@2,guard@1",
+    "prompt_version": "narrative@4,trend@2,action@3,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

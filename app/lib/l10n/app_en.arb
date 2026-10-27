@@ -287,5 +287,27 @@
         "type": "String"
       }
     }
-  }
+  },
+  "lifeTitle": "Your situation (optional)",
+  "lifeHint": "Two people born at the same time and place share a chart; your situation is what makes the reading yours. Stored on this device; sent to the AI only with a reading.",
+  "lifeUseName": "Address me by name in readings",
+  "lifeResidence": "Where you live now",
+  "lifeNotSet": "Not set",
+  "lifeMarital": "Relationship status",
+  "maritalSingle": "Single",
+  "maritalDating": "In a relationship",
+  "maritalMarried": "Married",
+  "maritalSeparated": "Separated",
+  "maritalDivorced": "Divorced",
+  "maritalWidowed": "Widowed",
+  "lifeChildren": "Children",
+  "childrenNone": "None",
+  "childrenHas": "Yes",
+  "lifeOccupation": "Occupation / industry",
+  "lifeFamily": "Family situation",
+  "lifeFamilyHint": "e.g. live with my parents, caring for an elder",
+  "lifeConcern": "What do you want to know?",
+  "lifeConcernHint": "e.g. is next year good for changing jobs?",
+  "sectionSummary": "In short",
+  "remedyReady": "Ready"
 }

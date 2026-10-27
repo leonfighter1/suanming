@@ -49,6 +49,9 @@ class FakeApi {
   bool expireAccessOnce;
   final requests = <http.Request>[];
 
+  /// The server preloaded every topic's 破除運勢 plan (locked until bought).
+  bool preloadRemedies = false;
+
   /// Every request fails without a response (server unreachable).
   bool offline = false;
 
@@ -142,16 +145,26 @@ class FakeApi {
       return _json(fixture(system == 'tarot' ? 'chart_tarot' : 'chart_bazi'), 201);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
-    // 破除運勢: price + bought plans; buying returns pending, polling returns the plan.
+    // 破除運勢: price + plans. preloadRemedies: every topic ready but locked, and
+    // buying unlocks at once (200); otherwise buying returns pending (202) and polling the plan.
     final remedyOf = RegExp(r'^/v1/reports/[^/]+/remedies$');
     if (req.method == 'GET' && remedyOf.hasMatch(path)) {
-      return _json({'price': {'amount': 18, 'currency': 'HKD'}, 'items': remedies}, 200);
+      final bought = {for (final r in remedies) r['topic']};
+      final locked = preloadRemedies
+          ? [
+              for (final t in (finalReport['topics'] as List).cast<String>())
+                if (!bought.contains(t))
+                  {...fixture('remedy_passed'), 'topic': t, 'locked': true, 'content': null, 'payment': null},
+            ]
+          : const [];
+      return _json({'price': {'amount': 18, 'currency': 'HKD'}, 'items': [...remedies, ...locked]}, 200);
     }
     if (req.method == 'POST' && remedyOf.hasMatch(path)) {
       final topic = (jsonDecode(req.body) as Map)['topic'];
-      final r = {...fixture('remedy_passed'), 'topic': topic, 'status': 'pending', 'content': null};
-      remedies.add({...fixture('remedy_passed'), 'topic': topic});
-      return _json(r, 202);
+      final plan = {...fixture('remedy_passed'), 'topic': topic};
+      remedies.add(plan);
+      if (preloadRemedies) return _json(plan, 200);
+      return _json({...plan, 'status': 'pending', 'content': null}, 202);
     }
     if (req.method == 'GET' && path.startsWith('/v1/remedies/')) {
       return _json(remedies.isEmpty ? fixture('remedy_passed') : remedies.last, 200);

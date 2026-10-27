@@ -71,6 +71,12 @@ const ACTION: Record<Locale, string> = {
   en: "(Demo) Spend ten minutes this week noting one observation about {t}.",
 };
 
+const SUMMARY: Record<Locale, string> = {
+  "zh-Hant": "（示範）這一項的重點：照自己的節奏慢慢來。",
+  "zh-Hans": "（示范）这一项的重点：照自己的节奏慢慢来。",
+  en: "(Demo) The main point here: go at your own pace.",
+};
+
 const TREND_NOTE: Record<Locale, string> = {
   "zh-Hant": "（示範）依此期十神與原局刑沖合給出的參考分。",
   "zh-Hans": "（示范）依此期十神与原局刑冲合给出的参考分。",
@@ -152,6 +158,7 @@ export class MockProvider implements LLMProvider {
       const data: NarrativeOutput = {
         sections: p.topics.map((topic) => ({
           topic,
+          summary: SUMMARY[locale],
           paragraphs: [
             {
               text: TEXT[locale][topic],

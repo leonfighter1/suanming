@@ -21,8 +21,9 @@ import {
   type RegionRule,
   type Violation,
 } from "../compliance/index.js";
+import type { UserContext } from "./context.js";
 import { expectationLayer, factsLayer } from "./layers.js";
-import { actionUser, guardUser, narrativeUser, PROMPTS, trendUser } from "./prompts.js";
+import { actionUser, guardUser, narrativeUser, PROMPTS, todayLine, trendUser } from "./prompts.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
 import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schemas.js";
 import { glossaryFor, LOCALES, normalizeTerms, type Locale } from "./terms.js";
@@ -60,6 +61,8 @@ export interface ReportOptions {
   topics?: Topic[];
   /** Optional user question (tarot) */
   question?: string;
+  /** What the user told us about their life (src/ai/context.ts) */
+  context?: UserContext;
   /** Return the held draft for blocked/manual_review reports. Internal tools only. */
   includeDraft?: boolean;
 }
@@ -354,6 +357,8 @@ export async function generateReport(
         locale: opts.locale,
         glossary,
         question: opts.question,
+        context: opts.context,
+        today: todayLine(now),
         feedback,
       }),
     check: (data) => {
@@ -361,6 +366,7 @@ export async function generateReport(
       let ungrounded = 0;
       const sections = data.sections.map((s) => ({
         topic: s.topic,
+        ...(s.summary && { summary: normalizeTerms(s.summary, opts.locale).text }),
         paragraphs: s.paragraphs.slice(0, 4).flatMap((p) => {
           const { text, fixes } = normalizeTerms(p.text, opts.locale);
           termFixes.push(...fixes);
@@ -385,7 +391,10 @@ export async function generateReport(
         value,
         feedback,
         ...scanTexts(
-          value.sections.flatMap((s) => s.paragraphs.map((p) => p.text)),
+          value.sections.flatMap((s) => [
+            ...(s.summary ? [s.summary] : []),
+            ...s.paragraphs.map((p) => p.text),
+          ]),
           rules,
         ),
       };
@@ -431,6 +440,8 @@ export async function generateReport(
           chartSummary,
           locale: opts.locale,
           glossary,
+          context: opts.context,
+          today: todayLine(now),
           feedback,
         }),
       check: (data) => {
@@ -486,6 +497,8 @@ export async function generateReport(
               rule_groups: region.rule_groups,
             },
             draft,
+            context: opts.context,
+            today: todayLine(now),
           }),
         check: (value) => ({ value, feedback: [], block: [], review: [] }),
       });

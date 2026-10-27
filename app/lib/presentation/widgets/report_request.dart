@@ -10,9 +10,12 @@ import '../report_page.dart';
 
 /// Topic picker + "generate AI reading" button for a computed chart.
 class ReportRequest extends ConsumerStatefulWidget {
-  const ReportRequest({super.key, required this.chartId, required this.system, this.title});
+  const ReportRequest({super.key, required this.chartId, required this.system, this.title, this.context});
   final String chartId;
   final String system;
+
+  /// What the user told us about their life (POST /v1/reports `context`).
+  final Map<String, Object?>? context;
 
   /// Shown on the report page and in exports (e.g. 「小明 的命盤」).
   final String? title;
@@ -36,6 +39,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             chartId: widget.chartId,
             locale: settings.apiLocaleCode,
             topics: _available.where(_selected.contains).toList(),
+            context: widget.context,
           );
       ref.invalidate(historyProvider);
       await navigator.push(

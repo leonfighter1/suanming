@@ -34,6 +34,7 @@ beforeAll(async () => {
     trustProxy: true,
     staticDir: web,
     aiQuota: { perUserPerDay: 2, totalPerDay: 3 },
+    preloadRemedies: false, // quota counts here are about reports only
     log: () => {},
   });
   await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));

@@ -115,12 +115,14 @@ class ApiClient {
     required String locale,
     List<String>? topics,
     String? question,
+    Map<String, Object?>? context,
   }) async =>
       ReportView.fromJson(await _authed('POST', '/v1/reports', {
         'chart_id': chartId,
         'locale': locale,
         if (topics != null && topics.isNotEmpty) 'topics': topics,
         if (question != null && question.isNotEmpty) 'question': question,
+        'context': ?context,
       }));
 
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));

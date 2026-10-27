@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import '../domain/models.dart';
+import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'labels.dart';
@@ -11,9 +12,12 @@ import 'widgets/report_request.dart';
 
 /// 四柱 · 農曆對照 · 五行 · 大運 · 流年, then the AI reading request.
 class BaziChartPage extends ConsumerWidget {
-  const BaziChartPage({super.key, required this.chart, this.personName = ''});
+  const BaziChartPage({super.key, required this.chart, this.personName = '', this.profile});
   final ChartResult chart;
   final String personName;
+
+  /// The profile the chart was computed for: its life context goes with the reading.
+  final BirthProfile? profile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,7 +90,12 @@ class BaziChartPage extends ConsumerWidget {
           ],
         ),
       ),
-      ReportRequest(chartId: chart.chartId, system: 'bazi', title: title),
+      ReportRequest(
+        chartId: chart.chartId,
+        system: 'bazi',
+        title: title,
+        context: profile?.life.toApi(name: profile!.name, locale: ref.watch(settingsProvider).apiLocaleCode),
+      ),
     ];
 
     return Scaffold(

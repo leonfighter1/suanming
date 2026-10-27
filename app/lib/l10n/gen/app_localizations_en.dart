@@ -586,4 +586,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String serverUnreachable(String url) {
     return 'Can\'t reach the server at $url.\nOn a phone, 127.0.0.1 is the phone itself: start `npm run api:lan` on the computer and open http://<computer\'s Wi-Fi address>:5000. From an https page, add ?api=<https server address> to the page URL.';
   }
+
+  @override
+  String get lifeTitle => 'Your situation (optional)';
+
+  @override
+  String get lifeHint =>
+      'Two people born at the same time and place share a chart; your situation is what makes the reading yours. Stored on this device; sent to the AI only with a reading.';
+
+  @override
+  String get lifeUseName => 'Address me by name in readings';
+
+  @override
+  String get lifeResidence => 'Where you live now';
+
+  @override
+  String get lifeNotSet => 'Not set';
+
+  @override
+  String get lifeMarital => 'Relationship status';
+
+  @override
+  String get maritalSingle => 'Single';
+
+  @override
+  String get maritalDating => 'In a relationship';
+
+  @override
+  String get maritalMarried => 'Married';
+
+  @override
+  String get maritalSeparated => 'Separated';
+
+  @override
+  String get maritalDivorced => 'Divorced';
+
+  @override
+  String get maritalWidowed => 'Widowed';
+
+  @override
+  String get lifeChildren => 'Children';
+
+  @override
+  String get childrenNone => 'None';
+
+  @override
+  String get childrenHas => 'Yes';
+
+  @override
+  String get lifeOccupation => 'Occupation / industry';
+
+  @override
+  String get lifeFamily => 'Family situation';
+
+  @override
+  String get lifeFamilyHint => 'e.g. live with my parents, caring for an elder';
+
+  @override
+  String get lifeConcern => 'What do you want to know?';
+
+  @override
+  String get lifeConcernHint => 'e.g. is next year good for changing jobs?';
+
+  @override
+  String get sectionSummary => 'In short';
+
+  @override
+  String get remedyReady => 'Ready';
 }

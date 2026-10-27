@@ -45,6 +45,11 @@ String exportReportMarkdown({
       ..writeln()
       ..writeln('### ${topicLabel(s.topic)}')
       ..writeln();
+    if (s.summary != null) {
+      b
+        ..writeln('**${s.summary}**')
+        ..writeln();
+    }
     for (final p in s.paragraphs) {
       b
         ..writeln(p.text)

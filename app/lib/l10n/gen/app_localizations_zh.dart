@@ -569,6 +569,73 @@ class AppLocalizationsZh extends AppLocalizations {
   String serverUnreachable(String url) {
     return '连不上服务器 $url。\n手机上的 127.0.0.1 是手机本身：请在电脑运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。若页面是 https，请在网址后加 ?api=https 服务器地址。';
   }
+
+  @override
+  String get lifeTitle => '个人情况（选填）';
+
+  @override
+  String get lifeHint =>
+      '同时同地出生的人命盘相同，填上你的实际情况，解读才会贴近你本人。资料只存在本机，只在产生解读时连同命盘送给 AI。';
+
+  @override
+  String get lifeUseName => '解读时用名字称呼我';
+
+  @override
+  String get lifeResidence => '现居地';
+
+  @override
+  String get lifeNotSet => '未填写';
+
+  @override
+  String get lifeMarital => '婚姻状况';
+
+  @override
+  String get maritalSingle => '单身';
+
+  @override
+  String get maritalDating => '恋爱中';
+
+  @override
+  String get maritalMarried => '已婚';
+
+  @override
+  String get maritalSeparated => '分居';
+
+  @override
+  String get maritalDivorced => '离婚';
+
+  @override
+  String get maritalWidowed => '丧偶';
+
+  @override
+  String get lifeChildren => '子女';
+
+  @override
+  String get childrenNone => '没有';
+
+  @override
+  String get childrenHas => '有';
+
+  @override
+  String get lifeOccupation => '职业／行业';
+
+  @override
+  String get lifeFamily => '家庭情况';
+
+  @override
+  String get lifeFamilyHint => '例如：与父母同住、需要照顾长辈';
+
+  @override
+  String get lifeConcern => '想问的事';
+
+  @override
+  String get lifeConcernHint => '例如：明年适合转工作吗？';
+
+  @override
+  String get sectionSummary => '一句话重点';
+
+  @override
+  String get remedyReady => '已备好';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1135,4 +1202,71 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String serverUnreachable(String url) {
     return '連不上伺服器 $url。\n手機上的 127.0.0.1 是手機本身：請在電腦執行 npm run api:lan，再用手機開啟 http://電腦的區域網路位址:5000。若頁面是 https，請在網址後加 ?api=https 伺服器位址。';
   }
+
+  @override
+  String get lifeTitle => '個人情況（選填）';
+
+  @override
+  String get lifeHint =>
+      '同時同地出生的人命盤相同，填上你的實際情況，解讀才會貼近你本人。資料只存在本機，只在產生解讀時連同命盤送給 AI。';
+
+  @override
+  String get lifeUseName => '解讀時用名字稱呼我';
+
+  @override
+  String get lifeResidence => '現居地';
+
+  @override
+  String get lifeNotSet => '未填寫';
+
+  @override
+  String get lifeMarital => '婚姻狀況';
+
+  @override
+  String get maritalSingle => '單身';
+
+  @override
+  String get maritalDating => '戀愛中';
+
+  @override
+  String get maritalMarried => '已婚';
+
+  @override
+  String get maritalSeparated => '分居';
+
+  @override
+  String get maritalDivorced => '離婚';
+
+  @override
+  String get maritalWidowed => '喪偶';
+
+  @override
+  String get lifeChildren => '子女';
+
+  @override
+  String get childrenNone => '沒有';
+
+  @override
+  String get childrenHas => '有';
+
+  @override
+  String get lifeOccupation => '職業／行業';
+
+  @override
+  String get lifeFamily => '家庭情況';
+
+  @override
+  String get lifeFamilyHint => '例如：與父母同住、需要照顧長輩';
+
+  @override
+  String get lifeConcern => '想問的事';
+
+  @override
+  String get lifeConcernHint => '例如：明年適合轉工嗎？';
+
+  @override
+  String get sectionSummary => '一句話重點';
+
+  @override
+  String get remedyReady => '已備好';
 }

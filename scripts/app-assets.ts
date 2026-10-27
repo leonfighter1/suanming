@@ -84,6 +84,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     status: remedy.status,
     created_at: ts,
     updated_at: ts,
+    unlocked: true,
     payment: { status: "placeholder", ...REMEDY_PRICE },
     remedy,
   });

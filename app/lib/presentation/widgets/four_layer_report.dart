@@ -108,6 +108,17 @@ class _FourLayerReportState extends State<FourLayerReport> {
                       expandedAlignment: Alignment.centerLeft,
                       expandedCrossAxisAlignment: CrossAxisAlignment.start,
                       title: Text(l10n.topic(s.topic), style: theme.textTheme.titleMedium?.copyWith(color: scheme.primary)),
+                      // 一句話重點: the plain main point, visible even while collapsed.
+                      subtitle: s.summary == null
+                          ? null
+                          : Padding(
+                              padding: const EdgeInsets.only(top: Space.xs),
+                              child: Text(
+                                s.summary!,
+                                key: Key('summary-${s.topic}'),
+                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, height: 1.5),
+                              ),
+                            ),
                       children: [
                         for (final p in s.paragraphs)
                           Padding(

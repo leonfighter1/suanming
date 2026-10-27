@@ -8,6 +8,7 @@ import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'place_picker.dart';
+import 'widgets/life_context_fields.dart';
 
 /// Profiles kept on this device: the user's own (default ★) and people they help.
 class ProfilesPage extends ConsumerWidget {
@@ -167,6 +168,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   value: _p,
                   onChanged: (p) => setState(() => _p = p),
                 ),
+                LifeContextFields(value: _p.life, onChanged: (l) => setState(() => _p = _p.copyWith(life: l))),
               ],
             ),
           ),

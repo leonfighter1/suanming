@@ -11,8 +11,15 @@
 7. Buttons placed in a Row, Wrap or dialog action bar must use compactButtons() (or an explicit minimumSize); the app theme makes them full-width.
 8. Never default a client to 127.0.0.1 for anything another device may open; derive the API host from where the page was served and test the phone path.
 9. Anything meant to stay reachable from this computer must hold a keep-awake request and supervise its child processes (restart or fail loudly).
+10. Validate external timezone data against the running Node tzdb at build time, and test every record, not a sample of countries.
 
 ## Log
+
+### 2026-10-26: New IANA zone unknown to Node (America/Coyhaique)
+- **Symptom:** places test: RangeError Invalid time zone America/Coyhaique
+- **Root cause:** GeoNames uses tzdb 2025b zones; this Node bundles tzdb 2024b, so a birth in Aysen would fail to compute
+- **Fix:** build:places maps split zones to their parent (SPLIT_ZONES) and fails the build on any unknown zone
+- **Rule:** Validate external timezone data against the running Node tzdb at build time, and test every record, not a sample of countries. (Rule 10)
 
 ### 2026-10-26: Public tunnel URL died after a while
 - **Symptom:** The trycloudflare URL from npm run public stopped working after some time

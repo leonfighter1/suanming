@@ -55,7 +55,7 @@ describe("generateReport — happy path", () => {
     expect(r.layers!.interpretation.map((s) => s.topic)).toEqual(r.topics);
     expect(r.layers!.actions.length).toBeGreaterThan(0);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
-    expect(r.ai_disclosure.prompt_version).toBe("narrative@3,trend@1,action@2,guard@1");
+    expect(r.ai_disclosure.prompt_version).toBe("narrative@4,trend@2,action@3,guard@2");
     expect(r.ai_disclosure.model).toContain("deepseek-v4-pro");
     // The trend agent runs in parallel with the narrative (八字 only).
     expect(mock.calls.map((c) => c.agent).sort()).toEqual([

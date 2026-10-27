@@ -21,12 +21,24 @@ export interface FaithfulnessIssue {
     | "wrong_year_ganzhi"
     | "card_not_in_spread"
     | "wrong_orientation"
-    | "wrong_script";
+    | "wrong_script"
+    | "wrong_relative_year";
   detail: string;
   quote: string;
 }
 
 const GZ = /[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g;
+/** 今年/明年/去年 … 干支 within one sentence: the 干支 must be that year's (from the report date). */
+const RELATIVE_GZ =
+  /(今年|明年|去年|this year|next year|last year)[^。！？.!?]{0,20}?([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/gi;
+const RELATIVE_OFFSET: Record<string, number> = {
+  今年: 0,
+  明年: 1,
+  去年: -1,
+  "this year": 0,
+  "next year": 1,
+  "last year": -1,
+};
 const YEAR_GZ =
   /((?:19|20|21)\d{2})\s*年?\s*的?\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g;
 
@@ -63,6 +75,17 @@ export function checkFaithfulness(chart: ChartFact, report: Report): Faithfulnes
         // 干支 inside a longer 干支 run like 庚午己卯 are still individually checked.
         if (!known.has(m[0]))
           issues.push({ kind: "unknown_ganzhi", detail: `${m[0]} is not in the chart`, quote: t });
+      }
+      const thisYear = Number(report.created_at.slice(0, 4));
+      for (const m of t.matchAll(RELATIVE_GZ)) {
+        const year = thisYear + RELATIVE_OFFSET[m[1]!.toLowerCase()]!;
+        const real = yearGanZhi(year);
+        if (real !== m[2])
+          issues.push({
+            kind: "wrong_relative_year",
+            detail: `${m[1]} is ${year} ${real}, not ${m[2]}`,
+            quote: t,
+          });
       }
       for (const m of t.matchAll(YEAR_GZ)) {
         const real = yearGanZhi(Number(m[1]));

@@ -241,9 +241,12 @@ class Paragraph {
 }
 
 class Section {
-  const Section(this.topic, this.paragraphs);
+  const Section(this.topic, this.paragraphs, [this.summary]);
   final String topic;
   final List<Paragraph> paragraphs;
+
+  /// The topic's main point in one plain sentence (narrative@4+).
+  final String? summary;
 }
 
 class ActionItem {
@@ -341,6 +344,7 @@ class ReportLayers {
               (p['fact_refs'] as List).cast<String>(),
             ),
           ),
+          s['summary'] as String?,
         ),
       ),
       _list(
@@ -382,6 +386,7 @@ class RemedyView {
     this.closing,
     this.message,
     this.paymentStatus,
+    this.locked = false,
   });
 
   factory RemedyView.fromJson(Json j) {
@@ -401,6 +406,7 @@ class RemedyView {
       closing: c?['closing'] as String?,
       message: j['message'] as String?,
       paymentStatus: (j['payment'] as Json?)?['status'] as String?,
+      locked: j['locked'] as bool? ?? false,
     );
   }
 
@@ -419,6 +425,12 @@ class RemedyView {
 
   /// "placeholder" until Phase 4 payments.
   final String? paymentStatus;
+
+  /// Preloaded but not bought: content withheld until purchase.
+  final bool locked;
+
+  /// Preloaded and ready: buying opens it at once.
+  bool get ready => locked && status == 'passed';
 
   bool get isTerminal => status != 'pending';
   bool get hasContent => status == 'passed' && target != null;

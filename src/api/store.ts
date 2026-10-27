@@ -3,7 +3,7 @@
  * (db/schema_v0.sql + migrations, encrypted facts/report bodies) implements the
  * same interface later.
  */
-import type { Remedy, Report } from "../ai/index.js";
+import type { Remedy, Report, UserContext } from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
 import type { AgentName, Topic } from "../ai/types.js";
@@ -30,6 +30,8 @@ export interface ReportRecord {
   error?: string;
   /** Live stage while pending (pipeline onProgress). */
   progress?: { stage: AgentName; attempt: number; updated_at: string };
+  /** What the user told us (kept for this report's 破除運勢 plans; deleted with the account). */
+  context?: UserContext;
 }
 
 /** A paid 破除運勢 plan for one topic of a report (payment: Phase 4 TODO). */
@@ -41,7 +43,13 @@ export interface RemedyRecord {
   status: ReportRecordStatus;
   created_at: string;
   updated_at: string;
-  payment: { status: "placeholder"; amount: number; currency: string };
+  /**
+   * Preloaded plans are generated before purchase and stay locked (content
+   * withheld) until bought; buying only unlocks them, so they open instantly.
+   */
+  unlocked: boolean;
+  /** Set on purchase. */
+  payment?: { status: "placeholder"; amount: number; currency: string };
   remedy?: Remedy;
   error?: string;
   progress?: { stage: AgentName; attempt: number; updated_at: string };

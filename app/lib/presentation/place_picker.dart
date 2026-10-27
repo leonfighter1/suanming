@@ -11,17 +11,38 @@ const commonCountries = ['HK', 'MO', 'TW', 'CN', 'SG', 'MY', 'US', 'CA', 'GB', '
 
 /// The birthplace field: shows "中國 · 廣東 · 廣州市" and opens [PlacePickerPage].
 class PlaceField extends ConsumerWidget {
-  const PlaceField({super.key, required this.value, required this.onChanged});
-  final BirthPlace value;
+  const PlaceField({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.label,
+    this.fieldKey = const Key('city'),
+    this.showDetail = true,
+    this.onClear,
+  });
+
+  /// Null: nothing picked yet (shows "未填寫").
+  final BirthPlace? value;
   final ValueChanged<BirthPlace> onChanged;
+
+  /// Defaults to 出生地.
+  final String? label;
+  final Key fieldKey;
+
+  /// Show timezone + longitude under the field (they drive 真太陽時 for a birthplace).
+  final bool showDetail;
+
+  /// Offers a clear button when set and a value is picked.
+  final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final locale = ref.watch(settingsProvider).apiLocaleCode;
+    final v = value;
     return InkWell(
-      key: const Key('city'),
+      key: fieldKey,
       borderRadius: BorderRadius.circular(Radii.field),
       onTap: () async {
         final picked = await Navigator.of(context).push<BirthPlace>(
@@ -31,12 +52,18 @@ class PlaceField extends ConsumerWidget {
       },
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: l10n.city,
+          labelText: label ?? l10n.city,
           prefixIcon: const Icon(Icons.place_outlined),
-          suffixIcon: const Icon(Icons.chevron_right),
-          helperText: l10n.placeDetail(value.timezone, value.longitude.toStringAsFixed(2)),
+          suffixIcon: v != null && onClear != null
+              ? IconButton(icon: const Icon(Icons.close), onPressed: onClear, tooltip: l10n.lifeNotSet)
+              : const Icon(Icons.chevron_right),
+          helperText: v != null && showDetail ? l10n.placeDetail(v.timezone, v.longitude.toStringAsFixed(2)) : null,
         ),
-        child: Text(value.label(locale), key: const Key('place-label'), style: theme.textTheme.bodyLarge),
+        child: Text(
+          v?.label(locale) ?? l10n.lifeNotSet,
+          key: fieldKey == const Key('city') ? const Key('place-label') : null,
+          style: theme.textTheme.bodyLarge?.copyWith(color: v == null ? theme.colorScheme.onSurfaceVariant : null),
+        ),
       ),
     );
   }

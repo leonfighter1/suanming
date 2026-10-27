@@ -78,6 +78,8 @@ void main() {
     final api = await openReport(tester);
     final buy = find.byKey(const Key('remedy-buy-career_wealth'));
     await tester.scrollUntilVisible(buy, 300, scrollable: mainScrollable);
+    await tester.ensureVisible(buy);
+    await settle(tester);
     expect(find.textContaining('HKD 18'), findsWidgets);
     await tester.tap(buy);
     await settle(tester);

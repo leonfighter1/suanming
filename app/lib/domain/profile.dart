@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'cities.dart';
+import 'life_context.dart';
 import 'places.dart';
 
 /// A person charts are computed for: the user ("我") or someone they help.
@@ -18,6 +19,7 @@ class BirthProfile {
     this.timeMode = 'exact',
     this.shichen,
     this.place,
+    this.life = const LifeContext(),
   });
 
   factory BirthProfile.fromJson(Map<String, dynamic> j) => BirthProfile(
@@ -31,6 +33,7 @@ class BirthProfile {
         timeMode: j['time_mode'] as String? ?? 'exact',
         shichen: j['shichen'] as String?,
         place: j['place'] == null ? null : BirthPlace.fromJson(j['place'] as Map<String, dynamic>),
+        life: LifeContext.fromJson(j['life'] as Map<String, dynamic>?),
       );
 
   final String id;
@@ -47,6 +50,9 @@ class BirthProfile {
 
   /// Birthplace picked as country → region → city (GET /v1/places).
   final BirthPlace? place;
+
+  /// Personal situation for readings (optional; device only until a report is requested).
+  final LifeContext life;
 
   /// The birthplace in effect: the picked place, else the legacy city.
   BirthPlace get birthPlace => place ?? BirthPlace.legacy(cityByKey(cityKey));
@@ -81,6 +87,7 @@ class BirthProfile {
         'time_mode': timeMode,
         'shichen': shichen,
         if (place != null) 'place': place!.toJson(),
+        if (!life.isEmpty || !life.useName) 'life': life.toJson(),
       };
 
   BirthProfile copyWith({
@@ -93,6 +100,7 @@ class BirthProfile {
     String? timeMode,
     String? shichen,
     BirthPlace? place,
+    LifeContext? life,
   }) =>
       BirthProfile(
         id: id,
@@ -105,6 +113,7 @@ class BirthProfile {
         timeMode: timeMode ?? this.timeMode,
         shichen: shichen ?? this.shichen,
         place: place ?? this.place,
+        life: life ?? this.life,
       );
 }
 

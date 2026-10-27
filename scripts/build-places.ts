@@ -46,6 +46,28 @@ const ZH_NAMES = [
   "IT",
 ];
 
+/**
+ * Zones newer than the tzdb in older Node builds, mapped to the zone they split
+ * from. Births before the split have identical local time in both, so 八字 results
+ * don't change; the parent works on every Node. America/Coyhaique: split from
+ * America/Santiago in tzdb 2025b (Aysén stopped following Chile's DST in 2025).
+ */
+const SPLIT_ZONES: Record<string, string> = {
+  "America/Coyhaique": "America/Santiago",
+};
+
+function checkedZone(tz: string): string {
+  const zone = SPLIT_ZONES[tz] ?? tz;
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: zone });
+  } catch {
+    throw new Error(
+      `timezone ${tz} is unknown to this Node (tzdb ${process.versions.tz}); add it to SPLIT_ZONES`,
+    );
+  }
+  return zone;
+}
+
 /** Feature codes left out: city sections, historical, abandoned, destroyed, religious sites. */
 const SKIP_FEATURES = new Set(["PPLX", "PPLH", "PPLQ", "PPLW", "PPLCH"]);
 
@@ -205,7 +227,7 @@ for (const r of cities) {
   list.push({
     id: Number(id),
     names: namesFor(cc, name!, zh.get(cc)?.get(id!)),
-    tz,
+    tz: checkedZone(tz),
     lon: round(Number(lon)),
     lat: round(Number(lat)),
     pop: Number(pop),

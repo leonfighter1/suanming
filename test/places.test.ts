@@ -37,14 +37,19 @@ describe("birthplace gazetteer (data/places)", () => {
     for (const n of ["台北市", "新北市", "高雄市", "臺中市", "花蓮縣"]) expect(tw).toContain(n);
   });
 
-  it("every city in the main markets has a timezone the engine accepts", () => {
-    for (const cc of ["CN", "HK", "TW", "MY", "US", "GB"]) {
-      for (const r of placeCountry(cc)!.regions) {
+  it("every city has a timezone the engine accepts and a valid longitude", () => {
+    const zones = new Set<string>();
+    for (const { code } of placeIndex().countries) {
+      for (const r of placeCountry(code)!.regions) {
         for (const c of r.cities) {
-          expect(() => new Intl.DateTimeFormat("en", { timeZone: c.tz })).not.toThrow();
+          zones.add(c.tz);
           expect(Math.abs(c.lon)).toBeLessThanOrEqual(180);
         }
       }
+    }
+    // Each distinct zone once (constructing a formatter per city is slow).
+    for (const tz of zones) {
+      expect(() => new Intl.DateTimeFormat("en", { timeZone: tz }), tz).not.toThrow();
     }
   });
 

@@ -90,16 +90,17 @@ class RemedyButton extends ConsumerWidget {
         child: Padding(padding: EdgeInsets.all(10), child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
-    final bought = l.items.where((r) => r.topic == topic && r.status != 'failed').firstOrNull;
+    final plan = l.items.where((r) => r.topic == topic && r.status != 'failed').firstOrNull;
+    final bought = plan != null && !plan.locked;
     final label = compact
         ? l10n.remedyFor(l10n.topic(topic))
-        : bought != null
+        : bought
         ? l10n.remedyView
         : l10n.remedyUnlock(l.priceLabel);
     void onPressed() => openRemedy(context, ref, reportId: reportId, topic: topic, list: l);
-    return compactButtons(
+    final button = compactButtons(
       context,
-      bought != null && !compact
+      bought && !compact
           ? FilledButton.tonalIcon(
               key: Key('remedy-open-$topic'),
               onPressed: onPressed,
@@ -109,9 +110,19 @@ class RemedyButton extends ConsumerWidget {
           : OutlinedButton.icon(
               key: Key(compact ? 'remedy-inline-$topic' : 'remedy-buy-$topic'),
               onPressed: onPressed,
-              icon: Icon(bought != null ? Icons.description_outlined : Icons.lock_open_outlined),
+              icon: Icon(bought ? Icons.description_outlined : Icons.lock_open_outlined),
               label: Text(label),
             ),
+    );
+    // Preloaded and ready: buying opens it at once.
+    if (compact || plan == null || !plan.ready) return button;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Pill(l10n.remedyReady, key: Key('remedy-ready-$topic'), icon: Icons.bolt),
+        const SizedBox(width: Space.s),
+        button,
+      ],
     );
   }
 }
@@ -127,7 +138,8 @@ Future<void> openRemedy(
   final l10n = AppLocalizations.of(context);
   final topicLabel = l10n.topic(topic);
   var remedy = list.items.where((r) => r.topic == topic && r.status != 'failed').firstOrNull;
-  if (remedy == null) {
+  // Not bought yet (absent, or preloaded and locked): pay first; buying a preloaded plan only unlocks it.
+  if (remedy == null || remedy.locked) {
     final pay = await showDialog<bool>(
       context: context,
       builder: (ctx) => compactButtons(

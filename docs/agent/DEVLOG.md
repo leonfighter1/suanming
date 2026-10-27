@@ -2,6 +2,16 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (k): life context, plain language, preloaded 破除運勢
+
+- Owner feedback: readings felt generic (same chart for everyone born at the same time and place) and hard to read; plans should open faster.
+- Life context: optional name use, current residence, marital status, children, occupation, family situation and question, stored with the profile on the device and sent as `context` with a report request (never with the chart). The model sees it in <user_context> as information, not instructions; chart facts still decide every chart claim. Trend scores stay chart-only.
+- Plain language: narrative@4, action@3, trend@2, remedy@2 share a 大白話 rule (short sentences, conclusion first, every 命理 term explained in brackets, everyday examples) plus a one-sentence plain `summary` per topic, shown even when the topic is collapsed.
+- Preload: after a report passes, every topic's plan is generated (two at a time) and kept locked; buying only unlocks it, so it opens at once. Background preloads count against the daily total AI cap only.
+- Live checks (DeepSeek, 徐梅 profile with context): first run said 明年 = 丙午 (it is 2027 丁未) and named the user in the third person; two of three preloaded plans were held as fabricated_fact. Fixes: every prompt gets <today> (date + 去年/今年/明年 干支), names only as direct address, guard@2 also sees <user_context>, <trend> and <today>, and checkFaithfulness flags 今年/明年/去年 + wrong 干支. Rerun: years right, all three plans passed, buying opened in 11 ms.
+- A held preloaded plan is never sold: buying regenerates it. Held reports/plans log their rule ids and guard categories (no quotes).
+- Places: America/Coyhaique (tzdb 2025b) is unknown to Node's 2024b tzdb; build:places maps such split zones to their parent and fails on any unknown zone. Found by widening the places test to every city.
+
 ## 2026-10-26 (j): phone browsers can sign in
 
 - Cause: the web app called http://127.0.0.1:8787, which on a phone is the phone; the API listened on loopback only; dev CORS allowed only localhost.

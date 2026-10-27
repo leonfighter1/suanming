@@ -68,6 +68,17 @@ describe("checkFaithfulness", () => {
     expect(kinds).toContain("wrong_year_ganzhi"); // 2027 is 丁未
   });
 
+  it("flags 今年/明年/去年 paired with the wrong year's 干支 (report dated 2026)", async () => {
+    // FIXED_NOW is in 2026: 去年 2025 乙巳, 今年 2026 丙午, 明年 2027 丁未.
+    const wrong = await reportWith(bazi, ["明年的流年（每年輪到的干支）是丙午，會讓你想動。"]);
+    const issues = checkFaithfulness(bazi, wrong).filter((i) => i.kind === "wrong_relative_year");
+    expect(issues.map((i) => i.detail)).toEqual(["明年 is 2027 丁未, not 丙午"]);
+    const right = await reportWith(bazi, ["今年丙午火旺；明年丁未，去年乙巳。"]);
+    expect(checkFaithfulness(bazi, right).filter((i) => i.kind === "wrong_relative_year")).toEqual(
+      [],
+    );
+  });
+
   it("flags tarot cards not in the spread and wrong 正位/逆位", async () => {
     const { DECK } = await import("../src/engines/tarot/deck.js");
     const name = (id: string) => DECK.find((d) => d.id === id)!.name["zh-Hant"];

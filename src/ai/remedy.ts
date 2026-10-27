@@ -21,7 +21,8 @@ import {
   type Report,
   type ReportStatus,
 } from "./pipeline.js";
-import { guardUser, remedyUser } from "./prompts.js";
+import type { UserContext } from "./context.js";
+import { guardUser, remedyUser, todayLine } from "./prompts.js";
 import { loadRouting, routeFor } from "./routing.js";
 import { guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
@@ -83,7 +84,7 @@ export async function generateRemedy(
   chart: ChartFact,
   report: Report,
   topic: Topic,
-  opts: { country: string },
+  opts: { country: string; context?: UserContext },
   deps: PipelineDeps,
 ): Promise<Remedy> {
   const now = deps.now?.() ?? new Date();
@@ -139,6 +140,8 @@ export async function generateRemedy(
         interpretation: layers.interpretation.filter((s) => s.topic === topic),
         actions: layers.actions.filter((a) => a.topic === topic),
         trend,
+        context: opts.context,
+        today: todayLine(now),
         locale,
         glossary,
         feedback,
@@ -204,6 +207,9 @@ export async function generateRemedy(
             rule_groups: region.rule_groups,
           },
           draft: { remedy_plan: plan.value },
+          context: opts.context,
+          trend,
+          today: todayLine(now),
         }),
       check: (value) => ({ value, feedback: [], block: [], review: [] }),
     });

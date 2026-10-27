@@ -11,6 +11,7 @@ import { createServer, type IncomingMessage, type ServerResponse, type Server } 
 import {
   generateRemedy,
   generateReport,
+  parseUserContext,
   GeoRefusedError,
   LOCALES,
   ReportInputError,
@@ -74,6 +75,11 @@ export interface ApiOptions {
   staticDir?: string;
   /** Daily caps on AI jobs (reports + 破除運勢 plans), to bound provider spend. */
   aiQuota?: { perUserPerDay: number; totalPerDay: number };
+  /**
+   * Generate every topic's 破除運勢 plan (locked) right after a report passes, so a
+   * purchase opens instantly. Default true. Counts against aiQuota.totalPerDay.
+   */
+  preloadRemedies?: boolean;
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
@@ -140,14 +146,38 @@ export function publicRemedy(r: RemedyRecord) {
     status: r.status,
     created_at: r.created_at,
     updated_at: r.updated_at,
-    payment: r.payment,
+    /** Preloaded but not bought: ready to unlock, content withheld. */
+    locked: !r.unlocked,
+    ...(r.payment && { payment: r.payment }),
   };
   if (r.status === "pending") return r.progress ? { ...base, progress: r.progress } : base;
   if (r.status === "failed") return { ...base, message: "generation failed; please retry" };
   if (r.status !== "passed" || !r.remedy?.content) {
     return { ...base, message: "this plan is held for review and is not available yet" };
   }
-  return { ...base, content: r.remedy.content };
+  return r.unlocked ? { ...base, content: r.remedy.content } : base;
+}
+
+/**
+ * Why a report or plan was held, for the server log: status reasons, rule ids and
+ * guard categories only. Never quotes (they can contain the user's own words).
+ */
+export function heldWhy(r: {
+  reasons: string[];
+  compliance: {
+    rule_violations: { rule_id: string }[];
+    review?: { violations: { category: string }[] };
+  };
+}): string {
+  const rules = [...new Set(r.compliance.rule_violations.map((v) => v.rule_id))];
+  const guard = [...new Set((r.compliance.review?.violations ?? []).map((v) => v.category))];
+  return [
+    r.reasons.join("; "),
+    rules.length && `rules ${rules.join(",")}`,
+    guard.length && `guard ${guard.join(",")}`,
+  ]
+    .filter(Boolean)
+    .join(" | ");
 }
 
 export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<void> } {
@@ -192,6 +222,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     aiUse.set(`${day}:u:${user}`, mine + 1);
     aiUse.set(`${day}:all`, all + 1);
   }
+  /** Background jobs (preloads) take only from the daily total; false = skip. */
+  function takeBackgroundQuota(): boolean {
+    const q = opts.aiQuota;
+    if (!q) return true;
+    const day = now().toISOString().slice(0, 10);
+    const all = aiUse.get(`${day}:all`) ?? 0;
+    if (all >= q.totalPerDay) return false;
+    aiUse.set(`${day}:all`, all + 1);
+    return true;
+  }
 
   const auth = opts.auth;
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
@@ -228,7 +268,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     try {
       const report: Report = await generateReport(
         fact,
-        { locale: record.locale, country: c.country, topics: record.topics, question },
+        {
+          locale: record.locale,
+          country: c.country,
+          topics: record.topics,
+          question,
+          context: record.context,
+        },
         {
           providers: opts.providers,
           routing: opts.routing,
@@ -245,6 +291,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         },
       );
       next = { ...record, status: report.status, report, updated_at: now().toISOString() };
+      if (report.status !== "passed") log(`report ${record.id} held: ${heldWhy(report)}`);
     } catch (e) {
       const upstream = upstreamMessage(e);
       log(
@@ -261,16 +308,52 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // The account may have been deleted while this ran; never resurrect its data.
     if (!(await store.getReport(record.id))) return;
     await store.putReport(next);
+    if (next.status === "passed" && next.report && opts.preloadRemedies !== false) {
+      await preloadRemedies(next, next.report, fact, c);
+    }
   }
 
-  async function runRemedyJob(record: RemedyRecord, report: Report, fact: ChartFact, c: Caller) {
+  /** Every topic's plan, generated now and kept locked until bought (two at a time). */
+  async function preloadRemedies(record: ReportRecord, report: Report, fact: ChartFact, c: Caller) {
+    const queue: RemedyRecord[] = [];
+    for (const topic of record.topics) {
+      if (!takeBackgroundQuota()) break; // on-demand generation still works later
+      const ts = now().toISOString();
+      const r: RemedyRecord = {
+        id: randomUUID(),
+        owner: record.owner,
+        report_id: record.id,
+        topic,
+        status: "pending",
+        created_at: ts,
+        updated_at: ts,
+        unlocked: false,
+      };
+      await store.putRemedy(r);
+      queue.push(r);
+    }
+    const worker = async () => {
+      for (let r = queue.shift(); r; r = queue.shift()) {
+        await runRemedyJob(r, report, fact, c, record.context);
+      }
+    };
+    await Promise.all([worker(), worker()]);
+  }
+
+  async function runRemedyJob(
+    record: RemedyRecord,
+    report: Report,
+    fact: ChartFact,
+    c: Caller,
+    context?: ReportRecord["context"],
+  ) {
     let next: RemedyRecord;
     try {
       const remedy = await generateRemedy(
         fact,
         report,
         record.topic,
-        { country: c.country },
+        { country: c.country, context },
         {
           providers: opts.providers,
           routing: opts.routing,
@@ -286,6 +369,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         },
       );
       next = { ...record, status: remedy.status, remedy, updated_at: now().toISOString() };
+      if (remedy.status !== "passed") log(`remedy ${record.id} held: ${heldWhy(remedy)}`);
     } catch (e) {
       const upstream = upstreamMessage(e);
       log(
@@ -299,8 +383,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         updated_at: now().toISOString(),
       };
     }
-    if (!(await store.getRemedy(record.id))) return;
-    await store.putRemedy(next);
+    const current = await store.getRemedy(record.id);
+    if (!current) return;
+    // Bought while generating: keep the purchase.
+    await store.putRemedy({ ...next, unlocked: current.unlocked, payment: current.payment });
   }
 
   /** The caller's passed report and its chart, or 404 / 409. */
@@ -324,11 +410,35 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       );
     }
     assertServed(c.country, fact.system);
-    const existing = (await store.listRemedies(record.id)).find(
+    let existing = (await store.listRemedies(record.id)).find(
       (x) => x.topic === topic && x.status !== "failed",
     );
+    // A preloaded plan the guard held is never sold: retire it and generate a fresh one.
+    if (
+      existing &&
+      !existing.unlocked &&
+      (existing.status === "blocked" || existing.status === "manual_review")
+    ) {
+      await store.putRemedy({
+        ...existing,
+        status: "failed",
+        error: "superseded: held preload regenerated on purchase",
+        updated_at: now().toISOString(),
+      });
+      existing = undefined;
+    }
     if (existing) {
-      return { status: 200, body: publicRemedy(existing), headers: {} as Record<string, string> };
+      // Preloaded: buying only unlocks it. TODO(Phase 4 payments): verify the receipt.
+      const bought = existing.unlocked
+        ? existing
+        : {
+            ...existing,
+            unlocked: true,
+            payment: { status: "placeholder" as const, ...REMEDY_PRICE },
+            updated_at: now().toISOString(),
+          };
+      if (!existing.unlocked) await store.putRemedy(bought);
+      return { status: 200, body: publicRemedy(bought), headers: {} as Record<string, string> };
     }
     takeAiQuota(c.user);
 
@@ -343,10 +453,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       updated_at: ts,
       // TODO(Phase 4 payments): verify the store receipt here; until then every
       // purchase is a placeholder that succeeds without charging.
+      unlocked: true,
       payment: { status: "placeholder", ...REMEDY_PRICE },
     };
     await store.putRemedy(remedy);
-    const job = runRemedyJob(remedy, report, fact, c).finally(() => jobs.delete(job));
+    const job = runRemedyJob(remedy, report, fact, c, record.context).finally(() =>
+      jobs.delete(job),
+    );
     jobs.add(job);
     return {
       status: 202,
@@ -374,6 +487,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     assertServed(c.country, chart.fact.system);
     takeAiQuota(c.user);
     const question = typeof body.question === "string" ? body.question.slice(0, 300) : undefined;
+    const context = parseUserContext(body.context);
 
     const ts = now().toISOString();
     const record: ReportRecord = {
@@ -385,6 +499,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       topics: TOPICS.filter((t) => requested.includes(t)),
       created_at: ts,
       updated_at: ts,
+      ...(context && { context }),
     };
     await store.putReport(record);
     const job = runJob(record, chart.fact, c, question).finally(() => jobs.delete(job));
