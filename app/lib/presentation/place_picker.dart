@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import '../domain/places.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'keyboard.dart';
 
 /// Countries shown first: launch markets and common birthplaces.
 const commonCountries = ['HK', 'MO', 'TW', 'CN', 'SG', 'MY', 'US', 'CA', 'GB', 'AU'];
@@ -137,11 +139,29 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(Space.l),
-              child: TextField(
-                key: const Key('place-search'),
-                controller: _search,
-                decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.placeSearch),
-                onChanged: (v) => setState(() => _q = v),
+              // Esc clears the search first; with it empty, Esc steps back a level.
+              child: Focus(
+                canRequestFocus: false,
+                skipTraversal: true,
+                onKeyEvent: (_, e) {
+                  if (e is! KeyDownEvent || e.logicalKey != LogicalKeyboardKey.escape || _q.isEmpty) {
+                    return KeyEventResult.ignored;
+                  }
+                  _step(() {});
+                  return KeyEventResult.handled;
+                },
+                child: TextField(
+                  key: const Key('place-search'),
+                  controller: _search,
+                  // Opened from the keyboard: type at once (no pop-up keyboard after a tap).
+                  autofocus: keyboardInUse,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.placeSearch),
+                  onChanged: (v) => setState(() => _q = v),
+                  // Enter takes the first entry and keeps the focus here for the next step.
+                  onEditingComplete: () {},
+                  onSubmitted: (_) => _pickFirst(),
+                ),
               ),
             ),
             Expanded(child: _list(context, locale)),
@@ -167,9 +187,8 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
     if (_country == null) {
       final async = ref.watch(placeCountriesProvider);
       return loading(async, () {
-        final all = async.value!.where((c) => c.names.matches(_q)).toList()..sort((a, b) => a.names.en.compareTo(b.names.en));
+        final (common, all) = _countryList(async.value!);
         if (all.isEmpty) return empty();
-        final common = _q.isEmpty ? [for (final code in commonCountries) ...all.where((c) => c.code == code)] : <PlaceCountryInfo>[];
         return ListView(
           children: [
             if (common.isNotEmpty) _Header(l10n.placeCommon),
@@ -192,13 +211,13 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
           });
           return const SizedBox.shrink();
         }
-        final list = regions.where((r) => r.names.matches(_q) || r.cities.any((c) => c.names.matches(_q))).toList();
+        final list = _regionList(regions);
         if (list.isEmpty) return empty();
         return ListView(children: [
           for (final r in list) _tile(r.names, locale, key: 'region-${r.code}', trailing: '${r.cities.length}', onTap: () => _step(() => _region = r)),
         ]);
       }
-      final cities = _region!.cities.where((c) => c.names.matches(_q)).toList();
+      final cities = _cityList();
       if (cities.isEmpty) return empty();
       return ListView(children: [
         for (final c in cities)
@@ -214,6 +233,37 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
   }
 
   void _pickCountry(PlaceCountryInfo c) => _step(() => _country = c);
+
+  /// Countries as listed: the common ones first (when not searching), then all A–Z.
+  (List<PlaceCountryInfo>, List<PlaceCountryInfo>) _countryList(List<PlaceCountryInfo> countries) {
+    final all = countries.where((c) => c.names.matches(_q)).toList()..sort((a, b) => a.names.en.compareTo(b.names.en));
+    final common = _q.isEmpty ? [for (final code in commonCountries) ...all.where((c) => c.code == code)] : <PlaceCountryInfo>[];
+    return (common, all);
+  }
+
+  /// A region matches by its own name or any of its cities'.
+  List<PlaceRegion> _regionList(List<PlaceRegion> regions) =>
+      regions.where((r) => r.names.matches(_q) || r.cities.any((c) => c.names.matches(_q))).toList();
+
+  List<PlaceCity> _cityList() => _region!.cities.where((c) => c.names.matches(_q)).toList();
+
+  /// Enter in the search box: the first entry as listed.
+  void _pickFirst() {
+    if (_country == null) {
+      final countries = ref.read(placeCountriesProvider).value;
+      if (countries == null) return;
+      final (common, all) = _countryList(countries);
+      final first = [...common, ...all].firstOrNull;
+      if (first != null) _pickCountry(first);
+    } else if (_region == null) {
+      final regions = ref.read(placeRegionsProvider(_country!.code)).value;
+      final first = regions == null ? null : _regionList(regions).firstOrNull;
+      if (first != null) _step(() => _region = first);
+    } else {
+      final first = _cityList().firstOrNull;
+      if (first != null) Navigator.of(context).pop(BirthPlace.pick(_country!, _region!, first));
+    }
+  }
 
   Widget _tile(PlaceNames n, String locale, {String? key, String? subtitle, String? trailing, required VoidCallback onTap}) {
     final main = n.of(locale);

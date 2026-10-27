@@ -939,6 +939,77 @@ class AppLocalizationsZh extends AppLocalizations {
   String editCurrent(String name) {
     return '编辑“$name”的资料';
   }
+
+  @override
+  String get leaveReadingTitle => '返回将重新开始';
+
+  @override
+  String get leaveReadingBody => '这次测算还没有完成，返回后需要重新开始。';
+
+  @override
+  String get leaveFormBody => '本次填写的内容不会保留，返回后需要重新填写。';
+
+  @override
+  String get leaveChartBody => '返回后要重新排盘才能再看到这个命盘。已生成的解读会保存在历史记录里。';
+
+  @override
+  String get leaveTarotBody => '这次抽到的牌不会保留，下次要重新抽牌。已生成的解读会保存在历史记录里。';
+
+  @override
+  String get leaveReadingStay => '继续测算';
+
+  @override
+  String get leaveReadingGo => '返回';
+
+  @override
+  String get leaveEditsTitle => '放弃未保存的修改？';
+
+  @override
+  String get leaveEditsBody => '返回后，这次的修改不会保存。';
+
+  @override
+  String get leaveEditsStay => '继续编辑';
+
+  @override
+  String get leaveEditsGo => '放弃修改';
+
+  @override
+  String get keysTitle => '键盘快捷键';
+
+  @override
+  String get keysTab => '移到下一个 / 上一个控件';
+
+  @override
+  String get keySpace => '空格';
+
+  @override
+  String get keysPress => '按下按钮；展开或收起段落';
+
+  @override
+  String get keysEsc => '返回上一层：先关闭菜单和对话框；测算未完成时会先提醒';
+
+  @override
+  String get keysArrows => '切换选项（如 公历 / 农历）和图表时期；滚动 大运 / 流年';
+
+  @override
+  String get keysScroll => '滚动页面；在菜单里上下选择';
+
+  @override
+  String get keysSubmit => '提交表单：登录、排盘、保存';
+
+  @override
+  String get keysHelp => '打开这个列表';
+
+  @override
+  String get keysBrowser => '切换浏览器标签页：这是浏览器自己的快捷键，本应用不占用。应用内切换选项请用 ← →';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String cardHidden(String position) {
+    return '$position，未翻开';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1874,5 +1945,76 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String editCurrent(String name) {
     return '編輯「$name」的資料';
+  }
+
+  @override
+  String get leaveReadingTitle => '返回將重新開始';
+
+  @override
+  String get leaveReadingBody => '這次測算還沒有完成，返回後需要重新開始。';
+
+  @override
+  String get leaveFormBody => '本次填寫的內容不會保留，返回後需要重新填寫。';
+
+  @override
+  String get leaveChartBody => '返回後要重新排盤才能再看到這個命盤。已生成的解讀會保存在歷史紀錄裡。';
+
+  @override
+  String get leaveTarotBody => '這次抽到的牌不會保留，下次要重新抽牌。已生成的解讀會保存在歷史紀錄裡。';
+
+  @override
+  String get leaveReadingStay => '繼續測算';
+
+  @override
+  String get leaveReadingGo => '返回';
+
+  @override
+  String get leaveEditsTitle => '放棄未儲存的修改？';
+
+  @override
+  String get leaveEditsBody => '返回後，這次的修改不會儲存。';
+
+  @override
+  String get leaveEditsStay => '繼續編輯';
+
+  @override
+  String get leaveEditsGo => '放棄修改';
+
+  @override
+  String get keysTitle => '鍵盤快速鍵';
+
+  @override
+  String get keysTab => '移到下一個／上一個控制項';
+
+  @override
+  String get keySpace => '空白鍵';
+
+  @override
+  String get keysPress => '按下按鈕；展開或收起段落';
+
+  @override
+  String get keysEsc => '返回上一層：先關閉選單和對話框；測算未完成時會先提醒';
+
+  @override
+  String get keysArrows => '切換選項（如 公曆／農曆）和圖表時期；捲動 大運／流年';
+
+  @override
+  String get keysScroll => '捲動頁面；在選單裡上下選擇';
+
+  @override
+  String get keysSubmit => '提交表單：登入、排盤、儲存';
+
+  @override
+  String get keysHelp => '開啟這個列表';
+
+  @override
+  String get keysBrowser => '切換瀏覽器分頁：這是瀏覽器自己的快速鍵，本應用不佔用。應用內切換選項請用 ← →';
+
+  @override
+  String get close => '關閉';
+
+  @override
+  String cardHidden(String position) {
+    return '$position，未翻開';
   }
 }

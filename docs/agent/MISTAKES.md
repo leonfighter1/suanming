@@ -19,8 +19,36 @@
 15. Never run dart format on whole directories in this app; format only files you created, or none.
 16. Before scripting against the v1 API, read its response builder (publicReport, publicRemedy, publicLifeReport) for field names; reports use report_id, not id.
 17. Store new state before notifying listeners, and test it with a listener that reads the state back.
+18. Esc handling must look past a focused text field's own DismissIntent (keyboard.dart _layerAt); test Esc from inside a field.
+19. In widget tests, pump a frame between enterText (or any setState) and the next key press; use press() from test/keys.dart.
+20. Check whether a DropdownMenu is open with find.text(entry).hitTestable(), never a plain find.text.
+21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
 
 ## Log
+
+### 2026-10-27: flutter test --platform chrome never loads on this machine
+- **Symptom:** Failed to load: Connection closed before test suite loaded, then the run hung until the timeout; an untouched existing test failed the same way.
+- **Root cause:** The browser test runner cannot load suites here (environment, not the code). Meant for the global list, which this session could not write.
+- **Fix:** Web key handling verified through VM tests, explicit ButtonActivateIntent and ActivateIntent handling, and the web build gate.
+- **Rule:** Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device). (Rule 21)
+
+### 2026-10-27: A closed DropdownMenu still had its entries in the tree
+- **Symptom:** find.text(entry) found a widget after Esc closed the dropdown.
+- **Root cause:** DropdownMenu keeps an invisible copy of its entries to size itself.
+- **Fix:** Check open menu entries with find.text(...).hitTestable().
+- **Rule:** Check whether a DropdownMenu is open with find.text(entry).hitTestable(), never a plain find.text. (Rule 20)
+
+### 2026-10-27: Key pressed right after enterText met the old page
+- **Symptom:** Esc right after tester.enterText left the page without the 返回将重新开始 question.
+- **Root cause:** enterText doesn't pump: the setState that switches the guard on had not rebuilt PopScope when the key arrived.
+- **Fix:** test/keys.dart press() pumps a frame before sending the key, as real time always passes between inputs.
+- **Rule:** In widget tests, pump a frame between enterText (or any setState) and the next key press; use press() from test/keys.dart. (Rule 19)
+
+### 2026-10-27: Esc in a text field did nothing on a page
+- **Symptom:** With focus in a TextField, Esc neither went back nor closed anything.
+- **Root cause:** EditableText answers DismissIntent itself (to hide its toolbar) and is always enabled, so Esc stopped there; the route's own Esc action is disabled on full pages.
+- **Fix:** keyboard.dart _layerAt looks for an open layer above the focused text field, then falls back to popping the page.
+- **Rule:** Esc handling must look past a focused text field's own DismissIntent (keyboard.dart _layerAt); test Esc from inside a field. (Rule 18)
 
 ### 2026-10-27: Listener notified before the new state was stored
 - **Symptom:** watchAiMode called onChange before saving the new mode, so the AI switched console line would have printed the old mode

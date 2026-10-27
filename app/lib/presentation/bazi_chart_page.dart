@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
@@ -6,6 +7,7 @@ import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'keyboard.dart';
 import 'labels.dart';
 import 'theme.dart';
 import 'life_report_page.dart';
@@ -74,12 +76,18 @@ class BaziChartPage extends ConsumerWidget {
           '${t(b.dayunForward ? '顺行' : '逆行')} · ${l10n.dayunFrom(b.dayunStartDate)}',
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        child: _Timeline(items: [for (final c in b.cycles) _Step(c.ganzhi, '${c.startYear}', l10n.age(c.startAge))]),
+        child: _Timeline(
+          key: const Key('dayun-strip'),
+          label: l10n.dayun,
+          items: [for (final c in b.cycles) _Step(c.ganzhi, '${c.startYear}', l10n.age(c.startAge))],
+        ),
       ),
       AppCard(
         title: l10n.liunian,
         icon: Icons.calendar_view_month,
         child: _Timeline(
+          key: const Key('liunian-strip'),
+          label: l10n.liunian,
           items: [
             for (final y in b.liunian)
               _Step(
@@ -108,11 +116,16 @@ class BaziChartPage extends ConsumerWidget {
       ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: ListView(
-        padding: Space.page,
-        children: [for (var i = 0; i < sections.length; i++) FadeSlideIn(index: i, child: sections[i])],
+    // Only readings are kept in 历史记录: leaving drops the chart, so ask first.
+    return LeaveGuard(
+      active: true,
+      message: l10n.leaveChartBody,
+      child: Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: ListView(
+          padding: Space.page,
+          children: [for (var i = 0; i < sections.length; i++) FadeSlideIn(index: i, child: sections[i])],
+        ),
       ),
     );
   }
@@ -220,43 +233,83 @@ class _Step {
   final String line3;
 }
 
-class _Timeline extends StatelessWidget {
-  const _Timeline({required this.items});
+class _Timeline extends StatefulWidget {
+  const _Timeline({super.key, required this.items, required this.label});
   final List<_Step> items;
+
+  /// What a screen reader calls the strip (大运 / 流年).
+  final String label;
+
+  @override
+  State<_Timeline> createState() => _TimelineState();
+}
+
+class _TimelineState extends State<_Timeline> {
+  final _scroll = ScrollController();
+
+  /// One item and its gap.
+  static const _step = 96.0 + Space.s;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _go(double Function(ScrollPosition p) to) {
+    final p = _scroll.position;
+    _scroll.animateTo(
+      to(p).clamp(p.minScrollExtent, p.maxScrollExtent),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final items = widget.items;
     final small = Theme.of(context).textTheme.bodySmall;
     final scheme = Theme.of(context).colorScheme;
     Widget line(String s) =>
         Text(s, style: small, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis);
-    return SizedBox(
-      // Room for 干支 + three caption lines (流年: year·age, 十神, 沖合).
-      height: 144,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(width: Space.s),
-        itemBuilder: (_, i) {
-          final s = items[i];
-          return Container(
-            width: 96,
-            padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.m),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(Radii.field),
-            ),
-            child: Column(
-              children: [
-                GanZhiText(s.ganzhi, size: 22),
-                const SizedBox(height: Space.xs),
-                line(s.line1),
-                if (s.line2.isNotEmpty) line(s.line2),
-                if (s.line3.isNotEmpty) line(s.line3),
-              ],
-            ),
-          );
-        },
+    // Keyboard users can't swipe: Tab focuses the strip, ←/→ step, Home/End jump.
+    return Pressable(
+      label: widget.label,
+      keys: {
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => _go((p) => p.pixels + _step),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => _go((p) => p.pixels - _step),
+        const SingleActivator(LogicalKeyboardKey.home): () => _go((p) => p.minScrollExtent),
+        const SingleActivator(LogicalKeyboardKey.end): () => _go((p) => p.maxScrollExtent),
+      },
+      child: SizedBox(
+        // Room for 干支 + three caption lines (流年: year·age, 十神, 沖合).
+        height: 144,
+        child: ListView.separated(
+          controller: _scroll,
+          scrollDirection: Axis.horizontal,
+          itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(width: Space.s),
+          itemBuilder: (_, i) {
+            final s = items[i];
+            return Container(
+              width: 96,
+              padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.m),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(Radii.field),
+              ),
+              child: Column(
+                children: [
+                  GanZhiText(s.ganzhi, size: 22),
+                  const SizedBox(height: Space.xs),
+                  line(s.line1),
+                  if (s.line2.isNotEmpty) line(s.line2),
+                  if (s.line3.isNotEmpty) line(s.line3),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

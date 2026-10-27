@@ -964,4 +964,83 @@ class AppLocalizationsEn extends AppLocalizations {
   String editCurrent(String name) {
     return 'Edit $name\'s details';
   }
+
+  @override
+  String get leaveReadingTitle => 'Going back starts over';
+
+  @override
+  String get leaveReadingBody =>
+      'This reading isn\'t finished: going back means starting it again.';
+
+  @override
+  String get leaveFormBody =>
+      'What you entered for this reading won\'t be kept.';
+
+  @override
+  String get leaveChartBody =>
+      'You\'ll need to compute the chart again to see it. Readings you generated stay in History.';
+
+  @override
+  String get leaveTarotBody =>
+      'These cards won\'t be kept: you\'ll draw again next time. Readings you generated stay in History.';
+
+  @override
+  String get leaveReadingStay => 'Keep going';
+
+  @override
+  String get leaveReadingGo => 'Go back';
+
+  @override
+  String get leaveEditsTitle => 'Discard unsaved changes?';
+
+  @override
+  String get leaveEditsBody => 'Your changes won\'t be saved.';
+
+  @override
+  String get leaveEditsStay => 'Keep editing';
+
+  @override
+  String get leaveEditsGo => 'Discard';
+
+  @override
+  String get keysTitle => 'Keyboard shortcuts';
+
+  @override
+  String get keysTab => 'Move to the next / previous control';
+
+  @override
+  String get keySpace => 'Space';
+
+  @override
+  String get keysPress =>
+      'Press the focused button; expand or collapse a section';
+
+  @override
+  String get keysEsc =>
+      'Back one level: menus and dialogs close first; an unfinished reading asks first';
+
+  @override
+  String get keysArrows =>
+      'Switch options (e.g. Gregorian / Lunar) and chart periods; scroll the luck and annual pillars';
+
+  @override
+  String get keysScroll => 'Scroll the page; move through a menu';
+
+  @override
+  String get keysSubmit => 'Submit the form: sign in, compute the chart, save';
+
+  @override
+  String get keysHelp => 'Show this list';
+
+  @override
+  String get keysBrowser =>
+      'Switches browser tabs: the browser\'s own key, which the app leaves alone. Inside the app, switch options with ← →';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String cardHidden(String position) {
+    return '$position, face down';
+  }
 }

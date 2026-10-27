@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'keyboard.dart';
 import 'review_page.dart';
 import 'sign_in_page.dart';
 
@@ -74,6 +75,16 @@ class SettingsPage extends ConsumerWidget {
               onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ReviewPage())),
             ),
           ],
+          const Divider(),
+          // The keyboard list is also behind Ctrl+/ (or ?) on every page.
+          ListTile(
+            key: const Key('open-shortcuts'),
+            leading: const Icon(Icons.keyboard_outlined),
+            title: Text(l10n.keysTitle),
+            subtitle: const Text('Ctrl + /'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showShortcutList(context),
+          ),
           const Divider(),
           ListTile(
             key: const Key('sign-out'),

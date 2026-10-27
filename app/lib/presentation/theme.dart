@@ -41,10 +41,16 @@ ThemeData buildTheme(Brightness brightness) {
     dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
   );
   final rounded = RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.field));
+  // Keyboard focus: the same clear outline on every button and chip.
+  final focusSide = WidgetStateBorderSide.resolveWith(
+    (states) => states.contains(WidgetState.focused) ? focusOutline(scheme) : null,
+  );
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
     scaffoldBackgroundColor: scheme.surface,
+    // Focus tint of list rows, section headers and cards (Material's default is faint grey).
+    focusColor: scheme.primary.withValues(alpha: 0.14),
     // One transition everywhere: shared-axis style zoom + fade.
     pageTransitionsTheme: PageTransitionsTheme(
       builders: {
@@ -73,13 +79,15 @@ ThemeData buildTheme(Brightness brightness) {
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), shape: rounded),
+      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), shape: rounded).copyWith(side: focusSide),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48), shape: rounded),
+      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48), shape: rounded).copyWith(side: focusSide),
     ),
+    textButtonTheme: TextButtonThemeData(style: ButtonStyle(side: focusSide)),
+    iconButtonTheme: IconButtonThemeData(style: ButtonStyle(side: focusSide)),
     segmentedButtonTheme: SegmentedButtonThemeData(style: SegmentedButton.styleFrom(shape: rounded)),
-    chipTheme: ChipThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.chip))),
+    chipTheme: ChipThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.chip)), side: focusSide),
     dividerTheme: DividerThemeData(color: scheme.outlineVariant.withValues(alpha: 0.5), space: Space.xl),
     listTileTheme: const ListTileThemeData(contentPadding: EdgeInsets.symmetric(horizontal: Space.l)),
   );

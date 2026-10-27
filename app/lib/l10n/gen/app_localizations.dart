@@ -1886,6 +1886,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit {name}\'s details'**
   String editCurrent(String name);
+
+  /// No description provided for @leaveReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Going back starts over'**
+  String get leaveReadingTitle;
+
+  /// No description provided for @leaveReadingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This reading isn\'t finished: going back means starting it again.'**
+  String get leaveReadingBody;
+
+  /// No description provided for @leaveFormBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What you entered for this reading won\'t be kept.'**
+  String get leaveFormBody;
+
+  /// No description provided for @leaveChartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll need to compute the chart again to see it. Readings you generated stay in History.'**
+  String get leaveChartBody;
+
+  /// No description provided for @leaveTarotBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These cards won\'t be kept: you\'ll draw again next time. Readings you generated stay in History.'**
+  String get leaveTarotBody;
+
+  /// No description provided for @leaveReadingStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get leaveReadingStay;
+
+  /// No description provided for @leaveReadingGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get leaveReadingGo;
+
+  /// No description provided for @leaveEditsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes?'**
+  String get leaveEditsTitle;
+
+  /// No description provided for @leaveEditsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes won\'t be saved.'**
+  String get leaveEditsBody;
+
+  /// No description provided for @leaveEditsStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get leaveEditsStay;
+
+  /// No description provided for @leaveEditsGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get leaveEditsGo;
+
+  /// No description provided for @keysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get keysTitle;
+
+  /// No description provided for @keysTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to the next / previous control'**
+  String get keysTab;
+
+  /// No description provided for @keySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get keySpace;
+
+  /// No description provided for @keysPress.
+  ///
+  /// In en, this message translates to:
+  /// **'Press the focused button; expand or collapse a section'**
+  String get keysPress;
+
+  /// No description provided for @keysEsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Back one level: menus and dialogs close first; an unfinished reading asks first'**
+  String get keysEsc;
+
+  /// No description provided for @keysArrows.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch options (e.g. Gregorian / Lunar) and chart periods; scroll the luck and annual pillars'**
+  String get keysArrows;
+
+  /// No description provided for @keysScroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll the page; move through a menu'**
+  String get keysScroll;
+
+  /// No description provided for @keysSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the form: sign in, compute the chart, save'**
+  String get keysSubmit;
+
+  /// No description provided for @keysHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this list'**
+  String get keysHelp;
+
+  /// No description provided for @keysBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Switches browser tabs: the browser\'s own key, which the app leaves alone. Inside the app, switch options with ← →'**
+  String get keysBrowser;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @cardHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'{position}, face down'**
+  String cardHidden(String position);
 }
 
 class _AppLocalizationsDelegate

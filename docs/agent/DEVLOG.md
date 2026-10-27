@@ -2,6 +2,16 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (c): keyboard access for web users; release v1.0.0
+
+- Owner request: keyboard support for web users. Esc goes back one level, and on a 测算 page it first reminds that going back starts over; Tab, Enter to expand, Ctrl+Tab and the rest considered. Plan listed by area first, then built area by area.
+- Built `app/lib/presentation/keyboard.dart`: `KeyboardShell` around the Navigator (Esc = close the nearest open layer, else pop the page; Ctrl+/ or ? = 键盘快捷键 list; Ctrl+Enter = the page's `SubmitShortcut`), `LeaveGuard` (返回将重新开始 on the 八字 form once edited, 命盘, 塔罗 once drawn; 放弃未保存的修改？ in the profile editors; also covers the ← button and system back), `Pressable` (tarot cards, the trend chart, the 大运 / 流年 strips), `SegmentKeys` (←/→ on every option row), `keyboardInUse` (date / time pickers open in input mode, the 出生地 search autofocuses). Focus look: `FocusRing` / `focusOutline` in design.dart, button and chip outline in the theme. Sign-in: Enter moves on and submits. 出生地: Enter picks the first match, Esc clears then steps back. 设置 → 键盘快捷键.
+- Ctrl+Tab: browsers keep it (Chrome never passes it to a page), so the app leaves it alone and uses ←/→ for switching options; written into the shortcut list.
+- Fixed on the way: a chart or tarot draw finishing after the page was left opened on top of 首页 / called setState on a closed page (`mounted` checks).
+- Tests: keyboard_shell_test (7, no fixtures), keyboard_test (13, every area, plus a source rule banning a bare GestureDetector in screens); helpers in test/keys.dart. Focus look checked on rendered images in light and dark.
+- Mistakes: Esc swallowed by a focused text field (rule 18); a key right after enterText met the old page (rule 19); a closed DropdownMenu keeps its entries in the tree (rule 20); `flutter test --platform chrome` never loads on this machine (rule 21; meant for the global list, which this session could not write: access denied).
+- Owner requests during the work: README gets a detailed 更新记录 entry per update, and every update ends with the harness; both written into the new keyboard-access skill (.claude/skills) and CLAUDE.md. Released as v1.0.0 (package.json 1.0.0; app 1.0.0+1), tag v1.0.0.
+
 ## 2026-10-27 (b): cleaner top bar; mock or real AI switch
 
 - Owner request: 个人资料 and 语言 straight on the bar, 设置 as its own icon instead of ⋮. Home bar now: 历史记录 · 个人资料 · 语言 (translate icon + 简/繁/EN, one-tap menu) · 设置 (gear). The gear opens the 设置 page (the old 账号 page renamed: account details, 内容审核 for reviewers, sign-out, deletion). The sign-in bar has 语言 too. The four buttons fit a 360-wide phone in all three languages (test).

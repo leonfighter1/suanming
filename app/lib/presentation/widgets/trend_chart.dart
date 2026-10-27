@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
+import '../keyboard.dart';
 import '../labels.dart';
 
 /// Series colours: one fixed slot per entity (validated categorical order, light
@@ -74,18 +76,20 @@ class _TrendCardState extends State<TrendCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SegmentedButton<bool>(
-            key: const Key('trend-mode'),
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: false, label: Text(l10n.trendDayun)),
-              ButtonSegment(value: true, label: Text(l10n.trendLiunian)),
-            ],
-            selected: {_byYear},
-            onSelectionChanged: (s) => setState(() {
-              _byYear = s.first;
-              _selected = null;
-            }),
+          SegmentKeys(
+            child: SegmentedButton<bool>(
+              key: const Key('trend-mode'),
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(value: false, label: Text(l10n.trendDayun)),
+                ButtonSegment(value: true, label: Text(l10n.trendLiunian)),
+              ],
+              selected: {_byYear},
+              onSelectionChanged: (s) => setState(() {
+                _byYear = s.first;
+                _selected = null;
+              }),
+            ),
           ),
           const SizedBox(height: Space.m),
           // Filters: 綜合 or any topics, several at once to compare. They double as the legend.
@@ -107,9 +111,17 @@ class _TrendCardState extends State<TrendCard> {
           const SizedBox(height: Space.m),
           if (points.isNotEmpty)
             LayoutBuilder(
-              builder: (context, box) => GestureDetector(
+              builder: (context, box) => Pressable(
                 key: const Key('trend-plot'),
-                behavior: HitTestBehavior.opaque,
+                label: '${l10n.trendTitle} · ${_byYear ? '${points[sel].year}' : points[sel].label}',
+                // Tab to the chart: ←/→ step through the periods, Home/End jump to either end.
+                keys: {
+                  const SingleActivator(LogicalKeyboardKey.arrowLeft): () => setState(() => _selected = math.max(0, sel - 1)),
+                  const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
+                      setState(() => _selected = math.min(points.length - 1, sel + 1)),
+                  const SingleActivator(LogicalKeyboardKey.home): () => setState(() => _selected = 0),
+                  const SingleActivator(LogicalKeyboardKey.end): () => setState(() => _selected = points.length - 1),
+                },
                 onTapDown: (d) {
                   final plotW = box.maxWidth - _TrendPainter.leftPad;
                   final step = plotW / points.length;

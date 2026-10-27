@@ -7,19 +7,22 @@ Read this before working in this repository.
 Installed in `C:\Users\AgentSkills` (see its README). They call each other's
 scripts and don't copy them.
 
-| When                               | Skill                                                                                   | Command                                                                                                                                                          |
-| ---------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Start of every task                | **mistake-memory**: load the rules learned so far                                       | `powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\mistake-memory\scripts\show-rules.ps1 -Project .`                                                 |
-| Before writing any new code        | **reuse-first**: find the existing module first                                         | `powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\reuse-first\scripts\find-existing.ps1 -Project . -Terms <a,b>`, and read [MODULES.md](MODULES.md) |
-| Before saying "done" or committing | **harness-check**: run every gate in `.harness.json`                                    | `powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\harness-check\scripts\check.ps1 -Project .`                                                       |
-| After fixing any failure           | **mistake-memory**: record it as a rule                                                 | `...\mistake-memory\scripts\add-mistake.ps1 -Project . -Title ... -Rule ...` (`-Scope global` for tooling lessons)                                               |
-| Flutter app work                   | **appdev** (`~/.claude/skills/appdev`): its check is what harness-check runs for `app/` | through harness-check                                                                                                                                            |
+| When                               | Skill                                                                                      | Command                                                                                                                                                          |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Start of every task                | **mistake-memory**: load the rules learned so far                                          | `powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\mistake-memory\scripts\show-rules.ps1 -Project .`                                                 |
+| Before writing any new code        | **reuse-first**: find the existing module first                                            | `powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\reuse-first\scripts\find-existing.ps1 -Project . -Terms <a,b>`, and read [MODULES.md](MODULES.md) |
+| Before saying "done" or committing | **harness-check**: run every gate in `.harness.json`                                       | `powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\harness-check\scripts\check.ps1 -Project .`                                                       |
+| After fixing any failure           | **mistake-memory**: record it as a rule                                                    | `...\mistake-memory\scripts\add-mistake.ps1 -Project . -Title ... -Rule ...` (`-Scope global` for tooling lessons)                                               |
+| Flutter app work                   | **appdev** (`~/.claude/skills/appdev`): its check is what harness-check runs for `app/`    | through harness-check                                                                                                                                            |
+| Any app screen, dialog or widget   | **keyboard-access** (`.claude/skills/keyboard-access`): keyboard rules and building blocks | read its checklist; reuse `app/lib/presentation/keyboard.dart`                                                                                                   |
+| Finishing every update             | **keyboard-access**, section "Finishing every update"                                      | harness PASS → README 更新记录 entry → version → records → commit                                                                                                |
 
 Records:
 
 - [docs/agent/MISTAKES.md](docs/agent/MISTAKES.md): project rules
 - `C:\Users\AgentSkills\mistake-memory\GLOBAL_MISTAKES.md`: machine and tooling rules
 - [docs/agent/DEVLOG.md](docs/agent/DEVLOG.md): one entry per working session
+- [README.md](README.md) 更新记录: one detailed entry per update or release (owner's rule)
 
 ## Hard rules for this codebase
 

@@ -7,6 +7,7 @@ import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'keyboard.dart';
 import 'place_picker.dart';
 import 'widgets/life_context_fields.dart';
 import 'widgets/remedy.dart' show compactButtons;
@@ -120,6 +121,14 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       );
   late final _name = TextEditingController(text: _p.name);
 
+  /// Changed since the page opened: Esc and ← ask before dropping it.
+  bool _dirty = false;
+
+  void _edit(BirthProfile p) => setState(() {
+        _p = p;
+        _dirty = true;
+      });
+
   @override
   void dispose() {
     _name.dispose();
@@ -135,51 +144,55 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.profile == null ? l10n.addProfile : l10n.editProfile),
-        actions: [
-          if (widget.profile != null)
-            IconButton(
-              tooltip: l10n.deleteProfile,
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                await ref.read(profilesProvider.notifier).remove(widget.profile!.id);
-                navigator.pop();
-              },
-            ),
-        ],
-      ),
-      body: ListView(
-        padding: Space.page,
-        children: [
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  key: const Key('profile-name'),
-                  controller: _name,
-                  decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
-                  onChanged: (_) => setState(() {}),
+    return LeaveGuard(
+      kind: LeaveKind.edits,
+      active: _dirty,
+      child: SubmitShortcut(
+        onSubmit: _name.text.trim().isEmpty ? null : _save,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(widget.profile == null ? l10n.addProfile : l10n.editProfile),
+            actions: [
+              if (widget.profile != null)
+                IconButton(
+                  tooltip: l10n.deleteProfile,
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () async {
+                    final navigator = Navigator.of(context);
+                    await ref.read(profilesProvider.notifier).remove(widget.profile!.id);
+                    navigator.pop();
+                  },
                 ),
-                const SizedBox(height: Space.l),
-                BirthFields(
-                  value: _p,
-                  onChanged: (p) => setState(() => _p = p),
+            ],
+          ),
+          body: ListView(
+            padding: Space.page,
+            children: [
+              AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      key: const Key('profile-name'),
+                      controller: _name,
+                      decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
+                      onChanged: (_) => setState(() => _dirty = true),
+                    ),
+                    const SizedBox(height: Space.l),
+                    BirthFields(value: _p, onChanged: _edit),
+                    LifeContextFields(value: _p.life, onChanged: (l) => _edit(_p.copyWith(life: l))),
+                  ],
                 ),
-                LifeContextFields(value: _p.life, onChanged: (l) => setState(() => _p = _p.copyWith(life: l))),
-              ],
-            ),
+              ),
+              FilledButton.icon(
+                key: const Key('save-profile'),
+                onPressed: _name.text.trim().isEmpty ? null : _save,
+                icon: const Icon(Icons.check),
+                label: Text(l10n.save),
+              ),
+            ],
           ),
-          FilledButton.icon(
-            key: const Key('save-profile'),
-            onPressed: _name.text.trim().isEmpty ? null : _save,
-            icon: const Icon(Icons.check),
-            label: Text(l10n.save),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -211,6 +224,14 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
   late final _name = TextEditingController(text: _p.name);
   bool _busy = false;
 
+  /// Changed since the pop-up opened: Esc and tapping outside ask first.
+  bool _dirty = false;
+
+  void _edit(BirthProfile p) => setState(() {
+        _p = p;
+        _dirty = true;
+      });
+
   @override
   void dispose() {
     _name.dispose();
@@ -229,58 +250,65 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Dialog(
-      key: const Key('profile-dialog'),
-      insetPadding: const EdgeInsets.all(Space.l),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 640, maxHeight: MediaQuery.sizeOf(context).height * 0.9),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(Space.xl, Space.l, Space.s, 0),
-              child: Row(children: [
-                Icon(widget.profile == null ? Icons.person_add_alt_1 : Icons.edit_outlined, color: theme.colorScheme.primary),
-                const SizedBox(width: Space.s),
-                Expanded(child: Text(widget.profile == null ? l10n.addTester : l10n.editProfile, style: theme.textTheme.titleLarge)),
-                IconButton(tooltip: l10n.cancel, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-              ]),
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(Space.xl, Space.m, Space.xl, Space.m),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  TextField(
-                    key: const Key('dialog-profile-name'),
-                    controller: _name,
-                    autofocus: widget.profile == null,
-                    decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
-                    onChanged: (_) => setState(() {}),
+    return LeaveGuard(
+      kind: LeaveKind.edits,
+      active: _dirty && !_busy,
+      child: SubmitShortcut(
+        onSubmit: _busy || _name.text.trim().isEmpty ? null : _save,
+        child: Dialog(
+          key: const Key('profile-dialog'),
+          insetPadding: const EdgeInsets.all(Space.l),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 640, maxHeight: MediaQuery.sizeOf(context).height * 0.9),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.xl, Space.l, Space.s, 0),
+                  child: Row(children: [
+                    Icon(widget.profile == null ? Icons.person_add_alt_1 : Icons.edit_outlined, color: theme.colorScheme.primary),
+                    const SizedBox(width: Space.s),
+                    Expanded(child: Text(widget.profile == null ? l10n.addTester : l10n.editProfile, style: theme.textTheme.titleLarge)),
+                    IconButton(tooltip: l10n.cancel, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                  ]),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(Space.xl, Space.m, Space.xl, Space.m),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      TextField(
+                        key: const Key('dialog-profile-name'),
+                        controller: _name,
+                        autofocus: widget.profile == null,
+                        decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
+                        onChanged: (_) => setState(() => _dirty = true),
+                      ),
+                      const SizedBox(height: Space.l),
+                      BirthFields(value: _p, onChanged: _edit),
+                      LifeContextFields(value: _p.life, onChanged: (l) => _edit(_p.copyWith(life: l))),
+                    ]),
                   ),
-                  const SizedBox(height: Space.l),
-                  BirthFields(value: _p, onChanged: (p) => setState(() => _p = p)),
-                  LifeContextFields(value: _p.life, onChanged: (l) => setState(() => _p = _p.copyWith(life: l))),
-                ]),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(Space.l, 0, Space.l, Space.l),
-              child: compactButtons(
-                context,
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
-                  const SizedBox(width: Space.s),
-                  FilledButton.icon(
-                    key: const Key('dialog-save-profile'),
-                    onPressed: _busy || _name.text.trim().isEmpty ? null : _save,
-                    icon: const Icon(Icons.check),
-                    label: Text(l10n.save),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.l, 0, Space.l, Space.l),
+                  child: compactButtons(
+                    context,
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+                      const SizedBox(width: Space.s),
+                      FilledButton.icon(
+                        key: const Key('dialog-save-profile'),
+                        onPressed: _busy || _name.text.trim().isEmpty ? null : _save,
+                        icon: const Icon(Icons.check),
+                        label: Text(l10n.save),
+                      ),
+                    ]),
                   ),
-                ]),
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -306,14 +334,16 @@ class BirthFields extends ConsumerWidget {
         Text(l10n.birthTime, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Space.s),
         // Date: 公曆 or 農曆 (birthLocal is always stored as 公曆).
-        SegmentedButton<String>(
-          key: const Key('date-mode'),
-          segments: [
-            ButtonSegment(value: 'gregorian', label: Text(l10n.gregorian), icon: const Icon(Icons.calendar_today, size: 18)),
-            ButtonSegment(value: 'lunar', label: Text(l10n.lunarLabel), icon: const Icon(Icons.nightlight_round, size: 18)),
-          ],
-          selected: {value.dateMode},
-          onSelectionChanged: (s) => onChanged(value.copyWith(dateMode: s.first)),
+        SegmentKeys(
+          child: SegmentedButton<String>(
+            key: const Key('date-mode'),
+            segments: [
+              ButtonSegment(value: 'gregorian', label: Text(l10n.gregorian), icon: const Icon(Icons.calendar_today, size: 18)),
+              ButtonSegment(value: 'lunar', label: Text(l10n.lunarLabel), icon: const Icon(Icons.nightlight_round, size: 18)),
+            ],
+            selected: {value.dateMode},
+            onSelectionChanged: (s) => onChanged(value.copyWith(dateMode: s.first)),
+          ),
         ),
         const SizedBox(height: Space.s),
         AnimatedSwitcher(
@@ -330,6 +360,8 @@ class BirthFields extends ConsumerWidget {
                       initialDate: d,
                       firstDate: DateTime(1900),
                       lastDate: DateTime.now(),
+                      // From the keyboard: type the date instead of arrowing back through the years.
+                      initialEntryMode: keyboardInUse ? DatePickerEntryMode.input : DatePickerEntryMode.calendar,
                     );
                     if (picked != null) {
                       onChanged(value.copyWith(birthLocal: DateTime(picked.year, picked.month, picked.day, d.hour, d.minute)));
@@ -347,19 +379,21 @@ class BirthFields extends ConsumerWidget {
             : LunarPreview(date: d),
         const SizedBox(height: Space.l),
         // Time: exact clock time, or a 時辰 with its 干支.
-        SegmentedButton<String>(
-          key: const Key('time-mode'),
-          segments: [
-            ButtonSegment(value: 'exact', label: Text(l10n.timeExact), icon: const Icon(Icons.schedule, size: 18)),
-            ButtonSegment(value: 'shichen', label: Text(l10n.timeShichen), icon: const Icon(Icons.hourglass_bottom, size: 18)),
-          ],
-          selected: {value.timeMode},
-          onSelectionChanged: (s) {
-            if (s.first == 'exact') return onChanged(value.copyWith(timeMode: 'exact'));
-            // Start from the 時辰 that contains the current time.
-            final key = shichenKeyFor(d.hour);
-            onChanged(value.copyWith(timeMode: 'shichen', shichen: key, birthLocal: _withMid(d, key)));
-          },
+        SegmentKeys(
+          child: SegmentedButton<String>(
+            key: const Key('time-mode'),
+            segments: [
+              ButtonSegment(value: 'exact', label: Text(l10n.timeExact), icon: const Icon(Icons.schedule, size: 18)),
+              ButtonSegment(value: 'shichen', label: Text(l10n.timeShichen), icon: const Icon(Icons.hourglass_bottom, size: 18)),
+            ],
+            selected: {value.timeMode},
+            onSelectionChanged: (s) {
+              if (s.first == 'exact') return onChanged(value.copyWith(timeMode: 'exact'));
+              // Start from the 時辰 that contains the current time.
+              final key = shichenKeyFor(d.hour);
+              onChanged(value.copyWith(timeMode: 'shichen', shichen: key, birthLocal: _withMid(d, key)));
+            },
+          ),
         ),
         const SizedBox(height: Space.s),
         AnimatedSwitcher(
@@ -371,7 +405,11 @@ class BirthFields extends ConsumerWidget {
                   icon: const Icon(Icons.schedule, size: 18),
                   label: Text(TimeOfDay.fromDateTime(d).format(context)),
                   onPressed: () async {
-                    final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(d));
+                    final t = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(d),
+                      initialEntryMode: keyboardInUse ? TimePickerEntryMode.input : TimePickerEntryMode.dial,
+                    );
                     if (t != null) onChanged(value.copyWith(birthLocal: DateTime(d.year, d.month, d.day, t.hour, t.minute)));
                   },
                 ),
@@ -382,13 +420,16 @@ class BirthFields extends ConsumerWidget {
         const SizedBox(height: Space.l),
         Text(l10n.gender, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Space.s),
-        SegmentedButton<String>(
-          segments: [
-            ButtonSegment(value: 'male', label: Text(l10n.male), icon: const Icon(Icons.male)),
-            ButtonSegment(value: 'female', label: Text(l10n.female), icon: const Icon(Icons.female)),
-          ],
-          selected: {value.gender},
-          onSelectionChanged: (s) => onChanged(value.copyWith(gender: s.first)),
+        SegmentKeys(
+          child: SegmentedButton<String>(
+            key: const Key('gender'),
+            segments: [
+              ButtonSegment(value: 'male', label: Text(l10n.male), icon: const Icon(Icons.male)),
+              ButtonSegment(value: 'female', label: Text(l10n.female), icon: const Icon(Icons.female)),
+            ],
+            selected: {value.gender},
+            onSelectionChanged: (s) => onChanged(value.copyWith(gender: s.first)),
+          ),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,

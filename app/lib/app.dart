@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'application/providers.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'presentation/home_page.dart';
+import 'presentation/keyboard.dart';
 import 'presentation/sign_in_page.dart';
 import 'presentation/theme.dart';
 
@@ -26,6 +27,8 @@ class MingliApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      // App-wide keys around the Navigator: Esc = back one level, Ctrl+/ = list.
+      builder: (_, navigator) => KeyboardShell(child: navigator!),
       home: const AuthGate(),
     );
   }
