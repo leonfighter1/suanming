@@ -249,6 +249,7 @@ describe("DELETE /v1/account", () => {
       charts: 1,
       reports: 1,
       remedies: 4, // every tarot topic's plan was preloaded
+      life_reports: 0,
     });
     expect((await authed(t.access_token, "/v1/me")).status).toBe(401);
     expect((await post("/v1/auth/refresh", { refresh_token: t.refresh_token })).status).toBe(401);

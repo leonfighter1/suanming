@@ -6,6 +6,7 @@ import '../config.dart';
 import '../data/api_client.dart';
 import '../data/profile_store.dart';
 import '../data/token_store.dart';
+import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/places.dart';
 import '../domain/profile.dart';
@@ -221,6 +222,28 @@ final calendarDayProvider = FutureProvider.autoDispose.family<CalendarDay, DateT
 /// Months of a 農曆 year (incl. 閏月), for the 農曆 date picker.
 final lunarMonthsProvider = FutureProvider.autoDispose.family<List<LunarMonthInfo>, int>(
   (ref, year) => ref.watch(apiClientProvider).lunarMonths(year),
+);
+
+/// Polls a 一生运势报告 until it leaves `pending`.
+final lifeReportProvider = StreamProvider.autoDispose.family<LifeReportView, String>((ref, id) async* {
+  final api = ref.watch(apiClientProvider);
+  final interval = ref.watch(pollIntervalProvider);
+  while (true) {
+    final r = await api.getLifeReport(id);
+    yield r;
+    if (r.isTerminal) return;
+    await Future<void>.delayed(interval);
+  }
+});
+
+/// The user's life reports (newest first).
+final lifeReportsProvider = FutureProvider.autoDispose<List<LifeReportView>>(
+  (ref) => ref.watch(apiClientProvider).listLifeReports(),
+);
+
+/// A chart by id (life reports opened from history need its 八字).
+final chartProvider = FutureProvider.autoDispose.family<ChartResult, String>(
+  (ref, id) => ref.watch(apiClientProvider).getChart(id),
 );
 
 /// Birthplace countries (static server data; cached for the session).

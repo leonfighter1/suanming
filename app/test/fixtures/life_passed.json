@@ -1,0 +1,511 @@
+{
+  "life_report_id": "55555555-5555-4555-8555-555555555555",
+  "chart_id": "66666666-6666-4666-8666-666666666666",
+  "status": "passed",
+  "locale": "zh-Hans",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "facts": {
+    "birth": {
+      "civil_local": "1987-11-23T03:30:00",
+      "pillar_clock": "1987-11-23T03:44:56",
+      "true_solar_time_applied": true
+    },
+    "benming": {
+      "method": "先天数起卦（年月日时）",
+      "steps": {
+        "year_branch": {
+          "zhi": "卯",
+          "number": 4
+        },
+        "lunar_month": 10,
+        "lunar_day": 3,
+        "hour_branch": {
+          "zhi": "寅",
+          "number": 3
+        },
+        "upper_sum": 17,
+        "upper_remainder": 1,
+        "lower_sum": 20,
+        "lower_remainder": 4,
+        "moving_remainder": 2
+      },
+      "hexagram": {
+        "id": "100111",
+        "upper": "111",
+        "lower": "100",
+        "name": "无妄",
+        "full_name": "天雷无妄",
+        "gua_ci": "无妄：元亨，利贞。其匪正有眚，不利有攸往。",
+        "da_xiang": "天下雷行，物与无妄；先王以茂对时，育万物。"
+      },
+      "moving_line": 2,
+      "changed": {
+        "id": "110111",
+        "upper": "111",
+        "lower": "110",
+        "name": "履",
+        "full_name": "天泽履",
+        "gua_ci": "履虎尾，不咥人，亨。",
+        "da_xiang": "上天下泽，履；君子以辨上下，安民志。"
+      },
+      "nuclear": {
+        "id": "001011",
+        "upper": "011",
+        "lower": "001",
+        "name": "渐",
+        "full_name": "风山渐",
+        "gua_ci": "渐：女归吉，利贞。",
+        "da_xiang": "山上有木，渐；君子以居贤德，善俗。"
+      },
+      "lines": [
+        {
+          "line": 1,
+          "yang": true,
+          "moving": false,
+          "age_from": 0,
+          "age_to": 14,
+          "text": "初九：无妄，往吉。"
+        },
+        {
+          "line": 2,
+          "yang": false,
+          "moving": true,
+          "age_from": 15,
+          "age_to": 29,
+          "text": "六二：不耕获，不菑畬，则利有攸往。"
+        },
+        {
+          "line": 3,
+          "yang": false,
+          "moving": false,
+          "age_from": 30,
+          "age_to": 44,
+          "text": "六三：无妄之灾，或系之牛，行人之得，邑人之灾。"
+        },
+        {
+          "line": 4,
+          "yang": true,
+          "moving": false,
+          "age_from": 45,
+          "age_to": 59,
+          "text": "九四：可贞，无咎。"
+        },
+        {
+          "line": 5,
+          "yang": true,
+          "moving": false,
+          "age_from": 60,
+          "age_to": 74,
+          "text": "九五：无妄之疾，勿药有喜。"
+        },
+        {
+          "line": 6,
+          "yang": true,
+          "moving": false,
+          "age_from": 75,
+          "age_to": null,
+          "text": "上九：无妄，行有眚，无攸利。"
+        }
+      ]
+    },
+    "meihua": {
+      "ti": {
+        "trigram": "111",
+        "wuxing": "金"
+      },
+      "yong": {
+        "trigram": "100",
+        "wuxing": "木",
+        "relation": "体克",
+        "stage": "早年"
+      },
+      "hu": {
+        "hexagram": "001011",
+        "trigrams": [
+          {
+            "trigram": "011",
+            "wuxing": "木",
+            "relation": "体克"
+          },
+          {
+            "trigram": "001",
+            "wuxing": "土",
+            "relation": "生体"
+          }
+        ],
+        "stage": "中年"
+      },
+      "bian": {
+        "hexagram": "110111",
+        "trigram": "110",
+        "wuxing": "金",
+        "relation": "比和",
+        "stage": "晚年"
+      },
+      "season": {
+        "month_zhi": "亥",
+        "ruling": "水",
+        "ti_strength": "休"
+      }
+    },
+    "bazhai": {
+      "year": 1987,
+      "gender": "male",
+      "kua": 4,
+      "trigram": "011",
+      "wuxing": "木",
+      "group": "东四命",
+      "directions": [
+        {
+          "star": "生气",
+          "luck": "大吉",
+          "trigram": "010",
+          "direction": "北"
+        },
+        {
+          "star": "天医",
+          "luck": "吉",
+          "trigram": "101",
+          "direction": "南"
+        },
+        {
+          "star": "延年",
+          "luck": "吉",
+          "trigram": "100",
+          "direction": "东"
+        },
+        {
+          "star": "伏位",
+          "luck": "小吉",
+          "trigram": "011",
+          "direction": "东南"
+        },
+        {
+          "star": "祸害",
+          "luck": "凶",
+          "trigram": "111",
+          "direction": "西北"
+        },
+        {
+          "star": "六煞",
+          "luck": "凶",
+          "trigram": "110",
+          "direction": "西"
+        },
+        {
+          "star": "五鬼",
+          "luck": "凶",
+          "trigram": "000",
+          "direction": "西南"
+        },
+        {
+          "star": "绝命",
+          "luck": "大凶",
+          "trigram": "001",
+          "direction": "东北"
+        }
+      ]
+    },
+    "trigrams": {
+      "100": {
+        "name": "震",
+        "image": "雷",
+        "wuxing": "木"
+      },
+      "101": {
+        "name": "离",
+        "image": "火",
+        "wuxing": "火"
+      },
+      "110": {
+        "name": "兑",
+        "image": "泽",
+        "wuxing": "金"
+      },
+      "111": {
+        "name": "乾",
+        "image": "天",
+        "wuxing": "金"
+      },
+      "011": {
+        "name": "巽",
+        "image": "风",
+        "wuxing": "木"
+      },
+      "010": {
+        "name": "坎",
+        "image": "水",
+        "wuxing": "水"
+      },
+      "001": {
+        "name": "艮",
+        "image": "山",
+        "wuxing": "土"
+      },
+      "000": {
+        "name": "坤",
+        "image": "地",
+        "wuxing": "土"
+      }
+    }
+  },
+  "layers": {
+    "methods": {
+      "yijing": {
+        "meaning": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ming_yao": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "zhi_gua": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "stages": [
+          {
+            "line": 1,
+            "reading": "(Demo) Tradition offers this as a prompt for self-reflection."
+          },
+          {
+            "line": 2,
+            "reading": "(Demo) Tradition offers this as a prompt for self-reflection."
+          },
+          {
+            "line": 3,
+            "reading": "(Demo) Tradition offers this as a prompt for self-reflection."
+          },
+          {
+            "line": 4,
+            "reading": "(Demo) Tradition offers this as a prompt for self-reflection."
+          },
+          {
+            "line": 5,
+            "reading": "(Demo) Tradition offers this as a prompt for self-reflection."
+          },
+          {
+            "line": 6,
+            "reading": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ]
+      },
+      "meihua": {
+        "season": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "early": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "middle": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "late": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "conclusion": "(Demo) Tradition offers this as a prompt for self-reflection."
+      },
+      "wuxing": {
+        "analysis": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "favorable": [
+          "(Demo) Tradition offers this as a prompt for self-reflection."
+        ],
+        "unfavorable": [
+          "(Demo) Tradition offers this as a prompt for self-reflection."
+        ],
+        "note": "(Demo) Tradition offers this as a prompt for self-reflection."
+      },
+      "bazhai": {
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "daily": "(Demo) Tradition offers this as a prompt for self-reflection."
+      },
+      "fact_refs": [
+        "/benming/hexagram",
+        "/meihua/ti",
+        "/bazhai/kua"
+      ]
+    },
+    "topics": [
+      {
+        "key": "personality",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      },
+      {
+        "key": "career",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      },
+      {
+        "key": "wealth",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      },
+      {
+        "key": "relationships",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      },
+      {
+        "key": "children",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      },
+      {
+        "key": "parents",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      },
+      {
+        "key": "health",
+        "summary": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "points": [
+          {
+            "period": "",
+            "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+          }
+        ],
+        "fact_refs": [
+          "/bazi/day_master"
+        ]
+      }
+    ],
+    "stages": [
+      {
+        "dayun_index": 1,
+        "label": "Steady",
+        "score": 57,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "庚戌",
+        "start_year": 1992,
+        "start_age": 6,
+        "end_age": 15
+      },
+      {
+        "dayun_index": 2,
+        "label": "Steady",
+        "score": 74,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "己酉",
+        "start_year": 2002,
+        "start_age": 16,
+        "end_age": 25
+      },
+      {
+        "dayun_index": 3,
+        "label": "Steady",
+        "score": 50,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "戊申",
+        "start_year": 2012,
+        "start_age": 26,
+        "end_age": 35
+      },
+      {
+        "dayun_index": 4,
+        "label": "Steady",
+        "score": 67,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "丁未",
+        "start_year": 2022,
+        "start_age": 36,
+        "end_age": 45
+      },
+      {
+        "dayun_index": 5,
+        "label": "Steady",
+        "score": 43,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "丙午",
+        "start_year": 2032,
+        "start_age": 46,
+        "end_age": 55
+      },
+      {
+        "dayun_index": 6,
+        "label": "Steady",
+        "score": 60,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "乙巳",
+        "start_year": 2042,
+        "start_age": 56,
+        "end_age": 65
+      },
+      {
+        "dayun_index": 7,
+        "label": "Steady",
+        "score": 77,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "甲辰",
+        "start_year": 2052,
+        "start_age": 66,
+        "end_age": 75
+      },
+      {
+        "dayun_index": 8,
+        "label": "Steady",
+        "score": 53,
+        "focus": "(Demo) Tradition offers this as a prompt for self-reflection.",
+        "ganzhi": "癸卯",
+        "start_year": 2062,
+        "start_age": 76,
+        "end_age": 85
+      }
+    ],
+    "summary": {
+      "verdict": "(Demo) Tradition offers this as a prompt for self-reflection.",
+      "advice": [
+        {
+          "area": "Steady",
+          "text": "(Demo) Tradition offers this as a prompt for self-reflection."
+        }
+      ],
+      "closing": "(Demo) Tradition offers this as a prompt for self-reflection."
+    },
+    "expectation": {
+      "text": "命理内容属文化参考与自我反思，不是对未来的预测，也不构成医疗、财务、法律或心理专业意见。重要决定请咨询相关专业人士。",
+      "ai_label": "本解读由 AI 根据命盘数据生成，仅供参考与自我反思。",
+      "label_required": false
+    }
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "life_methods@1,life_topics@1,guard@2",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

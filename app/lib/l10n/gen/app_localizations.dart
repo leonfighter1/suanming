@@ -1292,6 +1292,468 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ready'**
   String get remedyReady;
+
+  /// No description provided for @lifeEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Life report'**
+  String get lifeEntry;
+
+  /// No description provided for @lifeEntryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'I Ching natal hexagram, Plum Blossom and Five Elements, read together over a whole life'**
+  String get lifeEntryDesc;
+
+  /// No description provided for @lifeGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create life report'**
+  String get lifeGenerate;
+
+  /// No description provided for @lifeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I Ching natal hexagram  |  Plum Blossom  |  Five Elements'**
+  String get lifeSubtitle;
+
+  /// No description provided for @lifeReportOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Life report'**
+  String lifeReportOf(String name);
+
+  /// No description provided for @lifeItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get lifeItem;
+
+  /// No description provided for @lifeContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get lifeContent;
+
+  /// No description provided for @lifeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get lifeName;
+
+  /// No description provided for @lifeBirthLunar.
+  ///
+  /// In en, this message translates to:
+  /// **'Born (lunar)'**
+  String get lifeBirthLunar;
+
+  /// No description provided for @lifeBirthSolar.
+  ///
+  /// In en, this message translates to:
+  /// **'Born (Gregorian)'**
+  String get lifeBirthSolar;
+
+  /// No description provided for @lifeBirthPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthplace'**
+  String get lifeBirthPlace;
+
+  /// No description provided for @lifeTrueSolar.
+  ///
+  /// In en, this message translates to:
+  /// **'True solar time'**
+  String get lifeTrueSolar;
+
+  /// No description provided for @lifeGanzhi.
+  ///
+  /// In en, this message translates to:
+  /// **'Four pillars'**
+  String get lifeGanzhi;
+
+  /// No description provided for @lifeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This report follows traditional methods and is cultural reference, not scientific prediction. The three methods are worked out separately and then read together.'**
+  String get lifeNote;
+
+  /// No description provided for @lifeSec1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. I Ching natal hexagram'**
+  String get lifeSec1;
+
+  /// No description provided for @lifeQigua.
+  ///
+  /// In en, this message translates to:
+  /// **'Casting'**
+  String get lifeQigua;
+
+  /// No description provided for @lifeBenGua.
+  ///
+  /// In en, this message translates to:
+  /// **'Natal hexagram'**
+  String get lifeBenGua;
+
+  /// No description provided for @lifeHuGua.
+  ///
+  /// In en, this message translates to:
+  /// **'Nuclear'**
+  String get lifeHuGua;
+
+  /// No description provided for @lifeZhiGuaShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed'**
+  String get lifeZhiGuaShort;
+
+  /// No description provided for @lifeGuaYi.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning: the base tone of a life'**
+  String get lifeGuaYi;
+
+  /// No description provided for @lifeMingYao.
+  ///
+  /// In en, this message translates to:
+  /// **'The life line'**
+  String get lifeMingYao;
+
+  /// No description provided for @lifeZhiGua.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed hexagram: where life arrives'**
+  String get lifeZhiGua;
+
+  /// No description provided for @lifeSixLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Six lines and life stages'**
+  String get lifeSixLines;
+
+  /// No description provided for @lifeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get lifeLine;
+
+  /// No description provided for @lifeAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get lifeAge;
+
+  /// No description provided for @lifeYaoCi.
+  ///
+  /// In en, this message translates to:
+  /// **'Line text'**
+  String get lifeYaoCi;
+
+  /// No description provided for @lifeForLife.
+  ///
+  /// In en, this message translates to:
+  /// **'For your life'**
+  String get lifeForLife;
+
+  /// No description provided for @lifeSec2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Plum Blossom numerology'**
+  String get lifeSec2;
+
+  /// No description provided for @lifeMhGua.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigram'**
+  String get lifeMhGua;
+
+  /// No description provided for @lifeMhRel.
+  ///
+  /// In en, this message translates to:
+  /// **'To the self trigram'**
+  String get lifeMhRel;
+
+  /// No description provided for @lifeMhStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Governs'**
+  String get lifeMhStage;
+
+  /// No description provided for @lifeTi.
+  ///
+  /// In en, this message translates to:
+  /// **'Self (体)'**
+  String get lifeTi;
+
+  /// No description provided for @lifeYong.
+  ///
+  /// In en, this message translates to:
+  /// **'Use (用)'**
+  String get lifeYong;
+
+  /// No description provided for @lifeHu.
+  ///
+  /// In en, this message translates to:
+  /// **'Nuclear (互)'**
+  String get lifeHu;
+
+  /// No description provided for @lifeBian.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed (变)'**
+  String get lifeBian;
+
+  /// No description provided for @lifeSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Yourself'**
+  String get lifeSelf;
+
+  /// No description provided for @lifeEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Early life'**
+  String get lifeEarly;
+
+  /// No description provided for @lifeMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle age'**
+  String get lifeMiddle;
+
+  /// No description provided for @lifeLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Later life'**
+  String get lifeLate;
+
+  /// No description provided for @lifeSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Season'**
+  String get lifeSeason;
+
+  /// No description provided for @lifeMhConclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Plum Blossom conclusion'**
+  String get lifeMhConclusion;
+
+  /// No description provided for @relBihe.
+  ///
+  /// In en, this message translates to:
+  /// **'Harmony'**
+  String get relBihe;
+
+  /// No description provided for @relShengti.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports you'**
+  String get relShengti;
+
+  /// No description provided for @relTisheng.
+  ///
+  /// In en, this message translates to:
+  /// **'Drains you'**
+  String get relTisheng;
+
+  /// No description provided for @relTike.
+  ///
+  /// In en, this message translates to:
+  /// **'You control it (effort brings gain)'**
+  String get relTike;
+
+  /// No description provided for @relKeti.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressures you'**
+  String get relKeti;
+
+  /// No description provided for @lifeSec3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Five Elements and Eight Mansions'**
+  String get lifeSec3;
+
+  /// No description provided for @lifeWuxingDist.
+  ///
+  /// In en, this message translates to:
+  /// **'Five Elements (weighted, simplified)'**
+  String get lifeWuxingDist;
+
+  /// No description provided for @lifeFavorable.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourable'**
+  String get lifeFavorable;
+
+  /// No description provided for @lifeUnfavorable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavourable'**
+  String get lifeUnfavorable;
+
+  /// No description provided for @lifeBazhai.
+  ///
+  /// In en, this message translates to:
+  /// **'Eight Mansions life gua'**
+  String get lifeBazhai;
+
+  /// No description provided for @lifeKua.
+  ///
+  /// In en, this message translates to:
+  /// **'Life gua {kua} · {name} ({group}, {wuxing})'**
+  String lifeKua(String kua, String name, String group, String wuxing);
+
+  /// No description provided for @lifeDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday use'**
+  String get lifeDaily;
+
+  /// No description provided for @lifeSec4.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Life topics'**
+  String get lifeSec4;
+
+  /// No description provided for @lifeTopicPersonality.
+  ///
+  /// In en, this message translates to:
+  /// **'Personality'**
+  String get lifeTopicPersonality;
+
+  /// No description provided for @lifeTopicCareer.
+  ///
+  /// In en, this message translates to:
+  /// **'Career'**
+  String get lifeTopicCareer;
+
+  /// No description provided for @lifeTopicWealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get lifeTopicWealth;
+
+  /// No description provided for @lifeTopicRelationships.
+  ///
+  /// In en, this message translates to:
+  /// **'Love and marriage'**
+  String get lifeTopicRelationships;
+
+  /// No description provided for @lifeTopicChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Family and children'**
+  String get lifeTopicChildren;
+
+  /// No description provided for @lifeTopicParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents'**
+  String get lifeTopicParents;
+
+  /// No description provided for @lifeTopicHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Wellbeing'**
+  String get lifeTopicHealth;
+
+  /// No description provided for @lifeSec5.
+  ///
+  /// In en, this message translates to:
+  /// **'5. Life stages'**
+  String get lifeSec5;
+
+  /// No description provided for @lifeYears.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get lifeYears;
+
+  /// No description provided for @lifeFortune.
+  ///
+  /// In en, this message translates to:
+  /// **'Outlook'**
+  String get lifeFortune;
+
+  /// No description provided for @lifeFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get lifeFocus;
+
+  /// No description provided for @lifeSec6.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Overall reading and advice'**
+  String get lifeSec6;
+
+  /// No description provided for @lifeDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download report package'**
+  String get lifeDownload;
+
+  /// No description provided for @lifePrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print / save as PDF'**
+  String get lifePrint;
+
+  /// No description provided for @lifeGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is writing your life report…'**
+  String get lifeGenerating;
+
+  /// No description provided for @lifeStageMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the I Ching, Plum Blossom and Eight Mansions'**
+  String get lifeStageMethods;
+
+  /// No description provided for @lifeStageTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the topics and life stages'**
+  String get lifeStageTopics;
+
+  /// No description provided for @lifeTook.
+  ///
+  /// In en, this message translates to:
+  /// **'About 3–5 minutes. You can leave this page; it keeps going.'**
+  String get lifeTook;
+
+  /// No description provided for @lifeDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Direction'**
+  String get lifeDirection;
+
+  /// No description provided for @lifeStar.
+  ///
+  /// In en, this message translates to:
+  /// **'Star'**
+  String get lifeStar;
+
+  /// No description provided for @lifeLuck.
+  ///
+  /// In en, this message translates to:
+  /// **'Luck'**
+  String get lifeLuck;
+
+  /// No description provided for @lifeMhName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get lifeMhName;
+
+  /// No description provided for @lifeWuxing.
+  ///
+  /// In en, this message translates to:
+  /// **'Element'**
+  String get lifeWuxing;
 }
 
 class _AppLocalizationsDelegate

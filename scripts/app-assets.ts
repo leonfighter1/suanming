@@ -8,8 +8,14 @@
  * (this module only builds; scripts/sync-app-assets.ts writes).
  */
 import { readFileSync } from "node:fs";
-import { generateRemedy, generateReport, MockProvider, TOPICS_BY_SYSTEM } from "../src/ai/index.js";
-import { publicRemedy, publicReport, REMEDY_PRICE } from "../src/api/server.js";
+import {
+  generateLifeReport,
+  generateRemedy,
+  generateReport,
+  MockProvider,
+  TOPICS_BY_SYSTEM,
+} from "../src/ai/index.js";
+import { publicLifeReport, publicRemedy, publicReport, REMEDY_PRICE } from "../src/api/server.js";
 import {
   computeBazi,
   lunarDate,
@@ -89,6 +95,27 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     remedy,
   });
 
+  // The owner's sample (吴勇, 1987-11-23 03:30, 靖江) as a 一生运势报告.
+  const lifeChart = computeBazi(
+    { local: "1987-11-23T03:30", timezone: "Asia/Shanghai", longitude: 120.2625, gender: "male" },
+    { digestPepper: secrets.digestPepper, now, tzdb: "fixture" },
+  );
+  const life = await generateLifeReport(
+    lifeChart,
+    { locale: "zh-Hans", country: "HK" },
+    { providers: { deepseek: mock, anthropic: mock }, now },
+  );
+  const lifeView = publicLifeReport({
+    id: "55555555-5555-4555-8555-555555555555",
+    owner: "fixture",
+    chart_id: "66666666-6666-4666-8666-666666666666",
+    status: life.status,
+    locale: "zh-Hans",
+    created_at: ts,
+    updated_at: ts,
+    life,
+  });
+
   return {
     "app/assets/i18n/terms.json": JSON.parse(readFileSync(at("i18n/terms.json"), "utf8")),
     "app/assets/i18n/tarot_deck.json": {
@@ -106,6 +133,11 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     },
     "app/test/fixtures/report_passed.json": view,
     "app/test/fixtures/remedy_passed.json": remedyView,
+    "app/test/fixtures/life_passed.json": lifeView,
+    "app/test/fixtures/chart_life.json": {
+      chart_id: "66666666-6666-4666-8666-666666666666",
+      chart_fact: lifeChart,
+    },
     // Birthplace data for the fake API: four countries; CN trimmed to 廣東.
     "app/test/fixtures/places.json": {
       index: {

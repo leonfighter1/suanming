@@ -12,8 +12,22 @@
 8. Never default a client to 127.0.0.1 for anything another device may open; derive the API host from where the page was served and test the phone path.
 9. Anything meant to stay reachable from this computer must hold a keep-awake request and supervise its child processes (restart or fail loudly).
 10. Validate external timezone data against the running Node tzdb at build time, and test every record, not a sample of countries.
+11. Check a gazetteer against real sample addresses (the owner's examples) before calling coverage done.
+12. Write the arithmetic for a hand-computed expectation into the test comment, so a wrong expectation is visible as such.
 
 ## Log
+
+### 2026-10-26: Hand-computed test expectation was wrong (命卦 1985)
+- **Symptom:** kuaNumber(1985, male) test expected 2, engine returned 6
+- **Root cause:** I applied the 5→2 rule to the wrong year: 1985 male is 8+5=13→4, 10−4=6; the 5→2 case is 1986
+- **Fix:** corrected the expectation with the written-out arithmetic, kept both years as cases
+- **Rule:** Write the arithmetic for a hand-computed expectation into the test comment, so a wrong expectation is visible as such. (Rule 12)
+
+### 2026-10-26: GeoNames cities15000 missed county-level cities
+- **Symptom:** 靖江 (pop ~700k) was not selectable; 873 of 3718 Chinese places had no Chinese name
+- **Root cause:** cities15000 skips places GeoNames lists without population; Chinese names often sit on the ADM3 division or are untagged
+- **Fix:** add every PPLA..PPLA3 seat from the full CN/TW/HK/MO/MY/SG dumps; borrow the division name by parent codes + name prefix; accept untagged all-Han names
+- **Rule:** Check a gazetteer against real sample addresses (the owner's examples) before calling coverage done. (Rule 11)
 
 ### 2026-10-26: New IANA zone unknown to Node (America/Coyhaique)
 - **Symptom:** places test: RangeError Invalid time zone America/Coyhaique

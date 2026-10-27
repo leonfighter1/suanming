@@ -2,6 +2,15 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-26 (m): 一生运势报告
+
+- Owner request: a whole-life report section, downloadable as a package, modelled on the owner's sample (吴勇, 1987-11-23 03:30, 江苏靖江).
+- Engine (src/engines/yijing): 本命卦 by 先天数 (年支 + 农历月 + 农历日 → 上卦, + 时支 → 下卦, mod 6 → 命爻), 之卦, 互卦, 六爻配年 (15-year stages); 梅花 体/用/互/变 with 五行 relations and 旺相休囚死; 八宅 命卦 from the 干支 year and gender, directions by the 大游年 line flips. Golden test = the owner's sample (all values match), plus hand-checked 噬嗑/颐/蹇 and an independent 坎命 table.
+- Texts: data/yijing/hexagrams.json from @freizl/yijing 2.1.0 (MIT) zh-TW; 简体 by OpenCC with 乾 shielded (OpenCC writes 干); errata 不災畬 → 不菑畬.
+- AI: life_methods@1 and life_topics@1 run in parallel, then guard@2; same plain-language, context and date rules, plus life-report safety (no lifespan or relatives' illness, no property/investment advice, neutral partners). API /v1/life-reports.
+- App: home entry + chart-page button; report page with hexagram figures (命爻 in red), 梅花 table, 五行 bars, 八宅 compass, stage chart, six sections; download = ZIP (styled printable HTML + Markdown), print/PDF, copy. 起卦 lines match the sample text exactly (test).
+- Places: 靖江 was missing (cities15000 skips unpopulated seats). Added every 省/地级/县级 seat for CN/TW/HK/MO/MY/SG from the full dumps, names borrowed from the division (靖江市); Chinese-name gaps in CN 873 → 415.
+
 ## 2026-10-26 (l): 简体中文 as the main language, Mainland usage
 
 - Owner decision: the main language is 简体中文 with Mainland grammar and vocabulary.

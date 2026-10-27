@@ -3,7 +3,7 @@
  * (db/schema_v0.sql + migrations, encrypted facts/report bodies) implements the
  * same interface later.
  */
-import type { Remedy, Report, UserContext } from "../ai/index.js";
+import type { LifeReport, Remedy, Report, UserContext } from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
 import type { AgentName, Topic } from "../ai/types.js";
@@ -55,6 +55,20 @@ export interface RemedyRecord {
   progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
 
+/** A 一生运势报告 job. */
+export interface LifeReportRecord {
+  id: string;
+  owner: string;
+  chart_id: string;
+  status: ReportRecordStatus;
+  locale: Locale;
+  created_at: string;
+  updated_at: string;
+  life?: LifeReport;
+  error?: string;
+  progress?: { stage: AgentName; attempt: number; updated_at: string };
+}
+
 export interface Store {
   putChart(c: ChartRecord): Promise<void>;
   getChart(id: string): Promise<ChartRecord | undefined>;
@@ -68,14 +82,34 @@ export interface Store {
   getRemedy(id: string): Promise<RemedyRecord | undefined>;
   /** Oldest first. */
   listRemedies(reportId: string): Promise<RemedyRecord[]>;
+  putLifeReport(r: LifeReportRecord): Promise<void>;
+  getLifeReport(id: string): Promise<LifeReportRecord | undefined>;
+  /** Newest first. */
+  listLifeReports(owner: string, limit: number): Promise<LifeReportRecord[]>;
   /** Account deletion: remove everything the user owns. Returns counts for the receipt. */
-  deleteOwnerData(owner: string): Promise<{ charts: number; reports: number; remedies: number }>;
+  deleteOwnerData(
+    owner: string,
+  ): Promise<{ charts: number; reports: number; remedies: number; life_reports: number }>;
 }
 
 export class InMemoryStore implements Store {
   private charts = new Map<string, ChartRecord>();
   private reports = new Map<string, ReportRecord>();
   private remedies = new Map<string, RemedyRecord>();
+  private lifeReports = new Map<string, LifeReportRecord>();
+  async putLifeReport(r: LifeReportRecord) {
+    this.lifeReports.set(r.id, structuredClone(r));
+  }
+  async getLifeReport(id: string) {
+    const r = this.lifeReports.get(id);
+    return r && structuredClone(r);
+  }
+  async listLifeReports(owner: string, limit: number) {
+    return newest(
+      [...this.lifeReports.values()].filter((r) => r.owner === owner),
+      limit,
+    );
+  }
   async putChart(c: ChartRecord) {
     this.charts.set(c.id, structuredClone(c));
   }
@@ -123,7 +157,10 @@ export class InMemoryStore implements Store {
     let remedies = 0;
     for (const [id, r] of this.remedies)
       if (r.owner === owner && this.remedies.delete(id)) remedies++;
-    return { charts, reports, remedies };
+    let life_reports = 0;
+    for (const [id, r] of this.lifeReports)
+      if (r.owner === owner && this.lifeReports.delete(id)) life_reports++;
+    return { charts, reports, remedies, life_reports };
   }
 }
 

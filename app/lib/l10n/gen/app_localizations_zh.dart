@@ -636,6 +636,241 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get remedyReady => '已备好';
+
+  @override
+  String get lifeEntry => '一生运势报告';
+
+  @override
+  String get lifeEntryDesc => '易经本命卦、梅花易数、五行八卦，三法合看一生走势';
+
+  @override
+  String get lifeGenerate => '生成一生运势报告';
+
+  @override
+  String get lifeSubtitle => '易经本命卦　|　梅花易数　|　五行八卦';
+
+  @override
+  String lifeReportOf(String name) {
+    return '$name 一生运势报告';
+  }
+
+  @override
+  String get lifeItem => '项目';
+
+  @override
+  String get lifeContent => '内容';
+
+  @override
+  String get lifeName => '姓名';
+
+  @override
+  String get lifeBirthLunar => '出生（农历）';
+
+  @override
+  String get lifeBirthSolar => '出生（公历）';
+
+  @override
+  String get lifeBirthPlace => '出生地';
+
+  @override
+  String get lifeTrueSolar => '真太阳时';
+
+  @override
+  String get lifeGanzhi => '生辰干支';
+
+  @override
+  String get lifeNote => '说明：本报告依传统术数推演，属传统文化参考，不是科学预测。三种方法各自独立推演，最后再合看。';
+
+  @override
+  String get lifeSec1 => '一、易经本命卦';
+
+  @override
+  String get lifeQigua => '起卦';
+
+  @override
+  String get lifeBenGua => '本命卦';
+
+  @override
+  String get lifeHuGua => '互卦';
+
+  @override
+  String get lifeZhiGuaShort => '之卦';
+
+  @override
+  String get lifeGuaYi => '卦义：一生的底色';
+
+  @override
+  String get lifeMingYao => '命爻';
+
+  @override
+  String get lifeZhiGua => '之卦：人生归宿';
+
+  @override
+  String get lifeSixLines => '六爻配人生阶段';
+
+  @override
+  String get lifeLine => '爻';
+
+  @override
+  String get lifeAge => '年龄';
+
+  @override
+  String get lifeYaoCi => '爻辞';
+
+  @override
+  String get lifeForLife => '对应人生';
+
+  @override
+  String get lifeSec2 => '二、梅花易数';
+
+  @override
+  String get lifeMhGua => '卦';
+
+  @override
+  String get lifeMhRel => '与体卦的关系';
+
+  @override
+  String get lifeMhStage => '主管';
+
+  @override
+  String get lifeTi => '体卦';
+
+  @override
+  String get lifeYong => '用卦';
+
+  @override
+  String get lifeHu => '互卦';
+
+  @override
+  String get lifeBian => '变卦';
+
+  @override
+  String get lifeSelf => '代表本人';
+
+  @override
+  String get lifeEarly => '早年';
+
+  @override
+  String get lifeMiddle => '中年';
+
+  @override
+  String get lifeLate => '晚年';
+
+  @override
+  String get lifeSeason => '时令';
+
+  @override
+  String get lifeMhConclusion => '梅花结论';
+
+  @override
+  String get relBihe => '比和（同气相助）';
+
+  @override
+  String get relShengti => '生体（得助）';
+
+  @override
+  String get relTisheng => '体生（耗泄）';
+
+  @override
+  String get relTike => '体克（我克为财，辛苦得）';
+
+  @override
+  String get relKeti => '克体（受压）';
+
+  @override
+  String get lifeSec3 => '三、五行八卦';
+
+  @override
+  String get lifeWuxingDist => '五行分布（加权，简化计分）';
+
+  @override
+  String get lifeFavorable => '喜';
+
+  @override
+  String get lifeUnfavorable => '忌';
+
+  @override
+  String get lifeBazhai => '八卦命卦（八宅）';
+
+  @override
+  String lifeKua(String kua, String name, String group, String wuxing) {
+    return '命卦 $kua · $name卦（$group，五行属$wuxing）';
+  }
+
+  @override
+  String get lifeDaily => '日常宜用';
+
+  @override
+  String get lifeSec4 => '四、分项运势';
+
+  @override
+  String get lifeTopicPersonality => '性格';
+
+  @override
+  String get lifeTopicCareer => '事业';
+
+  @override
+  String get lifeTopicWealth => '财运';
+
+  @override
+  String get lifeTopicRelationships => '情感与婚姻';
+
+  @override
+  String get lifeTopicChildren => '家庭与子女';
+
+  @override
+  String get lifeTopicParents => '父母';
+
+  @override
+  String get lifeTopicHealth => '健康';
+
+  @override
+  String get lifeSec5 => '五、人生阶段总览';
+
+  @override
+  String get lifeYears => '年份';
+
+  @override
+  String get lifeFortune => '运势';
+
+  @override
+  String get lifeFocus => '重点';
+
+  @override
+  String get lifeSec6 => '六、总评与建议';
+
+  @override
+  String get lifeDownload => '下载报告包';
+
+  @override
+  String get lifePrint => '打印 / 保存 PDF';
+
+  @override
+  String get lifeGenerating => 'AI 正在撰写一生运势报告…';
+
+  @override
+  String get lifeStageMethods => '推演易经、梅花与八宅';
+
+  @override
+  String get lifeStageTopics => '撰写分项运势与人生阶段';
+
+  @override
+  String get lifeTook => '大约需要 3–5 分钟。可以先离开这个页面，完成后回来查看。';
+
+  @override
+  String get lifeDirection => '方位';
+
+  @override
+  String get lifeStar => '星名';
+
+  @override
+  String get lifeLuck => '吉凶';
+
+  @override
+  String get lifeMhName => '卦名';
+
+  @override
+  String get lifeWuxing => '五行';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1269,4 +1504,239 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get remedyReady => '已備好';
+
+  @override
+  String get lifeEntry => '一生運勢報告';
+
+  @override
+  String get lifeEntryDesc => '易經本命卦、梅花易數、五行八卦，三法合看一生走勢';
+
+  @override
+  String get lifeGenerate => '生成一生運勢報告';
+
+  @override
+  String get lifeSubtitle => '易經本命卦　|　梅花易數　|　五行八卦';
+
+  @override
+  String lifeReportOf(String name) {
+    return '$name 一生運勢報告';
+  }
+
+  @override
+  String get lifeItem => '項目';
+
+  @override
+  String get lifeContent => '內容';
+
+  @override
+  String get lifeName => '姓名';
+
+  @override
+  String get lifeBirthLunar => '出生（農曆）';
+
+  @override
+  String get lifeBirthSolar => '出生（公曆）';
+
+  @override
+  String get lifeBirthPlace => '出生地';
+
+  @override
+  String get lifeTrueSolar => '真太陽時';
+
+  @override
+  String get lifeGanzhi => '生辰干支';
+
+  @override
+  String get lifeNote => '說明：本報告依傳統術數推演，屬傳統文化參考，不是科學預測。三種方法各自獨立推演，最後再合看。';
+
+  @override
+  String get lifeSec1 => '一、易經本命卦';
+
+  @override
+  String get lifeQigua => '起卦';
+
+  @override
+  String get lifeBenGua => '本命卦';
+
+  @override
+  String get lifeHuGua => '互卦';
+
+  @override
+  String get lifeZhiGuaShort => '之卦';
+
+  @override
+  String get lifeGuaYi => '卦義：一生的底色';
+
+  @override
+  String get lifeMingYao => '命爻';
+
+  @override
+  String get lifeZhiGua => '之卦：人生歸宿';
+
+  @override
+  String get lifeSixLines => '六爻配人生階段';
+
+  @override
+  String get lifeLine => '爻';
+
+  @override
+  String get lifeAge => '年齡';
+
+  @override
+  String get lifeYaoCi => '爻辭';
+
+  @override
+  String get lifeForLife => '對應人生';
+
+  @override
+  String get lifeSec2 => '二、梅花易數';
+
+  @override
+  String get lifeMhGua => '卦';
+
+  @override
+  String get lifeMhRel => '與體卦的關係';
+
+  @override
+  String get lifeMhStage => '主管';
+
+  @override
+  String get lifeTi => '體卦';
+
+  @override
+  String get lifeYong => '用卦';
+
+  @override
+  String get lifeHu => '互卦';
+
+  @override
+  String get lifeBian => '變卦';
+
+  @override
+  String get lifeSelf => '代表本人';
+
+  @override
+  String get lifeEarly => '早年';
+
+  @override
+  String get lifeMiddle => '中年';
+
+  @override
+  String get lifeLate => '晚年';
+
+  @override
+  String get lifeSeason => '時令';
+
+  @override
+  String get lifeMhConclusion => '梅花結論';
+
+  @override
+  String get relBihe => '比和（同氣相助）';
+
+  @override
+  String get relShengti => '生體（得助）';
+
+  @override
+  String get relTisheng => '體生（耗洩）';
+
+  @override
+  String get relTike => '體克（我剋為財，辛苦得）';
+
+  @override
+  String get relKeti => '剋體（受壓）';
+
+  @override
+  String get lifeSec3 => '三、五行八卦';
+
+  @override
+  String get lifeWuxingDist => '五行分佈（加權，簡化計分）';
+
+  @override
+  String get lifeFavorable => '喜';
+
+  @override
+  String get lifeUnfavorable => '忌';
+
+  @override
+  String get lifeBazhai => '八卦命卦（八宅）';
+
+  @override
+  String lifeKua(String kua, String name, String group, String wuxing) {
+    return '命卦 $kua · $name卦（$group，五行屬$wuxing）';
+  }
+
+  @override
+  String get lifeDaily => '日常宜用';
+
+  @override
+  String get lifeSec4 => '四、分項運勢';
+
+  @override
+  String get lifeTopicPersonality => '性格';
+
+  @override
+  String get lifeTopicCareer => '事業';
+
+  @override
+  String get lifeTopicWealth => '財運';
+
+  @override
+  String get lifeTopicRelationships => '情感與婚姻';
+
+  @override
+  String get lifeTopicChildren => '家庭與子女';
+
+  @override
+  String get lifeTopicParents => '父母';
+
+  @override
+  String get lifeTopicHealth => '健康';
+
+  @override
+  String get lifeSec5 => '五、人生階段總覽';
+
+  @override
+  String get lifeYears => '年份';
+
+  @override
+  String get lifeFortune => '運勢';
+
+  @override
+  String get lifeFocus => '重點';
+
+  @override
+  String get lifeSec6 => '六、總評與建議';
+
+  @override
+  String get lifeDownload => '下載報告包';
+
+  @override
+  String get lifePrint => '列印 / 儲存 PDF';
+
+  @override
+  String get lifeGenerating => 'AI 正在撰寫一生運勢報告…';
+
+  @override
+  String get lifeStageMethods => '推演易經、梅花與八宅';
+
+  @override
+  String get lifeStageTopics => '撰寫分項運勢與人生階段';
+
+  @override
+  String get lifeTook => '大約需要 3–5 分鐘。可以先離開這個頁面，完成後回來查看。';
+
+  @override
+  String get lifeDirection => '方位';
+
+  @override
+  String get lifeStar => '星名';
+
+  @override
+  String get lifeLuck => '吉凶';
+
+  @override
+  String get lifeMhName => '卦名';
+
+  @override
+  String get lifeWuxing => '五行';
 }

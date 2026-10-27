@@ -9,6 +9,7 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import {
+  generateLifeReport,
   generateRemedy,
   generateReport,
   parseUserContext,
@@ -38,7 +39,13 @@ import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { upstreamMessage } from "../service/runtime.js";
-import { InMemoryStore, type RemedyRecord, type ReportRecord, type Store } from "./store.js";
+import {
+  InMemoryStore,
+  type LifeReportRecord,
+  type RemedyRecord,
+  type ReportRecord,
+  type Store,
+} from "./store.js";
 
 export const API_VERSION = "0.2.0";
 
@@ -156,6 +163,29 @@ export function publicRemedy(r: RemedyRecord) {
     return { ...base, message: "this plan is held for review and is not available yet" };
   }
   return r.unlocked ? { ...base, content: r.remedy.content } : base;
+}
+
+/** What the user may see of a 一生运势报告. */
+export function publicLifeReport(r: LifeReportRecord) {
+  const base = {
+    life_report_id: r.id,
+    chart_id: r.chart_id,
+    status: r.status,
+    locale: r.locale,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+  };
+  if (r.status === "pending") return r.progress ? { ...base, progress: r.progress } : base;
+  if (r.status === "failed") return { ...base, message: "generation failed; please retry" };
+  if (r.status !== "passed" || !r.life?.layers) {
+    return { ...base, message: "this report is held for review and is not available yet" };
+  }
+  return {
+    ...base,
+    facts: r.life.facts,
+    layers: r.life.layers,
+    ai_disclosure: r.life.ai_disclosure,
+  };
 }
 
 /**
@@ -468,6 +498,84 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
+  async function runLifeJob(
+    record: LifeReportRecord,
+    fact: ChartFact,
+    c: Caller,
+    context?: ReportRecord["context"],
+  ) {
+    let next: LifeReportRecord;
+    try {
+      const life = await generateLifeReport(
+        fact,
+        { locale: record.locale, country: c.country, context },
+        {
+          providers: opts.providers,
+          routing: opts.routing,
+          now,
+          onProgress: async ({ stage, attempt }) => {
+            const current = await store.getLifeReport(record.id);
+            if (current?.status !== "pending") return;
+            await store.putLifeReport({
+              ...current,
+              progress: { stage, attempt, updated_at: now().toISOString() },
+            });
+          },
+        },
+      );
+      next = { ...record, status: life.status, life, updated_at: now().toISOString() };
+      if (life.status !== "passed") log(`life report ${record.id} held: ${heldWhy(life)}`);
+    } catch (e) {
+      const upstream = upstreamMessage(e);
+      log(
+        `life report ${record.id} failed: ${upstream ?? (e as Error).message}`,
+        upstream ? undefined : e,
+      );
+      next = {
+        ...record,
+        status: "failed",
+        error: upstream ?? "internal error",
+        updated_at: now().toISOString(),
+      };
+    }
+    if (!(await store.getLifeReport(record.id))) return;
+    await store.putLifeReport(next);
+  }
+
+  async function createLifeReport(req: IncomingMessage, c: Caller) {
+    const body = (await readJson(req)) as Record<string, unknown>;
+    const chartId = body.chart_id;
+    if (typeof chartId !== "string" || !UUID_RE.test(chartId))
+      throw new InputError("chart_id must be a UUID");
+    const chart = await store.getChart(chartId);
+    if (!chart || chart.owner !== c.user) throw new HttpError(404, "chart not found");
+    if (chart.fact.system !== "bazi") throw new InputError("a life report needs a bazi chart");
+    const locale = body.locale as Locale;
+    if (!LOCALES.includes(locale))
+      throw new InputError(`locale must be one of ${LOCALES.join(", ")}`);
+    assertServed(c.country, "bazi");
+    const context = parseUserContext(body.context);
+    takeAiQuota(c.user);
+    const ts = now().toISOString();
+    const record: LifeReportRecord = {
+      id: randomUUID(),
+      owner: c.user,
+      chart_id: chart.id,
+      status: "pending",
+      locale,
+      created_at: ts,
+      updated_at: ts,
+    };
+    await store.putLifeReport(record);
+    const job = runLifeJob(record, chart.fact, c, context).finally(() => jobs.delete(job));
+    jobs.add(job);
+    return {
+      status: 202,
+      body: publicLifeReport(record),
+      headers: { location: `/v1/life-reports/${record.id}`, "retry-after": "5" },
+    };
+  }
+
   async function createReport(req: IncomingMessage, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
     const chartId = body.chart_id;
@@ -619,6 +727,38 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         deleted: { account: true, ...deleted },
         completed_at: now().toISOString(),
       });
+    }
+
+    // ---- 一生运势报告 ----
+    if (path === "/v1/life-reports" && req.method === "POST") {
+      const out = await createLifeReport(req, c);
+      return send(res, out.status, out.body, out.headers);
+    }
+    if (path === "/v1/life-reports" && req.method === "GET") {
+      const rows = await store.listLifeReports(c.user, 50);
+      return send(res, 200, {
+        items: rows.map((r) => {
+          const {
+            facts: _f,
+            layers: _l,
+            ai_disclosure: _a,
+            ...view
+          } = publicLifeReport(r) as Record<string, unknown>;
+          return view;
+        }),
+      });
+    }
+    const lm = /^\/v1\/life-reports\/([^/]+)$/.exec(path);
+    if (lm && req.method === "GET") {
+      const r = UUID_RE.test(lm[1]!) ? await store.getLifeReport(lm[1]!) : undefined;
+      if (!r || r.owner !== c.user) throw new HttpError(404, "life report not found");
+      const view = publicLifeReport(r);
+      return send(
+        res,
+        200,
+        view,
+        aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
+      );
     }
 
     // ---- 破除運勢 plans (paid per topic; payment is a Phase 4 TODO) ----

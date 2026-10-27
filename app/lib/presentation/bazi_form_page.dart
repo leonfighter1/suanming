@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
+import 'life_report_page.dart';
 import 'design.dart';
 import 'profiles_page.dart';
 import 'widgets/life_context_fields.dart';
@@ -13,7 +14,10 @@ import 'widgets/life_context_fields.dart';
 /// 八字 input. Starts from the default profile; pick another person from
 /// 「為誰排盤」, and adjust fields for this chart only.
 class BaziFormPage extends ConsumerStatefulWidget {
-  const BaziFormPage({super.key});
+  const BaziFormPage({super.key, this.lifeReport = false});
+
+  /// The 一生运势报告 entry: same form, then the life report instead of the chart page.
+  final bool lifeReport;
 
   @override
   ConsumerState<BaziFormPage> createState() => _BaziFormPageState();
@@ -42,6 +46,10 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
       });
       // The name stays on the device: label the chart locally for history.
       if (p.name.isNotEmpty) await ref.read(profilesProvider.notifier).labelChart(chart.chartId, p.name);
+      if (widget.lifeReport) {
+        if (mounted) await startLifeReport(context, ref, chart: chart, profile: p);
+        return;
+      }
       await navigator.push(MaterialPageRoute<void>(builder: (_) => BaziChartPage(chart: chart, personName: p.name, profile: p)));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
@@ -59,7 +67,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
     final draft = _draft ?? selected ?? _fallback('');
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.homeBazi)),
+      appBar: AppBar(title: Text(widget.lifeReport ? l10n.lifeEntry : l10n.homeBazi)),
       body: ListView(
         padding: Space.page,
         children: [
@@ -125,7 +133,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
               icon: _busy
                   ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.auto_awesome),
-              label: Text(l10n.compute),
+              label: Text(widget.lifeReport ? l10n.lifeGenerate : l10n.compute),
             ),
           ),
         ],

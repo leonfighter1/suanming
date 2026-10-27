@@ -417,6 +417,82 @@ paths:
               schema: { type: object }
         "400": { $ref: "#/components/responses/Problem" }
 
+  /v1/life-reports:
+    post:
+      tags: [reports]
+      operationId: createLifeReport
+      summary: Start a 一生运势报告 for a 八字 chart (async)
+      description: |
+        易经本命卦, 梅花易数 and 八宅 facts are computed by the engine
+        (src/engines/yijing); two agents write the interpretation; then the
+        Compliance Guard. Counts against the daily AI caps in public mode.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chart_id, locale]
+              properties:
+                chart_id: { type: string, format: uuid }
+                locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+                context:
+                  description: Same as POST /v1/reports `context`
+                  type: object
+      responses:
+        "202":
+          description: Accepted; poll Location
+          headers:
+            Location: { schema: { type: string } }
+            Retry-After: { schema: { type: integer } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LifeReport" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+    get:
+      tags: [reports]
+      operationId: listLifeReports
+      summary: The user's life reports, newest first (no content)
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/LifeReport" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/life-reports/{life_report_id}:
+    get:
+      tags: [reports]
+      operationId: getLifeReport
+      summary: Poll a 一生运势报告
+      parameters:
+        - name: life_report_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Current state; `facts`, `layers` and `ai_disclosure` only when passed
+          headers:
+            X-AI-Generated: { $ref: "#/components/headers/X-AI-Generated" }
+            X-AI-Model: { $ref: "#/components/headers/X-AI-Model" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LifeReport" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
   /v1/places:
     get:
       tags: [charts]
@@ -880,6 +956,39 @@ components:
                           ganzhi: { type: string }
                 total: { type: integer, minimum: 0, maximum: 100 }
                 method_note: { type: string }
+        ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
+
+    LifeReport:
+      type: object
+      required: [life_report_id, chart_id, status, locale, created_at, updated_at]
+      properties:
+        life_report_id: { type: string, format: uuid }
+        chart_id: { type: string, format: uuid }
+        status: { type: string, enum: [pending, passed, blocked, manual_review, failed] }
+        locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        message: { type: string }
+        progress:
+          type: object
+          properties:
+            stage: { type: string, enum: [life_methods, life_topics, guard] }
+            attempt: { type: integer, minimum: 1 }
+            updated_at: { type: string, format: date-time }
+        facts:
+          description: |
+            Engine output, not AI: birth (civil and 真太阳时 clock), benming
+            (本命卦: steps, hexagram, moving_line, changed 之卦, nuclear 互卦, six
+            lines with 爻辞 and ages), meihua (体/用/互/变 with 五行 relations and
+            seasonal strength), bazhai (命卦, group, eight directions), trigrams.
+          type: object
+        layers:
+          description: |
+            AI-generated, Guard-reviewed: methods (yijing, meihua, wuxing, bazhai),
+            topics (personality, career, wealth, relationships, children, parents,
+            health), stages (one per 大运 with label, score 0–100, focus, ganzhi,
+            years and ages), summary (verdict, advice, closing), expectation.
+          type: object
         ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
 
     PlaceNames:

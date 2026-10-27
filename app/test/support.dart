@@ -145,6 +145,17 @@ class FakeApi {
       return _json(fixture(system == 'tarot' ? 'chart_tarot' : 'chart_bazi'), 201);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
+    // 一生运势报告: real engine facts for the owner's sample (life_passed.json).
+    if (req.method == 'POST' && path == '/v1/life-reports') {
+      return _json({...fixture('life_passed'), 'status': 'pending', 'facts': null, 'layers': null}, 202);
+    }
+    if (req.method == 'GET' && path == '/v1/life-reports') {
+      return _json({'items': [{...fixture('life_passed'), 'facts': null, 'layers': null}]}, 200);
+    }
+    if (req.method == 'GET' && path.startsWith('/v1/life-reports/')) return _json(fixture('life_passed'), 200);
+    if (req.method == 'GET' && path == '/v1/charts/66666666-6666-4666-8666-666666666666') {
+      return _json(fixture('chart_life'), 200);
+    }
     // 破除運勢: price + plans. preloadRemedies: every topic ready but locked, and
     // buying unlocks at once (200); otherwise buying returns pending (202) and polling the plan.
     final remedyOf = RegExp(r'^/v1/reports/[^/]+/remedies$');

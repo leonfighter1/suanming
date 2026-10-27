@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
+import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'life_report_page.dart';
 import 'report_page.dart';
 import 'theme.dart';
 
@@ -17,14 +19,19 @@ class HistoryPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final history = ref.watch(historyProvider);
+    final lives = ref.watch(lifeReportsProvider).value ?? const <LifeReportView>[];
+    final labels = ref.watch(profilesProvider).value?.chartLabels ?? const {};
     return Scaffold(
       appBar: AppBar(title: Text(l10n.history)),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(historyProvider.future),
+        onRefresh: () {
+          ref.invalidate(lifeReportsProvider);
+          return ref.refresh(historyProvider.future);
+        },
         child: history.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => ListView(padding: Space.page, children: [Text('$e')]),
-          data: (items) => items.isEmpty
+          data: (items) => items.isEmpty && lives.isEmpty
               ? ListView(
                   padding: Space.page,
                   children: [
@@ -34,10 +41,27 @@ class HistoryPage extends ConsumerWidget {
                     Text(l10n.historyEmpty, textAlign: TextAlign.center),
                   ],
                 )
-              : ListView.builder(
+              : ListView(
                   padding: Space.page,
-                  itemCount: items.length,
-                  itemBuilder: (_, i) => FadeSlideIn(index: i, child: HistoryTile(item: items[i])),
+                  children: [
+                    // 一生运势报告 first: they are the long, kept documents.
+                    for (final (i, r) in lives.indexed)
+                      FadeSlideIn(
+                        index: i,
+                        child: AppCard(
+                          key: Key('history-life-${r.id}'),
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => LifeReportPage(reportId: r.id))),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.auto_stories),
+                            title: Text(labels[r.chartId] == null ? l10n.lifeEntry : l10n.lifeReportOf(labels[r.chartId]!)),
+                            subtitle: Text(r.createdAt == null ? '' : DateFormat('yyyy-MM-dd HH:mm').format(r.createdAt!.toLocal())),
+                            trailing: const Icon(Icons.chevron_right),
+                          ),
+                        ),
+                      ),
+                    for (final (i, it) in items.indexed) FadeSlideIn(index: lives.length + i, child: HistoryTile(item: it)),
+                  ],
                 ),
         ),
       ),

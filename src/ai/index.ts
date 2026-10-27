@@ -11,3 +11,10 @@ export { DeepSeekProvider, ProviderHttpError, type DeepSeekOptions } from "./pro
 export * from "./trend.js";
 export { generateRemedy, remedySchema, type Remedy, type RemedyContent } from "./remedy.js";
 export { CHILDREN, MARITAL, parseUserContext, type UserContext } from "./context.js";
+export {
+  generateLifeReport,
+  lifeFacts,
+  LIFE_TOPICS,
+  type LifeReport,
+  type LifeTopic,
+} from "./life.js";

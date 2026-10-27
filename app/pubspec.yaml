@@ -43,6 +43,7 @@ dependencies:
   share_plus: 13.3.1
   # Web printing of 破除運勢 plans (already a share_plus dependency).
   web: ^1.1.1
+  archive: ^4.5.2
 
 dev_dependencies:
   flutter_test:

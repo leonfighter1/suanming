@@ -8,6 +8,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'labels.dart';
 import 'theme.dart';
+import 'life_report_page.dart';
 import 'widgets/report_request.dart';
 
 /// 四柱 · 農曆對照 · 五行 · 大運 · 流年, then the AI reading request.
@@ -95,6 +96,10 @@ class BaziChartPage extends ConsumerWidget {
         system: 'bazi',
         title: title,
         context: profile?.life.toApi(name: profile!.name, locale: ref.watch(settingsProvider).apiLocaleCode),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(top: Space.m),
+        child: Center(child: LifeReportButton(chart: chart, profile: profile)),
       ),
     ];
 

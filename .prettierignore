@@ -6,3 +6,4 @@ docs/agent
 app/
 docs/verification/*-results.json
 data/places
+data/yijing

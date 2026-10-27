@@ -309,5 +309,105 @@
   "lifeConcern": "What do you want to know?",
   "lifeConcernHint": "e.g. is next year good for changing jobs?",
   "sectionSummary": "In short",
-  "remedyReady": "Ready"
+  "remedyReady": "Ready",
+  "lifeEntry": "Life report",
+  "lifeEntryDesc": "I Ching natal hexagram, Plum Blossom and Five Elements, read together over a whole life",
+  "lifeGenerate": "Create life report",
+  "lifeSubtitle": "I Ching natal hexagram  |  Plum Blossom  |  Five Elements",
+  "lifeReportOf": "{name} · Life report",
+  "@lifeReportOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "lifeItem": "Item",
+  "lifeContent": "Details",
+  "lifeName": "Name",
+  "lifeBirthLunar": "Born (lunar)",
+  "lifeBirthSolar": "Born (Gregorian)",
+  "lifeBirthPlace": "Birthplace",
+  "lifeTrueSolar": "True solar time",
+  "lifeGanzhi": "Four pillars",
+  "lifeNote": "This report follows traditional methods and is cultural reference, not scientific prediction. The three methods are worked out separately and then read together.",
+  "lifeSec1": "1. I Ching natal hexagram",
+  "lifeQigua": "Casting",
+  "lifeBenGua": "Natal hexagram",
+  "lifeHuGua": "Nuclear",
+  "lifeZhiGuaShort": "Changed",
+  "lifeGuaYi": "Meaning: the base tone of a life",
+  "lifeMingYao": "The life line",
+  "lifeZhiGua": "Changed hexagram: where life arrives",
+  "lifeSixLines": "Six lines and life stages",
+  "lifeLine": "Line",
+  "lifeAge": "Age",
+  "lifeYaoCi": "Line text",
+  "lifeForLife": "For your life",
+  "lifeSec2": "2. Plum Blossom numerology",
+  "lifeMhGua": "Trigram",
+  "lifeMhRel": "To the self trigram",
+  "lifeMhStage": "Governs",
+  "lifeTi": "Self (体)",
+  "lifeYong": "Use (用)",
+  "lifeHu": "Nuclear (互)",
+  "lifeBian": "Changed (变)",
+  "lifeSelf": "Yourself",
+  "lifeEarly": "Early life",
+  "lifeMiddle": "Middle age",
+  "lifeLate": "Later life",
+  "lifeSeason": "Season",
+  "lifeMhConclusion": "Plum Blossom conclusion",
+  "relBihe": "Harmony",
+  "relShengti": "Supports you",
+  "relTisheng": "Drains you",
+  "relTike": "You control it (effort brings gain)",
+  "relKeti": "Pressures you",
+  "lifeSec3": "3. Five Elements and Eight Mansions",
+  "lifeWuxingDist": "Five Elements (weighted, simplified)",
+  "lifeFavorable": "Favourable",
+  "lifeUnfavorable": "Unfavourable",
+  "lifeBazhai": "Eight Mansions life gua",
+  "lifeKua": "Life gua {kua} · {name} ({group}, {wuxing})",
+  "@lifeKua": {
+    "placeholders": {
+      "kua": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      },
+      "wuxing": {
+        "type": "String"
+      }
+    }
+  },
+  "lifeDaily": "Everyday use",
+  "lifeSec4": "4. Life topics",
+  "lifeTopicPersonality": "Personality",
+  "lifeTopicCareer": "Career",
+  "lifeTopicWealth": "Money",
+  "lifeTopicRelationships": "Love and marriage",
+  "lifeTopicChildren": "Family and children",
+  "lifeTopicParents": "Parents",
+  "lifeTopicHealth": "Wellbeing",
+  "lifeSec5": "5. Life stages",
+  "lifeYears": "Years",
+  "lifeFortune": "Outlook",
+  "lifeFocus": "Focus",
+  "lifeSec6": "6. Overall reading and advice",
+  "lifeDownload": "Download report package",
+  "lifePrint": "Print / save as PDF",
+  "lifeGenerating": "AI is writing your life report…",
+  "lifeStageMethods": "Reading the I Ching, Plum Blossom and Eight Mansions",
+  "lifeStageTopics": "Writing the topics and life stages",
+  "lifeTook": "About 3–5 minutes. You can leave this page; it keeps going.",
+  "lifeDirection": "Direction",
+  "lifeStar": "Star",
+  "lifeLuck": "Luck",
+  "lifeMhName": "Name",
+  "lifeWuxing": "Element"
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/places.dart';
 import 'token_store.dart';
@@ -128,6 +129,18 @@ class ApiClient {
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 
   Future<ChartResult> getChart(String id) async => ChartResult.fromJson(await _authed('GET', '/v1/charts/$id'));
+
+  // ---- 一生运势报告 ----
+
+  Future<LifeReportView> createLifeReport({required String chartId, required String locale, Map<String, Object?>? context}) async =>
+      LifeReportView.fromJson(await _authed('POST', '/v1/life-reports', {'chart_id': chartId, 'locale': locale, 'context': ?context}));
+
+  Future<LifeReportView> getLifeReport(String id) async => LifeReportView.fromJson(await _authed('GET', '/v1/life-reports/$id'));
+
+  Future<List<LifeReportView>> listLifeReports() async {
+    final j = await _authed('GET', '/v1/life-reports');
+    return (j['items'] as List).cast<Json>().map(LifeReportView.fromJson).toList();
+  }
 
   // ---- birthplaces (public) ----
 

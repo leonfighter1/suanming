@@ -653,4 +653,244 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get remedyReady => 'Ready';
+
+  @override
+  String get lifeEntry => 'Life report';
+
+  @override
+  String get lifeEntryDesc =>
+      'I Ching natal hexagram, Plum Blossom and Five Elements, read together over a whole life';
+
+  @override
+  String get lifeGenerate => 'Create life report';
+
+  @override
+  String get lifeSubtitle =>
+      'I Ching natal hexagram  |  Plum Blossom  |  Five Elements';
+
+  @override
+  String lifeReportOf(String name) {
+    return '$name · Life report';
+  }
+
+  @override
+  String get lifeItem => 'Item';
+
+  @override
+  String get lifeContent => 'Details';
+
+  @override
+  String get lifeName => 'Name';
+
+  @override
+  String get lifeBirthLunar => 'Born (lunar)';
+
+  @override
+  String get lifeBirthSolar => 'Born (Gregorian)';
+
+  @override
+  String get lifeBirthPlace => 'Birthplace';
+
+  @override
+  String get lifeTrueSolar => 'True solar time';
+
+  @override
+  String get lifeGanzhi => 'Four pillars';
+
+  @override
+  String get lifeNote =>
+      'This report follows traditional methods and is cultural reference, not scientific prediction. The three methods are worked out separately and then read together.';
+
+  @override
+  String get lifeSec1 => '1. I Ching natal hexagram';
+
+  @override
+  String get lifeQigua => 'Casting';
+
+  @override
+  String get lifeBenGua => 'Natal hexagram';
+
+  @override
+  String get lifeHuGua => 'Nuclear';
+
+  @override
+  String get lifeZhiGuaShort => 'Changed';
+
+  @override
+  String get lifeGuaYi => 'Meaning: the base tone of a life';
+
+  @override
+  String get lifeMingYao => 'The life line';
+
+  @override
+  String get lifeZhiGua => 'Changed hexagram: where life arrives';
+
+  @override
+  String get lifeSixLines => 'Six lines and life stages';
+
+  @override
+  String get lifeLine => 'Line';
+
+  @override
+  String get lifeAge => 'Age';
+
+  @override
+  String get lifeYaoCi => 'Line text';
+
+  @override
+  String get lifeForLife => 'For your life';
+
+  @override
+  String get lifeSec2 => '2. Plum Blossom numerology';
+
+  @override
+  String get lifeMhGua => 'Trigram';
+
+  @override
+  String get lifeMhRel => 'To the self trigram';
+
+  @override
+  String get lifeMhStage => 'Governs';
+
+  @override
+  String get lifeTi => 'Self (体)';
+
+  @override
+  String get lifeYong => 'Use (用)';
+
+  @override
+  String get lifeHu => 'Nuclear (互)';
+
+  @override
+  String get lifeBian => 'Changed (变)';
+
+  @override
+  String get lifeSelf => 'Yourself';
+
+  @override
+  String get lifeEarly => 'Early life';
+
+  @override
+  String get lifeMiddle => 'Middle age';
+
+  @override
+  String get lifeLate => 'Later life';
+
+  @override
+  String get lifeSeason => 'Season';
+
+  @override
+  String get lifeMhConclusion => 'Plum Blossom conclusion';
+
+  @override
+  String get relBihe => 'Harmony';
+
+  @override
+  String get relShengti => 'Supports you';
+
+  @override
+  String get relTisheng => 'Drains you';
+
+  @override
+  String get relTike => 'You control it (effort brings gain)';
+
+  @override
+  String get relKeti => 'Pressures you';
+
+  @override
+  String get lifeSec3 => '3. Five Elements and Eight Mansions';
+
+  @override
+  String get lifeWuxingDist => 'Five Elements (weighted, simplified)';
+
+  @override
+  String get lifeFavorable => 'Favourable';
+
+  @override
+  String get lifeUnfavorable => 'Unfavourable';
+
+  @override
+  String get lifeBazhai => 'Eight Mansions life gua';
+
+  @override
+  String lifeKua(String kua, String name, String group, String wuxing) {
+    return 'Life gua $kua · $name ($group, $wuxing)';
+  }
+
+  @override
+  String get lifeDaily => 'Everyday use';
+
+  @override
+  String get lifeSec4 => '4. Life topics';
+
+  @override
+  String get lifeTopicPersonality => 'Personality';
+
+  @override
+  String get lifeTopicCareer => 'Career';
+
+  @override
+  String get lifeTopicWealth => 'Money';
+
+  @override
+  String get lifeTopicRelationships => 'Love and marriage';
+
+  @override
+  String get lifeTopicChildren => 'Family and children';
+
+  @override
+  String get lifeTopicParents => 'Parents';
+
+  @override
+  String get lifeTopicHealth => 'Wellbeing';
+
+  @override
+  String get lifeSec5 => '5. Life stages';
+
+  @override
+  String get lifeYears => 'Years';
+
+  @override
+  String get lifeFortune => 'Outlook';
+
+  @override
+  String get lifeFocus => 'Focus';
+
+  @override
+  String get lifeSec6 => '6. Overall reading and advice';
+
+  @override
+  String get lifeDownload => 'Download report package';
+
+  @override
+  String get lifePrint => 'Print / save as PDF';
+
+  @override
+  String get lifeGenerating => 'AI is writing your life report…';
+
+  @override
+  String get lifeStageMethods =>
+      'Reading the I Ching, Plum Blossom and Eight Mansions';
+
+  @override
+  String get lifeStageTopics => 'Writing the topics and life stages';
+
+  @override
+  String get lifeTook =>
+      'About 3–5 minutes. You can leave this page; it keeps going.';
+
+  @override
+  String get lifeDirection => 'Direction';
+
+  @override
+  String get lifeStar => 'Star';
+
+  @override
+  String get lifeLuck => 'Luck';
+
+  @override
+  String get lifeMhName => 'Name';
+
+  @override
+  String get lifeWuxing => 'Element';
 }

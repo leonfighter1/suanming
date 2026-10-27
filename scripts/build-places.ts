@@ -71,6 +71,11 @@ function checkedZone(tz: string): string {
 /** Feature codes left out: city sections, historical, abandoned, destroyed, religious sites. */
 const SKIP_FEATURES = new Set(["PPLX", "PPLH", "PPLQ", "PPLW", "PPLCH"]);
 
+/** Countries whose every administrative seat is included, whatever its population. */
+const FULL_DUMP = ["CN", "TW", "HK", "MO", "MY", "SG"];
+/** Capital and seats of first/second/third-order divisions (省 / 地级 / 县级 in China). */
+const SEAT_FEATURES = new Set(["PPLC", "PPLA", "PPLA2", "PPLA3"]);
+
 type Names = { "zh-Hant": string; "zh-Hans": string; en: string };
 const toHant = OpenCC.Converter({ from: "cn", to: "hk" });
 const toHans = OpenCC.Converter({ from: "hk", to: "cn" });
@@ -116,11 +121,12 @@ const rows = (text: string) =>
     .map((l) => l.split("\t"));
 
 /** Best Chinese names per geonameid from a country's alternate-names file. */
-function chineseNames(text: string): Map<string, { hant?: string; hans?: string; any?: string }> {
-  const out = new Map<
-    string,
-    { hant?: string; hans?: string; any?: string; pref: Record<string, boolean> }
-  >();
+type ZhNames = { hant?: string; hans?: string; any?: string; bare?: string };
+/** Untagged names written only in Chinese characters (GeoNames often leaves 靖江 untagged). */
+const ALL_HAN = /^[一-鿿]+$/;
+
+function chineseNames(text: string): Map<string, ZhNames> {
+  const out = new Map<string, ZhNames & { pref: Record<string, boolean> }>();
   for (const r of rows(text)) {
     const [, id, lang, name, preferred, , colloquial, historic] = r;
     if (!id || !name || colloquial === "1" || historic === "1") continue;
@@ -131,7 +137,9 @@ function chineseNames(text: string): Map<string, { hant?: string; hans?: string;
           ? "hans"
           : lang === "zh"
             ? "any"
-            : undefined;
+            : !lang && ALL_HAN.test(name)
+              ? "bare"
+              : undefined;
     if (!slot) continue;
     const e = out.get(id) ?? { pref: {} };
     // Keep the first name per slot unless a later one is marked preferred.
@@ -151,17 +159,15 @@ const HANT_FIRST = new Set(["TW", "HK", "MO"]);
  * One Chinese name, then the other script by conversion, so 繁/简 always agree
  * (GeoNames' zh-CN and zh-TW entries often differ in more than script, e.g. 广州市 vs 廣州).
  */
-function namesFor(
-  cc: string,
-  en: string,
-  zh?: { hant?: string; hans?: string; any?: string },
-): Names {
-  if (!zh || !(zh.hant || zh.hans || zh.any)) return { "zh-Hant": en, "zh-Hans": en, en };
+function namesFor(cc: string, en: string, zh?: ZhNames): Names {
+  // Untagged Chinese only for the countries whose full dump we read (not e.g. JP kanji).
+  const any = zh?.any ?? (FULL_DUMP.includes(cc) ? zh?.bare : undefined);
+  if (!zh || !(zh.hant || zh.hans || any)) return { "zh-Hant": en, "zh-Hans": en, en };
   if (HANT_FIRST.has(cc)) {
-    const hant = zh.hant ?? toHant(zh.any ?? zh.hans!);
+    const hant = zh.hant ?? toHant(any ?? zh.hans!);
     return { "zh-Hant": hant, "zh-Hans": toHans(hant), en };
   }
-  const hans = zh.hans ?? toHans(zh.any ?? zh.hant!);
+  const hans = zh.hans ?? toHans(any ?? zh.hant!);
   return { "zh-Hant": toHant(hans), "zh-Hans": hans, en };
 }
 
@@ -193,6 +199,50 @@ const round = (n: number, d = 4) => Math.round(n * 10 ** d) / 10 ** d;
 // ---- build ----
 
 const cities = rows(unzipText(await cached("cities15000.zip"), "cities15000.txt"));
+// cities15000 misses many county-level cities that GeoNames lists without a
+// population (e.g. 靖江, ~700k people). For the main Chinese-speaking countries add
+// every seat of administration (capital, 省/地级/县级 seats) from the full dump.
+const seen = new Set(cities.map((r) => r[0]));
+/**
+ * Divisions by parent codes ("CN.04.3212.3" → ADM3 rows under 江苏 / 泰州). A seat's
+ * own lower codes are often empty (靖江 PPLA3 has no admin3), so a seat is matched to
+ * the division under the same parents whose name starts with the seat's name
+ * ("Jingjiang" → "Jingjiang Shi").
+ */
+const divisions = new Map<string, { id: string; name: string }[]>();
+const parentKey = (cc: string, a1: string, a2: string, level: number) =>
+  [cc, a1, level >= 2 ? a2 : "", level].join(".");
+for (const cc of FULL_DUMP) {
+  for (const r of rows(unzipText(await cached(`${cc}.zip`), `${cc}.txt`))) {
+    const [id, name, , , , , cls, feature, , , a1, a2] = r;
+    if (cls === "A" && /^ADM[123]$/.test(feature!)) {
+      const k = parentKey(cc, a1!, a2!, Number(feature!.slice(3)));
+      divisions.set(k, [...(divisions.get(k) ?? []), { id: id!, name: name! }]);
+    }
+    if (cls === "P" && SEAT_FEATURES.has(feature!) && !seen.has(id)) {
+      cities.push(r);
+      seen.add(id);
+    }
+  }
+}
+/** A seat's own Chinese name, else the name of the division it is the seat of (靖江 → 靖江市). */
+function seatChinese(cc: string, r: string[]) {
+  const own = zh.get(cc)?.get(r[0]!);
+  if ((own && (own.hans || own.hant || own.any)) || !FULL_DUMP.includes(cc)) return own;
+  // A seat's own level first; any other place (cities15000 lists many county cities
+  // as plain PPL) tries the county, then the prefecture division of the same name.
+  const own_level = { PPLA: 1, PPLA2: 2, PPLA3: 3 }[r[7]!];
+  const seatName = r[1]!.replace(/ (City|Shi|Xian|Qu|Town)$/, "");
+  for (const level of own_level ? [own_level] : [3, 2]) {
+    const div = divisions
+      .get(parentKey(cc, r[10]!, r[11]!, level))
+      ?.find((d) => d.name === seatName || d.name.startsWith(seatName + " "));
+    const fromDivision = div ? zh.get(cc)?.get(div.id) : undefined;
+    if (fromDivision && (fromDivision.hans || fromDivision.hant || fromDivision.any))
+      return fromDivision;
+  }
+  return own;
+}
 const admin1 = new Map(
   rows(readFileSync(await cached("admin1CodesASCII.txt"), "utf8")).map(([code, name, , id]) => [
     code!,
@@ -226,7 +276,7 @@ for (const r of cities) {
   const list = regions.get(key) ?? [];
   list.push({
     id: Number(id),
-    names: namesFor(cc, name!, zh.get(cc)?.get(id!)),
+    names: namesFor(cc, name!, seatChinese(cc, r)),
     tz: checkedZone(tz),
     lon: round(Number(lon)),
     lat: round(Number(lat)),

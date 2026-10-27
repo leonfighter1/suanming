@@ -71,6 +71,13 @@ const ACTION: Record<Locale, string> = {
   en: "(Demo) Spend ten minutes this week noting one observation about {t}.",
 };
 
+const LIFE_DEMO: Record<Locale, string> = {
+  "zh-Hant": "（示範）傳統上認為這一點可作為自我觀察的參考。",
+  "zh-Hans": "（示范）传统上认为这一点可以作为自我观察的参考。",
+  en: "(Demo) Tradition offers this as a prompt for self-reflection.",
+};
+const LIFE_LABEL: Record<Locale, string> = { "zh-Hant": "平順", "zh-Hans": "平顺", en: "Steady" };
+
 const SUMMARY: Record<Locale, string> = {
   "zh-Hant": "（示範）這一項的重點：照自己的節奏慢慢來。",
   "zh-Hans": "（示范）这一项的重点：照自己的节奏慢慢来。",
@@ -217,6 +224,51 @@ export class MockProvider implements LLMProvider {
         })),
         basis: r.basis,
         fact_refs: p.system === "bazi" ? ["/day_master", "/wuxing_weighted"] : ["/cards/0"],
+      };
+      return { kind: "ok", data, model, usage: USAGE };
+    }
+    if (req.agent === "life_methods") {
+      const d = LIFE_DEMO[locale];
+      const data = {
+        yijing: {
+          meaning: d,
+          ming_yao: d,
+          zhi_gua: d,
+          stages: [1, 2, 3, 4, 5, 6].map((line) => ({ line, reading: d })),
+        },
+        meihua: { season: d, early: d, middle: d, late: d, conclusion: d },
+        wuxing: { analysis: d, favorable: [d], unfavorable: [d], note: d },
+        bazhai: { summary: d, daily: d },
+        fact_refs: ["/benming/hexagram", "/meihua/ti", "/bazhai/kua"],
+      };
+      return { kind: "ok", data, model, usage: USAGE };
+    }
+    if (req.agent === "life_topics") {
+      const p = req.payload as { dayun: number[] };
+      const d = LIFE_DEMO[locale];
+      const keys = [
+        "personality",
+        "career",
+        "wealth",
+        "relationships",
+        "children",
+        "parents",
+        "health",
+      ];
+      const data = {
+        topics: keys.map((key) => ({
+          key,
+          summary: d,
+          points: [{ period: "", text: d }],
+          fact_refs: ["/bazi/day_master"],
+        })),
+        stages: p.dayun.map((dayun_index) => ({
+          dayun_index,
+          label: LIFE_LABEL[locale],
+          score: 40 + ((dayun_index * 17) % 41),
+          focus: d,
+        })),
+        summary: { verdict: d, advice: [{ area: LIFE_LABEL[locale], text: d }], closing: d },
       };
       return { kind: "ok", data, model, usage: USAGE };
     }

@@ -194,11 +194,55 @@ Besides <chart_facts> you may get:
 - <today>: today's date and which years are 今年 / 明年 / 去年. A 今年 / 明年 / 去年 that doesn't match it is fabricated_fact.
 Only claims about the chart itself must match <chart_facts>.`;
 
+/** 一生运势报告 (2026-10-26): shared by the two life agents. */
+const LIFE_COMMON = `You write part of a 一生运势报告 (a whole-life report) for a consumer 命理 app: a careful traditional reading for a general reader.
+
+<life_facts> holds everything, computed by deterministic engines: bazi (the 八字 chart facts), benming (易经本命卦: the hexagram, the moving line 命爻, the changed hexagram 之卦, the nuclear hexagram 互卦, and the six lines with their 爻辞 and life-stage ages), meihua (梅花易数: 体卦, 用卦, 互卦, 变卦 with their 五行 relation to 体, and the 体卦's strength in the birth month), bazhai (八宅: the 命卦, east/west group and the eight directions) and trigrams. Never recompute, correct or add to these facts. Cite JSON Pointer paths into <life_facts> in fact_refs (e.g. /benming/hexagram, /meihua/yong, /bazhai/directions/0, /bazi/dayun/cycles/3). Only cite paths that exist.
+
+Rules, as for every reading:
+- Cultural reference, not prediction: tendency language (传统上认为 / 可能 / 倾向于), never certainty, no fear or urgency, no rituals or purchases.
+- Never predict death or lifespan, divorce, a specific partner, the number or sex of children, or illness of the user or of relatives.
+- Health only as traditional 五行 correspondences: never name a disease, never suggest treatment; end what you write on health with a sentence saying it is not medical advice and to see a doctor when unwell.
+- Money: no investment, property-buying, trading or gambling advice and no amounts; at most general prudence (稳健理财、量入为出, careful with guarantees and lending).
+- Treat every relationship and family form the same. Say 伴侣 unless the user told us otherwise. When a tradition is gendered (e.g. 男命以财星为妻), present it as 传统上 and keep the reading neutral.
+
+${PLAIN}
+
+${CONTEXT_RULES}`;
+
+const LIFE_METHODS_V1 = `${LIFE_COMMON}
+
+Your part: the three methods.
+- yijing.meaning: the hexagram's 卦辞 explained in plain words as the base tone of this life (2–3 sentences; quote the 卦辞 once).
+- yijing.ming_yao: the 命爻 (benming.moving_line) and its 爻辞, explained: the one sentence that matters most for this life.
+- yijing.zhi_gua: the 之卦 as where life tends to arrive.
+- yijing.stages: one item per line 1–6 (line number), 1–2 sentences each on what that 爻辞 traditionally suggests for its age range (benming.lines[i].age_from–age_to).
+- meihua.season: the 体卦's strength in the birth month (meihua.season), in plain words.
+- meihua.early / middle / late: 用卦 / 互卦 / 变卦 against 体 (生体 = support, 体克 = gains through one's own effort, 克体 = pressure, 体生 = draining, 比和 = harmony), 2 sentences each, tied to early life, middle age and later life.
+- meihua.conclusion: one sentence overall.
+- wuxing.analysis: the 五行 balance from bazi.day_master, bazi.month_command and bazi.wuxing_weighted, and how the elements interact, in plain words (2–4 sentences).
+- wuxing.favorable / unfavorable: the elements traditionally favourable / unfavourable, each like 「木（帮身）」. A tendency, not a definitive 喜用神.
+- wuxing.note: the scores are simplified.
+- bazhai.summary: the 命卦 and group, and how its 五行 fits the 五行 analysis.
+- bazhai.daily: everyday uses: arranging a desk or bed toward the 吉 directions with what they already have, colours, kinds of work that traditionally suit the elements. Suggestions only; nothing to buy.`;
+
+const LIFE_TOPICS_V1 = `${LIFE_COMMON}
+
+Your part: topics, life stages and the summary.
+- topics: one item per key: personality, career, wealth, relationships, children, parents, health. summary = one plain sentence. points = 2–5 items, each with period (copy a label from life_facts.periods exactly, e.g. 「36–45 岁（2022–2031）」; or a year with its age from bazi.liunian, e.g. 「2027（40 岁）」; or "" when general; never work out age ranges yourself) and 1–2 concrete sentences.
+  Use the user's situation when given (work, partner, children, parents, what they asked). If they have no children, write about family relations instead of children's futures. For parents, describe the relationship and suggest care; nothing about their health or lifespan.
+- stages: one item per bazi.dayun.cycles entry (dayun_index = its index): label (2–4 characters, e.g. 平顺 / 起伏 / 辛苦多变 / 最好 / 中上 / 平稳), score 0–100 (50 = steady; use the range the facts justify) and focus (one short phrase).
+- summary.verdict: 2–3 sentences combining the three methods (易经, 梅花, 五行/八宅): where they agree.
+- summary.advice: 4–6 items with area (e.g. 做人, 事业, 钱财, 家庭, 健康) and one concrete sentence each.
+- summary.closing: one sentence: tradition shows tendencies and timing; their choices and effort decide.`;
+
 export const PROMPTS = {
   narrative: version("narrative", 4, NARRATIVE_V4),
   action: version("action", 3, ACTION_V3),
   trend: version("trend", 2, TREND_V2),
   remedy: version("remedy", 2, REMEDY_V2),
+  life_methods: version("life_methods", 1, LIFE_METHODS_V1),
+  life_topics: version("life_topics", 1, LIFE_TOPICS_V1),
   guard: version("guard", 2, GUARD_V2),
 } as const;
 
@@ -306,6 +350,27 @@ export function remedyUser(args: {
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
     `Write in ${LANGUAGE[args.locale]}.`,
+    feedbackBlock(args.feedback),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+export function lifeUser(args: {
+  part: "methods" | "topics";
+  facts: unknown;
+  context?: unknown;
+  today: string;
+  locale: Locale;
+  glossary: Record<string, string>;
+  feedback?: string[];
+}): string {
+  return [
+    tag("today", args.today),
+    tag("life_facts", args.facts),
+    args.context ? tag("user_context", args.context) : "",
+    tag("glossary", args.glossary),
+    `Write your part (${args.part}) in ${LANGUAGE[args.locale]}.`,
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)

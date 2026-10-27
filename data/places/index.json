@@ -413,7 +413,7 @@
     "zh-Hans": "中国",
     "en": "China"
    },
-   "cities": 2105
+   "cities": 3718
   },
   {
    "code": "CO",
@@ -836,7 +836,7 @@
     "zh-Hans": "香港",
     "en": "Hong Kong"
    },
-   "cities": 136
+   "cities": 137
   },
   {
    "code": "HN",
@@ -1295,7 +1295,7 @@
     "zh-Hans": "澳门",
     "en": "Macao"
    },
-   "cities": 6
+   "cities": 7
   },
   {
    "code": "MP",
@@ -1385,7 +1385,7 @@
     "zh-Hans": "马来西亚",
     "en": "Malaysia"
    },
-   "cities": 350
+   "cities": 355
   },
   {
    "code": "MZ",
@@ -2006,7 +2006,7 @@
     "zh-Hans": "台湾",
     "en": "Taiwan"
    },
-   "cities": 67
+   "cities": 71
   },
   {
    "code": "TZ",
