@@ -124,6 +124,10 @@ class ApiClient {
   Future<ChartResult> createChart(Map<String, Object?> request) async =>
       ChartResult.fromJson(await _authed('POST', '/v1/charts', request));
 
+  /// 算卦 (v6.0.0): 24 coins laid out face down on the server, before the reader picks; their id, to cast
+  /// from with mode pick.
+  Future<String> liuyaoLayout() async => (await _authed('POST', '/v1/liuyao/layouts', const {}))['draw_id'] as String;
+
   Future<ReportView> createReport({
     required String chartId,
     required String locale,

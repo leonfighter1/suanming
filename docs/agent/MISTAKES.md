@@ -47,8 +47,29 @@
 43. A findsNothing needs a positive anchor: first find the neighbour the missing widget would sit beside, and pair it with a test that finds the widget there when it should exist. Never use off-screen or scrolled-past as evidence of absence (lists cache children).
 44. Before stating how something behaves at runtime (no restart, hot update), grep every reader of it and test it the way the owner meets it: a server started before the change. A fresh process per test proves nothing about a running one.
 45. To change a hand-formatted JSON file (schemas, configs, the matrix), insert or replace text with Edit; never round-trip it through JSON.stringify. Check git diff --stat right after: a change much larger than intended means the file was reformatted.
+46. In app/, FilledButton and OutlinedButton are full width by the theme: never put one straight into a Row; give it Expanded/SizedBox or stack it in a Column. A layout exception in a widget test can surface as an unrelated failure (focus, taps): fix the first exception first.
+47. In a traditional text that passed through 简体, treat every character 简体 merges (系/繫/係, 腊/臘, 后/後, 干/幹, 机/機, 斗/鬥, 里/裏, 仆/僕, 凶/兇, 志/誌) as unverified until a print or the sense settles it, even when every digital copy agrees. Find a page transcription of a scanned print (維基文庫 Page: namespace) to map the scan, then read the scan where anything differs.
+48. Fetch Wikimedia page renders (DjVu/PDF thumbnails) one at a time, at least 5 s apart, with retry and backoff on a non-JSON answer; ask only for the pages the check needs, and cache them.
 
 ## Log
+
+### 2026-10-28: Commons API refused page renders after ten quick requests
+- **Symptom:** Downloading scan pages of a DjVu on Wikimedia Commons: after about ten pages the API answered 「You are making too many requests to the API」 (not JSON), and every later page failed.
+- **Root cause:** One imageinfo request and one thumbnail render per page, 400 ms apart: rendering DjVu pages is costly for Commons, and it rate-limits clients that ask faster than that.
+- **Fix:** A downloader that waits 3 s after the API call and 5 s after each image, and on a non-JSON or failed answer waits 20 s, 40 s and so on before retrying (up to five times). The rest came through on one run.
+- **Rule:** Fetch Wikimedia page renders (DjVu/PDF thumbnails) one at a time, at least 5 s apart, with retry and backoff on a non-JSON answer; ask only for the pages the check needs, and cache them. (Rule 48)
+
+### 2026-10-28: Three 周易 transcriptions shared a 简繁 slip the print did not have
+- **Symptom:** The 周易 data and both 維基文庫 copies read 系于金柅 (姤 初六) and 噬臘肉 (噬嗑 六三); the 四部叢刊 宋 print reads 繫 and 腊. Our source also had 兇, 鹹, 鬥, 後 for 后, 誌 for 志, and a line copied from the wrong hexagram (大有 九二).
+- **Root cause:** Each copy was converted from 简体 at some point. Where 简体 merges two 繁體 characters (系 for 繫/係, 腊 for 臘, 后 for 後, 干 for 幹, 机 for 機), a converter picks one, and copies converted the same way pick the same wrong one, so their agreement proves nothing.
+- **Fix:** Compared all 514 texts with two transcriptions and with the page transcription of a 宋 print, read the disputed readings in the scan (16 pages), and corrected 125 strings in build-yijing ERRATA, each pinned to its match count (docs/verification/zhouyi.md).
+- **Rule:** In a traditional text that passed through 简体, treat every character 简体 merges (系/繫/係, 腊/臘, 后/後, 干/幹, 机/機, 斗/鬥, 里/裏, 仆/僕, 凶/兇, 志/誌) as unverified until a print or the sense settles it, even when every digital copy agrees. Find a page transcription of a scanned print (維基文庫 Page: namespace) to map the scan, then read the scan where anything differs. (Rule 47)
+
+### 2026-10-28: A FilledButton in a Row took infinite width
+- **Symptom:** liuyao_test: BoxConstraints forces an infinite width at FilledButton liuyao-reveal, and then Tab traversal failed on an inactive Focus element
+- **Root cause:** The app theme gives FilledButton minimumSize Size.fromHeight(52) and OutlinedButton Size.fromHeight(48): full width. Inside a Row (beside a Spacer) that is infinite
+- **Fix:** Stacked the buttons in the card's Column (the main button full width, the secondary TextButton below), as the 求籤 page does
+- **Rule:** In app/, FilledButton and OutlinedButton are full width by the theme: never put one straight into a Row; give it Expanded/SizedBox or stack it in a Column. A layout exception in a widget test can surface as an unrelated failure (focus, taps): fix the first exception first. (Rule 46)
 
 ### 2026-10-28: Rewrote a formatted JSON file through JSON.stringify
 - **Symptom:** Adding liuyao to schemas/chart-fact.v0.1.schema.json turned a 180-line change into 1,186 changed lines; the same happened to .harness.json

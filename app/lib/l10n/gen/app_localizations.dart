@@ -2766,6 +2766,372 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'建议'**
   String get topicNamingAdvice;
+
+  /// No description provided for @homeLiuyao.
+  ///
+  /// In zh, this message translates to:
+  /// **'算卦'**
+  String get homeLiuyao;
+
+  /// No description provided for @homeLiuyaoDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'掷三枚硬币六次起卦，或自己掷好再填，马上看卦辞直说，仅供娱乐和玄学学习使用'**
+  String get homeLiuyaoDesc;
+
+  /// No description provided for @liuyaoQuestion.
+  ///
+  /// In zh, this message translates to:
+  /// **'想问的事（可选）'**
+  String get liuyaoQuestion;
+
+  /// No description provided for @liuyaoQuestionHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'一次只问一件事，问得越具体，解读越贴切'**
+  String get liuyaoQuestionHint;
+
+  /// No description provided for @liuyaoRemind.
+  ///
+  /// In zh, this message translates to:
+  /// **'起卦之前'**
+  String get liuyaoRemind;
+
+  /// No description provided for @liuyaoRemindBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'先静下心，把要问的事想清楚。一次只问一件事，同一件事不要一再重问。'**
+  String get liuyaoRemindBody;
+
+  /// No description provided for @liuyaoMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'起卦方式'**
+  String get liuyaoMode;
+
+  /// No description provided for @liuyaoModeAuto.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动掷币'**
+  String get liuyaoModeAuto;
+
+  /// No description provided for @liuyaoModePick.
+  ///
+  /// In zh, this message translates to:
+  /// **'自己挑币'**
+  String get liuyaoModePick;
+
+  /// No description provided for @liuyaoModeManual.
+  ///
+  /// In zh, this message translates to:
+  /// **'自掷自填'**
+  String get liuyaoModeManual;
+
+  /// No description provided for @liuyaoAutoHow.
+  ///
+  /// In zh, this message translates to:
+  /// **'由系统替你掷三枚硬币，共掷六次，从下往上成卦。'**
+  String get liuyaoAutoHow;
+
+  /// No description provided for @liuyaoToss.
+  ///
+  /// In zh, this message translates to:
+  /// **'掷币'**
+  String get liuyaoToss;
+
+  /// No description provided for @liuyaoTossNext.
+  ///
+  /// In zh, this message translates to:
+  /// **'掷下一爻'**
+  String get liuyaoTossNext;
+
+  /// No description provided for @liuyaoSkip.
+  ///
+  /// In zh, this message translates to:
+  /// **'直接看卦'**
+  String get liuyaoSkip;
+
+  /// No description provided for @liuyaoPickHow.
+  ///
+  /// In zh, this message translates to:
+  /// **'24 枚硬币已经随机摆好，都扣着。凭直觉挑 18 枚，每 3 枚成一爻，从下往上。'**
+  String get liuyaoPickHow;
+
+  /// No description provided for @liuyaoPickStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'摆好硬币'**
+  String get liuyaoPickStart;
+
+  /// No description provided for @liuyaoPicked.
+  ///
+  /// In zh, this message translates to:
+  /// **'已挑 {count} / 18 枚'**
+  String liuyaoPicked(int count);
+
+  /// No description provided for @liuyaoPickAgain.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新挑'**
+  String get liuyaoPickAgain;
+
+  /// No description provided for @liuyaoReveal.
+  ///
+  /// In zh, this message translates to:
+  /// **'看卦'**
+  String get liuyaoReveal;
+
+  /// No description provided for @liuyaoCoin.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {n} 枚硬币'**
+  String liuyaoCoin(int n);
+
+  /// No description provided for @liuyaoManualHow.
+  ///
+  /// In zh, this message translates to:
+  /// **'三枚硬币一起掷，共掷六次，从下往上记（第一次是初爻）。有字的一面算“字”，另一面算“背”。掷之前，先记下时间。'**
+  String get liuyaoManualHow;
+
+  /// No description provided for @liuyaoTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'起卦时间（精确到分钟）'**
+  String get liuyaoTime;
+
+  /// No description provided for @liuyaoTimePick.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择时间'**
+  String get liuyaoTimePick;
+
+  /// No description provided for @liuyaoTimeNow.
+  ///
+  /// In zh, this message translates to:
+  /// **'用现在的时间'**
+  String get liuyaoTimeNow;
+
+  /// No description provided for @liuyaoTimeMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先填写起卦时间'**
+  String get liuyaoTimeMissing;
+
+  /// No description provided for @liuyaoEnterBy.
+  ///
+  /// In zh, this message translates to:
+  /// **'填写方式'**
+  String get liuyaoEnterBy;
+
+  /// No description provided for @liuyaoByCoins.
+  ///
+  /// In zh, this message translates to:
+  /// **'按硬币'**
+  String get liuyaoByCoins;
+
+  /// No description provided for @liuyaoByLines.
+  ///
+  /// In zh, this message translates to:
+  /// **'按爻'**
+  String get liuyaoByLines;
+
+  /// No description provided for @liuyaoBei0.
+  ///
+  /// In zh, this message translates to:
+  /// **'三字'**
+  String get liuyaoBei0;
+
+  /// No description provided for @liuyaoBei1.
+  ///
+  /// In zh, this message translates to:
+  /// **'一背'**
+  String get liuyaoBei1;
+
+  /// No description provided for @liuyaoBei2.
+  ///
+  /// In zh, this message translates to:
+  /// **'二背'**
+  String get liuyaoBei2;
+
+  /// No description provided for @liuyaoBei3.
+  ///
+  /// In zh, this message translates to:
+  /// **'三背'**
+  String get liuyaoBei3;
+
+  /// No description provided for @liuyaoOldYin.
+  ///
+  /// In zh, this message translates to:
+  /// **'老阴'**
+  String get liuyaoOldYin;
+
+  /// No description provided for @liuyaoYoungYang.
+  ///
+  /// In zh, this message translates to:
+  /// **'少阳'**
+  String get liuyaoYoungYang;
+
+  /// No description provided for @liuyaoYoungYin.
+  ///
+  /// In zh, this message translates to:
+  /// **'少阴'**
+  String get liuyaoYoungYin;
+
+  /// No description provided for @liuyaoOldYang.
+  ///
+  /// In zh, this message translates to:
+  /// **'老阳'**
+  String get liuyaoOldYang;
+
+  /// No description provided for @liuyaoCoinZi.
+  ///
+  /// In zh, this message translates to:
+  /// **'字'**
+  String get liuyaoCoinZi;
+
+  /// No description provided for @liuyaoCoinBei.
+  ///
+  /// In zh, this message translates to:
+  /// **'背'**
+  String get liuyaoCoinBei;
+
+  /// No description provided for @liuyaoLine1.
+  ///
+  /// In zh, this message translates to:
+  /// **'初爻'**
+  String get liuyaoLine1;
+
+  /// No description provided for @liuyaoLine2.
+  ///
+  /// In zh, this message translates to:
+  /// **'二爻'**
+  String get liuyaoLine2;
+
+  /// No description provided for @liuyaoLine3.
+  ///
+  /// In zh, this message translates to:
+  /// **'三爻'**
+  String get liuyaoLine3;
+
+  /// No description provided for @liuyaoLine4.
+  ///
+  /// In zh, this message translates to:
+  /// **'四爻'**
+  String get liuyaoLine4;
+
+  /// No description provided for @liuyaoLine5.
+  ///
+  /// In zh, this message translates to:
+  /// **'五爻'**
+  String get liuyaoLine5;
+
+  /// No description provided for @liuyaoLine6.
+  ///
+  /// In zh, this message translates to:
+  /// **'上爻'**
+  String get liuyaoLine6;
+
+  /// No description provided for @liuyaoCast.
+  ///
+  /// In zh, this message translates to:
+  /// **'起卦'**
+  String get liuyaoCast;
+
+  /// No description provided for @liuyaoPrimary.
+  ///
+  /// In zh, this message translates to:
+  /// **'本卦'**
+  String get liuyaoPrimary;
+
+  /// No description provided for @liuyaoChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'变卦'**
+  String get liuyaoChanged;
+
+  /// No description provided for @liuyaoNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'第{n}卦'**
+  String liuyaoNumber(int n);
+
+  /// No description provided for @liuyaoTrigrams.
+  ///
+  /// In zh, this message translates to:
+  /// **'上卦 {upper}\n下卦 {lower}'**
+  String liuyaoTrigrams(String upper, String lower);
+
+  /// No description provided for @liuyaoCastAt.
+  ///
+  /// In zh, this message translates to:
+  /// **'起卦于 {time} · {year}年 {month}月 {day}日 {hour}时'**
+  String liuyaoCastAt(
+    String time,
+    String year,
+    String month,
+    String day,
+    String hour,
+  );
+
+  /// No description provided for @liuyaoStill.
+  ///
+  /// In zh, this message translates to:
+  /// **'六爻皆静，看本卦卦辞。'**
+  String get liuyaoStill;
+
+  /// No description provided for @liuyaoMoving.
+  ///
+  /// In zh, this message translates to:
+  /// **'动爻：{lines}'**
+  String liuyaoMoving(String lines);
+
+  /// No description provided for @liuyaoMain.
+  ///
+  /// In zh, this message translates to:
+  /// **'看这一句'**
+  String get liuyaoMain;
+
+  /// No description provided for @liuyaoAlso.
+  ///
+  /// In zh, this message translates to:
+  /// **'也看'**
+  String get liuyaoAlso;
+
+  /// No description provided for @liuyaoPlain.
+  ///
+  /// In zh, this message translates to:
+  /// **'直说'**
+  String get liuyaoPlain;
+
+  /// No description provided for @liuyaoSections.
+  ///
+  /// In zh, this message translates to:
+  /// **'解读分三部分：卦象、所问之事、建议。'**
+  String get liuyaoSections;
+
+  /// No description provided for @topicLiuyaoHexagram.
+  ///
+  /// In zh, this message translates to:
+  /// **'卦象'**
+  String get topicLiuyaoHexagram;
+
+  /// No description provided for @topicLiuyaoAnswer.
+  ///
+  /// In zh, this message translates to:
+  /// **'所问之事'**
+  String get topicLiuyaoAnswer;
+
+  /// No description provided for @topicLiuyaoAdvice.
+  ///
+  /// In zh, this message translates to:
+  /// **'建议'**
+  String get topicLiuyaoAdvice;
+
+  /// No description provided for @leaveLiuyaoBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'这次起的卦不会保留，下次要重新起卦。已生成的解读会保存在历史记录里。'**
+  String get leaveLiuyaoBody;
 }
 
 class _AppLocalizationsDelegate

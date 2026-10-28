@@ -12,6 +12,76 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v6.0.0 (2026-10-28): 算卦 complete: its pages in the app, and the 周易 text checked against a 宋 print
+
+Stage S10 of the [tech plan](docs/tech-plan.md) is complete (its summary is there). A big update: pushed, together
+with v5.3.0 and v5.4.0.
+
+- **算卦 is in the app** (首页 → 算卦).
+  - Type what you want to ask: one thing, as concretely as you can. A reminder comes before any cast: be calm,
+    ask one thing, don't ask it again and again.
+  - Then choose how to cast:
+    - **自動擲幣**: tap 擲幣. The six tosses come one at a time, 擲下一爻 for the next, or 直接看卦.
+    - **自己挑幣**: tap 擺好硬幣, and 24 coins are laid out face down before you choose.
+      - Pick 18 by feel, one by one: each picked coin shows its number, and 重新挑 starts over.
+      - After the 18th, 看卦 turns them over in the order you picked them; the first three make the 初爻.
+    - **自擲自填**: first set the exact time (選擇時間, or 用現在的時間). Nothing is cast without it.
+      - Then fill in six rows, 上爻 at the top: 按硬幣, as the three coins fell (字 / 背), or 按爻, as the line itself.
+      - Then 起卦.
+  - The hexagram comes at once, with no AI. The card shows:
+    - the six lines, with the moving ones marked;
+    - 本卦 → 變卦, with their 上卦 and 下卦;
+    - the time and its 干支;
+    - the 卦辭 or 爻辭 the reading rests on, each with its 直說 underneath.
+  - 生成 AI 解讀 then reads the cast for your question. History lists it by its hexagram (「算卦 · 天雷無妄」).
+  - Keyboard: Tab reaches every coin and Enter picks it. Once a hexagram is cast, Esc or 返回 asks first, since the
+    cast is not kept (a reading you generated stays in history).
+- **The 周易 text is corrected.** 算卦 quotes it, and so does the 一生运势 report, so both now read right.
+  - The text came from one digital copy. I compared all 514 texts (卦辭, 爻辭, 用九, 用六 and 大象) with two other
+    transcriptions. Then I compared them with a transcription of a 宋 print: 四部叢刊, 王弼注. Wherever anything
+    differed, I read the scan of the print itself, on 16 pages.
+  - 125 of 578 strings were wrong.
+    - **A line in the wrong hexagram:** 大有 九二 read 「同人於宗，吝」, which is 同人's line. It is now
+      「大車以載，有攸往，無咎」.
+    - **A line written twice:** 姤 九五.
+    - **Words missing or out of order:**
+      - 復 初九 「不遠復」 (it read 不復遠);
+      - 明夷 六四 「於出門庭」;
+      - 大過 九五 「老婦得其士夫」;
+      - 家人 九五 「勿恤，吉」;
+      - 損 上九 and 巽 「利有攸往」.
+    - **Wrong characters:** 兇 for 凶 (58 times), 鹹 for 咸 (the name of hexagram 31 too), 鬥 for 斗, 後 for 后
+      (the sovereign), 屍 for 尸, and more.
+    - **In the 大象:** 震's read 「虩雷…修身」, not 「洊雷…修省」.
+  - Some errors were in all three digital copies, and only the print shows them: 姤 初六 「繫于金柅」 (all had 系),
+    噬嗑 六三 「噬腊肉」 (all had 臘) and 復 初九 「无祇悔」.
+  - Every 卦辭 now opens with the hexagram's name, also where the name is its first word: 「履：履虎尾，不咥人，亨。」
+  - The evidence for every correction, and what was kept, is in
+    [docs/verification/zhouyi.md](docs/verification/zhouyi.md).
+  - Not done: the print read page by page where its transcription already agrees with our text. Say if you want
+    that.
+- Verified:
+  - 8 new app tests:
+    - the reminder comes before any cast;
+    - each of the three ways: the server tosses; the picks go in the order picked; nothing manual without the time;
+      by coins or by line;
+    - the reading and its history title;
+    - Tab and Enter on a coin.
+  - 4 new server tests on the 周易 text:
+    - every line opens with its own name, by place and 陰陽;
+    - every 卦辭 opens with its name;
+    - none of the mis-converted characters is left, nor a doubled line;
+    - the hand-checked lines and 大象.
+    - They fail on the old text.
+  - `npm run check:zhouyi` reproduces the comparison: all 514 texts read as the print does.
+  - All 487 server tests and 147 app tests pass; `verify:liuyao` 10 of 10; harness PASS.
+- Still waiting for you:
+  - whether a 八字 share card may show the four pillars;
+  - the 起名 字义库 review;
+  - Indonesia's sign-off;
+  - whether to strip the server's English;
+  - the Phase 3 gate items.
+
 ### v5.4.0 (2026-10-28): your three updates: even tarot spread choices, Chinese only, the admin in Beijing
 
 Stage S11 of the [tech plan](docs/tech-plan.md), what you asked for while 算卦 was being built. A medium update:

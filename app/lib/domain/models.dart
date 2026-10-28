@@ -2,10 +2,12 @@
 // Parsing is tolerant of extra fields: the contract is additive-only.
 
 import 'fengshui.dart';
+import 'liuyao.dart';
 import 'naming.dart';
 import 'qiuqian.dart';
 
 export 'fengshui.dart';
+export 'liuyao.dart';
 export 'naming.dart';
 export 'qiuqian.dart';
 
@@ -368,6 +370,7 @@ class ChartResult {
   QiuqianChart get qiuqian => QiuqianChart.fromFacts(facts);
   FengshuiChart get fengshui => FengshuiChart.fromFacts(facts);
   NamingChart get naming => NamingChart.fromFacts(facts);
+  LiuyaoChart get liuyao => LiuyaoChart.fromFacts(facts);
 }
 
 class Paragraph {
@@ -703,6 +706,7 @@ class HistoryItem {
     this.room,
     this.facing,
     this.surnames = const {},
+    this.hexagrams = const {},
   });
 
   factory HistoryItem.fromJson(Json j) {
@@ -721,6 +725,7 @@ class HistoryItem {
       room: chart['room'] as String?,
       facing: chart['facing'] as String?,
       surnames: ((chart['surname'] as Json?) ?? const {}).cast<String, String>(),
+      hexagrams: ((chart['primary'] as Json?) ?? const {}).cast<String, String>(),
     );
   }
 
@@ -746,4 +751,8 @@ class HistoryItem {
   /// 起名 (v4.5.0): the surname in both scripts; [surname] picks the reader's.
   final Map<String, String> surnames;
   String? surname(String apiLocale) => surnames[apiLocale == 'zh-Hans' ? 'zh-Hans' : 'zh-Hant'];
+
+  /// 算卦 (v6.0.0): the cast's 本卦 by its full name in both scripts; [hexagram] picks the reader's.
+  final Map<String, String> hexagrams;
+  String? hexagram(String apiLocale) => hexagrams[apiLocale == 'zh-Hans' ? 'zh-Hans' : 'zh-Hant'];
 }

@@ -9,6 +9,7 @@ import {
   relationToTi,
   seasonalStrength,
   yijingFacts,
+  zhouyiText,
 } from "../src/engines/yijing/index.js";
 import { placeCountry } from "../src/places/index.js";
 import { FIXED_NOW, PEPPER } from "./helpers.js";
@@ -149,5 +150,75 @@ describe("hand-checked cases", () => {
     );
     const y = yijingFacts(early.facts as never, 1988, yearGanZhi);
     expect(y.bazhai.year).toBe(1987); // still 丁卯 until 立春 1988-02-04
+  });
+});
+
+// The text as corrected against 維基文庫《周易》 and 《周易正義》 (docs/verification/zhouyi.md).
+describe("the 周易 text", () => {
+  const ids = Array.from({ length: 64 }, (_, n) => n.toString(2).padStart(6, "0"));
+  const all = ids.map(zhouyiText);
+  const scripts = ["zh-Hant", "zh-Hans"] as const;
+
+  it("each 爻辭 opens with its own line's name, by place and 陰陽 (初九 … 上六), then 用九 / 用六", () => {
+    const place = ["初", "二", "三", "四", "五", "上"];
+    for (const [i, t] of all.entries()) {
+      const names = [...ids[i]!].map((bit, k) => {
+        const n = bit === "1" ? "九" : "六";
+        return k === 0 || k === 5 ? place[k] + n : n + place[k];
+      });
+      if (ids[i] === "111111") names.push("用九");
+      if (ids[i] === "000000") names.push("用六");
+      for (const s of scripts) expect(t.yao_ci.map((y) => y[s].split("：")[0])).toEqual(names);
+    }
+  });
+
+  it("each 卦辭 opens with 「名：」, also where the name is its first word (「履：履虎尾」)", () => {
+    for (const t of all)
+      for (const s of scripts)
+        expect(t.gua_ci[s].startsWith(`${t.name[s]}：`), t.gua_ci[s]).toBe(true);
+    expect(zhouyiText("110111").gua_ci["zh-Hant"]).toBe("履：履虎尾，不咥人，亨。");
+  });
+
+  it("the source's slips stay corrected: no 繁體 mis-conversion, doubled line or stray space", () => {
+    const hant = all
+      .flatMap((t) => [t.name, t.gua_ci, ...t.yao_ci].map((x) => x["zh-Hant"]))
+      .concat(ids.map((id) => hexagram(id).da_xiang["zh-Hant"]));
+    for (const bad of [
+      "兇",
+      "鹹",
+      "鬥",
+      "屍",
+      "裏",
+      "仆",
+      "巳",
+      "啕",
+      "踟躅",
+      "賫",
+      "誌",
+      "臘",
+      "祗",
+    ])
+      expect(hant.filter((x) => x.includes(bad))).toEqual([]);
+    for (const x of hant) {
+      expect(x).toBe(x.trim());
+      expect(x.length % 2 === 0 && x.slice(0, x.length / 2) === x.slice(x.length / 2)).toBe(false);
+    }
+  });
+
+  it("hand-checked lines: 大有 九二, 姤 初六 and 九五, 復 初九, 損 上九 and 咸's name", () => {
+    expect(zhouyiText("111101").yao_ci[1]!["zh-Hant"]).toBe("九二：大車以載，有攸往，無咎。");
+    // The print reads 繫 and 祇 where all three digital copies have 系 and 祗.
+    expect(zhouyiText("011111").yao_ci[0]!["zh-Hant"]).toMatch(/^初六：繫於金柅/);
+    expect(zhouyiText("011111").yao_ci[4]!["zh-Hant"]).toBe("九五：以杞包瓜，含章，有隕自天。");
+    expect(zhouyiText("100000").yao_ci[0]!["zh-Hans"]).toBe("初九：不远复，无祇悔，元吉。");
+    expect(zhouyiText("110001").yao_ci[5]!["zh-Hant"]).toBe(
+      "上九：弗損益之，無咎，貞吉，利有攸往，得臣無家。",
+    );
+    expect(zhouyiText("001110").name).toEqual({ "zh-Hant": "咸", "zh-Hans": "咸" });
+    // 大象 (the 一生运势 brief reads it): 后 is the sovereign, not 後; 震's was misworded.
+    expect(hexagram("111000").da_xiang["zh-Hant"]).toBe(
+      "天地交，泰；后以財成天地之道，輔相天地之宜，以左右民。",
+    );
+    expect(hexagram("100100").da_xiang["zh-Hans"]).toBe("洊雷，震；君子以恐惧修省。");
   });
 });

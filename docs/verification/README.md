@@ -1,4 +1,4 @@
-# 八字 / 塔羅 / 求籤 technical verification (2026-10-26; 求籤 2026-10-28)
+# 八字 / 塔羅 / 求籤 / 算卦 technical verification (2026-10-26; 求籤 and 算卦 2026-10-28)
 
 Reproduce: `npm run verify:bazi`, `npm run verify:tarot`, `npm run verify:qiuqian`, `npm run verify:liuyao`, `npm run eval:ai -- --live`.
 The first three are harness and CI gates.
@@ -64,6 +64,10 @@ Reproduce: `npm run verify:liuyao` (a harness and CI gate).
 - **Non-vacuity:** a coin in ten turned to 背, a 上爻 that copies the 初爻, and a first laid-out coin always 字 are
   each caught.
 - **The cast time's 干支** is worked by hand in `test/liuyao.test.ts`, 立春 included.
+- **The 周易 text** (v6.0.0), all 514 卦辭, 爻辭 and 大象, is checked against two transcriptions and a 宋 print
+  (四部叢刊), read on 16 scan pages. 125 strings were corrected, among them a line in the wrong hexagram (大有 九二)
+  and readings all three transcriptions shared (姤 初六 繫, 噬嗑 六三 腊). The sources, the method and every
+  decision are in [zhouyi.md](zhouyi.md); reproduce with `npm run check:zhouyi`.
 
 ## AI faithfulness (DeepSeek `deepseek-v4-pro`, live)
 

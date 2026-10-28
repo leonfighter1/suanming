@@ -8,6 +8,7 @@ import 'daily_card.dart';
 import 'design.dart';
 import 'fengshui_page.dart';
 import 'history_page.dart';
+import 'liuyao_page.dart';
 import 'profiles_page.dart';
 import 'qiuqian_page.dart';
 import 'settings_page.dart';
@@ -109,11 +110,18 @@ class HomePage extends ConsumerWidget {
                     subtitle: l10n.homeQiuqianDesc,
                     onTap: () => push(context, const QiuqianPage()),
                   ),
+                'liuyao' => _Entry(
+                    key: const Key('entry-liuyao'),
+                    icon: Icons.toll_outlined,
+                    title: l10n.homeLiuyao,
+                    subtitle: l10n.homeLiuyaoDesc,
+                    onTap: () => push(context, const LiuyaoPage()),
+                  ),
                 _ => const SizedBox.shrink(),
               },
             ),
-          const FadeSlideIn(index: 6, child: DailyCard()),
-          const FadeSlideIn(index: 7, child: RecentHistory()),
+          const FadeSlideIn(index: 7, child: DailyCard()),
+          const FadeSlideIn(index: 8, child: RecentHistory()),
         ],
       ),
     );

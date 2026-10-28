@@ -36,7 +36,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress |
 | S8 地区精细化              | Indonesia's blocks, the five-region test, languages kept    | medium | v5.1.0            | done        |
 | S9 Phase 3 门禁            | 起名's own rule group; the Phase 3 gate record              | medium | v5.2.0            | done        |
-| S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | in progress |
+| S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | done        |
 | S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
@@ -1074,6 +1074,27 @@ As built (v5.3.0):
 - `zhouyiText` is a read-only accessor in the yijing module, so 算卦 reads the one 周易 source. The 一生运势 facts
   are unchanged.
 
+As built (v6.0.0):
+
+- **WP10.4**: the page as specified, in Chinese only (after S11).
+  - The texts on the card come from the facts. The 直說 and the trigrams' names come from
+    `app/assets/i18n/liuyao.json`, synced from the server.
+  - Every cast sends the device's time zone (`platform/time_zone*.dart`): the browser's IANA zone on the web, a
+    whole-hour `Etc/GMT∓N` elsewhere.
+  - The pick grid's coins are Pressables, so Tab and Enter pick them.
+- **WP10.5** went further than planned, because a print turned up with a page transcription:
+  - The text was compared with two transcriptions (維基文庫《周易》 and 《周易正義》). Then every text was looked up in
+    維基文庫's line-for-line transcription of the 四部叢刊 photo-reprint of a 宋 print. The disputed readings were
+    read in the scan itself, on 16 pages.
+  - 125 strings were corrected. Most were 简繁 slips, some shared by all three transcriptions: 姤 初六 繫, 噬嗑 六三
+    腊, 復 初九 and 坎 九五 祇. A whole line was in the wrong hexagram: 大有 九二 held 同人 六二's text.
+  - The 大象 was checked too, since the 一生运势 brief reads it. 9 more errors were found there, e.g. 震's
+    「虩雷…修身」 for 「洊雷…修省」.
+  - Each correction is pinned to its match count in `ERRATA`, and `test/yijing.test.ts` holds the layout and the
+    hand-checked lines.
+  - Not done: reading the print page by page for the texts where its transcription already agrees with ours
+    (docs/verification/zhouyi.md).
+
 ## S11 Owner updates (medium → v5.4.0)
 
 **Owner request (2026-10-28), while S10 was under way:**
@@ -1109,6 +1130,46 @@ As built (v5.4.0):
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S10 算卦 (done 2026-10-28: v5.3.0–v6.0.0)
+
+1. **Delivered**: the owner's 算卦, a method of its own (rule 8).
+   - **v5.3.0, the server half:**
+     - WP10.1, the engine and API: the classical coin rule (背 3, 字 2), auto, pick and manual casts, the cast
+       time's 干支, and 朱熹's rule for the texts;
+     - WP10.2, 450 直說 written by hand in 繁體 and converted to 简体;
+     - WP10.3, the AI reading: its own prompts, and a faithfulness check on hexagrams, quotes and 干支.
+   - **v6.0.0, the rest:**
+     - WP10.4, the app pages: the reminder, the three ways to cast, the hexagram card, the reading and history;
+     - WP10.5, the 周易 text checked against two transcriptions and a 宋 print, and corrected
+       (docs/verification/zhouyi.md).
+   - S11 (v5.4.0) went out in the middle, as the owner asked, so the pages were built in Chinese only.
+2. **Numbers**:
+   - Server tests 449 → 487 (v5.3.0 added 34); app tests 139 → 147.
+   - `verify:liuyao`: 10 of 10 checks over 100 000 casts.
+   - The 周易: all 514 卦辭, 爻辭 and 大象 checked. B = C against ours fell from 77 to 4, and those 4 are the
+     print's readings. 125 of 578 strings corrected, and 16 scan pages read.
+3. **Changed against the plan**:
+   - The English 直說 were dropped when the owner removed English (S11).
+   - WP10.5 checked the 大象 as well as the 450 texts 算卦 shows, because the 一生运势 brief reads it.
+   - It found a print to settle disputes (the 四部叢刊 宋本 with a page transcription) instead of a print read
+     alone.
+   - Every 卦辭 now opens with 「名：」, also where the name is its first word: a layout change the print comparison
+     needed.
+4. **Mistakes recorded**:
+   - Rules 45–46, in the server and app halves: JSON round-trips, and full-width buttons in a Row.
+   - Rule 47: digital copies can share a 简繁 slip, so a merged character is unverified until a print settles it.
+   - Rule 48: Commons rate-limits page renders.
+   - Global rule 1 recurred twice (backslashes through a heredoc). Both were caught at once and redone with Edit.
+5. **Next**:
+   - Nothing of S10 is open.
+   - Still waiting for the owner:
+     - WP7.2 (whether a 八字 share card may show the four pillars);
+     - 起名's 字义库 review, before 起名 goes on;
+     - Indonesia's sign-off;
+     - whether to strip the server's English;
+     - the Phase 3 gate items.
+   - A full page-by-page reading of the 周易 print is a candidate small update, should the owner want it.
 
 ### S11 Owner updates (done 2026-10-28: v5.4.0, medium)
 
@@ -1423,8 +1484,8 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP10.1    | done                         | v5.3.0  |
 | WP10.2    | done                         | v5.3.0  |
 | WP10.3    | done                         | v5.3.0  |
-| WP10.4    | planned                      | v6.0.0  |
-| WP10.5    | planned                      | v6.0.0  |
+| WP10.4    | done                         | v6.0.0  |
+| WP10.5    | done                         | v6.0.0  |
 | WP11.1    | done                         | v5.4.0  |
 | WP11.2    | done (app; server en kept)   | v5.4.0  |
 | WP11.3    | done                         | v5.4.0  |

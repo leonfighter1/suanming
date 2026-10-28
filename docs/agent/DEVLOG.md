@@ -2,7 +2,26 @@
 
 Newest first. One entry per working session, key points only.
 
-## 2026-10-28 (ag): S11, the owner's updates; release v5.4.0
+## 2026-10-28 (ah): S10 算卦 complete (the app pages, the 周易 text checked); release v6.0.0
+
+- **Owner:** 「做完了 push 到git 不用等我approval」. v5.4.0 was pushed with v5.3.0 (main and tags) after its harness PASS.
+- WP10.4, the app (`liuyao_page.dart`, `widgets/hexagram_card.dart`, `domain/liuyao.dart`, `platform/time_zone*.dart`):
+  - the question, a reminder before any cast, and the three ways in a SegmentedButton;
+  - 自動 shows the six tosses one by one (with a skip); 自己挑幣 lays out 24 coins and keeps the picks in order; 自擲自填 needs the time first, then six rows, by coins or by line;
+  - the hexagram card (lines with the moving ones marked, 本卦 → 變卦 with trigrams, the time's 干支, the focus texts with 直說), then the AI reading and history 「算卦 · 天雷無妄」;
+  - keyboard: every coin is a Pressable, Tab order pinned; LeaveGuard and SubmitShortcut.
+  - 8 new app tests (139 → 147). A FilledButton in a Row took infinite width (rule 46).
+- WP10.5, the 周易 text (docs/verification/zhouyi.md, `npm run check:zhouyi`):
+  - compared all 514 卦辭, 爻辭 and 大象 with 維基文庫《周易》 and 《周易正義》 (77 texts where both disagreed with ours), then with 維基文庫's page transcription of the 四部叢刊 宋 print;
+  - read the scan on 16 pages, and zoomed 祇 / 祗 at 1920 px;
+  - 125 strings corrected in `build-yijing` ERRATA (each pinned to its match count), among them 大有 九二 (it held 同人 六二), 姤 九五 written twice, and slips all three transcriptions shared (姤 初六 繫, 噬嗑 六三 腊, 復 初九 and 坎 九五 祇: rule 47);
+  - every 卦辭 now opens 「名：」 (履, 否, 同人 too), every 爻辭 「初九：」; `test/yijing.test.ts` pins the layout and the corrections (it fails on the old text).
+  - The fixtures for 算卦 and the 一生运势 report changed through `npm run sync:app` only.
+- Slips:
+  - a heredoc dropped backslashes again (global rule 1); redone with the Edit tool;
+  - the Commons API refused page renders after ten quick requests (rule 48);
+  - quotes inside an add-mistake argument broke PowerShell's argument passing; 「」 instead.
+- Harness: the first run after the version bump failed at the app gate (rule 23), the second passed; the final run on the finished tree passed.
 
 - v5.3.0 committed and tagged (b26a1e4) after a harness PASS. As rule 23 predicts, the first run failed at the app gate and the second passed.
 - **Owner request** (mid-S10): the same-size tarot spread icons with the name below; English removed (「这个软件不需要英文支持」); the admin located in Beijing.

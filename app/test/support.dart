@@ -26,6 +26,7 @@ final testTerms = Terms.parse(
   File('assets/i18n/qiuqian_lots.json').readAsStringSync(),
   File('assets/i18n/fengshui.json').readAsStringSync(),
   File('assets/i18n/naming_chars.json').readAsStringSync(),
+  File('assets/i18n/liuyao.json').readAsStringSync(),
 );
 
 /// The page's main vertical list (pages also contain horizontal timelines).
@@ -60,7 +61,10 @@ class FakeApi {
   final List<Map<String, dynamic>>? history;
 
   /// GET /v1/methods: the region's methods in entry order (v4.3.0). Tests of the order set it.
-  List<String> methods = const ['bazi', 'tarot', 'qiuqian', 'fengshui', 'astrology'];
+  List<String> methods = const ['bazi', 'tarot', 'qiuqian', 'liuyao', 'fengshui', 'astrology'];
+
+  /// POST /v1/liuyao/layouts calls so far (v6.0.0).
+  int layouts = 0;
 
   /// POST /v1/charts for 起名 (v4.5.0): a test's own chart in place of chart_naming.
   Map<String, dynamic>? namingChart;
@@ -211,12 +215,27 @@ class FakeApi {
           'qiuqian' => 'chart_qiuqian',
           'fengshui' => 'chart_fengshui',
           'naming' => 'chart_naming',
+          'liuyao' => 'chart_liuyao',
           _ => 'chart_bazi',
         }),
         201,
       );
     }
     // The region's methods in entry order (v4.3.0): the default order unless a test sets [methods].
+    // 算卦's coins laid out for a pick cast (v6.0.0): their id and commitment, the coins staying here.
+    if (req.method == 'POST' && path == '/v1/liuyao/layouts') {
+      layouts++;
+      return _json({
+        'draw_id': '9a9a9a9a-9a9a-49a9-89a9-9a9a9a9a9a9a',
+        'size': 24,
+        'picks': 18,
+        'commitment': 'sha256:${'0' * 64}',
+      }, 201);
+    }
+    // The cast that report_liuyao_passed reads (v6.0.0).
+    if (req.method == 'GET' && path == '/v1/charts/56565656-5656-4565-8565-565656565656') {
+      return _json(fixture('chart_liuyao'), 200);
+    }
     if (req.method == 'GET' && path == '/v1/methods') {
       return _json({
         'region': 'HK',

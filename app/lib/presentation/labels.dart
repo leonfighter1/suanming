@@ -20,6 +20,9 @@ extension ApiLabels on AppLocalizations {
         'fengshui_advice' => topicFengshuiAdvice,
         'naming_candidates' => topicNamingCandidates,
         'naming_advice' => topicNamingAdvice,
+        'liuyao_hexagram' => topicLiuyaoHexagram,
+        'liuyao_answer' => topicLiuyaoAnswer,
+        'liuyao_advice' => topicLiuyaoAdvice,
         _ => t,
       };
 

@@ -124,11 +124,13 @@ class HistoryTile extends ConsumerWidget {
     };
     final room = item.room == null ? null : terms?.fengshui?.roomName(item.room!, locale);
     final surname = item.surname(locale);
+    final hexagram = item.hexagram(locale);
     final title = switch (item.system) {
       'bazi' => label == null ? l10n.homeBazi : l10n.chartOf(label),
       'qiuqian' => l10n.homeQiuqian,
       'fengshui' => room == null ? l10n.homeFengshui : '${l10n.homeFengshui} · $room',
       'naming' => surname == null ? l10n.homeNaming : '${l10n.homeNaming} · $surname',
+      'liuyao' => hexagram == null ? l10n.homeLiuyao : '${l10n.homeLiuyao} · $hexagram',
       _ => l10n.homeTarot,
     };
     final lot = item.lotNumber == null ? null : terms?.lots?.lot(item.lotNumber!);
@@ -151,6 +153,7 @@ class HistoryTile extends ConsumerWidget {
               'qiuqian' => Icons.temple_buddhist_outlined,
               'fengshui' => Icons.explore_outlined,
               'naming' => Icons.badge_outlined,
+              'liuyao' => Icons.toll_outlined,
               _ => Icons.style_rounded,
             },
             color: scheme.primary,

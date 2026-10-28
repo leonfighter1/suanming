@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'fengshui.dart';
+import 'liuyao.dart';
 import 'naming.dart';
 import 'qiuqian.dart';
 
@@ -23,6 +24,7 @@ class Terms {
     this.lots,
     this.fengshui,
     this.naming,
+    this.liuyao,
   ]);
 
   static _Names _names(Object? v) => (v as Map<String, dynamic>).map(
@@ -36,6 +38,7 @@ class Terms {
         await bundle.loadString('assets/i18n/qiuqian_lots.json'),
         await bundle.loadString('assets/i18n/fengshui.json'),
         await bundle.loadString('assets/i18n/naming_chars.json'),
+        await bundle.loadString('assets/i18n/liuyao.json'),
       );
 
   factory Terms.parse(
@@ -45,6 +48,7 @@ class Terms {
     String? lotsJson,
     String? fengshuiJson,
     String? namingJson,
+    String? liuyaoJson,
   ]) {
     final terms = jsonDecode(termsJson) as Map<String, dynamic>;
     final deck = jsonDecode(deckJson) as Map<String, dynamic>;
@@ -64,11 +68,15 @@ class Terms {
       lotsJson == null ? null : LotSet.parse(lotsJson),
       fengshuiJson == null ? null : FengshuiTable.parse(fengshuiJson),
       namingJson == null ? null : NamingLibrary.parse(namingJson),
+      liuyaoJson == null ? null : LiuyaoTable.parse(liuyaoJson),
     );
   }
 
   /// 起名's 字义库 (v4.5.0, a draft until the owner's review), when loaded.
   final NamingLibrary? naming;
+
+  /// 算卦's trigrams and 直說 (v6.0.0), when loaded.
+  final LiuyaoTable? liuyao;
 
   /// 求籤's lot set (v4.3.0), when loaded.
   final LotSet? lots;

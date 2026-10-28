@@ -2186,5 +2186,95 @@
         }
       ]
     }
+  ],
+  "trigrams": [
+    {
+      "id": "111",
+      "name": {
+        "zh-Hant": "乾",
+        "zh-Hans": "乾"
+      },
+      "image": {
+        "zh-Hant": "天",
+        "zh-Hans": "天"
+      }
+    },
+    {
+      "id": "110",
+      "name": {
+        "zh-Hant": "兌",
+        "zh-Hans": "兑"
+      },
+      "image": {
+        "zh-Hant": "澤",
+        "zh-Hans": "泽"
+      }
+    },
+    {
+      "id": "101",
+      "name": {
+        "zh-Hant": "離",
+        "zh-Hans": "离"
+      },
+      "image": {
+        "zh-Hant": "火",
+        "zh-Hans": "火"
+      }
+    },
+    {
+      "id": "100",
+      "name": {
+        "zh-Hant": "震",
+        "zh-Hans": "震"
+      },
+      "image": {
+        "zh-Hant": "雷",
+        "zh-Hans": "雷"
+      }
+    },
+    {
+      "id": "011",
+      "name": {
+        "zh-Hant": "巽",
+        "zh-Hans": "巽"
+      },
+      "image": {
+        "zh-Hant": "風",
+        "zh-Hans": "风"
+      }
+    },
+    {
+      "id": "010",
+      "name": {
+        "zh-Hant": "坎",
+        "zh-Hans": "坎"
+      },
+      "image": {
+        "zh-Hant": "水",
+        "zh-Hans": "水"
+      }
+    },
+    {
+      "id": "001",
+      "name": {
+        "zh-Hant": "艮",
+        "zh-Hans": "艮"
+      },
+      "image": {
+        "zh-Hant": "山",
+        "zh-Hans": "山"
+      }
+    },
+    {
+      "id": "000",
+      "name": {
+        "zh-Hant": "坤",
+        "zh-Hans": "坤"
+      },
+      "image": {
+        "zh-Hant": "地",
+        "zh-Hans": "地"
+      }
+    }
   ]
 }

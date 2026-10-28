@@ -312,7 +312,7 @@ final dailyCardProvider = FutureProvider.autoDispose<ChartResult>((ref) {
 
 /// The methods the home page offers, in the region's entry order (GET /v1/methods, v4.3.0); the
 /// app shows the ones it has a page for. Unreachable or refused: the default order.
-const defaultMethods = ['bazi', 'tarot', 'qiuqian', 'fengshui'];
+const defaultMethods = ['bazi', 'tarot', 'qiuqian', 'liuyao', 'fengshui'];
 
 /// The methods the app has a page for: the home page's four, and 起名, reached from a 八字 chart (v4.5.0;
 /// off in the matrix until the owner's review, so absent unless the region offers it).

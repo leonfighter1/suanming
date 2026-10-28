@@ -1412,6 +1412,205 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get topicNamingAdvice => '建议';
+
+  @override
+  String get homeLiuyao => '算卦';
+
+  @override
+  String get homeLiuyaoDesc => '掷三枚硬币六次起卦，或自己掷好再填，马上看卦辞直说，仅供娱乐和玄学学习使用';
+
+  @override
+  String get liuyaoQuestion => '想问的事（可选）';
+
+  @override
+  String get liuyaoQuestionHint => '一次只问一件事，问得越具体，解读越贴切';
+
+  @override
+  String get liuyaoRemind => '起卦之前';
+
+  @override
+  String get liuyaoRemindBody => '先静下心，把要问的事想清楚。一次只问一件事，同一件事不要一再重问。';
+
+  @override
+  String get liuyaoMode => '起卦方式';
+
+  @override
+  String get liuyaoModeAuto => '自动掷币';
+
+  @override
+  String get liuyaoModePick => '自己挑币';
+
+  @override
+  String get liuyaoModeManual => '自掷自填';
+
+  @override
+  String get liuyaoAutoHow => '由系统替你掷三枚硬币，共掷六次，从下往上成卦。';
+
+  @override
+  String get liuyaoToss => '掷币';
+
+  @override
+  String get liuyaoTossNext => '掷下一爻';
+
+  @override
+  String get liuyaoSkip => '直接看卦';
+
+  @override
+  String get liuyaoPickHow => '24 枚硬币已经随机摆好，都扣着。凭直觉挑 18 枚，每 3 枚成一爻，从下往上。';
+
+  @override
+  String get liuyaoPickStart => '摆好硬币';
+
+  @override
+  String liuyaoPicked(int count) {
+    return '已挑 $count / 18 枚';
+  }
+
+  @override
+  String get liuyaoPickAgain => '重新挑';
+
+  @override
+  String get liuyaoReveal => '看卦';
+
+  @override
+  String liuyaoCoin(int n) {
+    return '第 $n 枚硬币';
+  }
+
+  @override
+  String get liuyaoManualHow =>
+      '三枚硬币一起掷，共掷六次，从下往上记（第一次是初爻）。有字的一面算“字”，另一面算“背”。掷之前，先记下时间。';
+
+  @override
+  String get liuyaoTime => '起卦时间（精确到分钟）';
+
+  @override
+  String get liuyaoTimePick => '选择时间';
+
+  @override
+  String get liuyaoTimeNow => '用现在的时间';
+
+  @override
+  String get liuyaoTimeMissing => '请先填写起卦时间';
+
+  @override
+  String get liuyaoEnterBy => '填写方式';
+
+  @override
+  String get liuyaoByCoins => '按硬币';
+
+  @override
+  String get liuyaoByLines => '按爻';
+
+  @override
+  String get liuyaoBei0 => '三字';
+
+  @override
+  String get liuyaoBei1 => '一背';
+
+  @override
+  String get liuyaoBei2 => '二背';
+
+  @override
+  String get liuyaoBei3 => '三背';
+
+  @override
+  String get liuyaoOldYin => '老阴';
+
+  @override
+  String get liuyaoYoungYang => '少阳';
+
+  @override
+  String get liuyaoYoungYin => '少阴';
+
+  @override
+  String get liuyaoOldYang => '老阳';
+
+  @override
+  String get liuyaoCoinZi => '字';
+
+  @override
+  String get liuyaoCoinBei => '背';
+
+  @override
+  String get liuyaoLine1 => '初爻';
+
+  @override
+  String get liuyaoLine2 => '二爻';
+
+  @override
+  String get liuyaoLine3 => '三爻';
+
+  @override
+  String get liuyaoLine4 => '四爻';
+
+  @override
+  String get liuyaoLine5 => '五爻';
+
+  @override
+  String get liuyaoLine6 => '上爻';
+
+  @override
+  String get liuyaoCast => '起卦';
+
+  @override
+  String get liuyaoPrimary => '本卦';
+
+  @override
+  String get liuyaoChanged => '变卦';
+
+  @override
+  String liuyaoNumber(int n) {
+    return '第$n卦';
+  }
+
+  @override
+  String liuyaoTrigrams(String upper, String lower) {
+    return '上卦 $upper\n下卦 $lower';
+  }
+
+  @override
+  String liuyaoCastAt(
+    String time,
+    String year,
+    String month,
+    String day,
+    String hour,
+  ) {
+    return '起卦于 $time · $year年 $month月 $day日 $hour时';
+  }
+
+  @override
+  String get liuyaoStill => '六爻皆静，看本卦卦辞。';
+
+  @override
+  String liuyaoMoving(String lines) {
+    return '动爻：$lines';
+  }
+
+  @override
+  String get liuyaoMain => '看这一句';
+
+  @override
+  String get liuyaoAlso => '也看';
+
+  @override
+  String get liuyaoPlain => '直说';
+
+  @override
+  String get liuyaoSections => '解读分三部分：卦象、所问之事、建议。';
+
+  @override
+  String get topicLiuyaoHexagram => '卦象';
+
+  @override
+  String get topicLiuyaoAnswer => '所问之事';
+
+  @override
+  String get topicLiuyaoAdvice => '建议';
+
+  @override
+  String get leaveLiuyaoBody => '这次起的卦不会保留，下次要重新起卦。已生成的解读会保存在历史记录里。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2821,4 +3020,203 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get topicNamingAdvice => '建議';
+
+  @override
+  String get homeLiuyao => '算卦';
+
+  @override
+  String get homeLiuyaoDesc => '擲三枚硬幣六次起卦，或自己擲好再填，馬上看卦辭直說，僅供娛樂和玄學學習使用';
+
+  @override
+  String get liuyaoQuestion => '想問的事（可選）';
+
+  @override
+  String get liuyaoQuestionHint => '一次只問一件事，問得越具體，解讀越貼切';
+
+  @override
+  String get liuyaoRemind => '起卦之前';
+
+  @override
+  String get liuyaoRemindBody => '先靜下心，把要問的事想清楚。一次只問一件事，同一件事不要一再重問。';
+
+  @override
+  String get liuyaoMode => '起卦方式';
+
+  @override
+  String get liuyaoModeAuto => '自動擲幣';
+
+  @override
+  String get liuyaoModePick => '自己挑幣';
+
+  @override
+  String get liuyaoModeManual => '自擲自填';
+
+  @override
+  String get liuyaoAutoHow => '由系統替你擲三枚硬幣，共擲六次，從下往上成卦。';
+
+  @override
+  String get liuyaoToss => '擲幣';
+
+  @override
+  String get liuyaoTossNext => '擲下一爻';
+
+  @override
+  String get liuyaoSkip => '直接看卦';
+
+  @override
+  String get liuyaoPickHow => '24 枚硬幣已經隨機擺好，都蓋著。憑直覺挑 18 枚，每 3 枚成一爻，從下往上。';
+
+  @override
+  String get liuyaoPickStart => '擺好硬幣';
+
+  @override
+  String liuyaoPicked(int count) {
+    return '已挑 $count / 18 枚';
+  }
+
+  @override
+  String get liuyaoPickAgain => '重新挑';
+
+  @override
+  String get liuyaoReveal => '看卦';
+
+  @override
+  String liuyaoCoin(int n) {
+    return '第 $n 枚硬幣';
+  }
+
+  @override
+  String get liuyaoManualHow =>
+      '三枚硬幣一起擲，共擲六次，從下往上記（第一次是初爻）。有字的一面算「字」，另一面算「背」。擲之前，先記下時間。';
+
+  @override
+  String get liuyaoTime => '起卦時間（精確到分鐘）';
+
+  @override
+  String get liuyaoTimePick => '選擇時間';
+
+  @override
+  String get liuyaoTimeNow => '用現在的時間';
+
+  @override
+  String get liuyaoTimeMissing => '請先填寫起卦時間';
+
+  @override
+  String get liuyaoEnterBy => '填寫方式';
+
+  @override
+  String get liuyaoByCoins => '按硬幣';
+
+  @override
+  String get liuyaoByLines => '按爻';
+
+  @override
+  String get liuyaoBei0 => '三字';
+
+  @override
+  String get liuyaoBei1 => '一背';
+
+  @override
+  String get liuyaoBei2 => '二背';
+
+  @override
+  String get liuyaoBei3 => '三背';
+
+  @override
+  String get liuyaoOldYin => '老陰';
+
+  @override
+  String get liuyaoYoungYang => '少陽';
+
+  @override
+  String get liuyaoYoungYin => '少陰';
+
+  @override
+  String get liuyaoOldYang => '老陽';
+
+  @override
+  String get liuyaoCoinZi => '字';
+
+  @override
+  String get liuyaoCoinBei => '背';
+
+  @override
+  String get liuyaoLine1 => '初爻';
+
+  @override
+  String get liuyaoLine2 => '二爻';
+
+  @override
+  String get liuyaoLine3 => '三爻';
+
+  @override
+  String get liuyaoLine4 => '四爻';
+
+  @override
+  String get liuyaoLine5 => '五爻';
+
+  @override
+  String get liuyaoLine6 => '上爻';
+
+  @override
+  String get liuyaoCast => '起卦';
+
+  @override
+  String get liuyaoPrimary => '本卦';
+
+  @override
+  String get liuyaoChanged => '變卦';
+
+  @override
+  String liuyaoNumber(int n) {
+    return '第$n卦';
+  }
+
+  @override
+  String liuyaoTrigrams(String upper, String lower) {
+    return '上卦 $upper\n下卦 $lower';
+  }
+
+  @override
+  String liuyaoCastAt(
+    String time,
+    String year,
+    String month,
+    String day,
+    String hour,
+  ) {
+    return '起卦於 $time · $year年 $month月 $day日 $hour時';
+  }
+
+  @override
+  String get liuyaoStill => '六爻皆靜，看本卦卦辭。';
+
+  @override
+  String liuyaoMoving(String lines) {
+    return '動爻：$lines';
+  }
+
+  @override
+  String get liuyaoMain => '看這一句';
+
+  @override
+  String get liuyaoAlso => '也看';
+
+  @override
+  String get liuyaoPlain => '直說';
+
+  @override
+  String get liuyaoSections => '解讀分三部分：卦象、所問之事、建議。';
+
+  @override
+  String get topicLiuyaoHexagram => '卦象';
+
+  @override
+  String get topicLiuyaoAnswer => '所問之事';
+
+  @override
+  String get topicLiuyaoAdvice => '建議';
+
+  @override
+  String get leaveLiuyaoBody => '這次起的卦不會保留，下次要重新起卦。已生成的解讀會保存在歷史紀錄裡。';
 }

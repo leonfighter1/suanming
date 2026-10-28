@@ -7,7 +7,7 @@
  *   app/assets/i18n/qiuqian_lots.json ← data/qiuqian (求籤's lot set, v4.3.0)
  *   app/assets/i18n/fengshui.json   ← src/engines/fengshui/principles.ts (风水's rooms, v4.4.0)
  *   app/assets/i18n/naming_chars.json ← src/engines/naming/characters.ts (起名's draft 字义库, v4.5.0)
- *   app/assets/i18n/liuyao_plain.json ← data/liuyao/plain.json (算卦's 直說, v5.3.0)
+ *   app/assets/i18n/liuyao.json     ← data/liuyao/plain.json + the yijing engine's trigrams (算卦, v6.0.0)
  *   app/test/fixtures/*.json        ← real engine + pipeline (mock provider) outputs
  * test/app-assets.test.ts fails when these are stale. Run: npm run sync:app
  * (this module only builds; scripts/sync-app-assets.ts writes).
@@ -54,6 +54,7 @@ import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeFengshui, PRINCIPLES_VERSION } from "../src/engines/fengshui/index.js";
 import { DIRECTIONS, FACINGS, ROOM_IDS, ROOMS } from "../src/engines/fengshui/principles.js";
 import { computeLiuyao } from "../src/engines/liuyao/index.js";
+import { TRIGRAMS } from "../src/engines/yijing/index.js";
 import { NAME_CHARS } from "../src/engines/naming/characters.js";
 import { computeNaming, LIBRARY } from "../src/engines/naming/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
@@ -406,10 +407,15 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
         meaning: c.meaning,
       })),
     },
-    // 算卦's 直說 (v5.3.0), for the hexagram card.
-    "app/assets/i18n/liuyao_plain.json": JSON.parse(
-      readFileSync(at("data/liuyao/plain.json"), "utf8"),
-    ),
+    // 算卦 (v6.0.0), for the hexagram card: the eight trigrams' names and images, and every text's 直說.
+    "app/assets/i18n/liuyao.json": {
+      ...JSON.parse(readFileSync(at("data/liuyao/plain.json"), "utf8")),
+      trigrams: TRIGRAMS.map((t) => ({
+        id: t.id,
+        name: { "zh-Hant": t.name["zh-Hant"], "zh-Hans": t.name["zh-Hans"] },
+        image: { "zh-Hant": t.image["zh-Hant"], "zh-Hans": t.image["zh-Hans"] },
+      })),
+    },
     "app/test/fixtures/chart_liuyao.json": {
       chart_id: "56565656-5656-4565-8565-565656565656",
       chart_fact: liuyao,
