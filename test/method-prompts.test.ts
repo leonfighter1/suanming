@@ -10,6 +10,7 @@ import {
 } from "../src/ai/index.js";
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
+import { computeFengshui } from "../src/engines/fengshui/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
@@ -38,6 +39,9 @@ const HASHES: Record<string, string> = {
   // v4.3.0 (WP6.1)
   "narrative_qiuqian@1": "0c3e3d0e3fb24f68",
   "action_qiuqian@1": "4d491e5caa9e0306",
+  // v4.4.0 (WP6.3)
+  "narrative_fengshui@1": "6bc0422cc8d0cead",
+  "action_fengshui@1": "146ae68566106766",
 };
 
 const charts = {
@@ -62,6 +66,7 @@ const charts = {
       newDrawId: () => "00000000-0000-4000-8000-000000000001",
     },
   ),
+  fengshui: computeFengshui({ room: "living" }, { digestPepper: PEPPER, now: FIXED_NOW }),
 };
 
 describe("each method's own prompts (rule 8)", () => {
@@ -78,10 +83,10 @@ describe("each method's own prompts (rule 8)", () => {
       expect(new Set(ids.map(([, id]) => id)).size).toBe(ids.length);
       for (const [system, id] of ids) expect(id).toMatch(new RegExp(`^${agent}_${system}@`));
     }
-    // No 破除運勢 plan for astrology (its chart has no houses or transits to rest one on) or for
-    // 求籤 (a lot is read once, for the question asked).
+    // No 破除運勢 plan for astrology (its chart has no houses or transits to rest one on), 求籤 (a lot
+    // is read once, for the question asked) or 风水 (its principles are the plan).
     const noPlan = Object.entries(METHOD_PROMPTS).filter(([, own]) => !own.remedy);
-    expect(noPlan.map(([system]) => system)).toEqual(["astrology", "qiuqian"]);
+    expect(noPlan.map(([system]) => system)).toEqual(["astrology", "qiuqian", "fengshui"]);
   });
 
   it("every report is written with its own method's prompts", async () => {
@@ -101,7 +106,7 @@ describe("each method's own prompts (rule 8)", () => {
     }
   });
 
-  it("tarot, astrology and 求籤 prompts carry no 八字 instructions; 八字 plans use the engine's 喜用", () => {
+  it("tarot, astrology, 求籤 and 风水 prompts carry no 八字 instructions; 八字 plans use the engine's 喜用", () => {
     const others = [
       PROMPTS.action_tarot,
       PROMPTS.remedy_tarot,
@@ -109,6 +114,8 @@ describe("each method's own prompts (rule 8)", () => {
       PROMPTS.action_astrology,
       PROMPTS.narrative_qiuqian,
       PROMPTS.action_qiuqian,
+      PROMPTS.narrative_fengshui,
+      PROMPTS.action_fengshui,
     ];
     for (const p of others) {
       for (const bazi of [

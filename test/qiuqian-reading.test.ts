@@ -144,11 +144,12 @@ describe("the entry order (WP6.2)", () => {
     methodsFor(resolveRegion(loadGeoMatrix(), cc)!).map((m) => m.system);
 
   it("puts 求籤 first in Taiwan and Hong Kong, and keeps the default order elsewhere", () => {
-    // TW, HK: qiuqian 1.5 > bazi 1.2 > tarot 1 = astrology 1 (ties keep bazi, tarot, qiuqian, astrology).
-    expect(order("TW")).toEqual(["qiuqian", "bazi", "tarot", "astrology"]);
-    expect(order("HK")).toEqual(["qiuqian", "bazi", "tarot", "astrology"]);
+    // TW, HK: qiuqian 1.5 > bazi 1.2 > tarot 1 = fengshui 1 = astrology 1 (ties keep bazi, tarot,
+    // qiuqian, fengshui, astrology).
+    expect(order("TW")).toEqual(["qiuqian", "bazi", "tarot", "fengshui", "astrology"]);
+    expect(order("HK")).toEqual(["qiuqian", "bazi", "tarot", "fengshui", "astrology"]);
     // SG: every weight 1, so the default order.
-    expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "astrology"]);
+    expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "fengshui", "astrology"]);
   });
 });
 
@@ -212,7 +213,7 @@ describe("the API", () => {
     const tw = await call("GET", "/v1/methods");
     expect(tw.status).toBe(200);
     expect(tw.body.methods.map((m: { system: string }) => m.system)[0]).toBe("qiuqian");
-    expect(tw.body.matrix_version).toBe("0.2.0");
+    expect(tw.body.matrix_version).toBe("0.3.0");
     const sg = await call("GET", "/v1/methods", undefined, "SG");
     expect(sg.body.methods[0].system).toBe("bazi");
     expect((await call("GET", "/v1/methods", undefined, "CN")).status).toBe(451);

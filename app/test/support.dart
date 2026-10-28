@@ -23,6 +23,7 @@ final testTerms = Terms.parse(
   File('assets/i18n/tarot_deck.json').readAsStringSync(),
   File('assets/i18n/term_tips.json').readAsStringSync(),
   File('assets/i18n/qiuqian_lots.json').readAsStringSync(),
+  File('assets/i18n/fengshui.json').readAsStringSync(),
 );
 
 /// The page's main vertical list (pages also contain horizontal timelines).
@@ -57,7 +58,7 @@ class FakeApi {
   final List<Map<String, dynamic>>? history;
 
   /// GET /v1/methods: the region's methods in entry order (v4.3.0). Tests of the order set it.
-  List<String> methods = const ['bazi', 'tarot', 'qiuqian', 'astrology'];
+  List<String> methods = const ['bazi', 'tarot', 'qiuqian', 'fengshui', 'astrology'];
 
   /// The signed-in user's email (`test…` accounts get a seeded default profile).
   final String email;
@@ -202,6 +203,7 @@ class FakeApi {
         fixture(switch (body['system']) {
           'tarot' => tarot,
           'qiuqian' => 'chart_qiuqian',
+          'fengshui' => 'chart_fengshui',
           _ => 'chart_bazi',
         }),
         201,
@@ -218,6 +220,10 @@ class FakeApi {
     // The 求籤 draw that report_qiuqian_passed reads (v4.3.0).
     if (req.method == 'GET' && path == '/v1/charts/dddddddd-dddd-4ddd-8ddd-dddddddddddd') {
       return _json(fixture('chart_qiuqian'), 200);
+    }
+    // The 风水 room that report_fengshui_passed reads (v4.4.0).
+    if (req.method == 'GET' && path == '/v1/charts/ffffffff-ffff-4fff-8fff-ffffffffffff') {
+      return _json(fixture('chart_fengshui'), 200);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
     // 一生运势报告: real engine facts for the owner's sample (life_passed.json).

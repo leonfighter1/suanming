@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'fengshui.dart';
 import 'qiuqian.dart';
 
 typedef _Names = Map<String, Map<String, String>>;
@@ -19,6 +20,7 @@ class Terms {
     this._keywords = const {},
     this._tips = const {},
     this.lots,
+    this.fengshui,
   ]);
 
   static _Names _names(Object? v) => (v as Map<String, dynamic>).map(
@@ -30,9 +32,10 @@ class Terms {
         await bundle.loadString('assets/i18n/tarot_deck.json'),
         await bundle.loadString('assets/i18n/term_tips.json'),
         await bundle.loadString('assets/i18n/qiuqian_lots.json'),
+        await bundle.loadString('assets/i18n/fengshui.json'),
       );
 
-  factory Terms.parse(String termsJson, String deckJson, [String? tipsJson, String? lotsJson]) {
+  factory Terms.parse(String termsJson, String deckJson, [String? tipsJson, String? lotsJson, String? fengshuiJson]) {
     final terms = jsonDecode(termsJson) as Map<String, dynamic>;
     final deck = jsonDecode(deckJson) as Map<String, dynamic>;
     return Terms(
@@ -49,11 +52,15 @@ class Terms {
       ),
       tipsJson == null ? const {} : _names((jsonDecode(tipsJson) as Map<String, dynamic>)['tips']),
       lotsJson == null ? null : LotSet.parse(lotsJson),
+      fengshuiJson == null ? null : FengshuiTable.parse(fengshuiJson),
     );
   }
 
   /// 求籤's lot set (v4.3.0), when loaded.
   final LotSet? lots;
+
+  /// 风水's rooms and facings (v4.4.0), when loaded.
+  final FengshuiTable? fengshui;
 
   final _Names _terms;
   final _Names _cards;

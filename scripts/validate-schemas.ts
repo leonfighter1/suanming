@@ -9,6 +9,7 @@ import { validateChartFact } from "../src/chart-fact/index.js";
 import { compileRules, loadGeoMatrix, loadRuleSet } from "../src/compliance/index.js";
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
+import { computeFengshui } from "../src/engines/fengshui/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
@@ -47,6 +48,7 @@ const samples = {
     ctx,
   ),
   qiuqian: computeQiuqian({}, ctx),
+  fengshui: computeFengshui({ room: "study", facing: "south" }, ctx),
 };
 for (const [name, fact] of Object.entries(samples)) {
   const r = validateChartFact(fact);

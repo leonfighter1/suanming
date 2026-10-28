@@ -161,6 +161,13 @@ Chinese characters. On Windows it finds Noto Sans SC or 微软雅黑; on Linux, 
 - The home order follows the account's region (`GET /v1/methods`): an account registered in Taiwan or Hong Kong sees
   求籤 first. In dev mode, `X-Dev-Country: TW` does the same.
 
+## 风水 (v4.4.0)
+
+- 首页 → 風水: choose the room, and optionally the facing and a description; then 看佈局.
+- The principles card shows the room's principles (and 「傳統上：…」 for a facing). 生成 AI 解讀 reads them for the
+  room.
+- An account registered in Malaysia (or `X-Dev-Country: MY` in dev mode) sees 風水 first.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

@@ -26,7 +26,7 @@
       "additionalProperties": false,
       "required": ["name", "version"],
       "properties": {
-        "name": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian"] },
+        "name": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui"] },
         "version": {
           "description": "Engine semver, including upstream library pin, e.g. 0.1.0+lunar-javascript.1.7.7",
           "type": "string",
@@ -34,7 +34,7 @@
         }
       }
     },
-    "system": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian"] },
+    "system": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui"] },
     "input_digest": {
       "description": "Keyed digest (HMAC-SHA256) of canonical input + engine version + rule versions. See src/chart-fact/digest.ts.",
       "type": "string",
@@ -78,6 +78,10 @@
     {
       "if": { "properties": { "system": { "const": "qiuqian" } } },
       "then": { "properties": { "facts": { "$ref": "#/$defs/qiuqian_facts" } } }
+    },
+    {
+      "if": { "properties": { "system": { "const": "fengshui" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/fengshui_facts" } } }
     }
   ],
   "$defs": {
@@ -667,6 +671,75 @@
                   "uniqueItems": true,
                   "items": { "type": "integer", "minimum": 0, "maximum": 77 }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "fengshui_facts": {
+      "description": "风水 (since v4.4.0): the general principles of direction and space for one room, never a 吉凶 judgement of a home. Every fact is a simplified_rule.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["room", "principles"],
+      "properties": {
+        "room": {
+          "type": "string",
+          "enum": ["bedroom", "study", "living", "kitchen", "entrance", "dining", "kids"]
+        },
+        "facing": {
+          "description": "The way the room's main window faces, when the user knows it.",
+          "type": "string",
+          "enum": [
+            "north",
+            "northeast",
+            "east",
+            "southeast",
+            "south",
+            "southwest",
+            "west",
+            "northwest"
+          ]
+        },
+        "direction": {
+          "description": "The facing's traditional association (後天八卦 and 五行).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["trigram", "element"],
+          "properties": {
+            "trigram": {
+              "type": "string",
+              "enum": ["kan", "gen", "zhen", "xun", "li", "kun", "dui", "qian"]
+            },
+            "element": { "type": "string", "enum": ["wood", "fire", "earth", "metal", "water"] }
+          }
+        },
+        "principles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "area"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z_]+$" },
+              "area": {
+                "type": "string",
+                "enum": [
+                  "bed",
+                  "desk",
+                  "seat",
+                  "door",
+                  "mirror",
+                  "light",
+                  "air",
+                  "flow",
+                  "storage",
+                  "stove",
+                  "table",
+                  "safety",
+                  "colour"
+                ]
               }
             }
           }

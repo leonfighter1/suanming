@@ -100,3 +100,17 @@ groups:
       flags: i
       unless: "\\b(not|no|never|isn't|cannot)\\b(\\s+\\S+){0,3}\\s+(cure|heal|treat)"
       action: block
+
+  # 风水 output only (v4.4.0; the owner's Phase 3 §4: 无吉凶断言句式). Not a region's group: the pipeline adds
+  # it for 风水 readings (METHOD_RULE_GROUPS), on top of the region's.
+  fengshui:
+    - id: F001
+      description: 住宅吉凶断言（凶宅、犯煞、风水不好）
+      pattern: "(凶宅|犯煞|沖煞|冲煞|煞氣|煞气|擋煞|挡煞|化煞|大凶|風水不好|风水不好|風水很差|风水很差|風水差|风水差)"
+      unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关)[^。！？]{0,8}(凶宅|犯煞|沖煞|冲煞|煞氣|煞气|擋煞|挡煞|化煞|大凶|風水不好|风水不好|風水很差|风水很差|風水差|风水差)"
+      action: block
+    - id: F002
+      description: 把布局和财运、婚姻、子嗣或运气挂钩
+      pattern: "(招財|招财|旺財|旺财|破財|破财|漏財|漏财|聚財|聚财|旺丁|損丁|损丁|旺夫|剋夫|克夫|招桃花|旺桃花|轉運|转运|開運|开运|改運|改运)"
+      unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关|不必|不需要|不用)[^。！？]{0,8}(招財|招财|旺財|旺财|破財|破财|漏財|漏财|聚財|聚财|旺丁|損丁|损丁|旺夫|剋夫|克夫|招桃花|旺桃花|轉運|转运|開運|开运|改運|改运)"
+      action: block

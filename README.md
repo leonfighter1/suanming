@@ -12,6 +12,49 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v4.4.0 (2026-10-28): 风水, general principles for a room, first in Malaysia
+
+Stage S6 of the [tech plan](docs/tech-plan.md) (新玩法), work package 6.3, built to your phase document's 风水 spec:
+general principles of direction and space only, never a 吉凶 judgement of a home. A medium update: committed locally,
+and pushed with S6's big update.
+
+- New on the home page: 「風水」. How to use it:
+  1. Choose the room: 臥室, 書房 · 工作桌, 客廳, 廚房, 玄關, 餐廳 or 兒童房.
+  2. Optionally choose the way its main window faces, eight directions or 不確定.
+  3. Optionally say how the room is now (「床在窗下，門在左邊」). It is private like a question, and no address or
+     floor plan is asked for.
+  4. 看佈局 shows the room's principles, each with its everyday reason.
+     - The reasons are light, air, sleep, safety, privacy, and how people move around.
+     - Some carry the tradition behind them, said without 吉凶, such as 「背後有靠」 or letting the 「氣」 flow.
+     - A facing adds its traditional association, e.g. 「傳統上：東 · 震 · 木」.
+  5. 生成 AI 解讀 relates the principles to your room: 佈局, 光線與動線 and 建議, then a few small changes, the
+     easiest first.
+- In Malaysia 風水 is the first entry, as your phase document asks (「马来西亚（风水内容权重提升）」). Elsewhere the
+  order is 八字, 塔羅, 求籤, 風水. The order still comes from the Geo-Rule matrix (now 0.3.0).
+- Your spec, kept:
+  - Every principle, and every paragraph of the reading, is marked `simplified_rule`.
+  - The reading never says 吉 or 凶, lucky or unlucky; never uses 煞, 旺 or 衰; and never ties a layout to wealth,
+    health, marriage, children or luck.
+  - It never suggests buying objects as a cure (charms, crystals, 八卦鏡), rituals, renovation or moving: only
+    moving, tidying and lighting with what you have.
+  - A 风水-only compliance rule group (F001, F002) holds 吉凶 phrasing such as 凶宅, 犯煞, 招財 and 破財. It applies
+    to 风水 readings only, so other methods are untouched.
+  - The reading's AI label says it gives general advice on space, not a judgement of your home.
+- Your three choices are what decide the principles. They come from a fixed table of 30 general principles for the
+  seven rooms; the 简体 text is checked against OpenCC, and the facings follow the 後天八卦.
+- For whoever runs the server: nothing to do. The database, if on, adds the method at the next start (migration 004).
+- Verified:
+  - 9 new server tests:
+    - the table: every room has principles, the texts in three languages, 简体 against OpenCC, no 吉凶 wording,
+      and the 後天八卦 directions;
+    - the engine: schema-valid and deterministic for every room and facing;
+    - a mock reading, every paragraph `simplified_rule`;
+    - the 风水 rule group: it holds 犯煞 in a 风水 reading but not in a tarot one;
+    - Malaysia's order, and the API (an unknown room or facing gives a 400; no plan).
+  - 4 new app tests: Malaysia's order; 看佈局 with the request it sends, the principles card and the facing, and
+    the description going with the reading; a new choice puts the room away; the reading page and history.
+  - All 385 server tests and 131 app tests pass; harness PASS.
+
 ### v4.3.0 (2026-10-28): 求籤 · 擲筊, the first new method, first in Taiwan and Hong Kong
 
 Stage S6 of the [tech plan](docs/tech-plan.md) (新玩法), work packages 6.1 and 6.2. You said 「继续吧不要停」 without

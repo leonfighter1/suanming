@@ -25,7 +25,7 @@ export interface GeoRuleMatrix {
 }
 
 /** Ties in entry weight keep this order. */
-const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "astrology"];
+const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "fengshui", "astrology"];
 
 /**
  * The methods a region offers, heaviest entry weight first (Phase 3 §2.4: 擲筊 / 求签 first in Taiwan and

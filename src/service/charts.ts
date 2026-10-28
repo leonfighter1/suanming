@@ -5,6 +5,8 @@
 import type { ChartFact } from "../chart-fact/index.js";
 import { computeAstrology } from "../engines/astrology/index.js";
 import { computeBazi, type InputBasis } from "../engines/bazi/index.js";
+import { computeFengshui } from "../engines/fengshui/index.js";
+import { FACINGS, ROOM_IDS, type Facing, type RoomId } from "../engines/fengshui/principles.js";
 import { computeQiuqian } from "../engines/qiuqian/index.js";
 import { LOT_SET_IDS, type LotSetId } from "../engines/qiuqian/lots.js";
 import { SPREADS, type SpreadId } from "../engines/tarot/deck.js";
@@ -29,7 +31,8 @@ export type ChartRequest =
     }
   | { system: "tarot"; spread: SpreadId; draw_id?: string; ritual?: TarotRitual }
   | { system: "astrology"; local: string; timezone: string; latitude: number; longitude: number }
-  | { system: "qiuqian"; lot_set?: LotSetId; draw_id?: string };
+  | { system: "qiuqian"; lot_set?: LotSetId; draw_id?: string }
+  | { system: "fengshui"; room: RoomId; facing?: Facing };
 
 export function str(v: unknown, name: string): string {
   if (typeof v !== "string" || !v.trim()) throw new InputError(`${name} is required`);
@@ -140,7 +143,21 @@ export function computeChart(raw: unknown, secrets: EngineSecrets, now?: () => D
         { ...secrets, now, ...(drawId && { newDrawId: () => drawId as string }) },
       );
     }
+    case "fengshui": {
+      // 风水 (v4.4.0): a room and, optionally, the way its main window faces. Nothing else.
+      const room = req.room as RoomId;
+      if (!ROOM_IDS.includes(room))
+        throw new InputError(`room must be one of ${ROOM_IDS.join(", ")}`);
+      const facing = req.facing as Facing | undefined;
+      if (facing !== undefined && !FACINGS.includes(facing)) {
+        throw new InputError(`facing must be one of ${FACINGS.join(", ")}`);
+      }
+      return computeFengshui(
+        { room, ...(facing && { facing }) },
+        { digestPepper: secrets.digestPepper, now },
+      );
+    }
     default:
-      throw new InputError("system must be bazi | tarot | astrology | qiuqian");
+      throw new InputError("system must be bazi | tarot | astrology | qiuqian | fengshui");
   }
 }

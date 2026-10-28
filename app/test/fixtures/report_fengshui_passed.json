@@ -1,0 +1,84 @@
+{
+  "report_id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+  "chart_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "locale": "zh-Hant",
+  "topics": [
+    "fengshui_layout",
+    "fengshui_flow",
+    "fengshui_advice"
+  ],
+  "layers": {
+    "facts": [
+      "臥室 · 東 · 震 · 木",
+      "床頭靠實牆。",
+      "床不正對房門，躺下時能看見門口。",
+      "鏡子不正對床。",
+      "床的上方不放沉重的櫃子或吊飾，也避開橫樑。",
+      "床底與床邊保持整潔通風。",
+      "臥室用柔和、可調暗的燈光，色調安靜。"
+    ],
+    "interpretation": [
+      {
+        "topic": "fengshui_layout",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）這個房間的佈局可以從主要家具的位置看起，先讓坐臥的地方背後有靠。",
+            "source_level": "simplified_rule",
+            "fact_refs": [
+              "/principles/0"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "fengshui_flow",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）讓光線與空氣進得來、走道不被擋住，房間會更舒適。",
+            "source_level": "simplified_rule",
+            "fact_refs": [
+              "/principles/1"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "fengshui_advice",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）可以先從最容易的一步做起，例如整理門口或調整燈光。",
+            "source_level": "simplified_rule",
+            "fact_refs": [
+              "/principles/2"
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "topic": "fengshui_advice",
+        "text": "（示範）本週花十分鐘寫下與「建議」相關的一個觀察。",
+        "horizon": "this_week"
+      }
+    ],
+    "expectation": {
+      "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
+      "ai_label": "本解讀由 AI 依據你所選的房間生成，是通用的空間建議，不是住宅吉凶的判斷，僅供娛樂和玄學學習使用。",
+      "label_required": false
+    }
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "narrative_fengshui@1,action_fengshui@1,guard@2",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

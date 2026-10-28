@@ -6,6 +6,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'bazi_form_page.dart';
 import 'daily_card.dart';
 import 'design.dart';
+import 'fengshui_page.dart';
 import 'history_page.dart';
 import 'profiles_page.dart';
 import 'qiuqian_page.dart';
@@ -93,6 +94,13 @@ class HomePage extends ConsumerWidget {
                     subtitle: l10n.homeTarotDesc,
                     onTap: () => push(context, const TarotPage()),
                   ),
+                'fengshui' => _Entry(
+                    key: const Key('entry-fengshui'),
+                    icon: Icons.explore_outlined,
+                    title: l10n.homeFengshui,
+                    subtitle: l10n.homeFengshuiDesc,
+                    onTap: () => push(context, const FengshuiPage()),
+                  ),
                 _ => _Entry(
                     key: const Key('entry-qiuqian'),
                     icon: Icons.temple_buddhist_outlined,
@@ -102,8 +110,8 @@ class HomePage extends ConsumerWidget {
                   ),
               },
             ),
-          const FadeSlideIn(index: 5, child: DailyCard()),
-          const FadeSlideIn(index: 6, child: RecentHistory()),
+          const FadeSlideIn(index: 6, child: DailyCard()),
+          const FadeSlideIn(index: 7, child: RecentHistory()),
         ],
       ),
     );

@@ -2582,6 +2582,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'round side up'**
   String get blockRound;
+
+  /// No description provided for @homeFengshui.
+  ///
+  /// In en, this message translates to:
+  /// **'Feng Shui'**
+  String get homeFengshui;
+
+  /// No description provided for @homeFengshuiDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'General principles for a room\'s layout: light, air and movement. No judgement of luck'**
+  String get homeFengshuiDesc;
+
+  /// No description provided for @fengshuiRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Which room'**
+  String get fengshuiRoom;
+
+  /// No description provided for @fengshuiFacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Which way the main window faces (optional)'**
+  String get fengshuiFacing;
+
+  /// No description provided for @fengshuiFacingUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure'**
+  String get fengshuiFacingUnknown;
+
+  /// No description provided for @fengshuiDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How the room is now (optional)'**
+  String get fengshuiDescription;
+
+  /// No description provided for @fengshuiDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, \"the bed is under the window, the door on the left\". Used only for the reading; no address or floor plan is kept.'**
+  String get fengshuiDescriptionHint;
+
+  /// No description provided for @fengshuiLook.
+  ///
+  /// In en, this message translates to:
+  /// **'See the layout'**
+  String get fengshuiLook;
+
+  /// No description provided for @fengshuiPrinciples.
+  ///
+  /// In en, this message translates to:
+  /// **'What to look at in this room'**
+  String get fengshuiPrinciples;
+
+  /// No description provided for @fengshuiNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These are general principles of space, not a judgement of your home.'**
+  String get fengshuiNote;
+
+  /// No description provided for @fengshuiSections.
+  ///
+  /// In en, this message translates to:
+  /// **'The reading has three parts: layout, light and movement, and advice.'**
+  String get fengshuiSections;
+
+  /// No description provided for @fengshuiDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Traditionally: {direction} · {trigram} · {element}'**
+  String fengshuiDirection(String direction, String trigram, String element);
+
+  /// No description provided for @topicFengshuiLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get topicFengshuiLayout;
+
+  /// No description provided for @topicFengshuiFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Light and movement'**
+  String get topicFengshuiFlow;
+
+  /// No description provided for @topicFengshuiAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Advice'**
+  String get topicFengshuiAdvice;
 }
 
 class _AppLocalizationsDelegate

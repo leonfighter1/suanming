@@ -1,8 +1,10 @@
 // Client-side views of the v1 API contract (api/openapi.yaml, ChartFact v0.1).
 // Parsing is tolerant of extra fields: the contract is additive-only.
 
+import 'fengshui.dart';
 import 'qiuqian.dart';
 
+export 'fengshui.dart';
 export 'qiuqian.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -362,6 +364,7 @@ class ChartResult {
   BaziChart get bazi => BaziChart.fromFacts(facts);
   TarotChart get tarot => TarotChart.fromFacts(facts);
   QiuqianChart get qiuqian => QiuqianChart.fromFacts(facts);
+  FengshuiChart get fengshui => FengshuiChart.fromFacts(facts);
 }
 
 class Paragraph {
@@ -694,6 +697,8 @@ class HistoryItem {
     this.cardsReversed = const [],
     this.lotNumber,
     this.lotGanzhi,
+    this.room,
+    this.facing,
   });
 
   factory HistoryItem.fromJson(Json j) {
@@ -709,6 +714,8 @@ class HistoryItem {
       cardsReversed: _list(chart['cards'], (c) => c['reversed'] as bool? ?? false),
       lotNumber: chart['lot'] as int?,
       lotGanzhi: chart['ganzhi'] as String?,
+      room: chart['room'] as String?,
+      facing: chart['facing'] as String?,
     );
   }
 
@@ -726,4 +733,8 @@ class HistoryItem {
   /// 求籤 (v4.3.0): the lot drawn and its label.
   final int? lotNumber;
   final String? lotGanzhi;
+
+  /// 风水 (v4.4.0): the room and its facing.
+  final String? room;
+  final String? facing;
 }

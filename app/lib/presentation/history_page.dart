@@ -122,9 +122,11 @@ class HistoryTile extends ConsumerWidget {
       'failed' => (l10n.statusFailed, scheme.error),
       _ => (l10n.statusReview, scheme.outline),
     };
+    final room = item.room == null ? null : terms?.fengshui?.roomName(item.room!, locale);
     final title = switch (item.system) {
       'bazi' => label == null ? l10n.homeBazi : l10n.chartOf(label),
       'qiuqian' => l10n.homeQiuqian,
+      'fengshui' => room == null ? l10n.homeFengshui : '${l10n.homeFengshui} · $room',
       _ => l10n.homeTarot,
     };
     final lot = item.lotNumber == null ? null : terms?.lots?.lot(item.lotNumber!);
@@ -145,6 +147,7 @@ class HistoryTile extends ConsumerWidget {
             switch (item.system) {
               'bazi' => Icons.grid_view_rounded,
               'qiuqian' => Icons.temple_buddhist_outlined,
+              'fengshui' => Icons.explore_outlined,
               _ => Icons.style_rounded,
             },
             color: scheme.primary,

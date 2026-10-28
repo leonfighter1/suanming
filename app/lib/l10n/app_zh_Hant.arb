@@ -413,5 +413,20 @@
   "topicQiuqianAnswer": "所問之事",
   "topicQiuqianAdvice": "建議",
   "blockFlat": "平面朝上",
-  "blockRound": "凸面朝上"
+  "blockRound": "凸面朝上",
+  "homeFengshui": "風水",
+  "homeFengshuiDesc": "房間佈局的通用原則：採光、通風與動線，不論吉凶",
+  "fengshuiRoom": "哪個房間",
+  "fengshuiFacing": "主要窗戶朝向（可不選）",
+  "fengshuiFacingUnknown": "不確定",
+  "fengshuiDescription": "房間現況（可不填）",
+  "fengshuiDescriptionHint": "例如「床在窗下，門在左邊」。只用於解讀，不會保存地址或平面圖。",
+  "fengshuiLook": "看佈局",
+  "fengshuiPrinciples": "這個房間可以留意",
+  "fengshuiNote": "這些是通用的空間原則，不是對住宅吉凶的判斷。",
+  "fengshuiSections": "解讀分三部分：佈局、光線與動線、建議。",
+  "fengshuiDirection": "傳統上：{direction} · {trigram} · {element}",
+  "topicFengshuiLayout": "佈局",
+  "topicFengshuiFlow": "光線與動線",
+  "topicFengshuiAdvice": "建議"
 }

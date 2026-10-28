@@ -22,6 +22,9 @@ export const TOPICS = [
   "qiuqian_poem",
   "qiuqian_answer",
   "qiuqian_advice",
+  "fengshui_layout",
+  "fengshui_flow",
+  "fengshui_advice",
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -31,6 +34,7 @@ export const TOPICS_BY_SYSTEM: Record<ChartSystem, readonly Topic[]> = {
   tarot: ["tarot_cards", "tarot_synthesis", "tarot_advice"],
   astrology: ["personality", "career_wealth", "relationships", "health"],
   qiuqian: ["qiuqian_poem", "qiuqian_answer", "qiuqian_advice"],
+  fengshui: ["fengshui_layout", "fengshui_flow", "fengshui_advice"],
 };
 
 /** The area of life a tarot reading may focus on (POST /v1/reports `focus`, tarot only). */
@@ -38,8 +42,8 @@ export const TAROT_FOCUS = ["career_wealth", "relationships", "health", "persona
 export type TarotFocus = (typeof TAROT_FOCUS)[number];
 
 /**
- * Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice, and 求籤 has no plan
- * at all (a lot is read once, for the question asked).
+ * Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice; 求籤 (a lot is read
+ * once, for the question asked) and 风水 (its principles are the plan) have none at all.
  */
 export const NO_PLAN_TOPICS: readonly Topic[] = [
   "tarot_cards",
@@ -47,6 +51,9 @@ export const NO_PLAN_TOPICS: readonly Topic[] = [
   "qiuqian_poem",
   "qiuqian_answer",
   "qiuqian_advice",
+  "fengshui_layout",
+  "fengshui_flow",
+  "fengshui_advice",
 ];
 
 export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
@@ -62,6 +69,9 @@ export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   qiuqian_poem: { "zh-Hant": "籤詩", "zh-Hans": "签诗", en: "The poem" },
   qiuqian_answer: { "zh-Hant": "所問之事", "zh-Hans": "所问之事", en: "Your question" },
   qiuqian_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
+  fengshui_layout: { "zh-Hant": "佈局", "zh-Hans": "布局", en: "Layout" },
+  fengshui_flow: { "zh-Hant": "光線與動線", "zh-Hans": "光线与动线", en: "Light and movement" },
+  fengshui_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
 };
 
 export interface Paragraph {

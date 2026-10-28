@@ -10,7 +10,7 @@
  * - Only "passed" reports carry layers for the user.
  */
 import { randomUUID } from "node:crypto";
-import type { ChartFact } from "../chart-fact/index.js";
+import type { ChartFact, ChartSystem } from "../chart-fact/index.js";
 import {
   compileRules,
   loadGeoMatrix,
@@ -31,10 +31,12 @@ import {
   narrativeUser,
   PROMPTS,
   qiuqianUser,
+  fengshuiUser,
   tarotUser,
   todayLine,
   type PromptVersion,
 } from "./prompts.js";
+import { FENGSHUI_TERMS, fengshuiBrief } from "./fengshui.js";
 import { lotBrief, QIUQIAN_TERMS, qiuqianView } from "./qiuqian.js";
 import { spreadBrief } from "./tarot.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
@@ -294,6 +296,14 @@ export function scanTexts(texts: string[], rules: CompiledRule[]) {
   };
 }
 
+/**
+ * Rule groups that apply to one method's output, on top of the region's (v4.4.0): 风水's own rules
+ * against 吉凶 phrasing about a home (the owner's Phase 3 §4).
+ */
+export const METHOD_RULE_GROUPS: Partial<Record<ChartSystem, string[]>> = {
+  fengshui: ["fengshui"],
+};
+
 /** Geo-Rule: the region's rules, or GeoRefusedError when the service/system isn't offered. */
 export function servedRegion(country: string, system: string) {
   const matrix = loadGeoMatrix();
@@ -335,7 +345,10 @@ export async function generateReport(
     throw new ReportInputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
   }
 
-  const rules = compileRules(loadRuleSet(), region.rule_groups);
+  const rules = compileRules(loadRuleSet(), [
+    ...region.rule_groups,
+    ...(METHOD_RULE_GROUPS[chart.system] ?? []),
+  ]);
   // A 八字 reading reads its focused view (WP2.3), a 求籤 reading the lot without the rounds that
   // confirmed it; the other methods' facts are small already.
   const facts =
@@ -349,8 +362,13 @@ export async function generateReport(
         ? qiuqianView(modelFacts(chart))
         : modelFacts(chart);
   const lot = chart.system === "qiuqian" ? lotBrief(chart, opts.locale) : undefined;
-  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體, so 求籤 names its own.
-  const glossary = glossaryFor(lot ? QIUQIAN_TERMS.join(" ") : JSON.stringify(facts), opts.locale);
+  const room = chart.system === "fengshui" ? fengshuiBrief(chart, opts.locale) : undefined;
+  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體 and a room's
+  // principles are ids, so 求籤 and 风水 name their own.
+  const glossary = glossaryFor(
+    lot ? QIUQIAN_TERMS.join(" ") : room ? FENGSHUI_TERMS.join(" ") : JSON.stringify(facts),
+    opts.locale,
+  );
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
   const providerFor = (agent: AgentName) => {
     const route = routeFor(routing, agent, opts.locale);
@@ -375,9 +393,15 @@ export async function generateReport(
   const tarot = chart.system === "tarot";
   const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
   const maxParagraphs = (t: Topic) => (t === "tarot_cards" && spread ? spread.cards.length : 4);
-  // A tarot or 求籤 reading's actions follow its advice (v2.3.0, v4.3.0); other methods act on every
-  // topic.
-  const advice: Topic | undefined = tarot ? "tarot_advice" : lot ? "qiuqian_advice" : undefined;
+  // A tarot, 求籤 or 风水 reading's actions follow its advice (v2.3.0, v4.3.0, v4.4.0); other methods
+  // act on every topic.
+  const advice: Topic | undefined = tarot
+    ? "tarot_advice"
+    : lot
+      ? "qiuqian_advice"
+      : room
+        ? "fengshui_advice"
+        : undefined;
   const actionTopics: Topic[] = advice && topics.includes(advice) ? [advice] : topics;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
@@ -389,6 +413,7 @@ export async function generateReport(
       system: chart.system,
       ...(spread && { cards: spread.cards.length }),
       ...(lot && { lines: lot.lines.length }),
+      ...(room && { principles: room.principles.length }),
     },
     maxRetries,
     enforce,
@@ -419,18 +444,30 @@ export async function generateReport(
               today: todayLine(now),
               feedback,
             })
-          : narrativeUser({
-              system: chart.system,
-              facts,
-              provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
-              topics,
-              locale: opts.locale,
-              glossary,
-              question: opts.question,
-              context: opts.context,
-              today: todayLine(now),
-              feedback,
-            }),
+          : room
+            ? fengshuiUser({
+                facts,
+                room,
+                topics,
+                locale: opts.locale,
+                glossary,
+                description: opts.question,
+                context: opts.context,
+                today: todayLine(now),
+                feedback,
+              })
+            : narrativeUser({
+                system: chart.system,
+                facts,
+                provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
+                topics,
+                locale: opts.locale,
+                glossary,
+                question: opts.question,
+                context: opts.context,
+                today: todayLine(now),
+                feedback,
+              }),
     check: (data) => {
       const feedback: string[] = [];
       let ungrounded = 0;
@@ -446,7 +483,9 @@ export async function generateReport(
             ungrounded++;
             return [];
           }
-          return [{ ...p, text, fact_refs: refs }];
+          // 风水 rests on simplified rules only (the owner's spec): no paragraph claims more.
+          const source_level = room ? "simplified_rule" : p.source_level;
+          return [{ ...p, text, fact_refs: refs, source_level }];
         }),
       }));
       if (ungrounded) {

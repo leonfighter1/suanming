@@ -592,7 +592,7 @@ As built (v4.3.0), beyond the spec above:
 
 ### WP6.3 风水 (medium → v4.4.0)
 
-The owner's spec (Phase 3 §2.1):
+The owner's spec (Phase 3 §2.1, §4):
 
 - Only general principles of direction and space (「书桌宜背靠实墙」), from the room's use and, optionally, its
   facing. The input is anonymous.
@@ -600,6 +600,61 @@ The owner's spec (Phase 3 §2.1):
 - ChartFact `system: "fengshui"`, every principle tagged `simplified_rule`.
 - A compliance rule set against 吉凶 phrasing.
 - Malaysia gives it more weight (§2.4).
+
+Design:
+
+- **Input:**
+  - the room: 臥室, 書房 / 工作桌, 客廳, 廚房, 玄關, 餐廳 or 兒童房;
+  - optionally its facing: eight directions, the way the main window faces;
+  - optionally a short description of the room ("the bed is under the window …"), private like a question.
+  - No address, no birth data, no floor plan.
+- **Engine** (`src/engines/fengshui`):
+  - a fixed table of principles per room, each with:
+    - the principle;
+    - its everyday reason (light, air, sleep, safety, privacy, how people move);
+    - the traditional idea behind it, said without 吉凶 (for example 「背後有靠」).
+  - The facing adds its traditional direction note: 後天八卦 and 五行, e.g. 南 · 離 · 火.
+  - Its own table: it shares none with 一生运势's 八宅 (rule 8). 八宅 assigns 吉凶 directions, which the spec
+    rules out.
+  - Facts: `{ room, facing?, principles: [{ id, area }], direction? }`. Every provenance entry is
+    `simplified_rule`.
+- **Texts:** 繁體 and English written by hand; 简体 written too, and a test holds it to OpenCC's conversion
+  except for listed words (rule 31, G18). They live in the engine's table: the server never loads OpenCC
+  (rule 36).
+- **Reading:** its own prompts, `narrative_fengshui@1` and `action_fengshui@1`, with no plan. Sections:
+  - 佈局 (`fengshui_layout`): the room's principles, and the description when given;
+  - 光線與動線 (`fengshui_flow`);
+  - 建議 (`fengshui_advice`).
+  - Tendency language. Never 吉 / 凶, 旺 / 衰 or 煞; never wealth, health, marriage or children tied to the home;
+    never buying objects (charms, crystals, 羅盤 items) or renovating as a cure.
+- **Compliance:** method rule groups. A `fengshui` group, applied only to 风水 output, blocks 吉凶 phrasing
+  (凶宅, 犯煞, 招財, 破財, 旺丁, 損丁 and their 简体 forms). Allow cases cover the disclaimer in both scripts (G5).
+- **Geo matrix:** `fengshui` available by default; Malaysia 1.3, so it leads there (§2.4).
+- **App:**
+  - the 风水 entry;
+  - a page: room chips, facing chips (or 不確定), the description, 看佈局, then the principles card and
+    生成 AI 解讀;
+  - the principles card on the reading page;
+  - history.
+- **Tests:**
+  - every principle is `simplified_rule`, and every room has principles;
+  - the 简体 texts are OpenCC's;
+  - the method rule group blocks 吉凶 phrasing and allows the disclaimer;
+  - prompts pinned and distinct;
+  - a mock reading;
+  - the API and the geo order (MY);
+  - the app page and the reading page.
+
+As built (v4.4.0):
+
+- 30 principles for the 7 rooms.
+- Method rule groups are new in the pipeline (`METHOD_RULE_GROUPS`). The `fengshui` group (F001: 凶宅, 犯煞, 风水不好;
+  F002: 招財, 破財, 旺丁, 轉運) applies to 风水 readings only. A test shows it holds a 风水 text and leaves the same
+  text in a tarot reading alone.
+- Every paragraph's `source_level` is pinned to `simplified_rule` in the pipeline, so the spec's 100 % doesn't rest
+  on the model.
+- 风水 and 求籤 have their own AI labels (`METHOD_LABELS`).
+- No share image for 风水: the owner's spec asks for none.
 
 ### WP6.4 起名 (medium → v4.5.0)
 
@@ -888,5 +943,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP7.2     | waits for the owner        | —       |
 | WP7.3     | waits for the stores       | —       |
 | WP6.1–6.2 | done                       | v4.3.0  |
-| WP6.3     | planned                    | v4.4.0  |
+| WP6.3     | done                       | v4.4.0  |
 | WP6.4     | planned                    | v4.5.0  |

@@ -2,6 +2,27 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ab): S6 WP6.3, 风水 to the owner's spec; release v4.4.0
+
+- v4.3.0 committed and tagged (16c00ea) after a harness PASS. The first run failed at analyze (rule 23, the pubspec bump); the second passed.
+- Spec first, from the owner's Phase 3 §2.1, §4: room use + optional facing, anonymous, never 吉凶, all `simplified_rule`, a compliance rule set, and more weight in Malaysia. Written into the plan before code.
+- Content: a table of 30 principles for 7 rooms (`src/engines/fengshui/principles.ts`).
+  - Each has an everyday reason and the tradition without 吉凶.
+  - 繁體, 简体 and English are written by hand; a test holds 简体 to OpenCC apart from 屏幕 and the quotes (rules 31, 36).
+  - Facings: its own 後天八卦 table (rule 8, not 一生运势's 八宅, which assigns 吉凶), hand-checked in a test.
+- Pipeline:
+  - method rule groups (`METHOD_RULE_GROUPS`: the `fengshui` group, F001 and F002, on top of the region's);
+  - every 风水 paragraph pinned to `simplified_rule`;
+  - the description goes in as `<user_description>`;
+  - its own AI label (`METHOD_LABELS`, which now holds 求籤's too).
+- API: the 风水 chart request, matrix 0.3.0 (MY 1.3), migration 004, OpenAPI.
+- App:
+  - `FengshuiPage` (room chips with icons, facings, the description, 看佈局) and `PrinciplesCard`;
+  - the reading page, history, the home entry;
+  - rendered and looked at in 繁體 (throwaway test, Noto Sans SC loaded).
+- A test missed the fourth home entry in the default 800 × 600 view: the list is lazy (G12 again). It now uses a tall view.
+- v4.4.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (aa): S6 WP6.1 + 6.2, 求籤 · 擲筊 and the entry order by region; release v4.3.0
 
 - **Owner (2026-10-28): 「继续吧不要停」**, after v4.2.0 asked which S6 methods come first. No choice made, so (rule 34) S6 follows the owner's phase document:

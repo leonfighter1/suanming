@@ -179,8 +179,9 @@ paths:
       description: |
         Since v4.3.0. The Geo-Rule matrix's methods for the caller's region (from the account),
         available ones only, heaviest entry_weight first; ties keep bazi, tarot, qiuqian,
-        astrology. The app orders its home page by it, so the matrix can put 求籤 first in
-        Taiwan and Hong Kong without an app release. 451 where the service isn't offered.
+        fengshui, astrology. The app orders its home page by it, so the matrix can put 求籤
+        first in Taiwan and Hong Kong and 风水 first in Malaysia without an app release. 451
+        where the service isn't offered.
       responses:
         "200":
           description: The region's methods
@@ -198,7 +199,7 @@ paths:
                       type: object
                       required: [system, entry_weight]
                       properties:
-                        system: { type: string, enum: [bazi, tarot, astrology, qiuqian] }
+                        system: { type: string, enum: [bazi, tarot, astrology, qiuqian, fengshui] }
                         entry_weight: { type: number }
         "401": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
@@ -839,8 +840,8 @@ paths:
         Paid per topic. TODO(Phase 4 payments): the purchase receipt will be
         verified here; until then `payment.status` is `placeholder` and nothing
         is charged. Buying a topic that already has a plan returns that plan (200).
-        Plans exist for bazi and tarot reports only: an astrology or 求籤 report gets a
-        400 before anything is charged, and none is preloaded for it. Each method writes
+        Plans exist for bazi and tarot reports only: an astrology, 求籤 or 风水 report gets
+        a 400 before anything is charged, and none is preloaded for it. Each method writes
         its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`). A tarot
         reading's tarot_cards and tarot_synthesis sections have no plan (400): its
         plan is on tarot_advice.
@@ -990,6 +991,7 @@ components:
         - $ref: "#/components/schemas/TarotChartRequest"
         - $ref: "#/components/schemas/AstrologyChartRequest"
         - $ref: "#/components/schemas/QiuqianChartRequest"
+        - $ref: "#/components/schemas/FengshuiChartRequest"
       discriminator:
         propertyName: system
         mapping:
@@ -997,6 +999,7 @@ components:
           tarot: "#/components/schemas/TarotChartRequest"
           astrology: "#/components/schemas/AstrologyChartRequest"
           qiuqian: "#/components/schemas/QiuqianChartRequest"
+          fengshui: "#/components/schemas/FengshuiChartRequest"
 
     BirthMoment:
       type: object
@@ -1069,6 +1072,23 @@ components:
             system: { const: astrology }
             latitude: { type: number, minimum: -90, maximum: 90 }
             longitude: { type: number, minimum: -180, maximum: 180 }
+
+    FengshuiChartRequest:
+      description: |
+        风水 (since v4.4.0): the general principles of direction and space for one room, never a
+        吉凶 judgement of a home. The input is anonymous: the room and, optionally, the way its
+        main window faces. A description of the room goes with the report as `question`.
+      type: object
+      additionalProperties: false
+      required: [system, room]
+      properties:
+        system: { const: fengshui }
+        room:
+          type: string
+          enum: [bedroom, study, living, kitchen, entrance, dining, kids]
+        facing:
+          type: string
+          enum: [north, northeast, east, southeast, south, southwest, west, northwest]
 
     QiuqianChartRequest:
       description: |
@@ -1377,6 +1397,8 @@ components:
         tarot_synthesis (the whole spread) and tarot_advice. Older tarot reports keep
         their four areas. qiuqian (since v4.3.0): qiuqian_poem (the poem, couplet by
         couplet), qiuqian_answer (what it says to the question) and qiuqian_advice.
+        fengshui (since v4.4.0): fengshui_layout, fengshui_flow (light and movement) and
+        fengshui_advice.
       type: string
       enum:
         [
@@ -1392,6 +1414,9 @@ components:
           qiuqian_poem,
           qiuqian_answer,
           qiuqian_advice,
+          fengshui_layout,
+          fengshui_flow,
+          fengshui_advice,
         ]
 
     AiDisclosure:

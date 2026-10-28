@@ -1,0 +1,62 @@
+{
+  "chart_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "fengshui",
+      "version": "0.1.0"
+    },
+    "system": "fengshui",
+    "input_digest": "hmac-sha256:147436043e963635922e19757a92a0952a7566803eed8f328d03dc9b69483e76",
+    "rule_versions": {
+      "principles": "fengshui-principles@1.0.0"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "room": "bedroom",
+      "facing": "east",
+      "direction": {
+        "trigram": "zhen",
+        "element": "wood"
+      },
+      "principles": [
+        {
+          "id": "bed_wall",
+          "area": "bed"
+        },
+        {
+          "id": "bed_door",
+          "area": "door"
+        },
+        {
+          "id": "bed_mirror",
+          "area": "mirror"
+        },
+        {
+          "id": "bed_overhead",
+          "area": "bed"
+        },
+        {
+          "id": "bed_clear",
+          "area": "storage"
+        },
+        {
+          "id": "bed_light",
+          "area": "light"
+        }
+      ]
+    },
+    "provenance": [
+      {
+        "path": "/principles",
+        "source_level": "simplified_rule",
+        "note": "通用的方位與空間原則（採光、通風、動線、安全），不是住宅吉凶的判斷"
+      },
+      {
+        "path": "/direction",
+        "source_level": "simplified_rule",
+        "note": "後天八卦方位與五行的傳統對應"
+      }
+    ]
+  }
+}

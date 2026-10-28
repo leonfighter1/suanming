@@ -15,6 +15,7 @@ import 'labels.dart';
 import 'theme.dart' show GanZhiText;
 import 'widgets/four_layer_report.dart';
 import 'widgets/lot_card.dart';
+import 'widgets/principles_card.dart';
 import 'widgets/tarot_spread.dart';
 
 /// Shows a report, polling until generation finishes. While pending it shows
@@ -153,8 +154,8 @@ class ReportPage extends ConsumerWidget {
 }
 
 /// A reading's chart on top: a tarot spread with its art, every card turned (v2.4.0), a 八字 chart's
-/// four pillars and 日主 (v3.4.0), or the 求籤 lot's slip (v4.3.0). Astrology shows nothing here: its
-/// facts are in the layers.
+/// four pillars and 日主 (v3.4.0), the 求籤 lot's slip (v4.3.0), or a 风水 room's principles (v4.4.0).
+/// Astrology shows nothing here: its facts are in the layers.
 class ReadingChart extends ConsumerWidget {
   const ReadingChart({super.key, required this.chartId});
   final String chartId;
@@ -175,6 +176,9 @@ class ReadingChart extends ConsumerWidget {
         return _ReadingPillars(chart: chart!.bazi);
       case 'qiuqian':
         return LotCard(key: const Key('reading-lot'), lotNumber: chart!.qiuqian.lotNumber);
+      case 'fengshui':
+        final room = chart!.fengshui;
+        return PrinciplesCard(key: const Key('reading-room'), room: room.room, facing: room.facing);
       default:
         return const SizedBox.shrink();
     }

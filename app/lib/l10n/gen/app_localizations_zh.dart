@@ -1315,6 +1315,53 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get blockRound => '凸面朝上';
+
+  @override
+  String get homeFengshui => '风水';
+
+  @override
+  String get homeFengshuiDesc => '房间布局的通用原则：采光、通风与动线，不论吉凶';
+
+  @override
+  String get fengshuiRoom => '哪个房间';
+
+  @override
+  String get fengshuiFacing => '主要窗户朝向（可不选）';
+
+  @override
+  String get fengshuiFacingUnknown => '不确定';
+
+  @override
+  String get fengshuiDescription => '房间现状（可不填）';
+
+  @override
+  String get fengshuiDescriptionHint => '例如“床在窗下，门在左边”。只用于解读，不会保存地址或平面图。';
+
+  @override
+  String get fengshuiLook => '看布局';
+
+  @override
+  String get fengshuiPrinciples => '这个房间可以留意';
+
+  @override
+  String get fengshuiNote => '这些是通用的空间原则，不是对住宅吉凶的判断。';
+
+  @override
+  String get fengshuiSections => '解读分三部分：布局、光线与动线、建议。';
+
+  @override
+  String fengshuiDirection(String direction, String trigram, String element) {
+    return '传统上：$direction · $trigram · $element';
+  }
+
+  @override
+  String get topicFengshuiLayout => '布局';
+
+  @override
+  String get topicFengshuiFlow => '光线与动线';
+
+  @override
+  String get topicFengshuiAdvice => '建议';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2627,4 +2674,51 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get blockRound => '凸面朝上';
+
+  @override
+  String get homeFengshui => '風水';
+
+  @override
+  String get homeFengshuiDesc => '房間佈局的通用原則：採光、通風與動線，不論吉凶';
+
+  @override
+  String get fengshuiRoom => '哪個房間';
+
+  @override
+  String get fengshuiFacing => '主要窗戶朝向（可不選）';
+
+  @override
+  String get fengshuiFacingUnknown => '不確定';
+
+  @override
+  String get fengshuiDescription => '房間現況（可不填）';
+
+  @override
+  String get fengshuiDescriptionHint => '例如「床在窗下，門在左邊」。只用於解讀，不會保存地址或平面圖。';
+
+  @override
+  String get fengshuiLook => '看佈局';
+
+  @override
+  String get fengshuiPrinciples => '這個房間可以留意';
+
+  @override
+  String get fengshuiNote => '這些是通用的空間原則，不是對住宅吉凶的判斷。';
+
+  @override
+  String get fengshuiSections => '解讀分三部分：佈局、光線與動線、建議。';
+
+  @override
+  String fengshuiDirection(String direction, String trigram, String element) {
+    return '傳統上：$direction · $trigram · $element';
+  }
+
+  @override
+  String get topicFengshuiLayout => '佈局';
+
+  @override
+  String get topicFengshuiFlow => '光線與動線';
+
+  @override
+  String get topicFengshuiAdvice => '建議';
 }

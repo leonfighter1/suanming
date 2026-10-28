@@ -36,6 +36,10 @@ const REFS: Record<Topic, string[]> = {
   qiuqian_poem: ["/lot/poem/0", "/lot/poem/1"],
   qiuqian_answer: ["/lot/poem/0"],
   qiuqian_advice: ["/lot/poem/3"],
+  // 风水's sections cite the room's principles (every room has at least three).
+  fengshui_layout: ["/principles/0"],
+  fengshui_flow: ["/principles/1"],
+  fengshui_advice: ["/principles/2"],
 };
 
 const TEXT: Record<Locale, Record<Topic, string>> = {
@@ -55,6 +59,9 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "（示範）這兩句籤詩描繪的景象，傳統上被讀作一段心境的變化，可作為自我觀察的參考。",
     qiuqian_answer: "（示範）就你所問的事，這支籤傳統上提示先看清情勢，再一步步來。",
     qiuqian_advice: "（示範）籤詩傳統上提示可以放慢腳步，先做眼前做得到的事。",
+    fengshui_layout: "（示範）這個房間的佈局可以從主要家具的位置看起，先讓坐臥的地方背後有靠。",
+    fengshui_flow: "（示範）讓光線與空氣進得來、走道不被擋住，房間會更舒適。",
+    fengshui_advice: "（示範）可以先從最容易的一步做起，例如整理門口或調整燈光。",
   },
   "zh-Hans": {
     wuxing:
@@ -72,6 +79,9 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "（示范）这两句签诗描绘的景象，传统上被读作一段心境的变化，可作为自我观察的参考。",
     qiuqian_answer: "（示范）就你所问的事，这支签传统上提示先看清情势，再一步步来。",
     qiuqian_advice: "（示范）签诗传统上提示可以放慢脚步，先做眼前做得到的事。",
+    fengshui_layout: "（示范）这个房间的布局可以从主要家具的位置看起，先让坐卧的地方背后有靠。",
+    fengshui_flow: "（示范）让光线与空气进得来、走道不被挡住，房间会更舒适。",
+    fengshui_advice: "（示范）可以先从最容易的一步做起，例如整理门口或调整灯光。",
   },
   en: {
     wuxing:
@@ -98,6 +108,12 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "(Demo) For what you asked, the lot traditionally suggests seeing the situation clearly first, then going step by step.",
     qiuqian_advice:
       "(Demo) The poem traditionally suggests slowing down and starting with what you can do now.",
+    fengshui_layout:
+      "(Demo) Start with where the main furniture stands: give the places you sit and sleep a wall behind them.",
+    fengshui_flow:
+      "(Demo) Let light and air in and keep walkways clear, and the room becomes more comfortable.",
+    fengshui_advice:
+      "(Demo) Begin with the easiest step, such as clearing the doorway or adjusting the light.",
   },
 };
 
@@ -222,7 +238,7 @@ export class MockProvider implements LLMProvider {
                 : [
                     paragraph(
                       topic,
-                      p.system === "bazi" || p.system === "qiuqian"
+                      p.system === "bazi" || p.system === "qiuqian" || p.system === "fengshui"
                         ? REFS[topic]
                         : p.system === "tarot"
                           ? ["/cards/0"]

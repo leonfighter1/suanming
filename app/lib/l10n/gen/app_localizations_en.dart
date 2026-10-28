@@ -1365,4 +1365,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blockRound => 'round side up';
+
+  @override
+  String get homeFengshui => 'Feng Shui';
+
+  @override
+  String get homeFengshuiDesc =>
+      'General principles for a room\'s layout: light, air and movement. No judgement of luck';
+
+  @override
+  String get fengshuiRoom => 'Which room';
+
+  @override
+  String get fengshuiFacing => 'Which way the main window faces (optional)';
+
+  @override
+  String get fengshuiFacingUnknown => 'Not sure';
+
+  @override
+  String get fengshuiDescription => 'How the room is now (optional)';
+
+  @override
+  String get fengshuiDescriptionHint =>
+      'For example, \"the bed is under the window, the door on the left\". Used only for the reading; no address or floor plan is kept.';
+
+  @override
+  String get fengshuiLook => 'See the layout';
+
+  @override
+  String get fengshuiPrinciples => 'What to look at in this room';
+
+  @override
+  String get fengshuiNote =>
+      'These are general principles of space, not a judgement of your home.';
+
+  @override
+  String get fengshuiSections =>
+      'The reading has three parts: layout, light and movement, and advice.';
+
+  @override
+  String fengshuiDirection(String direction, String trigram, String element) {
+    return 'Traditionally: $direction · $trigram · $element';
+  }
+
+  @override
+  String get topicFengshuiLayout => 'Layout';
+
+  @override
+  String get topicFengshuiFlow => 'Light and movement';
+
+  @override
+  String get topicFengshuiAdvice => 'Advice';
 }

@@ -53,7 +53,7 @@ void main() {
     testWidgets('home: Tab goes along the bar, then the entries; the focused card shows the ring', (tester) async {
       await start(tester);
       final stops = <String?>[];
-      for (var i = 0; i < 8; i++) {
+      for (var i = 0; i < 9; i++) {
         await press(tester, LogicalKeyboardKey.tab);
         stops.add(focusedKey());
       }
@@ -65,15 +65,16 @@ void main() {
         'entry-bazi',
         'entry-tarot',
         'entry-qiuqian', // 求籤 (v4.3.0), in the region's order: the default here
+        'entry-fengshui', // 风水 (v4.4.0)
         'daily-card', // 每日一牌 (v2.6.0)
       ]);
       expect(ringShown(tester, find.byKey(const Key('daily-card'))), isTrue); // the last one Tab reached
       expect(ringShown(tester, home), isFalse);
-      // Shift+Tab goes back to the 求籤 entry, and again to 塔罗; Enter opens it.
-      await press(tester, LogicalKeyboardKey.tab, shift: true);
-      expect(focusedKey(), 'entry-qiuqian');
-      await press(tester, LogicalKeyboardKey.tab, shift: true);
-      expect(focusedKey(), 'entry-tarot');
+      // Shift+Tab goes back through 风水 and 求籤 to 塔罗; Enter opens it.
+      for (final back in ['entry-fengshui', 'entry-qiuqian', 'entry-tarot']) {
+        await press(tester, LogicalKeyboardKey.tab, shift: true);
+        expect(focusedKey(), back);
+      }
       await press(tester, LogicalKeyboardKey.enter);
       expect(find.byKey(const Key('draw')), findsOneWidget);
     });

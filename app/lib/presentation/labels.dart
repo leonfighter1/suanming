@@ -15,6 +15,9 @@ extension ApiLabels on AppLocalizations {
         'qiuqian_poem' => topicQiuqianPoem,
         'qiuqian_answer' => topicQiuqianAnswer,
         'qiuqian_advice' => topicQiuqianAdvice,
+        'fengshui_layout' => topicFengshuiLayout,
+        'fengshui_flow' => topicFengshuiFlow,
+        'fengshui_advice' => topicFengshuiAdvice,
         _ => t,
       };
 

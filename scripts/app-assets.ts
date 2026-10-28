@@ -5,6 +5,7 @@
  *   app/assets/i18n/tarot_deck.json ← src/engines/tarot/deck.ts (78 card names)
  *   app/assets/i18n/term_tips.json  ← src/ai/term-tips.ts (what each 八字 term means)
  *   app/assets/i18n/qiuqian_lots.json ← data/qiuqian (求籤's lot set, v4.3.0)
+ *   app/assets/i18n/fengshui.json   ← src/engines/fengshui/principles.ts (风水's rooms, v4.4.0)
  *   app/test/fixtures/*.json        ← real engine + pipeline (mock provider) outputs
  * test/app-assets.test.ts fails when these are stale. Run: npm run sync:app
  * (this module only builds; scripts/sync-app-assets.ts writes).
@@ -46,6 +47,8 @@ import {
 } from "../src/engines/tarot/deck.js";
 import { KEYWORDS } from "../src/engines/tarot/keywords.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
+import { computeFengshui, PRINCIPLES_VERSION } from "../src/engines/fengshui/index.js";
+import { DIRECTIONS, FACINGS, ROOM_IDS, ROOMS } from "../src/engines/fengshui/principles.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { lotSet } from "../src/engines/qiuqian/lots.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
@@ -163,6 +166,32 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     report: qiuqianReport,
   });
   const lots = lotSet("guandi_100");
+
+  // A 风水 room and its reading (v4.4.0).
+  const fengshui = computeFengshui(
+    { room: "bedroom", facing: "east" },
+    { digestPepper: secrets.digestPepper, now },
+  );
+  const fengshuiReport = await generateReport(
+    fengshui,
+    { locale: "zh-Hant", country: "MY", question: "床在窗下，門在床的左邊。" },
+    {
+      providers: { deepseek: mock, anthropic: mock },
+      now,
+      newId: () => "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+    },
+  );
+  const fengshuiView = publicReport({
+    id: fengshuiReport.report_id,
+    owner: "fixture",
+    chart_id: "ffffffff-ffff-4fff-8fff-ffffffffffff", // chart_fengshui.json, the room it reads
+    status: fengshuiReport.status,
+    locale: fengshuiReport.locale,
+    topics: fengshuiReport.topics,
+    created_at: ts,
+    updated_at: ts,
+    report: fengshuiReport,
+  });
 
   const remedy = await generateRemedy(
     bazi,
@@ -290,6 +319,17 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       chart_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       chart_fact: relationship,
     },
+    // 风水's rooms, principles and facings (v4.4.0), for the room page and the reading.
+    "app/assets/i18n/fengshui.json": {
+      version: PRINCIPLES_VERSION,
+      rooms: Object.fromEntries(ROOM_IDS.map((id) => [id, ROOMS[id]])),
+      facings: Object.fromEntries(FACINGS.map((f) => [f, DIRECTIONS[f]])),
+    },
+    "app/test/fixtures/chart_fengshui.json": {
+      chart_id: "ffffffff-ffff-4fff-8fff-ffffffffffff",
+      chart_fact: fengshui,
+    },
+    "app/test/fixtures/report_fengshui_passed.json": fengshuiView,
     "app/test/fixtures/chart_qiuqian.json": {
       chart_id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
       chart_fact: qiuqian,

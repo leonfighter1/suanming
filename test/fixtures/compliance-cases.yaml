@@ -34,6 +34,10 @@ block:
   - { text: "记得添香油钱，才会转好运。", groups: [], rule: G008 }
   - { text: "建議安太歲，化解今年的不順。", groups: [], rule: G008 }
   - { text: "不满意的话再抽一支签就能转运。", groups: [], rule: G008 }
+  - { text: "這間是凶宅，最好搬走。", groups: [fengshui], rule: F001 }
+  - { text: "床对着门会犯煞。", groups: [fengshui], rule: F001 }
+  - { text: "厨房这样摆会破财。", groups: [fengshui], rule: F002 }
+  - { text: "鏡子這樣放可以招財。", groups: [fengshui], rule: F002 }
   - { text: "You are prone to develop heart disease after 40.", groups: [en_common], rule: E002 }
 allow:
   - { text: "傳統上，有些人會在廟裡點光明燈祈福，這是個人的選擇。", groups: [] }
@@ -41,6 +45,17 @@ allow:
   - { text: "不需要靠点光明灯才能安心，照顾好眼前的事更实在。", groups: [] }
   - { text: "籤詩只是提醒你放慢腳步，不是要你改運。", groups: [] }
   - { text: "本解讀由 AI 依據所得籤詩生成，僅供娛樂和玄學學習使用。", groups: [] }
+  - {
+      text: "本解讀由 AI 依據你所選的房間生成，是通用的空間建議，不是住宅吉凶的判斷，僅供娛樂和玄學學習使用。",
+      groups: [fengshui],
+    }
+  - {
+      text: "本解读由 AI 根据你所选的房间生成，是通用的空间建议，不是住宅吉凶的判断，仅供娱乐和玄学学习使用。",
+      groups: [fengshui],
+    }
+  - { text: "這份建議不談招財或運氣，只談舒適與安全。", groups: [fengshui] }
+  - { text: "传统上讲究把水与火分开，也是为了做饭安全。", groups: [fengshui] }
+  - { text: "床頭靠實牆，傳統上稱為「背後有靠」。", groups: [fengshui] }
   - { text: "本解读由 AI 根据所得签诗生成，仅供娱乐和玄学学习使用。", groups: [] }
   - { text: "五行火旺之人，傳統上建議注意作息與心情，如有不適請就醫。", groups: [] }
   - { text: "传统命理的健康推断仅供参考，不构成医疗诊断，如有不适请及时就医。", groups: [] }

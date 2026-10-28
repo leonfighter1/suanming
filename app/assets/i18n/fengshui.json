@@ -1,0 +1,640 @@
+{
+  "version": "1.0.0",
+  "rooms": {
+    "bedroom": {
+      "name": {
+        "zh-Hant": "臥室",
+        "zh-Hans": "卧室",
+        "en": "Bedroom"
+      },
+      "principles": [
+        {
+          "id": "bed_wall",
+          "area": "bed",
+          "text": {
+            "zh-Hant": "床頭靠實牆。",
+            "zh-Hans": "床头靠实墙。",
+            "en": "Put the head of the bed against a solid wall."
+          },
+          "why": {
+            "zh-Hant": "背後有牆，睡時較有安定感，也少受窗邊冷風與光線干擾；傳統上稱為「背後有靠」。",
+            "zh-Hans": "背后有墙，睡时较有安定感，也少受窗边冷风与光线干扰；传统上称为“背后有靠”。",
+            "en": "A wall behind you feels settled and keeps window draughts and light off your head; tradition calls this having support behind you."
+          }
+        },
+        {
+          "id": "bed_door",
+          "area": "door",
+          "text": {
+            "zh-Hant": "床不正對房門，躺下時能看見門口。",
+            "zh-Hans": "床不正对房门，躺下时能看见门口。",
+            "en": "Keep the bed out of line with the door, but where you can see the door when lying down."
+          },
+          "why": {
+            "zh-Hant": "門口的光線、聲音與走動不直衝床上，睡得較安穩；看得見門口也讓人放心。",
+            "zh-Hans": "门口的光线、声音与走动不直冲床上，睡得较安稳；看得见门口也让人放心。",
+            "en": "Light, noise and footsteps from the doorway don't run straight at the bed, and seeing the door puts the mind at rest."
+          }
+        },
+        {
+          "id": "bed_mirror",
+          "area": "mirror",
+          "text": {
+            "zh-Hant": "鏡子不正對床。",
+            "zh-Hans": "镜子不正对床。",
+            "en": "Don't let a mirror face the bed."
+          },
+          "why": {
+            "zh-Hant": "夜裡醒來時，鏡中的影像和反光容易讓人一驚，也可能影響入睡；可以移開，或睡前用布遮上。",
+            "zh-Hans": "夜里醒来时，镜中的影像和反光容易让人一惊，也可能影响入睡；可以移开，或睡前用布遮上。",
+            "en": "A reflection or a glint at night can startle you awake or keep you from sleep; move the mirror, or cover it at bedtime."
+          }
+        },
+        {
+          "id": "bed_overhead",
+          "area": "bed",
+          "text": {
+            "zh-Hant": "床的上方不放沉重的櫃子或吊飾，也避開橫樑。",
+            "zh-Hans": "床的上方不放沉重的柜子或吊饰，也避开横梁。",
+            "en": "Keep heavy shelves and hanging things off the wall above the bed, and don't sleep under a beam."
+          },
+          "why": {
+            "zh-Hant": "頭頂有重物或橫樑會帶來壓迫感，萬一掉落也危險。",
+            "zh-Hans": "头顶有重物或横梁会带来压迫感，万一掉落也危险。",
+            "en": "Weight overhead feels oppressive, and anything that falls is a danger."
+          }
+        },
+        {
+          "id": "bed_clear",
+          "area": "storage",
+          "text": {
+            "zh-Hant": "床底與床邊保持整潔通風。",
+            "zh-Hans": "床底与床边保持整洁通风。",
+            "en": "Keep under and around the bed clear and airy."
+          },
+          "why": {
+            "zh-Hant": "少堆雜物，灰塵少、空氣流通，房間也顯得輕鬆。",
+            "zh-Hans": "少堆杂物，灰尘少、空气流通，房间也显得轻松。",
+            "en": "Less clutter means less dust and better air, and the room feels lighter."
+          }
+        },
+        {
+          "id": "bed_light",
+          "area": "light",
+          "text": {
+            "zh-Hant": "臥室用柔和、可調暗的燈光，色調安靜。",
+            "zh-Hans": "卧室用柔和、可调暗的灯光，色调安静。",
+            "en": "Use soft, dimmable light and calm colours in the bedroom."
+          },
+          "why": {
+            "zh-Hant": "睡前把光線放柔，身體較容易進入休息狀態。",
+            "zh-Hans": "睡前把光线放柔，身体较容易进入休息状态。",
+            "en": "Softer light before sleep helps the body wind down."
+          }
+        }
+      ]
+    },
+    "study": {
+      "name": {
+        "zh-Hant": "書房 · 工作桌",
+        "zh-Hans": "书房 · 工作桌",
+        "en": "Study or desk"
+      },
+      "principles": [
+        {
+          "id": "desk_wall",
+          "area": "desk",
+          "text": {
+            "zh-Hant": "書桌宜背靠實牆，背後不要是走道或窗。",
+            "zh-Hans": "书桌宜背靠实墙，背后不要是走道或窗。",
+            "en": "Sit with a solid wall behind your desk, not a walkway or a window."
+          },
+          "why": {
+            "zh-Hant": "背後有靠，專心時不會被身後的走動或光線打擾；傳統上稱為「背後有靠」。",
+            "zh-Hans": "背后有靠，专心时不会被身后的走动或光线打扰；传统上称为“背后有靠”。",
+            "en": "With support behind you, footsteps and glare behind you don't break your focus; tradition calls this having support behind you."
+          }
+        },
+        {
+          "id": "desk_door",
+          "area": "door",
+          "text": {
+            "zh-Hant": "坐著能看見門口，但不正對門。",
+            "zh-Hans": "坐着能看见门口，但不正对门。",
+            "en": "Sit where you can see the door, but not directly facing it."
+          },
+          "why": {
+            "zh-Hant": "看得到誰進來，心裡較踏實；不正對門，就不會被進出的人直接打斷。",
+            "zh-Hans": "看得到谁进来，心里较踏实；不正对门，就不会被进出的人直接打断。",
+            "en": "Seeing who comes in is reassuring; not facing the door straight on keeps comings and goings from interrupting you."
+          }
+        },
+        {
+          "id": "desk_light",
+          "area": "light",
+          "text": {
+            "zh-Hant": "光線從側面來，避免窗戶在螢幕正後方或正前方。",
+            "zh-Hans": "光线从侧面来，避免窗户在屏幕正后方或正前方。",
+            "en": "Let light come from the side; avoid a window right behind or right in front of the screen."
+          },
+          "why": {
+            "zh-Hant": "側光不刺眼，螢幕上也少反光，眼睛較不累。",
+            "zh-Hans": "侧光不刺眼，屏幕上也少反光，眼睛较不累。",
+            "en": "Side light doesn't glare and puts fewer reflections on the screen, so the eyes tire less."
+          }
+        },
+        {
+          "id": "desk_tidy",
+          "area": "storage",
+          "text": {
+            "zh-Hant": "桌面只放正在用的東西，常用物品放在順手的位置。",
+            "zh-Hans": "桌面只放正在用的东西，常用物品放在顺手的位置。",
+            "en": "Keep only what you're using on the desk, and everyday things within easy reach."
+          },
+          "why": {
+            "zh-Hant": "桌面清爽，開始做事時就少一道整理的阻力。",
+            "zh-Hans": "桌面清爽，开始做事时就少一道整理的阻力。",
+            "en": "A clear desk removes one hurdle before you start."
+          }
+        },
+        {
+          "id": "desk_corner",
+          "area": "seat",
+          "text": {
+            "zh-Hant": "座位避免被尖角或柱角正對。",
+            "zh-Hans": "座位避免被尖角或柱角正对。",
+            "en": "Don't let a sharp corner or the edge of a pillar point at your seat."
+          },
+          "why": {
+            "zh-Hant": "尖角對著人會讓人下意識不自在，也容易碰撞；可以移動座位，或用植物、布簾柔化。",
+            "zh-Hans": "尖角对着人会让人下意识不自在，也容易碰撞；可以移动座位，或用植物、布帘柔化。",
+            "en": "A corner aimed at you feels uneasy without your noticing, and it's easy to bump; move the seat, or soften the corner with a plant or a curtain."
+          }
+        }
+      ]
+    },
+    "living": {
+      "name": {
+        "zh-Hant": "客廳",
+        "zh-Hans": "客厅",
+        "en": "Living room"
+      },
+      "principles": [
+        {
+          "id": "sofa_wall",
+          "area": "seat",
+          "text": {
+            "zh-Hant": "沙發背後靠牆，坐著能看見入口。",
+            "zh-Hans": "沙发背后靠墙，坐着能看见入口。",
+            "en": "Put the sofa's back to a wall, where you can see the way in."
+          },
+          "why": {
+            "zh-Hant": "背後有靠、看得見入口，坐著較放鬆。",
+            "zh-Hans": "背后有靠、看得见入口，坐着较放松。",
+            "en": "Support behind and a view of the entrance make it easier to relax."
+          }
+        },
+        {
+          "id": "living_flow",
+          "area": "flow",
+          "text": {
+            "zh-Hant": "走道保持通暢，家具不擋住門和窗。",
+            "zh-Hans": "走道保持通畅，家具不挡住门和窗。",
+            "en": "Keep walkways open, and don't block doors and windows with furniture."
+          },
+          "why": {
+            "zh-Hant": "走動順手，空氣與光線也能進來；傳統上把這叫做讓「氣」流通。",
+            "zh-Hans": "走动顺手，空气与光线也能进来；传统上把这叫做让“气”流通。",
+            "en": "Moving around is easy, and light and air can come in; tradition calls this letting the qi flow."
+          }
+        },
+        {
+          "id": "living_light",
+          "area": "light",
+          "text": {
+            "zh-Hant": "白天多用自然光，晚上光線溫暖均勻，不留陰暗的角落。",
+            "zh-Hans": "白天多用自然光，晚上光线温暖均匀，不留阴暗的角落。",
+            "en": "Use daylight in the day and warm, even light at night, with no dark corners."
+          },
+          "why": {
+            "zh-Hant": "明亮均勻的空間讓人精神好，也比較安全。",
+            "zh-Hans": "明亮均匀的空间让人精神好，也比较安全。",
+            "en": "An evenly lit room keeps you alert, and it is safer."
+          }
+        },
+        {
+          "id": "living_plants",
+          "area": "air",
+          "text": {
+            "zh-Hant": "放一兩盆容易照顧的植物。",
+            "zh-Hans": "放一两盆容易照顾的植物。",
+            "en": "Keep one or two easy-care plants."
+          },
+          "why": {
+            "zh-Hant": "植物讓空間有生氣，照顧它們也是一種放鬆。",
+            "zh-Hans": "植物让空间有生气，照顾它们也是一种放松。",
+            "en": "Plants bring the room to life, and tending them is a way to unwind."
+          }
+        },
+        {
+          "id": "living_through",
+          "area": "flow",
+          "text": {
+            "zh-Hant": "大門若一眼直通窗戶或陽台，可以用屏風、櫃子或植物稍作遮擋。",
+            "zh-Hans": "大门若一眼直通窗户或阳台，可以用屏风、柜子或植物稍作遮挡。",
+            "en": "If the front door looks straight through to a window or balcony, partly screen the line with a screen, a cabinet or plants."
+          },
+          "why": {
+            "zh-Hant": "進門時不會一眼看穿整個家，多一分隱私；傳統上認為這樣「氣」不會直進直出。",
+            "zh-Hans": "进门时不会一眼看穿整个家，多一分隐私；传统上认为这样“气”不会直进直出。",
+            "en": "The home isn't seen through at a glance, which adds privacy; tradition holds that the qi then doesn't rush straight in and out."
+          }
+        }
+      ]
+    },
+    "kitchen": {
+      "name": {
+        "zh-Hant": "廚房",
+        "zh-Hans": "厨房",
+        "en": "Kitchen"
+      },
+      "principles": [
+        {
+          "id": "stove_sink",
+          "area": "stove",
+          "text": {
+            "zh-Hant": "爐灶與水槽不正對，也不緊貼。",
+            "zh-Hans": "炉灶与水槽不正对，也不紧贴。",
+            "en": "Don't put the stove directly opposite the sink or right against it."
+          },
+          "why": {
+            "zh-Hant": "兩者之間留出工作檯，備料與烹調都順手，也較安全；傳統上講究把水與火分開。",
+            "zh-Hans": "两者之间留出工作台，备料与烹调都顺手，也较安全；传统上讲究把水与火分开。",
+            "en": "A worktop between them makes prep and cooking easier and safer; tradition keeps water and fire apart."
+          }
+        },
+        {
+          "id": "stove_wall",
+          "area": "stove",
+          "text": {
+            "zh-Hant": "爐灶背後是實牆，不在窗下。",
+            "zh-Hans": "炉灶背后是实墙，不在窗下。",
+            "en": "Back the stove onto a solid wall, not under a window."
+          },
+          "why": {
+            "zh-Hant": "窗邊的風會吹動火焰，窗簾也可能靠近火源。",
+            "zh-Hans": "窗边的风会吹动火焰，窗帘也可能靠近火源。",
+            "en": "A draught from the window moves the flame, and a curtain may come near it."
+          }
+        },
+        {
+          "id": "kitchen_air",
+          "area": "air",
+          "text": {
+            "zh-Hant": "保持通風與整潔，刀具收好。",
+            "zh-Hans": "保持通风与整洁，刀具收好。",
+            "en": "Keep the kitchen aired and tidy, and put knives away."
+          },
+          "why": {
+            "zh-Hant": "油煙散得快，空氣清新；刀具收好也更安全。",
+            "zh-Hans": "油烟散得快，空气清新；刀具收好也更安全。",
+            "en": "Cooking fumes clear quickly, and stored knives are safer."
+          }
+        },
+        {
+          "id": "kitchen_light",
+          "area": "light",
+          "text": {
+            "zh-Hant": "工作檯上方要有足夠的燈光。",
+            "zh-Hans": "工作台上方要有足够的灯光。",
+            "en": "Light the worktop well."
+          },
+          "why": {
+            "zh-Hant": "切菜和烹調時看得清楚，比較安全。",
+            "zh-Hans": "切菜和烹调时看得清楚，比较安全。",
+            "en": "Seeing clearly while cutting and cooking is safer."
+          }
+        }
+      ]
+    },
+    "entrance": {
+      "name": {
+        "zh-Hant": "玄關",
+        "zh-Hans": "玄关",
+        "en": "Entrance"
+      },
+      "principles": [
+        {
+          "id": "entry_bright",
+          "area": "light",
+          "text": {
+            "zh-Hant": "玄關保持明亮、整潔。",
+            "zh-Hans": "玄关保持明亮、整洁。",
+            "en": "Keep the entrance bright and tidy."
+          },
+          "why": {
+            "zh-Hant": "回家第一眼清爽明亮，心情也跟著放鬆；傳統上把入口看作一家的「氣口」。",
+            "zh-Hans": "回家第一眼清爽明亮，心情也跟着放松；传统上把入口看作一家的“气口”。",
+            "en": "A clear, bright first sight on coming home helps you unwind; tradition sees the entrance as the home's mouth of qi."
+          }
+        },
+        {
+          "id": "entry_shoes",
+          "area": "storage",
+          "text": {
+            "zh-Hant": "鞋子收進鞋櫃，門口不堆雜物。",
+            "zh-Hans": "鞋子收进鞋柜，门口不堆杂物。",
+            "en": "Put shoes away in a cabinet, and keep the doorway clear."
+          },
+          "why": {
+            "zh-Hant": "進出順暢，也少絆倒的危險。",
+            "zh-Hans": "进出顺畅，也少绊倒的危险。",
+            "en": "Coming and going is easy, with less to trip over."
+          }
+        },
+        {
+          "id": "entry_mirror",
+          "area": "mirror",
+          "text": {
+            "zh-Hant": "鏡子不正對大門，可以放在側牆。",
+            "zh-Hans": "镜子不正对大门，可以放在侧墙。",
+            "en": "Don't hang a mirror facing the front door; put it on a side wall."
+          },
+          "why": {
+            "zh-Hant": "一開門就看見自己的影像容易嚇一跳；側牆上的鏡子出門前一樣能整理儀容。",
+            "zh-Hans": "一开门就看见自己的影像容易吓一跳；侧墙上的镜子出门前一样能整理仪容。",
+            "en": "Seeing your reflection as the door opens can startle you; a mirror on a side wall still lets you check yourself before going out."
+          }
+        },
+        {
+          "id": "entry_screen",
+          "area": "flow",
+          "text": {
+            "zh-Hant": "入門處若能直接看見全屋，可以用屏風或櫃子隔出一點玄關。",
+            "zh-Hans": "入门处若能直接看见全屋，可以用屏风或柜子隔出一点玄关。",
+            "en": "If the whole home is visible from the door, set off a small entry with a screen or a cabinet."
+          },
+          "why": {
+            "zh-Hant": "多一層隱私，進門也有個轉換心情的地方。",
+            "zh-Hans": "多一层隐私，进门也有个转换心情的地方。",
+            "en": "It adds privacy, and a place to change pace on arriving."
+          }
+        }
+      ]
+    },
+    "dining": {
+      "name": {
+        "zh-Hant": "餐廳",
+        "zh-Hans": "餐厅",
+        "en": "Dining room"
+      },
+      "principles": [
+        {
+          "id": "table_door",
+          "area": "table",
+          "text": {
+            "zh-Hant": "餐桌不正對大門或廁所門。",
+            "zh-Hans": "餐桌不正对大门或厕所门。",
+            "en": "Keep the dining table out of line with the front door and the toilet door."
+          },
+          "why": {
+            "zh-Hant": "用餐時少受進出與氣味打擾，坐得安穩。",
+            "zh-Hans": "用餐时少受进出与气味打扰，坐得安稳。",
+            "en": "Meals are less disturbed by comings and goings and by smells."
+          }
+        },
+        {
+          "id": "table_light",
+          "area": "light",
+          "text": {
+            "zh-Hant": "餐桌上方用溫暖的燈光，桌面保持清爽。",
+            "zh-Hans": "餐桌上方用温暖的灯光，桌面保持清爽。",
+            "en": "Light the table warmly, and keep it clear."
+          },
+          "why": {
+            "zh-Hant": "溫暖的光讓人願意坐下來好好吃飯、聊天。",
+            "zh-Hans": "温暖的光让人愿意坐下来好好吃饭、聊天。",
+            "en": "Warm light invites people to sit, eat and talk."
+          }
+        },
+        {
+          "id": "table_space",
+          "area": "flow",
+          "text": {
+            "zh-Hant": "餐椅後方留出走動的空間。",
+            "zh-Hans": "餐椅后方留出走动的空间。",
+            "en": "Leave room to walk behind the dining chairs."
+          },
+          "why": {
+            "zh-Hant": "起身、上菜都方便，不會擠來擠去。",
+            "zh-Hans": "起身、上菜都方便，不会挤来挤去。",
+            "en": "Getting up and serving are easy, without squeezing past."
+          }
+        }
+      ]
+    },
+    "kids": {
+      "name": {
+        "zh-Hant": "兒童房",
+        "zh-Hans": "儿童房",
+        "en": "Children's room"
+      },
+      "principles": [
+        {
+          "id": "kids_bed",
+          "area": "bed",
+          "text": {
+            "zh-Hant": "床頭靠實牆，床不正對房門。",
+            "zh-Hans": "床头靠实墙，床不正对房门。",
+            "en": "Put the head of the bed against a solid wall, out of line with the door."
+          },
+          "why": {
+            "zh-Hant": "孩子睡得較有安全感，也少受門外的光線和聲音打擾。",
+            "zh-Hans": "孩子睡得较有安全感，也少受门外的光线和声音打扰。",
+            "en": "Children feel safer asleep, and are less disturbed by light and noise from outside."
+          }
+        },
+        {
+          "id": "kids_desk",
+          "area": "desk",
+          "text": {
+            "zh-Hant": "書桌背後有靠，光線從側面來。",
+            "zh-Hans": "书桌背后有靠，光线从侧面来。",
+            "en": "Give the desk a wall behind it and light from the side."
+          },
+          "why": {
+            "zh-Hant": "寫作業時較能專心，眼睛也不容易累。",
+            "zh-Hans": "写作业时较能专心，眼睛也不容易累。",
+            "en": "Homework is easier to focus on, and the eyes tire less."
+          }
+        },
+        {
+          "id": "kids_safe",
+          "area": "safety",
+          "text": {
+            "zh-Hant": "家具的尖角加上防撞套，重物不放在高處。",
+            "zh-Hans": "家具的尖角加上防撞套，重物不放在高处。",
+            "en": "Cover sharp furniture corners, and keep heavy things off high shelves."
+          },
+          "why": {
+            "zh-Hant": "孩子活潑好動，安全最重要。",
+            "zh-Hans": "孩子活泼好动，安全最重要。",
+            "en": "Children are lively: safety comes first."
+          }
+        },
+        {
+          "id": "kids_colour",
+          "area": "colour",
+          "text": {
+            "zh-Hant": "色彩明亮柔和，收納放在孩子拿得到的高度。",
+            "zh-Hans": "色彩明亮柔和，收纳放在孩子拿得到的高度。",
+            "en": "Use bright, soft colours, and storage at a height the child can reach."
+          },
+          "why": {
+            "zh-Hant": "柔和的顏色讓人安定；孩子能自己收拾，也是一種學習。",
+            "zh-Hans": "柔和的颜色让人安定；孩子能自己收拾，也是一种学习。",
+            "en": "Soft colours are calming, and tidying up by themselves is part of learning."
+          }
+        }
+      ]
+    }
+  },
+  "facings": {
+    "north": {
+      "name": {
+        "zh-Hant": "北",
+        "zh-Hans": "北",
+        "en": "North"
+      },
+      "trigram": {
+        "zh-Hant": "坎",
+        "zh-Hans": "坎",
+        "en": "Kan"
+      },
+      "element": {
+        "zh-Hant": "水",
+        "zh-Hans": "水",
+        "en": "Water"
+      }
+    },
+    "northeast": {
+      "name": {
+        "zh-Hant": "東北",
+        "zh-Hans": "东北",
+        "en": "Northeast"
+      },
+      "trigram": {
+        "zh-Hant": "艮",
+        "zh-Hans": "艮",
+        "en": "Gen"
+      },
+      "element": {
+        "zh-Hant": "土",
+        "zh-Hans": "土",
+        "en": "Earth"
+      }
+    },
+    "east": {
+      "name": {
+        "zh-Hant": "東",
+        "zh-Hans": "东",
+        "en": "East"
+      },
+      "trigram": {
+        "zh-Hant": "震",
+        "zh-Hans": "震",
+        "en": "Zhen"
+      },
+      "element": {
+        "zh-Hant": "木",
+        "zh-Hans": "木",
+        "en": "Wood"
+      }
+    },
+    "southeast": {
+      "name": {
+        "zh-Hant": "東南",
+        "zh-Hans": "东南",
+        "en": "Southeast"
+      },
+      "trigram": {
+        "zh-Hant": "巽",
+        "zh-Hans": "巽",
+        "en": "Xun"
+      },
+      "element": {
+        "zh-Hant": "木",
+        "zh-Hans": "木",
+        "en": "Wood"
+      }
+    },
+    "south": {
+      "name": {
+        "zh-Hant": "南",
+        "zh-Hans": "南",
+        "en": "South"
+      },
+      "trigram": {
+        "zh-Hant": "離",
+        "zh-Hans": "离",
+        "en": "Li"
+      },
+      "element": {
+        "zh-Hant": "火",
+        "zh-Hans": "火",
+        "en": "Fire"
+      }
+    },
+    "southwest": {
+      "name": {
+        "zh-Hant": "西南",
+        "zh-Hans": "西南",
+        "en": "Southwest"
+      },
+      "trigram": {
+        "zh-Hant": "坤",
+        "zh-Hans": "坤",
+        "en": "Kun"
+      },
+      "element": {
+        "zh-Hant": "土",
+        "zh-Hans": "土",
+        "en": "Earth"
+      }
+    },
+    "west": {
+      "name": {
+        "zh-Hant": "西",
+        "zh-Hans": "西",
+        "en": "West"
+      },
+      "trigram": {
+        "zh-Hant": "兌",
+        "zh-Hans": "兑",
+        "en": "Dui"
+      },
+      "element": {
+        "zh-Hant": "金",
+        "zh-Hans": "金",
+        "en": "Metal"
+      }
+    },
+    "northwest": {
+      "name": {
+        "zh-Hant": "西北",
+        "zh-Hans": "西北",
+        "en": "Northwest"
+      },
+      "trigram": {
+        "zh-Hant": "乾",
+        "zh-Hans": "乾",
+        "en": "Qian"
+      },
+      "element": {
+        "zh-Hant": "金",
+        "zh-Hans": "金",
+        "en": "Metal"
+      }
+    }
+  }
+}

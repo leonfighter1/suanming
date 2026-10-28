@@ -150,6 +150,13 @@ export function chartSummary(fact: ChartFact) {
     const lot = f.lot as { n: number; ganzhi: string };
     return { system: "qiuqian", lot_set: f.lot_set as string, lot: lot.n, ganzhi: lot.ganzhi };
   }
+  if (fact.system === "fengshui") {
+    return {
+      system: "fengshui",
+      room: f.room as string,
+      ...(typeof f.facing === "string" && { facing: f.facing }),
+    };
+  }
   return { system: fact.system };
 }
 

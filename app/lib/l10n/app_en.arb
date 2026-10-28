@@ -623,5 +623,27 @@
   "topicQiuqianAnswer": "Your question",
   "topicQiuqianAdvice": "Advice",
   "blockFlat": "flat side up",
-  "blockRound": "round side up"
+  "blockRound": "round side up",
+  "homeFengshui": "Feng Shui",
+  "homeFengshuiDesc": "General principles for a room's layout: light, air and movement. No judgement of luck",
+  "fengshuiRoom": "Which room",
+  "fengshuiFacing": "Which way the main window faces (optional)",
+  "fengshuiFacingUnknown": "Not sure",
+  "fengshuiDescription": "How the room is now (optional)",
+  "fengshuiDescriptionHint": "For example, \"the bed is under the window, the door on the left\". Used only for the reading; no address or floor plan is kept.",
+  "fengshuiLook": "See the layout",
+  "fengshuiPrinciples": "What to look at in this room",
+  "fengshuiNote": "These are general principles of space, not a judgement of your home.",
+  "fengshuiSections": "The reading has three parts: layout, light and movement, and advice.",
+  "fengshuiDirection": "Traditionally: {direction} · {trigram} · {element}",
+  "@fengshuiDirection": {
+    "placeholders": {
+      "direction": { "type": "String" },
+      "trigram": { "type": "String" },
+      "element": { "type": "String" }
+    }
+  },
+  "topicFengshuiLayout": "Layout",
+  "topicFengshuiFlow": "Light and movement",
+  "topicFengshuiAdvice": "Advice"
 }
