@@ -56,6 +56,27 @@ class DayunCycle {
   final int xusui;
 }
 
+/// One 流月: its 干支, the 节 it begins on and when, and its 十神.
+class LiuyueMonth {
+  const LiuyueMonth(this.ganzhi, this.jie, this.starts, this.shishenGan, this.shishenZhi);
+  factory LiuyueMonth.fromJson(Json j) => LiuyueMonth(
+        j['ganzhi'] as String,
+        j['jie'] as String,
+        j['starts'] as String,
+        j['shishen_gan'] as String,
+        j['shishen_zhi'] as String,
+      );
+  final String ganzhi;
+
+  /// The 节 it begins on (engine form, simplified), e.g. 立春.
+  final String jie;
+
+  /// When it begins, YYYY-MM-DD HH:mm in UTC+8.
+  final String starts;
+  final String shishenGan;
+  final String shishenZhi;
+}
+
 /// 合冲刑害破 among characters: its type, element (for 合 / 会) and members.
 class Relation {
   const Relation(this.type, this.element, this.members);
@@ -197,6 +218,9 @@ class BaziChart {
     this.kongwangPillars = const [],
     this.taiyuan,
     this.strength,
+    this.dayunYears = const [],
+    this.liuyueYear,
+    this.liuyue = const [],
   });
 
   factory BaziChart.fromFacts(Json f) {
@@ -226,6 +250,10 @@ class BaziChart {
       kongwangPillars: ((kw?['pillars'] as List?) ?? const []).cast<String>(),
       taiyuan: f['taiyuan'] as String?,
       strength: f['strength'] == null ? null : StrengthView.fromJson(f['strength'] as Json),
+      // Charts since v3.3.0 (older ones: empty), and 流月 since v1.3.0.
+      dayunYears: _list(f['dayun_years'], Liunian.fromJson),
+      liuyueYear: (f['liuyue'] as Json?)?['year'] as int?,
+      liuyue: _list((f['liuyue'] as Json?)?['months'], LiuyueMonth.fromJson),
     );
   }
 
@@ -259,7 +287,26 @@ class BaziChart {
   /// 日主旺衰 + 喜用 (charts since v2.0.0).
   final StrengthView? strength;
 
+  /// The ten years of every 大运, in order (charts since v3.3.0; empty before).
+  final List<Liunian> dayunYears;
+
+  /// The year the 流月 are for, and its twelve months from 立春.
+  final int? liuyueYear;
+  final List<LiuyueMonth> liuyue;
+
   String get fourPillars => pillarOrder.map((k) => pillars[k]!.ganzhi).join(' ');
+
+  /// The year the chart is read in: its first 流年 (the engine starts them this year).
+  int? get thisYear => liunian.isEmpty ? null : liunian.first.year;
+
+  /// The 大运 running in [thisYear] (null before the first one starts).
+  int? get currentDayun => liunian.isEmpty || liunian.first.dayunIndex == 0 ? null : liunian.first.dayunIndex;
+
+  /// One 大运's ten years.
+  List<Liunian> yearsOf(int dayunIndex) => [
+        for (final y in dayunYears)
+          if (y.dayunIndex == dayunIndex) y,
+      ];
 }
 
 class TarotCardFact {

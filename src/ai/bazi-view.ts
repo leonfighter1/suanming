@@ -2,7 +2,8 @@
  * What a 八字 agent reads (tech plan WP2.3): every natal fact, every 大运 and 流年 by name, and
  * a period's full detail (its relations, 神煞 and score basis) only for the periods in focus.
  * Arrays keep their length and order, so a cited path such as /liunian/3 names the same year as
- * in the stored chart. 流月 is left out: no 八字 prompt reads it.
+ * in the stored chart. 流月 and the years of each 大运 (dayun_years, v3.3.0) are left out: no
+ * 八字 prompt reads them.
  */
 import type { TrendLayer } from "./trend.js";
 import type { Topic } from "./types.js";
@@ -41,7 +42,14 @@ export function baziView(
   focus: Focus,
   opts: { trend: boolean },
 ): Record<string, unknown> {
-  const { liuyue: _months, trend, dayun, liunian, ...natal } = facts as Entry & Periods;
+  const {
+    liuyue: _months,
+    dayun_years: _decades,
+    trend,
+    dayun,
+    liunian,
+    ...natal
+  } = facts as Entry & Periods;
   return {
     ...natal,
     ...(dayun && {

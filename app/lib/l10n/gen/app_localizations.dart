@@ -2372,6 +2372,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Symbolic stars (Shen Sha)'**
   String get shenshaName;
+
+  /// No description provided for @timelineNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get timelineNow;
+
+  /// No description provided for @timelineThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get timelineThisYear;
+
+  /// No description provided for @dayunTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a luck pillar to see its ten years.'**
+  String get dayunTapHint;
+
+  /// No description provided for @dayunYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{ganzhi} luck pillar, {from}–{to}'**
+  String dayunYears(String ganzhi, int from, int to);
+
+  /// No description provided for @liuyueOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Months of {year}'**
+  String liuyueOf(int year);
+
+  /// No description provided for @pillarRelation.
+  ///
+  /// In en, this message translates to:
+  /// **'{pillar} {relation}'**
+  String pillarRelation(String pillar, String relation);
 }
 
 class _AppLocalizationsDelegate

@@ -248,10 +248,11 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 
 ## S4 八字与全局 UI (big → v4.0.0)
 
-Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, **v3.2.0** = WP4.2, then
-one X.Y.0 per WP; the last goes out as **v4.0.0** with the S4 summary, pushed with every release since v3.1.0. Lessons
-to read first: P7 (buttons in rows), P15 (no dart format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), P32
-(non-empty checks), the keyboard-access checklist.
+Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, **v3.2.0** = WP4.2,
+**v3.3.0** = WP4.3, then one X.Y.0 per WP; the last goes out as **v4.0.0** with the S4 summary, pushed with every
+release since v3.1.0. Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
+format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), P32 (non-empty checks), P33 (typed keys), the
+keyboard-access checklist.
 
 - WP4.1 Stems and branches coloured by 五行; 藏干 / 长生 / 纳音 rows folded under 更多.
   - As built (v3.1.0):
@@ -300,6 +301,27 @@ to read first: P7 (buttons in rows), P15 (no dart format), P19, P24, P25, P27 (w
     - Not yet: the 一生运势报告 page's terms (WP4.6 gives them `TermTip` when it splits the page) and short English
       names in the table (WP4.8).
 - WP4.3 Timeline: the current 大运 and 流年 marked; tapping a 大运 shows its ten years; 流月 shown.
+  - As built (v3.3.0):
+    - Engine: a new fact, `dayun_years`, holds the ten years of every 大运 (80 for the sample chart). Each year is
+      the same entry as in `liunian`, without its relations and 神煞; one helper builds both, so `liunian` is
+      unchanged. The schema gets an optional property.
+    - No prompt reads `dayun_years`: `baziView` and the life report drop it, as they drop `liuyue`. The
+      faithfulness check leaves it out too: 80 years hold every 干支, so counting them would let any 干支 through.
+      A test pins that with 甲子 (2044).
+    - The 命盘 page:
+      - 大运: a 当前 badge marks the 大运 running in the chart's year (its first 流年). Tapping a 大运 (or Tab and
+        Enter) opens its ten years under the strip, titled e.g. 辛巳大运 · 2007–2016年; tapping it again closes
+        them. A hint says so until one is opened. Charts made before v3.3.0 have no years to open.
+      - 流年: a 今年 badge marks this year, here and in an open 大运's years.
+      - 流月: a new card, 2026年流月. Each month shows its 干支, the date it begins (北京时间), its 节 and its 十神.
+    - Term table 1.2.0: the twelve 节 (惊蛰 → 驚蟄, 芒种 → 芒種) with English names. They occur only in 流月,
+      which no prompt reads, so no model input changed; no reading fixture changed.
+    - Found and fixed: in English a 流年's relation read 「YearSix Clashes」; it reads 「Year Six Clashes」 now.
+    - Tests:
+      - Engine: ten years per 大运 from each start year; 2007 丁亥 and 2029 己酉 worked out by hand; equal to
+        `liunian` where they meet; every 节 in the term table.
+      - Views: no `dayun_years` in a reading, a plan or a life report prompt.
+      - App: the badges, opening and closing, the keyboard path, 流月, the English line and an old chart.
 - WP4.4 首页: 一生运势报告 as its own entry, 今日 (每日一牌), recent readings.
 - WP4.5 Reading page: the chart or spread on top, a jump list, share as an image.
 - WP4.6 Split `life_report_page.dart` (991 lines) and `profiles_page.dart` (596) into widgets. The split
@@ -307,7 +329,8 @@ to read first: P7 (buttons in rows), P15 (no dart format), P19, P24, P25, P27 (w
 - WP4.7 (found in S1) Widget tests reach cards through `scrollTo()` in `test/support.dart` (rule 27). Ten test files
   still call `scrollUntilVisible` directly.
 - WP4.8 (found in WP4.2) On a phone, the English names in the 四柱 table break mid-word ("Compani on (Bi Jian)"):
-  give the table a short English form (Companion), with the full name kept for the tip's title.
+  give the table a short English form (Companion), with the full name kept for the tip's title. The strips'
+  English lines are cut off too ("nominal age…", "Indirect Res…"), and the short forms serve them as well.
 
 ## S5 数据持久化 (medium → v4.1.0)
 
@@ -453,5 +476,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP3.6     | done                       | v3.0.0          |
 | WP4.1     | done                       | v3.1.0          |
 | WP4.2     | done                       | v3.2.0          |
-| WP4.3–4.8 | todo                       | v3.3.0 … v4.0.0 |
+| WP4.3     | done                       | v3.3.0          |
+| WP4.4–4.8 | todo                       | v3.4.0 … v4.0.0 |
 | S5–S6     | todo                       | above           |

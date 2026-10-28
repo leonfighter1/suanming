@@ -378,5 +378,11 @@
   "specialNote": "宜请有经验的师傅细看",
   "termTipHint": "点击带虚线的术语，查看它的意思。",
   "termTipAbout": "什么是{term}？",
-  "shenshaName": "神煞"
+  "shenshaName": "神煞",
+  "timelineNow": "当前",
+  "timelineThisYear": "今年",
+  "dayunTapHint": "点击一步大运，查看它的十年。",
+  "dayunYears": "{ganzhi}大运 · {from}–{to}年",
+  "liuyueOf": "{year}年流月",
+  "pillarRelation": "{pillar}{relation}"
 }

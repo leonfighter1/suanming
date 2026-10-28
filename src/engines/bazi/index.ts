@@ -213,11 +213,10 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       shensha: periodShensha(natal, d.getGanZhi()[1]!),
     }));
 
-  const liunian = Array.from({ length: LIUNIAN_YEARS }, (_, i) => {
-    const y = input.options.liunianFrom + i;
+  // A year as the 命盘 shows it: 干支, ages, 十神, and its 六冲 / 六合 with the chart.
+  const yearEntry = (y: number, dayunIndex: number) => {
     const gz = yearGanZhi(y);
     const [gan, zhi] = [gz[0]!, gz[1]!];
-    const dy = [...cycles].reverse().find((c) => c.start_year <= y);
     return {
       year: y,
       ganzhi: gz,
@@ -225,12 +224,27 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       age_xu: y - birthYear + 1,
       shishen_gan: tenGod(day.gan, gan),
       shishen_zhi: tenGod(day.gan, HIDDEN_MAIN[zhi]!),
-      dayun_index: dy?.index ?? 0,
+      dayun_index: dayunIndex,
       branch_relations: branchRelations(zhi, natal),
+    };
+  };
+
+  const liunian = Array.from({ length: LIUNIAN_YEARS }, (_, i) => {
+    const y = input.options.liunianFrom + i;
+    const gz = yearGanZhi(y);
+    const dy = [...cycles].reverse().find((c) => c.start_year <= y);
+    return {
+      ...yearEntry(y, dy?.index ?? 0),
       relations: periodRelations(natal, { place: "liunian", ganzhi: gz }, dy?.ganzhi),
-      shensha: periodShensha(natal, zhi),
+      shensha: periodShensha(natal, gz[1]!),
     };
   });
+
+  // The ten years of every 大运, for the 命盘 page (WP4.3). No prompt reads them: the model
+  // views leave them out, and so does the faithfulness check (80 years hold every 干支).
+  const dayunYears = cycles.flatMap((c) =>
+    Array.from({ length: 10 }, (_, i) => yearEntry(c.start_year + i, c.index)),
+  );
 
   // 日主旺衰 + 喜用 (WP1.6), then every period's scores from them (WP1.7).
   const dmStrength = strength(natal);
@@ -307,6 +321,7 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       cycles,
     },
     liunian,
+    dayun_years: dayunYears,
   };
 
   const provenance: Provenance[] = [
@@ -369,6 +384,11 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       path: "/liuyue",
       source_level: "traditional_text",
       note: "流月以节令为界（立春至小寒，北京时间）；寅月天干按五虎遁",
+    },
+    {
+      path: "/dayun_years",
+      source_level: "traditional_text",
+      note: "每步大运的十个流年，与 liunian 同法（干支以立春为界、十神对日主、branch_relations 只含六冲六合）；不含 relations、shensha",
     },
     {
       path: "/strength",

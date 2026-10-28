@@ -12,6 +12,34 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v3.3.0 (2026-10-28): the 命盘 timeline: where you are now, any 大运's ten years, and 流月
+
+Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.3. A medium update: committed
+locally, pushed with v4.0.0.
+
+- 命盘 page, 大运:
+  - The 大运 you are in now carries a 当前 badge.
+  - Tap any 大运 to open its ten years under the strip, e.g. 「辛巳大运 · 2007–2016年」. Each year shows its 干支,
+    虚岁, 十神 and any 冲 / 合 with your chart. Tap it again to close them, or tap another one to switch.
+- 流年: this year carries a 今年 badge, in the 流年 strip and in an opened 大运.
+- 流月, new: 「2026年流月」 lists the twelve months from 立春. Each shows its 干支, the date it begins (北京时间), its
+  节 (立春, 惊蛰 …) and its 十神.
+- Keyboard: Tab reaches each 大运 and Enter opens or closes it. ←/→ still scroll the strip.
+- English page:
+  - The 节 have English names (Start of Spring, Awakening of Insects …).
+  - A year's relation reads 「Hour Six Harmonies」; it used to run together as 「HourSix Harmonies」.
+- Readings are unchanged: the new facts (the years of every 大运) are for the page only, and no AI prompt reads them.
+- Verified:
+  - 4 new server tests:
+    - every 大运 has its ten years, and two years are worked out by hand (2007 丁亥 偏印 / 正财, 2029 己酉 比肩 /
+      食神 with 卯酉 冲);
+    - the years match the 流年 list where they meet;
+    - every 节 has its names.
+  - Prompt checks: no reading, plan or life report prompt contains the new facts.
+  - 6 new app tests: the badges, opening and closing a 大运, the keyboard path, 流月, the English line, and a chart
+    made before this update.
+  - All 312 server tests and 114 app tests pass; harness PASS.
+
 ### v3.2.0 (2026-10-28): tap a term on the 命盘 to see what it means
 
 Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.2. A medium update: committed

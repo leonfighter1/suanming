@@ -191,11 +191,76 @@ describe("流月 and ages", () => {
     });
   });
 
+  it("every 节 the 流月 can begin on is in the protected-term table (v3.3.0)", async () => {
+    const { loadTerms } = await import("../src/ai/index.js");
+    const terms = loadTerms().terms;
+    // The twelve 节, 立春 to 小寒, the same names every year.
+    for (const year of [1990, 2026, 2045]) {
+      const jie = liuyue(year, yearGanZhi(year)[0]!).map((m) => m.jie);
+      expect(new Set(jie).size).toBe(12);
+      expect(jie.filter((j) => !terms[j])).toEqual([]);
+    }
+  });
+
   it("虚岁 on every 流年 and 大运, from the same civil birth year", () => {
     for (const y of sample.liunian) expect(y.age_xu).toBe(y.year - 1990 + 1);
     for (const c of sample.dayun.cycles) expect(c.start_age_xu).toBe(c.start_year - 1990 + 1);
     // For a Hong Kong birth the library's 虚岁 agrees.
     for (const c of sample.dayun.cycles) expect(c.start_age_xu).toBe(c.start_age);
+  });
+});
+
+describe("the ten years of every 大运 (WP4.3)", () => {
+  const years = sample.dayun_years as any[];
+
+  it("ten per 大运, in order, from each start year", () => {
+    // The 大运 start in 1997, 2007, …, 2067 (8 of them), so the years run 1997–2076.
+    expect(sample.dayun.cycles.map((c: any) => c.start_year)).toEqual([
+      1997, 2007, 2017, 2027, 2037, 2047, 2057, 2067,
+    ]);
+    expect(years.map((y) => y.year)).toEqual(Array.from({ length: 80 }, (_, i) => 1997 + i));
+    for (const c of sample.dayun.cycles) {
+      expect(years.filter((y) => y.dayun_index === c.index).map((y) => y.year)).toEqual(
+        Array.from({ length: 10 }, (_, i) => c.start_year + i),
+      );
+    }
+  });
+
+  it("a year reads as worked out by hand", () => {
+    // 2007 − 4 = 2003: 2003 mod 10 = 3 → 丁, 2003 mod 12 = 11 → 亥. 丁 阴火 generates 己 阴土, same
+    // polarity → 偏印; 亥's 本气 壬 阳水 is what 土 controls, opposite polarity → 正财. 亥 neither
+    // 合s nor 冲s 午 卯 卯 未. Age 2007 − 1990 = 17, 虚岁 18; the second 大运 (2007–2016).
+    expect(years.find((y) => y.year === 2007)).toEqual({
+      year: 2007,
+      ganzhi: "丁亥",
+      age: 17,
+      age_xu: 18,
+      shishen_gan: "偏印",
+      shishen_zhi: "正财",
+      dayun_index: 2,
+      branch_relations: [],
+    });
+    // 2029 − 4 = 2025: 2025 mod 10 = 5 → 己, 2025 mod 12 = 9 → 酉. 己 against 己 → 比肩; 酉's 本气
+    // 辛 阴金 is what 土 generates, same polarity → 食神. 卯酉 冲 the month and the day branch.
+    expect(years.find((y) => y.year === 2029)).toEqual({
+      year: 2029,
+      ganzhi: "己酉",
+      age: 39,
+      age_xu: 40,
+      shishen_gan: "比肩",
+      shishen_zhi: "食神",
+      dayun_index: 4,
+      branch_relations: [
+        { pillar: "month", type: "六冲" },
+        { pillar: "day", type: "六冲" },
+      ],
+    });
+  });
+
+  it("where it meets the 流年 list, it says the same", () => {
+    for (const { relations: _r, shensha: _s, ...entry } of sample.liunian) {
+      expect(years.find((y) => y.year === entry.year)).toEqual(entry);
+    }
   });
 });
 

@@ -1914,6 +1914,1078 @@
           ],
           "shensha": []
         }
+      ],
+      "dayun_years": [
+        {
+          "year": 1992,
+          "ganzhi": "壬申",
+          "age": 5,
+          "age_xu": 6,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "偏财",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 1993,
+          "ganzhi": "癸酉",
+          "age": 6,
+          "age_xu": 7,
+          "shishen_gan": "正官",
+          "shishen_zhi": "正财",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 1994,
+          "ganzhi": "甲戌",
+          "age": 7,
+          "age_xu": 8,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "食神",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 1995,
+          "ganzhi": "乙亥",
+          "age": 8,
+          "age_xu": 9,
+          "shishen_gan": "正印",
+          "shishen_zhi": "七杀",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 1996,
+          "ganzhi": "丙子",
+          "age": 9,
+          "age_xu": 10,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "正官",
+          "dayun_index": 1,
+          "branch_relations": []
+        },
+        {
+          "year": 1997,
+          "ganzhi": "丁丑",
+          "age": 10,
+          "age_xu": 11,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "伤官",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 1998,
+          "ganzhi": "戊寅",
+          "age": 11,
+          "age_xu": 12,
+          "shishen_gan": "食神",
+          "shishen_zhi": "偏印",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 1999,
+          "ganzhi": "己卯",
+          "age": 12,
+          "age_xu": 13,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "正印",
+          "dayun_index": 1,
+          "branch_relations": []
+        },
+        {
+          "year": 2000,
+          "ganzhi": "庚辰",
+          "age": 13,
+          "age_xu": 14,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "食神",
+          "dayun_index": 1,
+          "branch_relations": []
+        },
+        {
+          "year": 2001,
+          "ganzhi": "辛巳",
+          "age": 14,
+          "age_xu": 15,
+          "shishen_gan": "正财",
+          "shishen_zhi": "比肩",
+          "dayun_index": 1,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2002,
+          "ganzhi": "壬午",
+          "age": 15,
+          "age_xu": 16,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "劫财",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2003,
+          "ganzhi": "癸未",
+          "age": 16,
+          "age_xu": 17,
+          "shishen_gan": "正官",
+          "shishen_zhi": "伤官",
+          "dayun_index": 2,
+          "branch_relations": []
+        },
+        {
+          "year": 2004,
+          "ganzhi": "甲申",
+          "age": 17,
+          "age_xu": 18,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "偏财",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2005,
+          "ganzhi": "乙酉",
+          "age": 18,
+          "age_xu": 19,
+          "shishen_gan": "正印",
+          "shishen_zhi": "正财",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2006,
+          "ganzhi": "丙戌",
+          "age": 19,
+          "age_xu": 20,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "食神",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2007,
+          "ganzhi": "丁亥",
+          "age": 20,
+          "age_xu": 21,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "七杀",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2008,
+          "ganzhi": "戊子",
+          "age": 21,
+          "age_xu": 22,
+          "shishen_gan": "食神",
+          "shishen_zhi": "正官",
+          "dayun_index": 2,
+          "branch_relations": []
+        },
+        {
+          "year": 2009,
+          "ganzhi": "己丑",
+          "age": 22,
+          "age_xu": 23,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "伤官",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2010,
+          "ganzhi": "庚寅",
+          "age": 23,
+          "age_xu": 24,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "偏印",
+          "dayun_index": 2,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2011,
+          "ganzhi": "辛卯",
+          "age": 24,
+          "age_xu": 25,
+          "shishen_gan": "正财",
+          "shishen_zhi": "正印",
+          "dayun_index": 2,
+          "branch_relations": []
+        },
+        {
+          "year": 2012,
+          "ganzhi": "壬辰",
+          "age": 25,
+          "age_xu": 26,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "食神",
+          "dayun_index": 3,
+          "branch_relations": []
+        },
+        {
+          "year": 2013,
+          "ganzhi": "癸巳",
+          "age": 26,
+          "age_xu": 27,
+          "shishen_gan": "正官",
+          "shishen_zhi": "比肩",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2014,
+          "ganzhi": "甲午",
+          "age": 27,
+          "age_xu": 28,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "劫财",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2015,
+          "ganzhi": "乙未",
+          "age": 28,
+          "age_xu": 29,
+          "shishen_gan": "正印",
+          "shishen_zhi": "伤官",
+          "dayun_index": 3,
+          "branch_relations": []
+        },
+        {
+          "year": 2016,
+          "ganzhi": "丙申",
+          "age": 29,
+          "age_xu": 30,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "偏财",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2017,
+          "ganzhi": "丁酉",
+          "age": 30,
+          "age_xu": 31,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "正财",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2018,
+          "ganzhi": "戊戌",
+          "age": 31,
+          "age_xu": 32,
+          "shishen_gan": "食神",
+          "shishen_zhi": "食神",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2019,
+          "ganzhi": "己亥",
+          "age": 32,
+          "age_xu": 33,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "七杀",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2020,
+          "ganzhi": "庚子",
+          "age": 33,
+          "age_xu": 34,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "正官",
+          "dayun_index": 3,
+          "branch_relations": []
+        },
+        {
+          "year": 2021,
+          "ganzhi": "辛丑",
+          "age": 34,
+          "age_xu": 35,
+          "shishen_gan": "正财",
+          "shishen_zhi": "伤官",
+          "dayun_index": 3,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2022,
+          "ganzhi": "壬寅",
+          "age": 35,
+          "age_xu": 36,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "偏印",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2023,
+          "ganzhi": "癸卯",
+          "age": 36,
+          "age_xu": 37,
+          "shishen_gan": "正官",
+          "shishen_zhi": "正印",
+          "dayun_index": 4,
+          "branch_relations": []
+        },
+        {
+          "year": 2024,
+          "ganzhi": "甲辰",
+          "age": 37,
+          "age_xu": 38,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "食神",
+          "dayun_index": 4,
+          "branch_relations": []
+        },
+        {
+          "year": 2025,
+          "ganzhi": "乙巳",
+          "age": 38,
+          "age_xu": 39,
+          "shishen_gan": "正印",
+          "shishen_zhi": "比肩",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2026,
+          "ganzhi": "丙午",
+          "age": 39,
+          "age_xu": 40,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "劫财",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2027,
+          "ganzhi": "丁未",
+          "age": 40,
+          "age_xu": 41,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "伤官",
+          "dayun_index": 4,
+          "branch_relations": []
+        },
+        {
+          "year": 2028,
+          "ganzhi": "戊申",
+          "age": 41,
+          "age_xu": 42,
+          "shishen_gan": "食神",
+          "shishen_zhi": "偏财",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2029,
+          "ganzhi": "己酉",
+          "age": 42,
+          "age_xu": 43,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "正财",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2030,
+          "ganzhi": "庚戌",
+          "age": 43,
+          "age_xu": 44,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "食神",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2031,
+          "ganzhi": "辛亥",
+          "age": 44,
+          "age_xu": 45,
+          "shishen_gan": "正财",
+          "shishen_zhi": "七杀",
+          "dayun_index": 4,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2032,
+          "ganzhi": "壬子",
+          "age": 45,
+          "age_xu": 46,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "正官",
+          "dayun_index": 5,
+          "branch_relations": []
+        },
+        {
+          "year": 2033,
+          "ganzhi": "癸丑",
+          "age": 46,
+          "age_xu": 47,
+          "shishen_gan": "正官",
+          "shishen_zhi": "伤官",
+          "dayun_index": 5,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2034,
+          "ganzhi": "甲寅",
+          "age": 47,
+          "age_xu": 48,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "偏印",
+          "dayun_index": 5,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2035,
+          "ganzhi": "乙卯",
+          "age": 48,
+          "age_xu": 49,
+          "shishen_gan": "正印",
+          "shishen_zhi": "正印",
+          "dayun_index": 5,
+          "branch_relations": []
+        },
+        {
+          "year": 2036,
+          "ganzhi": "丙辰",
+          "age": 49,
+          "age_xu": 50,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "食神",
+          "dayun_index": 5,
+          "branch_relations": []
+        },
+        {
+          "year": 2037,
+          "ganzhi": "丁巳",
+          "age": 50,
+          "age_xu": 51,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "比肩",
+          "dayun_index": 5,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2038,
+          "ganzhi": "戊午",
+          "age": 51,
+          "age_xu": 52,
+          "shishen_gan": "食神",
+          "shishen_zhi": "劫财",
+          "dayun_index": 5,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2039,
+          "ganzhi": "己未",
+          "age": 52,
+          "age_xu": 53,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "伤官",
+          "dayun_index": 5,
+          "branch_relations": []
+        },
+        {
+          "year": 2040,
+          "ganzhi": "庚申",
+          "age": 53,
+          "age_xu": 54,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "偏财",
+          "dayun_index": 5,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2041,
+          "ganzhi": "辛酉",
+          "age": 54,
+          "age_xu": 55,
+          "shishen_gan": "正财",
+          "shishen_zhi": "正财",
+          "dayun_index": 5,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2042,
+          "ganzhi": "壬戌",
+          "age": 55,
+          "age_xu": 56,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "食神",
+          "dayun_index": 6,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2043,
+          "ganzhi": "癸亥",
+          "age": 56,
+          "age_xu": 57,
+          "shishen_gan": "正官",
+          "shishen_zhi": "七杀",
+          "dayun_index": 6,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2044,
+          "ganzhi": "甲子",
+          "age": 57,
+          "age_xu": 58,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "正官",
+          "dayun_index": 6,
+          "branch_relations": []
+        },
+        {
+          "year": 2045,
+          "ganzhi": "乙丑",
+          "age": 58,
+          "age_xu": 59,
+          "shishen_gan": "正印",
+          "shishen_zhi": "伤官",
+          "dayun_index": 6,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2046,
+          "ganzhi": "丙寅",
+          "age": 59,
+          "age_xu": 60,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "偏印",
+          "dayun_index": 6,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2047,
+          "ganzhi": "丁卯",
+          "age": 60,
+          "age_xu": 61,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "正印",
+          "dayun_index": 6,
+          "branch_relations": []
+        },
+        {
+          "year": 2048,
+          "ganzhi": "戊辰",
+          "age": 61,
+          "age_xu": 62,
+          "shishen_gan": "食神",
+          "shishen_zhi": "食神",
+          "dayun_index": 6,
+          "branch_relations": []
+        },
+        {
+          "year": 2049,
+          "ganzhi": "己巳",
+          "age": 62,
+          "age_xu": 63,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "比肩",
+          "dayun_index": 6,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2050,
+          "ganzhi": "庚午",
+          "age": 63,
+          "age_xu": 64,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "劫财",
+          "dayun_index": 6,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2051,
+          "ganzhi": "辛未",
+          "age": 64,
+          "age_xu": 65,
+          "shishen_gan": "正财",
+          "shishen_zhi": "伤官",
+          "dayun_index": 6,
+          "branch_relations": []
+        },
+        {
+          "year": 2052,
+          "ganzhi": "壬申",
+          "age": 65,
+          "age_xu": 66,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "偏财",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2053,
+          "ganzhi": "癸酉",
+          "age": 66,
+          "age_xu": 67,
+          "shishen_gan": "正官",
+          "shishen_zhi": "正财",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2054,
+          "ganzhi": "甲戌",
+          "age": 67,
+          "age_xu": 68,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "食神",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2055,
+          "ganzhi": "乙亥",
+          "age": 68,
+          "age_xu": 69,
+          "shishen_gan": "正印",
+          "shishen_zhi": "七杀",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2056,
+          "ganzhi": "丙子",
+          "age": 69,
+          "age_xu": 70,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "正官",
+          "dayun_index": 7,
+          "branch_relations": []
+        },
+        {
+          "year": 2057,
+          "ganzhi": "丁丑",
+          "age": 70,
+          "age_xu": 71,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "伤官",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2058,
+          "ganzhi": "戊寅",
+          "age": 71,
+          "age_xu": 72,
+          "shishen_gan": "食神",
+          "shishen_zhi": "偏印",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2059,
+          "ganzhi": "己卯",
+          "age": 72,
+          "age_xu": 73,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "正印",
+          "dayun_index": 7,
+          "branch_relations": []
+        },
+        {
+          "year": 2060,
+          "ganzhi": "庚辰",
+          "age": 73,
+          "age_xu": 74,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "食神",
+          "dayun_index": 7,
+          "branch_relations": []
+        },
+        {
+          "year": 2061,
+          "ganzhi": "辛巳",
+          "age": 74,
+          "age_xu": 75,
+          "shishen_gan": "正财",
+          "shishen_zhi": "比肩",
+          "dayun_index": 7,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2062,
+          "ganzhi": "壬午",
+          "age": 75,
+          "age_xu": 76,
+          "shishen_gan": "七杀",
+          "shishen_zhi": "劫财",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2063,
+          "ganzhi": "癸未",
+          "age": 76,
+          "age_xu": 77,
+          "shishen_gan": "正官",
+          "shishen_zhi": "伤官",
+          "dayun_index": 8,
+          "branch_relations": []
+        },
+        {
+          "year": 2064,
+          "ganzhi": "甲申",
+          "age": 77,
+          "age_xu": 78,
+          "shishen_gan": "偏印",
+          "shishen_zhi": "偏财",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2065,
+          "ganzhi": "乙酉",
+          "age": 78,
+          "age_xu": 79,
+          "shishen_gan": "正印",
+          "shishen_zhi": "正财",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六冲"
+            }
+          ]
+        },
+        {
+          "year": 2066,
+          "ganzhi": "丙戌",
+          "age": 79,
+          "age_xu": 80,
+          "shishen_gan": "比肩",
+          "shishen_zhi": "食神",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "year",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2067,
+          "ganzhi": "丁亥",
+          "age": 80,
+          "age_xu": 81,
+          "shishen_gan": "劫财",
+          "shishen_zhi": "七杀",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "hour",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2068,
+          "ganzhi": "戊子",
+          "age": 81,
+          "age_xu": 82,
+          "shishen_gan": "食神",
+          "shishen_zhi": "正官",
+          "dayun_index": 8,
+          "branch_relations": []
+        },
+        {
+          "year": 2069,
+          "ganzhi": "己丑",
+          "age": 82,
+          "age_xu": 83,
+          "shishen_gan": "伤官",
+          "shishen_zhi": "伤官",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "day",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2070,
+          "ganzhi": "庚寅",
+          "age": 83,
+          "age_xu": 84,
+          "shishen_gan": "偏财",
+          "shishen_zhi": "偏印",
+          "dayun_index": 8,
+          "branch_relations": [
+            {
+              "pillar": "month",
+              "type": "六合"
+            }
+          ]
+        },
+        {
+          "year": 2071,
+          "ganzhi": "辛卯",
+          "age": 84,
+          "age_xu": 85,
+          "shishen_gan": "正财",
+          "shishen_zhi": "正印",
+          "dayun_index": 8,
+          "branch_relations": []
+        }
       ]
     },
     "provenance": [
@@ -1996,6 +3068,11 @@
         "path": "/liuyue",
         "source_level": "traditional_text",
         "note": "流月以节令为界（立春至小寒，北京时间）；寅月天干按五虎遁"
+      },
+      {
+        "path": "/dayun_years",
+        "source_level": "traditional_text",
+        "note": "每步大运的十个流年，与 liunian 同法（干支以立春为界、十神对日主、branch_relations 只含六冲六合）；不含 relations、shensha"
       },
       {
         "path": "/strength",

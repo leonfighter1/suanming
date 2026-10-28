@@ -1,6 +1,6 @@
 {
   "_readme": "Protected term table (Phase 1 §2.3). Keys are the canonical engine form (simplified, as lunar-javascript emits). Values are the only allowed display form per locale. Hand-curated; never machine-translated. Shipped with the app and hot-updatable.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "terms": {
     "比肩": {
       "zh-Hant": "比肩",
@@ -286,6 +286,61 @@
       "zh-Hant": "立春",
       "zh-Hans": "立春",
       "en": "Start of Spring (Li Chun)"
+    },
+    "惊蛰": {
+      "zh-Hant": "驚蟄",
+      "zh-Hans": "惊蛰",
+      "en": "Awakening of Insects (Jing Zhe)"
+    },
+    "清明": {
+      "zh-Hant": "清明",
+      "zh-Hans": "清明",
+      "en": "Clear and Bright (Qing Ming)"
+    },
+    "立夏": {
+      "zh-Hant": "立夏",
+      "zh-Hans": "立夏",
+      "en": "Start of Summer (Li Xia)"
+    },
+    "芒种": {
+      "zh-Hant": "芒種",
+      "zh-Hans": "芒种",
+      "en": "Grain in Ear (Mang Zhong)"
+    },
+    "小暑": {
+      "zh-Hant": "小暑",
+      "zh-Hans": "小暑",
+      "en": "Minor Heat (Xiao Shu)"
+    },
+    "立秋": {
+      "zh-Hant": "立秋",
+      "zh-Hans": "立秋",
+      "en": "Start of Autumn (Li Qiu)"
+    },
+    "白露": {
+      "zh-Hant": "白露",
+      "zh-Hans": "白露",
+      "en": "White Dew (Bai Lu)"
+    },
+    "寒露": {
+      "zh-Hant": "寒露",
+      "zh-Hans": "寒露",
+      "en": "Cold Dew (Han Lu)"
+    },
+    "立冬": {
+      "zh-Hant": "立冬",
+      "zh-Hans": "立冬",
+      "en": "Start of Winter (Li Dong)"
+    },
+    "大雪": {
+      "zh-Hant": "大雪",
+      "zh-Hans": "大雪",
+      "en": "Major Snow (Da Xue)"
+    },
+    "小寒": {
+      "zh-Hant": "小寒",
+      "zh-Hans": "小寒",
+      "en": "Minor Cold (Xiao Han)"
     },
     "时": {
       "zh-Hant": "時",

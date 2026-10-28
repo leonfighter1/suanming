@@ -4,7 +4,7 @@
 
 1. Audit verification must check the stored record itself, not only a fresh recomputation.
 2. Exclude script-generated files from formatters and linters when the script that creates them is added.
-3. Size fixed-height cells for the maximum number of lines they can show, and cap every line with maxLines + ellipsis.
+3. Size fixed-height cells for the maximum number of lines they can show, and cap every line with maxLines + ellipsis. When a fixed-size box gains a border, take the border out of its padding: an ellipsis hides the lost room from widget tests (their font is not the real one), so look at a rendered screenshot (v3.3.0: 「2026 · 虛歲 37」 lost its age).
 4. Give heavy tests (WASM or browser start-up, sweeps over a whole dataset) an explicit timeout instead of relying on the 5 s default: a synchronous test can't be stopped, so it fails after finishing late under parallel load (the places sweep, v2.7.0: 2.5 s alone, 9.8 s in the full suite).
 5. Before treating a statistical test failure as a bug, check the test's null hypothesis matches how the process is supposed to behave.
 6. After touching a web-only (js_interop) file, run flutter build web before calling it done; the harness app gate does this.
@@ -30,12 +30,19 @@
 26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
 27. Pump a frame after scrollUntilVisible or tester.ensureVisible, before the next finder, tap or scroll: both jump without a frame, so the next step sees the old layout (a tap goes to the old position). Use scrollTo() from test/support.dart for each card.
 28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
-29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one.
+29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one. The exception is a fact no prompt reads that would make the check toothless: dayun_years (v3.3.0, 80 years, so every 干支) stays out, and the 甲子 test pins that.
 30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports (never `tsx -e`: Git Bash passes the newlines as `\n`), and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up. Check CJK text in such a script or with the Grep tool: Git Bash's grep here is not UTF-8 (`-P` refuses, `-o` splits characters) (v3.2.0).
 31. In 简体 copy (app_zh.arb, 简体 prompts), quote with “”, never 「」; write each script on its own instead of converting, and let locale_test check.
 32. To check that text is not empty, assert `expect(text.trim()).not.toBe('')`: `expect.any(String)` also matches `''`. Read each new assertion once for what it would let through.
+33. Give widget keys an explicit type, ValueKey<String>(id), never ValueKey(x) on a nullable value: a ValueKey<String?> matches no find.byKey(Key(...)) and focusedKey() ignores it.
 
 ## Log
+
+### 2026-10-28: A key built from a nullable id matched nothing
+- **Symptom:** The new timeline tests found no item by its key, and tabTo never reached it: Tab ran 60 stops and ended elsewhere.
+- **Root cause:** ValueKey(s.id) with a String? id is a ValueKey<String?>; it equals no ValueKey<String>, and focusedKey() only names ValueKey<String>.
+- **Fix:** The item key is built as ValueKey<String>(s.id!).
+- **Rule:** Give widget keys an explicit type, ValueKey<String>(id), never ValueKey(x) on a nullable value: a ValueKey<String?> matches no find.byKey(Key(...)) and focusedKey() ignores it. (Rule 33)
 
 ### 2026-10-28: A non-empty check accepted an empty string
 - **Symptom:** The new term tips test checked that every tip has text with expect.any(String); an empty tip would have passed. Caught on review, before any tip was empty.

@@ -42,6 +42,8 @@ describe("the focused 八字 view", () => {
       { trend: true },
     ) as any;
     expect(view.liuyue).toBeUndefined();
+    expect(full.dayun_years).toHaveLength(80); // the chart has them (v3.3.0); the view does not
+    expect(view.dayun_years).toBeUndefined();
     expect(view.view.focus_years).toEqual([2026, 2027, 2028]);
     // Same lengths and order as the stored chart, so /liunian/3 or /dayun/cycles/5 mean the same.
     expect(view.dayun.cycles.map((c: any) => [c.index, c.ganzhi])).toEqual(
@@ -121,9 +123,12 @@ describe("the focused 八字 view", () => {
     expect(reading).toContain('"focus_years": [\n   2026,\n   2027,\n   2028,\n   2031\n  ]');
     expect(reading).not.toContain('"liuyue"');
     expect(reading).not.toContain('"path": "/liuyue"'); // provenance only for paths it can see
+    expect(reading).not.toContain('"dayun_years"');
+    expect(reading).not.toContain('"path": "/dayun_years"');
 
     await generateRemedy(chart, report, "health", { country: "HK" }, deps(mock));
     const plan = mock.calls.filter((c) => c.agent === "remedy").at(-1)!.user;
+    expect(plan).not.toContain('"dayun_years"');
     const focus = planFocus(report.layers!.trend, "health", 2026);
     expect(plan).toContain(`"focus_cycles": [\n   ${focus.cycles.join(",\n   ")}\n  ]`);
     expect(plan).not.toContain('"trend": {\n  "method"'); // the plan gets its scores in <trend>
@@ -131,6 +136,7 @@ describe("the focused 八字 view", () => {
     await generateLifeReport(chart, { locale: "zh-Hans", country: "HK" }, deps(mock));
     const life = mock.calls.find((c) => c.agent === "life_methods")!.user;
     expect(life).not.toContain('"liuyue"');
+    expect(life).not.toContain('"dayun_years"');
     expect(life).toContain('"dayun_liunian"'); // the stage scores (trend.dayun) are still there
   });
 });

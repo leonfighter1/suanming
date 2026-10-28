@@ -574,5 +574,22 @@
       }
     }
   },
-  "shenshaName": "Symbolic stars (Shen Sha)"
+  "shenshaName": "Symbolic stars (Shen Sha)",
+  "timelineNow": "Now",
+  "timelineThisYear": "This year",
+  "dayunTapHint": "Tap a luck pillar to see its ten years.",
+  "dayunYears": "{ganzhi} luck pillar, {from}–{to}",
+  "@dayunYears": {
+    "placeholders": {
+      "ganzhi": { "type": "String" },
+      "from": { "type": "int" },
+      "to": { "type": "int" }
+    }
+  },
+  "liuyueOf": "Months of {year}",
+  "@liuyueOf": { "placeholders": { "year": { "type": "int" } } },
+  "pillarRelation": "{pillar} {relation}",
+  "@pillarRelation": {
+    "placeholders": { "pillar": { "type": "String" }, "relation": { "type": "String" } }
+  }
 }

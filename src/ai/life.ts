@@ -115,8 +115,10 @@ interface BaziFacts {
  * no life prompt uses (stage scores come from trend.dayun).
  */
 function lifeBazi(chart: ChartFact): Record<string, unknown> {
+  // 流月 and the years of each 大运 (v3.3.0) stay out, as in the reading's view.
   const {
     liuyue: _months,
+    dayun_years: _decades,
     trend,
     ...bazi
   } = modelFacts(chart) as Record<string, unknown> & {

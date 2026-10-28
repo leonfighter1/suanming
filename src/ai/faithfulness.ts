@@ -74,6 +74,8 @@ function knownGanzhi(chart: ChartFact): Set<string> {
   if (typeof f.taiyuan === "string") out.add(f.taiyuan);
   for (const m of (f.liuyue as { months?: { ganzhi: string }[] } | undefined)?.months ?? [])
     out.add(m.ganzhi);
+  // Not dayun_years (v3.3.0): no prompt reads it, and its 80 years hold every 干支, so counting
+  // them would let any 干支 through.
   return out;
 }
 

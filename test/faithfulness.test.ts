@@ -74,7 +74,10 @@ describe("checkFaithfulness", () => {
   it("flags 干支 not in the chart and wrong year 干支", async () => {
     const r = await reportWith(bazi, ["日柱甲子，2027年丙午。"]);
     const kinds = checkFaithfulness(bazi, r).map((i) => i.kind);
-    expect(kinds).toContain("unknown_ganzhi"); // 甲子 isn't in this chart
+    // 甲子 isn't in this chart's pillars, 大運, 流年 or 流月. It is 2044 (2040 mod 10 = 0 → 甲,
+    // mod 12 = 0 → 子), one of the dayun_years (v3.3.0), which the check leaves out on purpose.
+    expect((bazi.facts as any).dayun_years.map((y: any) => y.ganzhi)).toContain("甲子");
+    expect(kinds).toContain("unknown_ganzhi");
     expect(kinds).toContain("wrong_year_ganzhi"); // 2027 is 丁未
   });
 

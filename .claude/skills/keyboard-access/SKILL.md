@@ -42,6 +42,7 @@ Where things are:
 | A tap target that isn't a Material button, chip or tile | `Pressable(onPressed:, label:)`. A bare `GestureDetector` fails a test.                              |
 | A chart or anything that needs the tap position         | `Pressable(onTapDown:, keys: {←, →, Home, End})` (see `trend_chart.dart`)                            |
 | A horizontal strip that scrolls                         | `Pressable(keys:)` around it plus a `ScrollController` (see `_Timeline` in `bazi_chart_page.dart`)   |
+| Items in a strip that open something                    | a `Pressable` per item, inside the strip's (the 大运: Tab reaches each, Enter opens, ←/→ scroll)     |
 | A single-choice `SegmentedButton`                       | wrap it: `SegmentKeys(child: SegmentedButton<T>(...))`                                               |
 | The focus look                                          | buttons and chips: the theme; cards: `AppCard` (built in); custom: `Pressable` or `FocusRing`        |
 | A picker that should open ready for typing              | `keyboardInUse` (the last input was a key): date/time pickers open in input mode, search autofocuses |

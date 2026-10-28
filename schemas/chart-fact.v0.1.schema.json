@@ -359,6 +359,45 @@
             "liunian": { "type": "array", "items": { "$ref": "#/$defs/period_score" } }
           }
         },
+        "dayun_years": {
+          "description": "The ten years of every 大运, in order (charts since v3.3.0): the liunian entry without relations and shensha. For the 命盘 page; no prompt reads it.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "year",
+              "ganzhi",
+              "age",
+              "age_xu",
+              "shishen_gan",
+              "shishen_zhi",
+              "dayun_index",
+              "branch_relations"
+            ],
+            "properties": {
+              "year": { "type": "integer" },
+              "ganzhi": { "type": "string", "minLength": 2, "maxLength": 2 },
+              "age": { "type": "integer" },
+              "age_xu": { "description": "虚岁 in this year", "type": "integer" },
+              "shishen_gan": { "type": "string" },
+              "shishen_zhi": { "type": "string" },
+              "dayun_index": { "type": "integer", "minimum": 1 },
+              "branch_relations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["pillar", "type"],
+                  "properties": {
+                    "pillar": { "enum": ["year", "month", "day", "hour"] },
+                    "type": { "enum": ["六冲", "六合"] }
+                  }
+                }
+              }
+            }
+          }
+        },
         "liuyue": {
           "type": "object",
           "additionalProperties": false,

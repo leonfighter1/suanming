@@ -1245,4 +1245,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shenshaName => 'Symbolic stars (Shen Sha)';
+
+  @override
+  String get timelineNow => 'Now';
+
+  @override
+  String get timelineThisYear => 'This year';
+
+  @override
+  String get dayunTapHint => 'Tap a luck pillar to see its ten years.';
+
+  @override
+  String dayunYears(String ganzhi, int from, int to) {
+    return '$ganzhi luck pillar, $from–$to';
+  }
+
+  @override
+  String liuyueOf(int year) {
+    return 'Months of $year';
+  }
+
+  @override
+  String pillarRelation(String pillar, String relation) {
+    return '$pillar $relation';
+  }
 }

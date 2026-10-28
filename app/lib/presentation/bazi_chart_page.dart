@@ -139,25 +139,7 @@ class BaziChartPage extends ConsumerWidget {
             ],
           ),
         ),
-      AppCard(
-        title: l10n.dayun,
-        icon: Icons.timeline,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${t(b.dayunForward ? '顺行' : '逆行')} · ${l10n.dayunFrom(b.dayunStartDate)}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TermTipButton('大运', l10n.dayun),
-          ],
-        ),
-        child: _Timeline(
-          key: const Key('dayun-strip'),
-          label: l10n.dayun,
-          items: [for (final c in b.cycles) _Step(c.ganzhi, '${c.startYear}', l10n.age(c.xusui))],
-        ),
-      ),
+      _DayunCard(chart: b, t: t),
       AppCard(
         title: l10n.liunian,
         icon: Icons.calendar_view_month,
@@ -165,17 +147,31 @@ class BaziChartPage extends ConsumerWidget {
         child: _Timeline(
           key: const Key('liunian-strip'),
           label: l10n.liunian,
-          items: [
-            for (final y in b.liunian)
-              _Step(
-                y.ganzhi,
-                '${y.year} · ${l10n.age(y.xusui)}',
-                '${t(y.shishenGan)} / ${t(y.shishenZhi)}',
-                y.relations.map((r) => '${l10n.pillar(r.pillar)}${t(r.type)}').join(' '),
-              ),
-          ],
+          items: [for (final y in b.liunian) _yearStep(y, t, l10n, b.thisYear)],
         ),
       ),
+      // 流月 of the chart's year, from 立春 (facts since v1.3.0, shown since v3.3.0).
+      if (b.liuyue.isNotEmpty)
+        AppCard(
+          key: const Key('liuyue-card'),
+          title: l10n.liuyueOf(b.liuyueYear!),
+          icon: Icons.date_range,
+          trailing: TermTipButton('流月', t('流月')),
+          child: _Timeline(
+            key: const Key('liuyue-strip'),
+            label: t('流月'),
+            items: [
+              for (final m in b.liuyue)
+                // When it begins (the date, 北京时间), the 节 it begins on, its 十神.
+                _Step(
+                  m.ganzhi,
+                  m.starts.substring(0, 10),
+                  line2: t(m.jie),
+                  line3: '${t(m.shishenGan)} / ${t(m.shishenZhi)}',
+                ),
+            ],
+          ),
+        ),
       ReportRequest(
         chartId: chart.chartId,
         system: 'bazi',
@@ -353,12 +349,122 @@ class _WuxingBar extends StatelessWidget {
       );
 }
 
+/// 大运: the one running now is marked 当前; tapping one opens its ten years under the strip
+/// (v3.3.0).
+class _DayunCard extends StatefulWidget {
+  const _DayunCard({required this.chart, required this.t});
+  final BaziChart chart;
+  final String Function(String) t;
+
+  @override
+  State<_DayunCard> createState() => _DayunCardState();
+}
+
+class _DayunCardState extends State<_DayunCard> {
+  /// The 大运 whose years are open.
+  int? _open;
+
+  @override
+  Widget build(BuildContext context) {
+    final b = widget.chart;
+    final t = widget.t;
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final open = b.cycles.where((c) => c.index == _open).firstOrNull;
+    final years = open == null ? const <Liunian>[] : b.yearsOf(open.index);
+    return AppCard(
+      title: l10n.dayun,
+      icon: Icons.timeline,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${t(b.dayunForward ? '顺行' : '逆行')} · ${l10n.dayunFrom(b.dayunStartDate)}',
+            style: theme.textTheme.bodySmall,
+          ),
+          TermTipButton('大运', l10n.dayun),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _Timeline(
+            key: const Key('dayun-strip'),
+            label: l10n.dayun,
+            items: [
+              for (final c in b.cycles)
+                _Step(
+                  c.ganzhi,
+                  '${c.startYear}',
+                  line2: l10n.age(c.xusui),
+                  badge: c.index == b.currentDayun ? l10n.timelineNow : null,
+                  selected: c.index == _open,
+                  id: 'dayun-${c.index}',
+                  // Charts made before v3.3.0 have no years to open.
+                  onTap: b.dayunYears.isEmpty ? null : () => setState(() => _open = _open == c.index ? null : c.index),
+                ),
+            ],
+          ),
+          if (open == null && b.dayunYears.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: Space.s),
+              child: Text(
+                l10n.dayunTapHint,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
+          if (open != null && years.isNotEmpty) ...[
+            const SizedBox(height: Space.m),
+            Text(l10n.dayunYears(open.ganzhi, open.startYear, open.startYear + 9), style: theme.textTheme.titleSmall),
+            const SizedBox(height: Space.s),
+            // Keyed by the 大运, so switching to another starts its strip at its first year.
+            _Timeline(
+              key: ValueKey('decade-${open.index}'),
+              label: l10n.dayunYears(open.ganzhi, open.startYear, open.startYear + 9),
+              items: [for (final y in years) _yearStep(y, t, l10n, b.thisYear)],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A 流年 in a strip: 干支, year and 虚岁, its 十神, its 六冲 / 六合 with the chart; 今年 marked.
+_Step _yearStep(Liunian y, String Function(String) t, AppLocalizations l10n, int? thisYear) => _Step(
+      y.ganzhi,
+      '${y.year} · ${l10n.age(y.xusui)}',
+      line2: '${t(y.shishenGan)} / ${t(y.shishenZhi)}',
+      // 時柱六合, or Hour Six Harmonies (English read YearSix Clashes before v3.3.0).
+      line3: y.relations.map((r) => l10n.pillarRelation(l10n.pillar(r.pillar), t(r.type))).join(' '),
+      badge: y.year == thisYear ? l10n.timelineThisYear : null,
+    );
+
 class _Step {
-  const _Step(this.ganzhi, this.line1, [this.line2 = '', this.line3 = '']);
+  const _Step(
+    this.ganzhi,
+    this.line1, {
+    this.line2 = '',
+    this.line3 = '',
+    this.badge,
+    this.id,
+    this.onTap,
+    this.selected = false,
+  });
   final String ganzhi;
   final String line1;
   final String line2;
   final String line3;
+
+  /// A label on the top edge: 当前 (the 大运 running now) or 今年.
+  final String? badge;
+
+  /// The key of an item that can be pressed, e.g. dayun-3.
+  final String? id;
+  final VoidCallback? onTap;
+
+  /// Its details are open below the strip: a primary border.
+  final bool selected;
 }
 
 class _Timeline extends StatefulWidget {
@@ -396,11 +502,59 @@ class _TimelineState extends State<_Timeline> {
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
-    final small = Theme.of(context).textTheme.bodySmall;
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final small = theme.textTheme.bodySmall;
+    final scheme = theme.colorScheme;
+    // Room above the items for a badge on their top edge.
+    final top = items.any((s) => s.badge != null) ? 10.0 : 0.0;
     Widget line(String s) =>
         Text(s, style: small, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis);
-    // Keyboard users can't swipe: Tab focuses the strip, ←/→ step, Home/End jump.
+    Widget item(_Step s) {
+      Widget box = Container(
+        width: 96,
+        // The 2 px border comes out of the padding, so the text keeps its 80 px (2026 · 虛歲 37).
+        padding: const EdgeInsets.symmetric(horizontal: Space.s - 2, vertical: Space.m - 2),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(Radii.field),
+          // Every item has the border, so opening one doesn't move its text.
+          border: Border.all(color: s.selected ? scheme.primary : Colors.transparent, width: 2),
+        ),
+        child: Column(
+          children: [
+            GanZhiText(s.ganzhi, size: 22),
+            const SizedBox(height: Space.xs),
+            line(s.line1),
+            if (s.line2.isNotEmpty) line(s.line2),
+            if (s.line3.isNotEmpty) line(s.line3),
+          ],
+        ),
+      );
+      // ValueKey<String>, not ValueKey<String?>: tests and focusedKey() look for string keys.
+      if (s.onTap != null) box = Pressable(key: ValueKey<String>(s.id!), onPressed: s.onTap, child: box);
+      if (s.badge == null) return box;
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          box,
+          Positioned(
+            top: -8,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: Space.s - 2, vertical: 1),
+                decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(Radii.chip)),
+                child: Text(s.badge!, style: theme.textTheme.labelSmall?.copyWith(color: scheme.onPrimary)),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Keyboard users can't swipe: Tab focuses the strip, ←/→ step, Home/End jump; Tab goes on to
+    // the items that open (大运).
     return Pressable(
       label: widget.label,
       keys: {
@@ -410,33 +564,15 @@ class _TimelineState extends State<_Timeline> {
         const SingleActivator(LogicalKeyboardKey.end): () => _go((p) => p.maxScrollExtent),
       },
       child: SizedBox(
-        // Room for 干支 + three caption lines (流年: year·age, 十神, 沖合).
-        height: 144,
+        // Room for 干支 + three caption lines (流年: year·age, 十神, 沖合), and a badge.
+        height: 144 + top,
         child: ListView.separated(
           controller: _scroll,
           scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.only(top: top),
           itemCount: items.length,
           separatorBuilder: (_, _) => const SizedBox(width: Space.s),
-          itemBuilder: (_, i) {
-            final s = items[i];
-            return Container(
-              width: 96,
-              padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.m),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(Radii.field),
-              ),
-              child: Column(
-                children: [
-                  GanZhiText(s.ganzhi, size: 22),
-                  const SizedBox(height: Space.xs),
-                  line(s.line1),
-                  if (s.line2.isNotEmpty) line(s.line2),
-                  if (s.line3.isNotEmpty) line(s.line3),
-                ],
-              ),
-            );
-          },
+          itemBuilder: (_, i) => item(items[i]),
         ),
       ),
     );

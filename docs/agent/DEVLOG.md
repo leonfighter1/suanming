@@ -2,6 +2,25 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (u): S4 WP4.3, the 命盘 timeline; release v3.3.0
+
+- v3.2.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (ccd7ab5).
+- Engine:
+  - `dayun_years`: one `yearEntry` helper builds both it and `liunian`, so `liunian`'s JSON is unchanged. Optional in the schema; a provenance entry (filtered out of prompts, since the view lacks the path).
+  - Kept out of every model input (`baziView`, `lifeBazi`) and out of `knownGanzhi`: 80 years cover all 60 干支. The existing 甲子 test now says why (2044 is among them). Rule 29 widened.
+- Term table 1.2.0: the twelve 节. A scratch scan showed they occur nowhere a model reads (only in shensha.ts `liuyue`), so no glossary and no fixture changed.
+- App:
+  - `BaziChart.dayunYears`, `liuyue`, `thisYear`, `currentDayun`, `yearsOf`.
+  - `_DayunCard` holds which 大运 is open.
+  - `_Timeline` items take a badge, a selected border and an `onTap` (a `Pressable` per item inside the strip's).
+  - The new 流月 card.
+- Found while checking a render:
+  - The new 2 px border cost the year line its 虚岁 (an ellipsis, which tests can't see with their square-glyph font): the padding gives the 2 px back. Rule 3 widened.
+  - English relation lines ran together (`pillarRelation` now).
+- Mistakes: rule 33. `ValueKey(s.id)` on a `String?` made `ValueKey<String?>`, so no finder and no `focusedKey()` matched it, and the first timeline tests failed.
+- Plan: WP4.8 now also covers the strips' English lines.
+- v3.3.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (t): S4 WP4.2, term tips on the 命盘; release v3.2.0
 
 - Server:

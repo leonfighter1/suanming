@@ -1202,6 +1202,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shenshaName => '神煞';
+
+  @override
+  String get timelineNow => '当前';
+
+  @override
+  String get timelineThisYear => '今年';
+
+  @override
+  String get dayunTapHint => '点击一步大运，查看它的十年。';
+
+  @override
+  String dayunYears(String ganzhi, int from, int to) {
+    return '$ganzhi大运 · $from–$to年';
+  }
+
+  @override
+  String liuyueOf(int year) {
+    return '$year年流月';
+  }
+
+  @override
+  String pillarRelation(String pillar, String relation) {
+    return '$pillar$relation';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2401,4 +2425,28 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get shenshaName => '神煞';
+
+  @override
+  String get timelineNow => '當前';
+
+  @override
+  String get timelineThisYear => '今年';
+
+  @override
+  String get dayunTapHint => '點選一步大運，查看它的十年。';
+
+  @override
+  String dayunYears(String ganzhi, int from, int to) {
+    return '$ganzhi大運 · $from–$to年';
+  }
+
+  @override
+  String liuyueOf(int year) {
+    return '$year年流月';
+  }
+
+  @override
+  String pillarRelation(String pillar, String relation) {
+    return '$pillar$relation';
+  }
 }
