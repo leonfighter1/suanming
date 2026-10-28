@@ -440,9 +440,22 @@ Plain language: the reader has never studied astrology. Short sentences, everyda
 
 <today> is today's date; use it whenever you mention time. Use the protected terms in <glossary> exactly as given.`;
 
+/**
+ * v2.2.0 (WP2.3): a 八字 reading or plan reads a focused view of the chart (bazi-view.ts). The
+ * prompts say what is in it, so a period shown without its detail is never read as one without
+ * relations.
+ */
+const NARRATIVE_BAZI_V6 = `${NARRATIVE_BAZI_V5}
+
+What you read (v2.2.0): chart_facts.view names the periods in focus: focus_cycles (the current 大运 and the next) and focus_years (this year, the next two, and any year the user asked about). Only those carry relations, shensha, branch_relations and a trend basis; every other 大运 and 流年 keeps only its 干支, years, ages, 十神 (a 流年's) and trend scores. Write the dayun_liunian topic about the periods in focus. You may name the others, but say nothing about their relations or 神煞.`;
+
+const REMEDY_BAZI_V4 = `${REMEDY_BAZI_V3}
+
+What you read (v2.2.0): chart_facts.view names the periods this plan targets: focus_cycles and focus_years, where this topic scores lowest from now on. Only those carry relations and shensha. Target them in target and focus_periods, and say nothing about the relations or 神煞 of other periods.`;
+
 export const PROMPTS = {
   narrative: version("narrative", 4, NARRATIVE_V4),
-  narrative_bazi: version("narrative_bazi", 5, NARRATIVE_BAZI_V5),
+  narrative_bazi: version("narrative_bazi", 6, NARRATIVE_BAZI_V6),
   narrative_tarot: version("narrative_tarot", 1, NARRATIVE_TAROT_V1),
   narrative_astrology: version("narrative_astrology", 1, NARRATIVE_ASTROLOGY_V1),
   action: version("action", 3, ACTION_V3),
@@ -451,7 +464,7 @@ export const PROMPTS = {
   action_astrology: version("action_astrology", 1, ACTION_ASTROLOGY_V1),
   trend: version("trend", 2, TREND_V2),
   remedy: version("remedy", 2, REMEDY_V2),
-  remedy_bazi: version("remedy_bazi", 3, REMEDY_BAZI_V3),
+  remedy_bazi: version("remedy_bazi", 4, REMEDY_BAZI_V4),
   remedy_tarot: version("remedy_tarot", 1, REMEDY_TAROT_V1),
   life_methods: version("life_methods", 2, LIFE_METHODS_V2),
   life_topics: version("life_topics", 2, LIFE_TOPICS_V2),

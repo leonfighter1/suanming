@@ -21,6 +21,7 @@ import {
   type RegionRule,
   type Violation,
 } from "../compliance/index.js";
+import { baziView, readingFocus } from "./bazi-view.js";
 import type { UserContext } from "./context.js";
 import { expectationLayer, factsLayer } from "./layers.js";
 import {
@@ -326,7 +327,15 @@ export async function generateReport(
   const topics = TOPICS.filter((t) => requested.includes(t));
 
   const rules = compileRules(loadRuleSet(), region.rule_groups);
-  const facts = modelFacts(chart);
+  // A 八字 reading reads its focused view (WP2.3); the other methods' facts are small already.
+  const facts =
+    chart.system === "bazi"
+      ? baziView(
+          modelFacts(chart),
+          readingFocus(chart.facts, now.getUTCFullYear(), opts.question),
+          { trend: true },
+        )
+      : modelFacts(chart);
   const glossary = glossaryFor(JSON.stringify(facts), opts.locale);
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
   const providerFor = (agent: AgentName) => {

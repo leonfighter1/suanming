@@ -30,8 +30,22 @@
 26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
 27. Pump a frame between scrollUntilVisible and the next finder or scroll; use scrollTo() from test/support.dart for each card.
 28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
+29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one.
+30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up.
 
 ## Log
+
+### 2026-10-28: A tsx scratch script failed three times before it ran
+- **Symptom:** A measuring script in the scratchpad failed with top-level await in cjs, then ERR_UNSUPPORTED_ESM_URL_SCHEME as .mts, then digest pepper must be >= 32 bytes
+- **Root cause:** Outside the package tsx runs a .ts file as CommonJS; as ESM, absolute Windows paths need file:// URLs; the pepper was a made-up short string
+- **Fix:** A .ts file with an async main(), absolute C:/ imports of src, and PEPPER imported from test/helpers.ts
+- **Rule:** Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up. (Rule 30)
+
+### 2026-10-28: The faithfulness check did not know the new 干支 facts
+- **Symptom:** Since v1.3.0 the model saw 胎元 and the 流月 (both 干支), but checkFaithfulness would flag either as unknown_ganzhi; found while measuring what the model reads (WP2.3)
+- **Root cause:** knownGanzhi in faithfulness.ts lists pillars, 大运, 流年 and the 农历 year; nobody extended it when the engine added 干支-valued facts
+- **Fix:** knownGanzhi adds taiyuan and every liuyue month; a test names 庚寅 (2026 寅月) and 胎元 庚午
+- **Rule:** When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one. (Rule 29)
 
 ### 2026-10-27: Trend notes called every 刑, 害 and 破 「刑害」
 - **Symptom:** The 2026 丙午 note for the sample chart said 「与日支有刑害」, but 卯午 is 相破; found while taking a release-note example from real output

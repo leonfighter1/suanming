@@ -61,6 +61,14 @@ describe("checkFaithfulness", () => {
     expect(checkFaithfulness(bazi, r)).toEqual([]);
   });
 
+  it("knows the 干支 of 胎元 and of every 流月 (facts since v1.3.0)", async () => {
+    // 2026's 寅月 is 庚寅 (五虎遁: a 丙 year starts at 庚寅), in no pillar, 大運 or 流年 of this
+    // chart; 胎元 = 己 + 1, 卯 + 3 = 庚午.
+    const r = await reportWith(bazi, ["寅月（庚寅）宜放慢腳步；胎元庚午。"]);
+    expect(r.status).toBe("passed");
+    expect(checkFaithfulness(bazi, r)).toEqual([]);
+  });
+
   it("flags 干支 not in the chart and wrong year 干支", async () => {
     const r = await reportWith(bazi, ["日柱甲子，2027年丙午。"]);
     const kinds = checkFaithfulness(bazi, r).map((i) => i.kind);

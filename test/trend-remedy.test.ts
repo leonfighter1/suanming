@@ -82,7 +82,7 @@ describe("generateRemedy", () => {
     expect(remedy.content!.steps.length).toBeGreaterThanOrEqual(3);
     expect(remedy.content!.closing).toMatch(/不保證任何結果/);
     expect(remedy.agents.map((a) => a.agent)).toEqual(["remedy", "guard"]);
-    expect(remedy.agents[0]!.prompt_version).toBe("remedy_bazi@3");
+    expect(remedy.agents[0]!.prompt_version).toBe("remedy_bazi@4");
     // The model sees this topic's trend and only this topic's reading.
     const call = mock.calls.find((c) => c.agent === "remedy")!;
     expect(call.user).toContain("<trend>");

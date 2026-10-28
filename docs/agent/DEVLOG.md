@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (k): S2 WP2.3, what each agent reads; release v2.2.0
+
+- v2.1.0: the first harness run failed at analyze (rule 23: the IDE's pub get after the pubspec bump); the second passed. Committed and tagged locally.
+- WP2.3 (`src/ai/bazi-view.ts`):
+  - A reading reads its focus in full (the current 大运 and the next; this year and two more; any year in the question).
+  - A plan reads its topic's lowest-scoring periods from now on.
+  - Every other period keeps its place with its 干支, ages and 十神, so cited paths still match the stored chart.
+  - `view` names the focus; 流月 is gone; the life agents lose 流月 and the 流年 scores.
+  - narrative_bazi@6 and remedy_bazi@4 describe the view.
+- Measured (sample chart, mock, characters sent for a reading + six plans + life report): 304.5k → 168.2k without the reviewer, 572.3k → 305.3k with it. Plans alone went from 195.8k to 85.3k.
+- Found while measuring: checkFaithfulness didn't know the 干支 of 胎元 or the 流月 (rule 29). The measuring script failed three times on tsx details first (rule 30).
+- v2.2.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-27 (j): S2 WP2.1, every method's own prompts; release v2.1.0
 
 - v2.0.0 pushed with v1.3.0 after a fresh harness PASS. The first run failed at analyze (rule 23: the junction the guard wouldn't let me remove); the second passed. CI and Pages green for 0d2c698.

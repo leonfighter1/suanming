@@ -10,6 +10,7 @@
  */
 import type { ChartFact, ChartSystem } from "../chart-fact/index.js";
 import { compileRules, loadRuleSet, type Violation } from "../compliance/index.js";
+import { baziView, planFocus } from "./bazi-view.js";
 import {
   modelFacts,
   resolvePointer,
@@ -122,7 +123,13 @@ export async function generateRemedy(
     if (!provider) throw new Error(`provider "${route.provider}" not configured`);
     return { route, provider };
   };
-  const facts = modelFacts(chart);
+  // A 八字 plan reads its focused view: the periods where its topic scores lowest (WP2.3).
+  const facts =
+    chart.system === "bazi"
+      ? baziView(modelFacts(chart), planFocus(layers.trend, topic, now.getUTCFullYear()), {
+          trend: false,
+        })
+      : modelFacts(chart);
   const glossary = glossaryFor(JSON.stringify(facts), locale);
   const trend = layers.trend && {
     dayun: layers.trend.dayun.map((d) => ({

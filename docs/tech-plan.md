@@ -147,6 +147,18 @@ Releases, one per work package (medium, committed and tagged locally; pushed wit
   review is on. Give each agent the facts it needs (the natal chart, strength, relations, 神煞, the current 大运, the
   流年 a question is about, the trend basis). Keep every path it may cite resolvable. Measure characters per agent
   before and after.
+  - As built (v2.2.0): `src/ai/bazi-view.ts`.
+    - A reading's focus (`readingFocus`): the current 大运 and the next, this year and the next two, and any 流年
+      year the question names.
+    - A plan's focus (`planFocus`): its topic's two lowest-scoring 大运 and three lowest-scoring 流年 from now on.
+      Before, a plan could target a 大运 already past.
+    - Every other period keeps its place in its list and its 干支, years, ages and 十神, so a cited path means the
+      same in the stored chart. `view` names the focus. 流月 is dropped (no prompt read it). The life agents lose
+      流月 and the 流年 scores.
+    - `narrative_bazi@6` and `remedy_bazi@4` say what the view holds.
+    - Found on the way: `checkFaithfulness` didn't know the 干支 of 胎元 and 流月 (rule 29).
+    - Measured on the sample: characters sent for a reading, its six plans and the life report went from 304.5k to
+      168.2k without the reviewer (−45%), and from 572.3k to 305.3k with it.
 
 ## S3 塔罗体验 (big → v3.0.0)
 
@@ -255,6 +267,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill).
 | WP1.7 | done                       | v2.0.0  |
 | WP1.8 | waiting for a reference    | —       |
 | WP2.1 | done                       | v2.1.0  |
-| WP2.3 | todo                       | v2.2.0  |
+| WP2.3 | done                       | v2.2.0  |
 | WP2.2 | todo                       | v2.3.0  |
 | S3–S6 | todo                       | above   |

@@ -12,6 +12,43 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.2.0 (2026-10-28): the AI reads less, and what it reads matters
+
+Stage S2 of the [tech plan](docs/tech-plan.md), work package 2.3. A medium update: committed locally, pushed with the
+next big update.
+
+- Nothing changes on screen. A 八字 reading, its 破除运势 plans and the 一生运势报告 are now written from a shorter,
+  focused copy of the chart. They cost about half the tokens when the real AI is on, and the AI keeps to the periods
+  that matter:
+  - A reading sees the full detail (刑冲合害, 神煞, the reasons behind each score) of the current 大运 and the next,
+    this year and the next two, and any year named in the question. Every other 大运 and 流年 it sees by name, age
+    and 十神 only.
+  - A 破除运势 plan sees in full the periods where its topic scores lowest from now on (two 大运, three 流年). Before,
+    a plan could target a 大运 that was already over.
+  - The 一生运势报告 no longer gets the 流月 and the 流年 scores, which it never used. No agent gets the 流月 now: no
+    instruction used them.
+- Measured on the sample chart: characters sent to the AI for a reading with all six topics, its six plans and the
+  life report.
+
+  | Agent (calls)                        | v2.1.0  | v2.2.0  |
+  | ------------------------------------ | ------- | ------- |
+  | Reading (1)                          | 32,418  | 17,524  |
+  | Actions (1)                          | 2,628   | 2,576   |
+  | 破除运势 plans (6)                   | 195,813 | 85,338  |
+  | 一生运势报告 (2)                     | 73,681  | 62,743  |
+  | Total                                | 304,540 | 168,181 |
+  | Reviewer (8, only when review is on) | 267,738 | 137,098 |
+
+  These are characters, not tokens: the JSON's spacing counts too.
+
+- Fixed: the AI-evaluation check (`checkFaithfulness`) now knows the 干支 of 胎元 and of the 流月, so a reading that
+  names them is no longer flagged as unknown.
+- Verified:
+  - 5 new server tests: a reading's focus (with a year asked about, and before the first 大运); every period keeps
+    its place and only the focus ones keep their detail; a plan's focus is its topic's lowest from now on, never a
+    past 大运; each 八字 agent reads its own view; the faithfulness check knows 胎元 and the 流月.
+  - All 283 server tests and 90 app tests pass; harness PASS.
+
 ### v2.1.0 (2026-10-27): every method writes with its own instructions
 
 Stage S2 of the [tech plan](docs/tech-plan.md), work package 2.1. A medium update: committed locally, pushed with the

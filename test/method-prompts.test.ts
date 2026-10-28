@@ -13,11 +13,13 @@ import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 
-// The first nine were hashed from the committed prompts.ts before WP2.1 touched it; the six
-// added in v2.1.0 are pinned as released. Changing a prompt's text needs a new version.
+// The versions older than v2.1.0 were hashed from the committed prompts.ts before WP2.1 touched
+// it; later ones are pinned as released. Changing a prompt's text needs a new version. A version
+// replaced in the registry stays in the file as the start of its successor's text (narrative_bazi@5
+// of @6, remedy_bazi@3 of @4), so its text stays pinned through the successor's hash.
 const HASHES: Record<string, string> = {
   "narrative@4": "49007c9a8aba351e",
-  "narrative_bazi@5": "7c8f0e336194d769",
+  "narrative_bazi@6": "d7c2c79e4aed5cc0",
   "narrative_tarot@1": "4539f0f1184b8d18",
   "action@3": "87f6e73c8dd8d3de",
   "trend@2": "80a95937498e19fc",
@@ -29,7 +31,7 @@ const HASHES: Record<string, string> = {
   "action_bazi@4": "effdf6065ae231c6",
   "action_tarot@1": "8240f4ad84d43389",
   "action_astrology@1": "3da662668915d1f0",
-  "remedy_bazi@3": "3a95402829edb4a5",
+  "remedy_bazi@4": "1953c4f923cf05ab",
   "remedy_tarot@1": "ccb65119b225516a",
 };
 

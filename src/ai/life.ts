@@ -110,6 +110,23 @@ interface BaziFacts {
   };
 }
 
+/**
+ * The 八字 facts the life agents read (WP2.3): all of them but 流月 and the 流年 scores, which
+ * no life prompt uses (stage scores come from trend.dayun).
+ */
+function lifeBazi(chart: ChartFact): Record<string, unknown> {
+  const {
+    liuyue: _months,
+    trend,
+    ...bazi
+  } = modelFacts(chart) as Record<string, unknown> & {
+    trend?: Record<string, unknown>;
+  };
+  if (!trend) return bazi;
+  const { liunian: _years, ...lifeTrend } = trend;
+  return { ...bazi, trend: lifeTrend };
+}
+
 /** Everything the life report shows and the model reads: 八字 facts + 易经 / 梅花 / 八宅. */
 export function lifeFacts(chart: ChartFact, locale: Locale) {
   const f = chart.facts as unknown as Parameters<typeof yijingFacts>[0] & BaziFacts;
@@ -240,7 +257,7 @@ export async function generateLifeReport(
   const engine = engineTrend(chart);
   const engineScore = (index: number) =>
     engine.dayun.find((d) => d.index === index)?.scores.dayun_liunian;
-  const modelInput = { bazi: modelFacts(chart), ...facts, periods };
+  const modelInput = { bazi: lifeBazi(chart), ...facts, periods };
   const glossary = glossaryFor(JSON.stringify(modelInput), opts.locale);
   const today = todayLine(now);
   const termFixes: string[] = [];

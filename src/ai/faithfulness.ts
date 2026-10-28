@@ -70,6 +70,10 @@ function knownGanzhi(chart: ChartFact): Set<string> {
   for (const y of (f.liunian as { ganzhi: string }[] | undefined) ?? []) out.add(y.ganzhi);
   const lunar = f.lunar as { year_ganzhi?: string } | undefined;
   if (lunar?.year_ganzhi) out.add(lunar.year_ganzhi);
+  // Facts since v1.3.0: 胎元 is a 干支, and so is every 流月.
+  if (typeof f.taiyuan === "string") out.add(f.taiyuan);
+  for (const m of (f.liuyue as { months?: { ganzhi: string }[] } | undefined)?.months ?? [])
+    out.add(m.ganzhi);
   return out;
 }
 
