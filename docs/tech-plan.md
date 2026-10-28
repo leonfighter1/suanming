@@ -523,6 +523,10 @@ From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（�
         endpoint (owner, passed, method, no font);
       - app: the menu shares the server's JPEG; a 八字 reading has no such item.
 - WP7.2 A 八字 reading's share card: the four pillars coloured by 五行, the reading's main point, the same footer.
+  - **Waits for the owner (privacy, rule 34).** The four pillars give away the birth date to about two hours, which
+    is why `docs/data-retention.md` counts a 八字 chart as personal data. A tarot draw gives nothing away, so its
+    image could go out as the owner's spec asks. Whether a 八字 image may show the pillars, show only the reading,
+    or not exist is the owner's decision.
 - WP7.3 The deep link back to the reading, once the app is in the stores.
 
 ## 阶段总结 (stage summaries)
@@ -737,6 +741,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP4.9     | moved to S7 (WP7.1)        | —       |
 | WP5.1–5.2 | done                       | v4.1.0  |
 | WP7.1     | done                       | v4.2.0  |
-| WP7.2     | todo                       | —       |
+| WP7.2     | waits for the owner        | —       |
 | WP7.3     | waits for the stores       | —       |
 | S6        | waits for the owner        | above   |
