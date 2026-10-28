@@ -8,7 +8,7 @@
  *
  * Payment is a Phase 4 TODO: the API records a placeholder charge before calling this.
  */
-import type { ChartFact } from "../chart-fact/index.js";
+import type { ChartFact, ChartSystem } from "../chart-fact/index.js";
 import { compileRules, loadRuleSet, type Violation } from "../compliance/index.js";
 import {
   modelFacts,
@@ -22,7 +22,7 @@ import {
   type ReportStatus,
 } from "./pipeline.js";
 import type { UserContext } from "./context.js";
-import { guardUser, remedyUser, todayLine } from "./prompts.js";
+import { guardUser, METHOD_PROMPTS, remedyUser, todayLine } from "./prompts.js";
 import { loadRouting, routeFor } from "./routing.js";
 import { guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
@@ -74,13 +74,28 @@ export const remedySchema = {
   },
 };
 
-const CLOSING: Record<Locale, string> = {
-  "zh-Hant":
-    "以上為傳統命理中的調和做法，僅供娛樂和玄學學習使用，不保證任何結果；涉及健康、財務或法律的決定，請諮詢相關專業人士。",
-  "zh-Hans":
-    "以上为传统命理中的调和做法，仅供娱乐和玄学学习使用，不保证任何结果；涉及健康、财务或法律的决定，请咨询相关专业人士。",
-  en: "These are traditional balancing practices for entertainment and metaphysics study only; no outcome is guaranteed. For health, financial or legal decisions, consult a qualified professional.",
+/** The fixed closing note, per method (rule 8): a tarot plan isn't a 命理 balancing practice. */
+const CLOSING: Partial<Record<ChartSystem, Record<Locale, string>>> = {
+  bazi: {
+    "zh-Hant":
+      "以上為傳統命理中的調和做法，僅供娛樂和玄學學習使用，不保證任何結果；涉及健康、財務或法律的決定，請諮詢相關專業人士。",
+    "zh-Hans":
+      "以上为传统命理中的调和做法，仅供娱乐和玄学学习使用，不保证任何结果；涉及健康、财务或法律的决定，请咨询相关专业人士。",
+    en: "These are traditional balancing practices for entertainment and metaphysics study only; no outcome is guaranteed. For health, financial or legal decisions, consult a qualified professional.",
+  },
+  tarot: {
+    "zh-Hant":
+      "以上建議依據所抽塔羅牌的牌義整理，僅供娛樂和玄學學習使用，不保證任何結果；涉及健康、財務或法律的決定，請諮詢相關專業人士。",
+    "zh-Hans":
+      "以上建议依据所抽塔罗牌的牌义整理，仅供娱乐和玄学学习使用，不保证任何结果；涉及健康、财务或法律的决定，请咨询相关专业人士。",
+    en: "These suggestions follow the meanings of the cards drawn, for entertainment and metaphysics study only; no outcome is guaranteed. For health, financial or legal decisions, consult a qualified professional.",
+  },
 };
+
+/** Methods with a 破除運勢 plan: their own prompt and closing note (astrology has neither). */
+export function remedyAvailable(system: ChartSystem): boolean {
+  return METHOD_PROMPTS[system].remedy !== undefined && CLOSING[system] !== undefined;
+}
 
 export async function generateRemedy(
   chart: ChartFact,
@@ -94,6 +109,9 @@ export async function generateRemedy(
   const layers = report.layers;
   if (report.status !== "passed" || !layers) throw new Error("report has no passed layers");
   if (!report.topics.includes(topic)) throw new Error(`topic ${topic} is not in this report`);
+  const prompt = METHOD_PROMPTS[chart.system].remedy;
+  const closing = CLOSING[chart.system]?.[locale];
+  if (!prompt || !closing) throw new Error(`no 破除運勢 plan for ${chart.system} readings`);
 
   const { region } = servedRegion(opts.country, chart.system);
   const rules = compileRules(loadRuleSet(), region.rule_groups);
@@ -130,6 +148,7 @@ export async function generateRemedy(
 
   const plan = await runAgent<RemedyContent>({
     agent: "remedy",
+    prompt,
     ...providerFor("remedy"),
     schema: remedySchema,
     payload: { topic, system: chart.system },
@@ -169,7 +188,13 @@ export async function generateRemedy(
       if (value.fact_refs.length === 0)
         feedback.push("fact_refs cited no existing chart_facts path");
       if (value.steps.length < 3) feedback.push("give 4–6 steps");
-      if (!value.target.trim()) feedback.push("target must name the topic and periods");
+      if (!value.target.trim()) {
+        feedback.push(
+          chart.system === "tarot"
+            ? "target must name the topic and the cards"
+            : "target must name the topic and periods",
+        );
+      }
       return {
         value,
         feedback,
@@ -248,10 +273,10 @@ export async function generateRemedy(
     topic,
     locale,
     created_at: now.toISOString(),
-    ...(status === "passed" && plan.ok && { content: { ...plan.value, closing: CLOSING[locale] } }),
+    ...(status === "passed" && plan.ok && { content: { ...plan.value, closing } }),
     ...(status !== "passed" &&
       (plan.ok ? plan.value : plan.held) && {
-        held_content: { ...(plan.ok ? plan.value : plan.held)!, closing: CLOSING[locale] },
+        held_content: { ...(plan.ok ? plan.value : plan.held)!, closing },
       }),
     compliance: {
       rule_violations: ruleViolations,

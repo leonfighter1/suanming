@@ -25,14 +25,14 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status  |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0            | planned |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
+| Stage                      | What                                                        | Size   | Release when done | Status      |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | in progress |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned     |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned     |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -124,12 +124,22 @@ scores) + the S1 summary. Lessons to read first: G4, G7, P12, P23.
 - Settle the formula against a named source (a 排盘 tool's output for several charts, or a textbook example with its
   answer), then add both as facts. Not before.
 
-## S2 方法独立 + 塔罗解读结构 (medium → v2.1.0)
+## S2 方法独立 + 塔罗解读结构 (medium → v2.1.0–v2.3.0)
+
+Releases, one per work package (medium, committed and tagged locally; pushed with v3.0.0): **v2.1.0** = WP2.1;
+**v2.2.0** = WP2.3; **v2.3.0** = WP2.2. Lessons to read first: G7, P12, P26, P28.
 
 - WP2.1 Every method's own prompts: `action_tarot`, `remedy_tarot` (no 五行 colours or directions in a tarot plan),
   and astrology's own narrative (or astrology out of the API until it is a real method). The compliance guard stays
   one reviewer for every method; method context goes into its user message only. Test: no two methods share a
   reading prompt; every prompt version keeps its hash.
+  - As built (v2.1.0): `METHOD_PROMPTS` names each method's narrative, action and remedy prompt. 八字:
+    `narrative_bazi@5`, `action_bazi@4` (the engine's 喜用 for any element in an action), `remedy_bazi@3` (the
+    engine's 喜用 / 忌, ages labelled 虚岁). 塔罗: `narrative_tarot@1`, `action_tarot@1`, `remedy_tarot@1`, with its
+    own closing note. Astrology: `narrative_astrology@1` and `action_astrology@1`, and no 破除运势 plan (its chart has
+    no houses or transits; the API refuses one with a 400 and preloads none). The 八字 facts layer gained the
+    旺衰 / 喜用 line, so the action agent and the report see the engine's judgement. Old versions stay registered;
+    `test/method-prompts.test.ts` pins all 15 hashes (the nine older ones taken from the file before the change).
 - WP2.2 A tarot-native reading: sections 逐张解读 / 综合 / 建议 instead of 八字's four topics, with an optional focus
   (事业, 感情, 健康, 自我) beside the question.
 - WP2.3 (found in S1) What each agent reads. The 八字 facts sent to the narrative agent grew from 3.3k to 17.0k
@@ -244,4 +254,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill).
 | WP1.6 | done                       | v2.0.0  |
 | WP1.7 | done                       | v2.0.0  |
 | WP1.8 | waiting for a reference    | —       |
-| S2–S6 | todo                       | above   |
+| WP2.1 | done                       | v2.1.0  |
+| WP2.3 | todo                       | v2.2.0  |
+| WP2.2 | todo                       | v2.3.0  |
+| S3–S6 | todo                       | above   |

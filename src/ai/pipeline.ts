@@ -26,6 +26,7 @@ import { expectationLayer, factsLayer } from "./layers.js";
 import {
   actionUser,
   guardUser,
+  METHOD_PROMPTS,
   narrativeUser,
   PROMPTS,
   tarotUser,
@@ -346,18 +347,13 @@ export async function generateReport(
   // 2. The 八字 trend chart is the engine's (since v2.0.0): no model scores it.
   const trend = chart.system === "bazi" ? trendLayer(chart, topics, opts.locale) : undefined;
 
-  // Each method reads with its own prompt: 八字 and tarot never share one with each other
-  // or with astrology (which still reads with the shared narrative@4).
+  // Each method reads and writes its actions with its own prompts (rule 8, METHOD_PROMPTS).
+  const prompts = METHOD_PROMPTS[chart.system];
   const tarot = chart.system === "tarot";
   const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
-  const ownPrompt = tarot
-    ? PROMPTS.narrative_tarot
-    : chart.system === "bazi"
-      ? PROMPTS.narrative_bazi
-      : undefined;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
-    ...(ownPrompt && { prompt: ownPrompt }),
+    prompt: prompts.narrative,
     ...providerFor("narrative"),
     schema: narrativeSchema(topics),
     payload: { topics, system: chart.system },
@@ -444,6 +440,7 @@ export async function generateReport(
     // 3. Action
     const action = await runAgent<ActionOutput>({
       agent: "action",
+      prompt: prompts.action,
       ...providerFor("action"),
       schema: actionSchema(topics),
       payload: { topics },

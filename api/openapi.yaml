@@ -731,6 +731,9 @@ paths:
         Paid per topic. TODO(Phase 4 payments): the purchase receipt will be
         verified here; until then `payment.status` is `placeholder` and nothing
         is charged. Buying a topic that already has a plan returns that plan (200).
+        Plans exist for bazi and tarot reports only: an astrology report gets a 400
+        before anything is charged, and none is preloaded for it. Each method writes
+        its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`).
       requestBody:
         required: true
         content:

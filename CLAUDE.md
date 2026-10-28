@@ -51,9 +51,11 @@ Records:
 8. **Each method stands alone** (owner, 2026-10-27). 八字, 塔罗, 一生运势 and
    astrology each have their own engine, prompts and code paths. A change for one
    must never change another's prompts, facts or output: give a method its own
-   prompt version (塔罗 reads with `narrative_tarot@N`, not the shared
-   `narrative@N`) and keep method-specific logic behind its own branch or module.
-   `test/tarot-reading.test.ts` pins `narrative@4`.
+   prompt versions (`METHOD_PROMPTS` in `src/ai/prompts.ts`: each method's
+   narrative, action and remedy prompt, e.g. 塔罗 reads with `narrative_tarot@N`,
+   never a shared one) and keep method-specific logic behind its own branch or
+   module. `test/method-prompts.test.ts` pins every released prompt's hash and
+   checks that no two methods share a prompt.
 
 ## Map
 

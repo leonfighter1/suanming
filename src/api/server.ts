@@ -12,6 +12,7 @@ import {
   generateLifeReport,
   generateRemedy,
   generateReport,
+  remedyAvailable,
   parseUserContext,
   GeoRefusedError,
   LOCALES,
@@ -411,6 +412,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   /** Every topic's plan, generated now and kept locked until bought (two at a time). */
   async function preloadRemedies(record: ReportRecord, report: Report, fact: ChartFact, c: Caller) {
+    if (!remedyAvailable(fact.system)) return;
     const queue: RemedyRecord[] = [];
     for (const topic of record.topics) {
       if (!takeBackgroundQuota()) break; // on-demand generation still works later
@@ -500,6 +502,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   async function createRemedy(req: IncomingMessage, reportId: string, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
     const { record, report, fact } = await ownedPassedReport(reportId, c);
+    if (!remedyAvailable(fact.system)) {
+      throw new InputError("破除運勢 plans are available for bazi and tarot readings only");
+    }
     const topic = body.topic as Topic;
     if (!record.topics.includes(topic)) {
       throw new InputError(

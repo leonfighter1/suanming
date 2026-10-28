@@ -64,7 +64,7 @@ describe("tarot reading, the classic way", () => {
       { locale: "zh-Hans", country: "HK", topics: ["career_wealth"], question: "我该不该换工作？" },
       { providers: { deepseek: tarotAi, anthropic: tarotAi }, now: FIXED_NOW },
     );
-    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@1,action@3,guard@2");
+    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@1,action_tarot@1,guard@2");
     const reading = tarotAi.sent.find((r) => r.agent === "narrative")!;
     expect(reading.system).toBe(PROMPTS.narrative_tarot.system);
     expect(reading.user).toContain("<spread>");
@@ -82,7 +82,7 @@ describe("tarot reading, the classic way", () => {
     );
     const baziReading = baziAi.sent.find((r) => r.agent === "narrative")!;
     // 八字 reads with its own prompt too (v2.0.0); the shared narrative@4 stays byte for byte
-    // what it was, for astrology.
+    // what it was (since v2.1.0 astrology has its own as well, test/method-prompts.test.ts).
     expect(baziReading.system).toBe(PROMPTS.narrative_bazi.system);
     expect(PROMPTS.narrative_bazi.system).not.toBe(PROMPTS.narrative.system);
     expect(PROMPTS.narrative.id).toBe("narrative@4");

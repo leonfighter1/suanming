@@ -1,7 +1,8 @@
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { generateRemedy, generateReport, MockProvider } from "../src/ai/index.js";
+import { generateRemedy, generateReport, MockProvider, PROMPTS } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
+import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
@@ -81,7 +82,7 @@ describe("generateRemedy", () => {
     expect(remedy.content!.steps.length).toBeGreaterThanOrEqual(3);
     expect(remedy.content!.closing).toMatch(/不保證任何結果/);
     expect(remedy.agents.map((a) => a.agent)).toEqual(["remedy", "guard"]);
-    expect(remedy.agents[0]!.prompt_version).toBe("remedy@2");
+    expect(remedy.agents[0]!.prompt_version).toBe("remedy_bazi@3");
     // The model sees this topic's trend and only this topic's reading.
     const call = mock.calls.find((c) => c.agent === "remedy")!;
     expect(call.user).toContain("<trend>");
@@ -122,6 +123,31 @@ describe("generateRemedy", () => {
     await expect(
       generateRemedy(chart, report, "career_wealth", { country: "HK" }, deps(mock)),
     ).rejects.toThrow(/not in this report/);
+  });
+
+  it("a tarot plan has its own prompt and closing note; astrology has no plan (v2.1.0)", async () => {
+    const tarot = computeTarot(
+      { spread: "three_card" },
+      { drawKey: DRAW_KEY, digestPepper: PEPPER, now: FIXED_NOW, newDrawId: () => "draw-1" },
+    );
+    const mock = new MockProvider();
+    const report = await generateReport(tarot, zhHantHK, deps(mock));
+    const plan = await generateRemedy(tarot, report, "health", { country: "HK" }, deps(mock));
+    expect(plan.status).toBe("passed");
+    expect(plan.agents[0]!.prompt_version).toBe("remedy_tarot@1");
+    expect(mock.calls.find((c) => c.agent === "remedy")!.system).toBe(PROMPTS.remedy_tarot.system);
+    expect(mock.calls.find((c) => c.agent === "remedy")!.user).not.toContain("<trend>");
+    expect(plan.content!.closing).toMatch(/^以上建議依據所抽塔羅牌的牌義整理/);
+
+    const sky = computeAstrology(
+      { local: "1990-03-15T14:30", timezone: "Asia/Hong_Kong", latitude: 22.3, longitude: 114.17 },
+      { digestPepper: PEPPER, now: FIXED_NOW },
+    );
+    const reading = await generateReport(sky, zhHantHK, deps(mock));
+    expect(reading.status).toBe("passed");
+    await expect(
+      generateRemedy(sky, reading, "health", { country: "HK" }, deps(mock)),
+    ).rejects.toThrow(/no 破除運勢 plan for astrology/);
   });
 });
 
@@ -395,6 +421,24 @@ describe("remedy API", () => {
       409,
     );
     await new Promise<void>((done) => api2.close(() => done()));
+  });
+
+  it("an astrology reading gets no plan: none preloaded, and buying one is a 400", async () => {
+    const c = await post("/v1/charts", {
+      system: "astrology",
+      local: "1990-03-15T14:30",
+      timezone: "Asia/Hong_Kong",
+      latitude: 22.3,
+      longitude: 114.17,
+    });
+    const { chart_id } = await c.json();
+    const { report_id } = await (await post("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
+    await api.drain();
+    expect((await (await get(`/v1/reports/${report_id}`)).json()).status).toBe("passed");
+    expect((await (await get(`/v1/reports/${report_id}/remedies`)).json()).items).toEqual([]);
+    const buy = await post(`/v1/reports/${report_id}/remedies`, { topic: "health" });
+    expect(buy.status).toBe(400);
+    expect((await (await get(`/v1/reports/${report_id}/remedies`)).json()).items).toEqual([]);
   });
 
   it("rejects unknown topics and other users", async () => {

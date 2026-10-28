@@ -55,7 +55,7 @@ describe("generateReport — happy path", () => {
     expect(r.layers!.interpretation.map((s) => s.topic)).toEqual(r.topics);
     expect(r.layers!.actions.length).toBeGreaterThan(0);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
-    expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@5,action@3,guard@2");
+    expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@5,action_bazi@4,guard@2");
     expect(r.ai_disclosure.model).toContain("deepseek-v4-pro");
     // No trend agent: the engine scores the trend chart (v2.0.0).
     expect(mock.calls.map((c) => c.agent).sort()).toEqual(["action", "guard", "narrative"]);
@@ -316,6 +316,21 @@ it("facts layer shows the 農曆 date in the reader's script", async () => {
   expect(factsLayer(chart, "zh-Hant", 2026)[1]).toBe("農曆：庚午年二月十九（生肖馬）");
   expect(factsLayer(chart, "zh-Hans", 2026)[1]).toBe("农历：庚午年二月十九（生肖马）");
   expect(factsLayer(chart, "en", 2026)[1]).toBe("Lunar date: month 2, day 19, 庚午 year (Horse)");
+});
+
+it("facts layer shows the engine's 旺衰 and 喜用 as the 命盘 page does (v2.1.0)", async () => {
+  const { factsLayer } = await import("../src/ai/index.js");
+  // 庚午 己卯 己卯 辛未 (test/bazi-strength.test.ts): 26.8 support points → 身弱; 卯 month is 木 →
+  // 不得令; 喜用 = 印 火, 比劫 土; 忌 = 食伤 金, 财 水, 官杀 木.
+  expect(factsLayer(chart, "zh-Hans", 2026)).toContain(
+    "日主旺衰（简化扶抑）：身弱；不得令；喜用：火、土；忌：金、水、木",
+  );
+  expect(factsLayer(chart, "zh-Hant", 2026)).toContain(
+    "日主旺衰（簡化扶抑）：身弱；不得令；喜用：火、土；忌：金、水、木",
+  );
+  expect(factsLayer(chart, "en", 2026)).toContain(
+    "Day Master strength (simplified): Weak Day Master (Shen Ruo); not in season; favourable: Fire, Earth; unfavourable: Metal, Water, Wood",
+  );
 });
 
 it("facts layer and narrative prompt carry the 農曆 / 時辰 input basis to the AI", async () => {

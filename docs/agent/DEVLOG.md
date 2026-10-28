@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (j): S2 WP2.1, every method's own prompts; release v2.1.0
+
+- v2.0.0 pushed with v1.3.0 after a fresh harness PASS. The first run failed at analyze (rule 23: the junction the guard wouldn't let me remove); the second passed. CI and Pages green for 0d2c698.
+- WP2.1:
+  - `METHOD_PROMPTS` names each method's narrative, action and remedy prompt.
+  - New prompts: action_bazi@4, remedy_bazi@3 (the engine's 喜用 / 忌, 虚岁), action_tarot@1, remedy_tarot@1 (cards only; its own closing note), narrative_astrology@1, action_astrology@1.
+  - Astrology has no plan: refused at the API (400), never preloaded.
+  - The 八字 facts layer shows 旺衰 / 喜用.
+- Found while reading: astrology was read with narrative@4 (health as 五行), and remedy@2 told tarot plans to use 五行 colours and directions. Both were rule 8 leaks, now closed.
+- Hashes: the nine existing versions were taken from the committed file before the edit, so the new pin test proves none changed (G7).
+- Plan: S2 is now three medium releases (v2.1.0 WP2.1, v2.2.0 WP2.3, v2.3.0 WP2.2). Rule 23 was corrected in place (the guard blocks removing the junction). Memory updated (the project now follows the tech plan).
+- v2.1.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-27 (i): S1 part 2 (旺衰, 喜用, 运势 scores from the engine); S1 summary; release v2.0.0
 
 - WP1.6 strength.ts:

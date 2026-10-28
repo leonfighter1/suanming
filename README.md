@@ -12,6 +12,37 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.1.0 (2026-10-27): every method writes with its own instructions
+
+Stage S2 of the [tech plan](docs/tech-plan.md), work package 2.1. A medium update: committed locally, pushed with the
+next big update.
+
+- 八字 readings
+  - The 命盘事实 list of a report gains a line with the engine's 日主旺衰 and 喜用, as on the 五行 card:
+    「日主旺衰（简化扶抑）：身弱；不得令；喜用：火、土；忌：金、水、木」.
+  - An action that uses an element (a colour, a direction, a season) uses only the engine's 喜用. A balanced chart
+    gets advice on balance, not on pushing one element.
+  - 破除运势 plans base every 补 / 泄 step, colour and direction on the engine's 喜用 and 忌, and label ages 虚岁.
+    Before, the AI chose the elements itself and wrote plain 岁.
+- 塔罗 readings
+  - Actions and 破除运势 plans have their own instructions. They rest on the cards drawn and their positions, with no
+    五行, lucky colours, directions or other 八字 ideas.
+  - A tarot plan names the cards it rests on, and ends with its own note
+    (「以上建议依据所抽塔罗牌的牌义整理……」) instead of the 命理 one.
+- Astrology (API only)
+  - Readings and actions have their own instructions: the planets in their signs and their aspects, never houses or
+    the ascendant, which the simplified chart doesn't compute. Before, astrology was read with 八字-style rules (for
+    example health as 五行).
+  - An astrology reading has no 破除运势 plan. None is prepared in the background, and a purchase is refused (400)
+    before anything is charged.
+- Behind the scenes: one table (`METHOD_PROMPTS`) says which instructions each method uses, and no two methods share
+  them. A released prompt version never changes: a test pins all 15.
+- Verified:
+  - 7 new server tests: each method's prompts in every report; the hash of every prompt version; no 八字 rules in
+    the tarot and astrology prompts; the tarot plan and its note; no astrology plan, in the pipeline and in the API;
+    the 旺衰 line in three languages.
+  - All 278 server tests and 90 app tests pass; harness PASS.
+
 ### v2.0.0 (2026-10-27): 八字 engine, complete: 日主旺衰, 喜用, and 运势 scores from the engine
 
 Stage S1 of the [tech plan](docs/tech-plan.md) is complete: work packages 1.6–1.7 here, 1.1–1.5 in v1.3.0. The

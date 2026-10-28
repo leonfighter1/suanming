@@ -29,6 +29,14 @@ interface BaziFacts {
   day_master: { gan: string; wuxing: string; yin_yang: string };
   month_command: { zhi: string; wuxing: string };
   wuxing_weighted: { scores: Record<string, number> };
+  /** The engine's 日主旺衰 (charts since v2.0.0). */
+  strength?: {
+    verdict: string;
+    de_ling: boolean;
+    favorable: string[];
+    unfavorable: string[];
+    special?: string;
+  };
   dayun: {
     direction: string;
     start_date: string;
@@ -49,6 +57,13 @@ const L = {
     dm: "日主",
     mc: "月令",
     wx: "五行（加權，簡化計分）",
+    strength: "日主旺衰（簡化扶抑）",
+    deLing: "得令",
+    notDeLing: "不得令",
+    fav: "喜用",
+    unfav: "忌",
+    special: "宜請有經驗的師傅細看",
+    list: "、",
     dy: "大運",
     start: "起運",
     current: "目前大運",
@@ -65,6 +80,13 @@ const L = {
     dm: "日主",
     mc: "月令",
     wx: "五行（加权，简化计分）",
+    strength: "日主旺衰（简化扶抑）",
+    deLing: "得令",
+    notDeLing: "不得令",
+    fav: "喜用",
+    unfav: "忌",
+    special: "宜请有经验的师傅细看",
+    list: "、",
     dy: "大运",
     start: "起运",
     current: "目前大运",
@@ -81,6 +103,13 @@ const L = {
     dm: "Day Master",
     mc: "Month Command",
     wx: "Five Elements (weighted, simplified score)",
+    strength: "Day Master strength (simplified)",
+    deLing: "in season",
+    notDeLing: "not in season",
+    fav: "favourable",
+    unfav: "unfavourable",
+    special: "best looked at by an experienced practitioner",
+    list: ", ",
     dy: "Luck Pillars",
     start: "start",
     current: "Current luck pillar",
@@ -155,6 +184,21 @@ function inputBasisLines(b: BaziFacts["input_basis"], locale: Locale): string[] 
   return out;
 }
 
+/** 旺衰 and 喜用 as the 命盘 page shows them (the engine's simplified 扶抑 judgement). */
+function strengthLine(s: NonNullable<BaziFacts["strength"]>, locale: Locale): string {
+  const t = L[locale];
+  const tr = (k: string) => term(k, locale);
+  const parts = [tr(s.verdict), s.de_ling ? t.deLing : t.notDeLing];
+  if (s.special) parts.push(`${tr(s.special)}（${t.special}）`);
+  else if (s.favorable.length) {
+    parts.push(
+      `${t.fav}：${s.favorable.map(tr).join(t.list)}`,
+      `${t.unfav}：${s.unfavorable.map(tr).join(t.list)}`,
+    );
+  }
+  return `${t.strength}：${parts.join(t.sep)}`;
+}
+
 export function factsLayer(chart: ChartFact, locale: Locale, nowYear: number): string[] {
   const t = L[locale];
   const tr = (k: string) => term(k, locale);
@@ -176,6 +220,7 @@ export function factsLayer(chart: ChartFact, locale: Locale, nowYear: number): s
       `${t.wx}：${Object.entries(f.wuxing_weighted.scores)
         .map(([k, v]) => `${tr(k)} ${v}`)
         .join(" · ")}`,
+      ...(f.strength ? [strengthLine(f.strength, locale)] : []),
       `${t.dy}：${tr(f.dayun.direction === "forward" ? "顺行" : "逆行")}${t.sep}${t.start} ${f.dayun.start_date}` +
         (current
           ? `${t.sep}${t.current} ${current.ganzhi}（${current.start_year} ${t.since}）`

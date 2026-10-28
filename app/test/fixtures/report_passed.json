@@ -18,6 +18,7 @@
       "農曆：庚午年二月十九（生肖馬）",
       "日主：己土（陰）；月令：卯木",
       "五行（加權，簡化計分）：木 2.1 · 火 1 · 土 2.9 · 金 2 · 水 0",
+      "日主旺衰（簡化扶抑）：身弱；不得令；喜用：火、土；忌：金、水、木",
       "大運：順行；起運 1997-02-19；目前大運 壬午（2017 起）",
       "流年 2026 丙午：正印 / 偏印；與時支六合",
       "流年 2027 丁未：偏印 / 比肩；與年支六合",
@@ -450,7 +451,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_bazi@5,action@3,guard@2",
+    "prompt_version": "narrative_bazi@5,action_bazi@4,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }
