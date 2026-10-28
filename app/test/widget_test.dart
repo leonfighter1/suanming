@@ -26,7 +26,36 @@ void main() {
     await settle(tester);
     expect(find.text('命理大師'), findsWidgets); // app bar + greeting banner
     expect(find.byKey(const Key('entry-bazi')), findsOneWidget);
+    await scrollTo(tester, const Key('entry-tarot')); // 西方, below 東方 (v6.1.0)
     expect(find.text('塔羅'), findsOneWidget);
+  });
+
+  testWidgets('home groups the methods: 東方 (八字, 求籤, 算卦, 風水), then 西方 (塔羅) (owner, v6.1.0)', (tester) async {
+    tester.view.physicalSize = const Size(900, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final api = FakeApi();
+    await tester.pumpWidget(testApp(api));
+    await settle(tester);
+    double y(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
+    expect(find.descendant(of: find.byKey(const Key('group-east')), matching: find.text('東方')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('group-west')), matching: find.text('西方')), findsOneWidget);
+    // 東方 in the region's order (the default here), all above 西方.
+    final east = [for (final k in ['entry-bazi', 'entry-qiuqian', 'entry-liuyao', 'entry-fengshui']) y(k)];
+    expect(east, [...east]..sort());
+    expect(east.first, greaterThan(y('group-east')));
+    expect(east.last, lessThan(y('group-west')));
+    expect(y('entry-tarot'), greaterThan(y('group-west')));
+
+    // A region whose matrix leaves out every 西方 method shows no 西方 heading.
+    api.methods = const ['qiuqian', 'bazi'];
+    await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
+    await tester.pumpWidget(testApp(api));
+    await settle(tester);
+    expect(find.byKey(const Key('group-east')), findsOneWidget); // the anchor (rule 43)
+    expect(y('entry-qiuqian'), lessThan(y('entry-bazi')));
+    expect(find.byKey(const Key('entry-tarot')), findsNothing);
+    expect(find.byKey(const Key('group-west')), findsNothing);
   });
 
   testWidgets('bazi: compute chart → pillars with protected 繁體 terms', (tester) async {
@@ -94,7 +123,7 @@ void main() {
   testWidgets('tarot: draw, reveal all cards, then the reading request appears', (tester) async {
     await tester.pumpWidget(testApp(FakeApi()));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('entry-tarot')));
+    await openEntry(tester, 'tarot');
     await settle(tester);
     await scrollAndTap(tester, find.byKey(const Key('draw')));
     await settle(tester);

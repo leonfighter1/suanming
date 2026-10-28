@@ -1420,6 +1420,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeLiuyaoDesc => '掷三枚硬币六次起卦，或自己掷好再填，马上看卦辞直说，仅供娱乐和玄学学习使用';
 
   @override
+  String get homeEast => '东方';
+
+  @override
+  String get homeWest => '西方';
+
+  @override
   String get liuyaoQuestion => '想问的事（可选）';
 
   @override
@@ -1475,6 +1481,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String liuyaoCoin(int n) {
     return '第 $n 枚硬币';
+  }
+
+  @override
+  String liuyaoCoinFace(int n, String face) {
+    return '第 $n 枚硬币：$face';
   }
 
   @override
@@ -3028,6 +3039,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get homeLiuyaoDesc => '擲三枚硬幣六次起卦，或自己擲好再填，馬上看卦辭直說，僅供娛樂和玄學學習使用';
 
   @override
+  String get homeEast => '東方';
+
+  @override
+  String get homeWest => '西方';
+
+  @override
   String get liuyaoQuestion => '想問的事（可選）';
 
   @override
@@ -3083,6 +3100,11 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String liuyaoCoin(int n) {
     return '第 $n 枚硬幣';
+  }
+
+  @override
+  String liuyaoCoinFace(int n, String face) {
+    return '第 $n 枚硬幣：$face';
   }
 
   @override

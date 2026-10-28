@@ -21,6 +21,13 @@ abstract final class Radii {
   static const chip = 10.0;
 }
 
+/// Anything lying face down, a tarot card's back or a covered coin (v6.1.0): navy, with a gold edge and gold marks.
+abstract final class FaceDown {
+  static const navy = Color(0xFF1E2546);
+  static const navyLight = Color(0xFF34407A);
+  static const gold = Color(0xFFE4BC62);
+}
+
 /// The keyboard focus outline, one look on every control: the text colour
 /// (dark in light mode, light in dark mode) outside the edge, which stands out
 /// on any fill. Buttons and chips get it from the theme; cards and custom

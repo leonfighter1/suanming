@@ -36,21 +36,25 @@ Future<void> _openQiuqian(WidgetTester tester, FakeApi api) async {
 }
 
 void main() {
-  testWidgets('the home page puts 求籤 first where the region does (Taiwan, Hong Kong)', (tester) async {
-    final api = FakeApi()..methods = const ['qiuqian', 'bazi', 'tarot', 'astrology'];
+  Future<Map<String, double>> homeTops(WidgetTester tester, FakeApi api) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(api));
     await frames(tester, 10);
-    final top = {for (final k in ['entry-qiuqian', 'entry-bazi', 'entry-tarot']) k: tester.getTopLeft(find.byKey(Key(k))).dy};
+    return {for (final k in ['entry-qiuqian', 'entry-bazi', 'entry-tarot']) k: tester.getTopLeft(find.byKey(Key(k))).dy};
+  }
+
+  testWidgets('the home page puts 求籤 first where the region does (Taiwan, Hong Kong)', (tester) async {
+    final top = await homeTops(tester, FakeApi()..methods = const ['qiuqian', 'bazi', 'tarot', 'astrology']);
     expect(top['entry-qiuqian']! < top['entry-bazi']!, isTrue);
     expect(top['entry-bazi']! < top['entry-tarot']!, isTrue);
   });
 
-  testWidgets('elsewhere the default order: 八字, 塔羅, 求籤', (tester) async {
-    await tester.pumpWidget(testApp(FakeApi()));
-    await frames(tester, 10);
-    final top = {for (final k in ['entry-qiuqian', 'entry-bazi', 'entry-tarot']) k: tester.getTopLeft(find.byKey(Key(k))).dy};
-    expect(top['entry-bazi']! < top['entry-tarot']!, isTrue);
-    expect(top['entry-tarot']! < top['entry-qiuqian']!, isTrue);
+  testWidgets('elsewhere the default order: 東方 八字, 求籤, then 西方 塔羅 (v6.1.0)', (tester) async {
+    final top = await homeTops(tester, FakeApi());
+    expect(top['entry-bazi']! < top['entry-qiuqian']!, isTrue);
+    expect(top['entry-qiuqian']! < top['entry-tarot']!, isTrue);
   });
 
   testWidgets('drawing a lot: each stick, each throw, then the lot and a reading of the question', (tester) async {

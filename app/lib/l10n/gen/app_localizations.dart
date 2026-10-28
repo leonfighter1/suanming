@@ -2779,6 +2779,18 @@ abstract class AppLocalizations {
   /// **'掷三枚硬币六次起卦，或自己掷好再填，马上看卦辞直说，仅供娱乐和玄学学习使用'**
   String get homeLiuyaoDesc;
 
+  /// No description provided for @homeEast.
+  ///
+  /// In zh, this message translates to:
+  /// **'东方'**
+  String get homeEast;
+
+  /// No description provided for @homeWest.
+  ///
+  /// In zh, this message translates to:
+  /// **'西方'**
+  String get homeWest;
+
   /// No description provided for @liuyaoQuestion.
   ///
   /// In zh, this message translates to:
@@ -2886,6 +2898,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'第 {n} 枚硬币'**
   String liuyaoCoin(int n);
+
+  /// No description provided for @liuyaoCoinFace.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {n} 枚硬币：{face}'**
+  String liuyaoCoinFace(int n, String face);
 
   /// No description provided for @liuyaoManualHow.
   ///

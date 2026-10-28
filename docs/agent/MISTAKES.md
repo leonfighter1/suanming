@@ -50,8 +50,29 @@
 46. In app/, FilledButton and OutlinedButton are full width by the theme: never put one straight into a Row; give it Expanded/SizedBox or stack it in a Column. A layout exception in a widget test can surface as an unrelated failure (focus, taps): fix the first exception first.
 47. In a traditional text that passed through 简体, treat every character 简体 merges (系/繫/係, 腊/臘, 后/後, 干/幹, 机/機, 斗/鬥, 里/裏, 仆/僕, 凶/兇, 志/誌) as unverified until a print or the sense settles it, even when every digital copy agrees. Find a page transcription of a scanned print (維基文庫 Page: namespace) to map the scan, then read the scan where anything differs.
 48. Fetch Wikimedia page renders (DjVu/PDF thumbnails) one at a time, at least 5 s apart, with retry and backoff on a non-JSON answer; ask only for the pages the check needs, and cache them.
+49. Before laying out by a Material widget's size (a chip, a button), measure it in a test at the sizes that matter: its outline, density and focus side can add to label plus padding. Then pin the layout in a test at those sizes, focused too.
+50. A CustomPainter that draws text takes its font from the page: pass DefaultTextStyle.of(context).style (or the theme text style) into the painter and use its fontFamily and fallback. Look at a render with the real font loaded, not only the test font, whose boxes hide this.
+51. A test opens a method from the home page through openEntry (scroll, then tap), never a bare tap on entry-*, so a change in the home order or grouping cannot leave an entry off the first screen. Run every test that taps a moved entry before calling a home change done.
 
 ## Log
+
+### 2026-10-28: Grouping the home page broke the tests that tapped 塔羅 unscrolled
+- **Symptom:** After 塔羅 moved into the 西方 group below 東方, five app tests failed: taps and finds on entry-tarot at phone sizes found nothing (the entry was past the list cache).
+- **Root cause:** The tests tapped home entries straight after start, relying on them being in the first screen; the new order put 塔羅 sixth, below the fold of an 800x600 or phone-sized view.
+- **Fix:** Added openEntry (test/support.dart): scroll the home list to the entry, then tap it; every 塔羅 entry tap goes through it, and the order tests use a tall view.
+- **Rule:** A test opens a method from the home page through openEntry (scroll, then tap), never a bare tap on entry-*, so a change in the home order or grouping cannot leave an entry off the first screen. Run every test that taps a moved entry before calling a home change done. (Rule 51)
+
+### 2026-10-28: A painted inscription came out as boxes: TextPainter has no font of its own
+- **Symptom:** Rendered with Noto Sans SC loaded, the 乾隆通寶 on the 算卦 coin showed four boxes, while all the page text read right.
+- **Root cause:** The coin painter built its TextStyle without a font family, so its TextPainter took the engine default (FlutterTest in tests, the platform font in the app) instead of the page font the theme gives every Text.
+- **Fix:** The coin passes DefaultTextStyle.of(context).style into the painter, which draws with its fontFamily and fontFamilyFallback; the render then showed 乾 隆 通 寶 round the hole.
+- **Rule:** A CustomPainter that draws text takes its font from the page: pass DefaultTextStyle.of(context).style (or the theme text style) into the painter and use its fontFamily and fallback. Look at a render with the real font loaded, not only the test font, whose boxes hide this. (Rule 50)
+
+### 2026-10-28: Spread chips still wrapped two to a row: a chip is wider than label plus padding
+- **Symptom:** With the chips given zero padding and labels of (width - 2 gaps) / 3, the tarot spread choices still went two to a row at 360 px (tops 769, 769, 879).
+- **Root cause:** A chip draws its 1 px outline inside its shape, and its Ink pads the content by that inset, so a chip is its label plus 2 px. I computed the widths from the padding alone, without measuring.
+- **Fix:** Measured the chips in a throwaway test (label 96 → chip 98), subtracted the 2 px edges from each label, and tested 320, 360 and 412 px plus a keyboard-focused chip (focus draws its outline outside, so it never widens a chip).
+- **Rule:** Before laying out by a Material widget's size (a chip, a button), measure it in a test at the sizes that matter: its outline, density and focus side can add to label plus padding. Then pin the layout in a test at those sizes, focused too. (Rule 49)
 
 ### 2026-10-28: Commons API refused page renders after ten quick requests
 - **Symptom:** Downloading scan pages of a DjVu on Wikimedia Commons: after about ten pages the API answered 「You are making too many requests to the API」 (not JSON), and every later page failed.

@@ -62,22 +62,23 @@ void main() {
         'open-profiles',
         'language-menu',
         'open-settings',
+        // 東方 (owner, v6.1.0), in the region's order: the default here.
         'entry-bazi',
-        'entry-tarot',
-        'entry-qiuqian', // 求籤 (v4.3.0), in the region's order: the default here
+        'entry-qiuqian', // 求籤 (v4.3.0)
         'entry-liuyao', // 算卦 (v6.0.0), after 求籤
         'entry-fengshui', // 风水 (v4.4.0)
+        'entry-tarot', // 西方
         'daily-card', // 每日一牌 (v2.6.0)
       ]);
       expect(ringShown(tester, find.byKey(const Key('daily-card'))), isTrue); // the last one Tab reached
       expect(ringShown(tester, home), isFalse);
-      // Shift+Tab goes back through 风水, 算卦 and 求籤 to 塔罗; Enter opens it.
-      for (final back in ['entry-fengshui', 'entry-liuyao', 'entry-qiuqian', 'entry-tarot']) {
+      // Shift+Tab goes back through 塔罗, 风水 and 算卦 to 求籤; Enter opens it.
+      for (final back in ['entry-tarot', 'entry-fengshui', 'entry-liuyao', 'entry-qiuqian']) {
         await press(tester, LogicalKeyboardKey.tab, shift: true);
         expect(focusedKey(), back);
       }
       await press(tester, LogicalKeyboardKey.enter);
-      expect(find.byKey(const Key('draw')), findsOneWidget);
+      expect(find.byKey(const Key('qiuqian-question')), findsOneWidget);
     });
   });
 

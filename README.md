@@ -12,6 +12,41 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v6.1.0 (2026-10-28): your three updates: coins that turn over, tarot spreads three to a row, 东方 and 西方
+
+Stage S12 of the [tech plan](docs/tech-plan.md), the three things you asked for after v6.0.0. A medium update,
+pushed as you said I could.
+
+- **算卦's coins are real 銅錢 now, and they turn over like the tarot cards.**
+  - Each coin is round with a square hole. The 字 side reads 乾隆通寶 round the hole, and the 背 side is plain.
+  - **自動擲幣**: each time you press 擲下一爻, the three coins are thrown. They spin up from their other side and
+    land on what the toss gave, one just after another, and then the line (「初爻：背 字 字 → 少陽」) shows.
+  - **自己挑幣**: the 24 coins lie covered, in the same navy and gold as the back of a tarot card. A coin you pick
+    glows and shows its number.
+    - After 看卦, the coins you picked turn over one by one in the order you picked them, as the tarot cards do,
+      each keeping its number in a corner.
+    - The coins you didn't pick dim.
+  - If your phone or computer is set to reduce motion, the coins show their faces straight away.
+- **塔羅's spreads sit three to a row on a phone** (单张 · 三张 · 凯尔特十字, then 二选一 · 关系牌阵). Every name is shown
+  in full. On a wider screen all five stay in one row.
+- **The home page has two groups:**
+  - **东方**: 八字排盘, 求签, 算卦, 风水.
+  - **西方**: 塔罗, for now; new ones can join either group.
+  - Each group keeps your region's order (求签 first in Taiwan and Hong Kong, 风水 first in Malaysia).
+  - A group the region offers nothing from isn't shown.
+  - Tab follows the groups: 东方 top to bottom, then 西方.
+- Verified:
+  - 4 new app tests, which check:
+    - the toss starts on the other face and lands on the toss, and its line shows only after landing;
+    - the picks turn over in order (the first after 300 ms, the 18th still covered), and the unpicked dim;
+    - with reduce motion, the faces show at once;
+    - the spread choices sit three to a row at 320, 360 and 412 px (also with a chip keyboard-focused), and five in
+      one row at 1000 px;
+    - the home groups and their order, and a region without 塔羅 shows no 西方.
+  - I looked at it rendered with a real Chinese font: the toss rows, the covered coins, the coins mid-turn and
+    turned, the home groups, and the spreads at 360 px.
+  - All 487 server tests and 151 app tests pass; harness PASS.
+
 ### v6.0.0 (2026-10-28): 算卦 complete: its pages in the app, and the 周易 text checked against a 宋 print
 
 Stage S10 of the [tech plan](docs/tech-plan.md) is complete (its summary is there). A big update: pushed, together

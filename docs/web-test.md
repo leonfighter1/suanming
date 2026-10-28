@@ -196,18 +196,23 @@ Then: 八字排盘 → compute a chart → 為這個命盤起名 at the end of t
 No restart is needed. In dev mode, `X-Dev-Country: ID` then shows the region. Its readings carry the content-block
 line in every model call, and the `id` rule group records any hit.
 
-## 算卦 (v6.0.0)
+## 算卦 (v6.0.0; the coins turn over since v6.1.0)
 
-- 首页 → 算卦: type the question (one thing), read the reminder, then choose how to cast:
-  - **自動擲幣**: 擲幣. The six tosses come one at a time (擲下一爻, or 直接看卦).
+- 首页 → 東方 → 算卦: type the question (one thing), read the reminder, then choose how to cast:
+  - **自動擲幣**: 擲幣. The six tosses come one at a time (擲下一爻, or 直接看卦). Each toss's three 銅錢 are thrown:
+    they spin and land, 字 (乾隆通寶) or 背 (plain), and then the line shows.
   - **自己挑幣**: 擺好硬幣 lays out 24 face-down coins on the server. Pick 18, one by one (click, or Tab and Enter);
-    each gets its number, and 重新挑 starts over. After the 18th, 看卦 turns them over in the order picked.
+    each glows and gets its number, and 重新挑 starts over. After the 18th, 看卦 turns them over one by one in the
+    order picked, like the tarot cards; the coins not picked dim.
+  - With the system's reduce-motion setting on, the coins show their faces at once.
   - **自擲自填**: set the exact time first (選擇時間, or 用現在的時間). Then enter six rows from 初爻 (bottom) up, 按硬幣
     (字 / 背) or 按爻, and 起卦.
 - The card shows the hexagram at once, with no AI: the six lines (moving ones marked), 本卦 → 變卦, the trigrams, the
   time's 干支, and the texts it is read by, each with its 直說.
 - 生成 AI 解讀 then reads the cast for the question. With `IS_AI_MOCK=TRUE` the reading is the mock's demo text.
 - 算卦 is offered everywhere, after 求籤 in the home order. History names a reading by its hexagram (「算卦 · 天雷無妄」).
+- Since v6.1.0 the home page has two groups: 東方 (八字, 求籤, 算卦, 風水, in the region's order) and 西方 (塔羅).
+  On a phone, 塔羅's spread choices sit three to a row.
 
 ## Cache
 

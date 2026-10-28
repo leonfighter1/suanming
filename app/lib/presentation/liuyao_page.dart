@@ -8,6 +8,7 @@ import '../l10n/gen/app_localizations.dart';
 import '../platform/time_zone.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'widgets/copper_coin.dart';
 import 'widgets/hexagram_card.dart';
 import 'widgets/report_request.dart';
 
@@ -23,6 +24,11 @@ class LiuyaoPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<LiuyaoPage> createState() => _LiuyaoPageState();
 }
+
+/// The coins of a toss leave the hand one after another; a reveal turns the picked coins over in pick order
+/// (owner, v6.1.0: the coins turn over like the tarot cards).
+const _tossStagger = Duration(milliseconds: 120);
+const _revealStagger = Duration(milliseconds: 90);
 
 /// The three coins a manual line stands for, by the classical count (背 3, 字 2).
 const _coinsOf = {
@@ -390,7 +396,8 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
 }
 
 /// An auto cast revealed one toss at a time, 初爻 first: the hexagram grows from the bottom, each toss with its
-/// three coins and its line. 擲下一爻 shows the next; 直接看卦 shows them all.
+/// three coins and its line. 擲下一爻 shows the next; 直接看卦 shows them all. Each toss's coins are thrown and
+/// land on their faces, and then its line shows (owner, v6.1.0).
 class _Tosses extends StatelessWidget {
   const _Tosses({required this.chart, required this.shown, required this.onNext, required this.onSkip});
   final LiuyaoChart chart;
@@ -420,9 +427,31 @@ class _Tosses extends StatelessWidget {
           Padding(
             key: ValueKey<String>('toss-$i'),
             padding: const EdgeInsets.symmetric(vertical: Space.xs),
-            child: Text(
-              '${places[i]}：${(chart.coins[i] ?? const <String>[]).map(coin).join(' ')} → ${kind(chart.values[i])}',
-              style: theme.textTheme.bodyMedium,
+            child: Row(
+              children: [
+                // The line below says what the coins show.
+                ExcludeSemantics(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final (j, face) in (chart.coins[i] ?? const <String>[]).indexed)
+                        Padding(
+                          padding: const EdgeInsets.only(right: Space.s),
+                          child: CopperCoin(face: face, size: 40, toss: true, delay: _tossStagger * j),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: Space.xs),
+                Expanded(
+                  child: _AfterLanding(
+                    child: Text(
+                      '${places[i]}：${(chart.coins[i] ?? const <String>[]).map(coin).join(' ')} → ${kind(chart.values[i])}',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         if (shown < 6) ...[
@@ -441,7 +470,28 @@ class _Tosses extends StatelessWidget {
   }
 }
 
-/// The 24 coins laid out face down. Each pick shows its number; once cast, each picked coin shows its face.
+/// A toss's line, shown once its coins have landed.
+class _AfterLanding extends StatelessWidget {
+  const _AfterLanding({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final landed = _tossStagger * 2 + CopperCoin.spin;
+    final total = landed + const Duration(milliseconds: 200);
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: still ? Duration.zero : total,
+      curve: Interval(landed.inMicroseconds / total.inMicroseconds, 1),
+      builder: (context, v, child) => Opacity(opacity: v, child: child),
+      child: child,
+    );
+  }
+}
+
+/// The 24 coins laid out face down. A picked coin glows and carries its number. Once cast, the picked coins turn
+/// over one after another in the order picked, each to the face its toss gave it, and the others step back.
 class _CoinGrid extends StatelessWidget {
   const _CoinGrid({required this.picks, required this.cast, required this.onPick});
   final List<int> picks;
@@ -451,7 +501,7 @@ class _CoinGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
+    String name(String face) => face == 'bei' ? l10n.liuyaoCoinBei : l10n.liuyaoCoinZi;
     return Wrap(
       key: const Key('liuyao-coins'),
       spacing: Space.s,
@@ -464,28 +514,21 @@ class _CoinGrid extends StatelessWidget {
             // The face, once cast: the order picked gives the toss (3 per line) and the coin in it.
             final toss = picked ? cast?.coins[order ~/ 3] : null;
             final face = toss == null ? null : toss[order % 3];
-            final coin = Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: picked ? scheme.primaryContainer : scheme.surfaceContainerHighest,
-                border: Border.all(color: picked ? scheme.primary : scheme.outline, width: 1.5),
-              ),
-              child: Text(
-                face == null
-                    ? (picked ? '${order + 1}' : '')
-                    : (face == 'bei' ? l10n.liuyaoCoinBei : l10n.liuyaoCoinZi),
-                style: TextStyle(color: scheme.onPrimaryContainer, fontWeight: FontWeight.w600),
-              ),
-            );
             return Pressable(
               key: ValueKey<String>('coin-$i'),
               radius: 22,
-              label: l10n.liuyaoCoin(i + 1),
+              label: face == null ? l10n.liuyaoCoin(i + 1) : l10n.liuyaoCoinFace(i + 1, name(face)),
               onPressed: picked || onPick == null ? null : () => onPick!(i),
-              child: coin,
+              child: AnimatedOpacity(
+                opacity: cast != null && !picked ? 0.35 : 1,
+                duration: CopperCoin.turn,
+                child: CopperCoin(
+                  face: face,
+                  number: picked ? order + 1 : null,
+                  glow: picked,
+                  delay: _revealStagger * (picked ? order : 0),
+                ),
+              ),
             );
           }(),
       ],

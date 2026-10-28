@@ -20,10 +20,10 @@ const _ratio = 12 / 7;
 const _thumbnail = 96.0;
 
 // The deck's own colours (JingyaoPaint tarot_card.dart), so the back matches the faces
-// in light and dark alike, as a real deck would.
-const _navy = Color(0xFF1E2546);
-const _navyLight = Color(0xFF34407A);
-const _gold = Color(0xFFE4BC62);
+// in light and dark alike, as a real deck would. 算卦's covered coins share them (design.dart).
+const _navy = FaceDown.navy;
+const _navyLight = FaceDown.navyLight;
+const _gold = FaceDown.gold;
 
 String tarotArt(String cardId) => 'assets/tarot/$cardId.webp';
 

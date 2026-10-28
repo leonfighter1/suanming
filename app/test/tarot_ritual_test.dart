@@ -23,7 +23,7 @@ Future<FakeApi> openRitual(WidgetTester tester) async {
   final api = FakeApi();
   await tester.pumpWidget(testApp(api));
   await settle(tester);
-  await tester.tap(find.byKey(const Key('entry-tarot')));
+  await openEntry(tester, 'tarot');
   await settle(tester);
   await tester.ensureVisible(find.byKey(const Key('draw')));
   await tester.pump(); // rule 27

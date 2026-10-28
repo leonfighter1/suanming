@@ -2,6 +2,30 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ai): S12, the owner's three UI requests; release v6.1.0
+
+- **Owner requests**, three in a row after v6.0.0:
+  - 算卦's coins should turn over like the tarot cards;
+  - the tarot spread choices three to a row on a phone (「现在只有两个一排。很难看」);
+  - the home page split into 东方 (八字, 算卦, 风水, 求签) and 西方 (塔罗 for now, more later).
+  - Rule 34: no earlier owner decision on these. The region's home order (v4.3.0) is kept inside each group.
+- WP12.1: the chips have no padding and share the width three to a row (all five in one row where they fit).
+  - The first try still gave two to a row: a chip is its label plus its 2 px outline (rule 49). I measured it in a
+    throwaway test and fixed the sum.
+  - A test covers 320 / 360 / 412 px, a focused chip, and 1000 px.
+- WP12.2: `_east` / `_west` in home_page.dart, with headings 東方 / 西方. A group with no method on offer is not shown.
+  - The Tab order and the order tests changed with it (塔羅 after 風水).
+  - Five tests that tapped 塔羅 unscrolled broke, and now go through `openEntry` (rule 51).
+- WP12.3: `CopperCoin`: 字 with 乾隆通寶, 背 plain, the cover in the tarot back's colours (now `FaceDown` in
+  design.dart).
+  - Tosses spin from the other face and land; the line shows after.
+  - The picks turn over one by one in the order picked, and the rest dim.
+  - Reduce motion shows the faces at once.
+  - Rendered with Noto Sans SC and looked at. That showed the inscription as boxes (the painter had no font,
+    rule 50) and two-digit numbers wrapping. Both fixed and looked at again.
+- Tests: 4 new (147 → 151); the pick test now reads the coin's face from its side key and its spoken label.
+- Manual Flutter runs went through the scratchpad junction (rule 23); the harness ran twice as that rule expects.
+
 ## 2026-10-28 (ah): S10 算卦 complete (the app pages, the 周易 text checked); release v6.0.0
 
 - **Owner:** 「做完了 push 到git 不用等我approval」. v5.4.0 was pushed with v5.3.0 (main and tags) after its harness PASS.

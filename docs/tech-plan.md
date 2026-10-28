@@ -38,6 +38,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S9 Phase 3 门禁            | 起名's own rule group; the Phase 3 gate record              | medium | v5.2.0            | done        |
 | S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | done        |
 | S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | done        |
+| S12 Owner updates          | tarot spreads 3 a row, 东方 / 西方 home, coins that turn    | medium | v6.1.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1127,9 +1128,71 @@ As built (v5.4.0):
 - Server English (`en` in the API, prompts and tables) is kept: nothing calls it now. Removing it is the owner's
   call.
 
+## S12 Owner updates (medium → v6.1.0)
+
+**Owner requests (2026-10-28), after v6.0.0, three in a row:**
+
+> 针对做好UI 算卦的铜钱，给动画翻拍。类似于塔罗牌那样的翻牌
+>
+> 塔罗牌 牌阵在手机版上要三个一排。现在只有两个一排。很难看
+>
+> 将算命分为东方和西方，东方的八字算卦风水求签为一组，西方的目前只有塔罗牌。之后可以添加。
+
+- **WP12.1 The tarot spread choices three to a row on a phone.**
+  - All five go in one row where they fit; elsewhere they share the width three to a row, every name in full.
+  - A test checks 320, 360 and 412 px, a keyboard-focused chip, and a wide screen.
+- **WP12.2 The home page in two groups:** 东方 (八字, 算卦, 风水, 求签) and 西方 (塔罗 for now).
+  - Each group keeps the region's order inside it (求籤 first in Taiwan and Hong Kong, 风水 first in Malaysia).
+  - A group none of whose methods the region offers is not shown.
+  - A new method joins a group in one place.
+- **WP12.3 The coins turn over like the tarot cards.** 算卦's coins are drawn as 銅錢: round, with a square hole.
+  - 字 reads 乾隆通寶 round the hole, and 背 is plain.
+  - 自動擲幣: each toss's three coins are thrown and spin from their other face, then land, and only then does
+    the line show.
+  - 自己挑幣: the coins lie covered in the tarot back's colours. A picked coin glows and carries its number. Once
+    cast, the picks turn over one by one in the order picked; the rest dim.
+  - The system's reduce-motion setting shows the faces at once.
+
+Lessons: rules 3, 7, 15, 19, 22, 23, 24, 25, 27, 43, 46; the keyboard-access skill.
+
+As built (v6.1.0):
+
+- **WP12.1:** a chip is its label plus its 1 px outline, drawn inside on each side (measured: 96 → 98 px). A
+  focused chip draws its outline outside, so focus never widens it.
+  - At 360 px the card's inner width is 286 px: three chips of 90 px and two 8 px gaps.
+  - The chips have no padding of their own.
+- **WP12.2:** the groups are two sets in `home_page.dart`, beside the entries, in the region's order from
+  `GET /v1/methods`. No region puts a 西方 method first today, so 东方 always leads.
+  - Tests that open 塔罗 from home now scroll to it first (`openEntry` in test/support.dart): it sits below the
+    东方 group, off a phone's first screen.
+- **WP12.3:** `CopperCoin` (widgets/copper_coin.dart) turns as a tarot card does (`rotateY` with perspective, the far
+  side mirrored back), over the same 500 ms.
+  - A toss spins through five half-turns in 900 ms, rising as it goes, the coins 120 ms apart.
+  - A reveal turns the picks 90 ms apart.
+  - The face-down colours moved to `FaceDown` in design.dart, shared with the tarot back.
+  - The inscription is drawn in the page's font. A TextPainter takes none of its own, and a test render without it
+    showed boxes.
+  - Two-digit pick numbers scale down rather than wrap.
+  - Looked at rendered with Noto Sans SC: the toss rows, the covered grid, and the grid mid-turn and turned.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S12 Owner updates (done 2026-10-28: v6.1.0, medium)
+
+1. **Delivered** in v6.1.0, the owner's three requests:
+   - WP12.1: the tarot spread choices three to a row on a phone;
+   - WP12.2: the home page in 东方 and 西方 groups;
+   - WP12.3: 算卦's coins drawn as 銅錢, turning over like the tarot cards.
+2. **Numbers**: app tests 147 → 151; server tests 487.
+3. **Changed against the plan**: nothing. The face-down colours moved into design.dart, so the coins and the tarot
+   back share one look.
+4. **Mistakes recorded**:
+   - rule 49: measure a widget before laying out by its size;
+   - rule 50: a painter's text needs the page's font;
+   - rule 51: open home entries through `openEntry`.
+5. **Next**: what the owner picks. The open items are as at S10's end.
 
 ### S10 算卦 (done 2026-10-28: v5.3.0–v6.0.0)
 
@@ -1489,3 +1552,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP11.1    | done                         | v5.4.0  |
 | WP11.2    | done (app; server en kept)   | v5.4.0  |
 | WP11.3    | done                         | v5.4.0  |
+| WP12.1    | done                         | v6.1.0  |
+| WP12.2    | done                         | v6.1.0  |
+| WP12.3    | done                         | v6.1.0  |

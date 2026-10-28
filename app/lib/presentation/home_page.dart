@@ -18,6 +18,11 @@ import 'widgets/language_menu.dart';
 void push(BuildContext context, Widget page) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 
+/// The home page's two groups (owner, v6.1.0): 东方, 八字 · 算卦 · 风水 · 求签, and 西方, 塔罗 for now. A new
+/// method joins one of them here. Inside a group the methods keep the region's order.
+const _east = {'bazi', 'qiuqian', 'liuyao', 'fengshui'};
+const _west = {'tarot'};
+
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -26,6 +31,16 @@ class HomePage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final book = ref.watch(profilesProvider).value;
     final me = book?.defaultProfile;
+    // The methods in the region's entry order (GET /v1/methods, v4.3.0): 求籤 first in Taiwan and Hong Kong, the
+    // default order elsewhere and while the order loads. Each group under its name, 东方 first.
+    final methods = (ref.watch(methodsProvider).value ?? defaultMethods).where(defaultMethods.contains).toList();
+    final entries = <Widget>[
+      for (final (key, title, members) in [('east', l10n.homeEast, _east), ('west', l10n.homeWest, _west)])
+        if (methods.any(members.contains)) ...[
+          _GroupTitle(key: Key('group-$key'), title: title),
+          for (final system in methods.where(members.contains)) _entry(context, l10n, system),
+        ],
+    ];
     return Scaffold(
       // Everything one tap away: 历史记录, 个人资料, 语言, and the 设置 gear.
       appBar: AppBar(
@@ -75,54 +90,73 @@ class HomePage extends ConsumerWidget {
                 child: Text(l10n.noProfileBody),
               ),
             ),
-          // The methods in the region's entry order (GET /v1/methods, v4.3.0): 求籤 first in Taiwan
-          // and Hong Kong, the default order elsewhere and while the order loads.
-          for (final (i, system)
-              in (ref.watch(methodsProvider).value ?? defaultMethods).where(defaultMethods.contains).indexed)
-            FadeSlideIn(
-              index: 2 + i,
-              child: switch (system) {
-                'bazi' => _Entry(
-                    key: const Key('entry-bazi'),
-                    icon: Icons.grid_view_rounded,
-                    title: l10n.homeBazi,
-                    subtitle: l10n.homeBaziDesc,
-                    onTap: () => push(context, const BaziFormPage()),
-                  ),
-                'tarot' => _Entry(
-                    key: const Key('entry-tarot'),
-                    icon: Icons.style_rounded,
-                    title: l10n.homeTarot,
-                    subtitle: l10n.homeTarotDesc,
-                    onTap: () => push(context, const TarotPage()),
-                  ),
-                'fengshui' => _Entry(
-                    key: const Key('entry-fengshui'),
-                    icon: Icons.explore_outlined,
-                    title: l10n.homeFengshui,
-                    subtitle: l10n.homeFengshuiDesc,
-                    onTap: () => push(context, const FengshuiPage()),
-                  ),
-                'qiuqian' => _Entry(
-                    key: const Key('entry-qiuqian'),
-                    icon: Icons.temple_buddhist_outlined,
-                    title: l10n.homeQiuqian,
-                    subtitle: l10n.homeQiuqianDesc,
-                    onTap: () => push(context, const QiuqianPage()),
-                  ),
-                'liuyao' => _Entry(
-                    key: const Key('entry-liuyao'),
-                    icon: Icons.toll_outlined,
-                    title: l10n.homeLiuyao,
-                    subtitle: l10n.homeLiuyaoDesc,
-                    onTap: () => push(context, const LiuyaoPage()),
-                  ),
-                _ => const SizedBox.shrink(),
-              },
-            ),
-          const FadeSlideIn(index: 7, child: DailyCard()),
-          const FadeSlideIn(index: 8, child: RecentHistory()),
+          for (final (i, entry) in entries.indexed) FadeSlideIn(index: 2 + i, child: entry),
+          FadeSlideIn(index: 2 + entries.length, child: const DailyCard()),
+          FadeSlideIn(index: 3 + entries.length, child: const RecentHistory()),
         ],
+      ),
+    );
+  }
+
+  Widget _entry(BuildContext context, AppLocalizations l10n, String system) => switch (system) {
+        'bazi' => _Entry(
+            key: const Key('entry-bazi'),
+            icon: Icons.grid_view_rounded,
+            title: l10n.homeBazi,
+            subtitle: l10n.homeBaziDesc,
+            onTap: () => push(context, const BaziFormPage()),
+          ),
+        'tarot' => _Entry(
+            key: const Key('entry-tarot'),
+            icon: Icons.style_rounded,
+            title: l10n.homeTarot,
+            subtitle: l10n.homeTarotDesc,
+            onTap: () => push(context, const TarotPage()),
+          ),
+        'fengshui' => _Entry(
+            key: const Key('entry-fengshui'),
+            icon: Icons.explore_outlined,
+            title: l10n.homeFengshui,
+            subtitle: l10n.homeFengshuiDesc,
+            onTap: () => push(context, const FengshuiPage()),
+          ),
+        'qiuqian' => _Entry(
+            key: const Key('entry-qiuqian'),
+            icon: Icons.temple_buddhist_outlined,
+            title: l10n.homeQiuqian,
+            subtitle: l10n.homeQiuqianDesc,
+            onTap: () => push(context, const QiuqianPage()),
+          ),
+        'liuyao' => _Entry(
+            key: const Key('entry-liuyao'),
+            icon: Icons.toll_outlined,
+            title: l10n.homeLiuyao,
+            subtitle: l10n.homeLiuyaoDesc,
+            onTap: () => push(context, const LiuyaoPage()),
+          ),
+        _ => const SizedBox.shrink(),
+      };
+}
+
+/// A group's name above its methods on the home page: 东方, 西方 (owner, v6.1.0). Read out as a heading.
+class _GroupTitle extends StatelessWidget {
+  const _GroupTitle({super.key, required this.title});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.xs, Space.s, Space.xs, Space.m),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

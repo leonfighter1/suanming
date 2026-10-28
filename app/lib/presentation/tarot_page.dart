@@ -14,8 +14,13 @@ import 'widgets/report_request.dart';
 import 'widgets/tarot_ritual.dart';
 import 'widgets/tarot_spread.dart';
 
-/// Each spread choice's width: room for its icon and the longest name (凯尔特十字) on one line.
-const _spreadChoiceWidth = 84.0;
+/// A spread choice's width where all five fit in one row: room for its icon and the longest name (凯尔特十字) on
+/// one line. Where they don't (a phone), the choices share the width three to a row (owner, v6.1.0).
+const _spreadChoiceWidth = 96.0;
+
+/// What a chip adds round its label: its 1 px outline, drawn inside, on each side (a focused chip's outline is
+/// drawn outside, so focus never makes it wider).
+const _spreadChipEdges = 2.0;
 
 /// 塔罗 the classic way: think of a question, choose a spread, draw; the cards are laid
 /// out as the spread prescribes and turned in dealing order (widgets/tarot_spread.dart).
@@ -185,50 +190,63 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                       // Each spread drawn small, then its positions, before the draw (v2.5.0).
                       Text(l10n.spread, style: Theme.of(context).textTheme.labelLarge),
                       const SizedBox(height: Space.s),
-                      // Five spreads (v2.8.0) are too many for one segmented row on a phone:
-                      // chips wrap, take Tab, Enter and Space, and show the theme's focus border.
-                      Wrap(
-                        key: const Key('spread'),
-                        spacing: Space.s,
-                        runSpacing: Space.s,
-                        children: [
-                          for (final (id, name) in [
-                            ('single', l10n.spreadSingleShort),
-                            ('three_card', l10n.spreadThreeShort),
-                            ('celtic_cross', l10n.spreadCelticShort),
-                            ('two_paths', l10n.spreadTwoPathsShort),
-                            ('relationship', l10n.spreadRelationshipShort),
-                          ])
-                            ChoiceChip(
-                              key: Key('spread-$id'),
-                              showCheckmark: false,
-                              selected: _spread == id,
-                              onSelected: (_) => setState(() {
-                                _spread = id;
-                                _inRitual = false; // a ritual is for one spread's count
-                              }),
-                              // Every choice the same size (owner, v5.4.0): the same square icon, the name below.
-                              label: SizedBox(
-                                width: _spreadChoiceWidth,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: Space.s),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SpreadIcon(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
-                                      const SizedBox(height: Space.s),
-                                      Text(
-                                        name,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                      // Five spreads (v2.8.0) are too many for one segmented row on a phone: chips wrap, take
+                      // Tab, Enter and Space, and show the theme's focus border. All five go in one row where
+                      // they fit; else three to a row, sharing the width (owner, v6.1.0: a phone showed two).
+                      LayoutBuilder(
+                        builder: (context, box) {
+                          const gap = Space.s;
+                          final width = 5 * (_spreadChoiceWidth + _spreadChipEdges) + 4 * gap <= box.maxWidth
+                              ? _spreadChoiceWidth
+                              : ((box.maxWidth - 2 * gap) / 3).floorToDouble() - _spreadChipEdges;
+                          return Wrap(
+                            key: const Key('spread'),
+                            spacing: gap,
+                            runSpacing: gap,
+                            children: [
+                              for (final (id, name) in [
+                                ('single', l10n.spreadSingleShort),
+                                ('three_card', l10n.spreadThreeShort),
+                                ('celtic_cross', l10n.spreadCelticShort),
+                                ('two_paths', l10n.spreadTwoPathsShort),
+                                ('relationship', l10n.spreadRelationshipShort),
+                              ])
+                                ChoiceChip(
+                                  key: Key('spread-$id'),
+                                  showCheckmark: false,
+                                  selected: _spread == id,
+                                  onSelected: (_) => setState(() {
+                                    _spread = id;
+                                    _inRitual = false; // a ritual is for one spread's count
+                                  }),
+                                  // No padding of its own: a chip is its label and its edges, so three fill a row.
+                                  padding: EdgeInsets.zero,
+                                  labelPadding: EdgeInsets.zero,
+                                  // Every choice the same size (owner, v5.4.0): the same square icon, the name
+                                  // below.
+                                  label: SizedBox(
+                                    width: width,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: Space.s),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SpreadIcon(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
+                                          const SizedBox(height: Space.s),
+                                          Text(
+                                            name,
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                        ],
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: Space.s),
                       Text(

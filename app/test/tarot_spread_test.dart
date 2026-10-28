@@ -37,7 +37,7 @@ Future<FakeApi> drawAt(
   await tester.pumpWidget(const SizedBox.shrink()); // a fresh app, not the last one updated (rule 24)
   await tester.pumpWidget(testApp(api));
   await settle(tester);
-  await tester.tap(find.byKey(const Key('entry-tarot')));
+  await openEntry(tester, 'tarot');
   await settle(tester);
   if (question.isNotEmpty) await tester.enterText(find.byKey(const Key('tarot-question')), question);
   if (focus != null) {
@@ -79,7 +79,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink()); // rule 24
     await tester.pumpWidget(testApp(FakeApi()));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('entry-tarot')));
+    await openEntry(tester, 'tarot');
     await settle(tester);
   }
 
@@ -126,6 +126,37 @@ void main() {
       final drawn = tester.getSize(within(id, find.byType(SpreadDiagram)));
       expect(max(drawn.width, drawn.height), closeTo(56, 0.01), reason: id);
     }
+  });
+
+  testWidgets('on a phone the spread choices sit three to a row; with room, all five in one (owner, v6.1.0)', (tester) async {
+    const ids = ['single', 'three_card', 'celtic_cross', 'two_paths', 'relationship'];
+    Rect at(String id) => tester.getRect(find.byKey(Key('spread-$id')));
+    for (final width in [320.0, 360.0, 412.0]) {
+      tester.view.physicalSize = Size(width, 2000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(const SizedBox.shrink()); // rule 24
+      await tester.pumpWidget(testApp(FakeApi()));
+      await settle(tester);
+      await openEntry(tester, 'tarot');
+      await settle(tester);
+      final tops = [for (final id in ids) at(id).top];
+      expect(tops.sublist(0, 3).toSet(), hasLength(1), reason: '$width: $tops');
+      expect(tops.sublist(3).toSet(), hasLength(1), reason: '$width: $tops');
+      expect(tops[3], greaterThan(tops[0]), reason: '$width');
+      expect(at('two_paths').left, at('single').left, reason: '$width');
+      expect({for (final id in ids) at(id).size}, hasLength(1), reason: '$width');
+      for (final id in ids) {
+        final name = find.descendant(of: find.byKey(Key('spread-$id')), matching: find.byType(Text));
+        expect(tester.renderObject<RenderParagraph>(name).didExceedMaxLines, isFalse, reason: '$width $id');
+      }
+      // Keyboard focus draws its outline outside a chip, so the rows stay as they are.
+      await tabTo(tester, 'spread-celtic_cross');
+      expect(focusedKey(), 'spread-celtic_cross');
+      expect([for (final id in ids) at(id).top], tops, reason: '$width, focused');
+    }
+    await openTarot(tester); // 1000 wide
+    expect({for (final id in ids) at(id).top}, hasLength(1));
   });
 
   testWidgets('二选一 lies in a V and 关系牌阵 in two rows (v2.8.0)', (tester) async {

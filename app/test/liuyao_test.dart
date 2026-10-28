@@ -37,6 +37,12 @@ Future<void> _mode(WidgetTester tester, String label) async {
 
 final _chart = fixture('chart_liuyao')['chart_fact']['facts'] as Map<String, dynamic>;
 
+/// The side each coin under [within] shows now, in order: `zi`, `bei` or `cover` (copper_coin.dart keys it).
+List<String> _sides(Finder within) => [
+      for (final e in find.descendant(of: within, matching: find.byType(CustomPaint)).evaluate())
+        if (e.widget.key case ValueKey<String>(:final value) when value.startsWith('coin-side-')) value.substring(10),
+    ];
+
 void main() {
   test('a time zone from a whole-hour offset: IANA Etc names flip the sign', () {
     expect(offsetZone(const Duration(hours: 8)), 'Etc/GMT-8');
@@ -131,10 +137,78 @@ void main() {
     expect(body['draw_id'], '9a9a9a9a-9a9a-49a9-89a9-9a9a9a9a9a9a');
     expect(body['picks'], picks);
 
-    // Turned over: the first pick shows the 初爻's first coin.
-    final face = ((_chart['tosses'] as List).first['coins'] as List).first == 'bei' ? '背' : '字';
-    expect(find.descendant(of: find.byKey(const Key('coin-23')), matching: find.text(face)), findsOneWidget);
+    // Turned over: the first pick shows the 初爻's first coin, and says so.
+    final first = ((_chart['tosses'] as List).first['coins'] as List).first as String;
+    expect(_sides(find.byKey(const Key('coin-23'))), [first]);
+    expect(tester.getSemantics(find.byKey(const Key('coin-23'))).label, contains('第 24 枚硬幣：${first == 'bei' ? '背' : '字'}'));
     expect(find.byKey(const Key('hexagram-card')), findsOneWidget);
+  });
+
+  testWidgets('the coins turn over like the tarot cards: a toss lands on its faces, a reveal turns the picks in order (owner, v6.1.0)', (tester) async {
+    final tosses = [
+      for (final t in _chart['tosses'] as List) [for (final c in (t as Map)['coins'] as List) c as String],
+    ];
+    String other(String face) => face == 'bei' ? 'zi' : 'bei';
+
+    // 自動擲幣: thrown, each coin spins up from its other face and lands on the toss; then the line shows.
+    await _open(tester);
+    await tester.tap(find.byKey(const Key('liuyao-toss')));
+    await frames(tester);
+    await tester.tap(find.byKey(const Key('liuyao-next')));
+    await tester.pump();
+    final row = find.byKey(const ValueKey<String>('toss-0'));
+    final line = find.descendant(of: row, matching: find.byType(Opacity));
+    expect(_sides(row), [for (final c in tosses[0]) other(c)]);
+    expect(tester.widget<Opacity>(line).opacity, 0);
+    await tester.pump(const Duration(milliseconds: 1300)); // 900 ms spin, the third coin 240 ms behind
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(_sides(row), tosses[0]);
+    expect(tester.widget<Opacity>(line).opacity, 1);
+
+    // 自己挑幣: once cast, the picked coins turn over one by one in the order picked; the others stay covered.
+    await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
+    await _open(tester);
+    await _mode(tester, '自己挑幣');
+    await tester.tap(find.byKey(const Key('liuyao-lay-out')));
+    await frames(tester);
+    final picks = [23, 0, 5, 7, 2, 19, 11, 4, 16, 9, 21, 1, 14, 8, 22, 6, 13, 10];
+    for (final c in picks) {
+      await tester.tap(find.byKey(Key('coin-$c')));
+      await tester.pump();
+    }
+    expect(_sides(find.byKey(const Key('liuyao-coins'))), List.filled(24, 'cover'));
+    await tester.tap(find.byKey(const Key('liuyao-reveal')));
+    for (var i = 0; i < 10 && find.byKey(const Key('hexagram-card')).evaluate().isEmpty; i++) {
+      await tester.pump();
+    }
+    Finder coin(int i) => find.byKey(Key('coin-$i'));
+    String faceOf(int order) => tosses[order ~/ 3][order % 3];
+    expect(_sides(coin(picks.first)), ['cover']);
+    await tester.pump(const Duration(milliseconds: 300)); // past the first coin's half-turn
+    expect(_sides(coin(picks.first)), [faceOf(0)]);
+    expect(_sides(coin(picks.last)), ['cover']); // the 18th waits 17 × 90 ms
+    await tester.pump(const Duration(milliseconds: 2000));
+    for (final (order, c) in picks.indexed) {
+      expect(_sides(coin(c)), [faceOf(order)], reason: 'pick ${order + 1}');
+    }
+    for (final c in [3, 12, 15, 17, 18, 20]) {
+      expect(_sides(coin(c)), ['cover'], reason: 'coin $c');
+      expect(tester.widget<AnimatedOpacity>(find.descendant(of: coin(c), matching: find.byType(AnimatedOpacity))).opacity, 0.35);
+    }
+  });
+
+  testWidgets('with the system\'s animations off, the coins show their faces at once', (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    await _open(tester);
+    await tester.tap(find.byKey(const Key('liuyao-toss')));
+    await frames(tester);
+    await tester.tap(find.byKey(const Key('liuyao-next')));
+    await tester.pump();
+    await tester.pump();
+    final row = find.byKey(const ValueKey<String>('toss-0'));
+    expect(_sides(row), [for (final c in ((_chart['tosses'] as List).first['coins'] as List)) c as String]);
+    expect(tester.widget<Opacity>(find.descendant(of: row, matching: find.byType(Opacity))).opacity, 1);
   });
 
   testWidgets('自擲自填: nothing is cast without the time; the lines go as the coins counted', (tester) async {

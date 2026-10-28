@@ -45,6 +45,13 @@ Future<void> scrollToFinder(WidgetTester tester, Finder finder, {double delta = 
 /// Scroll the main list down to [key] (see [scrollToFinder]).
 Future<void> scrollTo(WidgetTester tester, Key key) => scrollToFinder(tester, find.byKey(key));
 
+/// On the home page, open a method: scroll to its entry, then tap it. Since v6.1.0 the 西方 group (塔羅) sits
+/// below the 東方 one, off a phone's first screen.
+Future<void> openEntry(WidgetTester tester, String system) async {
+  await scrollTo(tester, Key('entry-$system'));
+  await tester.tap(find.byKey(Key('entry-$system')));
+}
+
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
 /// fixtures; reports go pending → [finalReport].
 class FakeApi {

@@ -18,7 +18,7 @@ Future<void> openGlossary(WidgetTester tester) async {
   addTearDown(tester.view.reset);
   await tester.pumpWidget(testApp(FakeApi()));
   await settle(tester);
-  await tester.tap(find.byKey(const Key('entry-tarot')));
+  await openEntry(tester, 'tarot');
   await settle(tester);
   await tester.tap(find.byKey(const Key('open-glossary')));
   await settle(tester);
