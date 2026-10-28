@@ -9,15 +9,6 @@ import 'package:mingli_app/domain/models.dart';
 import 'keys.dart';
 import 'support.dart';
 
-/// Presses Tab until [key] has the focus (named as [focusedKey] names it).
-Future<void> tabTo(WidgetTester tester, String key, {int max = 60}) async {
-  for (var i = 0; i < max && focusedKey() != key; i++) {
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await frames(tester, 3);
-  }
-  expect(focusedKey(), key, reason: 'Tab never reached $key');
-}
-
 /// A tall phone-width view, signed in as a tester with a default profile.
 Future<void> start(WidgetTester tester, {Locale? locale = zhHans, double width = 400}) async {
   tester.view.physicalSize = Size(width, 2400);
@@ -62,13 +53,24 @@ void main() {
     testWidgets('home: Tab goes along the bar, then the entries; the focused card shows the ring', (tester) async {
       await start(tester);
       final stops = <String?>[];
-      for (var i = 0; i < 6; i++) {
+      for (var i = 0; i < 7; i++) {
         await press(tester, LogicalKeyboardKey.tab);
         stops.add(focusedKey());
       }
-      expect(stops, ['open-history', 'open-profiles', 'language-menu', 'open-settings', 'entry-bazi', 'entry-tarot']);
-      expect(ringShown(tester, find.byKey(const Key('entry-tarot'))), isTrue);
+      expect(stops, [
+        'open-history',
+        'open-profiles',
+        'language-menu',
+        'open-settings',
+        'entry-bazi',
+        'entry-tarot',
+        'daily-card', // 每日一牌 (v2.6.0)
+      ]);
+      expect(ringShown(tester, find.byKey(const Key('daily-card'))), isTrue); // the last one Tab reached
       expect(ringShown(tester, home), isFalse);
+      // Shift+Tab goes back to the 塔罗 entry; Enter opens it.
+      await press(tester, LogicalKeyboardKey.tab, shift: true);
+      expect(focusedKey(), 'entry-tarot');
       await press(tester, LogicalKeyboardKey.enter);
       expect(find.byKey(const Key('draw')), findsOneWidget);
     });

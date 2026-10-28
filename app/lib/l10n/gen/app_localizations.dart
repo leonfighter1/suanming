@@ -501,6 +501,18 @@ abstract class AppLocalizations {
   /// **'Celtic Cross (10 cards)'**
   String get spreadCeltic;
 
+  /// No description provided for @dailyCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card of the day'**
+  String get dailyCard;
+
+  /// No description provided for @dailyCardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One card a day, the same all day. Open it to see it large, or ask the AI to read it.'**
+  String get dailyCardHint;
+
   /// No description provided for @spreadSingleShort.
   ///
   /// In en, this message translates to:

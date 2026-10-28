@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (o): S3 WP3.3, 每日一牌; release v2.6.0
+
+- v2.5.0: harness PASS after the rule 23 retry; committed and tagged.
+- WP3.3 (`src/service/daily.ts` + route `GET /v1/tarot/daily`):
+  - `keyedUuid` (UUIDv8 from an HMAC under the draw key) for the draw id and the chart id.
+  - The date must be within a day of the server's UTC date.
+  - Geo-Rule first. Stored once with `ChartRecord.daily`; left out of `listCharts`.
+- App:
+  - `dailyCardProvider` with the device date; `daily_card.dart` (`DailyCard` on 首页, `DailyCardPage` with the spread and a reading request).
+  - Fake API route; `tabTo` moved to `test/keys.dart` (reuse-first).
+- Test fixes on the way: the home Tab-order test pressed Tab exactly six times, so the seventh stop never showed. It now presses seven, and Shift+Tab goes back to 塔罗 so its Enter check stays.
+- v2.6.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (n): S3 WP3.2, choosing a spread and asking; release v2.5.0
 
 - v2.4.0: the harness hit rule 23 on the first run; the automatic retry passed. Committed and tagged.

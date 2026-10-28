@@ -200,6 +200,10 @@ class FakeApi {
     if (req.method == 'GET' && path == '/v1/charts/66666666-6666-4666-8666-666666666666') {
       return _json(fixture('chart_life'), 200);
     }
+    // 每日一牌: the single-card draw, for any date.
+    if (req.method == 'GET' && path == '/v1/tarot/daily') {
+      return _json({...fixture('chart_tarot_single'), 'date': '2026-10-25'}, 200);
+    }
     // The three-card draw that report_tarot_passed reads.
     if (req.method == 'GET' && path == '/v1/charts/33333333-3333-4333-8333-333333333333') {
       return _json(fixture('chart_tarot'), 200);

@@ -215,6 +215,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spreadCeltic => '凯尔特十字（10 张）';
 
   @override
+  String get dailyCard => '今日一牌';
+
+  @override
+  String get dailyCardHint => '每天一张，当天不变。点开看大图，也可以请 AI 解读。';
+
+  @override
   String get spreadSingleShort => '单张';
 
   @override
@@ -1329,6 +1335,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get spreadCeltic => '凱爾特十字（10 張）';
+
+  @override
+  String get dailyCard => '今日一牌';
+
+  @override
+  String get dailyCardHint => '每天一張，當天不變。點開看大圖，也可以請 AI 解讀。';
 
   @override
   String get spreadSingleShort => '單張';

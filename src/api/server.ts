@@ -42,6 +42,7 @@ import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
+import { dailyDate, dailyIds, drawDaily } from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
 import {
   InMemoryStore,
@@ -1026,6 +1027,27 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           view,
           aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
         );
+      }
+      // 每日一牌: the account's card of the day, the same all day (src/service/daily.ts).
+      if (path === "/v1/tarot/daily") {
+        assertServed(c.country, "tarot");
+        const date = dailyDate(
+          new URL(req.url ?? "/", "http://localhost").searchParams.get("date"),
+          now(),
+        );
+        const { drawId, chartId } = dailyIds(opts.secrets.drawKey, c.user, date);
+        let chart = await store.getChart(chartId);
+        if (!chart) {
+          chart = {
+            id: chartId,
+            owner: c.user,
+            fact: drawDaily(opts.secrets, drawId, now),
+            created_at: now().toISOString(),
+            daily: date,
+          };
+          await store.putChart(chart);
+        }
+        return send(res, 200, { chart_id: chart.id, chart_fact: chart.fact, date });
       }
       const limit = Math.min(
         Math.max(

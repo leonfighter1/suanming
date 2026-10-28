@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_form_page.dart';
+import 'daily_card.dart';
 import 'design.dart';
 import 'history_page.dart';
 import 'profiles_page.dart';
@@ -91,7 +92,8 @@ class HomePage extends ConsumerWidget {
               onTap: () => push(context, const TarotPage()),
             ),
           ),
-          const FadeSlideIn(index: 4, child: RecentHistory()),
+          const FadeSlideIn(index: 4, child: DailyCard()),
+          const FadeSlideIn(index: 5, child: RecentHistory()),
         ],
       ),
     );

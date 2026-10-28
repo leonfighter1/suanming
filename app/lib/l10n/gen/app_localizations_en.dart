@@ -221,6 +221,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spreadCeltic => 'Celtic Cross (10 cards)';
 
   @override
+  String get dailyCard => 'Card of the day';
+
+  @override
+  String get dailyCardHint =>
+      'One card a day, the same all day. Open it to see it large, or ask the AI to read it.';
+
+  @override
   String get spreadSingleShort => 'One card';
 
   @override

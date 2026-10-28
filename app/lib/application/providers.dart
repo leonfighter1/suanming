@@ -244,6 +244,13 @@ final lifeReportsProvider = FutureProvider.autoDispose<List<LifeReportView>>(
   (ref) => ref.watch(apiClientProvider).listLifeReports(),
 );
 
+/// 每日一牌 for the device's calendar date (GET /v1/tarot/daily).
+final dailyCardProvider = FutureProvider.autoDispose<ChartResult>((ref) {
+  final d = DateTime.now();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return ref.watch(apiClientProvider).dailyCard('${d.year}-${two(d.month)}-${two(d.day)}');
+});
+
 /// A chart by id (life reports opened from history need its 八字).
 final chartProvider = FutureProvider.autoDispose.family<ChartResult, String>(
   (ref, id) => ref.watch(apiClientProvider).getChart(id),

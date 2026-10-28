@@ -12,6 +12,31 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.6.0 (2026-10-28): 每日一牌, a card for the day
+
+Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.3. A medium update: committed locally,
+pushed with v3.0.0.
+
+- 首页: a new card 「今日一牌」 after the 八字 and 塔罗 entries.
+  - It shows today's card with its art and name, upside down and marked 逆位 when it came reversed.
+  - It is the same card all day. Tomorrow brings a new one. Every account has its own.
+  - Touching it opens the card large; from there you can ask the AI to read it (a one-card tarot reading).
+  - Where tarot isn't offered, or when the server can't be reached, the card simply isn't shown.
+- How it works: the day's card comes from your account and the date, under the app's secret draw key. It can't be
+  guessed in advance or read ahead of its day (only today's date is accepted, for any time zone), and like every
+  draw it can be checked afterwards. It is kept as your chart but not listed among the charts you made.
+- Keyboard: the card is a Tab stop after the 塔罗 entry; Enter opens it and Esc comes back.
+- API: `GET /v1/tarot/daily?date=YYYY-MM-DD`.
+- Verified:
+  - 5 new server tests:
+    - the same card all day, replaying from its draw id, and opened as the account's chart;
+    - another day or account gets its own card, and others can't open yours;
+    - only today's real date;
+    - the Geo-Rule first, and not listed among the charts;
+    - the id format.
+  - 2 new app tests: the card on 首页 and its page; Tab, Enter and Esc. The home Tab-order test includes it.
+  - All 292 server tests and 97 app tests pass; harness PASS.
+
 ### v2.5.0 (2026-10-28): choosing a spread, and asking
 
 Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.2. A medium update: committed locally,

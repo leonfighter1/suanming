@@ -44,6 +44,15 @@ Future<void> systemBack(WidgetTester tester) async {
   await frames(tester);
 }
 
+/// Presses Tab until [key] has the focus (named as [focusedKey] names it).
+Future<void> tabTo(WidgetTester tester, String key, {int max = 60}) async {
+  for (var i = 0; i < max && focusedKey() != key; i++) {
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await frames(tester, 3);
+  }
+  expect(focusedKey(), key, reason: 'Tab never reached $key');
+}
+
 /// The nearest string key above the focused node: how tests name a Tab stop.
 String? focusedKey() {
   final context = FocusManager.instance.primaryFocus?.context;

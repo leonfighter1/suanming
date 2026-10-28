@@ -680,6 +680,38 @@ paths:
                   chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
         "404": { $ref: "#/components/responses/Problem" }
 
+  /v1/tarot/daily:
+    get:
+      tags: [charts]
+      operationId: getDailyCard
+      summary: 每日一牌, the account's card of the day (the same all day)
+      description: |
+        A single-card draw whose draw id comes from the account and the date under the draw
+        key: the same card all day, unguessable without the key, replayable by the audit.
+        Stored as the account's chart on first request (GET /v1/charts/{chart_id} opens it,
+        POST /v1/reports reads it) but not listed in GET /v1/charts. Since v2.6.0.
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: The reader's calendar date; within a day of the server's UTC date.
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: The day's card
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chart_id, chart_fact, date]
+                properties:
+                  chart_id: { type: string, format: uuid }
+                  chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
+                  date: { type: string, format: date }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
   /v1/reports/{report_id}:
     get:
       tags: [reports]

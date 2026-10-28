@@ -81,6 +81,8 @@
   "spreadSingle": "Single card",
   "spreadThree": "Three cards (past · present · future)",
   "spreadCeltic": "Celtic Cross (10 cards)",
+  "dailyCard": "Card of the day",
+  "dailyCardHint": "One card a day, the same all day. Open it to see it large, or ask the AI to read it.",
   "spreadSingleShort": "One card",
   "spreadThreeShort": "Three cards",
   "spreadCelticShort": "Celtic Cross",

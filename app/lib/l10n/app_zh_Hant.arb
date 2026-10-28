@@ -67,6 +67,8 @@
   "spreadSingle": "單張",
   "spreadThree": "三張（過去・現在・未來）",
   "spreadCeltic": "凱爾特十字（10 張）",
+  "dailyCard": "今日一牌",
+  "dailyCardHint": "每天一張，當天不變。點開看大圖，也可以請 AI 解讀。",
   "spreadSingleShort": "單張",
   "spreadThreeShort": "三張",
   "spreadCelticShort": "凱爾特十字",

@@ -199,6 +199,15 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
     questions as chips fill the field. The Celtic Cross list takes the larger of the spread's text scale and 1.5, so
     phones get 1.5× and wide screens keep 2×.
 - WP3.3 每日一牌: draw id from the account and the date, so the card stays the same all day; on 首页.
+  - As built (v2.6.0): `GET /v1/tarot/daily?date=` (`src/service/daily.ts`).
+    - The draw id and the chart id are version-8 UUIDs from an HMAC of the account and the date under the draw
+      key (separate labels), so a card is stable, unguessable and replayable.
+    - The date must be within a day of the server's UTC date (any time zone's today; no reading ahead). The
+      Geo-Rule runs first.
+    - The chart is stored once as the account's own (`ChartRecord.daily`): `GET /v1/charts/{id}` opens it and a
+      reading can be asked of it, but `GET /v1/charts` doesn't list it.
+    - App: a 今日一牌 card on 首页 after the two entries (hidden when there is none), opening a page with the card
+      large and an AI reading request; a Tab stop after `entry-tarot`. `tabTo` moved into `test/keys.dart`.
 - WP3.4 牌义图鉴: all 78 cards with their art and keywords (from the art; 繁 by OpenCC and checked by G18; English
   written to the RWS meanings), one source in `deck.ts`.
 - WP3.5 More spreads: 二选一 (five cards) and 关系牌阵 (six), with positions, meanings, layouts and their method in
@@ -322,5 +331,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP2.2     | done                       | v2.3.0          |
 | WP3.1     | done                       | v2.4.0          |
 | WP3.2     | done                       | v2.5.0          |
-| WP3.3–3.6 | todo                       | v2.6.0 … v3.0.0 |
+| WP3.3     | done                       | v2.6.0          |
+| WP3.4–3.6 | todo                       | v2.7.0 … v3.0.0 |
 | S4–S6     | todo                       | above           |

@@ -13,6 +13,8 @@ export interface ChartRecord {
   owner: string;
   fact: ChartFact;
   created_at: string;
+  /** 每日一牌: the date it is the card of (YYYY-MM-DD). Not listed among the charts. */
+  daily?: string;
 }
 
 export type ReportRecordStatus = "pending" | "passed" | "blocked" | "manual_review" | "failed";
@@ -173,7 +175,8 @@ export class InMemoryStore implements Store {
   }
   async listCharts(owner: string, limit: number) {
     return newest(
-      [...this.charts.values()].filter((c) => c.owner === owner),
+      // A 每日一牌 isn't a chart the user made: one a day would bury the rest.
+      [...this.charts.values()].filter((c) => c.owner === owner && !c.daily),
       limit,
     );
   }

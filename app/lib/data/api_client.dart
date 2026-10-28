@@ -143,6 +143,10 @@ class ApiClient {
 
   Future<Json> getReview(String kind, String id) => _authed('GET', '/v1/admin/reviews/$kind/$id');
 
+  /// 每日一牌 for [date] (YYYY-MM-DD, the device's date): the same card all day.
+  Future<ChartResult> dailyCard(String date) async =>
+      ChartResult.fromJson(await _authed('GET', '/v1/tarot/daily?date=$date'));
+
   Future<Json> decideReview(String kind, String id, {required bool approve, String? note}) =>
       _authed('POST', '/v1/admin/reviews/$kind/$id', {'decision': approve ? 'approve' : 'reject', if (note != null && note.trim().isNotEmpty) 'note': note.trim()});
 
