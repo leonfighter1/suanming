@@ -36,16 +36,22 @@ void main() {
     final facts = fixture('chart_bazi')['chart_fact']['facts'] as Map<String, dynamic>;
     final firstCycle = ((facts['dayun'] as Map)['cycles'] as List).first as Map;
 
-    // Cards in page order, scrolling down (the list builds lazily).
+    // Cards in page order, scrolling down (the list builds lazily, rule 25).
+    // 五行 card: 己土 has 26.8 of 100 support points (月干 己 12, 午 4, 未 10.8): 身弱; the 卯 month's
+    // 本气 is 木: 不得令. 喜用 = 印 火, 比劫 土; 忌 = 食伤 金, 财 水, 官杀 木.
+    await scrollTo(tester, const Key('strength'));
+    for (final pill in ['身弱', '不得令', '喜用：火、土', '忌：金、水、木']) {
+      expect(find.descendant(of: find.byKey(const Key('strength')), matching: find.text(pill)), findsOneWidget, reason: pill);
+    }
     // 己 日: 禄 午 = 年支; 年支 午: 桃花 卯 = 月, 日; 日支 卯: 华盖 未 = 时. 己卯 in 甲戌旬: 申酉 空.
     // 胎元: 己 + 1 = 庚, 卯 + 3 = 午.
-    await tester.scrollUntilVisible(find.byKey(const Key('shensha-card')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('shensha-card'));
     for (final pill in ['祿神 · 年柱', '桃花 · 月柱、日柱', '華蓋 · 時柱', '空亡 申酉', '胎元 庚午']) {
       expect(find.text(pill), findsOneWidget, reason: pill);
     }
 
     // 午卯 破 ×2, 午未 合 土, 卯未 半合 木 ×2 (亥卯未 with its middle 卯).
-    await tester.scrollUntilVisible(find.byKey(const Key('relations-card')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('relations-card'));
     final card = find.byKey(const Key('relations-card'));
     Finder inCard(String text) => find.descendant(of: card, matching: find.text(text));
     expect(inCard('相破'), findsNWidgets(2));
@@ -55,9 +61,9 @@ void main() {
     }
 
     // The first 大运 shows its 虚岁 from the civil birth year; 2026 is 虛歲 2026 − 1990 + 1 = 37.
-    await tester.scrollUntilVisible(find.byKey(const Key('dayun-strip')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('dayun-strip'));
     expect(find.text('虛歲 ${firstCycle['start_year'] - 1990 + 1}'), findsOneWidget);
-    await tester.scrollUntilVisible(find.byKey(const Key('liunian-strip')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('liunian-strip'));
     expect(find.text('2026 · 虛歲 37'), findsOneWidget);
   });
 

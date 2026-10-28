@@ -67,7 +67,33 @@ class BaziChartPage extends ConsumerWidget {
       AppCard(
         title: l10n.wuxingWeighted,
         icon: Icons.donut_large,
-        child: Column(children: [for (final e in b.wuxingWeighted.entries) _WuxingBar(e.key, e.value, t(e.key))]),
+        child: Column(
+          children: [
+            for (final e in b.wuxingWeighted.entries) _WuxingBar(e.key, e.value, t(e.key)),
+            // 日主旺衰 + 喜用 by the engine's simplified 扶抑法 (charts since v2.0.0).
+            if (b.strength case final s?) ...[
+              const SizedBox(height: Space.s),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(
+                  key: const Key('strength'),
+                  spacing: Space.s,
+                  runSpacing: Space.s,
+                  children: [
+                    Pill(t(s.verdict)),
+                    Pill(s.deLing ? t('得令') : l10n.notDeLing),
+                    if (s.special != null)
+                      Pill('${t(s.special!)} · ${l10n.specialNote}')
+                    else if (s.favorable.isNotEmpty) ...[
+                      Pill(l10n.favorableIs(s.favorable.map(t).join('、'))),
+                      Pill(l10n.unfavorableIs(s.unfavorable.map(t).join('、'))),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
       // 神煞 with the pillars that hold them, 空亡 and 胎元 (charts since v1.3.0).
       if (b.kongwang != null)

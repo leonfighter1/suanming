@@ -30,21 +30,13 @@ import {
   PROMPTS,
   tarotUser,
   todayLine,
-  trendUser,
   type PromptVersion,
 } from "./prompts.js";
 import { spreadBrief } from "./tarot.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
 import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schemas.js";
 import { glossaryFor, LOCALES, normalizeTerms, type Locale } from "./terms.js";
-import {
-  checkTrend,
-  trendLayer,
-  trendPayload,
-  trendSchema,
-  type TrendLayer,
-  type TrendOutput,
-} from "./trend.js";
+import { trendLayer, type TrendLayer } from "./trend.js";
 import {
   TOPICS,
   TOPICS_BY_SYSTEM,
@@ -351,43 +343,21 @@ export async function generateReport(
   let status: ReportStatus = "passed";
   let review: GuardOutput | undefined;
 
-  // 2. Narrative, and for 八字 the trend scores in parallel (both read only the chart).
-  //    A trend failure drops the trend chart, never the report.
-  const periods = chart.system === "bazi" ? trendPayload(chart, topics) : undefined;
-  const trendRun = periods
-    ? runAgent<TrendOutput>({
-        agent: "trend",
-        ...providerFor("trend"),
-        schema: trendSchema(topics),
-        payload: periods,
-        maxRetries,
-        enforce,
-        user: (feedback) => trendUser({ facts, periods, locale: opts.locale, glossary, feedback }),
-        check: (data) => {
-          const { value, feedback } = checkTrend(chart, topics, data);
-          for (const pt of [...value.dayun, ...value.liunian]) {
-            const { text, fixes } = normalizeTerms(pt.note, opts.locale);
-            termFixes.push(...fixes);
-            pt.note = text;
-          }
-          return {
-            value,
-            feedback,
-            ...scanTexts(
-              [...value.dayun, ...value.liunian].map((pt) => pt.note),
-              rules,
-            ),
-          };
-        },
-      }).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
-    : undefined;
+  // 2. The 八字 trend chart is the engine's (since v2.0.0): no model scores it.
+  const trend = chart.system === "bazi" ? trendLayer(chart, topics, opts.locale) : undefined;
 
-  // Each method reads with its own prompt: tarot never shares one with 八字 or astrology.
+  // Each method reads with its own prompt: 八字 and tarot never share one with each other
+  // or with astrology (which still reads with the shared narrative@4).
   const tarot = chart.system === "tarot";
   const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
+  const ownPrompt = tarot
+    ? PROMPTS.narrative_tarot
+    : chart.system === "bazi"
+      ? PROMPTS.narrative_bazi
+      : undefined;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
-    ...(tarot && { prompt: PROMPTS.narrative_tarot }),
+    ...(ownPrompt && { prompt: ownPrompt }),
     ...providerFor("narrative"),
     schema: narrativeSchema(topics),
     payload: { topics, system: chart.system },
@@ -460,19 +430,6 @@ export async function generateReport(
   });
   traces.push(narrative.trace);
 
-  let trend: TrendOutput | undefined;
-  const trendDone = await trendRun;
-  if (trendDone instanceof Error) {
-    if (!narrative.ok) throw trendDone;
-    reasons.push(`trend omitted: ${trendDone.message}`);
-  } else if (trendDone) {
-    traces.push(trendDone.trace);
-    if (trendDone.ok) {
-      trend = trendDone.value;
-      ruleViolations.push(...trendDone.review, ...trendDone.block);
-    } else reasons.push(`trend omitted: ${trendDone.reason}`);
-  }
-
   let actions: ActionOutput | undefined;
   if (narrative.ok && narrative.value.sections.length === 0) {
     status = "manual_review";
@@ -534,12 +491,10 @@ export async function generateReport(
 
       // 4. Model review layer — only for drafts the rule layer already passed,
       //    and only while review is on.
+      // The trend chart is the engine's (no model text), so it isn't part of the draft.
       const draft = {
         interpretation: narrative.value.sections,
         actions: actions.actions,
-        ...(trend && {
-          trend_notes: [...trend.dayun, ...trend.liunian].map((pt) => pt.note),
-        }),
       };
       const guard = !enforce
         ? undefined
@@ -622,7 +577,7 @@ export async function generateReport(
     interpretation,
     actions: actions?.actions ?? [],
     expectation: expectationLayer(opts.locale, labelRequired),
-    ...(trend && { trend: trendLayer(chart, topics, trend, opts.locale) }),
+    ...(trend && { trend }),
   };
   if (status === "passed" && candidate && actions) {
     report.layers = candidate;

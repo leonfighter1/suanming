@@ -2,6 +2,26 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (i): S1 part 2 (旺衰, 喜用, 运势 scores from the engine); S1 summary; release v2.0.0
+
+- WP1.6 strength.ts:
+  - 扶抑法 on the 100-point position scheme. The plan's weights had no source behind them (G4).
+  - 得令, 通根, 喜用 / 忌 and the 专旺 / 从格 flag, shown on the 五行 card.
+- WP1.7 trend-scores.ts:
+  - Six topic scores for every 大运 and 流年, from the facts, with what each rests on.
+  - Notes from templates (trend.ts).
+  - The trend agent left the 八字 pipeline, so a reading makes one model call fewer.
+  - narrative_bazi@5. life_methods@2 and life_topics@2 take the engine's stage scores and 虚岁 labels.
+  - Schema: new optional properties only.
+- The S1 summary is written in docs/tech-plan.md. Found on the way:
+  - WP2.3: the facts the model reads grew from 3.3k to 17.0k characters over S1.
+  - WP4.7: the other widget tests move to scrollTo().
+- Mistakes:
+  - Rule 27: back-to-back scrollUntilVisible. A probe of the scroll offsets showed that ensureVisible leaves no frame, so the next check saw the old layout and its first drag went past the card.
+  - Rule 28: the trend notes called every 刑, 害 and 破 「刑害」. Caught while taking a README example from real output.
+- Tooling: the guard now blocks `cmd /c rmdir` on a junction that points at the repo, so the scratchpad junction from the manual Flutter runs stays (rule 23).
+- v2.0.0 committed and tagged, then pushed with v1.3.0 after a fresh harness PASS.
+
 ## 2026-10-27 (h): tech plan and dev-workflow skill; S1 part 1, release v1.3.0
 
 - Owner: turn the review into a technical plan in stages, write a stage summary after each big stage, version by size (big X.0.0, medium X.Y.0, small X.Y.Z), push only big updates and only after a fresh harness PASS, describe every update in the README, never forget past mistakes, then work through the plan. Written: docs/tech-plan.md (stages S1–S6) and .claude/skills/dev-workflow (the finishing steps moved there from keyboard-access); CLAUDE.md points to both; memory updated (push rule).

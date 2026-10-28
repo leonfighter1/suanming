@@ -81,10 +81,12 @@ describe("tarot reading, the classic way", () => {
       { providers: { deepseek: baziAi, anthropic: baziAi }, now: FIXED_NOW },
     );
     const baziReading = baziAi.sent.find((r) => r.agent === "narrative")!;
-    // narrative@4 is byte for byte what it was before tarot got its own prompt.
+    // 八字 reads with its own prompt too (v2.0.0); the shared narrative@4 stays byte for byte
+    // what it was, for astrology.
+    expect(baziReading.system).toBe(PROMPTS.narrative_bazi.system);
+    expect(PROMPTS.narrative_bazi.system).not.toBe(PROMPTS.narrative.system);
     expect(PROMPTS.narrative.id).toBe("narrative@4");
     expect(promptHash(PROMPTS.narrative)).toBe("49007c9a8aba351e");
-    expect(baziReading.system).toBe(PROMPTS.narrative.system);
     expect(baziReading.user).not.toContain("<spread>");
   });
 

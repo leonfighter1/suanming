@@ -150,6 +150,64 @@
       "type": "array",
       "items": { "enum": ["天乙贵人", "文昌", "禄神", "羊刃", "桃花", "驿马", "华盖"] }
     },
+    "element_points": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["木", "火", "土", "金", "水"],
+      "properties": {
+        "木": { "type": "number" },
+        "火": { "type": "number" },
+        "土": { "type": "number" },
+        "金": { "type": "number" },
+        "水": { "type": "number" }
+      }
+    },
+    "period_score": {
+      "description": "Engine trend score of one period (src/engines/bazi/trend-scores.ts)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scores", "basis"],
+      "properties": {
+        "index": { "type": "integer" },
+        "year": { "type": "integer" },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "wuxing",
+            "personality",
+            "career_wealth",
+            "relationships",
+            "dayun_liunian",
+            "health"
+          ],
+          "properties": {
+            "wuxing": { "type": "integer", "minimum": 20, "maximum": 85 },
+            "personality": { "type": "integer", "minimum": 20, "maximum": 85 },
+            "career_wealth": { "type": "integer", "minimum": 20, "maximum": 85 },
+            "relationships": { "type": "integer", "minimum": 20, "maximum": 85 },
+            "dayun_liunian": { "type": "integer", "minimum": 20, "maximum": 85 },
+            "health": { "type": "integer", "minimum": 20, "maximum": 85 }
+          }
+        },
+        "basis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["favour", "relations", "families", "day_branch"],
+          "properties": {
+            "favour": { "type": "number", "minimum": -1, "maximum": 1 },
+            "relations": { "type": "number", "minimum": -0.6, "maximum": 0.3 },
+            "families": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "enum": ["比劫", "食伤", "财", "官杀", "印"] }
+            },
+            "day_branch": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
     "bazi_facts": {
       "type": "object",
       "additionalProperties": false,
@@ -262,6 +320,45 @@
           }
         },
         "taiyuan": { "type": "string", "minLength": 2, "maxLength": 2 },
+        "strength": {
+          "description": "日主旺衰 + 喜用, simplified 扶抑法 (src/engines/bazi/strength.ts)",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "method",
+            "points",
+            "by_element",
+            "support",
+            "verdict",
+            "de_ling",
+            "tong_gen",
+            "favorable",
+            "unfavorable"
+          ],
+          "properties": {
+            "method": { "enum": ["fuyi_100"] },
+            "points": { "type": "object" },
+            "by_element": { "$ref": "#/$defs/element_points" },
+            "support": { "type": "number", "minimum": 0, "maximum": 100 },
+            "verdict": { "enum": ["身强", "身弱", "中和"] },
+            "de_ling": { "type": "boolean" },
+            "tong_gen": { "type": "array", "items": { "enum": ["year", "month", "day", "hour"] } },
+            "favorable": { "type": "array", "items": { "$ref": "#/$defs/wuxing" } },
+            "unfavorable": { "type": "array", "items": { "$ref": "#/$defs/wuxing" } },
+            "special": { "enum": ["专旺候选", "从格候选"] }
+          }
+        },
+        "trend": {
+          "description": "Engine trend scores for every 大运 and 流年",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "dayun", "liunian"],
+          "properties": {
+            "method": { "enum": ["engine_fuyi_v1"] },
+            "dayun": { "type": "array", "items": { "$ref": "#/$defs/period_score" } },
+            "liunian": { "type": "array", "items": { "$ref": "#/$defs/period_score" } }
+          }
+        },
         "liuyue": {
           "type": "object",
           "additionalProperties": false,

@@ -70,10 +70,10 @@
           "start_age": 8,
           "end_age": 17,
           "scores": {
-            "career_wealth": 42
+            "career_wealth": 29
           },
-          "overall": 42,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 29,
+          "note": "庚辰：食傷當頭（表達和才華）；五行多為需要多留意的一方，與日支相害，宜多溝通。"
         },
         {
           "index": 2,
@@ -82,10 +82,10 @@
           "start_age": 18,
           "end_age": 27,
           "scores": {
-            "career_wealth": 49
+            "career_wealth": 39
           },
-          "overall": 49,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 39,
+          "note": "辛巳：食傷當頭（表達和才華）；五行多為需要多留意的一方。"
         },
         {
           "index": 3,
@@ -94,10 +94,10 @@
           "start_age": 28,
           "end_age": 37,
           "scores": {
-            "career_wealth": 56
+            "career_wealth": 47
           },
-          "overall": 56,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 47,
+          "note": "壬午：財星當頭（錢財和實際收穫）；五行有利與不利大致相當，與日支相破，宜多溝通。"
         },
         {
           "index": 4,
@@ -106,10 +106,10 @@
           "start_age": 38,
           "end_age": 47,
           "scores": {
-            "career_wealth": 63
+            "career_wealth": 45
           },
-          "overall": 63,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 45,
+          "note": "癸未：財星當頭（錢財和實際收穫）；五行有利與不利大致相當，與日支相合，相處較順。"
         },
         {
           "index": 5,
@@ -118,10 +118,10 @@
           "start_age": 48,
           "end_age": 57,
           "scores": {
-            "career_wealth": 70
+            "career_wealth": 20
           },
-          "overall": 70,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 20,
+          "note": "甲申：官殺當頭（規則、壓力和事業）；五行多為需要多留意的一方。"
         },
         {
           "index": 6,
@@ -130,10 +130,10 @@
           "start_age": 58,
           "end_age": 67,
           "scores": {
-            "career_wealth": 77
+            "career_wealth": 20
           },
-          "overall": 77,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 20,
+          "note": "乙酉：官殺當頭（規則、壓力和事業）；五行多為需要多留意的一方，與日支相沖，變動較多。"
         },
         {
           "index": 7,
@@ -142,10 +142,10 @@
           "start_age": 68,
           "end_age": 77,
           "scores": {
-            "career_wealth": 39
+            "career_wealth": 78
           },
-          "overall": 39,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 78,
+          "note": "丙戌：印星當頭（學習和支持你的人）；五行多為對你有利的一方，與日支相合，相處較順。"
         },
         {
           "index": 8,
@@ -154,10 +154,10 @@
           "start_age": 78,
           "end_age": 87,
           "scores": {
-            "career_wealth": 46
+            "career_wealth": 47
           },
-          "overall": 46,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 47,
+          "note": "丁亥：印星當頭（學習和支持你的人）；五行有利與不利大致相當，與日支相合，相處較順。"
         }
       ],
       "liunian": [
@@ -166,20 +166,20 @@
           "age": 37,
           "ganzhi": "丙午",
           "scores": {
-            "career_wealth": 42
+            "career_wealth": 79
           },
-          "overall": 42,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 79,
+          "note": "丙午：印星當頭（學習和支持你的人）；五行多為對你有利的一方，與日支相破，宜多溝通。"
         },
         {
           "year": 2027,
           "age": 38,
           "ganzhi": "丁未",
           "scores": {
-            "career_wealth": 49
+            "career_wealth": 79
           },
-          "overall": 49,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 79,
+          "note": "丁未：印星當頭（學習和支持你的人）；五行多為對你有利的一方，與日支相合，相處較順。"
         },
         {
           "year": 2028,
@@ -189,81 +189,81 @@
             "career_wealth": 56
           },
           "overall": 56,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "note": "戊申：比劫當頭（自己和同輩）；五行有利與不利大致相當。"
         },
         {
           "year": 2029,
           "age": 40,
           "ganzhi": "己酉",
           "scores": {
-            "career_wealth": 63
+            "career_wealth": 36
           },
-          "overall": 63,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 36,
+          "note": "己酉：比劫當頭（自己和同輩）；五行有利與不利大致相當，與日支相沖，變動較多。"
         },
         {
           "year": 2030,
           "age": 41,
           "ganzhi": "庚戌",
           "scores": {
-            "career_wealth": 70
+            "career_wealth": 35
           },
-          "overall": 70,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 35,
+          "note": "庚戌：食傷當頭（表達和才華）；五行多為需要多留意的一方，與日支相合，相處較順。"
         },
         {
           "year": 2031,
           "age": 42,
           "ganzhi": "辛亥",
           "scores": {
-            "career_wealth": 77
+            "career_wealth": 20
           },
-          "overall": 77,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 20,
+          "note": "辛亥：食傷當頭（表達和才華）；五行多為需要多留意的一方，與日支相合，相處較順。"
         },
         {
           "year": 2032,
           "age": 43,
           "ganzhi": "壬子",
           "scores": {
-            "career_wealth": 39
+            "career_wealth": 20
           },
-          "overall": 39,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 20,
+          "note": "壬子：財星當頭（錢財和實際收穫）；五行多為需要多留意的一方，與日支相刑，宜多溝通。"
         },
         {
           "year": 2033,
           "age": 44,
           "ganzhi": "癸丑",
           "scores": {
-            "career_wealth": 46
+            "career_wealth": 20
           },
-          "overall": 46,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 20,
+          "note": "癸丑：財星當頭（錢財和實際收穫）；五行多為需要多留意的一方。"
         },
         {
           "year": 2034,
           "age": 45,
           "ganzhi": "甲寅",
           "scores": {
-            "career_wealth": 53
+            "career_wealth": 22
           },
-          "overall": 53,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 22,
+          "note": "甲寅：官殺當頭（規則、壓力和事業）；五行多為需要多留意的一方。"
         },
         {
           "year": 2035,
           "age": 46,
           "ganzhi": "乙卯",
           "scores": {
-            "career_wealth": 60
+            "career_wealth": 20
           },
-          "overall": 60,
-          "note": "(Demo) Reference score from this period's Ten God and branch relations."
+          "overall": 20,
+          "note": "乙卯：官殺當頭（規則、壓力和事業）；五行多為需要多留意的一方。"
         }
       ],
-      "total": 55,
-      "method_note": "分數是 AI 依傳統命理（大運、流年與原局的十神、刑沖合會、五行平衡）給出的參考指數，0–100，50 為平穩；不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。"
+      "total": 41,
+      "method_note": "分數由排盤引擎計算：大運、流年的五行對你的喜忌（簡化扶抑法），加上與原局的刑沖合害，按主題加權；0–100，50 為平穩，同一命盤每次相同；是參考指數，不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。"
     }
   }
 }

@@ -123,6 +123,14 @@
     "空亡": { "zh-Hant": "空亡", "zh-Hans": "空亡", "en": "Void (Kong Wang)" },
     "胎元": { "zh-Hant": "胎元", "zh-Hans": "胎元", "en": "Conception Pillar (Tai Yuan)" },
     "流月": { "zh-Hant": "流月", "zh-Hans": "流月", "en": "Monthly Cycle (Liu Yue)" },
-    "虚岁": { "zh-Hant": "虛歲", "zh-Hans": "虚岁", "en": "Nominal Age (Xu Sui)" }
+    "虚岁": { "zh-Hant": "虛歲", "zh-Hans": "虚岁", "en": "Nominal Age (Xu Sui)" },
+    "身强": { "zh-Hant": "身強", "zh-Hans": "身强", "en": "Strong Day Master (Shen Qiang)" },
+    "身弱": { "zh-Hant": "身弱", "zh-Hans": "身弱", "en": "Weak Day Master (Shen Ruo)" },
+    "中和": { "zh-Hant": "中和", "zh-Hans": "中和", "en": "Balanced (Zhong He)" },
+    "得令": { "zh-Hant": "得令", "zh-Hans": "得令", "en": "In Season (De Ling)" },
+    "通根": { "zh-Hant": "通根", "zh-Hans": "通根", "en": "Rooted (Tong Gen)" },
+    "喜用": { "zh-Hant": "喜用", "zh-Hans": "喜用", "en": "Favourable Elements (Xi Yong)" },
+    "专旺候选": { "zh-Hant": "專旺候選", "zh-Hans": "专旺候选", "en": "Possible Dominant Chart" },
+    "从格候选": { "zh-Hant": "從格候選", "zh-Hans": "从格候选", "en": "Possible Follower Chart" }
   }
 }

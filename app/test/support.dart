@@ -25,6 +25,15 @@ final testTerms = Terms.parse(
 /// The page's main vertical list (pages also contain horizontal timelines).
 final mainScrollable = find.byType(Scrollable).first;
 
+/// Scroll the main list down to [key]. scrollUntilVisible ends on ensureVisible without a frame, so a
+/// second one checks the old layout and its first drag can carry a short card past unseen: pump around
+/// it (rule 27).
+Future<void> scrollTo(WidgetTester tester, Key key) async {
+  await tester.pump();
+  await tester.scrollUntilVisible(find.byKey(key), 300, scrollable: mainScrollable);
+  await tester.pump();
+}
+
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
 /// fixtures; reports go pending → [finalReport].
 class FakeApi {

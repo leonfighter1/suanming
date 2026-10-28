@@ -311,6 +311,411 @@
           }
         ]
       },
+      "strength": {
+        "method": "fuyi_100",
+        "points": {
+          "stems": {
+            "year": 8,
+            "month": 12,
+            "hour": 12
+          },
+          "branches": {
+            "year": 4,
+            "month": 40,
+            "day": 12,
+            "hour": 12
+          }
+        },
+        "by_element": {
+          "木": 23.2,
+          "火": 11.6,
+          "土": 1.2,
+          "金": 24,
+          "水": 40
+        },
+        "support": 34.8,
+        "verdict": "身弱",
+        "de_ling": false,
+        "tong_gen": [
+          "hour"
+        ],
+        "favorable": [
+          "木",
+          "火"
+        ],
+        "unfavorable": [
+          "土",
+          "金",
+          "水"
+        ]
+      },
+      "trend": {
+        "method": "engine_fuyi_v1",
+        "dayun": [
+          {
+            "index": 1,
+            "scores": {
+              "wuxing": 38,
+              "personality": 21,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 21,
+              "health": 37
+            },
+            "basis": {
+              "favour": -0.9,
+              "relations": 0.06,
+              "families": [
+                "财",
+                "食伤"
+              ],
+              "day_branch": null
+            }
+          },
+          {
+            "index": 2,
+            "scores": {
+              "wuxing": 44,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 26
+            },
+            "basis": {
+              "favour": -1,
+              "relations": -0.13,
+              "families": [
+                "食伤",
+                "财"
+              ],
+              "day_branch": "相破"
+            }
+          },
+          {
+            "index": 3,
+            "scores": {
+              "wuxing": 43,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 20
+            },
+            "basis": {
+              "favour": -1,
+              "relations": -0.27,
+              "families": [
+                "食伤",
+                "财"
+              ],
+              "day_branch": "半合"
+            }
+          },
+          {
+            "index": 4,
+            "scores": {
+              "wuxing": 70,
+              "personality": 68,
+              "career_wealth": 68,
+              "relationships": 63,
+              "dayun_liunian": 64,
+              "health": 58
+            },
+            "basis": {
+              "favour": 0.4,
+              "relations": 0.01,
+              "families": [
+                "比劫",
+                "食伤"
+              ],
+              "day_branch": "六害"
+            }
+          },
+          {
+            "index": 5,
+            "scores": {
+              "wuxing": 68,
+              "personality": 80,
+              "career_wealth": 68,
+              "relationships": 63,
+              "dayun_liunian": 68,
+              "health": 53
+            },
+            "basis": {
+              "favour": 0.7,
+              "relations": -0.18,
+              "families": [
+                "比劫",
+                "比劫"
+              ],
+              "day_branch": "六冲"
+            }
+          },
+          {
+            "index": 6,
+            "scores": {
+              "wuxing": 58,
+              "personality": 71,
+              "career_wealth": 61,
+              "relationships": 61,
+              "dayun_liunian": 61,
+              "health": 45
+            },
+            "basis": {
+              "favour": 0.6,
+              "relations": -0.29,
+              "families": [
+                "印",
+                "比劫"
+              ],
+              "day_branch": null
+            }
+          },
+          {
+            "index": 7,
+            "scores": {
+              "wuxing": 53,
+              "personality": 60,
+              "career_wealth": 60,
+              "relationships": 59,
+              "dayun_liunian": 58,
+              "health": 51
+            },
+            "basis": {
+              "favour": 0.3,
+              "relations": -0.08,
+              "families": [
+                "印",
+                "食伤"
+              ],
+              "day_branch": "半合"
+            }
+          },
+          {
+            "index": 8,
+            "scores": {
+              "wuxing": 29,
+              "personality": 48,
+              "career_wealth": 48,
+              "relationships": 46,
+              "dayun_liunian": 48,
+              "health": 46
+            },
+            "basis": {
+              "favour": 0,
+              "relations": -0.07,
+              "families": [
+                "官杀",
+                "印"
+              ],
+              "day_branch": "相刑"
+            }
+          }
+        ],
+        "liunian": [
+          {
+            "year": 2026,
+            "scores": {
+              "wuxing": 68,
+              "personality": 79,
+              "career_wealth": 67,
+              "relationships": 62,
+              "dayun_liunian": 67,
+              "health": 51
+            },
+            "basis": {
+              "favour": 0.7,
+              "relations": -0.22,
+              "families": [
+                "比劫",
+                "比劫"
+              ],
+              "day_branch": "六冲"
+            }
+          },
+          {
+            "year": 2027,
+            "scores": {
+              "wuxing": 70,
+              "personality": 68,
+              "career_wealth": 68,
+              "relationships": 63,
+              "dayun_liunian": 64,
+              "health": 58
+            },
+            "basis": {
+              "favour": 0.4,
+              "relations": 0.01,
+              "families": [
+                "比劫",
+                "食伤"
+              ],
+              "day_branch": "六害"
+            }
+          },
+          {
+            "year": 2028,
+            "scores": {
+              "wuxing": 43,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 20
+            },
+            "basis": {
+              "favour": -1,
+              "relations": -0.27,
+              "families": [
+                "食伤",
+                "财"
+              ],
+              "day_branch": "半合"
+            }
+          },
+          {
+            "year": 2029,
+            "scores": {
+              "wuxing": 44,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 26
+            },
+            "basis": {
+              "favour": -1,
+              "relations": -0.13,
+              "families": [
+                "食伤",
+                "财"
+              ],
+              "day_branch": "相破"
+            }
+          },
+          {
+            "year": 2030,
+            "scores": {
+              "wuxing": 38,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 32
+            },
+            "basis": {
+              "favour": -0.9,
+              "relations": -0.05,
+              "families": [
+                "财",
+                "食伤"
+              ],
+              "day_branch": null
+            }
+          },
+          {
+            "year": 2031,
+            "scores": {
+              "wuxing": 23,
+              "personality": 27,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 27,
+              "health": 40
+            },
+            "basis": {
+              "favour": -0.7,
+              "relations": 0.05,
+              "families": [
+                "财",
+                "官杀"
+              ],
+              "day_branch": null
+            }
+          },
+          {
+            "year": 2032,
+            "scores": {
+              "wuxing": 20,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 20
+            },
+            "basis": {
+              "favour": -1,
+              "relations": -0.34,
+              "families": [
+                "官杀",
+                "官杀"
+              ],
+              "day_branch": null
+            }
+          },
+          {
+            "year": 2033,
+            "scores": {
+              "wuxing": 20,
+              "personality": 20,
+              "career_wealth": 20,
+              "relationships": 20,
+              "dayun_liunian": 20,
+              "health": 23
+            },
+            "basis": {
+              "favour": -1,
+              "relations": -0.18,
+              "families": [
+                "官杀",
+                "食伤"
+              ],
+              "day_branch": "三会"
+            }
+          },
+          {
+            "year": 2034,
+            "scores": {
+              "wuxing": 55,
+              "personality": 85,
+              "career_wealth": 83,
+              "relationships": 83,
+              "dayun_liunian": 83,
+              "health": 68
+            },
+            "basis": {
+              "favour": 0.9,
+              "relations": 0.04,
+              "families": [
+                "印",
+                "印"
+              ],
+              "day_branch": null
+            }
+          },
+          {
+            "year": 2035,
+            "scores": {
+              "wuxing": 48,
+              "personality": 85,
+              "career_wealth": 83,
+              "relationships": 81,
+              "dayun_liunian": 83,
+              "health": 64
+            },
+            "basis": {
+              "favour": 1,
+              "relations": -0.06,
+              "families": [
+                "印",
+                "印"
+              ],
+              "day_branch": "相刑"
+            }
+          }
+        ]
+      },
       "input_basis": {
         "date": "gregorian",
         "time": "exact"
@@ -1591,6 +1996,16 @@
         "path": "/liuyue",
         "source_level": "traditional_text",
         "note": "流月以节令为界（立春至小寒，北京时间）；寅月天干按五虎遁"
+      },
+      {
+        "path": "/strength",
+        "source_level": "simplified_rule",
+        "note": "扶抑法简化计分（百分制：月支 40，日支、时支、月干、时干各 12，年干 8，年支 4；藏干按本中余气分）；未计调候、合化、从格"
+      },
+      {
+        "path": "/trend",
+        "source_level": "simplified_rule",
+        "note": "大运、流年五行对喜忌的偏向，加上与原局的刑冲合害，按主题加权（src/engines/bazi/trend-scores.ts）；参考指数，非预测"
       }
     ]
   }

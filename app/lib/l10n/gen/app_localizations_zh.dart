@@ -1052,6 +1052,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ziNextDayHint => '子时有两种算法；默认 23:00 后出生仍算当天';
+
+  @override
+  String get notDeLing => '不得令';
+
+  @override
+  String favorableIs(String elements) {
+    return '喜用：$elements';
+  }
+
+  @override
+  String unfavorableIs(String elements) {
+    return '忌：$elements';
+  }
+
+  @override
+  String get specialNote => '宜请有经验的师傅细看';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2101,4 +2117,20 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get ziNextDayHint => '子時有兩種算法；預設 23:00 後出生仍算當天';
+
+  @override
+  String get notDeLing => '不得令';
+
+  @override
+  String favorableIs(String elements) {
+    return '喜用：$elements';
+  }
+
+  @override
+  String unfavorableIs(String elements) {
+    return '忌：$elements';
+  }
+
+  @override
+  String get specialNote => '宜請有經驗的師傅細看';
 }

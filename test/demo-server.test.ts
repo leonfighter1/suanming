@@ -99,7 +99,7 @@ describe("demo server", () => {
     });
     expect(res.status).toBe(200);
     expect(res.headers.get("x-ai-generated")).toBe("true");
-    expect(res.headers.get("x-ai-model")).toMatch(/deepseek-v4-pro;prompt=narrative@4/);
+    expect(res.headers.get("x-ai-model")).toMatch(/deepseek-v4-pro;prompt=narrative_bazi@5/);
     const data = await res.json();
     expect(data.report.status).toBe("passed");
     expect(data.report.layers.interpretation.map((s: { topic: string }) => s.topic)).toEqual([

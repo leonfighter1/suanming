@@ -7,6 +7,8 @@ import {
 } from "../../chart-fact/index.js";
 import { natalRelations, periodRelations } from "./relations.js";
 import { kongWang, liuyue, natalShensha, periodShensha, taiYuan } from "./shensha.js";
+import { strength } from "./strength.js";
+import { trendScores } from "./trend-scores.js";
 import {
   beijingMs,
   formatWallClock,
@@ -230,6 +232,10 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     };
   });
 
+  // 日主旺衰 + 喜用 (WP1.6), then every period's scores from them (WP1.7).
+  const dmStrength = strength(natal);
+  const trend = trendScores(day.gan, dmStrength, { dayun: cycles, liunian });
+
   const liuyueYear = input.options.liunianFrom;
   const months = liuyue(liuyueYear, yearGanZhi(liuyueYear)[0]!).map((m) => ({
     ...m,
@@ -268,6 +274,8 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     kongwang: kongWang(natal),
     taiyuan: taiYuan(month),
     liuyue: { year: liuyueYear, clock: "utc+8", months },
+    strength: dmStrength,
+    trend,
     input_basis: {
       ...input.options.inputBasis,
       // A 時辰 picked by the clock can land in the neighbouring one after 真太陽時.
@@ -361,6 +369,16 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       path: "/liuyue",
       source_level: "traditional_text",
       note: "流月以节令为界（立春至小寒，北京时间）；寅月天干按五虎遁",
+    },
+    {
+      path: "/strength",
+      source_level: "simplified_rule",
+      note: "扶抑法简化计分（百分制：月支 40，日支、时支、月干、时干各 12，年干 8，年支 4；藏干按本中余气分）；未计调候、合化、从格",
+    },
+    {
+      path: "/trend",
+      source_level: "simplified_rule",
+      note: "大运、流年五行对喜忌的偏向，加上与原局的刑冲合害，按主题加权（src/engines/bazi/trend-scores.ts）；参考指数，非预测",
     },
   ];
 

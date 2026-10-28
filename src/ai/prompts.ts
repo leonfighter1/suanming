@@ -164,6 +164,28 @@ ${CONTEXT_RULES}
 
 Each section starts with summary: one plain sentence (at most about 40 Chinese characters or 25 English words) giving the reader the main point of that topic for them, with no 命理 terms.`;
 
+/** Replace a passage of an earlier version's text; throws if it isn't there (no silent copy). */
+function swap(text: string, from: string, to: string): string {
+  if (!text.includes(from)) throw new Error(`prompt passage not found: ${from.slice(0, 60)}`);
+  return text.replace(from, to);
+}
+
+/**
+ * 八字's own reading prompt from v2.0.0 (rule 8: each method stands alone; narrative@4 stays
+ * as it was, for astrology). v5 reads the facts the engine added in v1.3.0–v2.0.0.
+ */
+const NARRATIVE_BAZI_V5 = `${swap(
+  NARRATIVE_V4,
+  "Don't declare a definitive 喜用神.",
+  "Name favourable elements (喜用) only as the engine's simplified judgement in chart_facts.strength, never as definitive.",
+)}
+
+Engine facts (八字, v2.0.0):
+- Ages are 虚岁: chart_facts.liunian[].age_xu and chart_facts.dayun.cycles[].start_age_xu. Say 虚岁 (虛歲, "nominal age") whenever you give an age.
+- strength: the day master's strength by a simplified 扶抑 count (verdict 身强 / 身弱 / 中和, de_ling 得令, tong_gen 通根, favorable / unfavorable elements). Present it as a simplified traditional judgement. When strength.special is set (专旺候选 / 从格候选), say the chart needs a closer look by an experienced practitioner and name no 喜用.
+- relations (natal), dayun.cycles[].relations and liunian[].relations: every 合冲刑害破; cite them by path. shensha, kongwang and taiyuan are traditional markers: mention one only where it helps the topic, in tendency language and never as an omen (桃花 is charm and social ease, never an affair; 羊刃 is drive, never danger; 空亡 is a quieter area, never loss).
+- trend: the engine's period scores (0–100, 50 = steady) with their basis. Refer to them as given; never make up a score.`;
+
 /**
  * Tarot's own reading prompt (2026-10-27, owner: each method stays separate and the
  * spreads follow their classic method). Self-contained: nothing here is shared with the
@@ -276,14 +298,36 @@ Your part: topics, life stages and the summary.
 - summary.advice: 4–6 items with area (e.g. 做人, 事业, 钱财, 家庭, 健康) and one concrete sentence each.
 - summary.closing: one sentence: tradition shows tendencies and timing; their choices and effort decide.`;
 
+/** v2 (2026-10-27, v2.0.0): 虚岁 everywhere; 喜用 and the stage scores come from the engine. */
+const LIFE_COMMON_V2 = `${LIFE_COMMON}
+
+Engine judgements (v2.0.0): ages are 虚岁 (bazi.liunian[].age_xu, bazi.dayun.cycles[].start_age_xu and the labels in life_facts.periods); say 虚岁 when you give one. bazi.strength (the day master's strength and favourable elements, a simplified 扶抑 count) and bazi.trend (the period scores) are the engine's: use them as given, as tendencies.`;
+
+const LIFE_METHODS_V2 = swap(
+  swap(LIFE_METHODS_V1, LIFE_COMMON, LIFE_COMMON_V2),
+  "- wuxing.favorable / unfavorable: the elements traditionally favourable / unfavourable, each like 「木（帮身）」. A tendency, not a definitive 喜用神.",
+  "- wuxing.favorable / unfavorable: the engine's bazi.strength.favorable / unfavorable, each like 「木（帮身）」; a simplified judgement, not a definitive 喜用神. When bazi.strength.special is set they are empty: say a practitioner should look closer.",
+);
+
+const LIFE_TOPICS_V2 = [
+  [LIFE_COMMON, LIFE_COMMON_V2],
+  ["e.g. 「36–45 岁（2022–2031）」", "e.g. 「虚岁 36–45（2022–2031）」"],
+  ["e.g. 「2027（40 岁）」", "e.g. 「2027（虚岁 41）」 with bazi.liunian[].age_xu"],
+  [
+    "score 0–100 (50 = steady; use the range the facts justify)",
+    "score (copy scores.dayun_liunian of the matching bazi.trend.dayun entry: the engine's)",
+  ],
+].reduce((text, [from, to]) => swap(text, from!, to!), LIFE_TOPICS_V1);
+
 export const PROMPTS = {
   narrative: version("narrative", 4, NARRATIVE_V4),
+  narrative_bazi: version("narrative_bazi", 5, NARRATIVE_BAZI_V5),
   narrative_tarot: version("narrative_tarot", 1, NARRATIVE_TAROT_V1),
   action: version("action", 3, ACTION_V3),
   trend: version("trend", 2, TREND_V2),
   remedy: version("remedy", 2, REMEDY_V2),
-  life_methods: version("life_methods", 1, LIFE_METHODS_V1),
-  life_topics: version("life_topics", 1, LIFE_TOPICS_V1),
+  life_methods: version("life_methods", 2, LIFE_METHODS_V2),
+  life_topics: version("life_topics", 2, LIFE_TOPICS_V2),
   guard: version("guard", 2, GUARD_V2),
 } as const;
 
@@ -371,25 +415,6 @@ export function actionUser(args: {
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
     `Write in ${LANGUAGE[args.locale]}.`,
-    feedbackBlock(args.feedback),
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-}
-
-export function trendUser(args: {
-  facts: unknown;
-  periods: { topics: readonly Topic[]; dayun: number[]; liunian: number[] };
-  locale: Locale;
-  glossary: Record<string, string>;
-  feedback?: string[];
-}): string {
-  return [
-    tag("chart_facts", args.facts),
-    tag("periods", { dayun_indices: args.periods.dayun, liunian_years: args.periods.liunian }),
-    tag("glossary", args.glossary),
-    `Score these topics: ${args.periods.topics.join(", ")}.`,
-    `Write the notes in ${LANGUAGE[args.locale]}.`,
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)

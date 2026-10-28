@@ -22,7 +22,7 @@ describe("generateLifeReport", () => {
     const r = await generateLifeReport(chart, opts, deps(mock));
     expect(r.status).toBe("passed");
     expect(mock.calls.map((c) => c.agent).sort()).toEqual(["guard", "life_methods", "life_topics"]);
-    expect(r.ai_disclosure.prompt_version).toBe("life_methods@1,life_topics@1,guard@2");
+    expect(r.ai_disclosure.prompt_version).toBe("life_methods@2,life_topics@2,guard@2");
     // Deterministic facts, shown as computed.
     expect(r.facts.benming.hexagram.full_name).toBe("天雷无妄");
     expect(r.facts.benming.changed.full_name).toBe("天泽履");
@@ -33,7 +33,11 @@ describe("generateLifeReport", () => {
     const cycles = (chart.facts as { dayun: { cycles: { index: number; ganzhi: string }[] } }).dayun
       .cycles;
     expect(r.layers!.stages.map((s) => s.ganzhi)).toEqual(cycles.map((c) => c.ganzhi));
-    for (const s of r.layers!.stages) expect(s.score).toBeGreaterThanOrEqual(0);
+    // Stage scores are the engine's (v2.0.0), the same as the 运势走势 chart's.
+    const engine = (chart.facts as any).trend.dayun;
+    for (const s of r.layers!.stages) {
+      expect(s.score).toBe(engine.find((d: any) => d.index === s.dayun_index).scores.dayun_liunian);
+    }
     expect(r.layers!.methods.yijing.stages).toHaveLength(6);
   });
 
@@ -51,10 +55,11 @@ describe("generateLifeReport", () => {
     const mock = new MockProvider();
     await generateLifeReport(chart, opts, deps(mock));
     const cycles = (
-      chart.facts as { dayun: { cycles: { start_age: number; start_year: number }[] } }
+      chart.facts as { dayun: { cycles: { start_age_xu: number; start_year: number }[] } }
     ).dayun.cycles;
     const [a, b] = [cycles[3]!, cycles[4]!];
-    const label = `${a.start_age}–${b.start_age - 1} 岁（${a.start_year}–${a.start_year + 9}）`;
+    // 虚岁 (v2.0.0), from the civil birth year.
+    const label = `虚岁 ${a.start_age_xu}–${b.start_age_xu - 1}（${a.start_year}–${a.start_year + 9}）`;
     const user = mock.calls.find((c) => c.agent === "life_topics")!.user;
     expect(user).toContain(label);
   });

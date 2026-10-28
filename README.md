@@ -12,6 +12,48 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.0.0 (2026-10-27): 八字 engine, complete: 日主旺衰, 喜用, and 运势 scores from the engine
+
+Stage S1 of the [tech plan](docs/tech-plan.md) is complete: work packages 1.6–1.7 here, 1.1–1.5 in v1.3.0. The
+stage summary is in the plan under 阶段总结. A big update: pushed, together with v1.3.0.
+
+- 命盘 page, 五行 card: how strong the day master is, worked out by the engine.
+  - It shows 身强, 身弱 or 中和, and 得令 or 不得令.
+  - It lists the elements that help (「喜用：火、土」) and those to watch (「忌：金、水、木」).
+  - An extreme chart (almost all support, or almost none) shows 专旺候选 or 从格候选 with 「宜请有经验的师傅细看」,
+    and no 喜用.
+- 运势走势 (in a 八字 reading): the engine computes the scores now, not the AI.
+  - The same chart always gets the same scores, and scoring no longer costs a model call.
+  - Every 大运 and 流年 has six scores from 20 to 85: 五行, 性格, 事业财运, 婚姻感情, 大运流年, 健康.
+  - Each one has a one-line reason in 简体, 繁體 or English, for example
+    「丙午：印星当头（学习和支持你的人）；五行多为对你有利的一方，与日支相破，宜多沟通。」
+- 一生运势报告: each life stage is labelled with its 虚岁 and years (「虚岁 18–27（2007–2016）」). Its score is the
+  engine's, so the report and the 运势走势 chart agree.
+- AI readings of a 八字 chart have their own instructions (`narrative_bazi@5`). The AI explains the engine's 虚岁,
+  旺衰 and 喜用, 刑冲合害, 神煞 and scores; it doesn't work them out again. Tarot and astrology readings are
+  unchanged.
+- How the engine decides:
+  - 旺衰: a simplified 扶抑法 on the widely used 100-point scheme. 月支 counts 40; 日支, 时支, 月干 and 时干 12 each;
+    年干 8; 年支 4. A branch's points go to its hidden stems (本气 / 中气 / 余气). The day master's own element and
+    the one that generates it are its support: 55 or more is 身强, 45 or less 身弱.
+  - 喜用 by 扶抑: a weak day master is helped by 印 and 比劫, a strong one by 食伤, 财 and 官杀. 调候, 合化 and the
+    从格 itself are not considered.
+  - Scores weigh three things: the period's elements against 喜用 and 忌, its 十神 for each topic, and its relations
+    with the chart. A 冲 to the day or month branch lowers a score; a 合 raises it a little; 刑, 害 and 破 lower it a
+    little. Gender doesn't change a score.
+- Stage S1 in short (v1.3.0 + v2.0.0):
+  - One age convention (虚岁) everywhere.
+  - The 本命卦 on the same day as its hour.
+  - All 合冲刑害破; 神煞, 空亡, 胎元 and 流月; the 子时 setting.
+  - 旺衰 and 喜用, and scores from the engine.
+  - Not yet: 命宫 / 身宫, waiting for a reference.
+- Verified:
+  - 7 new server tests: strength worked out by hand for 身弱, 身强 and both flags; the 2026 丙午 scores and note
+    worked out by hand; the same chart always scores the same, within 20–85; a favourable period scores above an
+    unfavourable one.
+  - The 命盘 page test checks the strength pills.
+  - All 271 server tests and 90 app tests pass; harness PASS.
+
 ### v1.3.0 (2026-10-27): 八字 engine, part 1: ages, the pillar day, 合冲刑害破, 神煞
 
 Stage S1 of the [tech plan](docs/tech-plan.md), work packages 1.1–1.5. A medium update: committed locally, pushed

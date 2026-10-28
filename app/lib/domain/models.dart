@@ -69,6 +69,27 @@ class Relation {
   final List<(String pillar, String char)> members;
 }
 
+/// 日主旺衰 + 喜用 by the engine's simplified 扶抑法 (charts since v2.0.0).
+class StrengthView {
+  const StrengthView(this.verdict, this.deLing, this.favorable, this.unfavorable, this.special);
+  factory StrengthView.fromJson(Json j) => StrengthView(
+        j['verdict'] as String,
+        j['de_ling'] as bool,
+        (j['favorable'] as List).cast<String>(),
+        (j['unfavorable'] as List).cast<String>(),
+        j['special'] as String?,
+      );
+
+  /// 身强 | 身弱 | 中和 (engine form).
+  final String verdict;
+  final bool deLing;
+  final List<String> favorable;
+  final List<String> unfavorable;
+
+  /// 专旺候选 | 从格候选: no 喜用 set; worth a practitioner's closer look.
+  final String? special;
+}
+
 /// A 神煞 the natal chart holds, and the pillars that hold it.
 class ShenshaHit {
   const ShenshaHit(this.name, this.pillars);
@@ -175,6 +196,7 @@ class BaziChart {
     this.kongwang,
     this.kongwangPillars = const [],
     this.taiyuan,
+    this.strength,
   });
 
   factory BaziChart.fromFacts(Json f) {
@@ -203,6 +225,7 @@ class BaziChart {
       kongwang: kw?['by_day'] as String?,
       kongwangPillars: ((kw?['pillars'] as List?) ?? const []).cast<String>(),
       taiyuan: f['taiyuan'] as String?,
+      strength: f['strength'] == null ? null : StrengthView.fromJson(f['strength'] as Json),
     );
   }
 
@@ -232,6 +255,9 @@ class BaziChart {
 
   /// 胎元 干支.
   final String? taiyuan;
+
+  /// 日主旺衰 + 喜用 (charts since v2.0.0).
+  final StrengthView? strength;
 
   String get fourPillars => pillarOrder.map((k) => pillars[k]!.ganzhi).join(' ');
 }

@@ -24,55 +24,32 @@ const zhHantHK = { locale: "zh-Hant" as const, country: "HK" };
 const scores = (n: number) => ({ career_wealth: n, health: n });
 
 describe("trend scores", () => {
-  it("drops periods not in the chart, clamps scores and asks again for gaps", async () => {
-    const mock = new MockProvider({
-      trend: [
-        {
-          kind: "ok",
-          data: {
-            dayun: [
-              { index: 1, scores: scores(140), note: "甲" },
-              { index: 99, scores: scores(60), note: "不存在" },
-            ],
-            liunian: [{ year: 1900, scores: scores(60), note: "不存在" }],
-          },
-        },
-      ],
-    });
-    const r = await generateReport(
-      chart,
-      { ...zhHantHK, topics: ["career_wealth", "health"] },
-      deps(mock),
-    );
+  it("are the engine's (v2.0.0): no model is asked, and the same chart gives the same chart", async () => {
+    const topics = ["career_wealth", "health"] as const;
+    const mock = new MockProvider();
+    const r = await generateReport(chart, { ...zhHantHK, topics: [...topics] }, deps(mock));
     expect(r.status).toBe("passed");
-    const trendCalls = mock.calls.filter((c) => c.agent === "trend");
-    expect(trendCalls).toHaveLength(2);
-    expect(trendCalls[1]!.user).toContain("scores must be 0–100");
-    expect(trendCalls[1]!.user).toContain("missing dayun indices: 2, 3");
-    // The retry (mock default) covers every period of the chart.
-    expect(r.layers!.trend!.dayun).toHaveLength(8);
-    expect(r.layers!.trend!.liunian.map((y) => y.year)).toEqual(
+    expect(mock.calls.some((c) => c.agent === "trend")).toBe(false);
+    const engine = (chart.facts as any).trend;
+    const trend = r.layers!.trend!;
+    expect(trend.dayun).toHaveLength(8);
+    expect(trend.liunian.map((y) => y.year)).toEqual(
       Array.from({ length: 10 }, (_, i) => 2026 + i),
     );
-  });
-
-  it("a blocked trend note drops the trend chart but keeps the report", async () => {
-    const bad = {
-      kind: "ok" as const,
-      data: {
-        dayun: [{ index: 1, scores: scores(50), note: "不轉運的話，下半年就會出事。" }],
-        liunian: [],
-      },
-    };
-    const mock = new MockProvider({ trend: [bad, bad] });
-    const r = await generateReport(
+    trend.dayun.forEach((d, i) => {
+      expect(d.scores).toEqual({
+        career_wealth: engine.dayun[i].scores.career_wealth,
+        health: engine.dayun[i].scores.health,
+      });
+    });
+    // Notes are written from the basis, in the reader's script (2026 丙午: 印 for 己土).
+    expect(trend.liunian[0]!.note).toMatch(/^丙午：印星當頭（學習和支持你的人）；/);
+    const again = await generateReport(
       chart,
-      { ...zhHantHK, topics: ["career_wealth", "health"] },
-      deps(mock),
+      { ...zhHantHK, topics: [...topics] },
+      deps(new MockProvider()),
     );
-    expect(r.status).toBe("passed");
-    expect(r.layers!.trend).toBeUndefined();
-    expect(r.reasons.join()).toMatch(/trend omitted/);
+    expect(again.layers!.trend).toEqual(trend);
   });
 
   it("tarot reports have no trend agent", async () => {
@@ -307,7 +284,7 @@ describe("remedy API", () => {
     }
   });
 
-  it("the user's context reaches every agent that writes text, but not the trend scores", async () => {
+  it("the user's context reaches every agent that writes text", async () => {
     const m = new MockProvider();
     const api3 = createApiServer({
       secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
@@ -355,7 +332,7 @@ describe("remedy API", () => {
         expect(call.user).toContain("明年適合轉工嗎？");
         expect(call.user).toContain("中國 · 江蘇 · 靖江市"); // birthplace name reaches the reading
       }
-      expect(m.calls.find((c) => c.agent === "trend")!.user).not.toContain("<user_context>");
+      expect(m.calls.some((c) => c.agent === "trend")).toBe(false); // the engine scores (v2.0.0)
       // The reviewer sees the same context (and, for plans, the trend), so true
       // statements about the user aren't flagged as fabricated.
       const guards = m.calls.filter((c) => c.agent === "guard");

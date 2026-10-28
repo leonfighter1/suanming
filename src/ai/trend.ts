@@ -1,20 +1,16 @@
 /**
- * Trend scores (八字 only): the "trend" agent rates every 大運 period and every
- * listed 流年 year per topic on 0–100, for the report's trend chart.
- *
- * The model gives only per-topic scores and a one-line note per period. Which
- * periods exist comes from the ChartFact; the combined score per period (mean of
- * the topics) and the total (mean of the 大運 combined scores) are computed here,
- * so they are reproducible and never model-invented.
+ * The report's trend chart (八字 only). Since v2.0.0 the scores are the engine's
+ * (chart_facts.trend, src/engines/bazi/trend-scores.ts): the same chart always gives the
+ * same chart, and no model is asked. Charts made before carry no trend facts; their scores
+ * are computed here from their pillars with the same engine functions. The one-line note
+ * of each period is written from its basis, in the reader's language.
  */
 import type { ChartFact } from "../chart-fact/index.js";
+import { periodRelations, type Relation } from "../engines/bazi/relations.js";
+import { strength } from "../engines/bazi/strength.js";
+import { trendScores, type Family, type PeriodScore } from "../engines/bazi/trend-scores.js";
 import type { Locale } from "./terms.js";
 import type { Topic } from "./types.js";
-
-export interface TrendOutput {
-  dayun: { index: number; scores: Record<string, number>; note: string }[];
-  liunian: { year: number; scores: Record<string, number>; note: string }[];
-}
 
 interface TrendPoint {
   scores: Partial<Record<Topic, number>>;
@@ -38,119 +34,156 @@ export interface TrendLayer {
   method_note: string;
 }
 
-interface Periods {
-  cycles: {
-    index: number;
-    ganzhi: string;
-    start_year: number;
-    start_age: number;
-    start_age_xu?: number;
-  }[];
-  years: { year: number; ganzhi: string; age: number; age_xu?: number }[];
+type Natal = Record<"year" | "month" | "day" | "hour", { gan: string; zhi: string }>;
+interface Facts {
+  pillars: Natal;
+  dayun: {
+    cycles: {
+      index: number;
+      ganzhi: string;
+      start_year: number;
+      start_age: number;
+      start_age_xu?: number;
+      relations?: Relation[];
+    }[];
+  };
+  liunian: { year: number; ganzhi: string; age: number; age_xu?: number; relations?: Relation[] }[];
+  trend?: ReturnType<typeof trendScores>;
 }
 
 /** 虚岁 for every age shown (v1.3.0); charts made earlier lack the field: age + 1 is the same count. */
-const xuCycle = (c: Periods["cycles"][number]) => c.start_age_xu ?? c.start_age;
-const xuYear = (y: Periods["years"][number]) => y.age_xu ?? y.age + 1;
+const xuCycle = (c: Facts["dayun"]["cycles"][number]) => c.start_age_xu ?? c.start_age;
+const xuYear = (y: Facts["liunian"][number]) => y.age_xu ?? y.age + 1;
 
-function periodsOf(chart: ChartFact): Periods {
-  const f = chart.facts as {
-    dayun: { cycles: Periods["cycles"] };
-    liunian: Periods["years"];
-  };
-  return { cycles: f.dayun.cycles, years: f.liunian };
-}
-
-/** What the mock provider and the prompt need: the periods to score. */
-export function trendPayload(chart: ChartFact, topics: readonly Topic[]) {
-  const p = periodsOf(chart);
-  return {
-    topics,
-    dayun: p.cycles.map((c) => c.index),
-    liunian: p.years.map((y) => y.year),
-  };
-}
-
-export function trendSchema(topics: readonly Topic[]) {
-  const scores = {
-    type: "object",
-    additionalProperties: false,
-    required: [...topics],
-    properties: Object.fromEntries(topics.map((t) => [t, { type: "integer" }])),
-  };
-  const point = (key: string) => ({
-    type: "object",
-    additionalProperties: false,
-    required: [key, "scores", "note"],
-    properties: { [key]: { type: "integer" }, scores, note: { type: "string" } },
+/** The engine's scores: from the chart's facts, or worked out for a chart made before v2.0.0. */
+export function engineTrend(chart: ChartFact): ReturnType<typeof trendScores> {
+  const f = chart.facts as unknown as Facts;
+  if (f.trend) return f.trend;
+  const cycles = f.dayun.cycles;
+  const dayunAt = (year: number) => [...cycles].reverse().find((c) => c.start_year <= year)?.ganzhi;
+  return trendScores(f.pillars.day.gan, strength(f.pillars), {
+    dayun: cycles.map((c) => ({
+      ...c,
+      relations: c.relations ?? periodRelations(f.pillars, { place: "dayun", ganzhi: c.ganzhi }),
+    })),
+    liunian: f.liunian.map((y) => ({
+      ...y,
+      relations:
+        y.relations ??
+        periodRelations(f.pillars, { place: "liunian", ganzhi: y.ganzhi }, dayunAt(y.year)),
+    })),
   });
-  return {
-    type: "object",
-    additionalProperties: false,
-    required: ["dayun", "liunian"],
-    properties: {
-      dayun: { type: "array", items: point("index") },
-      liunian: { type: "array", items: point("year") },
-    },
-  };
 }
 
-const clamp = (n: number) => Math.min(100, Math.max(0, Math.round(n)));
+const FAMILY: Record<Family, Record<Locale, [name: string, plain: string]>> = {
+  比劫: {
+    "zh-Hans": ["比劫", "自己和同辈"],
+    "zh-Hant": ["比劫", "自己和同輩"],
+    en: ["Companions", "yourself and peers"],
+  },
+  食伤: {
+    "zh-Hans": ["食伤", "表达和才华"],
+    "zh-Hant": ["食傷", "表達和才華"],
+    en: ["Output", "expression and talent"],
+  },
+  财: {
+    "zh-Hans": ["财星", "钱财和实际收获"],
+    "zh-Hant": ["財星", "錢財和實際收穫"],
+    en: ["Wealth", "money and practical gains"],
+  },
+  官杀: {
+    "zh-Hans": ["官杀", "规则、压力和事业"],
+    "zh-Hant": ["官殺", "規則、壓力和事業"],
+    en: ["Officers", "rules, pressure and career"],
+  },
+  印: {
+    "zh-Hans": ["印星", "学习和支持你的人"],
+    "zh-Hant": ["印星", "學習和支持你的人"],
+    en: ["Resources", "learning and people who support you"],
+  },
+};
+const FAVOUR: Record<"up" | "down" | "even", Record<Locale, string>> = {
+  up: {
+    "zh-Hans": "五行多为对你有利的一方",
+    "zh-Hant": "五行多為對你有利的一方",
+    en: "its elements mostly work in your favour",
+  },
+  down: {
+    "zh-Hans": "五行多为需要多留意的一方",
+    "zh-Hant": "五行多為需要多留意的一方",
+    en: "its elements mostly call for care",
+  },
+  even: {
+    "zh-Hans": "五行有利与不利大致相当",
+    "zh-Hant": "五行有利與不利大致相當",
+    en: "its elements are about evenly balanced",
+  },
+};
+const DAY: Record<"clash" | "combine" | "strain", Record<Locale, string>> = {
+  clash: {
+    "zh-Hans": "，与日支相冲，变动较多",
+    "zh-Hant": "，與日支相沖，變動較多",
+    en: "; it clashes with your day branch, a time of change",
+  },
+  combine: {
+    "zh-Hans": "，与日支相合，相处较顺",
+    "zh-Hant": "，與日支相合，相處較順",
+    en: "; it combines with your day branch, an easier time with others",
+  },
+  // {rel}: the relation by its own name (相刑, 自刑, 相害, 相破), never lumped together as 刑害.
+  strain: {
+    "zh-Hans": "，与日支{rel}，宜多沟通",
+    "zh-Hant": "，與日支{rel}，宜多溝通",
+    en: "; it strains your day branch, so talk things through",
+  },
+};
 
-/** Keep only periods that exist in the chart; report gaps and out-of-range scores. */
-export function checkTrend(
-  chart: ChartFact,
-  topics: readonly Topic[],
-  data: TrendOutput,
-): { value: TrendOutput; feedback: string[] } {
-  const p = periodsOf(chart);
-  const feedback: string[] = [];
-  const fix = (s: Record<string, number>) => {
-    if (Object.values(s).some((v) => v < 0 || v > 100)) feedback.push("scores must be 0–100");
-    return Object.fromEntries(topics.map((t) => [t, clamp(s[t] ?? 50)]));
-  };
-  const indices = new Set(p.cycles.map((c) => c.index));
-  const years = new Set(p.years.map((y) => y.year));
-  const dayun = data.dayun
-    .filter((d) => indices.has(d.index))
-    .map((d) => ({ ...d, scores: fix(d.scores) }));
-  const liunian = data.liunian
-    .filter((y) => years.has(y.year))
-    .map((y) => ({ ...y, scores: fix(y.scores) }));
-  const missD = [...indices].filter((i) => !dayun.some((d) => d.index === i));
-  const missY = [...years].filter((y) => !liunian.some((d) => d.year === y));
-  if (missD.length) feedback.push(`missing dayun indices: ${missD.join(", ")}`);
-  if (missY.length) feedback.push(`missing liunian years: ${missY.join(", ")}`);
-  return { value: { dayun, liunian }, feedback: [...new Set(feedback)] };
+/** The plain one-line note of a period, from what its scores rest on. */
+export function trendNote(ganzhi: string, basis: PeriodScore["basis"], locale: Locale): string {
+  const [name, plain] = FAMILY[basis.families[0]][locale];
+  const favour =
+    FAVOUR[basis.favour >= 0.25 ? "up" : basis.favour <= -0.25 ? "down" : "even"][locale];
+  const t = basis.day_branch;
+  const day =
+    t === "六冲"
+      ? DAY.clash[locale]
+      : t && ["六合", "三合", "半合", "三会"].includes(t)
+        ? DAY.combine[locale]
+        : t
+          ? DAY.strain[locale].replace("{rel}", t === "六害" ? "相害" : t)
+          : "";
+  if (locale === "en") return `${ganzhi}: ${name} lead (${plain}); ${favour}${day}.`;
+  const lead = locale === "zh-Hant" ? "當頭" : "当头";
+  return `${ganzhi}：${name}${lead}（${plain}）；${favour}${day}。`;
 }
 
 const METHOD_NOTE: Record<Locale, string> = {
   "zh-Hant":
-    "分數是 AI 依傳統命理（大運、流年與原局的十神、刑沖合會、五行平衡）給出的參考指數，0–100，50 為平穩；不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。",
+    "分數由排盤引擎計算：大運、流年的五行對你的喜忌（簡化扶抑法），加上與原局的刑沖合害，按主題加權；0–100，50 為平穩，同一命盤每次相同；是參考指數，不是預測。「綜合」為所選項目的平均，「總分」為各大運綜合分的平均。",
   "zh-Hans":
-    "分数是 AI 根据传统命理（大运、流年与原局的十神、刑冲合会、五行平衡）给出的参考指数，0–100，50 为平稳；不是预测。“综合”为所选项目的平均，“总分”为各大运综合分的平均。",
-  en: "Scores are an AI reference index (0–100, 50 = steady) based on traditional readings of each luck pillar and year against the natal chart (Ten Gods, branch relations, element balance). They are not predictions. 'Combined' is the mean of the selected topics; 'total' is the mean of the luck-pillar combined scores.",
+    "分数由排盘引擎计算：大运、流年的五行对你的喜忌（简化扶抑法），加上与原局的刑冲合害，按主题加权；0–100，50 为平稳，同一命盘每次相同；是参考指数，不是预测。“综合”为所选项目的平均，“总分”为各大运综合分的平均。",
+  en: "Scores are computed by the chart engine: how each luck pillar's and year's elements suit your chart (a simplified strength method), plus its combinations and clashes with the natal chart, weighted per topic. 0–100, 50 = steady, the same every time for the same chart; a reference index, not a prediction. 'Combined' is the mean of the selected topics; 'total' is the mean of the luck-pillar combined scores.",
 };
 
 const mean = (xs: number[]) =>
   xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0;
 
-export function trendLayer(
-  chart: ChartFact,
-  topics: readonly Topic[],
-  out: TrendOutput,
-  locale: Locale,
-): TrendLayer {
-  const p = periodsOf(chart);
-  const point = (s: Record<string, number>, note: string): TrendPoint => ({
-    scores: s as TrendPoint["scores"],
-    overall: mean(topics.map((t) => s[t]!)),
-    note,
-  });
-  const dayun = p.cycles.flatMap((c, i) => {
-    const d = out.dayun.find((x) => x.index === c.index);
+export function trendLayer(chart: ChartFact, topics: readonly Topic[], locale: Locale): TrendLayer {
+  const f = chart.facts as unknown as Facts;
+  const engine = engineTrend(chart);
+  const point = (gz: string, p: PeriodScore): TrendPoint => {
+    const scores = Object.fromEntries(topics.map((t) => [t, p.scores[t]])) as TrendPoint["scores"];
+    return {
+      scores,
+      overall: mean(topics.map((t) => p.scores[t])),
+      note: trendNote(gz, p.basis, locale),
+    };
+  };
+  const cycles = f.dayun.cycles;
+  const dayun = cycles.flatMap((c, i) => {
+    const d = engine.dayun.find((x) => x.index === c.index);
     if (!d) return [];
-    const next = p.cycles[i + 1];
+    const next = cycles[i + 1];
     return [
       {
         index: c.index,
@@ -158,15 +191,13 @@ export function trendLayer(
         start_year: c.start_year,
         start_age: xuCycle(c),
         end_age: (next ? xuCycle(next) : xuCycle(c) + 10) - 1,
-        ...point(d.scores, d.note),
+        ...point(c.ganzhi, d),
       },
     ];
   });
-  const liunian = p.years.flatMap((y) => {
-    const d = out.liunian.find((x) => x.year === y.year);
-    return d
-      ? [{ year: y.year, age: xuYear(y), ganzhi: y.ganzhi, ...point(d.scores, d.note) }]
-      : [];
+  const liunian = f.liunian.flatMap((y) => {
+    const d = engine.liunian.find((x) => x.year === y.year);
+    return d ? [{ year: y.year, age: xuYear(y), ganzhi: y.ganzhi, ...point(y.ganzhi, d) }] : [];
   });
   return {
     topics: [...topics],

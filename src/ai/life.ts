@@ -22,6 +22,7 @@ import {
   type ReportStatus,
 } from "./pipeline.js";
 import { guardUser, lifeUser, todayLine } from "./prompts.js";
+import { engineTrend } from "./trend.js";
 import { loadRouting, routeFor } from "./routing.js";
 import { guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
@@ -98,7 +99,15 @@ export interface LifeReport {
 
 interface BaziFacts {
   time_basis: { civil_local: string; pillar_clock: string; true_solar_time_applied: boolean };
-  dayun: { cycles: { index: number; ganzhi: string; start_year: number; start_age: number }[] };
+  dayun: {
+    cycles: {
+      index: number;
+      ganzhi: string;
+      start_year: number;
+      start_age: number;
+      start_age_xu?: number;
+    }[];
+  };
 }
 
 /** Everything the life report shows and the model reads: 八字 facts + 易经 / 梅花 / 八宅. */
@@ -213,17 +222,24 @@ export async function generateLifeReport(
   };
   const facts = lifeFacts(chart, opts.locale);
   const cycles = (chart.facts as unknown as BaziFacts).dayun.cycles;
+  // 虚岁 from the civil birth year (v1.3.0); older charts: the library's start_age, the same count.
+  const xu = (c: (typeof cycles)[number]) => c.start_age_xu ?? c.start_age;
+  const endAge = (i: number) => (cycles[i + 1] ? xu(cycles[i + 1]!) : xu(cycles[i]!) + 10) - 1;
   // Ready-made period labels, so the model never works out age ranges itself
   // (a live run wrote 36–44 岁 for a 大运 that runs 36–45).
-  const sui = opts.locale === "en" ? " yrs" : " 岁";
-  const periods = cycles.map((c, i) => {
-    const end = (cycles[i + 1]?.start_age ?? c.start_age + 10) - 1;
-    return {
-      dayun_index: c.index,
-      ganzhi: c.ganzhi,
-      label: `${c.start_age}–${end}${opts.locale === "zh-Hant" ? " 歲" : sui}（${c.start_year}–${c.start_year + 9}）`,
-    };
-  });
+  const sui = { "zh-Hans": "虚岁", "zh-Hant": "虛歲", en: "nominal age" }[opts.locale];
+  const periods = cycles.map((c, i) => ({
+    dayun_index: c.index,
+    ganzhi: c.ganzhi,
+    label:
+      opts.locale === "en"
+        ? `${sui} ${xu(c)}–${endAge(i)} (${c.start_year}–${c.start_year + 9})`
+        : `${sui} ${xu(c)}–${endAge(i)}（${c.start_year}–${c.start_year + 9}）`,
+  }));
+  // Stage scores are the engine's (v2.0.0), the same as the 运势走势 chart's.
+  const engine = engineTrend(chart);
+  const engineScore = (index: number) =>
+    engine.dayun.find((d) => d.index === index)?.scores.dayun_liunian;
   const modelInput = { bazi: modelFacts(chart), ...facts, periods };
   const glossary = glossaryFor(JSON.stringify(modelInput), opts.locale);
   const today = todayLine(now);
@@ -316,7 +332,7 @@ export async function generateLifeReport(
               ...s,
               label: norm(s.label),
               focus: norm(s.focus),
-              score: Math.min(100, Math.max(0, Math.round(s.score))),
+              score: engineScore(s.dayun_index) ?? Math.min(100, Math.max(0, Math.round(s.score))),
             })),
           summary: {
             verdict: norm(d.summary.verdict),
@@ -415,15 +431,14 @@ export async function generateLifeReport(
       topics: t.topics,
       stages: cycles.flatMap((c, i) => {
         const s = t.stages.find((x) => x.dayun_index === c.index);
-        const next = cycles[i + 1];
         return s
           ? [
               {
                 ...s,
                 ganzhi: c.ganzhi,
                 start_year: c.start_year,
-                start_age: c.start_age,
-                end_age: (next?.start_age ?? c.start_age + 10) - 1,
+                start_age: xu(c),
+                end_age: endAge(i),
               },
             ]
           : [];

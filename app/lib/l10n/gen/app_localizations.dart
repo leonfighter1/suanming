@@ -2096,6 +2096,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Two schools; by default a birth after 23:00 keeps the same day'**
   String get ziNextDayHint;
+
+  /// No description provided for @notDeLing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in season'**
+  String get notDeLing;
+
+  /// No description provided for @favorableIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Favourable: {elements}'**
+  String favorableIs(String elements);
+
+  /// No description provided for @unfavorableIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavourable: {elements}'**
+  String unfavorableIs(String elements);
+
+  /// No description provided for @specialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'worth a closer look by a practitioner'**
+  String get specialNote;
 }
 
 class _AppLocalizationsDelegate

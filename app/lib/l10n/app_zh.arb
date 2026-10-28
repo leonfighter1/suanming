@@ -332,5 +332,9 @@
   "shenshaTitle": "神煞 · 空亡 · 胎元",
   "relationsTitle": "原局刑冲合害",
   "ziNextDay": "23:00–24:00 出生，日柱算次日",
-  "ziNextDayHint": "子时有两种算法；默认 23:00 后出生仍算当天"
+  "ziNextDayHint": "子时有两种算法；默认 23:00 后出生仍算当天",
+  "notDeLing": "不得令",
+  "favorableIs": "喜用：{elements}",
+  "unfavorableIs": "忌：{elements}",
+  "specialNote": "宜请有经验的师傅细看"
 }

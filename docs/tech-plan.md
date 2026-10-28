@@ -25,14 +25,14 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status      |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | in progress |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0            | planned     |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned     |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned     |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
+| Stage                      | What                                                        | Size   | Release when done | Status  |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0            | planned |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -92,14 +92,15 @@ scores) + the S1 summary. Lessons to read first: G4, G7, P12, P23.
 
 ### WP1.6 日主旺衰 + 喜用 (扶抑法, simplified)
 
-- Weights: the three other stems 1 each; branches year 1, month 3 (月令), day 1.5, hour 1, each split over its hidden
-  stems 0.6 / 0.3 / 0.1 (two: 0.7 / 0.3). Support = the day master's element (比劫) and the one that generates it
-  (印); total = everything.
-- Verdict: support / total ≥ 0.55 身强, ≤ 0.45 身弱, between 中和. Above 0.8 or below 0.15: flagged as a possible
-  专旺 / 从格 for a human; 喜用 not set.
+- Weights (as built in v2.0.0): the 100-point position scheme. 年干 8, 月干 12, 时干 12, 年支 4, 月支 40 (月令), 日支
+  12, 时支 12; each branch split over its hidden stems 0.6 / 0.3 / 0.1 (two: 0.7 / 0.3). Support = the points of the
+  day master's element (比劫) and of the one that generates it (印). First planned: stems 1 each, branches 1 / 3 /
+  1.5 / 1; replaced (S1 summary).
+- Verdict: support ≥ 55 身强, ≤ 45 身弱, between 中和. 80 or more, or 15 or less: flagged as a possible 专旺 / 从格
+  for a human; 喜用 not set.
 - 喜用: 身弱 → 印, 比劫 favourable; 食伤, 财, 官杀 unfavourable. 身强 → the reverse. 中和 → none set.
-- Facts `strength` (method, weights, support, total, ratio, verdict, 得令, 通根 pillars, favourable, unfavourable,
-  special). Provenance simplified_rule: 「扶抑法简化计分；未计调候、合化、从格」.
+- Facts `strength` (method `fuyi_100`, points, by_element, support, verdict, de_ling, tong_gen, favorable,
+  unfavorable, special). Provenance simplified_rule: 「扶抑法简化计分（百分制…）；未计调候、合化、从格」.
 - Accept: hand-computed charts (arithmetic in the test) for each verdict and both flags.
 
 ### WP1.7 运势走势 from the engine
@@ -112,6 +113,11 @@ scores) + the S1 summary. Lessons to read first: G4, G7, P12, P23.
 - The report's trend layer reads `trend`; the trend agent and `trend@2` leave the 八字 pipeline.
 - Accept: the same chart always gives the same scores; a favourable period scores above an unfavourable one with the
   same relations; male and female give the same scores for the same periods.
+- As built (v2.0.0): 六冲 −0.25 with the day pillar, −0.15 with the month, −0.1 otherwise; 天干相冲 −0.15 with the
+  日主, −0.05 otherwise; 相刑 / 自刑 −0.08; 六害 −0.05; 相破 −0.03; 合 +0.06 into a 喜用 element, −0.04 into a 忌
+  one, +0.02 otherwise; 天干五合 +0.04; the sum kept within −0.6 … 0.3. 婚姻感情 also weighs the relation with the day
+  branch. The scores take no gender. The 一生运势报告 takes its stage scores from `trend` too. Notes name the
+  day-branch relation as it is (rule 28).
 
 ### WP1.8 命宫 / 身宫 (waiting for a reference)
 
@@ -126,6 +132,11 @@ scores) + the S1 summary. Lessons to read first: G4, G7, P12, P23.
   reading prompt; every prompt version keeps its hash.
 - WP2.2 A tarot-native reading: sections 逐张解读 / 综合 / 建议 instead of 八字's four topics, with an optional focus
   (事业, 感情, 健康, 自我) beside the question.
+- WP2.3 (found in S1) What each agent reads. The 八字 facts sent to the narrative agent grew from 3.3k to 17.0k
+  characters over S1 (relations and 神煞 on every period, 流月, `trend`), and the guard reads them all too while
+  review is on. Give each agent the facts it needs (the natal chart, strength, relations, 神煞, the current 大运, the
+  流年 a question is about, the trend basis). Keep every path it may cite resolvable. Measure characters per agent
+  before and after.
 
 ## S3 塔罗体验 (big → v3.0.0)
 
@@ -149,6 +160,8 @@ scores) + the S1 summary. Lessons to read first: G4, G7, P12, P23.
 - WP4.4 首页: 一生运势报告 as its own entry, 今日 (每日一牌), recent readings.
 - WP4.5 Reading page: the chart or spread on top, a jump list, share as an image.
 - WP4.6 Split `life_report_page.dart` (991 lines) and `profiles_page.dart` (596) into widgets.
+- WP4.7 (found in S1) Widget tests reach cards through `scrollTo()` in `test/support.dart` (rule 27). Ten test files
+  still call `scrollUntilVisible` directly.
 
 ## S5 数据持久化 (medium → v4.1.0)
 
@@ -166,6 +179,59 @@ scores) + the S1 summary. Lessons to read first: G4, G7, P12, P23.
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill).
 
+### S1 八字引擎：完整、确定 (done 2026-10-27: v1.3.0 + v2.0.0)
+
+1. **Delivered**
+   - v1.3.0:
+     - WP1.1: 虚岁 on every 大运 and 流年 (`start_age_xu`, `age_xu`) and in every display.
+     - WP1.2: `lunar_pillar_day`, the 本命卦's date.
+     - WP1.3: `relations.ts`, all 合冲刑害破 for the chart, every 大运 and every 流年.
+     - WP1.4: `shensha.ts`, seven 神煞, 空亡, 胎元 and 流月.
+     - WP1.5: the 子时 switch (`options.ziHourSect`).
+   - v2.0.0:
+     - WP1.6: `strength.ts`, 日主旺衰 with 得令, 通根, 喜用 / 忌 and the 专旺 / 从格 flag, shown on the 五行 card.
+     - WP1.7: `trend-scores.ts`, six topic scores for every 大运 and 流年 with what each rests on, and notes from
+       templates in three languages.
+     - The trend agent left the 八字 pipeline. `narrative_bazi@5` explains the new facts.
+     - The 一生运势报告 (`life_methods@2`, `life_topics@2`) labels stages by 虚岁 and takes their scores from the
+       engine.
+   - Still open: WP1.8 (命宫 / 身宫), waiting for a reference.
+2. **Numbers**
+   - Server tests: 265 at v1.3.0 (11 new). 271 at v2.0.0 (7 new, 1 rewritten; the test of a blocked trend note went
+     with the trend agent).
+   - App tests: 90. The 命盘 page test now also checks the strength pills.
+   - Every harness run checks 7,000 charts against the oracle and 100,000 tarot draws.
+   - The sample chart's facts grew from 3.3k to 13.0k characters at v1.3.0 and 17.0k at v2.0.0 (compact JSON).
+   - A 八字 reading makes one model call fewer: narrative and action, plus the guard while review is on.
+3. **Changed against the plan**
+   - 命宫 / 身宫 moved to WP1.8. Two derivations of the formula disagreed, and no reference was at hand to settle
+     them (G4).
+   - WP1.6's weights. The planned ones (stems 1 each, branches 1 / 3 / 1.5 / 1) had no source behind them (G4). The
+     engine uses the widely cited 100-point position scheme instead, so support reads as points out of 100 against
+     the planned thresholds.
+   - The 一生运势报告's stage scores come from the engine too. Otherwise the report and the 运势走势 chart could
+     disagree about the same 大运.
+   - Part of S2's WP2.1 came early. 八字 got its own reading prompt (`narrative_bazi@5`), needed to explain the new
+     facts. `narrative@4` stays pinned for astrology, and `trend@2` stays registered for stored reports.
+   - Not planned: the facts the model reads grew about 5×. WP2.3 trims them.
+4. **Mistakes recorded** (docs/agent/MISTAKES.md):
+   - Rule 25: a test looked for a card above the one it had just scrolled to.
+   - Rule 26: the app's term table was stale after editing i18n/terms.json.
+   - Rule 27: a second `scrollUntilVisible` checked the layout from before the jump, and its first drag went past
+     the next card.
+   - Rule 28: the trend notes called every 刑, 害 and 破 「刑害」. Found while taking a release-note example from real
+     output, and fixed before release.
+   - What they teach: in widget tests, go top to bottom, give the list a frame after every jump, and sync before
+     testing. When a test fails for no clear reason, print what it sees step by step: a probe of the scroll offsets
+     found rule 27's cause in one run, where guessing had not. Name every relation by its own type.
+   - Expected values I wrote wrong, all caught by re-deriving by hand before the first run (G7, P12): in v1.3.0, a
+     missed 寅申 冲 and 庚 against 己 (伤官); in v2.0.0, the 繁體 note template said 当头 for 當頭 (G18).
+5. **Next**: S2 (v2.1.0).
+   - WP2.1: the action and remedy prompts for tarot, and astrology's.
+   - WP2.2: a tarot-native reading.
+   - WP2.3 (new): what each agent reads.
+   - Also new, in S4: WP4.7, the other widget tests move to `scrollTo()`.
+
 ## Status
 
 | WP    | Status                     | Release |
@@ -175,7 +241,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill).
 | WP1.3 | done                       | v1.3.0  |
 | WP1.4 | done (命宫 / 身宫 → WP1.8) | v1.3.0  |
 | WP1.5 | done                       | v1.3.0  |
-| WP1.6 | todo                       | v2.0.0  |
-| WP1.7 | todo                       | v2.0.0  |
+| WP1.6 | done                       | v2.0.0  |
+| WP1.7 | done                       | v2.0.0  |
 | WP1.8 | waiting for a reference    | —       |
 | S2–S6 | todo                       | above   |

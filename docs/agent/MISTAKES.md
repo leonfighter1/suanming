@@ -28,8 +28,22 @@
 24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
 25. In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta.
 26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
+27. Pump a frame between scrollUntilVisible and the next finder or scroll; use scrollTo() from test/support.dart for each card.
+28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
 
 ## Log
+
+### 2026-10-27: Trend notes called every 刑, 害 and 破 「刑害」
+- **Symptom:** The 2026 丙午 note for the sample chart said 「与日支有刑害」, but 卯午 is 相破; found while taking a release-note example from real output
+- **Root cause:** The day-branch template grouped 相刑, 自刑, 六害 and 相破 under one wording, and no test read a note
+- **Fix:** The template names the relation itself (六害 reads 相害); a test pins the 相破 and 相害 notes
+- **Rule:** In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output. (Rule 28)
+
+### 2026-10-27: Back-to-back scrollUntilVisible skipped the next card
+- **Symptom:** A chart-page test found the strength pills, then scrollUntilVisible for the 神煞 card right below them dragged to the end of the list: Bad state: No element
+- **Root cause:** scrollUntilVisible ends on Scrollable.ensureVisible without a frame; the next call checked the layout of the old offset (card not on screen yet) and its first 300 px drag carried the list past the card before it was ever laid out (finders only see sliver children on screen). Probe: px 907 after the jump, 1207 after one drag, card never found
+- **Fix:** scrollTo() in app/test/support.dart pumps a frame before and after scrollUntilVisible
+- **Rule:** Pump a frame between scrollUntilVisible and the next finder or scroll; use scrollTo() from test/support.dart for each card. (Rule 27)
 
 ### 2026-10-27: Edits to synced sources need sync:app before app tests
 - **Symptom:** New 神煞 terms showed untranslated (禄神 instead of 祿神) in an app test

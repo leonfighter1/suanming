@@ -504,5 +504,23 @@
   "shenshaTitle": "Stars, void and conception pillar",
   "relationsTitle": "Combinations and clashes in the chart",
   "ziNextDay": "Born 23:00–24:00: take the next day's day pillar",
-  "ziNextDayHint": "Two schools; by default a birth after 23:00 keeps the same day"
+  "ziNextDayHint": "Two schools; by default a birth after 23:00 keeps the same day",
+  "notDeLing": "Not in season",
+  "favorableIs": "Favourable: {elements}",
+  "@favorableIs": {
+    "placeholders": {
+      "elements": {
+        "type": "String"
+      }
+    }
+  },
+  "unfavorableIs": "Unfavourable: {elements}",
+  "@unfavorableIs": {
+    "placeholders": {
+      "elements": {
+        "type": "String"
+      }
+    }
+  },
+  "specialNote": "worth a closer look by a practitioner"
 }

@@ -1090,4 +1090,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ziNextDayHint =>
       'Two schools; by default a birth after 23:00 keeps the same day';
+
+  @override
+  String get notDeLing => 'Not in season';
+
+  @override
+  String favorableIs(String elements) {
+    return 'Favourable: $elements';
+  }
+
+  @override
+  String unfavorableIs(String elements) {
+    return 'Unfavourable: $elements';
+  }
+
+  @override
+  String get specialNote => 'worth a closer look by a practitioner';
 }
