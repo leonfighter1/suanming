@@ -25,14 +25,14 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status  |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done    |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
+| Stage                      | What                                                        | Size   | Release when done | Status      |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done        |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done        |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | in progress |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -248,7 +248,22 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 
 ## S4 八字与全局 UI (big → v4.0.0)
 
+Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, then one X.Y.0 per WP;
+the last goes out as **v4.0.0** with the S4 summary, pushed with every release since v3.1.0. Lessons to read first:
+P7 (buttons in rows), P15 (no dart format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), the keyboard-access
+checklist.
+
 - WP4.1 Stems and branches coloured by 五行; 藏干 / 长生 / 纳音 rows folded under 更多.
+  - As built (v3.1.0):
+    - The 干支 were already coloured (`GanZhiText`, `wuxingColor` in theme.dart), but not readably in every
+      case. Measured against the cards (surfaceContainerLow), light 木 was 4.45 : 1, 土 about 3.9 and 金 about
+      3.0, and in dark mode the fixed colours fell to 2.6 (水). Light 木, 土 and 金 are now darker, and dark mode
+      has its own lighter set (`wuxingColorOf(context, …)`).
+    - A test computes the WCAG ratio of every colour on the page and on the card in both themes: all at least
+      4.5.
+    - The life report's private palette (金 as gold, 3.1 : 1) is gone; it uses the shared one.
+    - The pillar grid shows 十神, 天干 and 地支. `pillar-more` opens 藏干 with its 十神, 长生 and 纳音 (unshaded,
+      so the small coloured 藏干 keep their contrast).
 - WP4.2 Term tips: a glossary (十神, 十二长生, 纳音, 空亡, 神煞, 大运, 流年, 旺衰 …) in three languages, one source on
   the server, synced; tapping a term opens its plain explanation.
 - WP4.3 Timeline: the current 大运 and 流年 marked; tapping a 大运 shows its ten years; 流月 shown.
@@ -381,23 +396,25 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 
 ## Status
 
-| WP    | Status                     | Release |
-| ----- | -------------------------- | ------- |
-| WP1.1 | done                       | v1.3.0  |
-| WP1.2 | done                       | v1.3.0  |
-| WP1.3 | done                       | v1.3.0  |
-| WP1.4 | done (命宫 / 身宫 → WP1.8) | v1.3.0  |
-| WP1.5 | done                       | v1.3.0  |
-| WP1.6 | done                       | v2.0.0  |
-| WP1.7 | done                       | v2.0.0  |
-| WP1.8 | waiting for a reference    | —       |
-| WP2.1 | done                       | v2.1.0  |
-| WP2.3 | done                       | v2.2.0  |
-| WP2.2 | done                       | v2.3.0  |
-| WP3.1 | done                       | v2.4.0  |
-| WP3.2 | done                       | v2.5.0  |
-| WP3.3 | done                       | v2.6.0  |
-| WP3.4 | done                       | v2.7.0  |
-| WP3.5 | done                       | v2.8.0  |
-| WP3.6 | done                       | v3.0.0  |
-| S4–S6 | todo                       | above   |
+| WP        | Status                     | Release         |
+| --------- | -------------------------- | --------------- |
+| WP1.1     | done                       | v1.3.0          |
+| WP1.2     | done                       | v1.3.0          |
+| WP1.3     | done                       | v1.3.0          |
+| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0          |
+| WP1.5     | done                       | v1.3.0          |
+| WP1.6     | done                       | v2.0.0          |
+| WP1.7     | done                       | v2.0.0          |
+| WP1.8     | waiting for a reference    | —               |
+| WP2.1     | done                       | v2.1.0          |
+| WP2.3     | done                       | v2.2.0          |
+| WP2.2     | done                       | v2.3.0          |
+| WP3.1     | done                       | v2.4.0          |
+| WP3.2     | done                       | v2.5.0          |
+| WP3.3     | done                       | v2.6.0          |
+| WP3.4     | done                       | v2.7.0          |
+| WP3.5     | done                       | v2.8.0          |
+| WP3.6     | done                       | v3.0.0          |
+| WP4.1     | done                       | v3.1.0          |
+| WP4.2–4.7 | todo                       | v3.2.0 … v4.0.0 |
+| S5–S6     | todo                       | above           |

@@ -12,6 +12,23 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v3.1.0 (2026-10-28): 五行 colours you can read, and a calmer 四柱 table
+
+Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.1. A medium update: committed
+locally, pushed with v4.0.0.
+
+- 命盘 page, 四柱 table: it opens on what matters first, 十神, 天干 and 地支. 「更多：藏干、长生、纳音」 under it opens
+  the rest (藏干 with their 十神, 十二长生 and 纳音); 「收起」 folds them away again.
+- 五行 colours, everywhere 干支 and 五行 are coloured:
+  - Light mode: 木, 土 and 金 are a little darker, so even the small 藏干 read clearly on a card.
+  - Dark mode: a lighter set of its own. Before, 水 blue was hard to read on a dark background.
+  - The 一生运势报告 uses the same colours as the rest of the app (its 金 was gold, and hard to read).
+- How it was checked: a test measures the contrast of every 五行 colour on the page and on a card, in light and dark
+  mode, and requires at least 4.5 : 1, the level for small text.
+- Verified:
+  - 2 new app tests: the contrast of every colour in both themes; the 四柱 table with and without 更多.
+  - All 301 server tests and 105 app tests pass; harness PASS.
+
 ### v3.0.0 (2026-10-28): 塔罗体验, complete: shuffle, cut and pick your own cards
 
 Stage S3 of the [tech plan](docs/tech-plan.md) is complete: work package 3.6 here, 3.1–3.5 in v2.4.0–v2.8.0. The stage

@@ -4,11 +4,19 @@ import 'design.dart';
 
 class AppColors {
   static const accent = Color(0xFF8A3B2E);
-  static const wood = Color(0xFF3F7D4E);
+  // 五行 on a light surface: at least 4.5 : 1 contrast on a card (surfaceContainerLow), so small
+  // 干支 (藏干) read too (v3.1.0: 木, 土 and 金 darker; they were 4.45, 3.9 and 3.0 on a card).
+  static const wood = Color(0xFF387449);
   static const fire = Color(0xFFC0392B);
-  static const earth = Color(0xFFA0712C);
-  static const metal = Color(0xFF8C8C8C);
+  static const earth = Color(0xFF8D6224);
+  static const metal = Color(0xFF6A6A6A);
   static const water = Color(0xFF2B5F8F);
+  // The same on a dark surface, lighter (water was 2.6 : 1 there).
+  static const woodDark = Color(0xFF7CC08A);
+  static const fireDark = Color(0xFFEF7B6E);
+  static const earthDark = Color(0xFFD9A55B);
+  static const metalDark = Color(0xFFBDBDBD);
+  static const waterDark = Color(0xFF7FB2E5);
 }
 
 const _stemBranchElement = {
@@ -17,22 +25,26 @@ const _stemBranchElement = {
   '戌': '土', '亥': '水',
 };
 
-/// Colour of a 五行 element ('木' …) or of a stem/branch character.
-Color wuxingColor(String elementOrChar) {
+/// Colour of a 五行 element ('木' …) or of a stem/branch character; [dark] for a dark surface.
+Color wuxingColor(String elementOrChar, {bool dark = false}) {
   switch (_stemBranchElement[elementOrChar] ?? elementOrChar) {
     case '木':
-      return AppColors.wood;
+      return dark ? AppColors.woodDark : AppColors.wood;
     case '火':
-      return AppColors.fire;
+      return dark ? AppColors.fireDark : AppColors.fire;
     case '土':
-      return AppColors.earth;
+      return dark ? AppColors.earthDark : AppColors.earth;
     case '金':
-      return AppColors.metal;
+      return dark ? AppColors.metalDark : AppColors.metal;
     case '水':
-      return AppColors.water;
+      return dark ? AppColors.waterDark : AppColors.water;
   }
   return Colors.grey;
 }
+
+/// [wuxingColor] for the theme in [context] (light or dark).
+Color wuxingColorOf(BuildContext context, String elementOrChar) =>
+    wuxingColor(elementOrChar, dark: Theme.of(context).brightness == Brightness.dark);
 
 ThemeData buildTheme(Brightness brightness) {
   final scheme = ColorScheme.fromSeed(
@@ -104,7 +116,7 @@ class GanZhiText extends StatelessWidget {
         TextSpan(
           children: [
             for (final ch in text.characters)
-              TextSpan(text: ch, style: TextStyle(color: wuxingColor(ch))),
+              TextSpan(text: ch, style: TextStyle(color: wuxingColorOf(context, ch))),
           ],
         ),
         style: TextStyle(fontSize: size, fontWeight: FontWeight.w600),

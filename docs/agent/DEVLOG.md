@@ -2,6 +2,15 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (s): v3.0.0 pushed; S4 WP4.1, readable 五行 colours, folded 四柱 rows; release v3.1.0
+
+- v3.0.0 pushed with v2.1.0–v2.8.0 after a fresh harness PASS; CI and Pages green for ca14148.
+- WP4.1:
+  - The colours already existed, so the work was making them readable. I measured each one before choosing, with a probe that printed every WCAG ratio: the card (surfaceContainerLow) costs about 5% against the plain page, and that put light 木 at 4.45. Light 木, 土 and 金 are now darker; `wuxingColorOf(context, …)` gives dark mode its own lighter set. A test pins at least 4.5 : 1 for all 20 pairs.
+  - The life report's private palette was removed (reuse-first).
+  - `_PillarGrid` is stateful with `pillar-more`; the coloured 藏干 lost its shading.
+- v3.1.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (r): S3 WP3.6, 洗牌 → 切牌 → 选牌; S3 summary; release v3.0.0
 
 - v2.8.0: harness PASS after the rule 23 retry; committed and tagged.

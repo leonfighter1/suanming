@@ -81,6 +81,8 @@
   "spreadSingle": "Single card",
   "spreadThree": "Three cards (past · present · future)",
   "spreadCeltic": "Celtic Cross (10 cards)",
+  "pillarMore": "More: hidden stems, life stage, nayin",
+  "pillarLess": "Less",
   "ritualTitle": "Shuffle · cut · pick",
   "ritualShuffleHint": "Hold your question in mind and shuffle the deck.",
   "ritualShuffle": "Shuffle",

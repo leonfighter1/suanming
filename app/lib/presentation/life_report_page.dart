@@ -13,6 +13,7 @@ import '../l10n/gen/app_localizations.dart';
 import '../platform/printer.dart';
 import 'design.dart';
 import 'life_export.dart';
+import 'theme.dart' show wuxingColorOf;
 import 'widgets/remedy.dart' show compactButtons;
 import 'widgets/trend_chart.dart' show seriesColor;
 
@@ -730,10 +731,10 @@ class _MeihuaTable extends StatelessWidget {
                 ),
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: _wuxingColor(wx).withValues(alpha: 0.15),
+                  backgroundColor: wuxingColorOf(context, wx).withValues(alpha: 0.15),
                   child: Text(
                     tri.name,
-                    style: TextStyle(color: _wuxingColor(wx), fontWeight: FontWeight.w700),
+                    style: TextStyle(color: wuxingColorOf(context, wx), fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(width: Space.s),
@@ -747,14 +748,6 @@ class _MeihuaTable extends StatelessWidget {
     );
   }
 }
-
-Color _wuxingColor(String wx) => switch (wx) {
-  '木' => const Color(0xFF2E7D32),
-  '火' => const Color(0xFFC62828),
-  '土' => const Color(0xFF8D6E63),
-  '金' => const Color(0xFFB8860B),
-  _ => const Color(0xFF1565C0),
-};
 
 class _WuxingBars extends StatelessWidget {
   const _WuxingBars({required this.scores});
@@ -775,7 +768,7 @@ class _WuxingBars extends StatelessWidget {
                   width: 28,
                   child: Text(
                     wx,
-                    style: TextStyle(fontWeight: FontWeight.w700, color: _wuxingColor(wx)),
+                    style: TextStyle(fontWeight: FontWeight.w700, color: wuxingColorOf(context, wx)),
                   ),
                 ),
                 Expanded(
@@ -784,8 +777,8 @@ class _WuxingBars extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: (scores[wx] ?? 0) / max,
                       minHeight: 12,
-                      color: _wuxingColor(wx),
-                      backgroundColor: _wuxingColor(wx).withValues(alpha: 0.12),
+                      color: wuxingColorOf(context, wx),
+                      backgroundColor: wuxingColorOf(context, wx).withValues(alpha: 0.12),
                     ),
                   ),
                 ),

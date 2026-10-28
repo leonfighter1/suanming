@@ -212,13 +212,24 @@ class _KV extends StatelessWidget {
       );
 }
 
-class _PillarGrid extends StatelessWidget {
+/// The four pillars: 十神, 天干 and 地支 always; 藏干, its 十神, 长生 and 纳音 under 更多 (v3.1.0),
+/// so the first look is the chart itself.
+class _PillarGrid extends StatefulWidget {
   const _PillarGrid({required this.chart, required this.t});
   final BaziChart chart;
   final String Function(String) t;
 
   @override
+  State<_PillarGrid> createState() => _PillarGridState();
+}
+
+class _PillarGridState extends State<_PillarGrid> {
+  bool _more = false;
+
+  @override
   Widget build(BuildContext context) {
+    final chart = widget.chart;
+    final t = widget.t;
     final l10n = AppLocalizations.of(context);
     final p = [for (final k in BaziChart.pillarOrder) chart.pillars[k]!];
     final small = Theme.of(context).textTheme.bodySmall;
@@ -234,21 +245,39 @@ class _PillarGrid extends StatelessWidget {
               Center(child: Padding(padding: const EdgeInsets.symmetric(vertical: Space.s - 2), child: cell(x))),
           ],
         );
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(Radii.field),
-      child: Table(
-        columnWidths: const {0: IntrinsicColumnWidth()},
-        children: [
-          row('', (x) => Text(l10n.pillar(BaziChart.pillarOrder[p.indexOf(x)]), style: small), shaded: true),
-          row(l10n.rowTenGod, (x) => Text(t(x.shishenGan))),
-          row(l10n.rowStem, (x) => GanZhiText(x.gan, size: 30)),
-          row(l10n.rowBranch, (x) => GanZhiText(x.zhi, size: 30)),
-          row(l10n.rowHidden, (x) => GanZhiText(x.hiddenGan.join(), size: 14), shaded: true),
-          row(l10n.rowTenGod, (x) => Text(x.shishenZhi.map(t).join(' '), style: small, textAlign: TextAlign.center), shaded: true),
-          row(l10n.rowLifeStage, (x) => Text(t(x.dishi))),
-          row(l10n.rowNayin, (x) => Text(t(x.nayin), style: small)),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(Radii.field),
+          child: Table(
+            key: const Key('pillar-grid'),
+            columnWidths: const {0: IntrinsicColumnWidth()},
+            children: [
+              row('', (x) => Text(l10n.pillar(BaziChart.pillarOrder[p.indexOf(x)]), style: small), shaded: true),
+              row(l10n.rowTenGod, (x) => Text(t(x.shishenGan))),
+              row(l10n.rowStem, (x) => GanZhiText(x.gan, size: 30)),
+              row(l10n.rowBranch, (x) => GanZhiText(x.zhi, size: 30)),
+              // Coloured 藏干 lie on the card itself, not a shaded row: small text keeps its contrast.
+              if (_more) ...[
+                row(l10n.rowHidden, (x) => GanZhiText(x.hiddenGan.join(), size: 14)),
+                row(l10n.rowTenGod, (x) => Text(x.shishenZhi.map(t).join(' '), style: small, textAlign: TextAlign.center)),
+                row(l10n.rowLifeStage, (x) => Text(t(x.dishi))),
+                row(l10n.rowNayin, (x) => Text(t(x.nayin), style: small)),
+              ],
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            key: const Key('pillar-more'),
+            onPressed: () => setState(() => _more = !_more),
+            icon: Icon(_more ? Icons.expand_less : Icons.expand_more),
+            label: Text(_more ? l10n.pillarLess : l10n.pillarMore),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -264,7 +293,7 @@ class _WuxingBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: Space.xs),
         child: Row(
           children: [
-            SizedBox(width: 56, child: Text(label, style: TextStyle(color: wuxingColor(element), fontWeight: FontWeight.w600))),
+            SizedBox(width: 56, child: Text(label, style: TextStyle(color: wuxingColorOf(context, element), fontWeight: FontWeight.w600))),
             Expanded(
               // Bars grow in on first paint.
               child: TweenAnimationBuilder<double>(
@@ -273,8 +302,8 @@ class _WuxingBar extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 builder: (_, v, _) => LinearProgressIndicator(
                   value: v,
-                  color: wuxingColor(element),
-                  backgroundColor: wuxingColor(element).withValues(alpha: 0.12),
+                  color: wuxingColorOf(context, element),
+                  backgroundColor: wuxingColorOf(context, element).withValues(alpha: 0.12),
                   minHeight: 10,
                   borderRadius: BorderRadius.circular(5),
                 ),

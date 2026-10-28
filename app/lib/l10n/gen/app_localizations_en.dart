@@ -221,6 +221,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spreadCeltic => 'Celtic Cross (10 cards)';
 
   @override
+  String get pillarMore => 'More: hidden stems, life stage, nayin';
+
+  @override
+  String get pillarLess => 'Less';
+
+  @override
   String get ritualTitle => 'Shuffle · cut · pick';
 
   @override

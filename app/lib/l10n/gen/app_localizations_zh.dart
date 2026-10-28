@@ -215,6 +215,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spreadCeltic => '凯尔特十字（10 张）';
 
   @override
+  String get pillarMore => '更多：藏干、长生、纳音';
+
+  @override
+  String get pillarLess => '收起';
+
+  @override
   String get ritualTitle => '洗牌 · 切牌 · 选牌';
 
   @override
@@ -1395,6 +1401,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get spreadCeltic => '凱爾特十字（10 張）';
+
+  @override
+  String get pillarMore => '更多：藏干、長生、納音';
+
+  @override
+  String get pillarLess => '收起';
 
   @override
   String get ritualTitle => '洗牌 · 切牌 · 選牌';

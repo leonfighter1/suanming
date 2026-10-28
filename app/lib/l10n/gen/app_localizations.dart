@@ -501,6 +501,18 @@ abstract class AppLocalizations {
   /// **'Celtic Cross (10 cards)'**
   String get spreadCeltic;
 
+  /// No description provided for @pillarMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More: hidden stems, life stage, nayin'**
+  String get pillarMore;
+
+  /// No description provided for @pillarLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get pillarLess;
+
   /// No description provided for @ritualTitle.
   ///
   /// In en, this message translates to:
