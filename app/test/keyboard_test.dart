@@ -215,7 +215,7 @@ void main() {
       expect(tester.widget<ChoiceChip>(find.byKey(const Key('focus-personality'))).selected, isTrue);
       expect(tester.widget<ChoiceChip>(find.byKey(const Key('focus-any'))).selected, isFalse);
       await press(tester, LogicalKeyboardKey.tab);
-      expect(focusedKey(), 'spread'); // then the spread and the draw, as before
+      expect(focusedKey(), 'spread-single'); // then the spread chips (v2.8.0) and the draw
     });
   });
 

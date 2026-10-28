@@ -57,8 +57,53 @@ Map<int, Rect> celticRects(double w) {
   };
 }
 
+/// The gap between columns of 二选一 and 关系牌阵, in card widths.
+const _gp = 0.25;
+
+/// Spreads laid out in two dimensions, wide and tall in card widths (the others lie in a row).
+const _spreadWide = {'celtic_cross': _celticWide, 'two_paths': 3 + 2 * _gp, 'relationship': 3 + 2 * _gp};
+const _spreadTall = {
+  'celtic_cross': _celticTall,
+  'two_paths': 3 * _ratio + 2 * _gy,
+  'relationship': 2 * _ratio + _gy,
+};
+
+/// Where each card of a two-dimensional spread lies, by position, for card width [w] (null for
+/// the spreads in a row: one card, three cards). 二选一 is a V: card 1, where you stand, at the
+/// bottom, path A rising on the left (2, then 4) and path B on the right (3, then 5). 关系牌阵 is
+/// two rows: you (1), the bond (3) and the other person (2); then what stands between (4), the
+/// direction (6) and what helps (5).
+Map<int, Rect>? spreadRects(String spreadId, double w) {
+  final h = w * _ratio;
+  double x(int column) => column * (1 + _gp) * w;
+  double y(int row) => row * (h + _gy * w);
+  return switch (spreadId) {
+    'celtic_cross' => celticRects(w),
+    'two_paths' => {
+        1: Rect.fromLTWH(x(1), y(2), w, h),
+        2: Rect.fromLTWH(x(0), y(1), w, h),
+        3: Rect.fromLTWH(x(2), y(1), w, h),
+        4: Rect.fromLTWH(x(0), y(0), w, h),
+        5: Rect.fromLTWH(x(2), y(0), w, h),
+      },
+    'relationship' => {
+        1: Rect.fromLTWH(x(0), y(0), w, h),
+        3: Rect.fromLTWH(x(1), y(0), w, h),
+        2: Rect.fromLTWH(x(2), y(0), w, h),
+        4: Rect.fromLTWH(x(0), y(1), w, h),
+        6: Rect.fromLTWH(x(1), y(1), w, h),
+        5: Rect.fromLTWH(x(2), y(1), w, h),
+      },
+    _ => null,
+  };
+}
+
+/// [rects] in painting order: card 2 of a Celtic Cross last, so it lies on top of card 1.
+List<MapEntry<int, Rect>> _painted(Map<int, Rect> rects) =>
+    rects.entries.toList()..sort((a, b) => (a.key == 2 ? 99 : a.key).compareTo(b.key == 2 ? 99 : b.key));
+
 /// A spread drawn small, before the draw (v2.5.0): each card an outline where it will lie, card 2
-/// of a Celtic Cross across card 1. The same geometry as [TarotSpread] ([celticRects]).
+/// of a Celtic Cross across card 1. The same geometry as [TarotSpread] ([spreadRects]).
 class SpreadDiagram extends StatelessWidget {
   const SpreadDiagram({super.key, required this.spreadId, required this.count, this.cardWidth = 8});
   final String spreadId;
@@ -72,19 +117,14 @@ class SpreadDiagram extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final w = cardWidth;
     final h = w * _ratio;
-    final celtic = spreadId == 'celtic_cross';
-    // Card 2 last, so it lies on top of card 1, as in the drawn spread.
-    final rects = celtic
-        ? [
-            for (final e in celticRects(w).entries.toList()
-              ..sort((a, b) => (a.key == 2 ? 99 : a.key).compareTo(b.key == 2 ? 99 : b.key)))
-              e.value,
-          ]
-        : [for (var i = 0; i < count; i++) Rect.fromLTWH(i * w * 1.4, 0, w, h)];
+    final laid = spreadRects(spreadId, w);
+    final rects = laid == null
+        ? [for (var i = 0; i < count; i++) Rect.fromLTWH(i * w * 1.4, 0, w, h)]
+        : [for (final e in _painted(laid)) e.value];
     return ExcludeSemantics(
       child: SizedBox(
-        width: celtic ? _celticWide * w : (count - 1) * w * 1.4 + w,
-        height: celtic ? _celticTall * w : h,
+        width: laid == null ? (count - 1) * w * 1.4 + w : _spreadWide[spreadId]! * w,
+        height: laid == null ? h : _spreadTall[spreadId]! * w,
         child: Stack(
           children: [
             for (final r in rects)
@@ -137,14 +177,19 @@ class TarotSpread extends ConsumerWidget {
       builder: (context, box) {
         final scale = _textScale(box.maxWidth);
         final body = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * scale;
-        // The Celtic Cross list is read card by card: at least 1.5× text, even on a phone (v2.5.0).
+        // The position list under a two-dimensional spread is read card by card: at least 1.5×
+        // text, even on a phone (v2.5.0).
         final listBody = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * max(scale, 1.5);
         final count = chart.cards.length;
-        final width = celtic
-            ? min(box.maxWidth / _celticWide, (MediaQuery.sizeOf(context).height - 160) / _celticTall)
+        // A two-dimensional spread (the Celtic Cross, 二选一, 关系牌阵) is sized so it fits the screen.
+        final wide = _spreadWide[chart.spreadId];
+        final tall = _spreadTall[chart.spreadId];
+        final width = wide != null && tall != null
+            ? min(box.maxWidth / wide, (MediaQuery.sizeOf(context).height - 160) / tall)
                 .clamp(36.0, 150.0)
                 .floorToDouble()
             : ((box.maxWidth - (count - 1) * Space.m) / count).clamp(56.0, 208.0).floorToDouble();
+        final rects = spreadRects(chart.spreadId, width);
         final thumbnails = width < _thumbnail;
 
         Future<void> open(TarotCardFact c, {required bool turn}) => showDialog<void>(
@@ -191,20 +236,19 @@ class TarotSpread extends ConsumerWidget {
           );
         }
 
-        final layout = celtic
+        final layout = rects != null
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Center(
                     child: SizedBox(
-                      width: _celticWide * width,
-                      height: _celticTall * width,
+                      width: wide! * width,
+                      height: tall! * width,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          // Card 2 last, so it lies on top of card 1.
-                          for (final MapEntry(key: n, value: rect) in celticRects(width).entries.toList()
-                            ..sort((a, b) => (a.key == 2 ? 99 : a.key).compareTo(b.key == 2 ? 99 : b.key)))
+                          // Card 2 of a Celtic Cross last, so it lies on top of card 1.
+                          for (final MapEntry(key: n, value: rect) in _painted(rects))
                             Positioned.fromRect(rect: rect, child: card(chart.cards[n - 1])),
                         ],
                       ),

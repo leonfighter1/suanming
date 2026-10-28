@@ -116,6 +116,9 @@ export const SPREADS = {
     "hopes_fears",
     "outcome",
   ],
+  // v2.8.0: 二选一 (five cards) and 关系牌阵 (six), in dealing order.
+  two_paths: ["choice_now", "path_a", "path_b", "outcome_a", "outcome_b"],
+  relationship: ["rel_you", "rel_them", "rel_bond", "rel_obstacle", "rel_help", "rel_direction"],
 } as const satisfies Record<string, readonly string[]>;
 
 export type SpreadId = keyof typeof SPREADS;
@@ -136,6 +139,17 @@ export const POSITION_LABELS: Record<string, { en: string; "zh-Hans": string; "z
     environment: { en: "Environment", "zh-Hans": "环境", "zh-Hant": "環境" },
     hopes_fears: { en: "Hopes & fears", "zh-Hans": "希望与恐惧", "zh-Hant": "希望與恐懼" },
     outcome: { en: "Outcome", "zh-Hans": "结果", "zh-Hant": "結果" },
+    choice_now: { en: "Where you stand", "zh-Hans": "现在的处境", "zh-Hant": "現在的處境" },
+    path_a: { en: "Path A", "zh-Hans": "选择 A", "zh-Hant": "選擇 A" },
+    path_b: { en: "Path B", "zh-Hans": "选择 B", "zh-Hant": "選擇 B" },
+    outcome_a: { en: "Where A leads", "zh-Hans": "A 的结果", "zh-Hant": "A 的結果" },
+    outcome_b: { en: "Where B leads", "zh-Hans": "B 的结果", "zh-Hant": "B 的結果" },
+    rel_you: { en: "You", "zh-Hans": "你", "zh-Hant": "你" },
+    rel_them: { en: "The other person", "zh-Hans": "对方", "zh-Hant": "對方" },
+    rel_bond: { en: "The bond", "zh-Hans": "关系现状", "zh-Hant": "關係現狀" },
+    rel_obstacle: { en: "What stands between", "zh-Hans": "阻碍", "zh-Hant": "阻礙" },
+    rel_help: { en: "What helps", "zh-Hans": "助力", "zh-Hant": "助力" },
+    rel_direction: { en: "Direction", "zh-Hans": "走向", "zh-Hant": "走向" },
   };
 
 /**
@@ -211,5 +225,63 @@ export const POSITION_MEANINGS: Record<
     en: "Where things tend to lead if they go on as they are; not a fixed fate.",
     "zh-Hans": "照目前的趋势，事情最可能的结局（不是定数）。",
     "zh-Hant": "照目前的趨勢，事情最可能的結局（不是定數）。",
+  },
+  // 二选一 (two paths, v2.8.0): the present at the bottom, each path rising to where it leads.
+  choice_now: {
+    en: "Where you stand as you choose: what weighs on the decision now.",
+    "zh-Hans": "做选择时的处境：此刻影响这个决定的状况。",
+    "zh-Hant": "做選擇時的處境：此刻影響這個決定的狀況。",
+  },
+  path_a: {
+    en: "How things tend to unfold if you take the first path.",
+    "zh-Hans": "走第一条路时，事情倾向如何发展。",
+    "zh-Hant": "走第一條路時，事情傾向如何發展。",
+  },
+  path_b: {
+    en: "How things tend to unfold if you take the second path.",
+    "zh-Hans": "走第二条路时，事情倾向如何发展。",
+    "zh-Hant": "走第二條路時，事情傾向如何發展。",
+  },
+  outcome_a: {
+    en: "Where the first path tends to lead if nothing changes; not a fixed fate.",
+    "zh-Hans": "若一切照旧，第一条路倾向带你去哪里（不是定数）。",
+    "zh-Hant": "若一切照舊，第一條路傾向帶你去哪裡（不是定數）。",
+  },
+  outcome_b: {
+    en: "Where the second path tends to lead if nothing changes; not a fixed fate.",
+    "zh-Hans": "若一切照旧，第二条路倾向带你去哪里（不是定数）。",
+    "zh-Hant": "若一切照舊，第二條路傾向帶你去哪裡（不是定數）。",
+  },
+  // 关系牌阵 (relationship, v2.8.0): you, the bond and the other person; what stands between
+  // you, what helps, and where it is going.
+  rel_you: {
+    en: "You: how you feel and what you bring to the relationship.",
+    "zh-Hans": "你：你在这段关系里的感受和付出。",
+    "zh-Hant": "你：你在這段關係裡的感受和付出。",
+  },
+  rel_them: {
+    en: "The other person, as the cards show their side: a tendency, never a fact about them.",
+    "zh-Hans": "对方：牌面所见对方的一面（是一种倾向，不是对方的事实）。",
+    "zh-Hant": "對方：牌面所見對方的一面（是一種傾向，不是對方的事實）。",
+  },
+  rel_bond: {
+    en: "The bond: where the relationship stands now, what connects you.",
+    "zh-Hans": "关系现状：这段关系目前的状态，把你们连在一起的东西。",
+    "zh-Hant": "關係現狀：這段關係目前的狀態，把你們連在一起的東西。",
+  },
+  rel_obstacle: {
+    en: "What stands between you: what makes things harder now.",
+    "zh-Hans": "阻碍：此刻让关系变难的因素。",
+    "zh-Hant": "阻礙：此刻讓關係變難的因素。",
+  },
+  rel_help: {
+    en: "What helps: what you can lean on, or do, for the relationship.",
+    "zh-Hans": "助力：可以借力、可以去做的事。",
+    "zh-Hant": "助力：可以借力、可以去做的事。",
+  },
+  rel_direction: {
+    en: "Where it is going if things go on as they are: a direction, never a fixed fate.",
+    "zh-Hans": "走向：若一切照旧，关系倾向的方向（是方向，不是定数）。",
+    "zh-Hant": "走向：若一切照舊，關係傾向的方向（是方向，不是定數）。",
   },
 };

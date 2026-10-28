@@ -969,7 +969,7 @@ components:
       required: [system, spread]
       properties:
         system: { const: tarot }
-        spread: { type: string, enum: [single, three_card, celtic_cross] }
+        spread: { type: string, enum: [single, three_card, celtic_cross, two_paths, relationship] }
 
     AstrologyChartRequest:
       allOf:

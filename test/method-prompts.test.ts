@@ -15,12 +15,13 @@ import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 
 // The versions older than v2.1.0 were hashed from the committed prompts.ts before WP2.1 touched
 // it; later ones are pinned as released. Changing a prompt's text needs a new version. A version
-// replaced in the registry stays in the file as the start of its successor's text (narrative_bazi@5
-// of @6, remedy_bazi@3 of @4), so its text stays pinned through the successor's hash.
+// replaced in the registry stays in the file as the base of its successor's text (narrative_bazi@5
+// of @6, remedy_bazi@3 of @4, each tarot @1 of its @2, narrative_tarot@2 of @3), so its text stays
+// pinned through the successor's hash: an edit changes that hash, or makes swap() throw.
 const HASHES: Record<string, string> = {
   "narrative@4": "49007c9a8aba351e",
   "narrative_bazi@6": "d7c2c79e4aed5cc0",
-  "narrative_tarot@2": "6f51cb586f537368",
+  "narrative_tarot@3": "afa57d4daa579c11",
   "action@3": "87f6e73c8dd8d3de",
   "trend@2": "80a95937498e19fc",
   "remedy@2": "8a54bed1ea13dffa",

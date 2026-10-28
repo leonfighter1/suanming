@@ -251,6 +251,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spreadCelticShort => '凯尔特十字';
 
   @override
+  String get spreadTwoPathsShort => '二选一';
+
+  @override
+  String get spreadRelationshipShort => '关系牌阵';
+
+  @override
   String get tarotExample1 => '这份工作还适合我吗？';
 
   @override
@@ -1392,6 +1398,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get spreadCelticShort => '凱爾特十字';
+
+  @override
+  String get spreadTwoPathsShort => '二選一';
+
+  @override
+  String get spreadRelationshipShort => '關係牌陣';
 
   @override
   String get tarotExample1 => '這份工作還適合我嗎？';

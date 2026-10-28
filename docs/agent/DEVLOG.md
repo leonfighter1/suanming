@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (q): S3 WP3.5, 二选一 and 关系牌阵; release v2.8.0
+
+- v2.7.0: harness PASS after the rule 23 retry; committed and tagged.
+- WP3.5:
+  - Spreads `two_paths` (5) and `relationship` (6) with their own position keys, labels and meanings; `PLACES`, typed by spread, made the compiler ask for theirs.
+  - narrative_tarot@3, built with swap() on @2.
+  - Schema and OpenAPI enums extended; fixtures for both through sync:app.
+- App:
+  - `spreadRects` + `_spreadWide` / `_spreadTall` generalize the two-dimensional layout. The Celtic Cross keeps its exact sizing, so the hand-worked widths still hold.
+  - The picker moved from SegmentedButton to wrapping ChoiceChips (five spreads overflow a phone row). The keyboard test's next stop is `spread-single`.
+- Fixed on the way: an info-level lint (a `for` without braces) would have failed `flutter analyze` in the harness.
+- v2.8.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (p): S3 WP3.4, 牌义图鉴; release v2.7.0
 
 - v2.6.0: harness PASS after the rule 23 retry; committed and tagged.

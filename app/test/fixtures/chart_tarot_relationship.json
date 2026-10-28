@@ -1,0 +1,78 @@
+{
+  "chart_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "tarot",
+      "version": "0.1.0"
+    },
+    "system": "tarot",
+    "input_digest": "hmac-sha256:0121418e60a9e2e0049d0713d6178bd40d85b0355f565d0315cc302863066e51",
+    "rule_versions": {
+      "deck": "rws-78/v1",
+      "rng": "hmac-sha256-drbg/v1"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "deck_id": "rws-78/v1",
+      "spread_id": "relationship",
+      "reversed_rate": 0.5,
+      "cards": [
+        {
+          "position": 1,
+          "position_key": "rel_you",
+          "card_id": "swords_13",
+          "reversed": true
+        },
+        {
+          "position": 2,
+          "position_key": "rel_them",
+          "card_id": "swords_07",
+          "reversed": false
+        },
+        {
+          "position": 3,
+          "position_key": "rel_bond",
+          "card_id": "cups_08",
+          "reversed": false
+        },
+        {
+          "position": 4,
+          "position_key": "rel_obstacle",
+          "card_id": "swords_02",
+          "reversed": true
+        },
+        {
+          "position": 5,
+          "position_key": "rel_help",
+          "card_id": "cups_02",
+          "reversed": true
+        },
+        {
+          "position": 6,
+          "position_key": "rel_direction",
+          "card_id": "major_19",
+          "reversed": false
+        }
+      ],
+      "audit": {
+        "draw_id": "00000000-0000-4000-8000-000000000005",
+        "drawn_at": "2026-10-25T00:00:00.000Z",
+        "rng": "hmac-sha256-drbg/v1",
+        "result_digest": "sha256:21866d5915387e2be1b392f1ae5aae7b354d60615d5cd8933470669acb1f13d2"
+      }
+    },
+    "provenance": [
+      {
+        "path": "/cards",
+        "source_level": "traditional_text",
+        "note": "RWS 78 张；牌阵位置义为通行版本"
+      },
+      {
+        "path": "/cards/reversed",
+        "source_level": "common_consensus",
+        "note": "逆位概率 0.5"
+      }
+    ]
+  }
+}

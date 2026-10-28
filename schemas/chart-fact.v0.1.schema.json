@@ -578,7 +578,10 @@
       "required": ["deck_id", "spread_id", "reversed_rate", "cards", "audit"],
       "properties": {
         "deck_id": { "type": "string" },
-        "spread_id": { "type": "string", "enum": ["single", "three_card", "celtic_cross"] },
+        "spread_id": {
+          "type": "string",
+          "enum": ["single", "three_card", "celtic_cross", "two_paths", "relationship"]
+        },
         "reversed_rate": { "type": "number", "minimum": 0, "maximum": 1 },
         "cards": {
           "type": "array",

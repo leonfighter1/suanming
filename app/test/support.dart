@@ -184,6 +184,8 @@ class FakeApi {
       final tarot = switch (body['spread']) {
         'celtic_cross' => 'chart_tarot_celtic',
         'single' => 'chart_tarot_single',
+        'two_paths' => 'chart_tarot_two_paths',
+        'relationship' => 'chart_tarot_relationship',
         _ => 'chart_tarot',
       };
       return _json(fixture(body['system'] == 'tarot' ? tarot : 'chart_bazi'), 201);

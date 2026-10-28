@@ -14,7 +14,7 @@ import { DECK } from "../src/engines/tarot/deck.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 
-const draw = (spread: "single" | "three_card" | "celtic_cross") =>
+const draw = (spread: "single" | "three_card" | "celtic_cross" | "two_paths" | "relationship") =>
   computeTarot(
     { spread },
     { drawKey: DRAW_KEY, digestPepper: PEPPER, now: FIXED_NOW, newDrawId: () => "draw-1" },
@@ -64,7 +64,7 @@ describe("tarot reading, the classic way", () => {
       { locale: "zh-Hans", country: "HK", focus: "career_wealth", question: "我该不该换工作？" },
       { providers: { deepseek: tarotAi, anthropic: tarotAi }, now: FIXED_NOW },
     );
-    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@2,action_tarot@2,guard@2");
+    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@3,action_tarot@2,guard@2");
     const reading = tarotAi.sent.find((r) => r.agent === "narrative")!;
     expect(reading.system).toBe(PROMPTS.narrative_tarot.system);
     expect(reading.user).toContain("<spread>");
@@ -160,6 +160,35 @@ describe("tarot reading, the classic way", () => {
     await expect(
       generateReport(celtic, { locale: "zh-Hans", country: "HK", focus: "money" as never }, deps),
     ).rejects.toThrow(/focus is for tarot readings/);
+  });
+
+  it("二选一 and 关系牌阵 (v2.8.0): dealt in position order, each card with its place", () => {
+    const paths = spreadBrief(draw("two_paths"), "zh-Hans");
+    expect(paths.cards.map((c) => [c.n, c.position])).toEqual([
+      [1, "现在的处境"],
+      [2, "选择 A"],
+      [3, "选择 B"],
+      [4, "A 的结果"],
+      [5, "B 的结果"],
+    ]);
+    expect(paths.cards[0]!.place).toBe("bottom, middle: where you stand");
+    expect(paths.cards[4]!.place).toBe("right, top: where path B leads");
+    const rel = spreadBrief(draw("relationship"), "en");
+    expect(rel.cards.map((c) => c.position)).toEqual([
+      "You",
+      "The other person",
+      "The bond",
+      "What stands between",
+      "What helps",
+      "Direction",
+    ]);
+    for (const c of [...paths.cards, ...rel.cards]) expect(c.meaning).not.toBe("");
+    // Their methods are in the tarot prompt.
+    const p = PROMPTS.narrative_tarot.system;
+    expect(p).toContain("two_paths (five cards, 二选一)");
+    expect(p).toContain("never choose for the user");
+    expect(p).toContain("relationship (six cards, 关系牌阵)");
+    expect(p).toContain("never predict a breakup");
   });
 
   it("the tarot prompt stands on its own: no 八字 rules in it", () => {

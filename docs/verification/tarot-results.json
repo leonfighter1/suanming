@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T05:56:56.516Z",
+  "generated_at": "2026-10-28T06:14:31.607Z",
   "draws_per_spread": 100000,
   "checks": [
     {
@@ -192,6 +192,146 @@
       "pass": true
     },
     {
+      "name": "two_paths · position 1 uniform over 78 cards",
+      "statistic": 75.98,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "two_paths · position 2 uniform over 78 cards",
+      "statistic": 69.42,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "two_paths · position 3 uniform over 78 cards",
+      "statistic": 75.81,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "two_paths · position 4 uniform over 78 cards",
+      "statistic": 61.3,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "two_paths · position 5 uniform over 78 cards",
+      "statistic": 81.89,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "two_paths · reversal rate 50 %",
+      "statistic": 1.06,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "49.92 %"
+    },
+    {
+      "name": "two_paths · reversal independent of card",
+      "statistic": 74.52,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "two_paths · positions 1→2 match sampling without replacement",
+      "statistic": 24.62,
+      "critical": 51.29,
+      "pass": true
+    },
+    {
+      "name": "two_paths · consecutive draws independent",
+      "statistic": 21.99,
+      "critical": 39.39,
+      "pass": true
+    },
+    {
+      "name": "two_paths · major/suit mix matches the deck",
+      "statistic": 3.5,
+      "critical": 18.72,
+      "pass": true
+    },
+    {
+      "name": "two_paths · no repeated card within a spread",
+      "statistic": 0,
+      "critical": 0,
+      "pass": true
+    },
+    {
+      "name": "relationship · position 1 uniform over 78 cards",
+      "statistic": 75.98,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · position 2 uniform over 78 cards",
+      "statistic": 69.42,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · position 3 uniform over 78 cards",
+      "statistic": 75.81,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · position 4 uniform over 78 cards",
+      "statistic": 61.3,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · position 5 uniform over 78 cards",
+      "statistic": 81.89,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · position 6 uniform over 78 cards",
+      "statistic": 56.33,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · reversal rate 50 %",
+      "statistic": 0.83,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "49.95 %"
+    },
+    {
+      "name": "relationship · reversal independent of card",
+      "statistic": 75.49,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "relationship · positions 1→2 match sampling without replacement",
+      "statistic": 24.62,
+      "critical": 51.29,
+      "pass": true
+    },
+    {
+      "name": "relationship · consecutive draws independent",
+      "statistic": 21.99,
+      "critical": 39.39,
+      "pass": true
+    },
+    {
+      "name": "relationship · major/suit mix matches the deck",
+      "statistic": 3.5,
+      "critical": 18.72,
+      "pass": true
+    },
+    {
+      "name": "relationship · no repeated card within a spread",
+      "statistic": 0,
+      "critical": 0,
+      "pass": true
+    },
+    {
       "name": "adjacent draw ids: same card at chance rate (1/78)",
       "statistic": 1.49,
       "critical": 3.09,
@@ -200,5 +340,5 @@
     }
   ],
   "pass": true,
-  "seconds": 14
+  "seconds": 11
 }

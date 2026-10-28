@@ -24,6 +24,23 @@ const PLACES: Record<SpreadId, readonly string[]> = {
     "staff: third from the bottom",
     "staff: top",
   ],
+  // A V: the present at the bottom, path A rising on the left, path B on the right.
+  two_paths: [
+    "bottom, middle: where you stand",
+    "left, middle: path A",
+    "right, middle: path B",
+    "left, top: where path A leads",
+    "right, top: where path B leads",
+  ],
+  // Two rows: you, the bond and the other person; then obstacle, direction and help.
+  relationship: [
+    "top row, left: you",
+    "top row, right: the other person",
+    "top row, middle: between you",
+    "bottom row, left",
+    "bottom row, right",
+    "bottom row, middle",
+  ],
 };
 
 const ORIENTATION: Record<Locale, readonly [upright: string, reversed: string]> = {

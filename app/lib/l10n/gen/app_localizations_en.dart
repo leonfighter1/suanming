@@ -258,6 +258,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spreadCelticShort => 'Celtic Cross';
 
   @override
+  String get spreadTwoPathsShort => 'Two paths';
+
+  @override
+  String get spreadRelationshipShort => 'Relationship';
+
+  @override
   String get tarotExample1 => 'Is this job still right for me?';
 
   @override

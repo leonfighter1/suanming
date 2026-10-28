@@ -84,16 +84,50 @@ void main() {
         ].join(' · ');
     expect(testTerms.spreadPositions('celtic_cross'), hasLength(10)); // deck.ts SPREADS, synced
     expect(listed(), expected('three_card')); // the default
-    for (final id in ['celtic_cross', 'single']) {
+    for (final id in ['celtic_cross', 'single', 'two_paths', 'relationship']) {
       await tester.tap(find.byKey(Key('spread-$id')), warnIfMissed: false); // the segment takes it
       await settle(tester);
       expect(listed(), expected(id));
     }
     // Each segment carries its small drawing: 1, 3 and 10 card outlines.
-    for (final (id, n) in [('single', 1), ('three_card', 3), ('celtic_cross', 10)]) {
+    for (final (id, n) in [
+      ('single', 1),
+      ('three_card', 3),
+      ('celtic_cross', 10),
+      ('two_paths', 5),
+      ('relationship', 6),
+    ]) {
       final diagram = find.descendant(of: find.byKey(Key('spread-$id')), matching: find.byType(SpreadDiagram));
       expect(find.descendant(of: diagram, matching: find.byType(DecoratedBox)), findsNWidgets(n), reason: id);
     }
+  });
+
+  testWidgets('二选一 lies in a V and 关系牌阵 in two rows (v2.8.0)', (tester) async {
+    await drawAt(tester, const Size(1000, 2000), spread: 'two_paths');
+    // Card 1, where you stand, lowest and in the middle; path A on the left (2, then 4 above),
+    // path B on the right (3, then 5 above).
+    expect(card(tester, 1).top, greaterThan(card(tester, 2).top));
+    expect(card(tester, 2).top, greaterThan(card(tester, 4).top));
+    expect([card(tester, 3).top, card(tester, 5).top], [card(tester, 2).top, card(tester, 4).top]);
+    expect(card(tester, 2).left, lessThan(card(tester, 1).left));
+    expect(card(tester, 3).left, greaterThan(card(tester, 1).left));
+    expect([card(tester, 4).left, card(tester, 5).left], [card(tester, 2).left, card(tester, 3).left]);
+    expect(find.byKey(const Key('tarot-slot-5')), findsOneWidget); // its positions listed below
+
+    await drawAt(tester, const Size(1000, 2000), spread: 'relationship');
+    // Top row: you (1), the bond (3), the other person (2); below: what stands between (4), the
+    // direction (6), what helps (5).
+    final top = card(tester, 1).top;
+    expect([card(tester, 3).top, card(tester, 2).top], [top, top]);
+    for (final n in [4, 5, 6]) {
+      expect(card(tester, n).top, greaterThan(top), reason: '$n');
+    }
+    expect(card(tester, 1).left, lessThan(card(tester, 3).left));
+    expect(card(tester, 3).left, lessThan(card(tester, 2).left));
+    expect(
+      [card(tester, 4).left, card(tester, 6).left, card(tester, 5).left],
+      [card(tester, 1).left, card(tester, 3).left, card(tester, 2).left],
+    );
   });
 
   testWidgets('an example question goes into the field with one touch', (tester) async {

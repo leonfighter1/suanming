@@ -165,35 +165,38 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                       // Each spread drawn small, then its positions, before the draw (v2.5.0).
                       Text(l10n.spread, style: Theme.of(context).textTheme.labelLarge),
                       const SizedBox(height: Space.s),
-                      SegmentKeys(
-                        child: SegmentedButton<String>(
-                          key: const Key('spread'),
-                          showSelectedIcon: false,
-                          segments: [
-                            for (final (id, name) in [
-                              ('single', l10n.spreadSingleShort),
-                              ('three_card', l10n.spreadThreeShort),
-                              ('celtic_cross', l10n.spreadCelticShort),
-                            ])
-                              ButtonSegment(
-                                value: id,
-                                label: Padding(
-                                  key: Key('spread-$id'),
-                                  padding: const EdgeInsets.symmetric(vertical: Space.s),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SpreadDiagram(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
-                                      const SizedBox(height: Space.xs),
-                                      Text(name, textAlign: TextAlign.center),
-                                    ],
-                                  ),
+                      // Five spreads (v2.8.0) are too many for one segmented row on a phone:
+                      // chips wrap, take Tab, Enter and Space, and show the theme's focus border.
+                      Wrap(
+                        key: const Key('spread'),
+                        spacing: Space.s,
+                        runSpacing: Space.s,
+                        children: [
+                          for (final (id, name) in [
+                            ('single', l10n.spreadSingleShort),
+                            ('three_card', l10n.spreadThreeShort),
+                            ('celtic_cross', l10n.spreadCelticShort),
+                            ('two_paths', l10n.spreadTwoPathsShort),
+                            ('relationship', l10n.spreadRelationshipShort),
+                          ])
+                            ChoiceChip(
+                              key: Key('spread-$id'),
+                              showCheckmark: false,
+                              selected: _spread == id,
+                              onSelected: (_) => setState(() => _spread = id),
+                              label: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: Space.s),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SpreadDiagram(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
+                                    const SizedBox(height: Space.xs),
+                                    Text(name, textAlign: TextAlign.center),
+                                  ],
                                 ),
                               ),
-                          ],
-                          selected: {_spread},
-                          onSelectionChanged: (s) => setState(() => _spread = s.first),
-                        ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: Space.s),
                       Text(

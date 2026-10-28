@@ -573,6 +573,18 @@ abstract class AppLocalizations {
   /// **'Celtic Cross'**
   String get spreadCelticShort;
 
+  /// No description provided for @spreadTwoPathsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Two paths'**
+  String get spreadTwoPathsShort;
+
+  /// No description provided for @spreadRelationshipShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get spreadRelationshipShort;
+
   /// No description provided for @tarotExample1.
   ///
   /// In en, this message translates to:

@@ -76,6 +76,15 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     { spread: "single" },
     { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000003" },
   );
+  // The two spreads of v2.8.0, for their layout tests.
+  const twoPaths = computeTarot(
+    { spread: "two_paths" },
+    { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000004" },
+  );
+  const relationship = computeTarot(
+    { spread: "relationship" },
+    { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000005" },
+  );
   const mock = new MockProvider();
   const report = await generateReport(
     bazi,
@@ -223,6 +232,14 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     "app/test/fixtures/chart_tarot_single.json": {
       chart_id: "99999999-9999-4999-8999-999999999999",
       chart_fact: single,
+    },
+    "app/test/fixtures/chart_tarot_two_paths.json": {
+      chart_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      chart_fact: twoPaths,
+    },
+    "app/test/fixtures/chart_tarot_relationship.json": {
+      chart_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      chart_fact: relationship,
     },
     "app/test/fixtures/report_passed.json": view,
     "app/test/fixtures/report_tarot_passed.json": tarotView,

@@ -221,6 +221,17 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
       large with the keywords.
 - WP3.5 More spreads: 二选一 (five cards) and 关系牌阵 (six), with positions, meanings, layouts and their method in
   the tarot prompt.
+  - As built (v2.8.0):
+    - `two_paths` and `relationship` in deck.ts `SPREADS`, with their own position keys (`choice_now`,
+      `path_a` …; `rel_you` …), labels and meanings in three scripts. The relationship spread doesn't reuse the
+      Celtic Cross's 挑战.
+    - Their places for the reading agent. `narrative_tarot@3` adds each method (never choose for the user;
+      card 2 is a tendency, never a claim about the other person; never a breakup) and the synthesis shapes.
+    - The schema and OpenAPI enums extended (additive). The tarot battery covers them by itself (it loops over
+      `SPREADS`).
+    - App: `spreadRects` lays out every two-dimensional spread (the Celtic Cross as before, the V, the two
+      rows) for both `TarotSpread` and `SpreadDiagram`. The picker became wrapping `ChoiceChip`s: five
+      segments overflow a phone.
 - WP3.6 洗牌 → 切牌 → 选牌: the engine still shuffles; the user's picks are positions in the seeded deck, stored in
   the draw so the audit replays it.
 
@@ -325,22 +336,23 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 
 ## Status
 
-| WP        | Status                     | Release        |
-| --------- | -------------------------- | -------------- |
-| WP1.1     | done                       | v1.3.0         |
-| WP1.2     | done                       | v1.3.0         |
-| WP1.3     | done                       | v1.3.0         |
-| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0         |
-| WP1.5     | done                       | v1.3.0         |
-| WP1.6     | done                       | v2.0.0         |
-| WP1.7     | done                       | v2.0.0         |
-| WP1.8     | waiting for a reference    | —              |
-| WP2.1     | done                       | v2.1.0         |
-| WP2.3     | done                       | v2.2.0         |
-| WP2.2     | done                       | v2.3.0         |
-| WP3.1     | done                       | v2.4.0         |
-| WP3.2     | done                       | v2.5.0         |
-| WP3.3     | done                       | v2.6.0         |
-| WP3.4     | done                       | v2.7.0         |
-| WP3.5–3.6 | todo                       | v2.8.0, v3.0.0 |
-| S4–S6     | todo                       | above          |
+| WP    | Status                     | Release |
+| ----- | -------------------------- | ------- |
+| WP1.1 | done                       | v1.3.0  |
+| WP1.2 | done                       | v1.3.0  |
+| WP1.3 | done                       | v1.3.0  |
+| WP1.4 | done (命宫 / 身宫 → WP1.8) | v1.3.0  |
+| WP1.5 | done                       | v1.3.0  |
+| WP1.6 | done                       | v2.0.0  |
+| WP1.7 | done                       | v2.0.0  |
+| WP1.8 | waiting for a reference    | —       |
+| WP2.1 | done                       | v2.1.0  |
+| WP2.3 | done                       | v2.2.0  |
+| WP2.2 | done                       | v2.3.0  |
+| WP3.1 | done                       | v2.4.0  |
+| WP3.2 | done                       | v2.5.0  |
+| WP3.3 | done                       | v2.6.0  |
+| WP3.4 | done                       | v2.7.0  |
+| WP3.5 | done                       | v2.8.0  |
+| WP3.6 | todo                       | v3.0.0  |
+| S4–S6 | todo                       | above   |

@@ -12,6 +12,30 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.8.0 (2026-10-28): two more spreads, 二选一 and 关系牌阵
+
+Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.5. A medium update: committed locally,
+pushed with v3.0.0.
+
+- 二选一 (five cards), for a choice between two paths.
+  - Card 1 at the bottom is where you stand. Path A rises on the left (how it tends to go, then where it tends to
+    lead), path B on the right.
+  - The reading weighs both paths fairly. It never chooses for you, and never calls either path doomed.
+- 关系牌阵 (six cards), for any relationship: a partner, family, a friend, a colleague.
+  - The top row is you, the bond and the other person; below are what stands between you, where it is going and
+    what helps.
+  - The other person's card is read as a tendency, never as a claim about what they think. There is never a
+    prediction of a breakup.
+- Both are drawn small in the picker, their positions listed before the draw, laid out as their spread prescribes
+  after it, and read in the classic order (逐张解读 card by card, then the whole spread and the advice).
+- The spread picker now wraps onto two lines on a phone, so all five fit. It works with Tab, Enter and Space like
+  the other chips.
+- Verified:
+  - 1 new server test: both spreads dealt in position order, with their places and meanings, and their methods in
+    the instructions. Every draw check (100,000 draws per spread) now runs on all five spreads.
+  - 1 new app test: the V and the two rows. The picker test covers all five drawings.
+  - All 298 server tests and 100 app tests pass; harness PASS.
+
 ### v2.7.0 (2026-10-28): 牌义图鉴, the whole deck
 
 Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.4. A medium update: committed locally,

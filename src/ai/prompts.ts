@@ -485,6 +485,21 @@ const NARRATIVE_TAROT_V2 = [
   ["answer it directly in the topic closest to it.", "answer it directly in tarot_synthesis."],
 ].reduce((text, [from, to]) => swap(text, from!, to!), NARRATIVE_TAROT_V1);
 
+/**
+ * v2.8.0 (WP3.5): two more spreads, each read its classic way: 二选一 (two_paths, five cards)
+ * and 关系牌阵 (relationship, six).
+ */
+const NARRATIVE_TAROT_V3 = [
+  [
+    "Compare card 10 with card 5 and with card 1.",
+    "Compare card 10 with card 5 and with card 1.\n- two_paths (five cards, 二选一): card 1 at the bottom is where the user stands as they choose. The first path rises on the left (card 2, how it tends to unfold; card 4, where it tends to lead) and the second on the right (card 3, then card 5). Read both paths with the same care and compare them; never choose for the user, and never call either path fated or doomed. End with what each path asks of them and what to weigh.\n- relationship (six cards, 关系牌阵): card 1 is the user; card 2 the other person as the cards show their side (a tendency, never a claim about what they think or will do); card 3 the bond between them; card 4 what stands between them; card 5 what helps; card 6 where things tend to go (a direction, never a fixed fate). Treat every kind of relationship the same (partner, family, friend, colleague); never predict a breakup, an affair, a partner's death or a specific partner.",
+  ],
+  [
+    "for three cards, past, present and future as one line of development; for one card, one paragraph.",
+    "for three cards, past, present and future as one line of development; for one card, one paragraph; for two paths, one paragraph on each path and one comparing them; for a relationship, one on the two of you and the bond (cards 1–3), one on what stands between you and what helps (cards 4–5), and one on the direction (card 6).",
+  ],
+].reduce((text, [from, to]) => swap(text, from!, to!), NARRATIVE_TAROT_V2);
+
 const ACTION_TAROT_V2 = [
   ["(the reading, by topic)", "(the reading: card by card, the whole spread, and its advice)"],
   ["- For each topic, give 2–3 actions.", "- Give 3–5 actions, all with topic tarot_advice."],
@@ -503,7 +518,7 @@ const REMEDY_TAROT_V2 = swap(
 export const PROMPTS = {
   narrative: version("narrative", 4, NARRATIVE_V4),
   narrative_bazi: version("narrative_bazi", 6, NARRATIVE_BAZI_V6),
-  narrative_tarot: version("narrative_tarot", 2, NARRATIVE_TAROT_V2),
+  narrative_tarot: version("narrative_tarot", 3, NARRATIVE_TAROT_V3),
   narrative_astrology: version("narrative_astrology", 1, NARRATIVE_ASTROLOGY_V1),
   action: version("action", 3, ACTION_V3),
   action_bazi: version("action_bazi", 4, ACTION_BAZI_V4),
