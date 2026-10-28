@@ -12,6 +12,59 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v5.3.0 (2026-10-28): 算卦, the server half: the coins, the hexagrams, 直說 and the AI reading
+
+Your request (算卦: coins cast automatically, half-automatically or by your own hand, with the time, the 八卦 and
+the texts at once, or an AI reading). Stage S10 of the [tech plan](docs/tech-plan.md), the server half. The app's
+pages come in v6.0.0. A medium update: committed locally.
+
+- **The coins**, by the classical rule: three coins, six tosses, from the bottom (初爻) up.
+  - 背 counts 3 and 字 2. One 背 is 少陽, two 少陰, three 老陽 (moving), three 字 老陰 (moving). Reference: 漢典
+    「單錢」.
+  - Each coin falls either way half the time.
+- **Three ways to cast**, as you asked:
+  - **自動**: the server tosses all 18 coins, and the cast replays from the server's key.
+  - **半自動 (挑幣)**: the server lays out 24 coins face down _before_ you pick.
+    - The coins stay hidden, and you get a commitment (a fingerprint of the layout).
+    - You pick 18, one at a time, and the order is kept: picks 1–3 make the 初爻.
+    - Anyone with the key can check afterwards that the coins were laid out before the picking.
+  - **自己擲、自己填**: you toss real coins and enter each line, as three coins (字 / 背) or as the line itself, for
+    anyone who counts the faces another way.
+    - The **exact time is required**, to the minute. A time in the future, or one a clock change skips, is
+      refused.
+- **What comes out at once**, with no AI:
+  - the 本卦 and, when lines move, the 變卦;
+  - the 上卦 and 下卦 (八卦 with their images), the King Wen number, and the 年月日時 干支 of the cast time;
+  - the 卦辭 and 爻辭 the reading rests on, chosen by 朱熹's rule (one moving line: its 爻辭; none: the 卦辭;
+    and so on to six).
+- **直說, your 「直抒胸臆，不用绕」**: every 卦辭, every 爻辭, and 用九 and 用六 (450 in all) has one plain sentence
+  saying straight out what it means.
+  - For example, 無妄 六二 「不耕穫，不菑畬」: 「別只想收穫，把眼前該做的做好，往前走就順。」
+  - They are written in 繁體 by hand, after the common readings, and converted to 简体. None is longer than 38
+    characters.
+  - Tendency, never fate: the compliance rules find nothing in any of them.
+- **The AI reading** has its own prompts, and the AI is told to say it straight:
+  - 卦象: what came up, each text quoted with its meaning;
+  - 所問之事: the answer comes in the first sentence (go ahead, wait, or change course), then why;
+  - 建議: what to keep doing, what to stop, what to watch for.
+  - It never claims 纳甲, 六亲, 世应 or 用神, which the app doesn't compute.
+  - A check catches a reading that names another hexagram, quotes another's text, or names a 干支 the cast doesn't
+    have.
+  - Chinese only, since you've removed English (that part of the app comes next).
+- 算卦 is on everywhere, after 求籤 in the home order. The Geo-Rule matrix is now 0.6.0, and the glossary 1.7.0
+  (本卦, 變卦, 動爻, 卦辭, 爻辭, 老陽 …).
+- For whoever runs the server: nothing to do. The database, if on, adds the method at the next start (migration 006).
+- Verified:
+  - 34 new server tests:
+    - the coin rule, the hexagrams and numbers, and 朱熹's rule for 0–6 moving lines;
+    - the cast time's 干支, worked by hand (立春 counted by the instant, the day by the local date);
+    - the three ways to cast, with replay and a tampered cast refused;
+    - the 450 直說 checked;
+    - the reading, its checks, and the API (the layout, the picks, the refusals).
+  - A new harness gate, `npm run verify:liuyao`: 100 000 casts pass 10 of 10 statistical checks, and biased coins
+    are caught.
+  - All 483 server tests pass; harness PASS.
+
 ### v5.2.0 (2026-10-28): 起名's own compliance rules, and the Phase 3 gate record
 
 Stage S9 of the [tech plan](docs/tech-plan.md) (Phase 3 门禁). Your documents end with 「Gate 未通过不进入下一阶段」,

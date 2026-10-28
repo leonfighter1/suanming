@@ -33,6 +33,7 @@ jobs:
       - run: npm run verify:bazi
       - run: npm run verify:tarot
       - run: npm run verify:qiuqian
+      - run: npm run verify:liuyao
       # POC regression guards: astronomy-engine must stay within the 0.01° gate.
       - run: npm run poc:astrology
       - run: npm run poc:bazi-jieqi

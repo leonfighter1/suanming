@@ -34,11 +34,13 @@ import {
   qiuqianUser,
   fengshuiUser,
   namingUser,
+  liuyaoUser,
   tarotUser,
   todayLine,
   type PromptVersion,
 } from "./prompts.js";
 import { FENGSHUI_TERMS, fengshuiBrief } from "./fengshui.js";
+import { LIUYAO_TERMS, liuyaoBrief, liuyaoView } from "./liuyao.js";
 import { NAMING_TERMS, namingBrief } from "./naming.js";
 import { lotBrief, QIUQIAN_TERMS, qiuqianView } from "./qiuqian.js";
 import { spreadBrief } from "./tarot.js";
@@ -310,7 +312,8 @@ export const METHOD_RULE_GROUPS: Partial<Record<ChartSystem, string[]>> = {
 };
 
 /**
- * A tarot, 求籤, 风水 or 起名 reading's actions follow its advice section (v2.3.0, v4.3.0, v4.4.0, v4.5.0);
+ * A tarot, 求籤, 风水, 起名 or 算卦 reading's actions follow its advice section (v2.3.0, v4.3.0, v4.4.0,
+ * v4.5.0, v5.3.0);
  * the other methods act on every topic.
  */
 const ADVICE_TOPIC: Partial<Record<ChartSystem, Topic>> = {
@@ -318,6 +321,7 @@ const ADVICE_TOPIC: Partial<Record<ChartSystem, Topic>> = {
   qiuqian: "qiuqian_advice",
   fengshui: "fengshui_advice",
   naming: "naming_advice",
+  liuyao: "liuyao_advice",
 };
 
 /** Geo-Rule: the region's rules, or GeoRefusedError when the service/system isn't offered. */
@@ -347,6 +351,9 @@ export async function generateReport(
 
   if (!LOCALES.includes(opts.locale))
     throw new ReportInputError(`unsupported locale ${opts.locale}`);
+  // 算卦 is read in Chinese only: the owner removed English support (2026-10-28).
+  if (chart.system === "liuyao" && opts.locale === "en")
+    throw new ReportInputError("算卦 readings are in Chinese: zh-Hans or zh-Hant");
 
   // 1. Geo-Rule runs before any model call.
   const { matrix, region } = servedRegion(opts.country, chart.system);
@@ -368,7 +375,7 @@ export async function generateReport(
   // A region's content blocks (Indonesia, v5.1.0) reach the model in every call; empty elsewhere.
   const regionLine = contentBlockLine(region);
   // A 八字 reading reads its focused view (WP2.3), a 求籤 reading the lot without the rounds that
-  // confirmed it; the other methods' facts are small already.
+  // confirmed it, a 算卦 reading the cast without its coins; the other methods' facts are small already.
   const facts =
     chart.system === "bazi"
       ? baziView(
@@ -378,13 +385,25 @@ export async function generateReport(
         )
       : chart.system === "qiuqian"
         ? qiuqianView(modelFacts(chart))
-        : modelFacts(chart);
+        : chart.system === "liuyao"
+          ? liuyaoView(modelFacts(chart))
+          : modelFacts(chart);
   const lot = chart.system === "qiuqian" ? lotBrief(chart, opts.locale) : undefined;
   const room = chart.system === "fengshui" ? fengshuiBrief(chart, opts.locale) : undefined;
   const names = chart.system === "naming" ? namingBrief(chart, opts.locale) : undefined;
+  const cast = chart.system === "liuyao" ? liuyaoBrief(chart, opts.locale) : undefined;
   // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體, a room's
-  // principles are ids and names are names, so 求籤, 风水 and 起名 name their own.
-  const ownTerms = lot ? QIUQIAN_TERMS : room ? FENGSHUI_TERMS : names ? NAMING_TERMS : undefined;
+  // principles are ids, names are names and a cast's texts are 繁體, so 求籤, 风水, 起名 and 算卦 name
+  // their own.
+  const ownTerms = lot
+    ? QIUQIAN_TERMS
+    : room
+      ? FENGSHUI_TERMS
+      : names
+        ? NAMING_TERMS
+        : cast
+          ? LIUYAO_TERMS
+          : undefined;
   const glossary = glossaryFor(ownTerms ? ownTerms.join(" ") : JSON.stringify(facts), opts.locale);
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
   const providerFor = (agent: AgentName) => {
@@ -426,6 +445,7 @@ export async function generateReport(
       ...(lot && { lines: lot.lines.length }),
       ...(room && { principles: room.principles.length }),
       ...(names && { candidates: names.candidates.length }),
+      ...(cast && { texts: cast.focus.length }),
     },
     maxRetries,
     enforce,
@@ -447,6 +467,7 @@ export async function generateReport(
       if (lot) return qiuqianUser({ ...common, lot, question: opts.question });
       if (room) return fengshuiUser({ ...common, room, description: opts.question });
       if (names) return namingUser({ ...common, names });
+      if (cast) return liuyaoUser({ ...common, cast, question: opts.question });
       return narrativeUser({
         ...common,
         system: chart.system,

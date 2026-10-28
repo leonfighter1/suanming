@@ -90,6 +90,16 @@ function hexText(id: string): HexText {
   return texts.find((h) => h.id === id)!;
 }
 
+/**
+ * A hexagram's 周易 text as the data holds it, for 算卦 (src/engines/liuyao, v5.3.0), which reads this one
+ * source: its King Wen number (the data's order), 卦名, 卦辭, and 爻辭 初 to 上, with 用九 / 用六 as a
+ * seventh for 乾 and 坤. Read-only: the 一生运势 facts above are unchanged by it.
+ */
+export function zhouyiText(id: string) {
+  const tx = hexText(id);
+  return { number: texts!.indexOf(tx) + 1, name: tx.name, gua_ci: tx.gua_ci, yao_ci: tx.yao_ci };
+}
+
 export interface Hexagram {
   /** Six lines bottom first */
   id: string;

@@ -1,0 +1,197 @@
+{
+  "chart_id": "56565656-5656-4565-8565-565656565656",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "liuyao",
+      "version": "0.1.0+lunar-javascript.1.7.7"
+    },
+    "system": "liuyao",
+    "input_digest": "hmac-sha256:af9dc7ff29a88e50d89e05dc0aac4bf0e9546431f9051930595e16434a3d238e",
+    "rule_versions": {
+      "zhouyi": "data/yijing@1",
+      "rng": "hmac-sha256-drbg/v1"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "mode": "auto",
+      "cast": {
+        "local": "2026-10-25T08:00",
+        "timezone": "Asia/Hong_Kong",
+        "utc": "2026-10-25T00:00:00.000Z",
+        "ganzhi": {
+          "year": "丙午",
+          "month": "戊戌",
+          "day": "壬申",
+          "hour": "甲辰"
+        }
+      },
+      "tosses": [
+        {
+          "coins": [
+            "bei",
+            "zi",
+            "zi"
+          ],
+          "value": 7
+        },
+        {
+          "coins": [
+            "zi",
+            "zi",
+            "zi"
+          ],
+          "value": 6
+        },
+        {
+          "coins": [
+            "bei",
+            "zi",
+            "zi"
+          ],
+          "value": 7
+        },
+        {
+          "coins": [
+            "bei",
+            "zi",
+            "zi"
+          ],
+          "value": 7
+        },
+        {
+          "coins": [
+            "zi",
+            "zi",
+            "bei"
+          ],
+          "value": 7
+        },
+        {
+          "coins": [
+            "bei",
+            "zi",
+            "zi"
+          ],
+          "value": 7
+        }
+      ],
+      "lines": [
+        {
+          "position": 1,
+          "value": 7,
+          "yang": true,
+          "moving": false
+        },
+        {
+          "position": 2,
+          "value": 6,
+          "yang": false,
+          "moving": true
+        },
+        {
+          "position": 3,
+          "value": 7,
+          "yang": true,
+          "moving": false
+        },
+        {
+          "position": 4,
+          "value": 7,
+          "yang": true,
+          "moving": false
+        },
+        {
+          "position": 5,
+          "value": 7,
+          "yang": true,
+          "moving": false
+        },
+        {
+          "position": 6,
+          "value": 7,
+          "yang": true,
+          "moving": false
+        }
+      ],
+      "primary": {
+        "id": "101111",
+        "number": 13,
+        "name": {
+          "zh-Hant": "同人",
+          "zh-Hans": "同人"
+        },
+        "full_name": {
+          "zh-Hant": "天火同人",
+          "zh-Hans": "天火同人"
+        },
+        "upper": "111",
+        "lower": "101",
+        "gua_ci": {
+          "zh-Hant": "同人於野，亨。利涉大川，利君子貞。",
+          "zh-Hans": "同人于野，亨。利涉大川，利君子贞。"
+        }
+      },
+      "changed": {
+        "id": "111111",
+        "number": 1,
+        "name": {
+          "zh-Hant": "乾",
+          "zh-Hans": "乾"
+        },
+        "full_name": {
+          "zh-Hant": "乾為天",
+          "zh-Hans": "乾为天"
+        },
+        "upper": "111",
+        "lower": "111",
+        "gua_ci": {
+          "zh-Hant": "乾：元亨，利貞。",
+          "zh-Hans": "乾：元亨，利贞。"
+        }
+      },
+      "focus": {
+        "moving": 1,
+        "texts": [
+          {
+            "hexagram": "primary",
+            "line": 2,
+            "role": "main",
+            "text": {
+              "zh-Hant": "六二：同人於宗，吝。",
+              "zh-Hans": "六二：同人于宗，吝。"
+            }
+          }
+        ]
+      },
+      "audit": {
+        "draw_id": "78787878-7878-4878-8878-787878787878",
+        "cast_at": "2026-10-25T00:00:00.000Z",
+        "rng": "hmac-sha256-drbg/v1",
+        "result_digest": "sha256:0a8446cdb6bf99bf9fff5f91fbf57c818e346716856fe72c7a2070b292e19adb"
+      }
+    },
+    "provenance": [
+      {
+        "path": "/tosses",
+        "source_level": "common_consensus",
+        "note": "金錢卦：背三字二，一背為單（少陽）、二背為拆（少陰）、三背為重（老陽）、三字為交（老陰）"
+      },
+      {
+        "path": "/primary/gua_ci",
+        "source_level": "traditional_text",
+        "note": "周易通行本（data/yijing/hexagrams.json）"
+      },
+      {
+        "path": "/focus",
+        "source_level": "common_consensus",
+        "note": "朱熹《易學啟蒙·考變占》：依動爻多少取本卦、之卦之辭"
+      },
+      {
+        "path": "/cast/ganzhi",
+        "source_level": "derived",
+        "note": "年以立春、月以節氣（東八區），日時以當地時間；子時以晚子時為當日"
+      }
+    ]
+  }
+}

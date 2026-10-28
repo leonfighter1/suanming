@@ -46,8 +46,15 @@
 42. When a feature ships behind a switch the owner will flip, no test may pin the switch's shipped value: test both states with an explicit override, assert the gate as an invariant (on => reviewed), and make every on-screen trace of the gate follow its flag. Try the documented steps once, run the tests, then undo them.
 43. A findsNothing needs a positive anchor: first find the neighbour the missing widget would sit beside, and pair it with a test that finds the widget there when it should exist. Never use off-screen or scrolled-past as evidence of absence (lists cache children).
 44. Before stating how something behaves at runtime (no restart, hot update), grep every reader of it and test it the way the owner meets it: a server started before the change. A fresh process per test proves nothing about a running one.
+45. To change a hand-formatted JSON file (schemas, configs, the matrix), insert or replace text with Edit; never round-trip it through JSON.stringify. Check git diff --stat right after: a change much larger than intended means the file was reformatted.
 
 ## Log
+
+### 2026-10-28: Rewrote a formatted JSON file through JSON.stringify
+- **Symptom:** Adding liuyao to schemas/chart-fact.v0.1.schema.json turned a 180-line change into 1,186 changed lines; the same happened to .harness.json
+- **Root cause:** JSON.parse + JSON.stringify(…, 2) expands every compact object and array, and prettier keeps objects expanded once they are, so the whole file is reformatted
+- **Fix:** Restored both from git and inserted the new parts as text (Edit, or a string insert); checked git diff --stat before going on
+- **Rule:** To change a hand-formatted JSON file (schemas, configs, the matrix), insert or replace text with Edit; never round-trip it through JSON.stringify. Check git diff --stat right after: a change much larger than intended means the file was reformatted. (Rule 45)
 
 ### 2026-10-28: Documented 'no restart needed' from one code path
 - **Symptom:** docs/web-test.md (v4.5.0/v5.0.0) told the owner a matrix change needs no restart; the API server (assertServed, /v1/methods, health) and AuthService sign-up loaded the matrix once at start, so switching 起名 on would have kept answering 451 until a restart

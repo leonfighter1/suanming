@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-10-28T18:32:09.354Z",
+  "casts": 100000,
+  "checks": [
+    {
+      "name": "each coin falls 背 half the time",
+      "statistic": 1.33,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "50.05 %"
+    },
+    {
+      "name": "the coins of a toss fall independently",
+      "statistic": 0.31,
+      "critical": 11.16,
+      "pass": true
+    },
+    {
+      "name": "lines are 老陰 1/8, 少陽 3/8, 少陰 3/8, 老陽 1/8",
+      "statistic": 3.36,
+      "critical": 16.55,
+      "pass": true,
+      "detail": "74553 / 225199 / 225052 / 75196"
+    },
+    {
+      "name": "a line doesn't depend on its position",
+      "statistic": 8.5,
+      "critical": 37.84,
+      "pass": true
+    },
+    {
+      "name": "each line is independent of the one below",
+      "statistic": 5.27,
+      "critical": 28.06,
+      "pass": true
+    },
+    {
+      "name": "the 64 hexagrams are uniform",
+      "statistic": 54.61,
+      "critical": 103.51,
+      "pass": true
+    },
+    {
+      "name": "moving lines per cast are Binomial(6, ¼)",
+      "statistic": 16.77,
+      "critical": 22.67,
+      "pass": true,
+      "detail": "mean 1.497 (expected 1.5)"
+    },
+    {
+      "name": "each laid-out coin is 背 half the time",
+      "statistic": 0.37,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "49.99 %"
+    },
+    {
+      "name": "a laid-out coin doesn't depend on its place",
+      "statistic": 22.38,
+      "critical": 49.84,
+      "pass": true
+    },
+    {
+      "name": "a picked line is 1/8, 3/8, 3/8, 1/8",
+      "statistic": 4.95,
+      "critical": 16.55,
+      "pass": true
+    }
+  ],
+  "pass": true,
+  "seconds": 8
+}

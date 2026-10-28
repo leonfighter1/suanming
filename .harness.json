@@ -9,6 +9,7 @@
     { "name": "verify bazi (7000 vs oracle)", "run": "npm run verify:bazi" },
     { "name": "verify tarot (100k draws)", "run": "npm run verify:tarot" },
     { "name": "verify qiuqian (100k draws)", "run": "npm run verify:qiuqian" },
+    { "name": "verify liuyao (100k casts)", "run": "npm run verify:liuyao" },
     {
       "name": "app (pub get, analyze, test, build web)",
       "run": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\AgentSkills\\harness-check\\scripts\\check.ps1 -Project app -Build web"

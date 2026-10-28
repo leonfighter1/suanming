@@ -1,6 +1,6 @@
 # 八字 / 塔羅 / 求籤 technical verification (2026-10-26; 求籤 2026-10-28)
 
-Reproduce: `npm run verify:bazi`, `npm run verify:tarot`, `npm run verify:qiuqian`, `npm run eval:ai -- --live`.
+Reproduce: `npm run verify:bazi`, `npm run verify:tarot`, `npm run verify:qiuqian`, `npm run verify:liuyao`, `npm run eval:ai -- --live`.
 The first three are harness and CI gates.
 
 ## 八字: engine vs an independent oracle
@@ -51,6 +51,19 @@ Reproduce: `npm run verify:qiuqian` (a harness and CI gate).
   - the second stick is independent of the first, and consecutive draws are independent.
 - **Non-vacuity:** a block that always lands flat, a lot that comes one draw in 25, and a first throw that always
   confirms are each caught.
+
+## 算卦 (v5.3.0)
+
+Reproduce: `npm run verify:liuyao` (a harness and CI gate).
+
+- **The coins**, 100 000 casts at α = 0.001, pass 10 of 10 checks (`liuyao-results.json`):
+  - each coin falls 背 half the time, and the coins of a toss fall independently;
+  - lines are 老陰 1/8, 少陽 3/8, 少陰 3/8, 老陽 1/8, whatever their position, each independent of the one below;
+  - the 64 hexagrams are uniform, and the moving lines per cast are Binomial(6, ¼), mean 1.5;
+  - a pick layout's coins are 背 half the time, whatever their place, and a picked line is fair.
+- **Non-vacuity:** a coin in ten turned to 背, a 上爻 that copies the 初爻, and a first laid-out coin always 字 are
+  each caught.
+- **The cast time's 干支** is worked by hand in `test/liuyao.test.ts`, 立春 included.
 
 ## AI faithfulness (DeepSeek `deepseek-v4-pro`, live)
 

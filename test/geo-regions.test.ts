@@ -108,11 +108,11 @@ describe("the five regions of Phase 3 §2.4", () => {
         return out;
       });
       expect(orders).toEqual({
-        ID: ["bazi", "tarot", "qiuqian", "fengshui", "astrology"],
-        MY: ["fengshui", "bazi", "tarot", "qiuqian", "astrology"],
-        SG: ["bazi", "tarot", "qiuqian", "fengshui", "astrology"],
-        TW: ["qiuqian", "bazi", "tarot", "fengshui", "astrology"],
-        HK: ["qiuqian", "bazi", "tarot", "fengshui", "astrology"],
+        ID: ["bazi", "tarot", "qiuqian", "liuyao", "fengshui", "astrology"],
+        MY: ["fengshui", "bazi", "tarot", "qiuqian", "liuyao", "astrology"],
+        SG: ["bazi", "tarot", "qiuqian", "liuyao", "fengshui", "astrology"],
+        TW: ["qiuqian", "bazi", "tarot", "liuyao", "fengshui", "astrology"],
+        HK: ["qiuqian", "bazi", "tarot", "liuyao", "fengshui", "astrology"],
       });
     } finally {
       await new Promise<void>((r) => api.close(() => r()));

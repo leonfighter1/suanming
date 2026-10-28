@@ -6,6 +6,12 @@ import type { ChartFact } from "../chart-fact/index.js";
 import { computeAstrology } from "../engines/astrology/index.js";
 import { computeBazi, type InputBasis } from "../engines/bazi/index.js";
 import { computeFengshui } from "../engines/fengshui/index.js";
+import {
+  computeLiuyao,
+  LiuyaoInputError,
+  type CastMode,
+  type ManualLine,
+} from "../engines/liuyao/index.js";
 import { computeNaming } from "../engines/naming/index.js";
 import { FACINGS, ROOM_IDS, type Facing, type RoomId } from "../engines/fengshui/principles.js";
 import { computeQiuqian } from "../engines/qiuqian/index.js";
@@ -33,7 +39,18 @@ export type ChartRequest =
   | { system: "tarot"; spread: SpreadId; draw_id?: string; ritual?: TarotRitual }
   | { system: "astrology"; local: string; timezone: string; latitude: number; longitude: number }
   | { system: "qiuqian"; lot_set?: LotSetId; draw_id?: string }
-  | { system: "fengshui"; room: RoomId; facing?: Facing };
+  | { system: "fengshui"; room: RoomId; facing?: Facing }
+  | {
+      system: "liuyao";
+      mode: CastMode;
+      timezone: string;
+      /** pick: the layout's id (POST /v1/liuyao/layouts) and the 18 coins picked, in order */
+      draw_id?: string;
+      picks?: number[];
+      /** manual: the time of the toss, to the minute, and the six lines, 初爻 first */
+      local?: string;
+      lines?: ManualLine[];
+    };
 
 export function str(v: unknown, name: string): string {
   if (typeof v !== "string" || !v.trim()) throw new InputError(`${name} is required`);
@@ -161,8 +178,45 @@ export function computeChart(raw: unknown, secrets: EngineSecrets, now?: () => D
     case "naming":
       // 起名 reads one of the caller's 八字 charts: the API loads it and calls computeNamingChart.
       throw new InputError("a 起名 chart needs bazi_chart_id, one of your 八字 charts");
+    case "liuyao": {
+      // 算卦 (v5.3.0): the server tosses (auto), the reader picks from coins laid out before (pick), or the
+      // reader tosses and enters the lines and the time (manual).
+      const mode = req.mode as CastMode;
+      if (!["auto", "pick", "manual"].includes(mode))
+        throw new InputError("mode must be auto | pick | manual");
+      const timezone = str(req.timezone, "timezone");
+      const run = <T>(fn: () => T): T => {
+        try {
+          return fn();
+        } catch (e) {
+          if (e instanceof LiuyaoInputError) throw new InputError(e.message);
+          throw e;
+        }
+      };
+      const engine = { ...secrets, now };
+      if (mode === "auto") return run(() => computeLiuyao({ mode, timezone }, engine));
+      if (mode === "pick") {
+        const drawId = req.draw_id;
+        if (typeof drawId !== "string" || !UUID_RE.test(drawId))
+          throw new InputError("draw_id must be the UUID of a layout (POST /v1/liuyao/layouts)");
+        if (!Array.isArray(req.picks)) throw new InputError("picks must be an array");
+        return run(() =>
+          computeLiuyao({ mode, timezone, draw_id: drawId, picks: req.picks as number[] }, engine),
+        );
+      }
+      const local = str(req.local, "local");
+      if (!Array.isArray(req.lines)) throw new InputError("lines must be an array of six lines");
+      const lines = (req.lines as unknown[]).map((l) => {
+        if (!l || typeof l !== "object")
+          throw new InputError("each line is { coins } or { value }");
+        return l as ManualLine;
+      });
+      return run(() => computeLiuyao({ mode, timezone, local, lines }, engine));
+    }
     default:
-      throw new InputError("system must be bazi | tarot | astrology | qiuqian | fengshui | naming");
+      throw new InputError(
+        "system must be bazi | tarot | astrology | qiuqian | fengshui | naming | liuyao",
+      );
   }
 }
 

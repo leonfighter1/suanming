@@ -7,6 +7,7 @@
  *   app/assets/i18n/qiuqian_lots.json ← data/qiuqian (求籤's lot set, v4.3.0)
  *   app/assets/i18n/fengshui.json   ← src/engines/fengshui/principles.ts (风水's rooms, v4.4.0)
  *   app/assets/i18n/naming_chars.json ← src/engines/naming/characters.ts (起名's draft 字义库, v4.5.0)
+ *   app/assets/i18n/liuyao_plain.json ← data/liuyao/plain.json (算卦's 直說, v5.3.0)
  *   app/test/fixtures/*.json        ← real engine + pipeline (mock provider) outputs
  * test/app-assets.test.ts fails when these are stale. Run: npm run sync:app
  * (this module only builds; scripts/sync-app-assets.ts writes).
@@ -52,6 +53,7 @@ import { KEYWORDS } from "../src/engines/tarot/keywords.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeFengshui, PRINCIPLES_VERSION } from "../src/engines/fengshui/index.js";
 import { DIRECTIONS, FACINGS, ROOM_IDS, ROOMS } from "../src/engines/fengshui/principles.js";
+import { computeLiuyao } from "../src/engines/liuyao/index.js";
 import { NAME_CHARS } from "../src/engines/naming/characters.js";
 import { computeNaming, LIBRARY } from "../src/engines/naming/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
@@ -235,6 +237,32 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     report: namingReport,
   });
 
+  // 算卦: a cast the server tossed, and its reading (v5.3.0).
+  const liuyao = computeLiuyao(
+    { mode: "auto", timezone: "Asia/Hong_Kong" },
+    { ...secrets, now, newDrawId: () => "78787878-7878-4878-8878-787878787878" },
+  );
+  const liuyaoReport = await generateReport(
+    liuyao,
+    { locale: "zh-Hant", country: "HK", question: "要不要換工作？" },
+    {
+      providers: { deepseek: mock, anthropic: mock },
+      now,
+      newId: () => "67676767-6767-4676-8676-676767676767",
+    },
+  );
+  const liuyaoView = publicReport({
+    id: liuyaoReport.report_id,
+    owner: "fixture",
+    chart_id: "56565656-5656-4565-8565-565656565656", // chart_liuyao.json, the cast it reads
+    status: liuyaoReport.status,
+    locale: liuyaoReport.locale,
+    topics: liuyaoReport.topics,
+    created_at: ts,
+    updated_at: ts,
+    report: liuyaoReport,
+  });
+
   const remedy = await generateRemedy(
     bazi,
     report,
@@ -378,6 +406,15 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
         meaning: c.meaning,
       })),
     },
+    // 算卦's 直說 (v5.3.0), for the hexagram card.
+    "app/assets/i18n/liuyao_plain.json": JSON.parse(
+      readFileSync(at("data/liuyao/plain.json"), "utf8"),
+    ),
+    "app/test/fixtures/chart_liuyao.json": {
+      chart_id: "56565656-5656-4565-8565-565656565656",
+      chart_fact: liuyao,
+    },
+    "app/test/fixtures/report_liuyao_passed.json": liuyaoView,
     "app/test/fixtures/chart_naming.json": {
       chart_id: "34343434-3434-4434-8434-343434343434",
       chart_fact: naming,

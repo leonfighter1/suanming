@@ -28,7 +28,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui", "naming"]
+          "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui", "naming", "liuyao"]
         },
         "version": {
           "description": "Engine semver, including upstream library pin, e.g. 0.1.0+lunar-javascript.1.7.7",
@@ -39,7 +39,7 @@
     },
     "system": {
       "type": "string",
-      "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui", "naming"]
+      "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui", "naming", "liuyao"]
     },
     "input_digest": {
       "description": "Keyed digest (HMAC-SHA256) of canonical input + engine version + rule versions. See src/chart-fact/digest.ts.",
@@ -92,6 +92,10 @@
     {
       "if": { "properties": { "system": { "const": "naming" } } },
       "then": { "properties": { "facts": { "$ref": "#/$defs/naming_facts" } } }
+    },
+    {
+      "if": { "properties": { "system": { "const": "liuyao" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/liuyao_facts" } } }
     }
   ],
   "$defs": {
@@ -834,6 +838,178 @@
                 ]
               }
             }
+          }
+        }
+      }
+    },
+    "liuyao_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zh-Hant", "zh-Hans"],
+      "properties": {
+        "zh-Hant": { "type": "string", "minLength": 1 },
+        "zh-Hans": { "type": "string", "minLength": 1 }
+      }
+    },
+    "liuyao_hexagram": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "number", "name", "full_name", "upper", "lower", "gua_ci"],
+      "properties": {
+        "id": {
+          "description": "Six lines, 初爻 first, 1 = yang.",
+          "type": "string",
+          "pattern": "^[01]{6}$"
+        },
+        "number": {
+          "description": "King Wen number.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "name": { "$ref": "#/$defs/liuyao_text" },
+        "full_name": { "$ref": "#/$defs/liuyao_text" },
+        "upper": { "type": "string", "pattern": "^[01]{3}$" },
+        "lower": { "type": "string", "pattern": "^[01]{3}$" },
+        "gua_ci": { "$ref": "#/$defs/liuyao_text" }
+      }
+    },
+    "liuyao_ganzhi": {
+      "type": "string",
+      "pattern": "^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$"
+    },
+    "liuyao_facts": {
+      "description": "算卦 (since v5.3.0): 六爻 by three coins (金錢卦: 背 3, 字 2), cast by the server (auto), picked by the reader from coins laid out before the picking (pick), or tossed by the reader, with the time of the toss (manual). Lines are 初爻 first.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "cast", "tosses", "lines", "primary", "focus"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["auto", "pick", "manual"] },
+        "cast": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["local", "timezone", "utc", "ganzhi"],
+          "properties": {
+            "local": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$" },
+            "timezone": { "type": "string", "minLength": 1 },
+            "utc": { "type": "string", "format": "date-time" },
+            "ganzhi": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["year", "month", "day", "hour"],
+              "properties": {
+                "year": { "$ref": "#/$defs/liuyao_ganzhi" },
+                "month": { "$ref": "#/$defs/liuyao_ganzhi" },
+                "day": { "$ref": "#/$defs/liuyao_ganzhi" },
+                "hour": { "$ref": "#/$defs/liuyao_ganzhi" }
+              }
+            }
+          }
+        },
+        "tosses": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["coins", "value"],
+            "properties": {
+              "coins": {
+                "description": "The three coins; null when the reader entered the line itself.",
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": { "type": "string", "enum": ["zi", "bei"] }
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "value": { "type": "integer", "enum": [6, 7, 8, 9] }
+            }
+          }
+        },
+        "lines": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["position", "value", "yang", "moving"],
+            "properties": {
+              "position": { "type": "integer", "minimum": 1, "maximum": 6 },
+              "value": { "type": "integer", "enum": [6, 7, 8, 9] },
+              "yang": { "type": "boolean" },
+              "moving": { "type": "boolean" }
+            }
+          }
+        },
+        "primary": { "$ref": "#/$defs/liuyao_hexagram" },
+        "changed": { "$ref": "#/$defs/liuyao_hexagram" },
+        "focus": {
+          "description": "The texts the cast is read by, after 朱熹《易學啟蒙·考變占》.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["moving", "texts"],
+          "properties": {
+            "moving": { "type": "integer", "minimum": 0, "maximum": 6 },
+            "texts": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["hexagram", "role", "text"],
+                "properties": {
+                  "hexagram": { "type": "string", "enum": ["primary", "changed"] },
+                  "line": {
+                    "description": "1–6 a line, 7 用九 / 用六; absent: the 卦辭.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 7
+                  },
+                  "role": { "type": "string", "enum": ["main", "also"] },
+                  "text": { "$ref": "#/$defs/liuyao_text" }
+                }
+              }
+            }
+          }
+        },
+        "pick": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["size", "picks", "layout", "commitment"],
+          "properties": {
+            "size": { "type": "integer", "const": 24 },
+            "picks": {
+              "type": "array",
+              "minItems": 18,
+              "maxItems": 18,
+              "uniqueItems": true,
+              "items": { "type": "integer", "minimum": 0, "maximum": 23 }
+            },
+            "layout": {
+              "type": "array",
+              "minItems": 24,
+              "maxItems": 24,
+              "items": { "type": "string", "enum": ["zi", "bei"] }
+            },
+            "commitment": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["draw_id", "cast_at", "rng", "result_digest"],
+          "properties": {
+            "draw_id": { "type": "string", "format": "uuid" },
+            "cast_at": { "type": "string", "format": "date-time" },
+            "rng": { "type": "string", "enum": ["hmac-sha256-drbg/v1"] },
+            "result_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
           }
         }
       }

@@ -2,6 +2,29 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (af): S10 算卦, the server half; the owner's updates planned (S11); release v5.3.0
+
+- **Owner request: 算卦** (the coins cast automatically, half-automatically by picking from coins laid out before, or by the reader with the exact time and a reminder first; the 八卦, the texts at once or an AI reading; 「卦辞都是直抒胸臆，不用绕」). 六爻 had been parked in S6 as not in the owner's document; now it is their own request.
+- G4 before building: the coin rule checked against 漢典「單錢」 (二面一背 = 少陽, so 背 3, 字 2). lunar-javascript's 干支 probed against hand counts from 2000-01-01 (戊午).
+- WP10.1:
+  - the engine (`src/engines/liuyao`): auto (DRBG), pick (24 coins committed before 18 picks), manual (lines or coins, time required);
+  - the 干支 by the 八字 clock policy; 朱熹's focus rule; `verifyCast`;
+  - schema, migration 006, API (`POST /v1/liuyao/layouts`), matrix 0.6.0;
+  - `npm run verify:liuyao` as a harness and CI gate (10 checks, non-vacuity tested).
+- WP10.2: 450 直說 in 繁體 (scripts/liuyao-plain), 简体 by `npm run build:liuyao`; checked against data/yijing (ids, 用九/用六), the global rules and length.
+- WP10.3:
+  - `narrative_liuyao@1` / `action_liuyao@1` (pinned), with 直抒胸臆 written into them;
+  - the brief, AI label, facts layer, glossary 1.7.0;
+  - faithfulness: wrong_hexagram, misquoted_text, and the cast's 干支 (rule 29);
+  - Chinese only.
+- **Owner, mid-task:** the tarot spread icons the same size with the name below, English removed, and the admin located in Beijing. Planned as S11 (v5.4.0), before 算卦's app pages so those are built without English. The English 直說 already written was dropped.
+- Slips:
+  - JSON.stringify reformatted the schema and .harness.json (rule 45);
+  - backslashes in a heredoc broke an OpenAPI pattern (global rule 1 again, caught by validate:openapi);
+  - a three-card mock narrative with one paragraph retried into clean text (the tests now give one paragraph per card);
+  - the mock didn't cite 算卦's paths.
+- v5.3.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (ae): S9 Phase 3 门禁; release v5.2.0
 
 - The owner's documents end with 「Gate 未通过不进入下一阶段」. So nothing of Phase 4 starts before Phase 3's gate passes.

@@ -9,7 +9,8 @@ export const SOURCE_LEVELS = [
 ] as const;
 export type SourceLevel = (typeof SOURCE_LEVELS)[number];
 
-export type ChartSystem = "bazi" | "tarot" | "astrology" | "qiuqian" | "fengshui" | "naming";
+export type ChartSystem =
+  "bazi" | "tarot" | "astrology" | "qiuqian" | "fengshui" | "naming" | "liuyao";
 
 export interface Provenance {
   /** JSON Pointer into `facts` */

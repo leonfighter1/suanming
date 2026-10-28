@@ -147,12 +147,12 @@ describe("the entry order (WP6.2)", () => {
       .filter((s) => s !== "naming");
 
   it("puts 求籤 first in Taiwan and Hong Kong, and keeps the default order elsewhere", () => {
-    // TW, HK: qiuqian 1.5 > bazi 1.2 > tarot 1 = fengshui 1 = astrology 1 (ties keep bazi, tarot,
-    // qiuqian, fengshui, astrology).
-    expect(order("TW")).toEqual(["qiuqian", "bazi", "tarot", "fengshui", "astrology"]);
-    expect(order("HK")).toEqual(["qiuqian", "bazi", "tarot", "fengshui", "astrology"]);
+    // TW, HK: qiuqian 1.5 > bazi 1.2 > tarot 1 = liuyao 1 = fengshui 1 = astrology 1 (ties keep bazi,
+    // tarot, qiuqian, liuyao, fengshui, astrology; 算卦 since v5.3.0).
+    expect(order("TW")).toEqual(["qiuqian", "bazi", "tarot", "liuyao", "fengshui", "astrology"]);
+    expect(order("HK")).toEqual(["qiuqian", "bazi", "tarot", "liuyao", "fengshui", "astrology"]);
     // SG: every weight 1, so the default order.
-    expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "fengshui", "astrology"]);
+    expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "liuyao", "fengshui", "astrology"]);
   });
 });
 

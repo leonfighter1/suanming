@@ -38,6 +38,7 @@ import {
   lunarToSolar,
   shichenOptions,
 } from "../engines/bazi/index.js";
+import { newLayout } from "../engines/liuyao/index.js";
 import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
@@ -170,6 +171,16 @@ export function chartSummary(fact: ChartFact) {
       system: "naming",
       surname,
       ...(first && { first: first.given }),
+    };
+  }
+  if (fact.system === "liuyao") {
+    type Hex = { id: string; full_name: { "zh-Hant": string; "zh-Hans": string } };
+    const changed = f.changed as Hex | undefined;
+    return {
+      system: "liuyao",
+      mode: f.mode as string,
+      primary: (f.primary as Hex).full_name,
+      ...(changed && { changed: changed.full_name }),
     };
   }
   return { system: fact.system };
@@ -1000,6 +1011,14 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         matrix_version: matrix.matrix_version,
         methods: methodsFor(resolveRegion(matrix, c.country)!),
       });
+    }
+
+    // 算卦 (v5.3.0): coins laid out face down for a pick cast. The coins stay on the server (they follow
+    // from the draw key and the id); the reader gets the id and the commitment, then posts the 18 coins
+    // picked, in order, as a liuyao chart.
+    if (path === "/v1/liuyao/layouts" && req.method === "POST") {
+      assertServed(c.country, "liuyao");
+      return send(res, 201, newLayout(opts.secrets.drawKey));
     }
 
     // ---- account ----

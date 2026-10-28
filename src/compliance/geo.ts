@@ -48,7 +48,7 @@ export function contentBlockLine(region: Pick<RegionRule, "content_blocks">): st
 }
 
 /** Ties in entry weight keep this order. */
-const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "fengshui", "naming", "astrology"];
+const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "liuyao", "fengshui", "naming", "astrology"];
 
 /**
  * The methods a region offers, heaviest entry weight first (Phase 3 §2.4: 擲筊 / 求签 first in Taiwan and

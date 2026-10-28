@@ -36,6 +36,8 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress |
 | S8 地区精细化              | Indonesia's blocks, the five-region test, languages kept    | medium | v5.1.0            | done        |
 | S9 Phase 3 门禁            | 起名's own rule group; the Phase 3 gate record              | medium | v5.2.0            | done        |
+| S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | in progress |
+| S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | planned     |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -935,6 +937,162 @@ As built (v5.2.0):
   - `test/glossary.test.ts`: every term in three languages, keyed by its 简体 form.
 - With this, nothing in the owner's Phase 3 can go further without the owner. Phase 4 waits for the gate.
 
+## S10 算卦 (big → v6.0.0)
+
+**Owner request (2026-10-28):**
+
+> 添加算卦功能，对应自动撒钱币正反面，可以自己撒完自己填写，也可以自动填写。如果是自己填写撒卦，还需要自己填写精确时间，并且撒卦前提醒用户。也可以半自动撒卦，提前随机摆放好，然后让用户自己挑，等用户一个个选的时候记录顺序。也可以全自动。如果是自己填写的，需要提交；可以出八卦阴阳和各种词，可以预先对应卦辞，也可以等待更精准的AI卜卦。要求卦辞都是直抒胸臆，不用绕。
+
+So 六爻 by coins (金錢卦), which S6 had parked as "not in the owner's document", is now the owner's own request. It is
+its own method, `liuyao` (rule 8). It reads the 周易 text from `data/yijing/hexagrams.json`, the one source the
+一生运势 report already reads (rule 4), and changes nothing of that report.
+
+### WP10.1 The engine, the three ways to cast, and the API
+
+- **The coins** (金錢卦, the classical rule): three coins per line, six tosses, the first toss the 初爻.
+  - 背 counts 3 and 字 counts 2, so one 背 is 少陽 (7), two 背 少陰 (8), three 背 老陽 (9, moving ○) and three 字 老陰
+    (6, moving ×).
+  - Reference: 漢典「單錢」: 「擲三錢而成二面一背，象徵少陽之爻」.
+  - Each coin falls either way with chance ½, so a line is 老陰 1/8, 少陽 3/8, 少陰 3/8, 老陽 1/8.
+- **Three ways to cast**, as the owner asks:
+  - `auto`: the server tosses. Like 求籤, all 18 coins come from HMAC-DRBG on the cast's own seed
+    (HMAC(drawKey, "liuyao-seed/v1:" + draw id)), so the cast replays.
+  - `pick` (半自動): 24 coins are laid out face down _before_ the reader chooses.
+    - `POST /v1/liuyao/layouts` returns a draw id, the size and a commitment. The commitment is the SHA-256 of the
+      layout, which comes from HMAC(drawKey, "liuyao-layout/v1:" + draw id).
+    - The reader picks 18, one at a time, and the app keeps the order. Picks 1–3 make the 初爻, and so on up to
+      16–18 for the 上爻.
+    - The server rebuilds the layout from the draw id. The chart keeps the layout, the commitment and the picks, so
+      anyone with the key can check that the coins were set out before the picking.
+  - `manual`: the reader tosses real coins and enters each line, either three coins (字 / 背) or the line itself
+    (6–9, for readers who count the faces another way).
+    - The **cast time is required**: the local date and time, to the minute, and the time zone. A time that
+      doesn't exist (a DST gap) or lies in the future is refused.
+- **The cast time** gives the 年月日時 干支, with the year from 立春, the month from its 節 and the hour from the
+  wall clock (子時 as the 八字 engine counts it). `auto` and `pick` use the server's time in the reader's zone.
+- **The hexagrams:**
+  - 本卦 from the six lines;
+  - 變卦 with the moving lines turned, when any move;
+  - 上卦 and 下卦 (八卦) with their images;
+  - the King Wen number.
+- **Which texts the reading rests on**, by 朱熹《易學啟蒙·考變占》, the common rule:
+
+  | Moving lines | The texts read                                      |
+  | ------------ | --------------------------------------------------- |
+  | 0            | 本卦 卦辭                                           |
+  | 1            | that line's 爻辭                                    |
+  | 2            | both lines' 爻辭, the upper one first               |
+  | 3            | 本卦 and 變卦 卦辭, 本卦 first                      |
+  | 4            | the 變卦's two still lines, the lower one first     |
+  | 5            | the 變卦's one still line                           |
+  | 6            | 乾 用九, 坤 用六; any other hexagram: the 變卦 卦辭 |
+
+- **Facts** (ChartFact `system: "liuyao"`, additive):
+  - `{ mode, cast: { local, timezone, utc, ganzhi }, tosses, lines, primary, changed?, focus, pick?, audit? }`;
+  - provenance: the texts are `traditional_text` (周易 通行本), and the coin rule and the focus rule are
+    `common_consensus`.
+- **API:**
+  - `POST /v1/charts {system: "liuyao", mode, …}`;
+  - `POST /v1/liuyao/layouts`;
+  - migration 006 and OpenAPI;
+  - the geo matrix offers `liuyao` by default.
+- **Statistics:** `npm run verify:liuyao` (a harness gate, like 求籤). It covers 100 000 casts: the coins are fair,
+  the lines come at 1/8 : 3/8 : 3/8 : 1/8, the hexagrams are uniform, and the layouts are fair. There is a
+  non-vacuity test.
+
+### WP10.2 直說: plain words for every hexagram and line
+
+- The owner: 「卦辞都是直抒胸臆，不用绕」. Each of the 64 hexagrams, each of the 384 lines, and 用九 and 用六 gets
+  one or two plain sentences that say straight out what it means for the reader.
+  - Written by hand in 繁體 and English. 简体 comes from OpenCC in the build script, with 乾 kept (G18). The server
+    never loads OpenCC (rule 36).
+  - Tendency, never fate: no 注定 or 一定會, and no promises about money or health.
+  - They follow the common readings (程頤, 朱熹), so their level is `common_consensus`.
+- They are shown beside the original texts at once, with no AI and no waiting, as the owner asks (「可以预先对应
+  卦辞」).
+- Tests:
+  - all 450 are present in three languages;
+  - 简体 matches OpenCC;
+  - English has no Chinese;
+  - none matches the global rules.
+
+### WP10.3 The AI reading
+
+- Its own prompts, `narrative_liuyao@1` and `action_liuyao@1`, and no plan. Sections:
+  - 卦象 (`liuyao_hexagram`): the hexagrams and the moving lines, in plain words;
+  - 所問之事 (`liuyao_answer`): the answer to the question, said in the first sentence (go ahead, wait, or change
+    course), then why;
+  - 建議 (`liuyao_advice`).
+- The style, the owner's words: 直抒胸臆, 不用繞. There is no hedging filler and no unexplained jargon. It is still
+  tendency language, never a fixed fate.
+- The brief: the hexagrams, the lines, the focus texts with their 直說, and the cast's 干支, in the reader's script.
+- Faithfulness: a quoted text must be one of the cast's own, and a hexagram name must be one of its two.
+- Its own AI label and facts layer.
+
+### WP10.4 The app
+
+- A 「算卦」 entry. The page offers the question, then the three ways to cast.
+- **Before casting, a reminder**: be calm, ask one thing, and don't ask it again and again. For `manual` it adds
+  how to toss (three coins together, six times, record from the bottom up) and to note the time.
+- Each way to cast:
+  - `auto`: the six tosses are shown one at a time, with a skip;
+  - `pick`: 24 face-down coins. Each pick gets its number, the picks can be started over, and after 18 the cast
+    turns them over in order;
+  - `manual`: the time is required, then six rows (上爻 at the top), each with three coins or a line choice.
+- **The hexagram card:**
+  - the six lines, with the moving ones marked;
+  - 本卦 → 變卦, with their trigrams, the time and its 干支;
+  - the focus texts, each with its 直說.
+- Then the AI reading, the reading page and history (「算卦 · 天雷無妄」).
+- Keyboard access (the keyboard-access skill).
+
+### WP10.5 The 周易 text checked
+
+- `data/yijing/hexagrams.json` comes from one transcription, and 算卦 shows all 450 texts. It is compared with an
+  independent one (維基文庫 周易, fetched raw, rule 41). Disagreements are settled against a scanned print
+  (rule 39).
+- The evidence goes in `docs/verification/zhouyi.md`.
+- A correction changes the one source, so the 一生运势 report gains it too.
+
+Lessons: G4, G7, G18, rules 8, 29, 34, 36, 39, 41, 42, 43; P23 for the app.
+
+Order: WP10.1–10.3 as v5.3.0; then the owner's updates (S11) as v5.4.0, since one of them removes English and the
+app's pages are better built after it; then WP10.4–10.5, the stage summary and v6.0.0 (pushed).
+
+As built (v5.3.0):
+
+- **The owner removed English support while S10 was under way** (S11). So the 直說 are in Chinese only: 繁體 by
+  hand, 简体 by OpenCC. The English half already written was dropped, and 算卦 readings refuse `en`.
+- The cast time follows the 八字 engine's clock policy, checked by hand in the tests:
+  - 立春 counted by the instant: a New York cast on 3 Feb 2026 is 乙巳 at 13:00 and 丙午 at 17:00;
+  - the day by the local date.
+- The faithfulness check catches only what's clearly wrong, so the reader's own words in quotes pass:
+  - another hexagram's full name;
+  - a quoted phrase found only in other hexagrams' texts;
+  - a 干支 that is neither the cast's nor last, this or next year's.
+- A layout's coins never leave the server. The pick cast rebuilds them from the draw key and the id.
+- `zhouyiText` is a read-only accessor in the yijing module, so 算卦 reads the one 周易 source. The 一生运势 facts
+  are unchanged.
+
+## S11 Owner updates (medium → v5.4.0)
+
+**Owner request (2026-10-28), while S10 was under way:**
+
+> 完成之后进行一定更新：塔罗牌内的简化的选择不同玩法的图标大小框要一样大，现在大小不一（单张，三张，凯尔特十字等等），干脆都
+> 用一样大的图标，把字放在下方。另外这个软件不需要英文支持，可以移除英文。更新管理员信息，把位置定位北京。
+
+- **WP11.1 The tarot spread choices:**
+  - every spread gets the same size of box and the same size of icon, with its name below;
+  - a test checks that every choice has the same size.
+- **WP11.2 English removed:**
+  - The app keeps only 简体 and 繁體. That means the language menu, the ARB files (the template becomes 简体) and
+    the English branches in the app code.
+  - A language saved as English starts in 简体.
+  - Tests that assert English are removed or changed.
+  - The server's `en` stays accepted for now: nothing calls it, and removing it touches every method's prompts and
+    tables. Whether to strip it too is the owner's call.
+- **WP11.3 The admin's location:** the seeded 管理员 profile is located in Beijing (北京).
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
@@ -1239,3 +1397,11 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP8.3     | done                         | v5.1.0  |
 | WP9.1     | done                         | v5.2.0  |
 | WP9.2     | done                         | v5.2.0  |
+| WP10.1    | done                         | v5.3.0  |
+| WP10.2    | done                         | v5.3.0  |
+| WP10.3    | done                         | v5.3.0  |
+| WP10.4    | planned                      | v6.0.0  |
+| WP10.5    | planned                      | v6.0.0  |
+| WP11.1    | planned                      | v5.4.0  |
+| WP11.2    | planned                      | v5.4.0  |
+| WP11.3    | planned                      | v5.4.0  |

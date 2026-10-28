@@ -27,6 +27,9 @@ export const TOPICS = [
   "fengshui_advice",
   "naming_candidates",
   "naming_advice",
+  "liuyao_hexagram",
+  "liuyao_answer",
+  "liuyao_advice",
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -38,6 +41,7 @@ export const TOPICS_BY_SYSTEM: Record<ChartSystem, readonly Topic[]> = {
   qiuqian: ["qiuqian_poem", "qiuqian_answer", "qiuqian_advice"],
   fengshui: ["fengshui_layout", "fengshui_flow", "fengshui_advice"],
   naming: ["naming_candidates", "naming_advice"],
+  liuyao: ["liuyao_hexagram", "liuyao_answer", "liuyao_advice"],
 };
 
 /** The area of life a tarot reading may focus on (POST /v1/reports `focus`, tarot only). */
@@ -45,8 +49,8 @@ export const TAROT_FOCUS = ["career_wealth", "relationships", "health", "persona
 export type TarotFocus = (typeof TAROT_FOCUS)[number];
 
 /**
- * Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice; 求籤 (a lot is read
- * once, for the question asked), 风水 (its principles are the plan) and 起名 (a name is chosen, not
+ * Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice; 求籤 and 算卦 (a cast is
+ * read once, for the question asked), 风水 (its principles are the plan) and 起名 (a name is chosen, not
  * worked on) have none at all.
  */
 export const NO_PLAN_TOPICS: readonly Topic[] = [
@@ -60,6 +64,9 @@ export const NO_PLAN_TOPICS: readonly Topic[] = [
   "fengshui_advice",
   "naming_candidates",
   "naming_advice",
+  "liuyao_hexagram",
+  "liuyao_answer",
+  "liuyao_advice",
 ];
 
 export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
@@ -80,6 +87,9 @@ export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   fengshui_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
   naming_candidates: { "zh-Hant": "候選名字", "zh-Hans": "候选名字", en: "The names" },
   naming_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
+  liuyao_hexagram: { "zh-Hant": "卦象", "zh-Hans": "卦象", en: "The hexagram" },
+  liuyao_answer: { "zh-Hant": "所問之事", "zh-Hans": "所问之事", en: "Your question" },
+  liuyao_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
 };
 
 export interface Paragraph {

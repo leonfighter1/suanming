@@ -7,12 +7,15 @@
  * - "YYYY年 + 干支" / "YYYY 干支" pairings match the year's real 干支;
  * - every tarot card named is in the spread, and 正位/逆位 claims match;
  * - a 求籤 reading quotes only its lot's lines, word for word, and keeps the lot's number;
+ * - a 算卦 reading names only its own hexagrams and quotes no other hexagram's text;
  * - zh-Hant text contains no simplified forms of protected terms (and vice versa).
  * Not checked: 十神/五行 reasoning, which needs a human reviewer.
  */
 import type { ChartFact } from "../chart-fact/index.js";
 import { DECK, NAME_ALIASES } from "../engines/tarot/deck.js";
 import { yearGanZhi } from "../engines/bazi/index.js";
+import { hexOf } from "../engines/liuyao/index.js";
+import { zhouyiText } from "../engines/yijing/index.js";
 import type { Report } from "./pipeline.js";
 import { lotBrief } from "./qiuqian.js";
 import { loadTerms, type Locale } from "./terms.js";
@@ -26,10 +29,25 @@ export interface FaithfulnessIssue {
     | "wrong_script"
     | "wrong_relative_year"
     | "misquoted_line"
-    | "wrong_lot";
+    | "wrong_lot"
+    | "wrong_hexagram"
+    | "misquoted_text";
   detail: string;
   quote: string;
 }
+
+type Script = "zh-Hant" | "zh-Hans";
+/** Every hexagram's full name and texts (卦辭, 爻辭), per script: what a 算卦 reading may not borrow. */
+let zhouyi:
+  { id: string; full: Record<Script, string>; texts: Record<Script, string[]> }[] | undefined;
+const allHexagrams = () =>
+  (zhouyi ??= Array.from({ length: 64 }, (_, n) => {
+    const id = n.toString(2).padStart(6, "0");
+    const t = zhouyiText(id);
+    const full = hexOf(id).full_name;
+    const texts = (s: Script) => [t.gua_ci[s], ...t.yao_ci.map((y) => y[s])];
+    return { id, full, texts: { "zh-Hant": texts("zh-Hant"), "zh-Hans": texts("zh-Hans") } };
+  }));
 
 const GZ = /[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g;
 /** 一 starting a word: 「宝剑一样」 is "like a sword", not 宝剑一 (the Ace of Swords). */
@@ -189,6 +207,58 @@ export function checkFaithfulness(chart: ChartFact, report: Report): Faithfulnes
       for (const m of t.matchAll(LOT_NUMBER)) {
         if (lotNumber(m[1] ?? m[2]!) !== n)
           issues.push({ kind: "wrong_lot", detail: `this is lot ${n}, not ${m[0]}`, quote: t });
+      }
+    }
+  }
+
+  if (chart.system === "liuyao" && locale !== "en") {
+    // A 算卦 reading names only its own two hexagrams, and quotes no other hexagram's 卦辭 or 爻辭. A quoted
+    // phrase of four or more characters found in no hexagram (the user's own words) isn't checked.
+    const f = chart.facts as {
+      primary: { id: string };
+      changed?: { id: string };
+      cast: { ganzhi: Record<string, string> };
+    };
+    const own = new Set([f.primary.id, ...(f.changed ? [f.changed.id] : [])]);
+    const all = allHexagrams();
+    const mine = all.filter((h) => own.has(h.id)).flatMap((h) => h.texts[locale]);
+    const others = all.filter((h) => !own.has(h.id));
+    // The only 干支 a reading may name: the cast time's four (rule 29), and last, this and next year's.
+    const year = Number(report.created_at.slice(0, 4));
+    const ganzhi = new Set([
+      ...Object.values(f.cast.ganzhi),
+      yearGanZhi(year - 1),
+      yearGanZhi(year),
+      yearGanZhi(year + 1),
+    ]);
+    for (const t of texts) {
+      for (const m of t.matchAll(GZ)) {
+        if (!ganzhi.has(m[0]))
+          issues.push({
+            kind: "unknown_ganzhi",
+            detail: `${m[0]} is not the cast's 干支`,
+            quote: t,
+          });
+      }
+      for (const h of others) {
+        if (t.includes(h.full[locale]))
+          issues.push({
+            kind: "wrong_hexagram",
+            detail: `${h.full[locale]} is not this cast's hexagram`,
+            quote: t,
+          });
+      }
+      for (const q of t.matchAll(QUOTE)) {
+        for (const run of q[1]!.split(/[，。、；：！？,.;:!?\s]+/)) {
+          if ([...run].length < 4 || !/^\p{Script=Han}+$/u.test(run)) continue;
+          if (mine.some((x) => x.includes(run))) continue;
+          if (others.some((h) => h.texts[locale].some((x) => x.includes(run))))
+            issues.push({
+              kind: "misquoted_text",
+              detail: `「${run}」 is from another hexagram's text`,
+              quote: t,
+            });
+        }
       }
     }
   }

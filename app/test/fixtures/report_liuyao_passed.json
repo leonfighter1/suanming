@@ -1,0 +1,80 @@
+{
+  "report_id": "67676767-6767-4676-8676-676767676767",
+  "chart_id": "56565656-5656-4565-8565-565656565656",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "locale": "zh-Hant",
+  "topics": [
+    "liuyao_hexagram",
+    "liuyao_answer",
+    "liuyao_advice"
+  ],
+  "layers": {
+    "facts": [
+      "天火同人 → 乾為天 · 六二",
+      "六二：同人於宗，吝。"
+    ],
+    "interpretation": [
+      {
+        "topic": "liuyao_hexagram",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）這一卦的重點在主要的那句卦爻辭：先看清它說的處境，再看動爻往哪裡變。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/focus/texts/0",
+              "/primary"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "liuyao_answer",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）就你所問的事，這一卦傾向先穩住、把眼前的事做好，時機成熟再往前。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/focus/texts/0"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "liuyao_advice",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）把要做的事拆成一小步，這週先做第一步，做完再看下一步。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/focus/texts/0"
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "topic": "liuyao_advice",
+        "text": "（示範）本週花十分鐘寫下與「建議」相關的一個觀察。",
+        "horizon": "this_week"
+      }
+    ],
+    "expectation": {
+      "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
+      "ai_label": "本解讀由 AI 依據所得卦象生成，卦象只指出傾向，不決定結果，僅供娛樂和玄學學習使用。",
+      "label_required": false
+    }
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "narrative_liuyao@1,action_liuyao@1,guard@2",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

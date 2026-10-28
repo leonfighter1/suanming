@@ -178,8 +178,8 @@ paths:
       summary: The methods the caller's region offers, in entry order
       description: |
         Since v4.3.0. The Geo-Rule matrix's methods for the caller's region (from the account),
-        available ones only, heaviest entry_weight first; ties keep bazi, tarot, qiuqian,
-        fengshui, astrology. The app orders its home page by it, so the matrix can put 求籤
+        available ones only, heaviest entry_weight first; ties keep bazi, tarot, qiuqian, liuyao,
+        fengshui, naming, astrology. The app orders its home page by it, so the matrix can put 求籤
         first in Taiwan and Hong Kong and 风水 first in Malaysia without an app release. 451
         where the service isn't offered.
       responses:
@@ -201,8 +201,34 @@ paths:
                       properties:
                         system:
                           type: string
-                          enum: [bazi, tarot, astrology, qiuqian, fengshui, naming]
+                          enum: [bazi, tarot, astrology, qiuqian, fengshui, naming, liuyao]
                         entry_weight: { type: number }
+        "401": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/liuyao/layouts:
+    post:
+      tags: [charts]
+      operationId: createLiuyaoLayout
+      summary: Lay out coins face down for a 算卦 pick cast
+      description: |
+        Since v5.3.0. 24 coins, laid out before the reader picks: they follow from the server's
+        draw key and the layout's id, and stay on the server. The commitment (SHA-256 of the id
+        and the coins) shows afterwards that they came first. Then post the 18 coins picked, in
+        order, as a liuyao chart with mode pick and this draw_id.
+      responses:
+        "201":
+          description: The layout
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [draw_id, size, picks, commitment]
+                properties:
+                  draw_id: { type: string, format: uuid }
+                  size: { type: integer, const: 24 }
+                  picks: { type: integer, const: 18 }
+                  commitment: { type: string, pattern: "^sha256:[0-9a-f]{64}$" }
         "401": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -995,6 +1021,7 @@ components:
         - $ref: "#/components/schemas/QiuqianChartRequest"
         - $ref: "#/components/schemas/FengshuiChartRequest"
         - $ref: "#/components/schemas/NamingChartRequest"
+        - $ref: "#/components/schemas/LiuyaoChartRequest"
       discriminator:
         propertyName: system
         mapping:
@@ -1004,6 +1031,7 @@ components:
           qiuqian: "#/components/schemas/QiuqianChartRequest"
           fengshui: "#/components/schemas/FengshuiChartRequest"
           naming: "#/components/schemas/NamingChartRequest"
+          liuyao: "#/components/schemas/LiuyaoChartRequest"
 
     BirthMoment:
       type: object
@@ -1091,6 +1119,54 @@ components:
         surname:
           { type: string, minLength: 1, maxLength: 2, description: One or two Chinese characters }
         length: { type: integer, enum: [1, 2], default: 2, description: The given name's length }
+
+    LiuyaoChartRequest:
+      description: |
+        算卦 (since v5.3.0): 六爻 by three coins (背 3, 字 2), six tosses, the first the 初爻. auto: the
+        server tosses. pick: the 18 coins picked, in order, from a layout (POST /v1/liuyao/layouts).
+        manual: the reader's own six lines, each three coins or the line itself (6–9), and the time
+        of the toss, to the minute, which is required. The question goes with the report. Readings
+        are in Chinese only.
+      type: object
+      additionalProperties: false
+      required: [system, mode, timezone]
+      properties:
+        system: { const: liuyao }
+        mode: { type: string, enum: [auto, pick, manual] }
+        timezone: { type: string, description: The reader's IANA time zone }
+        draw_id: { type: string, format: uuid, description: "pick: the layout's id" }
+        picks:
+          type: array
+          description: "pick: 18 different coins, 0–23, in the order picked"
+          minItems: 18
+          maxItems: 18
+          uniqueItems: true
+          items: { type: integer, minimum: 0, maximum: 23 }
+        local:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+          description: "manual: the local time of the toss, to the minute"
+        lines:
+          type: array
+          description: "manual: six lines, 初爻 first"
+          minItems: 6
+          maxItems: 6
+          items:
+            oneOf:
+              - type: object
+                additionalProperties: false
+                required: [coins]
+                properties:
+                  coins:
+                    type: array
+                    minItems: 3
+                    maxItems: 3
+                    items: { type: string, enum: [zi, bei] }
+              - type: object
+                additionalProperties: false
+                required: [value]
+                properties:
+                  value: { type: integer, enum: [6, 7, 8, 9] }
 
     FengshuiChartRequest:
       description: |

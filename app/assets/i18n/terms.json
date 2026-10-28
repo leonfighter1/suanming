@@ -1,6 +1,6 @@
 {
   "_readme": "Protected term table (Phase 1 §2.3). Keys are the canonical engine form (simplified, as lunar-javascript emits). Values are the only allowed display form per locale. Hand-curated; never machine-translated. Shipped with the app and hot-updatable.",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "terms": {
     "比肩": {
       "zh-Hant": "比肩",
@@ -606,6 +606,51 @@
       "zh-Hant": "後天八卦",
       "zh-Hans": "后天八卦",
       "en": "Later Heaven Bagua"
+    },
+    "本卦": {
+      "zh-Hant": "本卦",
+      "zh-Hans": "本卦",
+      "en": "Primary Hexagram"
+    },
+    "变卦": {
+      "zh-Hant": "變卦",
+      "zh-Hans": "变卦",
+      "en": "Changed Hexagram"
+    },
+    "动爻": {
+      "zh-Hant": "動爻",
+      "zh-Hans": "动爻",
+      "en": "Moving Line"
+    },
+    "卦辞": {
+      "zh-Hant": "卦辭",
+      "zh-Hans": "卦辞",
+      "en": "Hexagram Judgment"
+    },
+    "爻辞": {
+      "zh-Hant": "爻辭",
+      "zh-Hans": "爻辞",
+      "en": "Line Text"
+    },
+    "老阳": {
+      "zh-Hant": "老陽",
+      "zh-Hans": "老阳",
+      "en": "Old Yang"
+    },
+    "老阴": {
+      "zh-Hant": "老陰",
+      "zh-Hans": "老阴",
+      "en": "Old Yin"
+    },
+    "少阳": {
+      "zh-Hant": "少陽",
+      "zh-Hans": "少阳",
+      "en": "Young Yang"
+    },
+    "少阴": {
+      "zh-Hant": "少陰",
+      "zh-Hans": "少阴",
+      "en": "Young Yin"
     },
     "太阳": {
       "zh-Hant": "太陽",

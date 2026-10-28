@@ -200,9 +200,9 @@ describe("the entry order and the API", () => {
       methodsFor(resolveRegion(loadGeoMatrix(), cc)!)
         .map((m) => m.system)
         .filter((s) => s !== "naming");
-    // MY: fengshui 1.3 > every other 1 (ties keep bazi, tarot, qiuqian, fengshui, astrology).
-    expect(order("MY")).toEqual(["fengshui", "bazi", "tarot", "qiuqian", "astrology"]);
-    expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "fengshui", "astrology"]);
+    // MY: fengshui 1.3 > every other 1 (ties keep bazi, tarot, qiuqian, liuyao, fengshui, astrology).
+    expect(order("MY")).toEqual(["fengshui", "bazi", "tarot", "qiuqian", "liuyao", "astrology"]);
+    expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "liuyao", "fengshui", "astrology"]);
   });
 
   const api = createApiServer({
