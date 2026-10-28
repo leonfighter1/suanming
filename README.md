@@ -12,6 +12,23 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.4.0 (2026-10-28): a tarot reading shows its cards
+
+Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.1. A medium update: committed locally,
+pushed with v3.0.0.
+
+- Reading page: a tarot reading opens with its spread at the top, as it was laid out, every card turned and drawn
+  with its art. On a phone a Celtic Cross shows as thumbnails, and touching one opens it large, as on the 塔罗 page.
+  八字 reading pages are unchanged.
+- 历史记录: a tarot reading shows its cards' art in small (up to five, then 「+5」 for a Celtic Cross), a reversed
+  card upside down as it was drawn, above the card names.
+- API: a report now carries its `chart_id`, so a reading page can show its chart (GET /v1/charts/{chart_id}).
+- Verified:
+  - The API test checks `chart_id` on a pending and a passed report.
+  - The tarot reading test now also checks the spread on top of the reading, every card turned.
+  - 1 new app test: the art in 历史记录, a reversed card upside down.
+  - All 287 server tests and 93 app tests pass; harness PASS.
+
 ### v2.3.0 (2026-10-28): 塔罗 reads like a tarot reading
 
 Stage S2 of the [tech plan](docs/tech-plan.md), work package 2.2, which completes the stage (v2.1.0–v2.3.0). A medium

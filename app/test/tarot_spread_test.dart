@@ -205,6 +205,17 @@ void main() {
     expect(sent['focus'], 'career_wealth');
     expect(sent['topics'], ['tarot_cards', 'tarot_synthesis', 'tarot_advice']);
 
+    // The reading page shows the spread on top, with its art, every card turned (v2.4.0).
+    final spread = find.byKey(const Key('reading-spread'));
+    expect(spread, findsOneWidget);
+    final semantics = tester.ensureSemantics();
+    for (var n = 1; n <= 3; n++) {
+      final c = find.descendant(of: spread, matching: find.byKey(Key('tarot-card-$n')));
+      expect(tester.getSemantics(c).label, isNot(contains('未翻開')));
+    }
+    semantics.dispose();
+    expect(tester.getTopLeft(spread).dy, lessThan(tester.getTopLeft(find.text('逐張解讀').first).dy));
+
     // The reading: 逐張解讀, 綜合解讀 and 建議, in that order; a plan for 建議 only.
     final tops = [for (final t in ['逐張解讀', '綜合解讀', '建議']) tester.getTopLeft(find.text(t).first).dy];
     expect(tops, [...tops]..sort());
@@ -213,5 +224,39 @@ void main() {
     expect(find.byKey(const Key('remedy-buy-tarot_advice')), findsOneWidget);
     expect(find.byKey(const Key('remedy-buy-tarot_cards')), findsNothing);
     expect(find.byKey(const Key('remedy-buy-tarot_synthesis')), findsNothing);
+  });
+
+  testWidgets('历史记录 shows a tarot reading with its cards\' art, a reversed card upside down', (tester) async {
+    final draw = fixture('chart_tarot')['chart_fact']['facts']['cards'] as List;
+    final api = FakeApi(
+      history: [
+        {
+          'report_id': '55555555-5555-4555-8555-555555555555',
+          'chart_id': '33333333-3333-4333-8333-333333333333',
+          'status': 'passed',
+          'created_at': '2026-10-25T00:00:00.000Z',
+          'updated_at': '2026-10-25T00:00:00.000Z',
+          'locale': 'zh-Hant',
+          'topics': ['tarot_cards', 'tarot_synthesis', 'tarot_advice'],
+          'chart': {
+            'system': 'tarot',
+            'spread': 'three_card',
+            'cards': [for (final c in draw) {'card_id': c['card_id'], 'reversed': c['reversed']}],
+          },
+        },
+      ],
+    );
+    await tester.pumpWidget(testApp(api));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('open-history')));
+    await settle(tester);
+    final art = find.byKey(const Key('history-art'));
+    expect(art, findsOneWidget);
+    expect(find.descendant(of: art, matching: find.byType(Image)), findsNWidgets(draw.length));
+    final turns = tester
+        .widgetList<RotatedBox>(find.descendant(of: art, matching: find.byType(RotatedBox)))
+        .map((b) => b.quarterTurns)
+        .toList();
+    expect(turns, [for (final c in draw) c['reversed'] == true ? 2 : 0]);
   });
 }

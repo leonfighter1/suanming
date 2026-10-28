@@ -532,6 +532,7 @@ class RemedyList {
 class ReportView {
   const ReportView({
     required this.id,
+    this.chartId,
     required this.status,
     required this.topics,
     this.message,
@@ -544,6 +545,7 @@ class ReportView {
 
   factory ReportView.fromJson(Json j) => ReportView(
         id: j['report_id'] as String,
+        chartId: j['chart_id'] as String?,
         status: j['status'] as String,
         topics: ((j['topics'] as List?) ?? const []).cast<String>(),
         message: j['message'] as String?,
@@ -555,6 +557,9 @@ class ReportView {
       );
 
   final String id;
+
+  /// The reading's chart (since v2.4.0), e.g. to show a tarot spread.
+  final String? chartId;
 
   /// pending | passed | blocked | manual_review | failed
   final String status;
@@ -634,6 +639,7 @@ class HistoryItem {
     required this.system,
     this.fourPillars,
     this.cardIds = const [],
+    this.cardsReversed = const [],
   });
 
   factory HistoryItem.fromJson(Json j) {
@@ -646,6 +652,7 @@ class HistoryItem {
       system: chart['system'] as String? ?? 'bazi',
       fourPillars: chart['four_pillars'] as String?,
       cardIds: _list(chart['cards'], (c) => c['card_id'] as String),
+      cardsReversed: _list(chart['cards'], (c) => c['reversed'] as bool? ?? false),
     );
   }
 
@@ -656,4 +663,7 @@ class HistoryItem {
   final String system;
   final String? fourPillars;
   final List<String> cardIds;
+
+  /// Per card in [cardIds]: drawn reversed.
+  final List<bool> cardsReversed;
 }

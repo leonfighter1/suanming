@@ -143,6 +143,8 @@ export function chartSummary(fact: ChartFact) {
 export function publicReport(r: ReportRecord) {
   const base = {
     report_id: r.id,
+    // The reading's chart, so a reading page can show it (a tarot spread, v2.4.0).
+    chart_id: r.chart_id,
     status: r.status,
     created_at: r.created_at,
     updated_at: r.updated_at,

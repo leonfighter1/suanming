@@ -12,8 +12,11 @@ import 'trend_chart.dart';
 /// 破除運勢 module below. Layer ④ (expectation + AI label) is the fixed footer
 /// [ExpectationFooter], so it stays visible however far the user scrolls.
 class FourLayerReport extends StatefulWidget {
-  const FourLayerReport({super.key, required this.layers, this.reportId, this.birthplace});
+  const FourLayerReport({super.key, required this.layers, this.reportId, this.birthplace, this.header});
   final ReportLayers layers;
+
+  /// Shown above the layers: a tarot reading's spread (v2.4.0).
+  final Widget? header;
 
   /// Shown first in the facts card when known.
   final String? birthplace;
@@ -51,6 +54,8 @@ class _FourLayerReportState extends State<FourLayerReport> {
     return ListView(
       padding: Space.page,
       children: [
+        // Takes no stagger slot: the cards below keep their timing.
+        if (widget.header != null) FadeSlideIn(child: widget.header!),
         if (layers.trend != null) FadeSlideIn(index: i++, child: TrendCard(trend: layers.trend!)),
         FadeSlideIn(
           index: i++,

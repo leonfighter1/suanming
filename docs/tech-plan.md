@@ -25,14 +25,14 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status  |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
+| Stage                      | What                                                        | Size   | Release when done | Status      |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done        |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | in progress |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned     |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -182,7 +182,15 @@ Releases, one per work package (medium, committed and tagged locally; pushed wit
 
 ## S3 塔罗体验 (big → v3.0.0)
 
+Releases, one per work package (medium, committed and tagged locally): **v2.4.0** = WP3.1, then one X.Y.0 per WP;
+the last WP goes out as **v3.0.0** with the S3 summary, pushed together with every release since v2.1.0. Lessons to
+read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (sync before app tests).
+
 - WP3.1 The reading page and 历史记录 show the spread with its art.
+  - As built (v2.4.0): the report view carries `chart_id` (additive). The reading page shows a tarot reading's spread
+    on top with every card turned (`ReadingSpread`, reusing `TarotSpread`; `FourLayerReport` takes a `header` that
+    takes no stagger slot, so 八字 pages animate as before). A tarot item in 历史记录 shows up to five cards' art,
+    reversed ones upside down, above their names.
 - WP3.2 Each spread drawn small in the picker (positions before drawing); example questions as chips; the Celtic
   Cross list at 1.5× text.
 - WP3.3 每日一牌: draw id from the account and the date, so the card stays the same all day; on 首页.
@@ -294,17 +302,20 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 
 ## Status
 
-| WP    | Status                     | Release |
-| ----- | -------------------------- | ------- |
-| WP1.1 | done                       | v1.3.0  |
-| WP1.2 | done                       | v1.3.0  |
-| WP1.3 | done                       | v1.3.0  |
-| WP1.4 | done (命宫 / 身宫 → WP1.8) | v1.3.0  |
-| WP1.5 | done                       | v1.3.0  |
-| WP1.6 | done                       | v2.0.0  |
-| WP1.7 | done                       | v2.0.0  |
-| WP1.8 | waiting for a reference    | —       |
-| WP2.1 | done                       | v2.1.0  |
-| WP2.3 | done                       | v2.2.0  |
-| WP2.2 | done                       | v2.3.0  |
-| S3–S6 | todo                       | above   |
+| WP        | Status                     | Release         |
+| --------- | -------------------------- | --------------- |
+| WP1.1     | done                       | v1.3.0          |
+| WP1.2     | done                       | v1.3.0          |
+| WP1.3     | done                       | v1.3.0          |
+| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0          |
+| WP1.5     | done                       | v1.3.0          |
+| WP1.6     | done                       | v2.0.0          |
+| WP1.7     | done                       | v2.0.0          |
+| WP1.8     | waiting for a reference    | —               |
+| WP2.1     | done                       | v2.1.0          |
+| WP2.3     | done                       | v2.2.0          |
+| WP2.2     | done                       | v2.3.0          |
+| WP3.1     | done                       | v2.4.0          |
+| WP3.2     | todo                       | v2.5.0          |
+| WP3.3–3.6 | todo                       | v2.6.0 … v3.0.0 |
+| S4–S6     | todo                       | above           |

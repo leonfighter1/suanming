@@ -13,6 +13,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'labels.dart';
 import 'widgets/four_layer_report.dart';
+import 'widgets/tarot_spread.dart';
 
 /// Shows a report, polling until generation finishes. While pending it shows
 /// the pipeline stage the server reports; when passed it can be exported.
@@ -105,13 +106,39 @@ class ReportPage extends ConsumerWidget {
           ),
           data: (r) => switch (r.status) {
             'pending' => _Generating(key: const ValueKey('pending'), report: r),
-            'passed' => FourLayerReport(key: const ValueKey('passed'), layers: r.layers!, reportId: r.id, birthplace: place),
+            'passed' => FourLayerReport(
+                key: const ValueKey('passed'),
+                layers: r.layers!,
+                reportId: r.id,
+                birthplace: place,
+                header: r.chartId == null ? null : ReadingSpread(chartId: r.chartId!),
+              ),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
             'manual_review' => _Message(key: const ValueKey('review'), icon: Icons.hourglass_top, text: l10n.statusReview),
             _ => _Message(key: const ValueKey('failed'), icon: Icons.error_outline, text: l10n.statusFailed),
           },
         ),
       ),
+    );
+  }
+}
+
+/// A tarot reading's spread with its art, every card turned (v2.4.0). Other charts show nothing
+/// here: their facts are in the layers.
+class ReadingSpread extends ConsumerWidget {
+  const ReadingSpread({super.key, required this.chartId});
+  final String chartId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chart = ref.watch(chartProvider(chartId)).value;
+    if (chart == null || chart.system != 'tarot') return const SizedBox.shrink();
+    final tarot = chart.tarot;
+    return AppCard(
+      key: const Key('reading-spread'),
+      title: AppLocalizations.of(context).spread,
+      icon: Icons.style_rounded,
+      child: TarotSpread(chart: tarot, revealed: {for (final c in tarot.cards) c.position}, onReveal: (_) {}),
     );
   }
 }

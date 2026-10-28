@@ -104,7 +104,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
   const tarotView = publicReport({
     id: tarotReport.report_id,
     owner: "fixture",
-    chart_id: "66666666-6666-4666-8666-666666666666",
+    chart_id: "33333333-3333-4333-8333-333333333333", // chart_tarot.json, the draw it reads
     status: tarotReport.status,
     locale: tarotReport.locale,
     topics: tarotReport.topics,

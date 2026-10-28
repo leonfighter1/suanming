@@ -10,6 +10,7 @@ import 'design.dart';
 import 'life_report_page.dart';
 import 'report_page.dart';
 import 'theme.dart';
+import 'widgets/tarot_spread.dart';
 
 /// All earlier readings, newest first. Pull down to refresh.
 class HistoryPage extends ConsumerWidget {
@@ -147,12 +148,39 @@ class HistoryTile extends ConsumerWidget {
                 const SizedBox(height: Space.xs),
                 if (item.fourPillars != null)
                   GanZhiText(item.fourPillars!, size: 15)
-                else if (item.cardIds.isNotEmpty)
+                else if (item.cardIds.isNotEmpty) ...[
+                  // The cards' art, small (v2.4.0); a reversed card upside down, as it was drawn.
+                  Row(
+                    key: const Key('history-art'),
+                    children: [
+                      for (final (i, id) in item.cardIds.take(5).indexed)
+                        Padding(
+                          padding: const EdgeInsets.only(right: Space.xs),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: RotatedBox(
+                              quarterTurns: i < item.cardsReversed.length && item.cardsReversed[i] ? 2 : 0,
+                              child: Image.asset(
+                                tarotArt(id),
+                                width: 22,
+                                height: 38,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const SizedBox(width: 22, height: 38),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (item.cardIds.length > 5)
+                        Text('+${item.cardIds.length - 5}', style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                  const SizedBox(height: Space.xs),
                   Text(
                     item.cardIds.map((c) => terms?.card(c, locale) ?? c).join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ],
                 const SizedBox(height: Space.xs),
                 Text(
                   DateFormat('yyyy-MM-dd HH:mm').format(item.createdAt.toLocal()),

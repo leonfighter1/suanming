@@ -2,6 +2,17 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (m): S3 WP3.1, a tarot reading shows its cards; release v2.4.0
+
+- v2.3.0: the first harness run failed at analyze (rule 23); the second passed. Committed and tagged.
+- WP3.1:
+  - `publicReport` carries `chart_id` (additive; OpenAPI updated).
+  - The app's `ReportView.chartId`. `ReadingSpread` on the reading page shows a tarot spread, all turned, via `chartProvider`.
+  - `FourLayerReport.header` takes no stagger slot, so 八字 pages animate exactly as before.
+  - History tiles show the cards' art: up to five, reversed ones turned, from the chart summary's `reversed`.
+- Fixture: the tarot report now names its real chart (`33333333-…`, chart_tarot.json). The fake API serves that chart, and takes an optional `history` list.
+- v2.4.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (l): S2 WP2.2, a tarot-native reading; S2 done; release v2.3.0
 
 - Sections `tarot_cards`, `tarot_synthesis` and `tarot_advice` (TOPICS); 八字 got an explicit list (`bazi: TOPICS` would have taken them, rule 8).

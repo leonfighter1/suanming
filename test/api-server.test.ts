@@ -63,12 +63,14 @@ describe("v1 API", () => {
     const pending = await r.json();
     expect(pending.status).toBe("pending");
     expect(pending.layers).toBeUndefined();
+    expect(pending.chart_id).toBe(chart_id); // since v2.4.0: a reading page can show its chart
 
     await api.drain();
     const done = await get(`/v1/reports/${pending.report_id}`);
     expect(done.headers.get("x-ai-generated")).toBe("true");
     const view = await done.json();
     expect(view.status).toBe("passed");
+    expect(view.chart_id).toBe(chart_id);
     expect(view.layers.interpretation.map((s: { topic: string }) => s.topic)).toEqual([
       "wuxing",
       "health",

@@ -43,7 +43,11 @@ class FakeApi {
     this.expireAccessOnce = false,
     this.email = 'me@example.com',
     this.pendingStage,
+    this.history,
   }) : finalReport = finalReport ?? fixture('report_passed');
+
+  /// GET /v1/reports items, when a test needs other readings than the one 八字 report.
+  final List<Map<String, dynamic>>? history;
 
   /// The signed-in user's email (`test…` accounts get a seeded default profile).
   final String email;
@@ -155,6 +159,7 @@ class FakeApi {
       }
       return _json(fixture('review_report'), 200);
     }
+    if (req.method == 'GET' && path == '/v1/reports' && history != null) return _json({'items': history}, 200);
     if (req.method == 'GET' && path == '/v1/reports') {
       return _json({
         'items': [
@@ -194,6 +199,10 @@ class FakeApi {
     if (req.method == 'GET' && path.startsWith('/v1/life-reports/')) return _json(fixture('life_passed'), 200);
     if (req.method == 'GET' && path == '/v1/charts/66666666-6666-4666-8666-666666666666') {
       return _json(fixture('chart_life'), 200);
+    }
+    // The three-card draw that report_tarot_passed reads.
+    if (req.method == 'GET' && path == '/v1/charts/33333333-3333-4333-8333-333333333333') {
+      return _json(fixture('chart_tarot'), 200);
     }
     // 破除運勢: price + plans. preloadRemedies: every topic ready but locked, and
     // buying unlocks at once (200); otherwise buying returns pending (202) and polling the plan.

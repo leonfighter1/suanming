@@ -954,6 +954,10 @@ components:
       required: [report_id, status, created_at, updated_at, locale, topics]
       properties:
         report_id: { type: string, format: uuid }
+        chart_id:
+          type: string
+          format: uuid
+          description: The reading's chart (GET /v1/charts/{chart_id}), e.g. to show a tarot spread. Since v2.4.0.
         status:
           type: string
           enum: [pending, passed, blocked, manual_review, failed]
