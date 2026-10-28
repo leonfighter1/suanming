@@ -102,6 +102,21 @@ void main() {
     expect(inside(find.byKey(const Key('liunian-strip')), 'This year'), findsOneWidget);
   });
 
+  testWidgets('in English (v4.0.0) the strips give each part a line, in wider items, without pinyin', (tester) async {
+    await openChart(tester, locale: const Locale('en'));
+    // The 四柱 table: 年干 庚 is 伤官, Hurting Officer, without (Shang Guan).
+    expect(find.descendant(of: find.byKey(const Key('pillar-grid')), matching: find.text('Hurting Officer')), findsOneWidget);
+    await scrollTo(tester, const Key('liunian-strip'));
+    final strip = find.byKey(const Key('liunian-strip'));
+    // 2026 丙午: 丙 阳火 generates 己 阴土, opposite polarity → 正印, Direct Resource; 午's 本气 丁 阴火, same
+    // polarity → 偏印, Indirect Resource. Year, 虚岁 (2026 − 1990 + 1 = 37) and each 十神 on a line of its own.
+    for (final text in ['2026', 'nominal age 37', 'Direct Resource', 'Indirect Resource']) {
+      expect(inside(strip, text), findsWidgets, reason: text);
+    }
+    final item = find.ancestor(of: inside(strip, 'nominal age 37'), matching: find.byType(Container)).first;
+    expect(tester.getSize(item).width, 128);
+  });
+
   test('a chart made before v3.3.0 has no years to open', () {
     final facts = Map<String, dynamic>.of(fixture('chart_bazi')['chart_fact']['facts'] as Map<String, dynamic>)
       ..remove('dayun_years');

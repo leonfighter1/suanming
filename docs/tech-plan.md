@@ -25,14 +25,15 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status      |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done        |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done        |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | in progress |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
+| Stage                      | What                                                        | Size   | Release when done | Status  |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done    |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done    |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
+| S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v5.1.0            | planned |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -249,8 +250,8 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 ## S4 八字与全局 UI (big → v4.0.0)
 
 Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, **v3.2.0** = WP4.2,
-**v3.3.0** = WP4.3, **v3.4.0** = WP4.5 (WP4.4 closed), **v3.5.0** = WP4.6 + WP4.7, then one X.Y.0 per WP; the last
-goes out as **v4.0.0** with the S4 summary, pushed with every release since v3.1.0. Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
+**v3.3.0** = WP4.3, **v3.4.0** = WP4.5 (WP4.4 closed), **v3.5.0** = WP4.6 + WP4.7, and **v4.0.0** = WP4.8 with the
+S4 summary, pushed with every release since v3.1.0 (WP4.9 moved to S7). Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
 format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), P32 (non-empty checks), P33 (typed keys), the
 keyboard-access checklist.
 
@@ -372,12 +373,20 @@ keyboard-access checklist.
 - WP4.8 (found in WP4.2) On a phone, the English names in the 四柱 table break mid-word ("Compani on (Bi Jian)"):
   give the table a short English form (Companion), with the full name kept for the tip's title. The strips'
   English lines are cut off too ("nominal age…", "Indirect Res…"), and the short forms serve them as well.
-- WP4.9 (split from WP4.5 by rule 34) Share a reading as an image, to the owner's spec in the phase document
-  (「分享图由服务端生成，带水印与免责声明」):
-  - the server renders the image, with a watermark and the disclaimer, never the app's screen;
-  - a deep link back to the reading, once the app is in the stores.
-  - Needs a server-side renderer that has CJK fonts; measure it first (G4). It may move to its own stage if it
-    turns out big.
+  - As built (v4.0.0):
+    - `Terms.short` is the brief form: English without its trailing pinyin (Companion for Companion (Bi Jian));
+      Chinese is unchanged. It is a rule over the one term table, not a second list of names.
+    - The 四柱 table, the strips and the relations labels show the brief form; each tip's title keeps the full
+      name. Abbreviations (DR, 7K …) were not used: they would need English names other than the table's.
+    - In a cell, a name of one word shrinks to fit instead of breaking (`TermTip(shrinkOneWord:)`). Names of
+      several words wrap between their words.
+    - The strips are 128 px wide in English, and a 流年 gives its year, 虚岁 and each 十神 a line of their own.
+      The 流月 do the same for their two 十神. Chinese keeps 96 px and its three lines; ←/→ step by the item's
+      width.
+    - Checked by rendering the English page: no word breaks, no line cut off in the 流年 strip. A long 节 name
+      (Awakening of Insects) can still end in an ellipsis.
+- WP4.9 (split from WP4.5 by rule 34) moved to S7 as WP7.1 (2026-10-28). It needs a server-side renderer and
+  fonts, and a deep link needs readings that persist (S5). It is a stage's worth of work, not a UI touch.
 
 ## S5 数据持久化 (medium → v4.1.0)
 
@@ -391,9 +400,72 @@ keyboard-access checklist.
 - WP6.2 合婚 between two saved profiles: 日柱 / 年柱 relations, 五行 complement, 生肖, its own prompt (every relationship
   type the same, never a prediction of a breakup).
 
+## S7 分享图 (medium → after S6)
+
+From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（分享图由服务端生成，带水印与免责声明）」).
+
+- WP7.1 Share a reading as an image:
+  - the server renders it, with a watermark and the disclaimer, never the app's screen;
+  - the app offers it through the system share sheet;
+  - a deep link back to the reading once the app is in the stores (the link needs S5's stored readings).
+  - First measure a renderer with CJK fonts on the server (G4): SVG through sharp/librsvg against a headless
+    browser, for fidelity, size and time.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S4 八字与全局 UI (done 2026-10-28: v3.1.0–v4.0.0)
+
+1. **Delivered**
+   - v3.1.0, WP4.1: 五行 colours that read on the cards in both themes (4.5 : 1 or more, pinned by a test); the 四柱
+     table opens on 十神, 天干 and 地支, the rest under 更多.
+   - v3.2.0, WP4.2: term tips.
+     - 63 plain explanations in three scripts, one source on the server, 繁體 reviewed (G18) and pinned by hash.
+     - Tap or Tab + Enter on any dotted term of the 命盘, or a card's ? button.
+     - 衰 病 死 墓 胎 got English names.
+   - v3.3.0, WP4.3: the timeline.
+     - 当前 and 今年 badges.
+     - Any 大运 opens its ten years (`dayun_years`, kept out of every prompt and out of the faithfulness check).
+     - 流月 shown.
+     - The twelve 节 in the term table.
+   - v3.4.0, WP4.5: a reading opens with its chart (the four pillars of a 八字 reading) and a jump list that opens a
+     section, brings it into view and moves the focus there.
+   - v3.5.0, WP4.6 + WP4.7: the two largest pages split into widget files (1029 → 460 and 637 → 315 lines); every
+     widget test scrolls through `scrollTo()` / `scrollToFinder()`, and a test keeps it so.
+   - v4.0.0, WP4.8: English names without pinyin in the table and the strips, which are wider in English with a
+     line per part; one-word names shrink instead of breaking.
+2. **Numbers**
+   - Server tests: 301 → 312. App tests: 103 → 121.
+   - The term table: 1.0.0 → 1.2.0 (5 stages, 11 节). Prompts unchanged: the 15 pinned hashes held, and no reading,
+     plan or life fixture changed in the stage.
+   - The sample chart's facts: 17.0k → 28.5k characters, all of it `dayun_years`, which no model reads.
+3. **Changed against the plan**
+   - WP4.4 (a 首页 entry for the 一生运势报告) was closed: the owner had put it inside 八字排盘 on 2026-10-27.
+     首页 already had 今日 and the recent readings.
+   - Sharing as an image left WP4.5. The owner's phase document wants it made on the server, with a watermark and
+     the disclaimer. It is S7 now (WP7.1), after S5, whose stored readings its deep link needs.
+   - WP4.6 dropped the tips on the life report (the owner's template, few 八字 terms, its 喜用 is the reading's),
+     and went out with WP4.7 as one code-health release.
+   - WP4.8 was found in WP4.2 and became the stage's last release.
+4. **Mistakes recorded**
+   - New:
+     - rule 32: `expect.any(String)` matches `''`;
+     - rule 33: a key built from a nullable id is a `ValueKey<String?>`;
+     - rule 34: look for an owner decision before building a plan item.
+   - Widened:
+     - rule 3: a border on a fixed box costs its text room, which only a render shows;
+     - rule 22: render the root layer to include a dialog;
+     - rule 27: `scrollToFinder`, and the test that enforces it;
+     - rule 29: a fact no prompt reads may stay out of the faithfulness check;
+     - rule 30: no `tsx -e`; check CJK text in a script.
+   - The rule 23 retry cost a second harness run at every release.
+   - What they teach:
+     - read why the app is as it is before changing it;
+     - check every assertion for what it would let through;
+     - look at a render, not only at the tests, whenever space is tight.
+5. **Next**: S5 数据持久化 (medium → v4.1.0): readings that survive a restart. Then S6 新玩法 (big → v5.0.0) and S7
+   分享图. WP1.8 still waits for a reference.
 
 ### S3 塔罗体验 (done 2026-10-28: v2.4.0–v3.0.0)
 
@@ -502,30 +574,31 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 
 ## Status
 
-| WP        | Status                     | Release         |
-| --------- | -------------------------- | --------------- |
-| WP1.1     | done                       | v1.3.0          |
-| WP1.2     | done                       | v1.3.0          |
-| WP1.3     | done                       | v1.3.0          |
-| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0          |
-| WP1.5     | done                       | v1.3.0          |
-| WP1.6     | done                       | v2.0.0          |
-| WP1.7     | done                       | v2.0.0          |
-| WP1.8     | waiting for a reference    | —               |
-| WP2.1     | done                       | v2.1.0          |
-| WP2.3     | done                       | v2.2.0          |
-| WP2.2     | done                       | v2.3.0          |
-| WP3.1     | done                       | v2.4.0          |
-| WP3.2     | done                       | v2.5.0          |
-| WP3.3     | done                       | v2.6.0          |
-| WP3.4     | done                       | v2.7.0          |
-| WP3.5     | done                       | v2.8.0          |
-| WP3.6     | done                       | v3.0.0          |
-| WP4.1     | done                       | v3.1.0          |
-| WP4.2     | done                       | v3.2.0          |
-| WP4.3     | done                       | v3.3.0          |
-| WP4.4     | closed (owner decision)    | —               |
-| WP4.5     | done                       | v3.4.0          |
-| WP4.6–4.7 | done                       | v3.5.0          |
-| WP4.8–4.9 | todo                       | v3.6.0 … v4.0.0 |
-| S5–S6     | todo                       | above           |
+| WP        | Status                     | Release |
+| --------- | -------------------------- | ------- |
+| WP1.1     | done                       | v1.3.0  |
+| WP1.2     | done                       | v1.3.0  |
+| WP1.3     | done                       | v1.3.0  |
+| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0  |
+| WP1.5     | done                       | v1.3.0  |
+| WP1.6     | done                       | v2.0.0  |
+| WP1.7     | done                       | v2.0.0  |
+| WP1.8     | waiting for a reference    | —       |
+| WP2.1     | done                       | v2.1.0  |
+| WP2.3     | done                       | v2.2.0  |
+| WP2.2     | done                       | v2.3.0  |
+| WP3.1     | done                       | v2.4.0  |
+| WP3.2     | done                       | v2.5.0  |
+| WP3.3     | done                       | v2.6.0  |
+| WP3.4     | done                       | v2.7.0  |
+| WP3.5     | done                       | v2.8.0  |
+| WP3.6     | done                       | v3.0.0  |
+| WP4.1     | done                       | v3.1.0  |
+| WP4.2     | done                       | v3.2.0  |
+| WP4.3     | done                       | v3.3.0  |
+| WP4.4     | closed (owner decision)    | —       |
+| WP4.5     | done                       | v3.4.0  |
+| WP4.6–4.7 | done                       | v3.5.0  |
+| WP4.8     | done                       | v4.0.0  |
+| WP4.9     | moved to S7 (WP7.1)        | —       |
+| S5–S7     | todo                       | above   |

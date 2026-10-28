@@ -30,6 +30,8 @@ class BaziChartPage extends ConsumerWidget {
     final terms = ref.watch(termsProvider).value;
     final b = chart.bazi;
     String t(String k) => terms?.t(k, locale) ?? k;
+    // For the table cells and the strips: English without its pinyin (v4.0.0).
+    String brief(String k) => terms?.short(k, locale) ?? k;
     String chars(String s) => s.characters.map(t).join();
     final title = personName.isEmpty ? l10n.homeBazi : l10n.chartOf(personName);
 
@@ -42,7 +44,7 @@ class BaziChartPage extends ConsumerWidget {
       AppCard(
         title: l10n.fourPillars,
         icon: Icons.grid_view_rounded,
-        child: _PillarGrid(chart: b, t: t),
+        child: _PillarGrid(chart: b, t: t, brief: brief),
       ),
       AppCard(
         key: const Key('lunar-card'),
@@ -130,16 +132,18 @@ class BaziChartPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final r in b.relations)
+                // The narrow label column takes the brief form; the tip keeps the full name (v4.0.0).
                 _KV(
-                  t(r.type),
+                  brief(r.type),
                   '${r.members.map((m) => '${l10n.pillar(m.$1)}${m.$2}').join(' · ')}'
                       '${r.element == null ? '' : '（${t(r.element!)}）'}',
                   tip: r.type,
+                  tipTitle: t(r.type),
                 ),
             ],
           ),
         ),
-      _DayunCard(chart: b, t: t),
+      _DayunCard(chart: b, t: t, brief: brief),
       AppCard(
         title: l10n.liunian,
         icon: Icons.calendar_view_month,
@@ -147,7 +151,7 @@ class BaziChartPage extends ConsumerWidget {
         child: _Timeline(
           key: const Key('liunian-strip'),
           label: l10n.liunian,
-          items: [for (final y in b.liunian) _yearStep(y, t, l10n, b.thisYear)],
+          items: [for (final y in b.liunian) _yearStep(y, brief, l10n, b.thisYear, english: locale == 'en')],
         ),
       ),
       // 流月 of the chart's year, from 立春 (facts since v1.3.0, shown since v3.3.0).
@@ -162,13 +166,15 @@ class BaziChartPage extends ConsumerWidget {
             label: t('流月'),
             items: [
               for (final m in b.liuyue)
-                // When it begins (the date, 北京时间), the 节 it begins on, its 十神.
-                _Step(
-                  m.ganzhi,
+                // When it begins (the date, 北京时间), the 节 it begins on, its 十神; English gives
+                // each 十神 its own line.
+                _Step(m.ganzhi, [
                   m.starts.substring(0, 10),
-                  line2: t(m.jie),
-                  line3: '${t(m.shishenGan)} / ${t(m.shishenZhi)}',
-                ),
+                  brief(m.jie),
+                  ...locale == 'en'
+                      ? [brief(m.shishenGan), brief(m.shishenZhi)]
+                      : ['${t(m.shishenGan)} / ${t(m.shishenZhi)}'],
+                ]),
             ],
           ),
         ),
@@ -205,12 +211,15 @@ class BaziChartPage extends ConsumerWidget {
 }
 
 class _KV extends StatelessWidget {
-  const _KV(this.k, this.v, {this.tip});
+  const _KV(this.k, this.v, {this.tip, this.tipTitle});
   final String k;
   final String v;
 
   /// The term [k] names, when tapping it explains it (a relation type).
   final String? tip;
+
+  /// The tip's title, when [k] is a brief form.
+  final String? tipTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +232,7 @@ class _KV extends StatelessWidget {
             width: 64,
             child: tip == null
                 ? Text(k, style: style)
-                : Align(alignment: Alignment.centerLeft, child: TermTip(tip!, k, style: style)),
+                : Align(alignment: Alignment.centerLeft, child: TermTip(tip!, k, title: tipTitle, style: style)),
           ),
           Expanded(child: Text(v, style: Theme.of(context).textTheme.bodyLarge)),
         ],
@@ -235,9 +244,12 @@ class _KV extends StatelessWidget {
 /// The four pillars: 十神, 天干 and 地支 always; 藏干, its 十神, 长生 and 纳音 under 更多 (v3.1.0),
 /// so the first look is the chart itself.
 class _PillarGrid extends StatefulWidget {
-  const _PillarGrid({required this.chart, required this.t});
+  const _PillarGrid({required this.chart, required this.t, required this.brief});
   final BaziChart chart;
   final String Function(String) t;
+
+  /// The cells' form of a term (English without its pinyin); [t] titles its tip.
+  final String Function(String) brief;
 
   @override
   State<_PillarGrid> createState() => _PillarGridState();
@@ -250,6 +262,9 @@ class _PillarGridState extends State<_PillarGrid> {
   Widget build(BuildContext context) {
     final chart = widget.chart;
     final t = widget.t;
+    // A cell's term: the brief form, the full one as its tip's title, one word never broken.
+    Widget term(String k, {TextStyle? style}) =>
+        TermTip(k, widget.brief(k), title: t(k), style: style, textAlign: TextAlign.center, shrinkOneWord: true);
     final l10n = AppLocalizations.of(context);
     final p = [for (final k in BaziChart.pillarOrder) chart.pillars[k]!];
     final small = Theme.of(context).textTheme.bodySmall;
@@ -277,7 +292,7 @@ class _PillarGridState extends State<_PillarGrid> {
             children: [
               row('', (x) => Text(l10n.pillar(BaziChart.pillarOrder[p.indexOf(x)]), style: small), shaded: true),
               // Each 十神 and 长生 opens its tip (v3.2.0); the day pillar's own cell is 日主.
-              row(l10n.rowTenGod, (x) => TermTip(x.shishenGan, t(x.shishenGan), textAlign: TextAlign.center), tip: '十神'),
+              row(l10n.rowTenGod, (x) => term(x.shishenGan), tip: '十神'),
               row(l10n.rowStem, (x) => GanZhiText(x.gan, size: 30), tip: '天干'),
               row(l10n.rowBranch, (x) => GanZhiText(x.zhi, size: 30), tip: '地支'),
               // Coloured 藏干 lie on the card itself, not a shaded row: small text keeps its contrast.
@@ -288,11 +303,11 @@ class _PillarGridState extends State<_PillarGrid> {
                   (x) => Wrap(
                     alignment: WrapAlignment.center,
                     spacing: Space.xs,
-                    children: [for (final s in x.shishenZhi) TermTip(s, t(s), style: small, textAlign: TextAlign.center)],
+                    children: [for (final s in x.shishenZhi) term(s, style: small)],
                   ),
                   tip: '十神',
                 ),
-                row(l10n.rowLifeStage, (x) => TermTip(x.dishi, t(x.dishi), textAlign: TextAlign.center), tip: '十二长生'),
+                row(l10n.rowLifeStage, (x) => term(x.dishi), tip: '十二长生'),
                 row(l10n.rowNayin, (x) => Text(t(x.nayin), style: small), tip: '纳音'),
               ],
             ],
@@ -352,9 +367,12 @@ class _WuxingBar extends StatelessWidget {
 /// 大运: the one running now is marked 当前; tapping one opens its ten years under the strip
 /// (v3.3.0).
 class _DayunCard extends StatefulWidget {
-  const _DayunCard({required this.chart, required this.t});
+  const _DayunCard({required this.chart, required this.t, required this.brief});
   final BaziChart chart;
   final String Function(String) t;
+
+  /// The strips' form of a term (English without its pinyin).
+  final String Function(String) brief;
 
   @override
   State<_DayunCard> createState() => _DayunCardState();
@@ -395,8 +413,7 @@ class _DayunCardState extends State<_DayunCard> {
               for (final c in b.cycles)
                 _Step(
                   c.ganzhi,
-                  '${c.startYear}',
-                  line2: l10n.age(c.xusui),
+                  ['${c.startYear}', l10n.age(c.xusui)],
                   badge: c.index == b.currentDayun ? l10n.timelineNow : null,
                   selected: c.index == _open,
                   id: 'dayun-${c.index}',
@@ -421,7 +438,10 @@ class _DayunCardState extends State<_DayunCard> {
             _Timeline(
               key: ValueKey('decade-${open.index}'),
               label: l10n.dayunYears(open.ganzhi, open.startYear, open.startYear + 9),
-              items: [for (final y in years) _yearStep(y, t, l10n, b.thisYear)],
+              items: [
+                for (final y in years)
+                  _yearStep(y, widget.brief, l10n, b.thisYear, english: Localizations.localeOf(context).languageCode == 'en'),
+              ],
             ),
           ],
         ],
@@ -431,30 +451,35 @@ class _DayunCardState extends State<_DayunCard> {
 }
 
 /// A 流年 in a strip: 干支, year and 虚岁, its 十神, its 六冲 / 六合 with the chart; 今年 marked.
-_Step _yearStep(Liunian y, String Function(String) t, AppLocalizations l10n, int? thisYear) => _Step(
-      y.ganzhi,
-      '${y.year} · ${l10n.age(y.xusui)}',
-      line2: '${t(y.shishenGan)} / ${t(y.shishenZhi)}',
-      // 時柱六合, or Hour Six Harmonies (English read YearSix Clashes before v3.3.0).
-      line3: y.relations.map((r) => l10n.pillarRelation(l10n.pillar(r.pillar), t(r.type))).join(' '),
-      badge: y.year == thisYear ? l10n.timelineThisYear : null,
-    );
+/// English gives the year, the 虚岁 and each 十神 a line of their own, so none is cut off (v4.0.0).
+_Step _yearStep(Liunian y, String Function(String) brief, AppLocalizations l10n, int? thisYear, {required bool english}) {
+  // 時柱六合, or Hour Six Harmonies (English read YearSix Clashes before v3.3.0).
+  final relations = y.relations.map((r) => l10n.pillarRelation(l10n.pillar(r.pillar), brief(r.type))).join(' ');
+  return _Step(
+    y.ganzhi,
+    [
+      ...english
+          ? ['${y.year}', l10n.age(y.xusui), brief(y.shishenGan), brief(y.shishenZhi)]
+          : ['${y.year} · ${l10n.age(y.xusui)}', '${brief(y.shishenGan)} / ${brief(y.shishenZhi)}'],
+      if (relations.isNotEmpty) relations,
+    ],
+    badge: y.year == thisYear ? l10n.timelineThisYear : null,
+  );
+}
 
 class _Step {
   const _Step(
     this.ganzhi,
-    this.line1, {
-    this.line2 = '',
-    this.line3 = '',
+    this.lines, {
     this.badge,
     this.id,
     this.onTap,
     this.selected = false,
   });
   final String ganzhi;
-  final String line1;
-  final String line2;
-  final String line3;
+
+  /// The caption lines under the 干支, at most five (the strip is sized for them).
+  final List<String> lines;
 
   /// A label on the top edge: 当前 (the 大运 running now) or 今年.
   final String? badge;
@@ -481,9 +506,6 @@ class _Timeline extends StatefulWidget {
 class _TimelineState extends State<_Timeline> {
   final _scroll = ScrollController();
 
-  /// One item and its gap.
-  static const _step = 96.0 + Space.s;
-
   @override
   void dispose() {
     _scroll.dispose();
@@ -507,11 +529,15 @@ class _TimelineState extends State<_Timeline> {
     final scheme = theme.colorScheme;
     // Room above the items for a badge on their top edge.
     final top = items.any((s) => s.badge != null) ? 10.0 : 0.0;
+    // English words are longer: wider items, so 「nominal age 37」 and 「Indirect Resource」 fit (v4.0.0).
+    final width = Localizations.localeOf(context).languageCode == 'en' ? 128.0 : 96.0;
+    // One item and its gap: what ←/→ move.
+    final step = width + Space.s;
     Widget line(String s) =>
         Text(s, style: small, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis);
     Widget item(_Step s) {
       Widget box = Container(
-        width: 96,
+        width: width,
         // The 2 px border comes out of the padding, so the text keeps its 80 px (2026 · 虛歲 37).
         padding: const EdgeInsets.symmetric(horizontal: Space.s - 2, vertical: Space.m - 2),
         decoration: BoxDecoration(
@@ -524,9 +550,8 @@ class _TimelineState extends State<_Timeline> {
           children: [
             GanZhiText(s.ganzhi, size: 22),
             const SizedBox(height: Space.xs),
-            line(s.line1),
-            if (s.line2.isNotEmpty) line(s.line2),
-            if (s.line3.isNotEmpty) line(s.line3),
+            for (final text in s.lines)
+              if (text.isNotEmpty) line(text),
           ],
         ),
       );
@@ -558,13 +583,13 @@ class _TimelineState extends State<_Timeline> {
     return Pressable(
       label: widget.label,
       keys: {
-        const SingleActivator(LogicalKeyboardKey.arrowRight): () => _go((p) => p.pixels + _step),
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => _go((p) => p.pixels - _step),
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => _go((p) => p.pixels + step),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => _go((p) => p.pixels - step),
         const SingleActivator(LogicalKeyboardKey.home): () => _go((p) => p.minScrollExtent),
         const SingleActivator(LogicalKeyboardKey.end): () => _go((p) => p.maxScrollExtent),
       },
       child: SizedBox(
-        // Room for 干支 + three caption lines (流年: year·age, 十神, 沖合), and a badge.
+        // Room for 干支 + up to five caption lines (English 流年: year, age, two 十神, 沖合), and a badge.
         height: 144 + top,
         child: ListView.separated(
           controller: _scroll,

@@ -2,6 +2,18 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (x): S4 WP4.8, English names that fit; S4 summary; release v4.0.0
+
+- v3.5.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (3b9a904).
+- WP4.8:
+  - `Terms.short` (English minus its trailing pinyin) is a rule over the one term table, so there is no second name list. Abbreviations (DR, 7K) were set aside because they would need names other than the table's.
+  - `TermTip(shrinkOneWord:)` puts a one-word name in a `FittedBox(scaleDown)`; several words still wrap.
+  - Strips: 128 px in English with a line per part (`_Step.lines`); ←/→ step by the width. The zh-Hant keyboard test keeps its 104 px.
+  - Checked by rendering the English page; the relations labels then got the brief form too.
+- The release is v4.0.0, not v3.6.0. WP4.9 (the share image) moved to a new stage, S7, because it needs a server renderer and S5's stored readings, so WP4.8 was S4's last WP. The code comments said v3.6.0 and were changed.
+- S4 summary written. Since v3.0.0 no reading, plan, life or review fixture and no prompt changed (git diff checked).
+- v4.0.0: harness on the final tree, then committed, tagged and pushed with v3.1.0–v3.5.0.
+
 ## 2026-10-28 (w): S4 WP4.6 + WP4.7, code health; release v3.5.0
 
 - v3.4.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (c05a1ee).

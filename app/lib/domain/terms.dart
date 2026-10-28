@@ -67,6 +67,13 @@ class Terms {
   /// Display form of an engine term (simplified canonical key) for an API locale.
   String t(String key, String apiLocale) => _terms[key]?[apiLocale] ?? key;
 
+  /// [t] for a tight place (a table cell, a strip): English drops the pinyin, Companion for
+  /// Companion (Bi Jian); titles and tips keep the full form. Chinese is the same (v4.0.0).
+  String short(String key, String apiLocale) {
+    final full = t(key, apiLocale);
+    return apiLocale == 'en' ? full.replaceFirst(RegExp(r'\s*\([^)]*\)$'), '') : full;
+  }
+
   String card(String cardId, String apiLocale) => _cards[cardId]?[apiLocale] ?? cardId;
 
   String position(String key, String apiLocale) => _positions[key]?[apiLocale] ?? key;

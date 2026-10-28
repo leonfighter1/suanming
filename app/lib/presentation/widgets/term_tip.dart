@@ -26,7 +26,16 @@ Future<void> showTermTip(BuildContext context, String title, String tip) => show
 /// (term_tips.json, synced from src/ai/term-tips.ts). It is underlined with dots; a term without a
 /// tip stays plain text.
 class TermTip extends ConsumerWidget {
-  const TermTip(this.term, this.label, {super.key, this.title, this.style, this.textAlign, this.pill = false});
+  const TermTip(
+    this.term,
+    this.label, {
+    super.key,
+    this.title,
+    this.style,
+    this.textAlign,
+    this.pill = false,
+    this.shrinkOneWord = false,
+  });
 
   /// The term as the engine writes it (simplified), e.g. 七杀.
   final String term;
@@ -42,21 +51,29 @@ class TermTip extends ConsumerWidget {
   /// Shown as a [Pill] (旺衰, 神煞, 空亡, 胎元).
   final bool pill;
 
+  /// In a narrow cell: a label of one word shrinks to fit rather than break mid-word
+  /// (Conception); labels of several words still wrap between them (v4.0.0).
+  final bool shrinkOneWord;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tip = _tipOf(ref, term);
-    if (tip.isEmpty) return pill ? Pill(label) : Text(label, style: style, textAlign: textAlign);
+    Widget fit(Widget text) =>
+        shrinkOneWord && !label.contains(' ') ? FittedBox(fit: BoxFit.scaleDown, child: text) : text;
+    if (tip.isEmpty) return pill ? Pill(label) : fit(Text(label, style: style, textAlign: textAlign));
     return Pressable(
       key: Key('tip-$term'),
       onPressed: () => showTermTip(context, title ?? label, tip),
       child: pill
           ? Pill(label, dotted: true)
-          : Text(
-              label,
-              textAlign: textAlign,
-              style: (style ?? const TextStyle()).copyWith(
-                decoration: TextDecoration.underline,
-                decorationStyle: TextDecorationStyle.dotted,
+          : fit(
+              Text(
+                label,
+                textAlign: textAlign,
+                style: (style ?? const TextStyle()).copyWith(
+                  decoration: TextDecoration.underline,
+                  decorationStyle: TextDecorationStyle.dotted,
+                ),
               ),
             ),
     );

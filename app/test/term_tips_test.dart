@@ -27,6 +27,14 @@ Finder inTip(String text) => find.descendant(of: tipDialog, matching: find.textC
 Finder inGrid(String text) => find.descendant(of: find.byKey(const Key('pillar-grid')), matching: find.text(text));
 
 void main() {
+  test('the brief form (v4.0.0): English without its pinyin, Chinese as it is', () {
+    expect(testTerms.short('伤官', 'en'), 'Hurting Officer'); // Hurting Officer (Shang Guan)
+    expect(testTerms.short('病', 'en'), 'Sickness'); // Sickness (Bing)
+    expect(testTerms.short('日主', 'en'), 'Day Master'); // no pinyin to drop
+    expect(testTerms.short('伤官', 'zh-Hant'), '傷官');
+    expect(testTerms.short('伤官', 'zh-Hans'), '伤官');
+  });
+
   testWidgets('a tapped term opens its tip in 繁體; 關閉 closes it', (tester) async {
     await openChart(tester);
     // 年干 庚 is yang 金, which 己 土 generates, of the opposite yin/yang: 傷官.
@@ -65,10 +73,12 @@ void main() {
     await openChart(tester, locale: const Locale('en'));
     await tester.tap(find.byKey(const Key('pillar-more')));
     await frames(tester);
-    // 病 had no English name before v3.2.0 and showed as 病.
-    expect(inGrid('Sickness (Bing)'), findsNWidgets(2));
-    await tester.tap(inGrid('Sickness (Bing)').first);
+    // 病 had no English name before v3.2.0 and showed as 病. Since v4.0.0 the cell drops the pinyin
+    // (WP4.8); the tip's title keeps the full name.
+    expect(inGrid('Sickness'), findsNWidgets(2));
+    await tester.tap(inGrid('Sickness').first);
     await frames(tester);
+    expect(inTip('Sickness (Bing)'), findsOneWidget);
     expect(inTip('a time to rest (not illness)'), findsOneWidget);
     await tester.tap(find.descendant(of: tipDialog, matching: find.text('Close')));
     await frames(tester);

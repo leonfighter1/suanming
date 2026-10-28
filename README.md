@@ -12,6 +12,36 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v4.0.0 (2026-10-28): 八字与全局 UI, complete: the English 命盘 reads cleanly
+
+Stage S4 of the [tech plan](docs/tech-plan.md) is complete: work package 4.8 here, 4.1–4.7 in v3.1.0–v3.5.0. The
+stage summary is in the plan under 阶段总结. A big update: pushed, together with every update since v3.1.0.
+
+- English 命盘: names no longer break in the middle of a word.
+  - The 四柱 table and the strips show each name without its pinyin: Hurting Officer, not Hurting Officer (Shang
+    Guan). Tap it, and the explanation's title gives the full name.
+  - A name of one word (Companion, Conception) shrinks a little to fit its cell.
+  - The 大运, 流年 and 流月 strips are wider in English. A 流年 shows its year, its nominal age and each 十神 on a
+    line of their own, so none is cut off.
+  - The 刑冲合害 labels drop the pinyin too.
+- Chinese pages are unchanged.
+- Stage S4 in short (v3.1.0–v4.0.0):
+  - 五行 colours you can read, in light and dark mode. The 四柱 table opens on what matters first.
+  - Tap any dotted term of the 命盘 for what it means, in plain words.
+  - The timeline:
+    - 当前 marks the 大运 you are in, and 今年 this year;
+    - any 大运 opens its ten years;
+    - 流月 for the year.
+  - A reading opens with your chart, and a jump list leads to each section.
+  - Behind the scenes: the two largest pages split up, and every test scrolls the same careful way.
+  - Not built, at your word: a separate 首页 entry for the 一生运势报告 (it stays inside 八字排盘, as you asked).
+  - Moved to a later stage: sharing a reading as an image, made on the server with a watermark and the disclaimer,
+    as your phase document asks.
+- Readings did not change in this stage: the AI reads the same facts as before, and its prompts are unchanged.
+- Verified:
+  - 2 new app tests: the English strips (wider items, a line per part) and the brief form of a name.
+  - All 312 server tests and 121 app tests pass; harness PASS on the final tree.
+
 ### v3.5.0 (2026-10-28): code health, no visible change
 
 Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work packages 4.6 and 4.7. A medium update:
