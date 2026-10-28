@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
@@ -30,6 +30,7 @@
     "api:public": "tsx scripts/api-server.ts --public",
     "public": "tsx scripts/public.ts",
     "build:yijing": "tsx scripts/build-yijing.ts",
+    "build:tarot-keywords": "tsx scripts/build-tarot-keywords.ts",
     "mirror:tarot": "tsx scripts/mirror-tarot-art.ts"
   },
   "dependencies": {

@@ -5,7 +5,7 @@
 1. Audit verification must check the stored record itself, not only a fresh recomputation.
 2. Exclude script-generated files from formatters and linters when the script that creates them is added.
 3. Size fixed-height cells for the maximum number of lines they can show, and cap every line with maxLines + ellipsis.
-4. Give tests with heavy runtime start-up (WASM, browsers) an explicit timeout instead of relying on the 5 s default.
+4. Give heavy tests (WASM or browser start-up, sweeps over a whole dataset) an explicit timeout instead of relying on the 5 s default: a synchronous test can't be stopped, so it fails after finishing late under parallel load (the places sweep, v2.7.0: 2.5 s alone, 9.8 s in the full suite).
 5. Before treating a statistical test failure as a bug, check the test's null hypothesis matches how the process is supposed to behave.
 6. After touching a web-only (js_interop) file, run flutter build web before calling it done; the harness app gate does this.
 7. Buttons placed in a Row, Wrap or dialog action bar must use compactButtons() (or an explicit minimumSize); the app theme makes them full-width.

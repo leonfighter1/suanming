@@ -38,6 +38,7 @@ import {
   POSITION_MEANINGS,
   SPREADS,
 } from "../src/engines/tarot/deck.js";
+import { KEYWORDS } from "../src/engines/tarot/keywords.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
@@ -204,6 +205,8 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       position_meanings: POSITION_MEANINGS,
       // Each spread's positions in dealing order, so the picker can show them before a draw.
       spreads: SPREADS,
+      // Each card's three keywords, as painted on the art (牌义图鉴, v2.7.0).
+      keywords: KEYWORDS,
     },
     "app/test/fixtures/chart_bazi.json": {
       chart_id: "22222222-2222-4222-8222-222222222222",

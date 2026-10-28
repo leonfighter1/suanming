@@ -221,6 +221,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spreadCeltic => 'Celtic Cross (10 cards)';
 
   @override
+  String get tarotGlossary => 'Card meanings';
+
+  @override
+  String get glossaryMajor => 'Major arcana';
+
+  @override
+  String get glossaryWands => 'Wands';
+
+  @override
+  String get glossaryCups => 'Cups';
+
+  @override
+  String get glossarySwords => 'Swords';
+
+  @override
+  String get glossaryPentacles => 'Pentacles';
+
+  @override
+  String get glossaryKeywords => 'Keywords on the card';
+
+  @override
   String get dailyCard => 'Card of the day';
 
   @override

@@ -501,6 +501,48 @@ abstract class AppLocalizations {
   /// **'Celtic Cross (10 cards)'**
   String get spreadCeltic;
 
+  /// No description provided for @tarotGlossary.
+  ///
+  /// In en, this message translates to:
+  /// **'Card meanings'**
+  String get tarotGlossary;
+
+  /// No description provided for @glossaryMajor.
+  ///
+  /// In en, this message translates to:
+  /// **'Major arcana'**
+  String get glossaryMajor;
+
+  /// No description provided for @glossaryWands.
+  ///
+  /// In en, this message translates to:
+  /// **'Wands'**
+  String get glossaryWands;
+
+  /// No description provided for @glossaryCups.
+  ///
+  /// In en, this message translates to:
+  /// **'Cups'**
+  String get glossaryCups;
+
+  /// No description provided for @glossarySwords.
+  ///
+  /// In en, this message translates to:
+  /// **'Swords'**
+  String get glossarySwords;
+
+  /// No description provided for @glossaryPentacles.
+  ///
+  /// In en, this message translates to:
+  /// **'Pentacles'**
+  String get glossaryPentacles;
+
+  /// No description provided for @glossaryKeywords.
+  ///
+  /// In en, this message translates to:
+  /// **'Keywords on the card'**
+  String get glossaryKeywords;
+
   /// No description provided for @dailyCard.
   ///
   /// In en, this message translates to:

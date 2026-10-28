@@ -210,6 +210,15 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
       large and an AI reading request; a Tab stop after `entry-tarot`. `tabTo` moved into `test/keys.dart`.
 - WP3.4 牌义图鉴: all 78 cards with their art and keywords (from the art; 繁 by OpenCC and checked by G18; English
   written to the RWS meanings), one source in `deck.ts`.
+  - As built (v2.7.0):
+    - `npm run build:tarot-keywords` reads the keywords painted on each card from JingyaoPaint's card code (majors
+      by `number`, minors from `_meanings[suit][rank]`; 3 per card, all 78 checked) into `data/tarot/keywords.json`.
+      简体 is as painted; 繁體 is OpenCC cn → tw, with every one-to-many character listed for review (G18).
+    - Review: of 234 keywords, one fix (疗愈 → 療癒, OpenCC kept 愈), kept in `HANT_FIXES` and pinned by a test.
+    - English in `keywords-en.ts`. `KEYWORDS` (`src/engines/tarot/keywords.ts`, beside deck.ts: deck.ts has no
+      file reads and the build script needs it) is the one source, synced into tarot_deck.json.
+    - App: `TarotGlossaryPage` from the 塔罗 bar, the deck in five groups, each card a `Pressable` opening its art
+      large with the keywords.
 - WP3.5 More spreads: 二选一 (five cards) and 关系牌阵 (six), with positions, meanings, layouts and their method in
   the tarot prompt.
 - WP3.6 洗牌 → 切牌 → 选牌: the engine still shuffles; the user's picks are positions in the seeded deck, stored in
@@ -316,21 +325,22 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 
 ## Status
 
-| WP        | Status                     | Release         |
-| --------- | -------------------------- | --------------- |
-| WP1.1     | done                       | v1.3.0          |
-| WP1.2     | done                       | v1.3.0          |
-| WP1.3     | done                       | v1.3.0          |
-| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0          |
-| WP1.5     | done                       | v1.3.0          |
-| WP1.6     | done                       | v2.0.0          |
-| WP1.7     | done                       | v2.0.0          |
-| WP1.8     | waiting for a reference    | —               |
-| WP2.1     | done                       | v2.1.0          |
-| WP2.3     | done                       | v2.2.0          |
-| WP2.2     | done                       | v2.3.0          |
-| WP3.1     | done                       | v2.4.0          |
-| WP3.2     | done                       | v2.5.0          |
-| WP3.3     | done                       | v2.6.0          |
-| WP3.4–3.6 | todo                       | v2.7.0 … v3.0.0 |
-| S4–S6     | todo                       | above           |
+| WP        | Status                     | Release        |
+| --------- | -------------------------- | -------------- |
+| WP1.1     | done                       | v1.3.0         |
+| WP1.2     | done                       | v1.3.0         |
+| WP1.3     | done                       | v1.3.0         |
+| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0         |
+| WP1.5     | done                       | v1.3.0         |
+| WP1.6     | done                       | v2.0.0         |
+| WP1.7     | done                       | v2.0.0         |
+| WP1.8     | waiting for a reference    | —              |
+| WP2.1     | done                       | v2.1.0         |
+| WP2.3     | done                       | v2.2.0         |
+| WP2.2     | done                       | v2.3.0         |
+| WP3.1     | done                       | v2.4.0         |
+| WP3.2     | done                       | v2.5.0         |
+| WP3.3     | done                       | v2.6.0         |
+| WP3.4     | done                       | v2.7.0         |
+| WP3.5–3.6 | todo                       | v2.8.0, v3.0.0 |
+| S4–S6     | todo                       | above          |

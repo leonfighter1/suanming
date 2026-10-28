@@ -2,6 +2,17 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (p): S3 WP3.4, 牌义图鉴; release v2.7.0
+
+- v2.6.0: harness PASS after the rule 23 retry; committed and tagged.
+- WP3.4:
+  - Keywords from the art: JingyaoPaint's card code (`keywords:` on each major, `_meanings` for the minors) → `build-tarot-keywords.ts` → `data/tarot/keywords.json` (ignored by prettier, rule P2).
+  - 繁體 by OpenCC with a G18 review list. I reviewed all 234: one fix, 疗愈 → 療癒, which my one-to-many list had missed until I read the full output.
+  - English in `keywords-en.ts`; `KEYWORDS` in `keywords.ts`; synced as `keywords` in tarot_deck.json (`Terms.keywords`, `Terms.cardIds`).
+  - `TarotGlossaryPage` from the 塔罗 bar.
+- Failure fixed: places.test's sweep (sync) passed alone in 2.5 s but finished at 9.8 s in the full run and failed the 5 s default. It now has an explicit 30 s timeout; rule 4 widened in place to cover dataset sweeps.
+- v2.7.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (o): S3 WP3.3, 每日一牌; release v2.6.0
 
 - v2.5.0: harness PASS after the rule 23 retry; committed and tagged.

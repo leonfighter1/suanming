@@ -9,6 +9,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
+import 'tarot_glossary_page.dart';
 import 'widgets/report_request.dart';
 import 'widgets/tarot_spread.dart';
 
@@ -78,7 +79,19 @@ class _TarotPageState extends ConsumerState<TarotPage> {
       child: SubmitShortcut(
         onSubmit: _busy || chart != null ? null : _draw,
         child: Scaffold(
-          appBar: AppBar(title: Text(l10n.homeTarot)),
+          appBar: AppBar(
+            title: Text(l10n.homeTarot),
+            actions: [
+              // 牌义图鉴: all 78 cards with their art and keywords (v2.7.0).
+              IconButton(
+                key: const Key('open-glossary'),
+                tooltip: l10n.tarotGlossary,
+                icon: const Icon(Icons.menu_book_outlined),
+                onPressed: () =>
+                    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TarotGlossaryPage())),
+              ),
+            ],
+          ),
           body: ListView(
             padding: Space.page,
             children: [

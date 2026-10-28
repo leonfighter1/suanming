@@ -51,7 +51,8 @@ describe("birthplace gazetteer (data/places)", () => {
     for (const tz of zones) {
       expect(() => new Intl.DateTimeFormat("en", { timeZone: tz }), tz).not.toThrow();
     }
-  });
+    // A sweep of every city: 2.5 s alone, near 10 s with the whole suite in parallel (rule 4).
+  }, 30_000);
 
   it("a picked city computes a chart (timezone + longitude flow into 真太陽時)", () => {
     const gz = placeCountry("CN")!

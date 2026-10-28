@@ -215,6 +215,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spreadCeltic => '凯尔特十字（10 张）';
 
   @override
+  String get tarotGlossary => '牌义图鉴';
+
+  @override
+  String get glossaryMajor => '大阿尔卡那';
+
+  @override
+  String get glossaryWands => '权杖';
+
+  @override
+  String get glossaryCups => '圣杯';
+
+  @override
+  String get glossarySwords => '宝剑';
+
+  @override
+  String get glossaryPentacles => '星币';
+
+  @override
+  String get glossaryKeywords => '牌面关键词';
+
+  @override
   String get dailyCard => '今日一牌';
 
   @override
@@ -1335,6 +1356,27 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get spreadCeltic => '凱爾特十字（10 張）';
+
+  @override
+  String get tarotGlossary => '牌義圖鑑';
+
+  @override
+  String get glossaryMajor => '大阿爾卡那';
+
+  @override
+  String get glossaryWands => '權杖';
+
+  @override
+  String get glossaryCups => '聖杯';
+
+  @override
+  String get glossarySwords => '寶劍';
+
+  @override
+  String get glossaryPentacles => '星幣';
+
+  @override
+  String get glossaryKeywords => '牌面關鍵詞';
 
   @override
   String get dailyCard => '今日一牌';

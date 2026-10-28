@@ -12,6 +12,28 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.7.0 (2026-10-28): 牌义图鉴, the whole deck
+
+Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.4. A medium update: committed locally,
+pushed with v3.0.0.
+
+- 塔罗 page: a new button 「牌义图鉴」 in the top bar opens the whole deck.
+  - The 78 cards, in the deck's order: the 22 of the major arcana, then 权杖, 圣杯, 宝剑 and 星币, 14 each, every one
+    with its art and name.
+  - Touching a card opens it large with the three keywords painted on it (for example 星星: 希望、信心、疗愈).
+- The keywords
+  - In 简体 they are exactly the ones on the card art.
+  - The 繁體 is converted and then checked by hand, as with the card names. One was corrected: 疗愈 is 療癒.
+  - English is written to the classic Rider–Waite–Smith meanings (the Star: hope, faith, healing).
+- Keyboard: every card is a Tab stop; Enter opens it and Esc closes it.
+- Fixed: a server test that checks every city of the place list could fail when the whole suite ran at once (it
+  took 10 s instead of 2.5 s); it now has its own time limit.
+- Verified:
+  - 3 new server tests: 3 keywords for every card in every script; the 繁體 as converted except the reviewed fix;
+    a few cards as painted.
+  - 2 new app tests: the deck in its groups, a card's keywords in 繁體; Tab, Enter and Esc.
+  - All 295 server tests and 99 app tests pass; harness PASS.
+
 ### v2.6.0 (2026-10-28): 每日一牌, a card for the day
 
 Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.3. A medium update: committed locally,
