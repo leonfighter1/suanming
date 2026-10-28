@@ -33,6 +33,8 @@ extension ApiLabels on AppLocalizations {
         'month' => pillarMonth,
         'day' => pillarDay,
         'hour' => pillarHour,
+        'dayun' => dayun,
+        'liunian' => liunian,
         _ => p,
       };
 }

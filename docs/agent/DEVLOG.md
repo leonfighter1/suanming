@@ -2,6 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (h): tech plan and dev-workflow skill; S1 part 1, release v1.3.0
+
+- Owner: turn the review into a technical plan in stages, write a stage summary after each big stage, version by size (big X.0.0, medium X.Y.0, small X.Y.Z), push only big updates and only after a fresh harness PASS, describe every update in the README, never forget past mistakes, then work through the plan. Written: docs/tech-plan.md (stages S1–S6) and .claude/skills/dev-workflow (the finishing steps moved there from keyboard-access); CLAUDE.md points to both; memory updated (push rule).
+- S1 WP1.1–1.5: 虚岁 on every 大运 / 流年 and in every display; `lunar_pillar_day` for the 本命卦; relations.ts (all 合冲刑害破, natal, 大运, 流年); shensha.ts (神煞, 空亡, 胎元, 流月); the 子时 switch. Schema: new optional properties only. 20 new protected terms.
+- 命宫 / 身宫 deferred to WP1.8: two derivations of the formula disagreed and there was no reference to check against.
+- Mistakes: a test scrolled past lazily built cards (rule 25); the app's term table was stale after editing i18n/terms.json (rule 26). Two of my own expectations were wrong before the first run (寅申 冲 missed; 庚 against 己 is 伤官); re-deriving by hand caught them, not the run.
+- v1.3.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-27 (g): 塔罗 the classic way; each method separate; release v1.2.0
 
 - Owner: check the tarot rules (above all the Celtic Cross layout, the classic order and method) and fix the UI and AI prompts. While at it: phones may use thumbnails opened large to turn, iPad and desktop show everything; and every method must stay separate, never affecting another.

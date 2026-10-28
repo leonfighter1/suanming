@@ -5,6 +5,8 @@ import {
   type ChartFact,
   type Provenance,
 } from "../../chart-fact/index.js";
+import { natalRelations, periodRelations } from "./relations.js";
+import { kongWang, liuyue, natalShensha, periodShensha, taiYuan } from "./shensha.js";
 import {
   beijingMs,
   formatWallClock,
@@ -192,6 +194,8 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     counts[ZHI_MAIN_WUXING[p.zhi]!]! += 1;
   }
 
+  const natal = { year, month, day, hour };
+  const birthYear = Number(input.local.slice(0, 4));
   const yun = instant.getYun(input.gender === "male" ? 1 : 0, 2);
   const cycles = yun
     .getDaYun(9)
@@ -201,10 +205,12 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       ganzhi: d.getGanZhi(),
       start_year: d.getStartYear(),
       start_age: d.getStartAge(),
+      // 虚岁 from the civil birth year, the count 流年 age_xu uses too (WP1.1).
+      start_age_xu: d.getStartYear() - birthYear + 1,
+      relations: periodRelations(natal, { place: "dayun", ganzhi: d.getGanZhi() }),
+      shensha: periodShensha(natal, d.getGanZhi()[1]!),
     }));
 
-  const natal = { year, month, day, hour };
-  const birthYear = Number(input.local.slice(0, 4));
   const liunian = Array.from({ length: LIUNIAN_YEARS }, (_, i) => {
     const y = input.options.liunianFrom + i;
     const gz = yearGanZhi(y);
@@ -214,12 +220,22 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
       year: y,
       ganzhi: gz,
       age: y - birthYear,
+      age_xu: y - birthYear + 1,
       shishen_gan: tenGod(day.gan, gan),
       shishen_zhi: tenGod(day.gan, HIDDEN_MAIN[zhi]!),
       dayun_index: dy?.index ?? 0,
       branch_relations: branchRelations(zhi, natal),
+      relations: periodRelations(natal, { place: "liunian", ganzhi: gz }, dy?.ganzhi),
+      shensha: periodShensha(natal, zhi),
     };
   });
+
+  const liuyueYear = input.options.liunianFrom;
+  const months = liuyue(liuyueYear, yearGanZhi(liuyueYear)[0]!).map((m) => ({
+    ...m,
+    shishen_gan: tenGod(day.gan, m.ganzhi[0]!),
+    shishen_zhi: tenGod(day.gan, HIDDEN_MAIN[m.ganzhi[1]!]!),
+  }));
 
   const rule_versions = {
     tzdb: ctx.tzdb ?? process.versions.tz ?? "unknown",
@@ -241,6 +257,17 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     },
     pillars: natal,
     lunar: lunarDate(civil.y, civil.m, civil.d),
+    // The 农历 of the day the pillars are read on (true solar day when applied), so the
+    // 本命卦 takes its date and its hour from the same day (WP1.2).
+    lunar_pillar_day: {
+      ...lunarDate(pillarClock.y, pillarClock.m, pillarClock.d),
+      basis: "pillar_clock_date" as const,
+    },
+    relations: natalRelations(natal),
+    shensha: natalShensha(natal),
+    kongwang: kongWang(natal),
+    taiyuan: taiYuan(month),
+    liuyue: { year: liuyueYear, clock: "utc+8", months },
     input_basis: {
       ...input.options.inputBasis,
       // A 時辰 picked by the clock can land in the neighbouring one after 真太陽時.
@@ -316,7 +343,24 @@ export function computeBazi(rawInput: BaziInput, ctx: BaziContext): ChartFact {
     {
       path: "/liunian",
       source_level: "traditional_text",
-      note: "流年干支以立春为界；十神对日主；地支与原局六冲、六合（不含刑害、三合）",
+      note: "流年干支以立春为界；十神对日主；branch_relations 只含六冲、六合，relations 含全部合冲刑害破；age_xu 为虚岁",
+    },
+    {
+      path: "/relations",
+      source_level: "traditional_text",
+      note: "天干五合、相冲；地支六合、六冲、三合、半合、三会、相刑、自刑、六害、相破",
+    },
+    {
+      path: "/shensha",
+      source_level: "traditional_text",
+      note: "天乙贵人、文昌、禄神、羊刃（阳干）以日干查；桃花、驿马、华盖以年支、日支查",
+    },
+    { path: "/kongwang", source_level: "traditional_text", note: "旬空：日柱、年柱所在旬缺的两支" },
+    { path: "/taiyuan", source_level: "traditional_text", note: "月干进一位，月支进三位" },
+    {
+      path: "/liuyue",
+      source_level: "traditional_text",
+      note: "流月以节令为界（立春至小寒，北京时间）；寅月天干按五虎遁",
     },
   ];
 

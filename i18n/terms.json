@@ -99,6 +99,30 @@
     "狮子": { "zh-Hant": "獅子", "zh-Hans": "狮子", "en": "Leo" },
     "处女": { "zh-Hant": "處女", "zh-Hans": "处女", "en": "Virgo" },
     "天蝎": { "zh-Hant": "天蠍", "zh-Hans": "天蝎", "en": "Scorpio" },
-    "双鱼": { "zh-Hant": "雙魚", "zh-Hans": "双鱼", "en": "Pisces" }
+    "双鱼": { "zh-Hant": "雙魚", "zh-Hans": "双鱼", "en": "Pisces" },
+    "天干五合": { "zh-Hant": "天干五合", "zh-Hans": "天干五合", "en": "Stem Combination (Gan He)" },
+    "天干相冲": { "zh-Hant": "天干相沖", "zh-Hans": "天干相冲", "en": "Stem Clash (Gan Chong)" },
+    "三合": { "zh-Hant": "三合", "zh-Hans": "三合", "en": "Three Harmonies (San He)" },
+    "半合": { "zh-Hant": "半合", "zh-Hans": "半合", "en": "Half Harmony (Ban He)" },
+    "三会": { "zh-Hant": "三會", "zh-Hans": "三会", "en": "Directional Combination (San Hui)" },
+    "相刑": { "zh-Hant": "相刑", "zh-Hans": "相刑", "en": "Punishment (Xing)" },
+    "自刑": { "zh-Hant": "自刑", "zh-Hans": "自刑", "en": "Self-Punishment (Zi Xing)" },
+    "六害": { "zh-Hant": "六害", "zh-Hans": "六害", "en": "Six Harms (Liu Hai)" },
+    "相破": { "zh-Hant": "相破", "zh-Hans": "相破", "en": "Destruction (Po)" },
+    "天乙贵人": {
+      "zh-Hant": "天乙貴人",
+      "zh-Hans": "天乙贵人",
+      "en": "Heavenly Noble (Tian Yi Gui Ren)"
+    },
+    "文昌": { "zh-Hant": "文昌", "zh-Hans": "文昌", "en": "Literary Star (Wen Chang)" },
+    "禄神": { "zh-Hant": "祿神", "zh-Hans": "禄神", "en": "Prosperity Star (Lu Shen)" },
+    "羊刃": { "zh-Hant": "羊刃", "zh-Hans": "羊刃", "en": "Goat Blade (Yang Ren)" },
+    "桃花": { "zh-Hant": "桃花", "zh-Hans": "桃花", "en": "Peach Blossom (Tao Hua)" },
+    "驿马": { "zh-Hant": "驛馬", "zh-Hans": "驿马", "en": "Travelling Horse (Yi Ma)" },
+    "华盖": { "zh-Hant": "華蓋", "zh-Hans": "华盖", "en": "Canopy (Hua Gai)" },
+    "空亡": { "zh-Hant": "空亡", "zh-Hans": "空亡", "en": "Void (Kong Wang)" },
+    "胎元": { "zh-Hant": "胎元", "zh-Hans": "胎元", "en": "Conception Pillar (Tai Yuan)" },
+    "流月": { "zh-Hant": "流月", "zh-Hans": "流月", "en": "Monthly Cycle (Liu Yue)" },
+    "虚岁": { "zh-Hant": "虛歲", "zh-Hans": "虚岁", "en": "Nominal Age (Xu Sui)" }
   }
 }

@@ -300,7 +300,7 @@ abstract class AppLocalizations {
   /// No description provided for @age.
   ///
   /// In en, this message translates to:
-  /// **'age {age}'**
+  /// **'nominal age {age}'**
   String age(int age);
 
   /// No description provided for @aiReport.
@@ -960,7 +960,7 @@ abstract class AppLocalizations {
   /// No description provided for @trendAge.
   ///
   /// In en, this message translates to:
-  /// **'Age {ages}'**
+  /// **'Nominal age {ages}'**
   String trendAge(String ages);
 
   /// No description provided for @expandAll.
@@ -2072,6 +2072,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap the card to turn it over'**
   String get tarotTapToTurn;
+
+  /// No description provided for @shenshaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars, void and conception pillar'**
+  String get shenshaTitle;
+
+  /// No description provided for @relationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Combinations and clashes in the chart'**
+  String get relationsTitle;
+
+  /// No description provided for @ziNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Born 23:00–24:00: take the next day\'s day pillar'**
+  String get ziNextDay;
+
+  /// No description provided for @ziNextDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Two schools; by default a birth after 23:00 keeps the same day'**
+  String get ziNextDayHint;
 }
 
 class _AppLocalizationsDelegate

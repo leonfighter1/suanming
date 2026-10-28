@@ -114,7 +114,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String age(int age) {
-    return 'age $age';
+    return 'nominal age $age';
   }
 
   @override
@@ -467,7 +467,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trendAge(String ages) {
-    return 'Age $ages';
+    return 'Nominal age $ages';
   }
 
   @override
@@ -1077,4 +1077,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tarotTapToTurn => 'Tap the card to turn it over';
+
+  @override
+  String get shenshaTitle => 'Stars, void and conception pillar';
+
+  @override
+  String get relationsTitle => 'Combinations and clashes in the chart';
+
+  @override
+  String get ziNextDay => 'Born 23:00–24:00: take the next day\'s day pillar';
+
+  @override
+  String get ziNextDayHint =>
+      'Two schools; by default a birth after 23:00 keeps the same day';
 }

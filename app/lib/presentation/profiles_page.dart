@@ -437,6 +437,14 @@ class BirthFields extends ConsumerWidget {
           value: value.trueSolarTime,
           onChanged: (v) => onChanged(value.copyWith(trueSolarTime: v)),
         ),
+        SwitchListTile(
+          key: const Key('zi-next-day'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.ziNextDay),
+          subtitle: Text(l10n.ziNextDayHint),
+          value: value.ziNextDay,
+          onChanged: (v) => onChanged(value.copyWith(ziNextDay: v)),
+        ),
       ],
     );
   }

@@ -96,6 +96,221 @@
         "day": 3,
         "day_name": "初三"
       },
+      "lunar_pillar_day": {
+        "basis": "pillar_clock_date",
+        "year": 1987,
+        "year_ganzhi": "丁卯",
+        "shengxiao": "兔",
+        "month": 10,
+        "is_leap_month": false,
+        "month_name": "十月",
+        "day": 3,
+        "day_name": "初三"
+      },
+      "relations": [
+        {
+          "type": "天干五合",
+          "element": "水",
+          "members": [
+            {
+              "pillar": "month",
+              "char": "辛"
+            },
+            {
+              "pillar": "day",
+              "char": "丙"
+            }
+          ]
+        },
+        {
+          "type": "半合",
+          "element": "木",
+          "members": [
+            {
+              "pillar": "year",
+              "char": "卯"
+            },
+            {
+              "pillar": "month",
+              "char": "亥"
+            }
+          ]
+        },
+        {
+          "type": "相刑",
+          "members": [
+            {
+              "pillar": "year",
+              "char": "卯"
+            },
+            {
+              "pillar": "day",
+              "char": "子"
+            }
+          ]
+        },
+        {
+          "type": "六合",
+          "element": "木",
+          "members": [
+            {
+              "pillar": "month",
+              "char": "亥"
+            },
+            {
+              "pillar": "hour",
+              "char": "寅"
+            }
+          ]
+        },
+        {
+          "type": "相破",
+          "members": [
+            {
+              "pillar": "month",
+              "char": "亥"
+            },
+            {
+              "pillar": "hour",
+              "char": "寅"
+            }
+          ]
+        }
+      ],
+      "shensha": [
+        {
+          "name": "天乙贵人",
+          "basis": "day_gan",
+          "targets": "亥酉",
+          "pillars": [
+            "month"
+          ]
+        },
+        {
+          "name": "桃花",
+          "basis": "year_zhi",
+          "targets": "子",
+          "pillars": [
+            "day"
+          ]
+        },
+        {
+          "name": "驿马",
+          "basis": "day_zhi",
+          "targets": "寅",
+          "pillars": [
+            "hour"
+          ]
+        }
+      ],
+      "kongwang": {
+        "by_day": "申酉",
+        "by_year": "戌亥",
+        "pillars": []
+      },
+      "taiyuan": "壬寅",
+      "liuyue": {
+        "year": 2026,
+        "clock": "utc+8",
+        "months": [
+          {
+            "month": 1,
+            "ganzhi": "庚寅",
+            "jie": "立春",
+            "starts": "2026-02-04 04:02",
+            "shishen_gan": "偏财",
+            "shishen_zhi": "偏印"
+          },
+          {
+            "month": 2,
+            "ganzhi": "辛卯",
+            "jie": "惊蛰",
+            "starts": "2026-03-05 21:59",
+            "shishen_gan": "正财",
+            "shishen_zhi": "正印"
+          },
+          {
+            "month": 3,
+            "ganzhi": "壬辰",
+            "jie": "清明",
+            "starts": "2026-04-05 02:40",
+            "shishen_gan": "七杀",
+            "shishen_zhi": "食神"
+          },
+          {
+            "month": 4,
+            "ganzhi": "癸巳",
+            "jie": "立夏",
+            "starts": "2026-05-05 19:48",
+            "shishen_gan": "正官",
+            "shishen_zhi": "比肩"
+          },
+          {
+            "month": 5,
+            "ganzhi": "甲午",
+            "jie": "芒种",
+            "starts": "2026-06-05 23:48",
+            "shishen_gan": "偏印",
+            "shishen_zhi": "劫财"
+          },
+          {
+            "month": 6,
+            "ganzhi": "乙未",
+            "jie": "小暑",
+            "starts": "2026-07-07 09:56",
+            "shishen_gan": "正印",
+            "shishen_zhi": "伤官"
+          },
+          {
+            "month": 7,
+            "ganzhi": "丙申",
+            "jie": "立秋",
+            "starts": "2026-08-07 19:42",
+            "shishen_gan": "比肩",
+            "shishen_zhi": "偏财"
+          },
+          {
+            "month": 8,
+            "ganzhi": "丁酉",
+            "jie": "白露",
+            "starts": "2026-09-07 22:41",
+            "shishen_gan": "劫财",
+            "shishen_zhi": "正财"
+          },
+          {
+            "month": 9,
+            "ganzhi": "戊戌",
+            "jie": "寒露",
+            "starts": "2026-10-08 14:29",
+            "shishen_gan": "食神",
+            "shishen_zhi": "食神"
+          },
+          {
+            "month": 10,
+            "ganzhi": "己亥",
+            "jie": "立冬",
+            "starts": "2026-11-07 17:52",
+            "shishen_gan": "伤官",
+            "shishen_zhi": "七杀"
+          },
+          {
+            "month": 11,
+            "ganzhi": "庚子",
+            "jie": "大雪",
+            "starts": "2026-12-07 10:52",
+            "shishen_gan": "偏财",
+            "shishen_zhi": "正官"
+          },
+          {
+            "month": 12,
+            "ganzhi": "辛丑",
+            "jie": "小寒",
+            "starts": "2027-01-05 22:09",
+            "shishen_gan": "正财",
+            "shishen_zhi": "伤官"
+          }
+        ]
+      },
       "input_basis": {
         "date": "gregorian",
         "time": "exact"
@@ -144,49 +359,437 @@
             "index": 1,
             "ganzhi": "庚戌",
             "start_year": 1992,
-            "start_age": 6
+            "start_age": 6,
+            "start_age_xu": 6,
+            "relations": [
+              {
+                "type": "六合",
+                "element": "火",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "卯"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "戌"
+                  }
+                ]
+              }
+            ],
+            "shensha": []
           },
           {
             "index": 2,
             "ganzhi": "己酉",
             "start_year": 2002,
-            "start_age": 16
+            "start_age": 16,
+            "start_age_xu": 16,
+            "relations": [
+              {
+                "type": "六冲",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "卯"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "酉"
+                  }
+                ]
+              },
+              {
+                "type": "相破",
+                "members": [
+                  {
+                    "pillar": "day",
+                    "char": "子"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "酉"
+                  }
+                ]
+              }
+            ],
+            "shensha": [
+              "天乙贵人",
+              "桃花"
+            ]
           },
           {
             "index": 3,
             "ganzhi": "戊申",
             "start_year": 2012,
-            "start_age": 26
+            "start_age": 26,
+            "start_age_xu": 26,
+            "relations": [
+              {
+                "type": "六害",
+                "members": [
+                  {
+                    "pillar": "month",
+                    "char": "亥"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "申"
+                  }
+                ]
+              },
+              {
+                "type": "半合",
+                "element": "水",
+                "members": [
+                  {
+                    "pillar": "day",
+                    "char": "子"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "申"
+                  }
+                ]
+              },
+              {
+                "type": "六冲",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "寅"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "申"
+                  }
+                ]
+              },
+              {
+                "type": "相刑",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "寅"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "申"
+                  }
+                ]
+              }
+            ],
+            "shensha": [
+              "文昌"
+            ]
           },
           {
             "index": 4,
             "ganzhi": "丁未",
             "start_year": 2022,
-            "start_age": 36
+            "start_age": 36,
+            "start_age_xu": 36,
+            "relations": [
+              {
+                "type": "三合",
+                "element": "木",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "卯"
+                  },
+                  {
+                    "pillar": "month",
+                    "char": "亥"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "未"
+                  }
+                ]
+              },
+              {
+                "type": "六害",
+                "members": [
+                  {
+                    "pillar": "day",
+                    "char": "子"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "未"
+                  }
+                ]
+              }
+            ],
+            "shensha": [
+              "华盖"
+            ]
           },
           {
             "index": 5,
             "ganzhi": "丙午",
             "start_year": 2032,
-            "start_age": 46
+            "start_age": 46,
+            "start_age_xu": 46,
+            "relations": [
+              {
+                "type": "天干五合",
+                "element": "水",
+                "members": [
+                  {
+                    "pillar": "month",
+                    "char": "辛"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "丙"
+                  }
+                ]
+              },
+              {
+                "type": "相破",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "卯"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "午"
+                  }
+                ]
+              },
+              {
+                "type": "六冲",
+                "members": [
+                  {
+                    "pillar": "day",
+                    "char": "子"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "午"
+                  }
+                ]
+              },
+              {
+                "type": "半合",
+                "element": "火",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "寅"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "午"
+                  }
+                ]
+              }
+            ],
+            "shensha": [
+              "羊刃"
+            ]
           },
           {
             "index": 6,
             "ganzhi": "乙巳",
             "start_year": 2042,
-            "start_age": 56
+            "start_age": 56,
+            "start_age_xu": 56,
+            "relations": [
+              {
+                "type": "天干相冲",
+                "members": [
+                  {
+                    "pillar": "month",
+                    "char": "辛"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "乙"
+                  }
+                ]
+              },
+              {
+                "type": "天干五合",
+                "element": "金",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "庚"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "乙"
+                  }
+                ]
+              },
+              {
+                "type": "六冲",
+                "members": [
+                  {
+                    "pillar": "month",
+                    "char": "亥"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "巳"
+                  }
+                ]
+              },
+              {
+                "type": "相刑",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "寅"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "巳"
+                  }
+                ]
+              },
+              {
+                "type": "六害",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "寅"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "巳"
+                  }
+                ]
+              }
+            ],
+            "shensha": [
+              "禄神",
+              "驿马"
+            ]
           },
           {
             "index": 7,
             "ganzhi": "甲辰",
             "start_year": 2052,
-            "start_age": 66
+            "start_age": 66,
+            "start_age_xu": 66,
+            "relations": [
+              {
+                "type": "天干相冲",
+                "members": [
+                  {
+                    "pillar": "hour",
+                    "char": "庚"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "甲"
+                  }
+                ]
+              },
+              {
+                "type": "三会",
+                "element": "木",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "卯"
+                  },
+                  {
+                    "pillar": "hour",
+                    "char": "寅"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "辰"
+                  }
+                ]
+              },
+              {
+                "type": "六害",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "卯"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "辰"
+                  }
+                ]
+              },
+              {
+                "type": "半合",
+                "element": "水",
+                "members": [
+                  {
+                    "pillar": "day",
+                    "char": "子"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "辰"
+                  }
+                ]
+              }
+            ],
+            "shensha": [
+              "华盖"
+            ]
           },
           {
             "index": 8,
             "ganzhi": "癸卯",
             "start_year": 2062,
-            "start_age": 76
+            "start_age": 76,
+            "start_age_xu": 76,
+            "relations": [
+              {
+                "type": "天干相冲",
+                "members": [
+                  {
+                    "pillar": "year",
+                    "char": "丁"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "癸"
+                  }
+                ]
+              },
+              {
+                "type": "半合",
+                "element": "木",
+                "members": [
+                  {
+                    "pillar": "month",
+                    "char": "亥"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "卯"
+                  }
+                ]
+              },
+              {
+                "type": "相刑",
+                "members": [
+                  {
+                    "pillar": "day",
+                    "char": "子"
+                  },
+                  {
+                    "pillar": "dayun",
+                    "char": "卯"
+                  }
+                ]
+              }
+            ],
+            "shensha": []
           }
         ]
       },
@@ -195,6 +798,7 @@
           "year": 2026,
           "ganzhi": "丙午",
           "age": 39,
+          "age_xu": 40,
           "shishen_gan": "比肩",
           "shishen_zhi": "劫财",
           "dayun_index": 4,
@@ -203,21 +807,132 @@
               "pillar": "day",
               "type": "六冲"
             }
+          ],
+          "relations": [
+            {
+              "type": "天干五合",
+              "element": "水",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "辛"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "丙"
+                }
+              ]
+            },
+            {
+              "type": "相破",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "卯"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "午"
+                }
+              ]
+            },
+            {
+              "type": "六冲",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "午"
+                }
+              ]
+            },
+            {
+              "type": "半合",
+              "element": "火",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "寅"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "午"
+                }
+              ]
+            },
+            {
+              "type": "六合",
+              "element": "土",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "未"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "午"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "羊刃"
           ]
         },
         {
           "year": 2027,
           "ganzhi": "丁未",
           "age": 40,
+          "age_xu": 41,
           "shishen_gan": "劫财",
           "shishen_zhi": "伤官",
           "dayun_index": 4,
-          "branch_relations": []
+          "branch_relations": [],
+          "relations": [
+            {
+              "type": "三合",
+              "element": "木",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "卯"
+                },
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "未"
+                }
+              ]
+            },
+            {
+              "type": "六害",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "未"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "华盖"
+          ]
         },
         {
           "year": 2028,
           "ganzhi": "戊申",
           "age": 41,
+          "age_xu": 42,
           "shishen_gan": "食神",
           "shishen_zhi": "偏财",
           "dayun_index": 4,
@@ -226,12 +941,71 @@
               "pillar": "hour",
               "type": "六冲"
             }
+          ],
+          "relations": [
+            {
+              "type": "六害",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "申"
+                }
+              ]
+            },
+            {
+              "type": "半合",
+              "element": "水",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "申"
+                }
+              ]
+            },
+            {
+              "type": "六冲",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "寅"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "申"
+                }
+              ]
+            },
+            {
+              "type": "相刑",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "寅"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "申"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "文昌"
           ]
         },
         {
           "year": 2029,
           "ganzhi": "己酉",
           "age": 42,
+          "age_xu": 43,
           "shishen_gan": "伤官",
           "shishen_zhi": "正财",
           "dayun_index": 4,
@@ -240,12 +1014,45 @@
               "pillar": "year",
               "type": "六冲"
             }
+          ],
+          "relations": [
+            {
+              "type": "六冲",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "卯"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "酉"
+                }
+              ]
+            },
+            {
+              "type": "相破",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "酉"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "天乙贵人",
+            "桃花"
           ]
         },
         {
           "year": 2030,
           "ganzhi": "庚戌",
           "age": 43,
+          "age_xu": 44,
           "shishen_gan": "偏财",
           "shishen_zhi": "食神",
           "dayun_index": 4,
@@ -254,12 +1061,56 @@
               "pillar": "year",
               "type": "六合"
             }
-          ]
+          ],
+          "relations": [
+            {
+              "type": "六合",
+              "element": "火",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "卯"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "戌"
+                }
+              ]
+            },
+            {
+              "type": "相刑",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "未"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "戌"
+                }
+              ]
+            },
+            {
+              "type": "相破",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "未"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "戌"
+                }
+              ]
+            }
+          ],
+          "shensha": []
         },
         {
           "year": 2031,
           "ganzhi": "辛亥",
           "age": 44,
+          "age_xu": 45,
           "shishen_gan": "正财",
           "shishen_zhi": "七杀",
           "dayun_index": 4,
@@ -268,21 +1119,171 @@
               "pillar": "hour",
               "type": "六合"
             }
+          ],
+          "relations": [
+            {
+              "type": "天干五合",
+              "element": "水",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "丙"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "辛"
+                }
+              ]
+            },
+            {
+              "type": "三合",
+              "element": "木",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "卯"
+                },
+                {
+                  "pillar": "dayun",
+                  "char": "未"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "亥"
+                }
+              ]
+            },
+            {
+              "type": "自刑",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "亥"
+                }
+              ]
+            },
+            {
+              "type": "六合",
+              "element": "木",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "寅"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "亥"
+                }
+              ]
+            },
+            {
+              "type": "相破",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "寅"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "亥"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "天乙贵人"
           ]
         },
         {
           "year": 2032,
           "ganzhi": "壬子",
           "age": 45,
+          "age_xu": 46,
           "shishen_gan": "七杀",
           "shishen_zhi": "正官",
           "dayun_index": 5,
-          "branch_relations": []
+          "branch_relations": [],
+          "relations": [
+            {
+              "type": "天干五合",
+              "element": "木",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "丁"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "壬"
+                }
+              ]
+            },
+            {
+              "type": "天干相冲",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "丙"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "壬"
+                }
+              ]
+            },
+            {
+              "type": "天干相冲",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "丙"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "壬"
+                }
+              ]
+            },
+            {
+              "type": "相刑",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "卯"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "子"
+                }
+              ]
+            },
+            {
+              "type": "六冲",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "午"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "子"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "桃花"
+          ]
         },
         {
           "year": 2033,
           "ganzhi": "癸丑",
           "age": 46,
+          "age_xu": 47,
           "shishen_gan": "正官",
           "shishen_zhi": "伤官",
           "dayun_index": 5,
@@ -291,12 +1292,74 @@
               "pillar": "day",
               "type": "六合"
             }
-          ]
+          ],
+          "relations": [
+            {
+              "type": "天干相冲",
+              "members": [
+                {
+                  "pillar": "year",
+                  "char": "丁"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "癸"
+                }
+              ]
+            },
+            {
+              "type": "三会",
+              "element": "水",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "丑"
+                }
+              ]
+            },
+            {
+              "type": "六合",
+              "element": "土",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "丑"
+                }
+              ]
+            },
+            {
+              "type": "六害",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "午"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "丑"
+                }
+              ]
+            }
+          ],
+          "shensha": []
         },
         {
           "year": 2034,
           "ganzhi": "甲寅",
           "age": 47,
+          "age_xu": 48,
           "shishen_gan": "偏印",
           "shishen_zhi": "偏印",
           "dayun_index": 5,
@@ -305,16 +1368,146 @@
               "pillar": "month",
               "type": "六合"
             }
+          ],
+          "relations": [
+            {
+              "type": "天干相冲",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "庚"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "甲"
+                }
+              ]
+            },
+            {
+              "type": "六合",
+              "element": "木",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "寅"
+                }
+              ]
+            },
+            {
+              "type": "相破",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "寅"
+                }
+              ]
+            },
+            {
+              "type": "半合",
+              "element": "火",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "午"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "寅"
+                }
+              ]
+            }
+          ],
+          "shensha": [
+            "驿马"
           ]
         },
         {
           "year": 2035,
           "ganzhi": "乙卯",
           "age": 48,
+          "age_xu": 49,
           "shishen_gan": "正印",
           "shishen_zhi": "正印",
           "dayun_index": 5,
-          "branch_relations": []
+          "branch_relations": [],
+          "relations": [
+            {
+              "type": "天干相冲",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "辛"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "乙"
+                }
+              ]
+            },
+            {
+              "type": "天干五合",
+              "element": "金",
+              "members": [
+                {
+                  "pillar": "hour",
+                  "char": "庚"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "乙"
+                }
+              ]
+            },
+            {
+              "type": "半合",
+              "element": "木",
+              "members": [
+                {
+                  "pillar": "month",
+                  "char": "亥"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "卯"
+                }
+              ]
+            },
+            {
+              "type": "相刑",
+              "members": [
+                {
+                  "pillar": "day",
+                  "char": "子"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "卯"
+                }
+              ]
+            },
+            {
+              "type": "相破",
+              "members": [
+                {
+                  "pillar": "dayun",
+                  "char": "午"
+                },
+                {
+                  "pillar": "liunian",
+                  "char": "卯"
+                }
+              ]
+            }
+          ],
+          "shensha": []
         }
       ]
     },
@@ -372,7 +1565,32 @@
       {
         "path": "/liunian",
         "source_level": "traditional_text",
-        "note": "流年干支以立春为界；十神对日主；地支与原局六冲、六合（不含刑害、三合）"
+        "note": "流年干支以立春为界；十神对日主；branch_relations 只含六冲、六合，relations 含全部合冲刑害破；age_xu 为虚岁"
+      },
+      {
+        "path": "/relations",
+        "source_level": "traditional_text",
+        "note": "天干五合、相冲；地支六合、六冲、三合、半合、三会、相刑、自刑、六害、相破"
+      },
+      {
+        "path": "/shensha",
+        "source_level": "traditional_text",
+        "note": "天乙贵人、文昌、禄神、羊刃（阳干）以日干查；桃花、驿马、华盖以年支、日支查"
+      },
+      {
+        "path": "/kongwang",
+        "source_level": "traditional_text",
+        "note": "旬空：日柱、年柱所在旬缺的两支"
+      },
+      {
+        "path": "/taiyuan",
+        "source_level": "traditional_text",
+        "note": "月干进一位，月支进三位"
+      },
+      {
+        "path": "/liuyue",
+        "source_level": "traditional_text",
+        "note": "流月以节令为界（立春至小寒，北京时间）；寅月天干按五虎遁"
       }
     ]
   }

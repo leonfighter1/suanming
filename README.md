@@ -8,8 +8,37 @@ Web test: **https://leonfighter1.github.io/suanming/** ([docs/web-test.md](docs/
 ## 更新记录 (release notes)
 
 Newest first. Every update adds an entry: version and date, then by area what changed for users, how to use it, and
-how it was verified. The steps that finish an update (harness, this entry, version) are in
-[.claude/skills/keyboard-access/SKILL.md](.claude/skills/keyboard-access/SKILL.md).
+how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tech-plan.md) and are the ones pushed;
+medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
+[.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
+
+### v1.3.0 (2026-10-27): 八字 engine, part 1: ages, the pillar day, 合冲刑害破, 神煞
+
+Stage S1 of the [tech plan](docs/tech-plan.md), work packages 1.1–1.5. A medium update: committed locally, pushed
+with v2.0.0.
+
+- 命盘 page
+  - Ages are 虚岁 everywhere and labelled 虚岁: the 大运 and 流年 strips, the 运势走势 chart and 破除运势. Before,
+    流年 showed 周岁 and 大运 虚岁 under the same 「岁」, one year apart.
+  - New card 神煞 · 空亡 · 胎元: 天乙贵人, 文昌, 禄神, 羊刃, 桃花, 驿马 and 华盖 with the pillars that hold them; 空亡
+    from the day pillar and the pillars that fall in it; 胎元.
+  - New card 原局刑冲合害: every 天干五合 / 相冲, and every 六合, 六冲, 三合, 半合, 三会, 相刑, 自刑, 六害 and 相破 between
+    the four pillars.
+- 个人资料: a new switch 「23:00–24:00 出生，日柱算次日」 for the other 子时 school. It is off by default, so a birth after
+  23:00 keeps the same day, as before.
+- 八字 engine (new facts only; nothing existing changed):
+  - 虚岁 on every 大运 and 流年.
+  - The 农历 of the day the pillars are read on. The 一生运势报告's 本命卦 now takes its date from it, so date and hour
+    come from the same day even when 真太阳时 crosses midnight (far-west China, Spain in summer).
+  - 合冲刑害破 for the chart, for every 大运 (with the chart) and every 流年 (with the chart and its 大运); 神煞 for the
+    chart and each period; 空亡; 胎元; 流月 (the twelve months of the current year from 立春, with 干支, start time and
+    十神; shown in a later update).
+  - 20 new protected terms (the relation types, the 神煞, 空亡, 胎元, 流月, 虚岁) in 简体, 繁體 and English.
+- Not yet: 命宫 / 身宫. Two textbook formulas disagree, and there is no reference at hand to settle it (WP1.8).
+- Verified: 11 new server tests (each relation type, full 三合 / 三刑 without their pairs, the sample chart's relations
+  and 神煞 worked out by hand, 空亡 across the 旬, 胎元 and 日空亡 against lunar-javascript, 流月 against the library's
+  month pillar, 虚岁, the Kashgar pillar day and its 本命卦) and 2 app tests (虚岁 on both strips, the two new cards,
+  the 子时 switch in the request); all 265 server tests and 90 app tests pass; harness PASS.
 
 ### v1.2.0 (2026-10-27): 塔罗 the classic way
 

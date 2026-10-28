@@ -39,9 +39,19 @@ export interface TrendLayer {
 }
 
 interface Periods {
-  cycles: { index: number; ganzhi: string; start_year: number; start_age: number }[];
-  years: { year: number; ganzhi: string; age: number }[];
+  cycles: {
+    index: number;
+    ganzhi: string;
+    start_year: number;
+    start_age: number;
+    start_age_xu?: number;
+  }[];
+  years: { year: number; ganzhi: string; age: number; age_xu?: number }[];
 }
+
+/** 虚岁 for every age shown (v1.3.0); charts made earlier lack the field: age + 1 is the same count. */
+const xuCycle = (c: Periods["cycles"][number]) => c.start_age_xu ?? c.start_age;
+const xuYear = (y: Periods["years"][number]) => y.age_xu ?? y.age + 1;
 
 function periodsOf(chart: ChartFact): Periods {
   const f = chart.facts as {
@@ -146,15 +156,17 @@ export function trendLayer(
         index: c.index,
         ganzhi: c.ganzhi,
         start_year: c.start_year,
-        start_age: c.start_age,
-        end_age: (next?.start_age ?? c.start_age + 10) - 1,
+        start_age: xuCycle(c),
+        end_age: (next ? xuCycle(next) : xuCycle(c) + 10) - 1,
         ...point(d.scores, d.note),
       },
     ];
   });
   const liunian = p.years.flatMap((y) => {
     const d = out.liunian.find((x) => x.year === y.year);
-    return d ? [{ year: y.year, age: y.age, ganzhi: y.ganzhi, ...point(d.scores, d.note) }] : [];
+    return d
+      ? [{ year: y.year, age: xuYear(y), ganzhi: y.ganzhi, ...point(d.scores, d.note) }]
+      : [];
   });
   return {
     topics: [...topics],

@@ -40,7 +40,7 @@
     }
   },
   "liunian": "Annual pillars",
-  "age": "age {age}",
+  "age": "nominal age {age}",
   "@age": {
     "placeholders": {
       "age": {
@@ -185,7 +185,7 @@
   "trendTotal": "Total",
   "trendCompare": "Compare",
   "trendTapHint": "Tap a period on the chart to see its scores and basis.",
-  "trendAge": "Age {ages}",
+  "trendAge": "Nominal age {ages}",
   "@trendAge": {
     "placeholders": {
       "ages": {
@@ -500,5 +500,9 @@
   "tarotNextShort": "next",
   "tarotZoomHint": "Tap a small card to see it large and turn it there.",
   "tarotAllTurned": "All cards are turned. Tap a card to see it large with its position's meaning.",
-  "tarotTapToTurn": "Tap the card to turn it over"
+  "tarotTapToTurn": "Tap the card to turn it over",
+  "shenshaTitle": "Stars, void and conception pillar",
+  "relationsTitle": "Combinations and clashes in the chart",
+  "ziNextDay": "Born 23:00–24:00: take the next day's day pillar",
+  "ziNextDayHint": "Two schools; by default a birth after 23:00 keeps the same day"
 }

@@ -15,6 +15,7 @@ class BirthProfile {
     required this.birthLocal,
     required this.cityKey,
     this.trueSolarTime = true,
+    this.ziNextDay = false,
     this.dateMode = 'gregorian',
     this.timeMode = 'exact',
     this.shichen,
@@ -29,6 +30,7 @@ class BirthProfile {
         birthLocal: DateTime.parse(j['birth_local'] as String),
         cityKey: j['city'] as String,
         trueSolarTime: j['true_solar_time'] as bool? ?? true,
+        ziNextDay: j['zi_next_day'] as bool? ?? false,
         dateMode: j['date_mode'] as String? ?? 'gregorian',
         timeMode: j['time_mode'] as String? ?? 'exact',
         shichen: j['shichen'] as String?,
@@ -58,6 +60,10 @@ class BirthProfile {
   BirthPlace get birthPlace => place ?? BirthPlace.legacy(cityByKey(cityKey));
   final bool trueSolarTime;
 
+  /// 子时流派: true = a birth 23:00–24:00 takes the next day's 日柱 (`ziHourSect` 1);
+  /// false = the same day (2, the default).
+  final bool ziNextDay;
+
   /// gregorian | lunar — how the date was entered (birthLocal is always 公曆).
   final String dateMode;
 
@@ -83,6 +89,7 @@ class BirthProfile {
         'birth_local': birthLocal.toIso8601String(),
         'city': cityKey,
         'true_solar_time': trueSolarTime,
+        if (ziNextDay) 'zi_next_day': true,
         'date_mode': dateMode,
         'time_mode': timeMode,
         'shichen': shichen,
@@ -96,6 +103,7 @@ class BirthProfile {
     DateTime? birthLocal,
     String? cityKey,
     bool? trueSolarTime,
+    bool? ziNextDay,
     String? dateMode,
     String? timeMode,
     String? shichen,
@@ -109,6 +117,7 @@ class BirthProfile {
         birthLocal: birthLocal ?? this.birthLocal,
         cityKey: cityKey ?? this.cityKey,
         trueSolarTime: trueSolarTime ?? this.trueSolarTime,
+        ziNextDay: ziNextDay ?? this.ziNextDay,
         dateMode: dateMode ?? this.dateMode,
         timeMode: timeMode ?? this.timeMode,
         shichen: shichen ?? this.shichen,

@@ -66,7 +66,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
         'timezone': place.timezone,
         'longitude': place.longitude,
         'gender': p.gender,
-        'options': {'trueSolarTime': p.trueSolarTime, 'inputBasis': p.inputBasis},
+        'options': {'trueSolarTime': p.trueSolarTime, 'ziHourSect': p.ziNextDay ? 1 : 2, 'inputBasis': p.inputBasis},
       });
       // Name and birthplace stay on the device: label the chart locally for history.
       final locale = ref.read(settingsProvider).apiLocaleCode;

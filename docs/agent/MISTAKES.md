@@ -26,8 +26,22 @@
 22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead.
 23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; after a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more.
 24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
+25. In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta.
+26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
 
 ## Log
+
+### 2026-10-27: Edits to synced sources need sync:app before app tests
+- **Symptom:** New 神煞 terms showed untranslated (禄神 instead of 祿神) in an app test
+- **Root cause:** i18n/terms.json was edited after the last npm run sync:app, so app/assets/i18n/terms.json was stale
+- **Fix:** npm run sync:app, then the test passed
+- **Rule:** After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests. (Rule 26)
+
+### 2026-10-27: scrollUntilVisible only scrolls one way
+- **Symptom:** A chart-page test checked the 流年 strip, then looked for the 神煞 card above it: Bad state: No element
+- **Root cause:** scrollUntilVisible with a positive delta only scrolls down; the card above had been scrolled past (and disposed by the lazy list)
+- **Fix:** Check the cards in page order, top to bottom
+- **Rule:** In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta. (Rule 25)
 
 ### 2026-10-27: A second pumpWidget of the same app keeps its state
 - **Symptom:** A layout test drew cards at 360 wide, then pumped testApp again at 1000 wide; the tap on 首页 entry-tarot found nothing

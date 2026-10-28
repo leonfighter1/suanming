@@ -321,9 +321,12 @@ export function bazhai(year: number, gender: "male" | "female") {
 
 // ---- from a 八字 ChartFact ----
 
+type LunarForYijing = { year_ganzhi: string; month: number; day: number; is_leap_month: boolean };
 interface BaziFactsForYijing {
   pillars: Record<"year" | "month" | "day" | "hour", { gan: string; zhi: string }>;
-  lunar: { year_ganzhi: string; month: number; day: number; is_leap_month: boolean };
+  lunar: LunarForYijing;
+  /** The 农历 of the pillar day (charts since v1.3.0); older charts have only `lunar`. */
+  lunar_pillar_day?: LunarForYijing;
   dayun: { gender: "male" | "female" };
   time_basis?: { civil_local: string };
 }
@@ -342,15 +345,17 @@ export function yijingFacts(
   civilYear: number,
   yearGanZhi: (y: number) => string,
 ) {
+  // Date and hour from the same day: the 时支 is read after 真太阳时, so is the 农历 day.
+  const day = f.lunar_pillar_day ?? f.lunar;
   const b = benmingGua({
-    yearZhi: f.lunar.year_ganzhi[1]!,
-    lunarMonth: f.lunar.month,
-    lunarDay: f.lunar.day,
+    yearZhi: day.year_ganzhi[1]!,
+    lunarMonth: day.month,
+    lunarDay: day.day,
     hourZhi: f.pillars.hour.zhi,
   });
   const year = ganzhiYear(civilYear, f.pillars.year.gan + f.pillars.year.zhi, yearGanZhi);
   return {
-    benming: { ...b, leap_month_note: f.lunar.is_leap_month ? "闰月按本月数起卦" : undefined },
+    benming: { ...b, leap_month_note: day.is_leap_month ? "闰月按本月数起卦" : undefined },
     meihua: meihua(b, f.pillars.month.zhi),
     bazhai: bazhai(year, f.dayun.gender),
     trigrams: Object.fromEntries(

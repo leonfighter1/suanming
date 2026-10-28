@@ -39,17 +39,42 @@ class Pillar {
 }
 
 class DayunCycle {
-  const DayunCycle(this.index, this.ganzhi, this.startYear, this.startAge);
+  const DayunCycle(this.index, this.ganzhi, this.startYear, this.startAge, this.xusui);
   factory DayunCycle.fromJson(Json j) => DayunCycle(
         j['index'] as int,
         j['ganzhi'] as String,
         j['start_year'] as int,
         j['start_age'] as int,
+        (j['start_age_xu'] ?? j['start_age']) as int,
       );
   final int index;
   final String ganzhi;
   final int startYear;
   final int startAge;
+
+  /// 虚岁 at the start, from the civil birth year (the count 流年 [Liunian.xusui] uses).
+  final int xusui;
+}
+
+/// 合冲刑害破 among characters: its type, element (for 合 / 会) and members.
+class Relation {
+  const Relation(this.type, this.element, this.members);
+  factory Relation.fromJson(Json j) => Relation(
+        j['type'] as String,
+        j['element'] as String?,
+        [for (final m in (j['members'] as List).cast<Json>()) (m['pillar'] as String, m['char'] as String)],
+      );
+  final String type;
+  final String? element;
+  final List<(String pillar, String char)> members;
+}
+
+/// A 神煞 the natal chart holds, and the pillars that hold it.
+class ShenshaHit {
+  const ShenshaHit(this.name, this.pillars);
+  factory ShenshaHit.fromJson(Json j) => ShenshaHit(j['name'] as String, (j['pillars'] as List).cast<String>());
+  final String name;
+  final List<String> pillars;
 }
 
 class BranchRelation {
@@ -63,6 +88,7 @@ class Liunian {
     required this.year,
     required this.ganzhi,
     required this.age,
+    required this.xusui,
     required this.shishenGan,
     required this.shishenZhi,
     required this.dayunIndex,
@@ -73,6 +99,7 @@ class Liunian {
         year: j['year'] as int,
         ganzhi: j['ganzhi'] as String,
         age: j['age'] as int,
+        xusui: (j['age_xu'] ?? (j['age'] as int) + 1) as int,
         shishenGan: j['shishen_gan'] as String,
         shishenZhi: j['shishen_zhi'] as String,
         dayunIndex: j['dayun_index'] as int,
@@ -85,6 +112,9 @@ class Liunian {
   final int year;
   final String ganzhi;
   final int age;
+
+  /// 虚岁 in this year (charts made before v1.3.0: age + 1, the same count).
+  final int xusui;
   final String shishenGan;
   final String shishenZhi;
   final int dayunIndex;
@@ -140,12 +170,18 @@ class BaziChart {
     required this.dayunStartDate,
     required this.cycles,
     required this.liunian,
+    this.relations = const [],
+    this.shensha = const [],
+    this.kongwang,
+    this.kongwangPillars = const [],
+    this.taiyuan,
   });
 
   factory BaziChart.fromFacts(Json f) {
     final p = f['pillars'] as Json;
     final dm = f['day_master'] as Json;
     final dy = f['dayun'] as Json;
+    final kw = f['kongwang'] as Json?;
     return BaziChart(
       pillars: {
         for (final k in pillarOrder) k: Pillar.fromJson(p[k] as Json),
@@ -161,6 +197,12 @@ class BaziChart {
       dayunStartDate: dy['start_date'] as String,
       cycles: _list(dy['cycles'], DayunCycle.fromJson),
       liunian: _list(f['liunian'], Liunian.fromJson),
+      // Charts since v1.3.0 (older ones: empty).
+      relations: _list(f['relations'], Relation.fromJson),
+      shensha: _list(f['shensha'], ShenshaHit.fromJson),
+      kongwang: kw?['by_day'] as String?,
+      kongwangPillars: ((kw?['pillars'] as List?) ?? const []).cast<String>(),
+      taiyuan: f['taiyuan'] as String?,
     );
   }
 
@@ -179,6 +221,17 @@ class BaziChart {
   final String dayunStartDate;
   final List<DayunCycle> cycles;
   final List<Liunian> liunian;
+
+  /// 合冲刑害破 among the natal pillars.
+  final List<Relation> relations;
+  final List<ShenshaHit> shensha;
+
+  /// 空亡 by the day pillar (two branches), and the natal pillars that fall in it.
+  final String? kongwang;
+  final List<String> kongwangPillars;
+
+  /// 胎元 干支.
+  final String? taiyuan;
 
   String get fourPillars => pillarOrder.map((k) => pillars[k]!.ganzhi).join(' ');
 }

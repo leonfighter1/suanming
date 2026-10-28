@@ -15,7 +15,7 @@ scripts and don't copy them.
 | After fixing any failure           | **mistake-memory**: record it as a rule                                                    | `...\mistake-memory\scripts\add-mistake.ps1 -Project . -Title ... -Rule ...` (`-Scope global` for tooling lessons)                                               |
 | Flutter app work                   | **appdev** (`~/.claude/skills/appdev`): its check is what harness-check runs for `app/`    | through harness-check                                                                                                                                            |
 | Any app screen, dialog or widget   | **keyboard-access** (`.claude/skills/keyboard-access`): keyboard rules and building blocks | read its checklist; reuse `app/lib/presentation/keyboard.dart`                                                                                                   |
-| Finishing every update             | **keyboard-access**, section "Finishing every update"                                      | harness PASS → README 更新记录 entry → version → records → commit                                                                                                |
+| Planning, continuing, finishing    | **dev-workflow** (`.claude/skills/dev-workflow`): tech plan, stages, versions, push rule   | work through [docs/tech-plan.md](docs/tech-plan.md); finish with harness PASS → README 更新记录 → version → records → commit; push big updates only              |
 
 Records:
 
@@ -58,6 +58,7 @@ Records:
 ## Map
 
 - [README.md](README.md): layout and commands
+- [docs/tech-plan.md](docs/tech-plan.md): the staged plan of open work (技术文档) and its stage summaries
 - [docs/SUMMARY.md](docs/SUMMARY.md): what each phase delivered
 - [docs/phase-1-status.md](docs/phase-1-status.md): current segment status
 - [docs/phase-0-gate.md](docs/phase-0-gate.md): open Phase 0 gate items

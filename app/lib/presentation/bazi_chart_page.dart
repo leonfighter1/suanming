@@ -69,6 +69,41 @@ class BaziChartPage extends ConsumerWidget {
         icon: Icons.donut_large,
         child: Column(children: [for (final e in b.wuxingWeighted.entries) _WuxingBar(e.key, e.value, t(e.key))]),
       ),
+      // 神煞 with the pillars that hold them, 空亡 and 胎元 (charts since v1.3.0).
+      if (b.kongwang != null)
+        AppCard(
+          key: const Key('shensha-card'),
+          title: l10n.shenshaTitle,
+          icon: Icons.auto_awesome_outlined,
+          child: Wrap(
+            spacing: Space.s,
+            runSpacing: Space.s,
+            children: [
+              for (final s in b.shensha) Pill('${t(s.name)} · ${s.pillars.map(l10n.pillar).join('、')}'),
+              Pill(
+                '${t('空亡')} ${b.kongwang}${b.kongwangPillars.isEmpty ? '' : ' · ${b.kongwangPillars.map(l10n.pillar).join('、')}'}',
+              ),
+              if (b.taiyuan != null) Pill('${t('胎元')} ${b.taiyuan}'),
+            ],
+          ),
+        ),
+      if (b.relations.isNotEmpty)
+        AppCard(
+          key: const Key('relations-card'),
+          title: l10n.relationsTitle,
+          icon: Icons.compare_arrows,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final r in b.relations)
+                _KV(
+                  t(r.type),
+                  '${r.members.map((m) => '${l10n.pillar(m.$1)}${m.$2}').join(' · ')}'
+                      '${r.element == null ? '' : '（${t(r.element!)}）'}',
+                ),
+            ],
+          ),
+        ),
       AppCard(
         title: l10n.dayun,
         icon: Icons.timeline,
@@ -79,7 +114,7 @@ class BaziChartPage extends ConsumerWidget {
         child: _Timeline(
           key: const Key('dayun-strip'),
           label: l10n.dayun,
-          items: [for (final c in b.cycles) _Step(c.ganzhi, '${c.startYear}', l10n.age(c.startAge))],
+          items: [for (final c in b.cycles) _Step(c.ganzhi, '${c.startYear}', l10n.age(c.xusui))],
         ),
       ),
       AppCard(
@@ -92,7 +127,7 @@ class BaziChartPage extends ConsumerWidget {
             for (final y in b.liunian)
               _Step(
                 y.ganzhi,
-                '${y.year} · ${l10n.age(y.age)}',
+                '${y.year} · ${l10n.age(y.xusui)}',
                 '${t(y.shishenGan)} / ${t(y.shishenZhi)}',
                 y.relations.map((r) => '${l10n.pillar(r.pillar)}${t(r.type)}').join(' '),
               ),

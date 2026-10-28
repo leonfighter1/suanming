@@ -33,7 +33,7 @@
   "dayun": "大運",
   "dayunFrom": "{date} 起運",
   "liunian": "流年",
-  "age": "{age} 歲",
+  "age": "虛歲 {age}",
   "aiReport": "AI 解讀",
   "chooseTopics": "分析方面",
   "generate": "生成 AI 解讀",
@@ -143,7 +143,7 @@
   "trendTotal": "總分",
   "trendCompare": "疊加比較",
   "trendTapHint": "點選圖上的時期，查看各項分數與依據。",
-  "trendAge": "{ages} 歲",
+  "trendAge": "虛歲 {ages}",
   "expandAll": "展開全部",
   "collapseAll": "收起全部",
   "remedyTitle": "破除運勢",
@@ -328,5 +328,9 @@
   "tarotNextShort": "下一張",
   "tarotZoomHint": "點擊小牌放大，在大圖裡翻開。",
   "tarotAllTurned": "牌已全部翻開。點擊任意一張，看大圖和位置含義。",
-  "tarotTapToTurn": "點擊牌面翻開"
+  "tarotTapToTurn": "點擊牌面翻開",
+  "shenshaTitle": "神煞 · 空亡 · 胎元",
+  "relationsTitle": "原局刑沖合害",
+  "ziNextDay": "23:00–24:00 出生，日柱算次日",
+  "ziNextDayHint": "子時有兩種算法；預設 23:00 後出生仍算當天"
 }

@@ -178,7 +178,8 @@ describe("日主 / 月令 / 加权五行 / 流年", () => {
 
   it("流年 2026 丙午 and 2027 丁未", () => {
     expect(f.liunian).toHaveLength(10);
-    expect(f.liunian[0]).toEqual({
+    // The fields from before v1.3.0 keep their values (ChartFact is additive-only).
+    expect(f.liunian[0]).toMatchObject({
       year: 2026,
       ganzhi: "丙午",
       age: 36,
@@ -186,6 +187,66 @@ describe("日主 / 月令 / 加权五行 / 流年", () => {
       shishen_zhi: "偏印",
       dayun_index: 3,
       branch_relations: [{ pillar: "hour", type: "六合" }],
+    });
+    // 虚岁: 2026 − 1990 + 1 = 37. 2026 lies in 大运 3 壬午 (己卯 forward: 庚辰 辛巳 壬午).
+    // 丙 with 时干 辛 五合 水, with 大运 壬 相冲; 午 with 年支 午 and 大运 午 自刑, with 卯 (月, 日)
+    // 相破, with 时支 未 六合 土. 神煞: 己 禄在午.
+    expect(f.liunian[0]).toMatchObject({
+      age_xu: 37,
+      relations: [
+        {
+          type: "天干五合",
+          element: "水",
+          members: [
+            { pillar: "hour", char: "辛" },
+            { pillar: "liunian", char: "丙" },
+          ],
+        },
+        {
+          type: "天干相冲",
+          members: [
+            { pillar: "dayun", char: "壬" },
+            { pillar: "liunian", char: "丙" },
+          ],
+        },
+        {
+          type: "自刑",
+          members: [
+            { pillar: "year", char: "午" },
+            { pillar: "liunian", char: "午" },
+          ],
+        },
+        {
+          type: "相破",
+          members: [
+            { pillar: "month", char: "卯" },
+            { pillar: "liunian", char: "午" },
+          ],
+        },
+        {
+          type: "相破",
+          members: [
+            { pillar: "day", char: "卯" },
+            { pillar: "liunian", char: "午" },
+          ],
+        },
+        {
+          type: "六合",
+          element: "土",
+          members: [
+            { pillar: "hour", char: "未" },
+            { pillar: "liunian", char: "午" },
+          ],
+        },
+        {
+          type: "自刑",
+          members: [
+            { pillar: "dayun", char: "午" },
+            { pillar: "liunian", char: "午" },
+          ],
+        },
+      ],
+      shensha: ["禄神"],
     });
     expect(f.liunian[1]!.ganzhi).toBe("丁未");
     expect(f.liunian[1]!.dayun_index).toBe(4);

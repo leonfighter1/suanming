@@ -33,7 +33,7 @@
   "dayun": "大运",
   "dayunFrom": "{date} 起运",
   "liunian": "流年",
-  "age": "{age} 岁",
+  "age": "虚岁 {age}",
   "aiReport": "AI 解读",
   "chooseTopics": "分析方面",
   "generate": "生成 AI 解读",
@@ -143,7 +143,7 @@
   "trendTotal": "总分",
   "trendCompare": "叠加对比",
   "trendTapHint": "点击图上的时期，查看各项分数和依据。",
-  "trendAge": "{ages} 岁",
+  "trendAge": "虚岁 {ages}",
   "expandAll": "展开全部",
   "collapseAll": "收起全部",
   "remedyTitle": "破除运势",
@@ -328,5 +328,9 @@
   "tarotNextShort": "下一张",
   "tarotZoomHint": "点击小牌放大，在大图里翻开。",
   "tarotAllTurned": "牌已全部翻开。点击任意一张，看大图和位置含义。",
-  "tarotTapToTurn": "点击牌面翻开"
+  "tarotTapToTurn": "点击牌面翻开",
+  "shenshaTitle": "神煞 · 空亡 · 胎元",
+  "relationsTitle": "原局刑冲合害",
+  "ziNextDay": "23:00–24:00 出生，日柱算次日",
+  "ziNextDayHint": "子时有两种算法；默认 23:00 后出生仍算当天"
 }

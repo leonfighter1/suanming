@@ -112,7 +112,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String age(int age) {
-    return '$age 岁';
+    return '虚岁 $age';
   }
 
   @override
@@ -452,7 +452,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String trendAge(String ages) {
-    return '$ages 岁';
+    return '虚岁 $ages';
   }
 
   @override
@@ -1040,6 +1040,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tarotTapToTurn => '点击牌面翻开';
+
+  @override
+  String get shenshaTitle => '神煞 · 空亡 · 胎元';
+
+  @override
+  String get relationsTitle => '原局刑冲合害';
+
+  @override
+  String get ziNextDay => '23:00–24:00 出生，日柱算次日';
+
+  @override
+  String get ziNextDayHint => '子时有两种算法；默认 23:00 后出生仍算当天';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1149,7 +1161,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String age(int age) {
-    return '$age 歲';
+    return '虛歲 $age';
   }
 
   @override
@@ -1489,7 +1501,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String trendAge(String ages) {
-    return '$ages 歲';
+    return '虛歲 $ages';
   }
 
   @override
@@ -2077,4 +2089,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tarotTapToTurn => '點擊牌面翻開';
+
+  @override
+  String get shenshaTitle => '神煞 · 空亡 · 胎元';
+
+  @override
+  String get relationsTitle => '原局刑沖合害';
+
+  @override
+  String get ziNextDay => '23:00–24:00 出生，日柱算次日';
+
+  @override
+  String get ziNextDayHint => '子時有兩種算法；預設 23:00 後出生仍算當天';
 }

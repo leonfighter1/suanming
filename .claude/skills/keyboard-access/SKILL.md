@@ -1,6 +1,6 @@
 ---
 name: keyboard-access
-description: Keyboard access for the 命理大师 app, plus the steps that finish every update. Use when adding or changing a screen, dialog, widget, tap target or shortcut in app/ (so Tab, Enter/Space, Esc and the arrow keys keep working for web users), and when finishing any update or release (harness, README 更新记录, version, records).
+description: Keyboard access for the 命理大师 app. Use when adding or changing a screen, dialog, widget, tap target or shortcut in app/ (so Tab, Enter/Space, Esc and the arrow keys keep working for web users). The steps that finish every update are in the dev-workflow skill.
 ---
 
 # Keyboard access (命理大师 app)
@@ -90,23 +90,7 @@ Where things are:
 - Only full pages leave on Esc. A dialog closes only through its own `DismissIntent`, so a dialog that must not be
   dismissed stays open.
 
-## Finishing every update (the owner's rules, for every change, not only keyboard work)
+## Finishing every update
 
-1. **Run the harness** and make it pass. It runs every gate, including the app gate (pub get, analyze, all tests,
-   web build), which shows the app still works:
-
-   ```
-   powershell -ExecutionPolicy Bypass -File C:\Users\AgentSkills\harness-check\scripts\check.ps1 -Project .
-   ```
-
-   Fix and run again until `HARNESS: PASS`. Never call work done on a red run, and report any gate that was skipped.
-
-2. **README.md → 更新记录**: a new entry at the top, `### vX.Y.Z (YYYY-MM-DD): title`. Under it, by area: what
-   changed for users, how to use it (keys, buttons, settings), what was fixed, and how it was verified (test counts,
-   harness result). Detail is wanted: someone reading only the README should know what the update did.
-3. **Version** for anything users notice: `version:` in `app/pubspec.yaml` (`X.Y.Z+build`, raise the build number
-   on every release) and `package.json` (`npm version X.Y.Z --no-git-tag-version`). A release gets the git tag
-   `vX.Y.Z`.
-4. **Records**: `docs/agent/DEVLOG.md` entry; `MODULES.md` rows for new reusable modules; every failure fixed on the
-   way goes in through `add-mistake.ps1` (mistake-memory skill).
-5. **Commit** with the attribution trailer and push; for a release, push the tag too.
+The steps that finish every update (harness, README 更新记录, version, records, commit, when to push) moved to the
+[dev-workflow skill](../dev-workflow/SKILL.md), together with the tech plan, the stages and the version rules.
