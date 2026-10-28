@@ -12,6 +12,34 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v5.0.0 (2026-10-28): 新玩法, three new methods (stage S6 complete)
+
+The big update that ends stage S6 of the [tech plan](docs/tech-plan.md). It brings the three methods your phase
+document plans, each standing alone, with its own engine, prompts and page. The stage summary is in the tech plan
+(阶段总结, S6). This push also carries v4.1.0–v4.5.0, below.
+
+- **求籤 · 擲筊** (v4.3.0), on the home page.
+  - Shake out a stick, then 擲筊 until a 聖筊 confirms it.
+  - The lot is the 關聖帝君一百籤, its poem checked line by line against two modern copies and a Qing print.
+  - The AI reads the poem for your question, with no fixed fate and no offerings. The lot can be shared as an image.
+  - In Taiwan and Hong Kong, 求籤 is the first entry.
+- **風水** (v4.4.0), on the home page.
+  - Choose a room, and optionally its facing and how it is now.
+  - You get general principles of light, air, rest and movement, and the AI relates them to your room.
+  - Never 吉凶, and never buying a cure.
+  - In Malaysia, 風水 is the first entry.
+- **起名** (v4.5.0), from a 八字 chart: 12 candidate names that serve the chart's 喜用 and sound well with the surname,
+  with each character's 五行 and meaning, and an AI reading of them. It is **off until you review its 字义库**. How
+  to review it and turn it on: [docs/web-test.md](docs/web-test.md) (起名).
+- What waits for you:
+  - the 起名 review;
+  - whether a 八字 reading may have a share image, since its four pillars would show the birth date (WP7.2).
+- Verified: a fresh harness run on the final tree passes every gate:
+  - 401 server tests;
+  - 137 app tests and the web build;
+  - the 7000-chart 八字 check against the oracle;
+  - 100 000 tarot draws and 100 000 求籤 draws.
+
 ### v4.5.0 (2026-10-28): 起名, candidate names from a 八字 chart (off until you review its 字义库)
 
 Stage S6 of the [tech plan](docs/tech-plan.md) (新玩法), work package 6.4, built to your phase document's 起名 spec:

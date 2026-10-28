@@ -2,7 +2,7 @@
 
 Newest first. One entry per working session, key points only.
 
-## 2026-10-28 (ac): S6 WP6.4, 起名 behind the owner's review; release v4.5.0
+## 2026-10-28 (ac): S6 WP6.4, 起名 behind the owner's review; S6 complete; releases v4.5.0 and v5.0.0
 
 - v4.4.0 committed and tagged (e899046) after a harness PASS (rule 23 again: the first run failed at analyze, the second passed).
 - Spec from the owner's Phase 3 §2.1, §4: 五行补益 from the 八字 chart, a 字义库 in 繁 and 简 checked by hand, 音律 rules, candidates with their basis. Written into the plan before code.
@@ -21,7 +21,9 @@ Newest first. One entry per working session, key points only.
   - With the fixes, all pass after the switch.
 - A negative test was vacuous: a scrolled-past widget was still built. It is now anchored on the neighbouring button (rule 43).
 - Owner's steps to turn 起名 on: docs/web-test.md.
-- v4.5.0 committed and tagged locally, not pushed.
+- v4.5.0 committed and tagged (970efef) after a harness PASS (rule 23: the first run failed at analyze, the second passed).
+- S6 stage summary written (tech plan, 阶段总结), and the v5.0.0 README entry.
+- v5.0.0: committed and tagged after a fresh harness PASS on the final tree. Pushed main and the tags, carrying v4.1.0–v5.0.0 (owner rule: big updates only).
 
 ## 2026-10-28 (ab): S6 WP6.3, 风水 to the owner's spec; release v4.4.0
 

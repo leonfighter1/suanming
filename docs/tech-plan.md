@@ -32,7 +32,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done        |
 | S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done        |
 | S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done        |
-| S6 新玩法                  | 求籤 · 擲筊, 风水, 起名 (the owner's phase document)        | big    | v5.0.0 + summary  | in progress |
+| S6 新玩法                  | 求籤 · 擲筊, 风水, 起名 (the owner's phase document)        | big    | v5.0.0 + summary  | done        |
 | S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
@@ -789,6 +789,63 @@ From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（�
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S6 新玩法 (done 2026-10-28: v4.3.0–v5.0.0)
+
+1. **Delivered**, the three new methods of the owner's phase document (Phase 3 §2.1, §2.4). Each stands alone
+   (rule 8): its own engine, prompts, brief, AI label and app page.
+   - **WP6.1 + 6.2, v4.3.0: 求籤 · 擲筊.**
+     - The 關聖帝君一百籤, text verified against two transcriptions and the Qing print. Evidence:
+       docs/verification/qiuqian-guandi-100.md.
+     - The ritual draws from its own seed (HMAC-DRBG), so a draw can be replayed.
+     - A share image of the lot.
+     - The home order now comes from the region (`GET /v1/methods`): 求籤 first in Taiwan and Hong Kong.
+   - **WP6.3, v4.4.0: 风水.**
+     - General principles of space for 7 rooms, with an optional facing (後天八卦), never 吉凶.
+     - Every paragraph is pinned to `simplified_rule`.
+     - A 风水-only compliance rule group. First in Malaysia.
+   - **WP6.4, v4.5.0: 起名.**
+     - 五行补益 from a 八字 chart's 喜用, a draft 字义库 and 音律 rules.
+     - It ships off until the owner's 人工校订, behind a gate that tests hold both ways.
+   - New shared pieces, each scoped per method:
+     - `METHOD_RULE_GROUPS` and `METHOD_LABELS`;
+     - entry weights in the Geo-Rule matrix;
+     - `MINGLI_GEO_MATRIX`, to switch the matrix without a release.
+2. **Numbers**
+   - Server tests 329 → 401; app tests 122 → 137 (v4.3.0: 364 / 127; v4.4.0: 385 / 131; v4.5.0: 401 / 137).
+   - A new harness gate: `verify:qiuqian`, 100 000 draws, 8 checks.
+   - Content:
+     - 100 lots: 85 agreed between the copies, 16 lines settled by the print, 5 corrections, 38 variants listed;
+     - 30 风水 principles for 7 rooms;
+     - 100 name characters and 83 surnames.
+   - Prompts: 6 new, each pinned, none shared. Compliance: G008, and F001 / F002 for 风水 only.
+   - Migrations 003–005. Geo-Rule matrix 0.1.0 → 0.4.0.
+3. **Changed against the plan**
+   - The owner made no choice of methods (「继续吧不要停」). S6 followed the owner's phase document instead
+     (rule 34), and this plan's own 六爻 / 合婚 ideas were parked.
+   - 求籤's text policy changed once the print was read in full: the two modern copies share errors (rule 39).
+   - 起名 shipped off. The spec asks for a hand-checked 字义库, and only the owner can sign that off. The owner's
+     switch was tried once and undone, and 7 tests that would have failed were fixed (rule 42).
+   - Only 求籤 has a share image: the 风水 and 起名 specs ask for none.
+4. **Mistakes recorded**
+   - Rules 38 and 40, about care with the machine and the owner's data:
+     - 38: a file was written to a retyped path, 命理大師, a folder the guard won't let me remove;
+     - 40: the owner's email went out once in a User-Agent.
+   - Rules 39 and 41, about evidence: modern copies can share errors, and summarising fetches don't give verbatim
+     text.
+   - Rules 42 and 43, about tests:
+     - 42: tests must not pin a switch the owner will flip;
+     - 43: a `findsNothing` needs a positive anchor.
+   - Rule 30 was corrected in place (absolute imports in project-root scripts).
+   - Rule 23 cost one harness run per release, three times in this stage: the first run after a pubspec bump
+     fails at analyze. That is a fix for the harness tooling, outside this repository.
+5. **Next**
+   - Waiting for the owner:
+     - the 起名 字义库 review (docs/web-test.md, 起名);
+     - WP7.2, a 八字 share card, which would show the birth date.
+   - Waiting for others: WP7.3, the deep link (needs the stores); WP1.8, 命宫 / 身宫 (needs a reference).
+   - New lot sets (六十甲子籤, 黃大仙靈籤) wait for verifiable sources. 六爻 / 合婚 stay parked.
+   - Then a fresh look for leftover work against the owner's documents, for the next stage.
 
 ### S5 数据持久化 (done 2026-10-28: v4.1.0, medium)
 
