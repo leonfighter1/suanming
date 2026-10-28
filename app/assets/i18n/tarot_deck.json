@@ -458,5 +458,72 @@
       "zh-Hans": "结果",
       "zh-Hant": "結果"
     }
+  },
+  "position_meanings": {
+    "focus": {
+      "en": "The heart of your question: the one card to reflect on.",
+      "zh-Hans": "你所问之事的核心：这次最值得细想的一张牌。",
+      "zh-Hant": "你所問之事的核心：這次最值得細想的一張牌。"
+    },
+    "past": {
+      "en": "What led here: the background and experience behind the question.",
+      "zh-Hans": "走到今天的背景和经历。",
+      "zh-Hant": "走到今天的背景和經歷。"
+    },
+    "present": {
+      "en": "Where things stand now: the heart of the matter.",
+      "zh-Hans": "事情现在的状态，也是这件事的核心。",
+      "zh-Hant": "事情現在的狀態，也是這件事的核心。"
+    },
+    "future": {
+      "en": "Where things tend to go if nothing changes; not a fixed fate.",
+      "zh-Hans": "照现在的方向，事情可能的走向（不是定数）。",
+      "zh-Hant": "照現在的方向，事情可能的走向（不是定數）。"
+    },
+    "challenge": {
+      "en": "What crosses the matter: the obstacle, or the force at work on it, which can also help.",
+      "zh-Hans": "横在现状上的阻力，或正在起作用的力量，也可能是助力。",
+      "zh-Hant": "橫在現狀上的阻力，或正在起作用的力量，也可能是助力。"
+    },
+    "foundation": {
+      "en": "The root beneath the matter: what it rests on, often from further back.",
+      "zh-Hans": "事情的根源和基础，往往来自更早以前。",
+      "zh-Hant": "事情的根源和基礎，往往來自更早以前。"
+    },
+    "recent_past": {
+      "en": "What is just passing: recent events whose influence is fading.",
+      "zh-Hans": "刚刚过去、影响正在减弱的事。",
+      "zh-Hant": "剛剛過去、影響正在減弱的事。"
+    },
+    "potential": {
+      "en": "The crown: what you aim for, the best that can come of it.",
+      "zh-Hans": "你心里追求的目标，事情可能达到的最好结果。",
+      "zh-Hant": "你心裡追求的目標，事情可能達到的最好結果。"
+    },
+    "near_future": {
+      "en": "What is likely to come next, in the weeks or months ahead.",
+      "zh-Hans": "接下来几周到几个月可能出现的情况。",
+      "zh-Hant": "接下來幾週到幾個月可能出現的情況。"
+    },
+    "self": {
+      "en": "You: your attitude and how you stand in the matter.",
+      "zh-Hans": "你自己的心态，以及你在这件事里的位置。",
+      "zh-Hant": "你自己的心態，以及你在這件事裡的位置。"
+    },
+    "environment": {
+      "en": "Around you: the people and circumstances that bear on it.",
+      "zh-Hans": "身边的人和外部环境对这件事的影响。",
+      "zh-Hant": "身邊的人和外部環境對這件事的影響。"
+    },
+    "hopes_fears": {
+      "en": "What you hope for or fear; often the same thing.",
+      "zh-Hans": "你期待或担心的事，两者常常是同一件事。",
+      "zh-Hant": "你期待或擔心的事，兩者常常是同一件事。"
+    },
+    "outcome": {
+      "en": "Where things tend to lead if they go on as they are; not a fixed fate.",
+      "zh-Hans": "照目前的趋势，事情最可能的结局（不是定数）。",
+      "zh-Hant": "照目前的趨勢，事情最可能的結局（不是定數）。"
+    }
   }
 }

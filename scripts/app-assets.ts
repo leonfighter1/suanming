@@ -29,7 +29,7 @@ import {
   lunarToSolar,
   shichenOptions,
 } from "../src/engines/bazi/index.js";
-import { DECK, DECK_ID, POSITION_LABELS } from "../src/engines/tarot/deck.js";
+import { DECK, DECK_ID, POSITION_LABELS, POSITION_MEANINGS } from "../src/engines/tarot/deck.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
@@ -57,6 +57,15 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
   const tarot = computeTarot(
     { spread: "three_card" },
     { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000001" },
+  );
+  // The other two spreads, for the app's layout tests (Celtic Cross: cross + staff).
+  const celtic = computeTarot(
+    { spread: "celtic_cross" },
+    { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000002" },
+  );
+  const single = computeTarot(
+    { spread: "single" },
+    { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000003" },
   );
   const mock = new MockProvider();
   const report = await generateReport(
@@ -163,6 +172,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       deck_id: DECK_ID,
       cards: Object.fromEntries(DECK.map((c) => [c.id, c.name])),
       positions: POSITION_LABELS,
+      position_meanings: POSITION_MEANINGS,
     },
     "app/test/fixtures/chart_bazi.json": {
       chart_id: "22222222-2222-4222-8222-222222222222",
@@ -171,6 +181,14 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     "app/test/fixtures/chart_tarot.json": {
       chart_id: "33333333-3333-4333-8333-333333333333",
       chart_fact: tarot,
+    },
+    "app/test/fixtures/chart_tarot_celtic.json": {
+      chart_id: "88888888-8888-4888-8888-888888888888",
+      chart_fact: celtic,
+    },
+    "app/test/fixtures/chart_tarot_single.json": {
+      chart_id: "99999999-9999-4999-8999-999999999999",
+      chart_fact: single,
     },
     "app/test/fixtures/report_passed.json": view,
     "app/test/fixtures/remedy_passed.json": remedyView,

@@ -166,8 +166,13 @@ class FakeApi {
       return _json({'deleted': {'account': true, 'charts': 1, 'reports': 1}, 'completed_at': '2026-10-26T00:00:00Z'}, 200);
     }
     if (req.method == 'POST' && path == '/v1/charts') {
-      final system = (jsonDecode(req.body) as Map)['system'];
-      return _json(fixture(system == 'tarot' ? 'chart_tarot' : 'chart_bazi'), 201);
+      final body = jsonDecode(req.body) as Map;
+      final tarot = switch (body['spread']) {
+        'celtic_cross' => 'chart_tarot_celtic',
+        'single' => 'chart_tarot_single',
+        _ => 'chart_tarot',
+      };
+      return _json(fixture(body['system'] == 'tarot' ? tarot : 'chart_bazi'), 201);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
     // 一生运势报告: real engine facts for the owner's sample (life_passed.json).

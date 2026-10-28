@@ -199,12 +199,13 @@ export function factsLayer(chart: ChartFact, locale: Locale, nowYear: number): s
   }
   if (chart.system === "tarot") {
     const f = chart.facts as {
-      cards: { position_key: string; card_id: string; reversed: boolean }[];
+      cards: { position: number; position_key: string; card_id: string; reversed: boolean }[];
     };
+    // Numbered in dealing order, the order a classic reading follows.
     return f.cards.map((c) => {
       const card = DECK.find((d) => d.id === c.card_id)!;
       const pos = POSITION_LABELS[c.position_key]?.[locale] ?? c.position_key;
-      return `${pos}: ${card.name[locale]}${c.reversed ? ` (${tr("逆位")})` : ""}`;
+      return `${c.position}. ${pos}: ${card.name[locale]}${c.reversed ? ` (${tr("逆位")})` : ""}`;
     });
   }
   const f = chart.facts as { bodies: { body: string; sign: string; longitude: number }[] };

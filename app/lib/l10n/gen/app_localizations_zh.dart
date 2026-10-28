@@ -212,9 +212,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reversed => '逆位';
 
   @override
-  String get tapToReveal => '点击卡牌翻开';
-
-  @override
   String get retry => '重试';
 
   @override
@@ -995,7 +992,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get keysScroll => '滚动页面；在菜单里上下选择';
 
   @override
-  String get keysSubmit => '提交表单：登录、排盘、保存';
+  String get keysSubmit => '提交表单：登录、排盘、抽牌、保存';
 
   @override
   String get keysHelp => '打开这个列表';
@@ -1010,6 +1007,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String cardHidden(String position) {
     return '$position，未翻开';
   }
+
+  @override
+  String get tarotQuestion => '你想问的问题（可选）';
+
+  @override
+  String get tarotQuestionHint => '抽牌前先在心里想好一个问题，解读会围绕它展开。';
+
+  @override
+  String tarotQuestionShown(String question) {
+    return '问题：$question';
+  }
+
+  @override
+  String tarotSlot(int n, String position) {
+    return '第 $n 张 · $position';
+  }
+
+  @override
+  String tarotNext(String slot) {
+    return '按牌阵顺序翻牌，下一张：$slot';
+  }
+
+  @override
+  String get tarotNextShort => '下一张';
+
+  @override
+  String get tarotZoomHint => '点击小牌放大，在大图里翻开。';
+
+  @override
+  String get tarotAllTurned => '牌已全部翻开。点击任意一张，看大图和位置含义。';
+
+  @override
+  String get tarotTapToTurn => '点击牌面翻开';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1217,9 +1247,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get reversed => '逆位';
-
-  @override
-  String get tapToReveal => '點擊卡牌翻開';
 
   @override
   String get retry => '重試';
@@ -2002,7 +2029,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get keysScroll => '捲動頁面；在選單裡上下選擇';
 
   @override
-  String get keysSubmit => '提交表單：登入、排盤、儲存';
+  String get keysSubmit => '提交表單：登入、排盤、抽牌、儲存';
 
   @override
   String get keysHelp => '開啟這個列表';
@@ -2017,4 +2044,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String cardHidden(String position) {
     return '$position，未翻開';
   }
+
+  @override
+  String get tarotQuestion => '你想問的問題（可選）';
+
+  @override
+  String get tarotQuestionHint => '抽牌前先在心裡想好一個問題，解讀會圍繞它展開。';
+
+  @override
+  String tarotQuestionShown(String question) {
+    return '問題：$question';
+  }
+
+  @override
+  String tarotSlot(int n, String position) {
+    return '第 $n 張 · $position';
+  }
+
+  @override
+  String tarotNext(String slot) {
+    return '按牌陣順序翻牌，下一張：$slot';
+  }
+
+  @override
+  String get tarotNextShort => '下一張';
+
+  @override
+  String get tarotZoomHint => '點擊小牌放大，在大圖裡翻開。';
+
+  @override
+  String get tarotAllTurned => '牌已全部翻開。點擊任意一張，看大圖和位置含義。';
+
+  @override
+  String get tarotTapToTurn => '點擊牌面翻開';
 }

@@ -495,12 +495,6 @@ abstract class AppLocalizations {
   /// **'Reversed'**
   String get reversed;
 
-  /// No description provided for @tapToReveal.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap a card to turn it over'**
-  String get tapToReveal;
-
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
@@ -1998,7 +1992,7 @@ abstract class AppLocalizations {
   /// No description provided for @keysSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Submit the form: sign in, compute the chart, save'**
+  /// **'Submit the form: sign in, compute the chart, draw the cards, save'**
   String get keysSubmit;
 
   /// No description provided for @keysHelp.
@@ -2024,6 +2018,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{position}, face down'**
   String cardHidden(String position);
+
+  /// No description provided for @tarotQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your question (optional)'**
+  String get tarotQuestion;
+
+  /// No description provided for @tarotQuestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Think of one question before you draw; the reading will answer it.'**
+  String get tarotQuestionHint;
+
+  /// No description provided for @tarotQuestionShown.
+  ///
+  /// In en, this message translates to:
+  /// **'Question: {question}'**
+  String tarotQuestionShown(String question);
+
+  /// No description provided for @tarotSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Card {n} · {position}'**
+  String tarotSlot(int n, String position);
+
+  /// No description provided for @tarotNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the cards in order. Next: {slot}'**
+  String tarotNext(String slot);
+
+  /// No description provided for @tarotNextShort.
+  ///
+  /// In en, this message translates to:
+  /// **'next'**
+  String get tarotNextShort;
+
+  /// No description provided for @tarotZoomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a small card to see it large and turn it there.'**
+  String get tarotZoomHint;
+
+  /// No description provided for @tarotAllTurned.
+  ///
+  /// In en, this message translates to:
+  /// **'All cards are turned. Tap a card to see it large with its position\'s meaning.'**
+  String get tarotAllTurned;
+
+  /// No description provided for @tarotTapToTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the card to turn it over'**
+  String get tarotTapToTurn;
 }
 
 class _AppLocalizationsDelegate

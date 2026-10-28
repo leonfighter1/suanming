@@ -66,7 +66,6 @@
   "spreadCeltic": "凯尔特十字（10 张）",
   "draw": "抽牌",
   "reversed": "逆位",
-  "tapToReveal": "点击卡牌翻开",
   "retry": "重试",
   "errorTitle": "请求失败",
   "disclaimerShort": "仅供娱乐和玄学学习使用，不是预测。",
@@ -316,9 +315,18 @@
   "keysEsc": "返回上一层：先关闭菜单和对话框；测算未完成时会先提醒",
   "keysArrows": "切换选项（如 公历 / 农历）和图表时期；滚动 大运 / 流年",
   "keysScroll": "滚动页面；在菜单里上下选择",
-  "keysSubmit": "提交表单：登录、排盘、保存",
+  "keysSubmit": "提交表单：登录、排盘、抽牌、保存",
   "keysHelp": "打开这个列表",
   "keysBrowser": "切换浏览器标签页：这是浏览器自己的快捷键，本应用不占用。应用内切换选项请用 ← →",
   "close": "关闭",
-  "cardHidden": "{position}，未翻开"
+  "cardHidden": "{position}，未翻开",
+  "tarotQuestion": "你想问的问题（可选）",
+  "tarotQuestionHint": "抽牌前先在心里想好一个问题，解读会围绕它展开。",
+  "tarotQuestionShown": "问题：{question}",
+  "tarotSlot": "第 {n} 张 · {position}",
+  "tarotNext": "按牌阵顺序翻牌，下一张：{slot}",
+  "tarotNextShort": "下一张",
+  "tarotZoomHint": "点击小牌放大，在大图里翻开。",
+  "tarotAllTurned": "牌已全部翻开。点击任意一张，看大图和位置含义。",
+  "tarotTapToTurn": "点击牌面翻开"
 }

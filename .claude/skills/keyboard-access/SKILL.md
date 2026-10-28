@@ -46,6 +46,8 @@ Where things are:
 | The focus look                                          | buttons and chips: the theme; cards: `AppCard` (built in); custom: `Pressable` or `FocusRing`        |
 | A picker that should open ready for typing              | `keyboardInUse` (the last input was a key): date/time pickers open in input mode, search autofocuses |
 | A new shortcut                                          | add it, a row in `ShortcutList`, and its text in the three ARB files                                 |
+| A dialog whose main target should take the focus        | `Pressable(autofocus: true)` (the enlarged tarot card: Enter turns it at once)                       |
+| Targets waiting their turn (tarot cards not yet next)   | `ExcludeFocus(excluding: true)`, so Tab only reaches what can be pressed now                         |
 
 ## Checklist for a new screen or widget
 

@@ -48,6 +48,12 @@ Records:
 6. Write files that contain backslashes with the Write/Edit tool, not shell heredocs.
 7. Flutter/Dart tooling needs an ASCII path on this machine. harness-check
    handles it; for manual runs use a junction.
+8. **Each method stands alone** (owner, 2026-10-27). 八字, 塔罗, 一生运势 and
+   astrology each have their own engine, prompts and code paths. A change for one
+   must never change another's prompts, facts or output: give a method its own
+   prompt version (塔罗 reads with `narrative_tarot@N`, not the shared
+   `narrative@N`) and keep method-specific logic behind its own branch or module.
+   `test/tarot-reading.test.ts` pins `narrative@4`.
 
 ## Map
 

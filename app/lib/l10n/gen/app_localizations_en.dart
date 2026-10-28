@@ -218,9 +218,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reversed => 'Reversed';
 
   @override
-  String get tapToReveal => 'Tap a card to turn it over';
-
-  @override
   String get retry => 'Retry';
 
   @override
@@ -1027,7 +1024,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keysScroll => 'Scroll the page; move through a menu';
 
   @override
-  String get keysSubmit => 'Submit the form: sign in, compute the chart, save';
+  String get keysSubmit =>
+      'Submit the form: sign in, compute the chart, draw the cards, save';
 
   @override
   String get keysHelp => 'Show this list';
@@ -1043,4 +1041,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String cardHidden(String position) {
     return '$position, face down';
   }
+
+  @override
+  String get tarotQuestion => 'Your question (optional)';
+
+  @override
+  String get tarotQuestionHint =>
+      'Think of one question before you draw; the reading will answer it.';
+
+  @override
+  String tarotQuestionShown(String question) {
+    return 'Question: $question';
+  }
+
+  @override
+  String tarotSlot(int n, String position) {
+    return 'Card $n · $position';
+  }
+
+  @override
+  String tarotNext(String slot) {
+    return 'Turn the cards in order. Next: $slot';
+  }
+
+  @override
+  String get tarotNextShort => 'next';
+
+  @override
+  String get tarotZoomHint =>
+      'Tap a small card to see it large and turn it there.';
+
+  @override
+  String get tarotAllTurned =>
+      'All cards are turned. Tap a card to see it large with its position\'s meaning.';
+
+  @override
+  String get tarotTapToTurn => 'Tap the card to turn it over';
 }

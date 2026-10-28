@@ -80,7 +80,6 @@
   "spreadCeltic": "Celtic Cross (10 cards)",
   "draw": "Draw",
   "reversed": "Reversed",
-  "tapToReveal": "Tap a card to turn it over",
   "retry": "Retry",
   "errorTitle": "Couldn't complete the request",
   "disclaimerShort": "For entertainment and metaphysics study only, not a prediction.",
@@ -457,7 +456,7 @@
   "keysEsc": "Back one level: menus and dialogs close first; an unfinished reading asks first",
   "keysArrows": "Switch options (e.g. Gregorian / Lunar) and chart periods; scroll the luck and annual pillars",
   "keysScroll": "Scroll the page; move through a menu",
-  "keysSubmit": "Submit the form: sign in, compute the chart, save",
+  "keysSubmit": "Submit the form: sign in, compute the chart, draw the cards, save",
   "keysHelp": "Show this list",
   "keysBrowser": "Switches browser tabs: the browser's own key, which the app leaves alone. Inside the app, switch options with ← →",
   "close": "Close",
@@ -468,5 +467,38 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tarotQuestion": "Your question (optional)",
+  "tarotQuestionHint": "Think of one question before you draw; the reading will answer it.",
+  "tarotQuestionShown": "Question: {question}",
+  "@tarotQuestionShown": {
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  },
+  "tarotSlot": "Card {n} · {position}",
+  "@tarotSlot": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "position": {
+        "type": "String"
+      }
+    }
+  },
+  "tarotNext": "Turn the cards in order. Next: {slot}",
+  "@tarotNext": {
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
+  "tarotNextShort": "next",
+  "tarotZoomHint": "Tap a small card to see it large and turn it there.",
+  "tarotAllTurned": "All cards are turned. Tap a card to see it large with its position's meaning.",
+  "tarotTapToTurn": "Tap the card to turn it over"
 }

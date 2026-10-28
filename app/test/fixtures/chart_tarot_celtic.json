@@ -1,0 +1,102 @@
+{
+  "chart_id": "88888888-8888-4888-8888-888888888888",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "tarot",
+      "version": "0.1.0"
+    },
+    "system": "tarot",
+    "input_digest": "hmac-sha256:5edf0fc1235a52fbcba34ce543354825b06a1e63a069a7941061857171025b35",
+    "rule_versions": {
+      "deck": "rws-78/v1",
+      "rng": "hmac-sha256-drbg/v1"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "deck_id": "rws-78/v1",
+      "spread_id": "celtic_cross",
+      "reversed_rate": 0.5,
+      "cards": [
+        {
+          "position": 1,
+          "position_key": "present",
+          "card_id": "major_13",
+          "reversed": false
+        },
+        {
+          "position": 2,
+          "position_key": "challenge",
+          "card_id": "wands_10",
+          "reversed": true
+        },
+        {
+          "position": 3,
+          "position_key": "foundation",
+          "card_id": "major_01",
+          "reversed": true
+        },
+        {
+          "position": 4,
+          "position_key": "recent_past",
+          "card_id": "major_15",
+          "reversed": true
+        },
+        {
+          "position": 5,
+          "position_key": "potential",
+          "card_id": "swords_04",
+          "reversed": false
+        },
+        {
+          "position": 6,
+          "position_key": "near_future",
+          "card_id": "wands_13",
+          "reversed": true
+        },
+        {
+          "position": 7,
+          "position_key": "self",
+          "card_id": "major_08",
+          "reversed": true
+        },
+        {
+          "position": 8,
+          "position_key": "environment",
+          "card_id": "major_21",
+          "reversed": false
+        },
+        {
+          "position": 9,
+          "position_key": "hopes_fears",
+          "card_id": "cups_06",
+          "reversed": true
+        },
+        {
+          "position": 10,
+          "position_key": "outcome",
+          "card_id": "wands_04",
+          "reversed": false
+        }
+      ],
+      "audit": {
+        "draw_id": "00000000-0000-4000-8000-000000000002",
+        "drawn_at": "2026-10-25T00:00:00.000Z",
+        "rng": "hmac-sha256-drbg/v1",
+        "result_digest": "sha256:263efa8ceee1270ae9afd9a8b0cc310c74bb20603bdf9888fc57d66a3a7cb09f"
+      }
+    },
+    "provenance": [
+      {
+        "path": "/cards",
+        "source_level": "traditional_text",
+        "note": "RWS 78 张；牌阵位置义为通行版本"
+      },
+      {
+        "path": "/cards/reversed",
+        "source_level": "common_consensus",
+        "note": "逆位概率 0.5"
+      }
+    ]
+  }
+}

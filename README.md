@@ -11,6 +11,45 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. The steps that finish an update (harness, this entry, version) are in
 [.claude/skills/keyboard-access/SKILL.md](.claude/skills/keyboard-access/SKILL.md).
 
+### v1.2.0 (2026-10-27): 塔罗 the classic way
+
+Checked against the classic method (owner request). Already right: a fair shuffle dealt into the positions in order,
+and the Celtic Cross positions and their order (after Rachel Pollack: 1 现在, 2 挑战 across it, 3 根基 below, 4 近期过去
+behind, 5 潜能 above, 6 近期未来 ahead, 7–10 the staff). Not right before, fixed now:
+
+- 塔罗 page
+  - The question first: an optional 你想问的问题 box before the draw. It shows above the cards and goes with the
+    reading.
+  - Each spread lies as it prescribes: one card in the middle; three cards in one row, 过去 → 现在 → 未来 from left to
+    right; the Celtic Cross as the cross (1 in the centre, 2 lying across 1, 3 below, 4 left, 5 above, 6 right) and the
+    staff (7 at the bottom up to 10 at the top). Before, every spread was a grid of cards.
+  - Cards are numbered and turned in dealing order: touching any face-down card turns the next one, which glows
+    gold, and the line above the cards names it (按牌阵顺序翻牌，下一张：第 3 张 · 根基).
+  - Phones: the Celtic Cross (and three cards on a narrow phone) are thumbnails; touching one opens it large, and it is
+    turned there. iPad and desktop show the whole spread on one screen, and cards turn where they lie.
+  - A turned card opens large with its position and what that position means. Under the Celtic Cross every position
+    is listed with its meaning; a turned card's row opens it too (card 1 lies under card 2).
+  - Keyboard: Tab reaches the turned cards and the next one, Enter or Space turns it; in the enlarged view Enter
+    turns the card and Esc closes it; Enter in the question box or Ctrl+Enter draws.
+- 塔罗 readings (AI)
+  - Tarot reads with its own prompt, `narrative_tarot@1`, written for tarot alone: the cards in dealing order, each in
+    the light of its position; the spread's own method (three cards past → present → future; Celtic Cross: 1 with 2,
+    then the lines 3 → 5 and 4 → 6, then the staff 7 → 10, comparing 10 with 5 and 1); upright and reversed; major and
+    minor arcana and the four suits; the user's question answered.
+  - The model now gets the spread ready to read (`<spread>`): each position's number, name and meaning, where it lies,
+    the card's name in the user's language, upright or reversed, and the path to cite. Before, it saw only ids such
+    as `major_09`.
+  - The facts in a reading are numbered in dealing order (1. 过去: 隐士).
+  - Each method stays separate (owner rule): 八字 and astrology still read with `narrative@4`, unchanged byte for byte
+    (a test pins it); nothing in this update reaches another method.
+- For developers: `app/lib/presentation/widgets/tarot_spread.dart` (`TarotSpread`, `celticRects`), `src/ai/tarot.ts`
+  (`spreadBrief`), `POSITION_MEANINGS` in `deck.ts` (synced to the app), fixtures `chart_tarot_celtic` and
+  `chart_tarot_single`, CLAUDE.md hard rule 8.
+- Verified: new server tests (the spread in dealing order, tarot on its own prompt with `<spread>` and the question,
+  `narrative@4` unchanged, numbered facts) and app tests (three in a row; the Celtic Cross on a desktop; turning in
+  order; phone thumbnails turned large; Enter and Esc in the enlarged view; the question sent with the reading); all 88
+  app tests and 254 server tests pass; harness PASS. Rendered on a phone, a laptop and a desktop.
+
 ### v1.1.2 (2026-10-27): tarot names match the art; two cards to a row on phones
 
 - 塔罗

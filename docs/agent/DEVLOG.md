@@ -2,6 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (g): 塔罗 the classic way; each method separate; release v1.2.0
+
+- Owner: check the tarot rules (above all the Celtic Cross layout, the classic order and method) and fix the UI and AI prompts. While at it: phones may use thumbnails opened large to turn, iPad and desktop show everything; and every method must stay separate, never affecting another.
+- Audit: the engine was right (fair shuffle dealt in order; Pollack's position order). Wrong: every spread a grid, cards turned in any order, no numbers or position meanings, no question before the draw (the API took one, the app never sent it), and the AI shared the 八字 narrative prompt with no tarot method, saw card ids only and had to guess that position n is /cards/(n−1).
+- UI (widgets/tarot_spread.dart): single centred, three in a row, Celtic cross + staff (`celticRects`, 5.6 w × 7.157 w, sized to the width and the screen height, w ≤ 150); cards under 96 pt are thumbnails that open large and turn there; touching any face-down card turns the next; numbers, gold glow on the next card, waiting cards out of the Tab order; enlarged view with the position's meaning; Celtic list whose rows open turned cards. Question box before the draw (Enter / Ctrl+Enter draws), sent with the reading. `Pressable(autofocus:)` added for the enlarged card.
+- AI: `narrative_tarot@1`, self-contained, with `tarotUser` and `<spread>` (src/ai/tarot.ts `spreadBrief`); `runAgent` takes a method's own prompt; `narrative@4` untouched, its hash pinned in test/tarot-reading.test.ts; tarot facts numbered. `POSITION_MEANINGS` in deck.ts → tarot_deck.json; fixtures for the Celtic Cross and the single card.
+- CLAUDE.md hard rule 8: each method stands alone.
+
 ## 2026-10-27 (f): tarot names match the art; two cards to a row on phones; release v1.1.2
 
 - Owner: push once all tasks are done (v1.1.0 tags and v1.1.1 pushed), then "yes for both" open questions: phone-fitted cards, and the six names that differed between the art and the app. "Yes" didn't pick a side for the names; the app now uses the painted ones (Mainland usage, the main language since 2026-10-26), leaving the art and JingyaoPaint untouched.

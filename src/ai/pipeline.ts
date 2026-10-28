@@ -23,7 +23,17 @@ import {
 } from "../compliance/index.js";
 import type { UserContext } from "./context.js";
 import { expectationLayer, factsLayer } from "./layers.js";
-import { actionUser, guardUser, narrativeUser, PROMPTS, todayLine, trendUser } from "./prompts.js";
+import {
+  actionUser,
+  guardUser,
+  narrativeUser,
+  PROMPTS,
+  tarotUser,
+  todayLine,
+  trendUser,
+  type PromptVersion,
+} from "./prompts.js";
+import { spreadBrief } from "./tarot.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
 import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schemas.js";
 import { glossaryFor, LOCALES, normalizeTerms, type Locale } from "./terms.js";
@@ -180,6 +190,8 @@ type AgentOutcome<T> =
 /** Shared generate → check → retry loop for every agent. */
 export async function runAgent<T>(args: {
   agent: AgentName;
+  /** A method's own prompt for this agent (tarot's reading); default PROMPTS[agent]. */
+  prompt?: PromptVersion;
   provider: LLMProvider;
   route: ReturnType<typeof routeFor>;
   user: (feedback: string[]) => string;
@@ -191,7 +203,7 @@ export async function runAgent<T>(args: {
   /** false: rule hits are recorded but cause no rewrite or hold (review paused). */
   enforce?: boolean;
 }): Promise<AgentOutcome<T>> {
-  const prompt = PROMPTS[args.agent];
+  const prompt = args.prompt ?? PROMPTS[args.agent];
   const trace: AgentTrace = {
     agent: args.agent,
     prompt_version: prompt.id,
@@ -370,8 +382,12 @@ export async function generateReport(
       }).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))))
     : undefined;
 
+  // Each method reads with its own prompt: tarot never shares one with 八字 or astrology.
+  const tarot = chart.system === "tarot";
+  const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
+    ...(tarot && { prompt: PROMPTS.narrative_tarot }),
     ...providerFor("narrative"),
     schema: narrativeSchema(topics),
     payload: { topics, system: chart.system },
@@ -379,18 +395,30 @@ export async function generateReport(
     enforce,
     onProgress: deps.onProgress,
     user: (feedback) =>
-      narrativeUser({
-        system: chart.system,
-        facts,
-        provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
-        topics,
-        locale: opts.locale,
-        glossary,
-        question: opts.question,
-        context: opts.context,
-        today: todayLine(now),
-        feedback,
-      }),
+      spread
+        ? tarotUser({
+            facts,
+            spread,
+            topics,
+            locale: opts.locale,
+            glossary,
+            question: opts.question,
+            context: opts.context,
+            today: todayLine(now),
+            feedback,
+          })
+        : narrativeUser({
+            system: chart.system,
+            facts,
+            provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
+            topics,
+            locale: opts.locale,
+            glossary,
+            question: opts.question,
+            context: opts.context,
+            today: todayLine(now),
+            feedback,
+          }),
     check: (data) => {
       const feedback: string[] = [];
       let ungrounded = 0;

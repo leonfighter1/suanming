@@ -229,7 +229,8 @@ describe("generateReport — input and Geo-Rule", () => {
     ).rejects.toBeInstanceOf(ReportInputError);
     const r = await generateReport(tarot, zhHantHK, deps(new MockProvider()));
     expect(r.status).toBe("passed");
-    expect(r.layers!.facts[0]).toMatch(/^過去: /);
+    // Facts are numbered in dealing order (v1.2.0), as a classic reading follows them.
+    expect(r.layers!.facts[0]).toMatch(/^1\. 過去: /);
   });
 });
 

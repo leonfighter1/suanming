@@ -280,10 +280,14 @@ class Pressable extends StatefulWidget {
     this.keys = const {},
     this.radius = Radii.field,
     this.label,
+    this.autofocus = false,
   });
 
   final Widget child;
   final VoidCallback? onPressed;
+
+  /// Take the focus when it first appears (e.g. the card in an enlarged view, so Enter turns it).
+  final bool autofocus;
 
   /// For targets that need the tap position (a chart).
   final GestureTapDownCallback? onTapDown;
@@ -310,6 +314,7 @@ class _PressableState extends State<Pressable> {
       button: press != null,
       label: widget.label,
       child: FocusableActionDetector(
+        autofocus: widget.autofocus,
         enabled: tappable || widget.keys.isNotEmpty,
         mouseCursor: tappable ? SystemMouseCursors.click : MouseCursor.defer,
         onShowFocusHighlight: (v) => setState(() => _focused = v),
