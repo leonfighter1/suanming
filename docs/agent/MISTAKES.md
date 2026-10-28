@@ -38,8 +38,15 @@
 34. Before building a plan item, search the DEVLOG, the README and git log for an owner decision on the same thing (owner, Owner request); a plan item never overrides one. Label owner requests as such in the DEVLOG.
 35. With PGlite, pass a JS array only for a column of a known array type such as text[]; for an enum array, write constant values into the SQL or pass text[] and cast it there. Probe a new parameter type in a scratch script before relying on it.
 36. Code that only scripts need (sync, review, build) is imported from its own module, never re-exported from an index the server imports; runtime-deps.test.ts holds the server to its dependencies.
+37. Against the mock provider, never assert that a report is still pending: drain the jobs and assert the end state, or give the test a provider that waits until released.
 
 ## Log
+
+### 2026-10-28: A test expected a reading to be still pending
+- **Symptom:** The share image endpoint test asserted 409 for a pending tarot reading and got 200: the reading had already passed.
+- **Root cause:** The mock provider answers at once, so by the next request the background job has finished; a pending state is a race, not a state the test controls.
+- **Fix:** The racy check was dropped; the test drains the jobs and asserts the end states (passed, another owner, another method).
+- **Rule:** Against the mock provider, never assert that a report is still pending: drain the jobs and assert the end state, or give the test a provider that waits until released. (Rule 37)
 
 ### 2026-10-28: A sync-only module reached the server through the ai index
 - **Symptom:** Found in v4.1.0: since v3.2.0 the ai index re-exported the term tips, and with them opencc-js, a devDependency, so every API server process loaded a dev tool; a production install without devDependencies would not have started.

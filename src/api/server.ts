@@ -44,6 +44,8 @@ import { placeCountry, placeIndex } from "../places/index.js";
 import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { dailyDate, dailyIds, drawDaily } from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
+import { shareFont } from "../share/font.js";
+import { renderTarotShare } from "../share/tarot-image.js";
 import {
   InMemoryStore,
   type ReviewDecision,
@@ -1020,6 +1022,33 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       const r = UUID_RE.test(one[1]!) ? await store.getRemedy(one[1]!) : undefined;
       if (!r || r.owner !== c.user) throw new HttpError(404, "remedy not found");
       return send(res, 200, publicRemedy(r));
+    }
+
+    // 分享图 (S7, v4.2.0): a passed tarot reading as an image, made here, as the owner's spec asks.
+    const sm = /^\/v1\/reports\/([^/]+)\/share\.jpg$/.exec(path);
+    if (sm && req.method === "GET") {
+      const r = UUID_RE.test(sm[1]!) ? await store.getReport(sm[1]!) : undefined;
+      if (!r || r.owner !== c.user) throw new HttpError(404, "report not found");
+      const chart = await store.getChart(r.chart_id);
+      if (r.status !== "passed" || !r.report?.layers || chart?.fact.system !== "tarot") {
+        throw new HttpError(409, "only a finished tarot reading can be shared as an image");
+      }
+      const font = shareFont(r.locale);
+      if (!font) {
+        throw new HttpError(
+          503,
+          "share images need a CJK font on the server: install fonts-noto-cjk or set MINGLI_SHARE_FONT",
+        );
+      }
+      const jpg = await renderTarotShare(r.report, chart.fact, { font, locale: r.locale });
+      res.writeHead(200, {
+        "content-type": "image/jpeg",
+        "content-length": String(jpg.length),
+        "cache-control": "private, max-age=86400",
+        ...aiHeaders(r.report.ai_disclosure),
+      });
+      res.end(jpg);
+      return;
     }
 
     if (req.method === "GET") {

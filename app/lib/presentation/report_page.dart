@@ -49,6 +49,9 @@ class ReportPage extends ConsumerWidget {
     final report = ref.watch(reportProvider(reportId));
     final r = report.value;
     final layers = r?.layers;
+    // The chart the reading is of (the header loads it too): only a tarot reading has a share image.
+    final chartId = r?.chartId;
+    final tarot = chartId != null && ref.watch(chartProvider(chartId)).value?.system == 'tarot';
 
     return Scaffold(
       appBar: AppBar(
@@ -63,13 +66,29 @@ class ReportPage extends ConsumerWidget {
               onSelected: (v) async {
                 final text = _export(l10n, r);
                 final messenger = ScaffoldMessenger.of(context);
+                final share = ref.read(shareProvider);
                 if (v == 'copy') {
                   await Clipboard.setData(ClipboardData(text: text));
                   messenger.showSnackBar(SnackBar(content: Text(l10n.copied)));
+                } else if (v == 'image') {
+                  // 分享图 (v4.2.0): the server makes it, with the watermark and the disclaimer.
+                  try {
+                    final jpg = await ref.read(apiClientProvider).shareImage(r.id);
+                    final name = 'mingli-tarot-${r.id.substring(0, 8)}.jpg';
+                    await share(
+                      ShareParams(
+                        files: [XFile.fromData(jpg, mimeType: 'image/jpeg', name: name)],
+                        fileNameOverrides: [name],
+                        subject: l10n.reportTitle,
+                      ),
+                    );
+                  } catch (_) {
+                    messenger.showSnackBar(SnackBar(content: Text(l10n.shareImageFailed)));
+                  }
                 } else {
                   // Share sheet on mobile; a file download on web/desktop browsers.
                   final name = 'mingli-reading-${r.id.substring(0, 8)}.md';
-                  await SharePlus.instance.share(
+                  await share(
                     ShareParams(
                       files: [XFile.fromData(utf8.encode(text), mimeType: 'text/markdown', name: name)],
                       fileNameOverrides: [name],
@@ -79,6 +98,13 @@ class ReportPage extends ConsumerWidget {
                 }
               },
               itemBuilder: (_) => [
+                // Tarot readings only, for now (the server's image is the spread).
+                if (tarot)
+                  PopupMenuItem(
+                    key: const Key('share-image'),
+                    value: 'image',
+                    child: Row(children: [const Icon(Icons.image_outlined), const SizedBox(width: Space.m), Text(l10n.shareImage)]),
+                  ),
                 PopupMenuItem(
                   key: const Key('download-report'),
                   value: 'download',

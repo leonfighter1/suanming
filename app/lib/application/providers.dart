@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../config.dart';
 import '../data/api_client.dart';
@@ -43,6 +44,13 @@ class SettingsNotifier extends Notifier<Settings> {
 final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(SettingsNotifier.new);
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
+
+/// The system share sheet (a download on the web); tests replace it to see what would be shared.
+final shareProvider = Provider<Future<void> Function(ShareParams params)>(
+  (ref) => (params) async {
+    await SharePlus.instance.share(params);
+  },
+);
 
 final apiClientProvider = Provider<ApiClient>(
   (ref) => ApiClient(

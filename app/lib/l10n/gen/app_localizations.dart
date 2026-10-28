@@ -2415,6 +2415,18 @@ abstract class AppLocalizations {
   /// **'Actions'**
   String get jumpActions;
 
+  /// No description provided for @shareImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as image'**
+  String get shareImage;
+
+  /// No description provided for @shareImageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t make the share image just now. Please try again later.'**
+  String get shareImageFailed;
+
   /// No description provided for @pillarRelation.
   ///
   /// In en, this message translates to:

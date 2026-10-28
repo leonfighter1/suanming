@@ -22,6 +22,8 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
+      # Share images (S7) are set in a CJK font the server must have, as it has libvips.
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fonts-noto-cjk
       - run: npm run lint
       - run: npm test
       - run: npm run validate:openapi

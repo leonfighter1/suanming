@@ -1229,6 +1229,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jumpActions => '行动建议';
 
   @override
+  String get shareImage => '分享图片';
+
+  @override
+  String get shareImageFailed => '暂时无法生成分享图，请稍后再试。';
+
+  @override
   String pillarRelation(String pillar, String relation) {
     return '$pillar$relation';
   }
@@ -2456,6 +2462,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get jumpActions => '行動建議';
+
+  @override
+  String get shareImage => '分享圖片';
+
+  @override
+  String get shareImageFailed => '暫時無法生成分享圖，請稍後再試。';
 
   @override
   String pillarRelation(String pillar, String relation) {

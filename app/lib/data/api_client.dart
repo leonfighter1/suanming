@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -135,6 +136,10 @@ class ApiClient {
 
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 
+  /// A passed tarot reading as a share image, made by the server (JPEG, v4.2.0).
+  Future<Uint8List> shareImage(String reportId) =>
+      _withAccess((access) => _bytes('/v1/reports/$reportId/share.jpg', access));
+
   Future<ChartResult> getChart(String id) async => ChartResult.fromJson(await _authed('GET', '/v1/charts/$id'));
 
   // ---- 内容审核 (reviewers only) ----
@@ -218,11 +223,15 @@ class ApiClient {
     await tokens.write(Tokens(j['access_token'] as String, j['refresh_token'] as String));
   }
 
-  Future<Json> _authed(String method, String path, [Object? body]) async {
+  Future<Json> _authed(String method, String path, [Object? body]) =>
+      _withAccess((access) => _send(method, path, body, access));
+
+  /// Runs [call] with the access token, refreshing it once if the server says it has expired.
+  Future<T> _withAccess<T>(Future<T> Function(String access) call) async {
     final t = await tokens.read();
     if (t == null) throw const ApiException(401, 'Signed out');
     try {
-      return await _send(method, path, body, t.access);
+      return await call(t.access);
     } on ApiException catch (e) {
       if (!e.isUnauthorized) rethrow;
       if (!await (_refreshing ??= _refresh().whenComplete(() => _refreshing = null))) {
@@ -230,7 +239,29 @@ class ApiClient {
         onSignedOut?.call();
         rethrow;
       }
-      return _send(method, path, body, (await tokens.read())!.access);
+      return call((await tokens.read())!.access);
+    }
+  }
+
+  /// A file the server makes (an image): its bytes, or the server's problem as an [ApiException].
+  Future<Uint8List> _bytes(String path, String access) async {
+    final http.Response res;
+    try {
+      res = await _http.get(Uri.parse('$baseUrl$path'), headers: {'authorization': 'Bearer $access'});
+    } on http.ClientException catch (e) {
+      throw ApiUnreachable(baseUrl, e.message);
+    }
+    if (res.statusCode >= 400) throw _problem(res);
+    return res.bodyBytes;
+  }
+
+  /// The RFC 7807 problem in an error response.
+  ApiException _problem(http.Response res) {
+    try {
+      final p = jsonDecode(utf8.decode(res.bodyBytes)) as Json;
+      return ApiException(res.statusCode, p['title'] as String? ?? 'Error', p['detail'] as String?, p['code'] as String?);
+    } on FormatException {
+      return ApiException(res.statusCode, 'HTTP ${res.statusCode}');
     }
   }
 
@@ -263,15 +294,8 @@ class ApiClient {
       // firewall, CORS refusal or an https page calling an http API.
       throw ApiUnreachable(baseUrl, e.message);
     }
+    if (res.statusCode >= 400) throw _problem(res);
     final text = utf8.decode(res.bodyBytes);
-    if (res.statusCode >= 400) {
-      try {
-        final p = jsonDecode(text) as Json;
-        throw ApiException(res.statusCode, p['title'] as String? ?? 'Error', p['detail'] as String?, p['code'] as String?);
-      } on FormatException {
-        throw ApiException(res.statusCode, 'HTTP ${res.statusCode}');
-      }
-    }
     return text.isEmpty ? <String, dynamic>{} : jsonDecode(text) as Json;
   }
 }

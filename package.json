@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
@@ -43,6 +43,7 @@
     "astronomy-engine": "2.1.19",
     "jose": "6.2.12",
     "lunar-javascript": "1.7.7",
+    "sharp": "0.35.5",
     "yaml": "^2.8.1"
   },
   "devDependencies": {
@@ -52,7 +53,6 @@
     "@types/node": "^22.0.0",
     "opencc-js": "1.4.2",
     "prettier": "^3.6.0",
-    "sharp": "0.35.5",
     "sweph": "2.10.3-8",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",

@@ -1272,6 +1272,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jumpActions => 'Actions';
 
   @override
+  String get shareImage => 'Share as image';
+
+  @override
+  String get shareImageFailed =>
+      'Couldn\'t make the share image just now. Please try again later.';
+
+  @override
   String pillarRelation(String pillar, String relation) {
     return '$pillar $relation';
   }

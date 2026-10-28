@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -219,6 +220,10 @@ class FakeApi {
     if (req.method == 'GET' && path == '/v1/charts/33333333-3333-4333-8333-333333333333') {
       return _json(fixture('chart_tarot'), 200);
     }
+    // 分享图 (v4.2.0): the server's JPEG; here a JPEG's first bytes are enough.
+    if (req.method == 'GET' && RegExp(r'^/v1/reports/[^/]+/share\.jpg$').hasMatch(path)) {
+      return http.Response.bytes([0xff, 0xd8, 0xff, 0xe0, 0, 0x10], 200, headers: {'content-type': 'image/jpeg'});
+    }
     // 破除運勢: price + plans. preloadRemedies: every topic ready but locked, and
     // buying unlocks at once (200); otherwise buying returns pending (202) and polling the plan.
     final remedyOf = RegExp(r'^/v1/reports/[^/]+/remedies$');
@@ -271,6 +276,8 @@ Widget testApp(
   Duration pollInterval = Duration.zero,
   // Most widget tests assert 繁體 copy; null = the app's real default (简体).
   Locale? locale = zhHant,
+  // Replaced providers, e.g. the share sheet.
+  List<Override> overrides = const [],
 }) {
   final store = tokens ?? InMemoryTokenStore(signedIn ? Tokens(api.access, 'refresh-0') : null);
   return ProviderScope(
@@ -290,6 +297,7 @@ Widget testApp(
       // rootBundle caches asset futures across tests, and a future created in a
       // previous test's fake-async zone never completes in the next one.
       termsProvider.overrideWithValue(AsyncValue.data(testTerms)),
+      ...overrides,
     ],
     child: const MingliApp(),
   );

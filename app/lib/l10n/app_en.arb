@@ -590,6 +590,8 @@
   "@liuyueOf": { "placeholders": { "year": { "type": "int" } } },
   "jumpTo": "Jump to",
   "jumpActions": "Actions",
+  "shareImage": "Share as image",
+  "shareImageFailed": "Couldn't make the share image just now. Please try again later.",
   "pillarRelation": "{pillar} {relation}",
   "@pillarRelation": {
     "placeholders": { "pillar": { "type": "String" }, "relation": { "type": "String" } }

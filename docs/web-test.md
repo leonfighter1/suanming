@@ -145,6 +145,13 @@ database store keeps them, encrypted, in a folder on this computer. It is off un
 - Deleting an account in the app removes its records and its key, and keeps a deletion record
   without personal data.
 
+## Share images: a Chinese font on the server (v4.2.0)
+
+「分享图片」 on a tarot reading asks the API for an image it makes itself. The API needs a font with
+Chinese characters. On Windows it finds Noto Sans SC or 微软雅黑; on Linux, install
+`fonts-noto-cjk`; on a Mac it finds PingFang. Any other font: `MINGLI_SHARE_FONT=<file>` and
+`MINGLI_SHARE_FONT_FAMILY=<its family name>`. Without one, the app says the image can't be made.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

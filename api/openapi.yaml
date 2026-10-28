@@ -736,6 +736,42 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
+  /v1/reports/{report_id}/share.jpg:
+    get:
+      tags: [reports]
+      operationId: getReportShareImage
+      summary: A passed tarot reading as a share image (v4.2.0)
+      description: |
+        1080 × 1350 JPEG made on the server: the cards with their positions, the reading's main
+        point, the report's AI label (the disclaimer) and a watermark. Never the question, the life
+        context or a name. Only the report's owner; only passed tarot readings for now.
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: The image
+          headers:
+            X-AI-Generated: { $ref: "#/components/headers/X-AI-Generated" }
+            X-AI-Model: { $ref: "#/components/headers/X-AI-Model" }
+          content:
+            image/jpeg:
+              schema: { type: string, format: binary }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: Not a passed tarot reading
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "503":
+          description: The server has no CJK font to set the image in
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+
   /v1/reports/{report_id}/remedies:
     parameters:
       - name: report_id

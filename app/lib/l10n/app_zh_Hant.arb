@@ -386,5 +386,7 @@
   "liuyueOf": "{year}年流月",
   "pillarRelation": "{pillar}{relation}",
   "jumpTo": "跳到",
-  "jumpActions": "行動建議"
+  "jumpActions": "行動建議",
+  "shareImage": "分享圖片",
+  "shareImageFailed": "暫時無法生成分享圖，請稍後再試。"
 }

@@ -2,6 +2,28 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (z): S6 waits for the owner; S7 WP7.1, the tarot share image; release v4.2.0
+
+- v4.1.0: the first harness run failed at the app gate (rule 23, the pubspec bump); the second passed. Committed and tagged (188d1c6).
+- Rule 34 on S6:
+  - The owner's phase document plans 起名 and 风水 (Phase 3, with specs), and puts 擲筊 / 求签 first for Taiwan and Hong Kong.
+  - It never mentions 六爻 or 合婚, which came from this plan's review.
+  - S6 is marked as waiting for the owner's choice. S7, the owner's own spec, goes first.
+- G4 before building: a scratch probe showed sharp alone sets CJK text in a given font (Pango) and composites the WebP art: 150 ms, 139 kB, every glyph right. No headless browser is needed.
+- Font: a system dependency, not a binary in the repo:
+  - `MINGLI_SHARE_FONT`, or found: Noto Sans CJK (TC face for 繁體), Noto Sans SC or 微软雅黑, PingFang;
+  - CI installs fonts-noto-cjk;
+  - no font gives a 503 that says what to install.
+- Fixed on the way:
+  - the card path from `URL.pathname` is percent-encoded under 命理大师 (`fileURLToPath` now);
+  - the AI label ran into the watermark in English (its place follows its height now).
+- App:
+  - `ApiClient._withAccess` (the refresh logic, shared) with `_bytes` and `_problem`;
+  - `shareProvider` (tests replace it), and `testApp(overrides:)`;
+  - Riverpod 3 keeps `Override` in `misc.dart`.
+- Tests: on the VM, `XFile.fromData` keeps no name, so the test checks `fileNameOverrides`. A racy "still pending" assertion against the mock was dropped (rule 37).
+- v4.2.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (y): S5 数据持久化, the encrypted database store; release v4.1.0
 
 - v4.0.0 pushed with v3.1.0–v3.5.0 after a fresh harness PASS on the final tree (second run, rule 23). CI and Pages green for 1770341. No gh CLI here: the Actions REST API was polled from node.

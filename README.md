@@ -12,6 +12,32 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v4.2.0 (2026-10-28): share a tarot reading as an image
+
+Stage S7 of the [tech plan](docs/tech-plan.md) (分享图), work package 7.1. A medium update: committed locally, pushed
+with the next big update.
+
+- Tarot reading page, ⋮ menu: 「分享图片」 opens the share sheet with an image of the reading. On a computer's browser
+  it downloads.
+- On the image, as your phase document asks (made on the server, with a watermark and the disclaimer):
+  - 「命理大師 · 塔羅」 at the top, in the reader's script;
+  - every card with its position and name, and 逆位 when reversed (the card is drawn upside down);
+  - the reading's main point;
+  - at the foot, the reading's AI label (「仅供娱乐和玄学学习使用」), and the watermark with the date.
+- Private by design: the image never shows your question, your 个人情况 or a name.
+- For whoever runs the server: it needs a Chinese font. On Windows, Noto Sans SC or 微软雅黑 is found; on Linux,
+  install `fonts-noto-cjk`. Otherwise set `MINGLI_SHARE_FONT`. Without one, the app says the image can't be made
+  just now.
+- 八字 readings get their own share card later (WP7.2). The link back into the app waits until the app is in the
+  stores.
+- Also in the plan: S6 (new methods) waits for your choice. Your phase document plans 起名 and 风水, and puts 擲筊 /
+  求签 first for Taiwan and Hong Kong. This plan had proposed 六爻 and 合婚. Which should come first?
+- Verified:
+  - 4 new server tests: what the image says, and that the question isn't on it; the image for three cards in 繁體
+    and a Celtic Cross in English; who may fetch it.
+  - 1 new app test: the menu shares the server's image; a 八字 reading has no such item.
+  - All 329 server tests and 122 app tests pass; harness PASS.
+
 ### v4.1.0 (2026-10-28): readings and accounts can survive a restart, encrypted
 
 Stage S5 of the [tech plan](docs/tech-plan.md) (数据持久化), complete: work packages 5.1 and 5.2. A medium update:

@@ -25,15 +25,15 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status  |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done    |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done    |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done    |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
-| S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v5.1.0            | planned |
+| Stage                      | What                                                        | Size   | Release when done | Status                   |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------------------------ |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done                     |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done                     |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done                     |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done                     |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done                     |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | waiting (owner's choice) |
+| S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress              |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -455,12 +455,22 @@ keyboard-access checklist.
 
 ## S6 新玩法 (big → v5.0.0)
 
+**Waiting for the owner's choice (rule 34, 2026-10-28).**
+
+- What the owner's phase document plans:
+  - 起名 and 风水, in Phase 3, each with its own spec. 起名 means 五行补益, a hand-checked 字义库 and 音律
+    rules. 风水 means general principles of direction and space, never a 吉凶 judgement of a home.
+  - 擲筊 / 求签 put first for Taiwan and Hong Kong.
+- The two packages below came from this plan's own review. The document mentions neither 六爻 nor 合婚.
+- Which new methods come first, and with which compliance rules, is the owner's decision. S7 goes first meanwhile:
+  it is the owner's own spec, and S5's stored readings unblocked it.
+
 - WP6.1 易经起卦 as its own method: 六爻 (three coins, six tosses: 本卦, 变卦, 动爻) and 梅花 (time or numbers),
   its own engine, prompts and screens.
 - WP6.2 合婚 between two saved profiles: 日柱 / 年柱 relations, 五行 complement, 生肖, its own prompt (every relationship
   type the same, never a prediction of a breakup).
 
-## S7 分享图 (medium → after S6)
+## S7 分享图 (medium → v4.2.0, before S6 while S6 waits)
 
 From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（分享图由服务端生成，带水印与免责声明）」).
 
@@ -470,6 +480,50 @@ From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（�
   - a deep link back to the reading once the app is in the stores (the link needs S5's stored readings).
   - First measure a renderer with CJK fonts on the server (G4): SVG through sharp/librsvg against a headless
     browser, for fidelity, size and time.
+  - Measured 2026-10-28: sharp alone composited three card arts and 简体 and 繁體 text set in a given font file
+    (Pango) at 1080 × 1350 in about 150 ms, a 139 kB JPEG, every glyph right. No headless browser is needed.
+  - Spec (v4.2.0), the owner's Pick-a-Pile case first: **tarot readings**.
+    - `GET /v1/reports/{id}/share.jpg`, for the owner only and passed readings only, 1080 × 1350:
+      - 命理大师 · 塔羅 at the top, in the reader's script;
+      - every card with its position, its name and 逆位 when reversed (drawn upside down, as in the app);
+      - the 综合解读's main point;
+      - at the bottom, the report's own AI label (仅供娱乐和玄学学习使用) and the watermark with the date.
+    - Never the question, the life context or a name: they stay private.
+    - The font is a system dependency, like libvips: `MINGLI_SHARE_FONT` (+ `_FAMILY`), or one found in the usual
+      places:
+      - Noto Sans CJK from `fonts-noto-cjk` on Linux, its TC face for 繁體 readers;
+      - Noto Sans SC or 微软雅黑 on Windows;
+      - PingFang on a Mac.
+        Without a font: 503 with what to install. CI installs `fonts-noto-cjk`.
+    - The app's reading menu offers 分享图片 for tarot readings, through the system share sheet (`share_plus`).
+    - Tests:
+      - the image (JPEG, size, a three-card and a Celtic Cross reading);
+      - the endpoint (owner only, passed only, 503 without a font);
+      - privacy (the question is not in the image's text);
+      - the app menu.
+    - Later: a 八字 reading's card (the four pillars), and the deep link.
+  - As built (v4.2.0):
+    - Server: `src/share/tarot-image.ts` and `src/share/font.ts`.
+      - `renderTarotShare` composes the image with sharp: art from `app/assets/tarot`, reversed cards turned, text
+        set by Pango in the found font. Measured: about 200 ms and 140 kB for three cards, 410 ms and 196 kB for a
+        Celtic Cross (two rows of five).
+      - `shareTexts` is everything the image says, kept apart so a test can show the question is not among it.
+      - The label's place follows its height: English wraps it to two lines.
+    - The API: `GET /v1/reports/{id}/share.jpg` (OpenAPI) carries the AI headers. It answers 404 to anyone but the
+      owner, 409 for anything but a passed tarot reading, and 503 with what to install when the server has no font.
+      sharp is a runtime dependency now.
+    - The app:
+      - 分享图片 in a tarot reading's menu fetches the image (`ApiClient.shareImage`, with the same token refresh
+        as every call) and hands it to the share sheet through `shareProvider`, which tests replace. The 下载
+        item uses the provider too.
+      - A failure shows a message.
+    - CI installs `fonts-noto-cjk`.
+    - Tests:
+      - server: the texts and privacy, the image for three cards in 繁體 and a Celtic Cross in English, and the
+        endpoint (owner, passed, method, no font);
+      - app: the menu shares the server's JPEG; a 八字 reading has no such item.
+- WP7.2 A 八字 reading's share card: the four pillars coloured by 五行, the reading's main point, the same footer.
+- WP7.3 The deep link back to the reading, once the app is in the stores.
 
 ## 阶段总结 (stage summaries)
 
@@ -682,4 +736,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP4.8     | done                       | v4.0.0  |
 | WP4.9     | moved to S7 (WP7.1)        | —       |
 | WP5.1–5.2 | done                       | v4.1.0  |
-| S6–S7     | todo                       | above   |
+| WP7.1     | done                       | v4.2.0  |
+| WP7.2     | todo                       | —       |
+| WP7.3     | waits for the stores       | —       |
+| S6        | waits for the owner        | above   |

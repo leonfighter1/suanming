@@ -4,7 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_app/application/providers.dart' show shareProvider;
+import 'package:mingli_app/presentation/history_page.dart' show HistoryTile;
 import 'package:mingli_app/presentation/theme.dart';
+import 'package:share_plus/share_plus.dart' show ShareParams;
 
 import 'keys.dart';
 import 'support.dart';
@@ -37,6 +40,61 @@ bool onScreen(WidgetTester tester, Finder finder) {
 }
 
 void main() {
+  testWidgets('a tarot reading offers 分享圖片: the server’s JPEG goes to the share sheet; a 八字 one doesn’t', (tester) async {
+    tester.view.physicalSize = const Size(1000, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final shared = <ShareParams>[];
+    final cards = fixture('chart_tarot')['chart_fact']['facts']['cards'] as List;
+    final api = FakeApi(
+      finalReport: fixture('report_tarot_passed'),
+      pendingPolls: 0,
+      history: [
+        {
+          'report_id': '55555555-5555-4555-8555-555555555555',
+          'chart_id': '33333333-3333-4333-8333-333333333333',
+          'status': 'passed',
+          'created_at': '2026-10-25T00:00:00.000Z',
+          'updated_at': '2026-10-25T00:00:00.000Z',
+          'locale': 'zh-Hant',
+          'topics': ['tarot_cards', 'tarot_synthesis', 'tarot_advice'],
+          'chart': {
+            'system': 'tarot',
+            'spread': 'three_card',
+            'cards': [for (final c in cards) {'card_id': c['card_id'], 'reversed': c['reversed']}],
+          },
+        },
+      ],
+    );
+    await tester.pumpWidget(
+      testApp(api, overrides: [shareProvider.overrideWithValue((p) async => shared.add(p))]),
+    );
+    await frames(tester, 10);
+    await tester.tap(find.byKey(const Key('open-history')));
+    await frames(tester, 10);
+    await tester.tap(find.byType(HistoryTile).first);
+    await frames(tester, 20);
+    await tester.tap(find.byKey(const Key('report-menu')));
+    await frames(tester);
+    await tester.tap(find.byKey(const Key('share-image')));
+    await frames(tester);
+    expect(api.requests.map((r) => r.url.path), contains('/v1/reports/55555555-5555-4555-8555-555555555555/share.jpg'));
+    expect(shared, hasLength(1));
+    final file = shared.single.files!.single;
+    expect(file.mimeType, 'image/jpeg');
+    expect((await file.readAsBytes()).sublist(0, 3), [0xff, 0xd8, 0xff]);
+    // XFile.fromData keeps a name only on the web; the share sheet takes it from fileNameOverrides.
+    expect(shared.single.fileNameOverrides, ['mingli-tarot-55555555.jpg']);
+
+    // A 八字 reading's menu has no image.
+    await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
+    await openReading(tester);
+    await tester.tap(find.byKey(const Key('report-menu')));
+    await frames(tester);
+    expect(find.byKey(const Key('download-report')), findsOneWidget);
+    expect(find.byKey(const Key('share-image')), findsNothing);
+  });
+
   testWidgets('a 八字 reading opens with its four pillars and 日主', (tester) async {
     await openReading(tester);
     final pillars = find.byKey(const Key('reading-pillars'));
