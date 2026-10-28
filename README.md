@@ -12,6 +12,27 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.5.0 (2026-10-28): choosing a spread, and asking
+
+Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.2. A medium update: committed locally,
+pushed with v3.0.0.
+
+- 塔罗 page
+  - The spread picker shows each spread drawn small: one card, three in a row, or the Celtic Cross with card 2
+    across card 1 and the staff beside it. Under it, the chosen spread's positions in dealing order, before you
+    draw (for example 「1 过去 · 2 现在 · 3 未来」).
+  - Four example questions as chips under the question field; a touch puts one in the field, to use or change.
+  - The Celtic Cross list under the spread (each position with what it stands for) is at least 1.5× text, also on a
+    phone. On wide screens it stays at 2×.
+- Keyboard: the picker is one control, as elsewhere in the app. Tab reaches it, ←/→ switch the spread, and the focus
+  ring shows. The example chips come right after the question.
+- Data: each spread's positions now reach the app from the server's deck (one source).
+- Verified:
+  - 2 new app tests: the picker's drawings (1, 3 and 10 cards) and position lists against the server's spreads; an
+    example question filling the field.
+  - The phone test checks the 1.5× list.
+  - All 287 server tests and 95 app tests pass; harness PASS.
+
 ### v2.4.0 (2026-10-28): a tarot reading shows its cards
 
 Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.1. A medium update: committed locally,

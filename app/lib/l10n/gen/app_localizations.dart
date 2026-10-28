@@ -501,6 +501,48 @@ abstract class AppLocalizations {
   /// **'Celtic Cross (10 cards)'**
   String get spreadCeltic;
 
+  /// No description provided for @spreadSingleShort.
+  ///
+  /// In en, this message translates to:
+  /// **'One card'**
+  String get spreadSingleShort;
+
+  /// No description provided for @spreadThreeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Three cards'**
+  String get spreadThreeShort;
+
+  /// No description provided for @spreadCelticShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Celtic Cross'**
+  String get spreadCelticShort;
+
+  /// No description provided for @tarotExample1.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this job still right for me?'**
+  String get tarotExample1;
+
+  /// No description provided for @tarotExample2.
+  ///
+  /// In en, this message translates to:
+  /// **'Where is this relationship going?'**
+  String get tarotExample2;
+
+  /// No description provided for @tarotExample3.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I watch for in the next three months?'**
+  String get tarotExample3;
+
+  /// No description provided for @tarotExample4.
+  ///
+  /// In en, this message translates to:
+  /// **'How should I make this decision?'**
+  String get tarotExample4;
+
   /// No description provided for @draw.
   ///
   /// In en, this message translates to:

@@ -57,6 +57,54 @@ Map<int, Rect> celticRects(double w) {
   };
 }
 
+/// A spread drawn small, before the draw (v2.5.0): each card an outline where it will lie, card 2
+/// of a Celtic Cross across card 1. The same geometry as [TarotSpread] ([celticRects]).
+class SpreadDiagram extends StatelessWidget {
+  const SpreadDiagram({super.key, required this.spreadId, required this.count, this.cardWidth = 8});
+  final String spreadId;
+
+  /// How many cards (deck SPREADS, via Terms.spreadPositions).
+  final int count;
+  final double cardWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final w = cardWidth;
+    final h = w * _ratio;
+    final celtic = spreadId == 'celtic_cross';
+    // Card 2 last, so it lies on top of card 1, as in the drawn spread.
+    final rects = celtic
+        ? [
+            for (final e in celticRects(w).entries.toList()
+              ..sort((a, b) => (a.key == 2 ? 99 : a.key).compareTo(b.key == 2 ? 99 : b.key)))
+              e.value,
+          ]
+        : [for (var i = 0; i < count; i++) Rect.fromLTWH(i * w * 1.4, 0, w, h)];
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: celtic ? _celticWide * w : (count - 1) * w * 1.4 + w,
+        height: celtic ? _celticTall * w : h,
+        child: Stack(
+          children: [
+            for (final r in rects)
+              Positioned.fromRect(
+                rect: r,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.surface,
+                    border: Border.all(color: scheme.primary, width: 1.2),
+                    borderRadius: BorderRadius.circular(1.5),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// A drawn spread, laid out the classic way and turned in dealing order:
 /// one card in the middle; three in a row, past → present → future; or the Celtic Cross,
 /// sized so the whole cross and staff fit the screen. Touching any face-down card turns
@@ -89,6 +137,8 @@ class TarotSpread extends ConsumerWidget {
       builder: (context, box) {
         final scale = _textScale(box.maxWidth);
         final body = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * scale;
+        // The Celtic Cross list is read card by card: at least 1.5× text, even on a phone (v2.5.0).
+        final listBody = (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * max(scale, 1.5);
         final count = chart.cards.length;
         final width = celtic
             ? min(box.maxWidth / _celticWide, (MediaQuery.sizeOf(context).height - 160) / _celticTall)
@@ -180,10 +230,10 @@ class TarotSpread extends ConsumerWidget {
                                   if (revealed.contains(c.position)) name(c),
                                   if (revealed.contains(c.position) && c.reversed) l10n.reversed,
                                 ].join(' · '),
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: listBody),
                               ),
                               if (meaning(c).isNotEmpty)
-                                Text(meaning(c), style: TextStyle(fontSize: body * 0.75, color: scheme.onSurfaceVariant)),
+                                Text(meaning(c), style: TextStyle(fontSize: listBody * 0.75, color: scheme.onSurfaceVariant)),
                             ],
                           ),
                         ),

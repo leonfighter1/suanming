@@ -31,7 +31,13 @@ import {
   lunarToSolar,
   shichenOptions,
 } from "../src/engines/bazi/index.js";
-import { DECK, DECK_ID, POSITION_LABELS, POSITION_MEANINGS } from "../src/engines/tarot/deck.js";
+import {
+  DECK,
+  DECK_ID,
+  POSITION_LABELS,
+  POSITION_MEANINGS,
+  SPREADS,
+} from "../src/engines/tarot/deck.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
@@ -196,6 +202,8 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       cards: Object.fromEntries(DECK.map((c) => [c.id, c.name])),
       positions: POSITION_LABELS,
       position_meanings: POSITION_MEANINGS,
+      // Each spread's positions in dealing order, so the picker can show them before a draw.
+      spreads: SPREADS,
     },
     "app/test/fixtures/chart_bazi.json": {
       chart_id: "22222222-2222-4222-8222-222222222222",

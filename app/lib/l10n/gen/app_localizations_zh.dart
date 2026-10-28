@@ -215,6 +215,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spreadCeltic => '凯尔特十字（10 张）';
 
   @override
+  String get spreadSingleShort => '单张';
+
+  @override
+  String get spreadThreeShort => '三张';
+
+  @override
+  String get spreadCelticShort => '凯尔特十字';
+
+  @override
+  String get tarotExample1 => '这份工作还适合我吗？';
+
+  @override
+  String get tarotExample2 => '我们的关系会往哪里走？';
+
+  @override
+  String get tarotExample3 => '接下来三个月我该注意什么？';
+
+  @override
+  String get tarotExample4 => '这个决定我该怎么做？';
+
+  @override
   String get draw => '抽牌';
 
   @override
@@ -1308,6 +1329,27 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get spreadCeltic => '凱爾特十字（10 張）';
+
+  @override
+  String get spreadSingleShort => '單張';
+
+  @override
+  String get spreadThreeShort => '三張';
+
+  @override
+  String get spreadCelticShort => '凱爾特十字';
+
+  @override
+  String get tarotExample1 => '這份工作還適合我嗎？';
+
+  @override
+  String get tarotExample2 => '我們的關係會往哪裡走？';
+
+  @override
+  String get tarotExample3 => '接下來三個月我該注意什麼？';
+
+  @override
+  String get tarotExample4 => '這個決定我該怎麼做？';
 
   @override
   String get draw => '抽牌';

@@ -2,6 +2,17 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (n): S3 WP3.2, choosing a spread and asking; release v2.5.0
+
+- v2.4.0: the harness hit rule 23 on the first run; the automatic retry passed. Committed and tagged.
+- WP3.2:
+  - Spread picker as `SegmentedButton` + `SegmentKeys`, with a `SpreadDiagram` per segment, built from `celticRects`.
+  - The positions line under it comes from deck.ts `SPREADS`, synced as `spreads` in tarot_deck.json (`Terms.spreadPositions`).
+  - Four example question chips.
+  - The Celtic Cross list takes max(scale, 1.5).
+- Tests: `drawAt` picks a spread by its segment key. Taps on a segment label pass `warnIfMissed: false`: the segment's button takes the touch and the label isn't in the hit path.
+- v2.5.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (m): S3 WP3.1, a tarot reading shows its cards; release v2.4.0
 
 - v2.3.0: the first harness run failed at analyze (rule 23); the second passed. Committed and tagged.

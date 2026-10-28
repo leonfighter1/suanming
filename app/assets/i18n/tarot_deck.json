@@ -525,5 +525,27 @@
       "zh-Hans": "照目前的趋势，事情最可能的结局（不是定数）。",
       "zh-Hant": "照目前的趨勢，事情最可能的結局（不是定數）。"
     }
+  },
+  "spreads": {
+    "single": [
+      "focus"
+    ],
+    "three_card": [
+      "past",
+      "present",
+      "future"
+    ],
+    "celtic_cross": [
+      "present",
+      "challenge",
+      "foundation",
+      "recent_past",
+      "potential",
+      "near_future",
+      "self",
+      "environment",
+      "hopes_fears",
+      "outcome"
+    ]
   }
 }

@@ -221,6 +221,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spreadCeltic => 'Celtic Cross (10 cards)';
 
   @override
+  String get spreadSingleShort => 'One card';
+
+  @override
+  String get spreadThreeShort => 'Three cards';
+
+  @override
+  String get spreadCelticShort => 'Celtic Cross';
+
+  @override
+  String get tarotExample1 => 'Is this job still right for me?';
+
+  @override
+  String get tarotExample2 => 'Where is this relationship going?';
+
+  @override
+  String get tarotExample3 =>
+      'What should I watch for in the next three months?';
+
+  @override
+  String get tarotExample4 => 'How should I make this decision?';
+
+  @override
   String get draw => 'Draw';
 
   @override

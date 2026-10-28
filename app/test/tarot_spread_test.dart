@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:mingli_app/presentation/widgets/tarot_spread.dart';
+
 import 'keys.dart';
 import 'support.dart';
 
@@ -44,9 +46,10 @@ Future<FakeApi> drawAt(
     await settle(tester);
   }
   if (spread != null) {
-    await tester.tap(find.byKey(const Key('spread')));
-    await settle(tester);
-    await tester.tap(find.text(spread).hitTestable().last);
+    await tester.ensureVisible(find.byKey(Key('spread-$spread')));
+    await tester.pump(); // a frame after the jump, before the tap (rule 27)
+    // The segment's button takes the touch; its label isn't in the hit path, hence no warning.
+    await tester.tap(find.byKey(Key('spread-$spread')), warnIfMissed: false);
     await settle(tester);
   }
   await tester.ensureVisible(find.byKey(const Key('draw')));
@@ -60,7 +63,45 @@ Rect card(WidgetTester tester, int n) => tester.getRect(find.byKey(Key('tarot-ca
 String spoken(WidgetTester tester, int n) => tester.getSemantics(find.byKey(Key('tarot-card-$n'))).label;
 
 void main() {
-  const celtic = '凱爾特十字（10 張）'; // the test app reads 繁體
+  const celtic = 'celtic_cross'; // a spread picker segment (v2.5.0); the test app reads 繁體
+
+  Future<void> openTarot(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1000, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const SizedBox.shrink()); // rule 24
+    await tester.pumpWidget(testApp(FakeApi()));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('entry-tarot')));
+    await settle(tester);
+  }
+
+  testWidgets('the picker draws each spread small and lists its positions before the draw', (tester) async {
+    await openTarot(tester);
+    String listed() => tester.widget<Text>(find.byKey(const Key('spread-positions'))).data!;
+    String expected(String id) => [
+          for (final (i, p) in testTerms.spreadPositions(id).indexed) '${i + 1} ${testTerms.position(p, 'zh-Hant')}',
+        ].join(' · ');
+    expect(testTerms.spreadPositions('celtic_cross'), hasLength(10)); // deck.ts SPREADS, synced
+    expect(listed(), expected('three_card')); // the default
+    for (final id in ['celtic_cross', 'single']) {
+      await tester.tap(find.byKey(Key('spread-$id')), warnIfMissed: false); // the segment takes it
+      await settle(tester);
+      expect(listed(), expected(id));
+    }
+    // Each segment carries its small drawing: 1, 3 and 10 card outlines.
+    for (final (id, n) in [('single', 1), ('three_card', 3), ('celtic_cross', 10)]) {
+      final diagram = find.descendant(of: find.byKey(Key('spread-$id')), matching: find.byType(SpreadDiagram));
+      expect(find.descendant(of: diagram, matching: find.byType(DecoratedBox)), findsNWidgets(n), reason: id);
+    }
+  });
+
+  testWidgets('an example question goes into the field with one touch', (tester) async {
+    await openTarot(tester);
+    await tester.tap(find.byKey(const Key('example-1')));
+    await tester.pump();
+    expect(tester.widget<TextField>(find.byKey(const Key('tarot-question'))).controller!.text, '我們的關係會往哪裡走？');
+  });
 
   testWidgets('three cards lie in one row: past, present, future', (tester) async {
     // Phone, 360 wide: content 360 − 2×16 (page) − 2×(20 + 1) (card padding + border) = 286;
@@ -132,6 +173,11 @@ void main() {
     // (800 − 160) / 7.157 = 89.4: ⌊51.1⌋ = 51, a thumbnail (under 96).
     await drawAt(tester, const Size(360, 800), spread: celtic);
     expect(card(tester, 1).width, 51);
+    // The list under it reads at 1.5× text even on a phone (v2.5.0): here the spread's own
+    // scale is (286 − 12) / 2 / 104 = 1.32, so the list takes 1.5.
+    final row = find.descendant(of: find.byKey(const Key('tarot-slot-1')), matching: find.byType(Text)).first;
+    final base = Theme.of(tester.element(row)).textTheme.bodyMedium!.fontSize!;
+    expect(tester.widget<Text>(row).style!.fontSize, base * 1.5);
     // Touching any face-down thumbnail opens the next card, card 1, still face down.
     await tester.ensureVisible(find.byKey(const Key('tarot-card-5')));
     await tester.pump(); // a frame after the jump, before the tap (rule 27)

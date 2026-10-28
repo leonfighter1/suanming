@@ -67,6 +67,8 @@ class _TarotPageState extends ConsumerState<TarotPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final terms = ref.watch(termsProvider).value;
+    final locale = ref.watch(settingsProvider).apiLocaleCode;
     final chart = _chart;
     // A draw can't be repeated as it was: once cards are out, ask before leaving.
     return LeaveGuard(
@@ -104,6 +106,25 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                           helperMaxLines: 2,
                         ),
                       ),
+                      const SizedBox(height: Space.s),
+                      // Example questions: a touch puts one in the field (v2.5.0).
+                      Wrap(
+                        spacing: Space.s,
+                        runSpacing: Space.s,
+                        children: [
+                          for (final (i, q) in [
+                            l10n.tarotExample1,
+                            l10n.tarotExample2,
+                            l10n.tarotExample3,
+                            l10n.tarotExample4,
+                          ].indexed)
+                            ActionChip(
+                              key: Key('example-$i'),
+                              label: Text(q),
+                              onPressed: () => setState(() => _question.text = q),
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: Space.m),
                       // Beside the question: the area of life the reading should look at (optional).
                       Text(l10n.tarotFocus, style: Theme.of(context).textTheme.labelLarge),
@@ -128,16 +149,47 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                         ],
                       ),
                       const SizedBox(height: Space.l),
-                      DropdownMenu<String>(
-                        key: const Key('spread'),
-                        expandedInsets: EdgeInsets.zero,
-                        initialSelection: _spread,
-                        dropdownMenuEntries: [
-                          DropdownMenuEntry(value: 'single', label: l10n.spreadSingle),
-                          DropdownMenuEntry(value: 'three_card', label: l10n.spreadThree),
-                          DropdownMenuEntry(value: 'celtic_cross', label: l10n.spreadCeltic),
-                        ],
-                        onSelected: (v) => setState(() => _spread = v ?? _spread),
+                      // Each spread drawn small, then its positions, before the draw (v2.5.0).
+                      Text(l10n.spread, style: Theme.of(context).textTheme.labelLarge),
+                      const SizedBox(height: Space.s),
+                      SegmentKeys(
+                        child: SegmentedButton<String>(
+                          key: const Key('spread'),
+                          showSelectedIcon: false,
+                          segments: [
+                            for (final (id, name) in [
+                              ('single', l10n.spreadSingleShort),
+                              ('three_card', l10n.spreadThreeShort),
+                              ('celtic_cross', l10n.spreadCelticShort),
+                            ])
+                              ButtonSegment(
+                                value: id,
+                                label: Padding(
+                                  key: Key('spread-$id'),
+                                  padding: const EdgeInsets.symmetric(vertical: Space.s),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SpreadDiagram(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
+                                      const SizedBox(height: Space.xs),
+                                      Text(name, textAlign: TextAlign.center),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                          selected: {_spread},
+                          onSelectionChanged: (s) => setState(() => _spread = s.first),
+                        ),
+                      ),
+                      const SizedBox(height: Space.s),
+                      Text(
+                        [
+                          for (final (i, p) in (terms?.spreadPositions(_spread) ?? const <String>[]).indexed)
+                            '${i + 1} ${terms!.position(p, locale)}',
+                        ].join(' · '),
+                        key: const Key('spread-positions'),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const SizedBox(height: Space.l),
                       FilledButton.icon(
