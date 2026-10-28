@@ -92,4 +92,28 @@ describe("checkFaithfulness", () => {
     expect(kinds).toContain("wrong_orientation");
     expect(kinds).toContain("card_not_in_spread");
   });
+
+  it("knows the deck's earlier names, and 「寶劍一樣」 is no card", async () => {
+    const { DECK, NAME_ALIASES } = await import("../src/engines/tarot/deck.js");
+    const drawn = (id: string) => cards.some((c) => c.card_id === id);
+    // A major arcana card with an earlier name (愚者, 女皇) and an ace, neither drawn here.
+    const [, earlier] = Object.entries(NAME_ALIASES).find(
+      ([id]) => id.startsWith("major") && !drawn(id),
+    )!;
+    const ace = DECK.find((d) => d.arcana === "minor" && d.rank === 1 && !drawn(d.id))!.name[
+      "zh-Hant"
+    ]; // e.g. 寶劍一
+    const r = await reportWith(tarot, [
+      `另見${earlier[0]}。`,
+      `像${ace}樣銳利地思考。`, // 寶劍 + 一樣 ("like a sword")
+      `${ace}（逆位）也值得一看。`,
+    ]);
+    const details = checkFaithfulness(tarot, r)
+      .filter((i) => i.kind === "card_not_in_spread")
+      .map((i) => i.detail);
+    expect(details).toEqual([
+      `${earlier[0]} is not in this spread`,
+      `${ace} is not in this spread`,
+    ]);
+  });
 });

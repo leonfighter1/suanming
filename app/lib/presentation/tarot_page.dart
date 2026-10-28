@@ -11,12 +11,13 @@ import 'keyboard.dart';
 import 'widgets/report_request.dart';
 
 // A card has the art's own shape, 7:12 (app/assets/tarot, made by `npm run mirror:tarot`).
-// The cards and the text around them are twice their first size (owner): 208 pt wide.
+// Cards and the text around them are drawn at a scale of the first 104-pt card: twice it
+// where there is room (owner), less on a phone so that two cards still share a row.
 // The corners stay small enough not to cut the gold frame painted 16/700 in from the edge.
-const _scale = 2.0;
-const _cardWidth = 104.0 * _scale;
-const _cardHeight = _cardWidth * 12 / 7;
-const _cardRadius = 6.0 * _scale;
+const _baseWidth = 104.0;
+
+/// Two cards side by side in [width], at most twice the first size.
+double _scaleFor(double width) => ((width - Space.m) / 2 / _baseWidth).clamp(1.0, 2.0);
 
 // The deck's own colours (JingyaoPaint tarot_card.dart), so the back matches the faces
 // in light and dark alike, as a real deck would.
@@ -112,29 +113,37 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                   ? const SizedBox.shrink()
                   : AppCard(
                       key: ValueKey(chart.chartId),
-                      // The hint and every card's captions at twice the body size, like the cards.
-                      child: DefaultTextStyle.merge(
-                        style: TextStyle(fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * _scale),
-                        child: Column(
-                          children: [
-                            Text(l10n.tapToReveal, textAlign: TextAlign.center),
-                            const SizedBox(height: Space.l),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              spacing: Space.m,
-                              runSpacing: Space.l,
+                      // The hint and every card's captions scale with the cards.
+                      child: LayoutBuilder(
+                        builder: (context, box) {
+                          final scale = _scaleFor(box.maxWidth);
+                          return DefaultTextStyle.merge(
+                            style: TextStyle(
+                              fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * scale,
+                            ),
+                            child: Column(
                               children: [
-                                for (final c in chart.tarot.cards)
-                                  _FlipCard(
-                                    key: Key('tarot-card-${c.position}'),
-                                    card: c,
-                                    revealed: _revealed.contains(c.position),
-                                    onTap: () => setState(() => _revealed.add(c.position)),
-                                  ),
+                                Text(l10n.tapToReveal, textAlign: TextAlign.center),
+                                const SizedBox(height: Space.l),
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: Space.m,
+                                  runSpacing: Space.l,
+                                  children: [
+                                    for (final c in chart.tarot.cards)
+                                      _FlipCard(
+                                        key: Key('tarot-card-${c.position}'),
+                                        card: c,
+                                        scale: scale,
+                                        revealed: _revealed.contains(c.position),
+                                        onTap: () => setState(() => _revealed.add(c.position)),
+                                      ),
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
             ),
@@ -148,8 +157,17 @@ class _TarotPageState extends ConsumerState<TarotPage> {
 }
 
 class _FlipCard extends ConsumerWidget {
-  const _FlipCard({super.key, required this.card, required this.revealed, required this.onTap});
+  const _FlipCard({
+    super.key,
+    required this.card,
+    required this.scale,
+    required this.revealed,
+    required this.onTap,
+  });
   final TarotCardFact card;
+
+  /// Times the first 104-pt card (see [_scaleFor]).
+  final double scale;
   final bool revealed;
   final VoidCallback onTap;
 
@@ -161,6 +179,9 @@ class _FlipCard extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final position = terms?.position(card.positionKey, locale) ?? card.positionKey;
     final name = terms?.card(card.cardId, locale) ?? card.cardId;
+    // Rounded down, so two cards that fill a row exactly don't wrap on a rounding error.
+    final width = (_baseWidth * scale).floorToDouble();
+    final radius = 6 * scale;
 
     // Tab to a card, Enter or Space turns it over. Face down, only its position is read out.
     return Pressable(
@@ -181,11 +202,11 @@ class _FlipCard extends ConsumerWidget {
                   ..setEntry(3, 2, 0.001)
                   ..rotateY(pi * v),
                 child: Container(
-                  width: _cardWidth,
-                  height: _cardHeight,
+                  width: width,
+                  height: width * 12 / 7,
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(_cardRadius),
+                    borderRadius: BorderRadius.circular(radius),
                     color: showFace ? scheme.surfaceContainerHighest : null,
                     gradient: showFace ? null : const RadialGradient(colors: [_navyLight, _navy]),
                     border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
@@ -207,7 +228,7 @@ class _FlipCard extends ConsumerWidget {
                             excludeFromSemantics: true, // the card's label says it
                             // Without its picture, a card shows its name.
                             errorBuilder: (_, _, _) => Padding(
-                              padding: const EdgeInsets.all((Space.s + 2) * _scale),
+                              padding: EdgeInsets.all((Space.s + 2) * scale),
                               child: Center(
                                 child: Text(
                                   name,
@@ -219,25 +240,25 @@ class _FlipCard extends ConsumerWidget {
                           ),
                         )
                       : Padding(
-                          padding: const EdgeInsets.all(5 * _scale),
+                          padding: EdgeInsets.all(5 * scale),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               border: Border.all(color: _gold.withValues(alpha: 0.8)),
-                              borderRadius: BorderRadius.circular(_cardRadius - 5 * _scale),
+                              borderRadius: BorderRadius.circular(radius - 5 * scale),
                             ),
-                            child: const Center(child: Icon(Icons.auto_awesome, color: _gold, size: 24 * _scale)),
+                            child: Center(child: Icon(Icons.auto_awesome, color: _gold, size: 24 * scale)),
                           ),
                         ),
                 ),
               );
             },
           ),
-          const SizedBox(height: 4 * _scale),
+          SizedBox(height: 4 * scale),
           // The name in the reader's language: the art's own is small and in 简体.
           // Read out through the card's label above.
           ExcludeSemantics(
             child: SizedBox(
-              width: _cardWidth,
+              width: width,
               child: Column(
                 children: [
                   Text(position, textAlign: TextAlign.center),
@@ -250,7 +271,7 @@ class _FlipCard extends ConsumerWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   if (revealed && card.reversed)
-                    Text(l10n.reversed, style: TextStyle(color: scheme.error, fontSize: 12 * _scale)),
+                    Text(l10n.reversed, style: TextStyle(color: scheme.error, fontSize: 12 * scale)),
                 ],
               ),
             ),

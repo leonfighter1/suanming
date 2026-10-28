@@ -1,7 +1,8 @@
 /**
  * Rider–Waite–Smith 78-card deck. RWS numbering: VIII = Strength, XI = Justice.
  * Display names here are defaults; the protected-term table (Phase 1
- * terms_zh-Hant.json) is the source of truth for UI copy.
+ * terms_zh-Hant.json) is the source of truth for UI copy. The Chinese names are
+ * the ones painted on the card art (app/assets/tarot): 愚人, 皇后, 权杖一 …
  */
 export const DECK_ID = "rws-78/v1";
 
@@ -16,10 +17,10 @@ export interface TarotCard {
 export type Suit = "wands" | "cups" | "swords" | "pentacles";
 
 const MAJORS: [string, string, string][] = [
-  ["The Fool", "愚者", "愚者"],
+  ["The Fool", "愚人", "愚人"],
   ["The Magician", "魔术师", "魔術師"],
   ["The High Priestess", "女祭司", "女祭司"],
-  ["The Empress", "女皇", "女皇"],
+  ["The Empress", "皇后", "皇后"],
   ["The Emperor", "皇帝", "皇帝"],
   ["The Hierophant", "教皇", "教皇"],
   ["The Lovers", "恋人", "戀人"],
@@ -48,7 +49,7 @@ const SUITS: Record<Suit, [string, string, string]> = {
 };
 
 const RANKS: [string, string, string][] = [
-  ["Ace", "王牌", "王牌"],
+  ["Ace", "一", "一"],
   ["Two", "二", "二"],
   ["Three", "三", "三"],
   ["Four", "四", "四"],
@@ -87,6 +88,18 @@ export const DECK: readonly TarotCard[] = Object.freeze([
     })),
   ),
 ]);
+
+/** Other names a card goes by (the deck's names before v1.1.2), so checks on readings still know them. */
+export const NAME_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  major_00: ["愚者"],
+  major_03: ["女皇"],
+  ...Object.fromEntries(
+    (Object.keys(SUITS) as Suit[]).map((s) => [
+      `${s}_01`,
+      [`${SUITS[s][1]}王牌`, `${SUITS[s][2]}王牌`],
+    ]),
+  ),
+};
 
 export const SPREADS = {
   single: ["focus"],

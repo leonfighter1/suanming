@@ -111,4 +111,39 @@ void main() {
     await tester.scrollUntilVisible(find.byKey(const Key('generate-report')), 300, scrollable: mainScrollable);
     expect(find.byKey(const Key('generate-report')), findsOneWidget);
   });
+
+  testWidgets('tarot: cards twice the first size where there is room, two to a row on a phone', (tester) async {
+    addTearDown(tester.view.reset);
+    Future<void> drawAt(double width) async {
+      tester.view.physicalSize = Size(width, 2000);
+      tester.view.devicePixelRatio = 1;
+      // A fresh app each time: pumping the same widget types again would keep the navigator.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(testApp(FakeApi()));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('entry-tarot')));
+      await settle(tester);
+      await scrollAndTap(tester, find.byKey(const Key('draw')));
+      await settle(tester);
+    }
+
+    Rect card(int n) => tester.getRect(find.byKey(Key('tarot-card-$n')));
+    double textSize(String text) => DefaultTextStyle.of(tester.element(find.text(text))).style.fontSize!;
+
+    // Phone, 360 wide: content 360 − 2×16 (page) − 2×(20 + 1) (card padding + border) = 286;
+    // two cards of (286 − 12 gap) / 2 = 137 side by side, the third on the next row;
+    // text at 137/104 of the 14-pt body size.
+    await drawAt(360);
+    expect(card(1).width, 137);
+    expect(card(2).top, card(1).top);
+    expect(card(3).top, greaterThan(card(1).bottom));
+    expect(textSize('過去'), closeTo(14 * 137 / 104, 0.001));
+
+    // Desktop, 1000 wide: room to spare, so the cap of twice 104 = 208, all three in one row;
+    // text at twice the body size.
+    await drawAt(1000);
+    expect(card(1).width, 208);
+    expect(card(3).top, card(1).top);
+    expect(textSize('過去'), 28);
+  });
 }

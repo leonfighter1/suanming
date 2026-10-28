@@ -2,6 +2,13 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (f): tarot names match the art; two cards to a row on phones; release v1.1.2
+
+- Owner: push once all tasks are done (v1.1.0 tags and v1.1.1 pushed), then "yes for both" open questions: phone-fitted cards, and the six names that differed between the art and the app. "Yes" didn't pick a side for the names; the app now uses the painted ones (Mainland usage, the main language since 2026-10-26), leaving the art and JingyaoPaint untouched.
+- Names: 愚人, 皇后, 权杖一 … 星币一 (繁 likewise) in deck.ts; sync:app → tarot_deck.json. The facts layer and checkFaithfulness use them; `NAME_ALIASES` keeps 愚者 / 女皇 / …王牌 for the check, and a 一-word guard stops 「宝剑一样」 counting as the Ace of Swords (both tested). mirror:tarot reports no differences now.
+- Layout: `_scaleFor(width)` fits two cards side by side, between 1× and 2× of 104 pt (137 on a 360 phone, 208 from 502 wide); text, back frame and gaps follow the scale; the width is rounded down so two exactly fitting cards don't wrap.
+- Mistakes: a second pumpWidget of the same app kept its navigator (rule 24).
+
 ## 2026-10-27 (e): tarot cards twice as large; release v1.1.1
 
 - Owner request: 卡牌界面字体和牌面需要放大2倍. Cards 104 → 208 pt wide (7:12, 357 tall); the card area's text at twice the body size (hint, position, name; 逆位 12 → 24); the back's frame and star scaled too. Corners 12: at 16 the clip would touch the painted gold frame. One `_scale` constant in tarot_page.dart.

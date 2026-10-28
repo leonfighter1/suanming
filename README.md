@@ -11,6 +11,23 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. The steps that finish an update (harness, this entry, version) are in
 [.claude/skills/keyboard-access/SKILL.md](.claude/skills/keyboard-access/SKILL.md).
 
+### v1.1.2 (2026-10-27): tarot names match the art; two cards to a row on phones
+
+- 塔罗
+  - On a phone the cards are as large as two side by side allow, 137 pt on a 360-wide phone (208 left room for
+    only one per row), and the text in the card area scales with them. Screens from about 500 pt wide keep twice
+    the first size (208-pt cards, 28-pt text).
+  - Card names now match the names painted on the art: 愚人 (was 愚者), 皇后 (was 女皇), 权杖一 / 圣杯一 / 宝剑一 /
+    星币一 (were …王牌); in 繁體 the same (權杖一 …). 塔罗 readings use the new names too.
+- For developers
+  - `src/engines/tarot/deck.ts` has the new names, and `NAME_ALIASES` keeps the earlier ones, so the faithfulness
+    check still catches a reading that writes 愚者 or 权杖王牌 for a card that wasn't drawn. The check no longer
+    reads 「宝剑一样」 ("like a sword") as the Ace of Swords.
+  - `npm run mirror:tarot` no longer reports names that differ.
+- Verified: new tests for the phone layout (two 137-pt cards to a row at 360 wide, 208 at 1000), the earlier names
+  and 「寶劍一樣」; all 83 app tests and 248 server tests pass; harness PASS. Rendered on a 360-wide phone in 简体 and
+  English.
+
 ### v1.1.1 (2026-10-27): tarot cards twice as large
 
 - 塔罗 (owner request: the cards and their text twice as large)

@@ -25,8 +25,15 @@
 21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
 22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead.
 23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; after a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more.
+24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
 
 ## Log
+
+### 2026-10-27: A second pumpWidget of the same app keeps its state
+- **Symptom:** A layout test drew cards at 360 wide, then pumped testApp again at 1000 wide; the tap on 首页 entry-tarot found nothing
+- **Root cause:** pumpWidget with the same widget types updates the tree in place, so the Navigator (and the tarot page on top) survived
+- **Fix:** pumpWidget(const SizedBox.shrink()) before pumping the new app
+- **Rule:** To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state. (Rule 24)
 
 ### 2026-10-27: Flutter deletes the l10n files after a run from another path
 - **Symptom:** The harness app gate failed at analyze with lib/l10n/gen/app_localizations*.dart missing, in v1.1.0 and again in v1.1.1, each time after app/pubspec.yaml changed

@@ -3,8 +3,8 @@
   "cards": {
     "major_00": {
       "en": "The Fool",
-      "zh-Hans": "愚者",
-      "zh-Hant": "愚者"
+      "zh-Hans": "愚人",
+      "zh-Hant": "愚人"
     },
     "major_01": {
       "en": "The Magician",
@@ -18,8 +18,8 @@
     },
     "major_03": {
       "en": "The Empress",
-      "zh-Hans": "女皇",
-      "zh-Hant": "女皇"
+      "zh-Hans": "皇后",
+      "zh-Hant": "皇后"
     },
     "major_04": {
       "en": "The Emperor",
@@ -113,8 +113,8 @@
     },
     "wands_01": {
       "en": "Ace of Wands",
-      "zh-Hans": "权杖王牌",
-      "zh-Hant": "權杖王牌"
+      "zh-Hans": "权杖一",
+      "zh-Hant": "權杖一"
     },
     "wands_02": {
       "en": "Two of Wands",
@@ -183,8 +183,8 @@
     },
     "cups_01": {
       "en": "Ace of Cups",
-      "zh-Hans": "圣杯王牌",
-      "zh-Hant": "聖杯王牌"
+      "zh-Hans": "圣杯一",
+      "zh-Hant": "聖杯一"
     },
     "cups_02": {
       "en": "Two of Cups",
@@ -253,8 +253,8 @@
     },
     "swords_01": {
       "en": "Ace of Swords",
-      "zh-Hans": "宝剑王牌",
-      "zh-Hant": "寶劍王牌"
+      "zh-Hans": "宝剑一",
+      "zh-Hant": "寶劍一"
     },
     "swords_02": {
       "en": "Two of Swords",
@@ -323,8 +323,8 @@
     },
     "pentacles_01": {
       "en": "Ace of Pentacles",
-      "zh-Hans": "星币王牌",
-      "zh-Hant": "星幣王牌"
+      "zh-Hans": "星币一",
+      "zh-Hant": "星幣一"
     },
     "pentacles_02": {
       "en": "Two of Pentacles",

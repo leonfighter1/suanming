@@ -10,7 +10,7 @@
  * Not checked: 十神/五行 reasoning, which needs a human reviewer.
  */
 import type { ChartFact } from "../chart-fact/index.js";
-import { DECK } from "../engines/tarot/deck.js";
+import { DECK, NAME_ALIASES } from "../engines/tarot/deck.js";
 import { yearGanZhi } from "../engines/bazi/index.js";
 import type { Report } from "./pipeline.js";
 import { loadTerms, type Locale } from "./terms.js";
@@ -28,6 +28,16 @@ export interface FaithfulnessIssue {
 }
 
 const GZ = /[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]/g;
+/** 一 starting a word: 「宝剑一样」 is "like a sword", not 宝剑一 (the Ace of Swords). */
+const ONE_WORD = /^[样樣般起同致直定些下次点點切种種个個旦边邊面向再时時]/u;
+
+/** Where a card's name is first mentioned in text, or -1. */
+function findCard(text: string, name: string): number {
+  for (let at = text.indexOf(name); at >= 0; at = text.indexOf(name, at + 1)) {
+    if (!name.endsWith("一") || !ONE_WORD.test(text.slice(at + name.length))) return at;
+  }
+  return -1;
+}
 /** 今年/明年/去年 … 干支 within one sentence: the 干支 must be that year's (from the report date). */
 const RELATIVE_GZ =
   /(今年|明年|去年|this year|next year|last year)[^。！？.!?]{0,20}?([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/gi;
@@ -104,12 +114,12 @@ export function checkFaithfulness(chart: ChartFact, report: Report): Faithfulnes
     const inSpread = new Map(cards.map((c) => [c.card_id, c.reversed]));
     // Longest names first so 「權杖十」 isn't matched as 「權杖一」-like prefixes.
     const names = DECK.flatMap((c) =>
-      Object.values(c.name).map((n) => ({ id: c.id, name: n })),
+      [...Object.values(c.name), ...(NAME_ALIASES[c.id] ?? [])].map((n) => ({ id: c.id, name: n })),
     ).sort((a, b) => b.name.length - a.name.length);
     for (const t of texts) {
       let rest = t;
       for (const { id, name } of names) {
-        const at = rest.indexOf(name);
+        const at = findCard(rest, name);
         if (at < 0) continue;
         rest = rest.slice(0, at) + " ".repeat(name.length) + rest.slice(at + name.length);
         if (!inSpread.has(id)) {
