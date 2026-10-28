@@ -14,6 +14,9 @@ import 'widgets/report_request.dart';
 import 'widgets/tarot_ritual.dart';
 import 'widgets/tarot_spread.dart';
 
+/// Each spread choice's width: room for its icon and the longest name (凯尔特十字) on one line.
+const _spreadChoiceWidth = 84.0;
+
 /// 塔罗 the classic way: think of a question, choose a spread, draw; the cards are laid
 /// out as the spread prescribes and turned in dealing order (widgets/tarot_spread.dart).
 class TarotPage extends ConsumerStatefulWidget {
@@ -204,15 +207,24 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                                 _spread = id;
                                 _inRitual = false; // a ritual is for one spread's count
                               }),
-                              label: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: Space.s),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SpreadDiagram(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
-                                    const SizedBox(height: Space.xs),
-                                    Text(name, textAlign: TextAlign.center),
-                                  ],
+                              // Every choice the same size (owner, v5.4.0): the same square icon, the name below.
+                              label: SizedBox(
+                                width: _spreadChoiceWidth,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: Space.s),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SpreadIcon(spreadId: id, count: terms?.spreadPositions(id).length ?? 1),
+                                      const SizedBox(height: Space.s),
+                                      Text(
+                                        name,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

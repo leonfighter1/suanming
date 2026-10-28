@@ -1223,6 +1223,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String pillarRelation(String pillar, String relation) {
+    return '$pillar$relation';
+  }
+
+  @override
   String get jumpTo => '跳到';
 
   @override
@@ -1233,11 +1238,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shareImageFailed => '暂时无法生成分享图，请稍后再试。';
-
-  @override
-  String pillarRelation(String pillar, String relation) {
-    return '$pillar$relation';
-  }
 
   @override
   String get homeQiuqian => '求签';
@@ -2632,6 +2632,11 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
+  String pillarRelation(String pillar, String relation) {
+    return '$pillar$relation';
+  }
+
+  @override
   String get jumpTo => '跳到';
 
   @override
@@ -2642,11 +2647,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get shareImageFailed => '暫時無法生成分享圖，請稍後再試。';
-
-  @override
-  String pillarRelation(String pillar, String relation) {
-    return '$pillar$relation';
-  }
 
   @override
   String get homeQiuqian => '求籤';

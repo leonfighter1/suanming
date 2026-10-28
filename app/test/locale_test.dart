@@ -48,18 +48,16 @@ void main() {
     expect(arb['deleteAccount'], '注销账号并删除数据');
   });
 
-  // The Phase 3 gate's 「英语扩展：全量页面英语资源覆盖」 (v5.2.0): every string exists in all three languages,
-  // and English shows Chinese only where it means to (the 体 / 用 / 互 / 变 hexagram roles, the surname example).
-  test('every page is in English: the three languages have the same strings', () {
+  // The owner removed English (v5.4.0): 简体 is the template, 繁體 has every one of its strings, and there is no
+  // English file or locale left.
+  test('the app is in Chinese only: 简体 and 繁體 have the same strings, and no English', () {
     Map<String, dynamic> arb(String f) => jsonDecode(File('lib/l10n/$f').readAsStringSync()) as Map<String, dynamic>;
     Set<String> keys(Map<String, dynamic> m) => m.keys.where((k) => !k.startsWith('@')).toSet();
-    final en = arb('app_en.arb'), hans = arb('app_zh.arb'), hant = arb('app_zh_Hant.arb');
-    expect(keys(en).length, greaterThan(400));
-    expect(keys(hans), keys(en));
-    expect(keys(hant), keys(en));
-    final cjk = RegExp(r'[㐀-鿿]');
-    final chineseInEnglish = keys(en).where((k) => cjk.hasMatch('${en[k]}')).toSet();
-    expect(chineseInEnglish, {'lifeTi', 'lifeYong', 'lifeHu', 'lifeBian', 'namingSurnameHint'});
+    final hans = arb('app_zh.arb'), hant = arb('app_zh_Hant.arb');
+    expect(keys(hans).length, greaterThan(400));
+    expect(keys(hant), keys(hans));
+    expect(File('lib/l10n/app_en.arb').existsSync(), isFalse);
+    expect(supportedAppLocales, [zhHans, zhHant]);
   });
 
   // v5.1.0 (tech plan WP8.3): a picked language is kept on the device for the next start.
@@ -71,23 +69,25 @@ void main() {
     expect(find.text('八字排盘'), findsWidgets);
     await tester.tap(find.byKey(const Key('language-menu')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('language-en')));
+    await tester.tap(find.byKey(const Key('language-zh-Hant')));
     await settle(tester);
-    expect(store.saved, 'en');
+    expect(store.saved, 'zh-Hant');
 
     // A restart: main() reads the saved language before the first frame.
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(testApp(api, locale: await startLocale(store), settings: store));
     await settle(tester);
-    expect(find.text('Bazi chart'), findsWidgets);
+    expect(find.text('八字排盤'), findsWidgets);
     expect(find.text('八字排盘'), findsNothing);
-    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, 'EN');
+    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁');
   });
 
   testWidgets('without a saved language, or without storage, the app starts in 简体中文', (tester) async {
     expect(await startLocale(InMemorySettingsStore()), zhHans);
     expect(await startLocale(_BrokenStore()), zhHans);
     expect(await startLocale(InMemorySettingsStore()..saved = 'zh-Hant'), zhHant);
+    // English saved before the owner removed it starts in 简体.
+    expect(await startLocale(InMemorySettingsStore()..saved = 'en'), zhHans);
     // Picking a language where it can't be saved still switches it.
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null, settings: _BrokenStore()));
     await settle(tester);

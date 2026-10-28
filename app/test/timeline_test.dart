@@ -94,27 +94,17 @@ void main() {
     }
   });
 
-  testWidgets('in English a 流年 relation reads with a space: Hour Six Harmonies', (tester) async {
-    await openChart(tester, locale: const Locale('en'));
-    await scrollTo(tester, const Key('liunian-strip'));
-    // 2026's 午 and the hour pillar's 未 make a 六合 (it read 「HourSix Harmonies」 before v3.3.0).
-    expect(inside(find.byKey(const Key('liunian-strip')), 'Hour Six Harmonies'), findsOneWidget);
-    expect(inside(find.byKey(const Key('liunian-strip')), 'This year'), findsOneWidget);
-  });
-
-  testWidgets('in English (v4.0.0) the strips give each part a line, in wider items, without pinyin', (tester) async {
-    await openChart(tester, locale: const Locale('en'));
-    // The 四柱 table: 年干 庚 is 伤官, Hurting Officer, without (Shang Guan).
-    expect(find.descendant(of: find.byKey(const Key('pillar-grid')), matching: find.text('Hurting Officer')), findsOneWidget);
+  testWidgets('a 流年 item reads year · 虚岁, then its two 十神, and 時柱六合 where 2026 meets the hour', (tester) async {
+    await openChart(tester);
     await scrollTo(tester, const Key('liunian-strip'));
     final strip = find.byKey(const Key('liunian-strip'));
-    // 2026 丙午: 丙 阳火 generates 己 阴土, opposite polarity → 正印, Direct Resource; 午's 本气 丁 阴火, same
-    // polarity → 偏印, Indirect Resource. Year, 虚岁 (2026 − 1990 + 1 = 37) and each 十神 on a line of its own.
-    for (final text in ['2026', 'nominal age 37', 'Direct Resource', 'Indirect Resource']) {
-      expect(inside(strip, text), findsWidgets, reason: text);
-    }
-    final item = find.ancestor(of: inside(strip, 'nominal age 37'), matching: find.byType(Container)).first;
-    expect(tester.getSize(item).width, 128);
+    // 2026 丙午: 丙 阳火 generates 己 阴土, opposite polarity → 正印; 午's 本气 丁 阴火, same polarity → 偏印.
+    // 虚岁 2026 − 1990 + 1 = 37. 午 and the hour pillar's 未 make a 六合.
+    expect(inside(strip, '2026 · 虛歲 37'), findsOneWidget);
+    expect(inside(strip, '正印 / 偏印'), findsWidgets);
+    expect(inside(strip, '時柱六合'), findsOneWidget);
+    final item = find.ancestor(of: inside(strip, '2026 · 虛歲 37'), matching: find.byType(Container)).first;
+    expect(tester.getSize(item).width, 96);
   });
 
   test('a chart made before v3.3.0 has no years to open', () {

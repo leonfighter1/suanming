@@ -12,6 +12,37 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v5.4.0 (2026-10-28): your three updates: even tarot spread choices, Chinese only, the admin in Beijing
+
+Stage S11 of the [tech plan](docs/tech-plan.md), what you asked for while 算卦 was being built. A medium update:
+committed locally, and pushed with 算卦's big update (v6.0.0).
+
+- **The tarot spread choices are all the same size** (单张, 三张, 凯尔特十字, 二选一, 关系牌阵).
+  - Each has the same square icon, its cards drawn as large as the square allows, and its name underneath on one
+    line.
+  - Checked in a test, which measures every choice's size and keeps each name uncut. I also looked at the page
+    rendered with a real Chinese font.
+- **The app is in Chinese only: 简体中文 and 繁體中文.**
+  - English is gone from the 语言 menu, and so is the English text file (简体 is now the main one).
+  - Readings, tips and timelines take the Chinese layout everywhere.
+  - Anyone who had chosen English opens in 简体.
+  - The server still accepts English requests, but nothing in the app sends one. Say if you want it stripped there
+    too: it touches every method's texts, so I've left it for your word.
+- **The 管理员 test profile is born in 北京** (中国 · 北京市 · 北京), with the place stored the way the place picker
+  stores it.
+  - A device that still has the old, untouched Taipei version gets moved to Beijing.
+  - A profile someone has edited keeps what they chose.
+  - Because the birthplace moved, its chart changes: true solar time is now taken at Beijing's longitude, with
+    China's 1988 summer time.
+- Verified:
+  - App tests:
+    - the spread choices are one size, each with its icon over its name;
+    - the admin is seeded in 北京, and an untouched old seed moves while an edited one stays;
+    - the app is Chinese only: no English file or locale, and English saved earlier starts in 简体;
+    - a picked 繁體 survives a restart.
+  - The English-only tests are rewritten for Chinese or removed.
+  - All 483 server tests and 139 app tests pass; harness PASS.
+
 ### v5.3.0 (2026-10-28): 算卦, the server half: the coins, the hexagrams, 直說 and the AI reading
 
 Your request (算卦: coins cast automatically, half-automatically or by your own hand, with the time, the 八卦 and

@@ -96,12 +96,9 @@ class Terms {
   /// Display form of an engine term (simplified canonical key) for an API locale.
   String t(String key, String apiLocale) => _terms[key]?[apiLocale] ?? key;
 
-  /// [t] for a tight place (a table cell, a strip): English drops the pinyin, Companion for
-  /// Companion (Bi Jian); titles and tips keep the full form. Chinese is the same (v4.0.0).
-  String short(String key, String apiLocale) {
-    final full = t(key, apiLocale);
-    return apiLocale == 'en' ? full.replaceFirst(RegExp(r'\s*\([^)]*\)$'), '') : full;
-  }
+  /// [t] for a tight place (a table cell, a strip). The same as [t]: the app is in Chinese only since the
+  /// owner removed English (v5.4.0), which used to drop its pinyin here.
+  String short(String key, String apiLocale) => t(key, apiLocale);
 
   String card(String cardId, String apiLocale) => _cards[cardId]?[apiLocale] ?? cardId;
 

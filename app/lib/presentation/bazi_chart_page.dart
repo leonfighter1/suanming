@@ -152,7 +152,7 @@ class BaziChartPage extends ConsumerWidget {
         child: _Timeline(
           key: const Key('liunian-strip'),
           label: l10n.liunian,
-          items: [for (final y in b.liunian) _yearStep(y, brief, l10n, b.thisYear, english: locale == 'en')],
+          items: [for (final y in b.liunian) _yearStep(y, brief, l10n, b.thisYear)],
         ),
       ),
       // 流月 of the chart's year, from 立春 (facts since v1.3.0, shown since v3.3.0).
@@ -167,14 +167,11 @@ class BaziChartPage extends ConsumerWidget {
             label: t('流月'),
             items: [
               for (final m in b.liuyue)
-                // When it begins (the date, 北京时间), the 节 it begins on, its 十神; English gives
-                // each 十神 its own line.
+                // When it begins (the date, 北京时间), the 节 it begins on, its 十神.
                 _Step(m.ganzhi, [
                   m.starts.substring(0, 10),
                   brief(m.jie),
-                  ...locale == 'en'
-                      ? [brief(m.shishenGan), brief(m.shishenZhi)]
-                      : ['${t(m.shishenGan)} / ${t(m.shishenZhi)}'],
+                  '${t(m.shishenGan)} / ${t(m.shishenZhi)}',
                 ]),
             ],
           ),
@@ -456,7 +453,7 @@ class _DayunCardState extends State<_DayunCard> {
               label: l10n.dayunYears(open.ganzhi, open.startYear, open.startYear + 9),
               items: [
                 for (final y in years)
-                  _yearStep(y, widget.brief, l10n, b.thisYear, english: Localizations.localeOf(context).languageCode == 'en'),
+                  _yearStep(y, widget.brief, l10n, b.thisYear),
               ],
             ),
           ],
@@ -468,15 +465,14 @@ class _DayunCardState extends State<_DayunCard> {
 
 /// A 流年 in a strip: 干支, year and 虚岁, its 十神, its 六冲 / 六合 with the chart; 今年 marked.
 /// English gives the year, the 虚岁 and each 十神 a line of their own, so none is cut off (v4.0.0).
-_Step _yearStep(Liunian y, String Function(String) brief, AppLocalizations l10n, int? thisYear, {required bool english}) {
-  // 時柱六合, or Hour Six Harmonies (English read YearSix Clashes before v3.3.0).
+_Step _yearStep(Liunian y, String Function(String) brief, AppLocalizations l10n, int? thisYear) {
+  // 時柱六合.
   final relations = y.relations.map((r) => l10n.pillarRelation(l10n.pillar(r.pillar), brief(r.type))).join(' ');
   return _Step(
     y.ganzhi,
     [
-      ...english
-          ? ['${y.year}', l10n.age(y.xusui), brief(y.shishenGan), brief(y.shishenZhi)]
-          : ['${y.year} · ${l10n.age(y.xusui)}', '${brief(y.shishenGan)} / ${brief(y.shishenZhi)}'],
+      '${y.year} · ${l10n.age(y.xusui)}',
+      '${brief(y.shishenGan)} / ${brief(y.shishenZhi)}',
       if (relations.isNotEmpty) relations,
     ],
     badge: y.year == thisYear ? l10n.timelineThisYear : null,
@@ -545,8 +541,7 @@ class _TimelineState extends State<_Timeline> {
     final scheme = theme.colorScheme;
     // Room above the items for a badge on their top edge.
     final top = items.any((s) => s.badge != null) ? 10.0 : 0.0;
-    // English words are longer: wider items, so 「nominal age 37」 and 「Indirect Resource」 fit (v4.0.0).
-    final width = Localizations.localeOf(context).languageCode == 'en' ? 128.0 : 96.0;
+    const width = 96.0;
     // One item and its gap: what ←/→ move.
     final step = width + Space.s;
     Widget line(String s) =>

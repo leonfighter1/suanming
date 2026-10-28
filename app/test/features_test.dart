@@ -161,6 +161,35 @@ void main() {
     final book = ProfileBook.decode(profiles.data['u1']);
     expect(book.profiles.map((p) => p.name), ['管理员', '测试家人']);
     expect(book.profiles[1].inputBasis, {'date': 'lunar', 'time': 'shichen', 'shichen': '午'});
+    // The admin is located in 北京 (owner, v5.4.0), the place as the place picker stores it.
+    final admin = book.profiles[0].birthPlace;
+    expect(admin.label('zh-Hans'), '中国 · 北京市 · 北京');
+    expect([admin.timezone, admin.longitude, admin.cityId], ['Asia/Shanghai', 116.3972, 1816670]);
+  });
+
+  testWidgets('an untouched admin profile from before v5.4.0 moves to 北京; an edited one stays', (tester) async {
+    BirthProfile seed({String name = '管理员'}) => BirthProfile(
+          id: 'default',
+          name: name,
+          gender: 'female',
+          birthLocal: DateTime(1988, 8, 8, 8),
+          cityKey: 'taipei',
+          timeMode: 'shichen',
+          shichen: '辰',
+        );
+    Future<ProfileBook> openWith(BirthProfile p) async {
+      final profiles = InMemoryProfileStore()..data['u1'] = ProfileBook(profiles: [p], defaultId: 'default').encode();
+      await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
+      await tester.pumpWidget(testApp(FakeApi(email: 'admin'), profiles: profiles));
+      await settle(tester);
+      return ProfileBook.decode(profiles.data['u1']);
+    }
+
+    final moved = (await openWith(seed())).profiles.single;
+    expect(moved.birthPlace.label('zh-Hans'), '中国 · 北京市 · 北京');
+    expect(moved.shichen, '辰'); // only the place changes
+    final kept = (await openWith(seed(name: '我'))).profiles.single;
+    expect(kept.birthPlace.label('zh-Hans'), '台北');
   });
 
   test('export always carries the AI label and the disclaimer', () {

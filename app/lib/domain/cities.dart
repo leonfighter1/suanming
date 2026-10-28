@@ -17,6 +17,8 @@ const cities = [
   City('singapore', 'SG', {'zh-Hant': '新加坡', 'zh-Hans': '新加坡', 'en': 'Singapore'}, 'Asia/Singapore', 103.8198),
   City('kl', 'MY', {'zh-Hant': '吉隆坡', 'zh-Hans': '吉隆坡', 'en': 'Kuala Lumpur'}, 'Asia/Kuala_Lumpur', 101.6869),
   City('shanghai', 'CN', {'zh-Hant': '上海', 'zh-Hans': '上海', 'en': 'Shanghai'}, 'Asia/Shanghai', 121.4737),
+  // The admin's birthplace since v5.4.0 (seeded with the picked place too): GeoNames 1816670.
+  City('beijing', 'CN', {'zh-Hant': '北京', 'zh-Hans': '北京', 'en': 'Beijing'}, 'Asia/Shanghai', 116.3972),
   City('guangzhou', 'CN', {'zh-Hant': '廣州', 'zh-Hans': '广州', 'en': 'Guangzhou'}, 'Asia/Shanghai', 113.2644),
   City('nyc', 'US', {'zh-Hant': '紐約', 'zh-Hans': '纽约', 'en': 'New York'}, 'America/New_York', -74.006),
   City('vancouver', 'CA', {'zh-Hant': '溫哥華', 'zh-Hans': '温哥华', 'en': 'Vancouver'}, 'America/Vancouver', -123.1207),

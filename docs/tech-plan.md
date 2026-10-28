@@ -37,7 +37,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S8 地区精细化              | Indonesia's blocks, the five-region test, languages kept    | medium | v5.1.0            | done        |
 | S9 Phase 3 门禁            | 起名's own rule group; the Phase 3 gate record              | medium | v5.2.0            | done        |
 | S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | in progress |
-| S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | planned     |
+| S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1093,9 +1093,32 @@ As built (v5.3.0):
     tables. Whether to strip it too is the owner's call.
 - **WP11.3 The admin's location:** the seeded 管理员 profile is located in Beijing (北京).
 
+As built (v5.4.0):
+
+- `SpreadIcon` (tarot_spread.dart) picks the card width so each spread fits a 56 px square. A scaled picture would
+  thicken the borders; this keeps them. Every choice is 84 px wide, with its name under the icon on one line. I
+  looked at it rendered with Noto Sans SC.
+- The ARB template is `app_zh.arb`. Its 34 metadata entries (placeholder types) moved over from the English file,
+  which is deleted along with its generated class. The English branches in the app code are gone: the timeline
+  widths, the 流年 and 流月 lines, the separators, and `Terms.short`.
+- 管理员 is seeded in 北京 with the picked-place form, plus a legacy `beijing` key. `movedAdminSeed` moves only the
+  untouched old Taipei seed.
+- Server English (`en` in the API, prompts and tables) is kept: nothing calls it now. Removing it is the owner's
+  call.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S11 Owner updates (done 2026-10-28: v5.4.0, medium)
+
+1. **Delivered** in v5.4.0: WP11.1, the tarot spread choices one size; WP11.2, English out of the app; WP11.3, the
+   admin in 北京.
+2. **Numbers**: app tests 140 → 139 (English-only checks removed, new checks added); server tests 483.
+3. **Changed against the plan**: done before 算卦's app pages, so those pages are built in Chinese only.
+4. **Mistakes recorded**: none new. Global rule 1 (no backslashes through a shell) nearly recurred; I used the Edit
+   tool for the regex instead.
+5. **Next**: S10's remaining work: WP10.4 (算卦's pages), WP10.5 (the 周易 text check), the stage summary and v6.0.0.
 
 ### S9 Phase 3 门禁 (done 2026-10-28: v5.2.0, medium)
 
@@ -1402,6 +1425,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP10.3    | done                         | v5.3.0  |
 | WP10.4    | planned                      | v6.0.0  |
 | WP10.5    | planned                      | v6.0.0  |
-| WP11.1    | planned                      | v5.4.0  |
-| WP11.2    | planned                      | v5.4.0  |
-| WP11.3    | planned                      | v5.4.0  |
+| WP11.1    | done                         | v5.4.0  |
+| WP11.2    | done (app; server en kept)   | v5.4.0  |
+| WP11.3    | done                         | v5.4.0  |

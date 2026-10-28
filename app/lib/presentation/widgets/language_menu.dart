@@ -6,7 +6,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 
 /// The app languages: API code, menu label, short label on the bar. 简体中文 first.
-const appLanguages = [('zh-Hans', '简体中文', '简'), ('zh-Hant', '繁體中文', '繁'), ('en', 'English', 'EN')];
+const appLanguages = [('zh-Hans', '简体中文', '简'), ('zh-Hant', '繁體中文', '繁')];
 
 /// 语言, straight on a top bar (home and sign-in): the current language's short
 /// label, and a one-tap menu to switch.
@@ -37,11 +37,7 @@ class LanguageMenu extends ConsumerWidget {
           ),
         ],
       ),
-      onSelected: (code) => ref.read(settingsProvider.notifier).setLocale(switch (code) {
-        'zh-Hant' => zhHant,
-        'en' => const Locale('en'),
-        _ => zhHans,
-      }),
+      onSelected: (code) => ref.read(settingsProvider.notifier).setLocale(code == 'zh-Hant' ? zhHant : zhHans),
       itemBuilder: (_) => [
         for (final (code, label, _) in appLanguages)
           CheckedPopupMenuItem(key: Key('language-$code'), value: code, checked: current == code, child: Text(label)),

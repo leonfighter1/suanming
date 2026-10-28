@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-import 'app_localizations_en.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -94,2679 +93,2678 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
     Locale('zh'),
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
 
   /// No description provided for @appTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Mingli Master'**
+  /// In zh, this message translates to:
+  /// **'命理大师'**
   String get appTitle;
 
   /// No description provided for @homeBazi.
   ///
-  /// In en, this message translates to:
-  /// **'Bazi chart'**
+  /// In zh, this message translates to:
+  /// **'八字排盘'**
   String get homeBazi;
 
   /// No description provided for @homeBaziDesc.
   ///
-  /// In en, this message translates to:
-  /// **'Four pillars, luck pillars and years from your birth time, or a whole-life report'**
+  /// In zh, this message translates to:
+  /// **'根据出生时间排出四柱、大运和流年，也可以生成一生运势报告'**
   String get homeBaziDesc;
 
   /// No description provided for @homeTarot.
   ///
-  /// In en, this message translates to:
-  /// **'Tarot'**
+  /// In zh, this message translates to:
+  /// **'塔罗'**
   String get homeTarot;
 
   /// No description provided for @homeTarotDesc.
   ///
-  /// In en, this message translates to:
-  /// **'Draw a spread, for entertainment and metaphysics study only'**
+  /// In zh, this message translates to:
+  /// **'抽一组牌阵，仅供娱乐和玄学学习使用'**
   String get homeTarotDesc;
 
   /// No description provided for @settings.
   ///
-  /// In en, this message translates to:
-  /// **'Settings'**
+  /// In zh, this message translates to:
+  /// **'设置'**
   String get settings;
 
   /// No description provided for @language.
   ///
-  /// In en, this message translates to:
-  /// **'Language'**
+  /// In zh, this message translates to:
+  /// **'语言'**
   String get language;
 
   /// No description provided for @region.
   ///
-  /// In en, this message translates to:
-  /// **'Region'**
+  /// In zh, this message translates to:
+  /// **'地区'**
   String get region;
 
   /// No description provided for @birthTime.
   ///
-  /// In en, this message translates to:
-  /// **'Birth time (local civil time)'**
+  /// In zh, this message translates to:
+  /// **'出生时间（当地时间）'**
   String get birthTime;
 
   /// No description provided for @pickDate.
   ///
-  /// In en, this message translates to:
-  /// **'Date'**
+  /// In zh, this message translates to:
+  /// **'日期'**
   String get pickDate;
 
   /// No description provided for @pickTime.
   ///
-  /// In en, this message translates to:
-  /// **'Time'**
+  /// In zh, this message translates to:
+  /// **'时间'**
   String get pickTime;
 
   /// No description provided for @city.
   ///
-  /// In en, this message translates to:
-  /// **'Birthplace'**
+  /// In zh, this message translates to:
+  /// **'出生地'**
   String get city;
 
   /// No description provided for @gender.
   ///
-  /// In en, this message translates to:
-  /// **'Gender (for luck pillar direction)'**
+  /// In zh, this message translates to:
+  /// **'性别（决定大运顺逆）'**
   String get gender;
 
   /// No description provided for @male.
   ///
-  /// In en, this message translates to:
-  /// **'Male'**
+  /// In zh, this message translates to:
+  /// **'男'**
   String get male;
 
   /// No description provided for @female.
   ///
-  /// In en, this message translates to:
-  /// **'Female'**
+  /// In zh, this message translates to:
+  /// **'女'**
   String get female;
 
   /// No description provided for @trueSolarTime.
   ///
-  /// In en, this message translates to:
-  /// **'True solar time correction'**
+  /// In zh, this message translates to:
+  /// **'真太阳时校正'**
   String get trueSolarTime;
 
   /// No description provided for @compute.
   ///
-  /// In en, this message translates to:
-  /// **'Compute chart'**
+  /// In zh, this message translates to:
+  /// **'排盘'**
   String get compute;
 
   /// No description provided for @fourPillars.
   ///
-  /// In en, this message translates to:
-  /// **'Four Pillars'**
+  /// In zh, this message translates to:
+  /// **'四柱'**
   String get fourPillars;
 
   /// No description provided for @pillarYear.
   ///
-  /// In en, this message translates to:
-  /// **'Year'**
+  /// In zh, this message translates to:
+  /// **'年柱'**
   String get pillarYear;
 
   /// No description provided for @pillarMonth.
   ///
-  /// In en, this message translates to:
-  /// **'Month'**
+  /// In zh, this message translates to:
+  /// **'月柱'**
   String get pillarMonth;
 
   /// No description provided for @pillarDay.
   ///
-  /// In en, this message translates to:
-  /// **'Day'**
+  /// In zh, this message translates to:
+  /// **'日柱'**
   String get pillarDay;
 
   /// No description provided for @pillarHour.
   ///
-  /// In en, this message translates to:
-  /// **'Hour'**
+  /// In zh, this message translates to:
+  /// **'时柱'**
   String get pillarHour;
 
   /// No description provided for @rowTenGod.
   ///
-  /// In en, this message translates to:
-  /// **'Ten God'**
+  /// In zh, this message translates to:
+  /// **'十神'**
   String get rowTenGod;
 
   /// No description provided for @rowStem.
   ///
-  /// In en, this message translates to:
-  /// **'Stem'**
+  /// In zh, this message translates to:
+  /// **'天干'**
   String get rowStem;
 
   /// No description provided for @rowBranch.
   ///
-  /// In en, this message translates to:
-  /// **'Branch'**
+  /// In zh, this message translates to:
+  /// **'地支'**
   String get rowBranch;
 
   /// No description provided for @rowHidden.
   ///
-  /// In en, this message translates to:
-  /// **'Hidden stems'**
+  /// In zh, this message translates to:
+  /// **'藏干'**
   String get rowHidden;
 
   /// No description provided for @rowLifeStage.
   ///
-  /// In en, this message translates to:
-  /// **'Life stage'**
+  /// In zh, this message translates to:
+  /// **'十二长生'**
   String get rowLifeStage;
 
   /// No description provided for @rowNayin.
   ///
-  /// In en, this message translates to:
-  /// **'Na Yin'**
+  /// In zh, this message translates to:
+  /// **'纳音'**
   String get rowNayin;
 
   /// No description provided for @dayMaster.
   ///
-  /// In en, this message translates to:
-  /// **'Day Master'**
+  /// In zh, this message translates to:
+  /// **'日主'**
   String get dayMaster;
 
   /// No description provided for @wuxingWeighted.
   ///
-  /// In en, this message translates to:
-  /// **'Five Elements (weighted, simplified score)'**
+  /// In zh, this message translates to:
+  /// **'五行（加权，简化计分）'**
   String get wuxingWeighted;
 
   /// No description provided for @dayun.
   ///
-  /// In en, this message translates to:
-  /// **'Luck pillars'**
+  /// In zh, this message translates to:
+  /// **'大运'**
   String get dayun;
 
   /// No description provided for @dayunFrom.
   ///
-  /// In en, this message translates to:
-  /// **'starts {date}'**
+  /// In zh, this message translates to:
+  /// **'{date} 起运'**
   String dayunFrom(String date);
 
   /// No description provided for @liunian.
   ///
-  /// In en, this message translates to:
-  /// **'Annual pillars'**
+  /// In zh, this message translates to:
+  /// **'流年'**
   String get liunian;
 
   /// No description provided for @age.
   ///
-  /// In en, this message translates to:
-  /// **'nominal age {age}'**
+  /// In zh, this message translates to:
+  /// **'虚岁 {age}'**
   String age(int age);
 
   /// No description provided for @aiReport.
   ///
-  /// In en, this message translates to:
-  /// **'AI reading'**
+  /// In zh, this message translates to:
+  /// **'AI 解读'**
   String get aiReport;
 
   /// No description provided for @chooseTopics.
   ///
-  /// In en, this message translates to:
-  /// **'Topics'**
+  /// In zh, this message translates to:
+  /// **'分析方面'**
   String get chooseTopics;
 
   /// No description provided for @generate.
   ///
-  /// In en, this message translates to:
-  /// **'Generate AI reading'**
+  /// In zh, this message translates to:
+  /// **'生成 AI 解读'**
   String get generate;
 
   /// No description provided for @generating.
   ///
-  /// In en, this message translates to:
-  /// **'Generating your reading…'**
+  /// In zh, this message translates to:
+  /// **'正在生成解读…'**
   String get generating;
 
   /// No description provided for @generatingHint.
   ///
-  /// In en, this message translates to:
-  /// **'This takes a few minutes. You can leave this screen; the reading will be here when you come back.'**
+  /// In zh, this message translates to:
+  /// **'大约需要几分钟。可以先离开这个页面，完成后回来查看。'**
   String get generatingHint;
 
   /// No description provided for @statusBlocked.
   ///
-  /// In en, this message translates to:
-  /// **'This reading didn\'t pass our content checks and won\'t be shown. Please try again.'**
+  /// In zh, this message translates to:
+  /// **'这份解读未通过内容审查，不会显示。请重新生成。'**
   String get statusBlocked;
 
   /// No description provided for @statusReview.
   ///
-  /// In en, this message translates to:
-  /// **'This reading is being reviewed by our team before it can be shown.'**
+  /// In zh, this message translates to:
+  /// **'这份解读正在由团队审核，通过后才会显示。'**
   String get statusReview;
 
   /// No description provided for @statusFailed.
   ///
-  /// In en, this message translates to:
-  /// **'Something went wrong while generating. Please try again.'**
+  /// In zh, this message translates to:
+  /// **'生成时出现问题，请重试。'**
   String get statusFailed;
 
   /// No description provided for @layerFacts.
   ///
-  /// In en, this message translates to:
-  /// **'Chart facts · computed, not AI'**
+  /// In zh, this message translates to:
+  /// **'命盘事实 · 引擎计算，非 AI'**
   String get layerFacts;
 
   /// No description provided for @layerInterpretation.
   ///
-  /// In en, this message translates to:
-  /// **'Interpretation · AI generated'**
+  /// In zh, this message translates to:
+  /// **'解读 · AI 生成'**
   String get layerInterpretation;
 
   /// No description provided for @layerActions.
   ///
-  /// In en, this message translates to:
-  /// **'Suggested actions · AI generated'**
+  /// In zh, this message translates to:
+  /// **'行动建议 · AI 生成'**
   String get layerActions;
 
   /// No description provided for @aiBadge.
   ///
-  /// In en, this message translates to:
+  /// In zh, this message translates to:
   /// **'AI'**
   String get aiBadge;
 
   /// No description provided for @topicWuxing.
   ///
-  /// In en, this message translates to:
-  /// **'Five Elements'**
+  /// In zh, this message translates to:
+  /// **'五行'**
   String get topicWuxing;
 
   /// No description provided for @topicPersonality.
   ///
-  /// In en, this message translates to:
-  /// **'Personality'**
+  /// In zh, this message translates to:
+  /// **'性格'**
   String get topicPersonality;
 
   /// No description provided for @topicCareerWealth.
   ///
-  /// In en, this message translates to:
-  /// **'Career & wealth'**
+  /// In zh, this message translates to:
+  /// **'事业财运'**
   String get topicCareerWealth;
 
   /// No description provided for @topicRelationships.
   ///
-  /// In en, this message translates to:
-  /// **'Relationships'**
+  /// In zh, this message translates to:
+  /// **'婚姻感情'**
   String get topicRelationships;
 
   /// No description provided for @topicDayunLiunian.
   ///
-  /// In en, this message translates to:
-  /// **'Luck & years'**
+  /// In zh, this message translates to:
+  /// **'大运流年'**
   String get topicDayunLiunian;
 
   /// No description provided for @topicHealth.
   ///
-  /// In en, this message translates to:
-  /// **'Wellbeing'**
+  /// In zh, this message translates to:
+  /// **'健康'**
   String get topicHealth;
 
   /// No description provided for @topicTarotCards.
   ///
-  /// In en, this message translates to:
-  /// **'Card by card'**
+  /// In zh, this message translates to:
+  /// **'逐张解读'**
   String get topicTarotCards;
 
   /// No description provided for @topicTarotSynthesis.
   ///
-  /// In en, this message translates to:
-  /// **'The whole spread'**
+  /// In zh, this message translates to:
+  /// **'综合解读'**
   String get topicTarotSynthesis;
 
   /// No description provided for @topicTarotAdvice.
   ///
-  /// In en, this message translates to:
-  /// **'Advice'**
+  /// In zh, this message translates to:
+  /// **'建议'**
   String get topicTarotAdvice;
 
   /// No description provided for @srcTraditional.
   ///
-  /// In en, this message translates to:
-  /// **'Classical texts'**
+  /// In zh, this message translates to:
+  /// **'典籍'**
   String get srcTraditional;
 
   /// No description provided for @srcConsensus.
   ///
-  /// In en, this message translates to:
-  /// **'Common practice'**
+  /// In zh, this message translates to:
+  /// **'通行共识'**
   String get srcConsensus;
 
   /// No description provided for @srcSimplified.
   ///
-  /// In en, this message translates to:
-  /// **'Simplified rule'**
+  /// In zh, this message translates to:
+  /// **'简化规则'**
   String get srcSimplified;
 
   /// No description provided for @srcDerived.
   ///
-  /// In en, this message translates to:
-  /// **'Synthesis'**
+  /// In zh, this message translates to:
+  /// **'综合推导'**
   String get srcDerived;
 
   /// No description provided for @horizonWeek.
   ///
-  /// In en, this message translates to:
-  /// **'This week'**
+  /// In zh, this message translates to:
+  /// **'本周'**
   String get horizonWeek;
 
   /// No description provided for @horizonMonth.
   ///
-  /// In en, this message translates to:
-  /// **'This month'**
+  /// In zh, this message translates to:
+  /// **'本月'**
   String get horizonMonth;
 
   /// No description provided for @horizonYear.
   ///
-  /// In en, this message translates to:
-  /// **'This year'**
+  /// In zh, this message translates to:
+  /// **'今年'**
   String get horizonYear;
 
   /// No description provided for @horizonOngoing.
   ///
-  /// In en, this message translates to:
-  /// **'Ongoing'**
+  /// In zh, this message translates to:
+  /// **'持续'**
   String get horizonOngoing;
 
   /// No description provided for @spread.
   ///
-  /// In en, this message translates to:
-  /// **'Spread'**
+  /// In zh, this message translates to:
+  /// **'牌阵'**
   String get spread;
 
   /// No description provided for @spreadSingle.
   ///
-  /// In en, this message translates to:
-  /// **'Single card'**
+  /// In zh, this message translates to:
+  /// **'单张'**
   String get spreadSingle;
 
   /// No description provided for @spreadThree.
   ///
-  /// In en, this message translates to:
-  /// **'Three cards (past · present · future)'**
+  /// In zh, this message translates to:
+  /// **'三张（过去・现在・未来）'**
   String get spreadThree;
 
   /// No description provided for @spreadCeltic.
   ///
-  /// In en, this message translates to:
-  /// **'Celtic Cross (10 cards)'**
+  /// In zh, this message translates to:
+  /// **'凯尔特十字（10 张）'**
   String get spreadCeltic;
 
   /// No description provided for @pillarMore.
   ///
-  /// In en, this message translates to:
-  /// **'More: hidden stems, life stage, nayin'**
+  /// In zh, this message translates to:
+  /// **'更多：藏干、长生、纳音'**
   String get pillarMore;
 
   /// No description provided for @pillarLess.
   ///
-  /// In en, this message translates to:
-  /// **'Less'**
+  /// In zh, this message translates to:
+  /// **'收起'**
   String get pillarLess;
 
   /// No description provided for @ritualTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Shuffle · cut · pick'**
+  /// In zh, this message translates to:
+  /// **'洗牌 · 切牌 · 选牌'**
   String get ritualTitle;
 
   /// No description provided for @ritualShuffleHint.
   ///
-  /// In en, this message translates to:
-  /// **'Hold your question in mind and shuffle the deck.'**
+  /// In zh, this message translates to:
+  /// **'心里想着你的问题，按“洗牌”把牌洗匀。'**
   String get ritualShuffleHint;
 
   /// No description provided for @ritualShuffle.
   ///
-  /// In en, this message translates to:
-  /// **'Shuffle'**
+  /// In zh, this message translates to:
+  /// **'洗牌'**
   String get ritualShuffle;
 
   /// No description provided for @ritualCutHint.
   ///
-  /// In en, this message translates to:
-  /// **'Cut the deck: choose the pile to go on top.'**
+  /// In zh, this message translates to:
+  /// **'切牌：选一叠，放到最上面。'**
   String get ritualCutHint;
 
   /// No description provided for @ritualPile.
   ///
-  /// In en, this message translates to:
-  /// **'Pile {n}'**
+  /// In zh, this message translates to:
+  /// **'第 {n} 叠'**
   String ritualPile(int n);
 
   /// No description provided for @ritualPickHint.
   ///
-  /// In en, this message translates to:
-  /// **'Pick {count} cards as you feel drawn ({picked} picked)'**
+  /// In zh, this message translates to:
+  /// **'选牌：凭直觉选 {count} 张（已选 {picked} 张）'**
   String ritualPickHint(int count, int picked);
 
   /// No description provided for @ritualCard.
   ///
-  /// In en, this message translates to:
-  /// **'Card {n}, face down'**
+  /// In zh, this message translates to:
+  /// **'第 {n} 张牌，背面朝上'**
   String ritualCard(int n);
 
   /// No description provided for @ritualSkip.
   ///
-  /// In en, this message translates to:
-  /// **'Let the deck pick for me'**
+  /// In zh, this message translates to:
+  /// **'让牌组替我选'**
   String get ritualSkip;
 
   /// No description provided for @ritualNote.
   ///
-  /// In en, this message translates to:
-  /// **'The deck is shuffled fairly and you pick blind; every draw can be checked afterwards.'**
+  /// In zh, this message translates to:
+  /// **'牌由系统公平洗好，你在背面朝上时选择；每次抽牌事后都可以核对。'**
   String get ritualNote;
 
   /// No description provided for @tarotGlossary.
   ///
-  /// In en, this message translates to:
-  /// **'Card meanings'**
+  /// In zh, this message translates to:
+  /// **'牌义图鉴'**
   String get tarotGlossary;
 
   /// No description provided for @glossaryMajor.
   ///
-  /// In en, this message translates to:
-  /// **'Major arcana'**
+  /// In zh, this message translates to:
+  /// **'大阿尔卡那'**
   String get glossaryMajor;
 
   /// No description provided for @glossaryWands.
   ///
-  /// In en, this message translates to:
-  /// **'Wands'**
+  /// In zh, this message translates to:
+  /// **'权杖'**
   String get glossaryWands;
 
   /// No description provided for @glossaryCups.
   ///
-  /// In en, this message translates to:
-  /// **'Cups'**
+  /// In zh, this message translates to:
+  /// **'圣杯'**
   String get glossaryCups;
 
   /// No description provided for @glossarySwords.
   ///
-  /// In en, this message translates to:
-  /// **'Swords'**
+  /// In zh, this message translates to:
+  /// **'宝剑'**
   String get glossarySwords;
 
   /// No description provided for @glossaryPentacles.
   ///
-  /// In en, this message translates to:
-  /// **'Pentacles'**
+  /// In zh, this message translates to:
+  /// **'星币'**
   String get glossaryPentacles;
 
   /// No description provided for @glossaryKeywords.
   ///
-  /// In en, this message translates to:
-  /// **'Keywords on the card'**
+  /// In zh, this message translates to:
+  /// **'牌面关键词'**
   String get glossaryKeywords;
 
   /// No description provided for @dailyCard.
   ///
-  /// In en, this message translates to:
-  /// **'Card of the day'**
+  /// In zh, this message translates to:
+  /// **'今日一牌'**
   String get dailyCard;
 
   /// No description provided for @dailyCardHint.
   ///
-  /// In en, this message translates to:
-  /// **'One card a day, the same all day. Open it to see it large, or ask the AI to read it.'**
+  /// In zh, this message translates to:
+  /// **'每天一张，当天不变。点开看大图，也可以请 AI 解读。'**
   String get dailyCardHint;
 
   /// No description provided for @spreadSingleShort.
   ///
-  /// In en, this message translates to:
-  /// **'One card'**
+  /// In zh, this message translates to:
+  /// **'单张'**
   String get spreadSingleShort;
 
   /// No description provided for @spreadThreeShort.
   ///
-  /// In en, this message translates to:
-  /// **'Three cards'**
+  /// In zh, this message translates to:
+  /// **'三张'**
   String get spreadThreeShort;
 
   /// No description provided for @spreadCelticShort.
   ///
-  /// In en, this message translates to:
-  /// **'Celtic Cross'**
+  /// In zh, this message translates to:
+  /// **'凯尔特十字'**
   String get spreadCelticShort;
 
   /// No description provided for @spreadTwoPathsShort.
   ///
-  /// In en, this message translates to:
-  /// **'Two paths'**
+  /// In zh, this message translates to:
+  /// **'二选一'**
   String get spreadTwoPathsShort;
 
   /// No description provided for @spreadRelationshipShort.
   ///
-  /// In en, this message translates to:
-  /// **'Relationship'**
+  /// In zh, this message translates to:
+  /// **'关系牌阵'**
   String get spreadRelationshipShort;
 
   /// No description provided for @tarotExample1.
   ///
-  /// In en, this message translates to:
-  /// **'Is this job still right for me?'**
+  /// In zh, this message translates to:
+  /// **'这份工作还适合我吗？'**
   String get tarotExample1;
 
   /// No description provided for @tarotExample2.
   ///
-  /// In en, this message translates to:
-  /// **'Where is this relationship going?'**
+  /// In zh, this message translates to:
+  /// **'我们的关系会往哪里走？'**
   String get tarotExample2;
 
   /// No description provided for @tarotExample3.
   ///
-  /// In en, this message translates to:
-  /// **'What should I watch for in the next three months?'**
+  /// In zh, this message translates to:
+  /// **'接下来三个月我该注意什么？'**
   String get tarotExample3;
 
   /// No description provided for @tarotExample4.
   ///
-  /// In en, this message translates to:
-  /// **'How should I make this decision?'**
+  /// In zh, this message translates to:
+  /// **'这个决定我该怎么做？'**
   String get tarotExample4;
 
   /// No description provided for @draw.
   ///
-  /// In en, this message translates to:
-  /// **'Draw'**
+  /// In zh, this message translates to:
+  /// **'抽牌'**
   String get draw;
 
   /// No description provided for @reversed.
   ///
-  /// In en, this message translates to:
-  /// **'Reversed'**
+  /// In zh, this message translates to:
+  /// **'逆位'**
   String get reversed;
 
   /// No description provided for @retry.
   ///
-  /// In en, this message translates to:
-  /// **'Retry'**
+  /// In zh, this message translates to:
+  /// **'重试'**
   String get retry;
 
   /// No description provided for @errorTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t complete the request'**
+  /// In zh, this message translates to:
+  /// **'请求失败'**
   String get errorTitle;
 
   /// No description provided for @disclaimerShort.
   ///
-  /// In en, this message translates to:
-  /// **'For entertainment and metaphysics study only, not a prediction.'**
+  /// In zh, this message translates to:
+  /// **'仅供娱乐和玄学学习使用，不是预测。'**
   String get disclaimerShort;
 
   /// No description provided for @signIn.
   ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
+  /// In zh, this message translates to:
+  /// **'登录'**
   String get signIn;
 
   /// No description provided for @createAccount.
   ///
-  /// In en, this message translates to:
-  /// **'Create account'**
+  /// In zh, this message translates to:
+  /// **'注册账号'**
   String get createAccount;
 
   /// No description provided for @haveAccount.
   ///
-  /// In en, this message translates to:
-  /// **'Already have an account? Sign in'**
+  /// In zh, this message translates to:
+  /// **'已有账号？去登录'**
   String get haveAccount;
 
   /// No description provided for @noAccount.
   ///
-  /// In en, this message translates to:
-  /// **'New here? Create an account'**
+  /// In zh, this message translates to:
+  /// **'新用户？立即注册'**
   String get noAccount;
 
   /// No description provided for @email.
   ///
-  /// In en, this message translates to:
-  /// **'Email'**
+  /// In zh, this message translates to:
+  /// **'邮箱'**
   String get email;
 
   /// No description provided for @password.
   ///
-  /// In en, this message translates to:
-  /// **'Password'**
+  /// In zh, this message translates to:
+  /// **'密码'**
   String get password;
 
   /// No description provided for @passwordHint.
   ///
-  /// In en, this message translates to:
-  /// **'At least 10 characters'**
+  /// In zh, this message translates to:
+  /// **'至少 10 个字符'**
   String get passwordHint;
 
   /// No description provided for @regionAccount.
   ///
-  /// In en, this message translates to:
-  /// **'Where you live'**
+  /// In zh, this message translates to:
+  /// **'居住地区'**
   String get regionAccount;
 
   /// No description provided for @regionAccountHint.
   ///
-  /// In en, this message translates to:
-  /// **'Decides which rules and content apply to you. It can\'t be changed later in this version.'**
+  /// In zh, this message translates to:
+  /// **'决定适用的规则和内容。当前版本注册后不能修改。'**
   String get regionAccountHint;
 
   /// No description provided for @ageConfirm.
   ///
-  /// In en, this message translates to:
-  /// **'I confirm I am at least 18 years old'**
+  /// In zh, this message translates to:
+  /// **'我确认已年满 18 岁'**
   String get ageConfirm;
 
   /// No description provided for @appleSignIn.
   ///
-  /// In en, this message translates to:
-  /// **'Sign in with Apple'**
+  /// In zh, this message translates to:
+  /// **'通过 Apple 登录'**
   String get appleSignIn;
 
   /// No description provided for @googleSignIn.
   ///
-  /// In en, this message translates to:
-  /// **'Sign in with Google'**
+  /// In zh, this message translates to:
+  /// **'通过 Google 登录'**
   String get googleSignIn;
 
   /// No description provided for @comingSoon.
   ///
-  /// In en, this message translates to:
-  /// **'Coming soon'**
+  /// In zh, this message translates to:
+  /// **'即将推出'**
   String get comingSoon;
 
   /// No description provided for @account.
   ///
-  /// In en, this message translates to:
-  /// **'Account'**
+  /// In zh, this message translates to:
+  /// **'账号'**
   String get account;
 
   /// No description provided for @signOut.
   ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
+  /// In zh, this message translates to:
+  /// **'退出登录'**
   String get signOut;
 
   /// No description provided for @deleteAccount.
   ///
-  /// In en, this message translates to:
-  /// **'Delete account and data'**
+  /// In zh, this message translates to:
+  /// **'注销账号并删除数据'**
   String get deleteAccount;
 
   /// No description provided for @deleteAccountTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Delete your account?'**
+  /// In zh, this message translates to:
+  /// **'确定注销账号吗？'**
   String get deleteAccountTitle;
 
   /// No description provided for @deleteAccountBody.
   ///
-  /// In en, this message translates to:
-  /// **'Your account, charts and readings will be deleted from our servers right away. This can\'t be undone.'**
+  /// In zh, this message translates to:
+  /// **'你的账号、命盘和解读会立即从服务器删除，无法恢复。'**
   String get deleteAccountBody;
 
   /// No description provided for @cancel.
   ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
+  /// In zh, this message translates to:
+  /// **'取消'**
   String get cancel;
 
   /// No description provided for @confirmDelete.
   ///
-  /// In en, this message translates to:
-  /// **'Delete'**
+  /// In zh, this message translates to:
+  /// **'删除'**
   String get confirmDelete;
 
   /// No description provided for @accountDeleted.
   ///
-  /// In en, this message translates to:
-  /// **'Your account and data have been deleted.'**
+  /// In zh, this message translates to:
+  /// **'账号和数据已删除。'**
   String get accountDeleted;
 
   /// No description provided for @signInMethods.
   ///
-  /// In en, this message translates to:
-  /// **'Sign-in methods'**
+  /// In zh, this message translates to:
+  /// **'登录方式'**
   String get signInMethods;
 
   /// No description provided for @captchaRequired.
   ///
-  /// In en, this message translates to:
-  /// **'Too many attempts. Please wait a few minutes and try again.'**
+  /// In zh, this message translates to:
+  /// **'尝试次数过多，请稍等几分钟再试。'**
   String get captchaRequired;
 
   /// No description provided for @profiles.
   ///
-  /// In en, this message translates to:
-  /// **'Profiles'**
+  /// In zh, this message translates to:
+  /// **'个人资料'**
   String get profiles;
 
   /// No description provided for @profileFor.
   ///
-  /// In en, this message translates to:
-  /// **'Chart for'**
+  /// In zh, this message translates to:
+  /// **'为谁排盘'**
   String get profileFor;
 
   /// No description provided for @addProfile.
   ///
-  /// In en, this message translates to:
-  /// **'Add profile'**
+  /// In zh, this message translates to:
+  /// **'添加资料'**
   String get addProfile;
 
   /// No description provided for @editProfile.
   ///
-  /// In en, this message translates to:
-  /// **'Edit profile'**
+  /// In zh, this message translates to:
+  /// **'编辑资料'**
   String get editProfile;
 
   /// No description provided for @name.
   ///
-  /// In en, this message translates to:
-  /// **'Name'**
+  /// In zh, this message translates to:
+  /// **'姓名'**
   String get name;
 
   /// No description provided for @setDefault.
   ///
-  /// In en, this message translates to:
-  /// **'Set as default'**
+  /// In zh, this message translates to:
+  /// **'设为默认'**
   String get setDefault;
 
   /// No description provided for @isDefault.
   ///
-  /// In en, this message translates to:
-  /// **'Default'**
+  /// In zh, this message translates to:
+  /// **'默认'**
   String get isDefault;
 
   /// No description provided for @deleteProfile.
   ///
-  /// In en, this message translates to:
-  /// **'Delete profile'**
+  /// In zh, this message translates to:
+  /// **'删除资料'**
   String get deleteProfile;
 
   /// No description provided for @profileHint.
   ///
-  /// In en, this message translates to:
-  /// **'Changes below apply to this chart only. Edit the profile to change it everywhere.'**
+  /// In zh, this message translates to:
+  /// **'以下修改只用于本次排盘；要永久修改请编辑资料。'**
   String get profileHint;
 
   /// No description provided for @noProfileTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Add your birth details'**
+  /// In zh, this message translates to:
+  /// **'填写你的出生信息'**
   String get noProfileTitle;
 
   /// No description provided for @noProfileBody.
   ///
-  /// In en, this message translates to:
-  /// **'Save them once and every chart starts from them. You can add profiles for others too.'**
+  /// In zh, this message translates to:
+  /// **'保存一次，以后排盘会自动带入。也可以给家人朋友添加资料。'**
   String get noProfileBody;
 
   /// No description provided for @createProfile.
   ///
-  /// In en, this message translates to:
-  /// **'Create profile'**
+  /// In zh, this message translates to:
+  /// **'创建资料'**
   String get createProfile;
 
   /// No description provided for @save.
   ///
-  /// In en, this message translates to:
-  /// **'Save'**
+  /// In zh, this message translates to:
+  /// **'保存'**
   String get save;
 
   /// No description provided for @saved.
   ///
-  /// In en, this message translates to:
-  /// **'Saved'**
+  /// In zh, this message translates to:
+  /// **'已保存'**
   String get saved;
 
   /// No description provided for @lunarCompare.
   ///
-  /// In en, this message translates to:
-  /// **'Lunar calendar'**
+  /// In zh, this message translates to:
+  /// **'农历对照'**
   String get lunarCompare;
 
   /// No description provided for @gregorian.
   ///
-  /// In en, this message translates to:
-  /// **'Gregorian'**
+  /// In zh, this message translates to:
+  /// **'公历'**
   String get gregorian;
 
   /// No description provided for @lunarLabel.
   ///
-  /// In en, this message translates to:
-  /// **'Lunar'**
+  /// In zh, this message translates to:
+  /// **'农历'**
   String get lunarLabel;
 
   /// No description provided for @zodiac.
   ///
-  /// In en, this message translates to:
-  /// **'Zodiac'**
+  /// In zh, this message translates to:
+  /// **'生肖'**
   String get zodiac;
 
   /// No description provided for @lunarYearNote.
   ///
-  /// In en, this message translates to:
-  /// **'The lunar year turns at Spring Festival; the year pillar turns at Li Chun.'**
+  /// In zh, this message translates to:
+  /// **'农历年以春节为界，八字年柱以立春为界。'**
   String get lunarYearNote;
 
   /// No description provided for @history.
   ///
-  /// In en, this message translates to:
-  /// **'History'**
+  /// In zh, this message translates to:
+  /// **'历史记录'**
   String get history;
 
   /// No description provided for @historyEmpty.
   ///
-  /// In en, this message translates to:
-  /// **'No readings yet. Your readings will appear here.'**
+  /// In zh, this message translates to:
+  /// **'还没有解读记录，生成后会显示在这里。'**
   String get historyEmpty;
 
   /// No description provided for @recent.
   ///
-  /// In en, this message translates to:
-  /// **'Recent'**
+  /// In zh, this message translates to:
+  /// **'最近记录'**
   String get recent;
 
   /// No description provided for @viewAll.
   ///
-  /// In en, this message translates to:
-  /// **'View all'**
+  /// In zh, this message translates to:
+  /// **'查看全部'**
   String get viewAll;
 
   /// No description provided for @analyzing.
   ///
-  /// In en, this message translates to:
-  /// **'AI is analysing in depth'**
+  /// In zh, this message translates to:
+  /// **'AI 正在深度分析中'**
   String get analyzing;
 
   /// No description provided for @stageNarrative.
   ///
-  /// In en, this message translates to:
-  /// **'Reading the chart'**
+  /// In zh, this message translates to:
+  /// **'深度解读命盘'**
   String get stageNarrative;
 
   /// No description provided for @stageAction.
   ///
-  /// In en, this message translates to:
-  /// **'Drafting suggestions'**
+  /// In zh, this message translates to:
+  /// **'整理行动建议'**
   String get stageAction;
 
   /// No description provided for @stageGuard.
   ///
-  /// In en, this message translates to:
-  /// **'Content review'**
+  /// In zh, this message translates to:
+  /// **'内容合规审查'**
   String get stageGuard;
 
   /// No description provided for @stageWaiting.
   ///
-  /// In en, this message translates to:
-  /// **'Queued'**
+  /// In zh, this message translates to:
+  /// **'排队中'**
   String get stageWaiting;
 
   /// No description provided for @elapsed.
   ///
-  /// In en, this message translates to:
-  /// **'Elapsed {time}'**
+  /// In zh, this message translates to:
+  /// **'已用时 {time}'**
   String elapsed(String time);
 
   /// No description provided for @retrying.
   ///
-  /// In en, this message translates to:
-  /// **'A draft didn\'t pass our checks; rewriting (attempt {n})'**
+  /// In zh, this message translates to:
+  /// **'上一稿未通过检查，正在重写（第 {n} 次）'**
   String retrying(int n);
 
   /// No description provided for @download.
   ///
-  /// In en, this message translates to:
-  /// **'Download'**
+  /// In zh, this message translates to:
+  /// **'下载'**
   String get download;
 
   /// No description provided for @copyAll.
   ///
-  /// In en, this message translates to:
-  /// **'Copy all'**
+  /// In zh, this message translates to:
+  /// **'复制全文'**
   String get copyAll;
 
   /// No description provided for @copied.
   ///
-  /// In en, this message translates to:
-  /// **'Copied'**
+  /// In zh, this message translates to:
+  /// **'已复制'**
   String get copied;
 
   /// No description provided for @more.
   ///
-  /// In en, this message translates to:
-  /// **'More'**
+  /// In zh, this message translates to:
+  /// **'更多'**
   String get more;
 
   /// No description provided for @chartOf.
   ///
-  /// In en, this message translates to:
-  /// **'{name}\'s chart'**
+  /// In zh, this message translates to:
+  /// **'{name} 的命盘'**
   String chartOf(String name);
 
   /// No description provided for @greeting.
   ///
-  /// In en, this message translates to:
-  /// **'Hello, {name}'**
+  /// In zh, this message translates to:
+  /// **'你好，{name}'**
   String greeting(String name);
 
   /// No description provided for @reportTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Mingli Master AI reading'**
+  /// In zh, this message translates to:
+  /// **'命理大师 AI 解读'**
   String get reportTitle;
 
   /// No description provided for @openChart.
   ///
-  /// In en, this message translates to:
-  /// **'Open chart'**
+  /// In zh, this message translates to:
+  /// **'查看命盘'**
   String get openChart;
 
   /// No description provided for @timeExact.
   ///
-  /// In en, this message translates to:
-  /// **'Exact time'**
+  /// In zh, this message translates to:
+  /// **'精确时间'**
   String get timeExact;
 
   /// No description provided for @timeShichen.
   ///
-  /// In en, this message translates to:
-  /// **'Shichen (2-hour period)'**
+  /// In zh, this message translates to:
+  /// **'时辰'**
   String get timeShichen;
 
   /// No description provided for @lunarYear.
   ///
-  /// In en, this message translates to:
-  /// **'Lunar year'**
+  /// In zh, this message translates to:
+  /// **'农历年'**
   String get lunarYear;
 
   /// No description provided for @lunarMonth.
   ///
-  /// In en, this message translates to:
-  /// **'Month'**
+  /// In zh, this message translates to:
+  /// **'月'**
   String get lunarMonth;
 
   /// No description provided for @lunarDay.
   ///
-  /// In en, this message translates to:
-  /// **'Day'**
+  /// In zh, this message translates to:
+  /// **'日'**
   String get lunarDay;
 
   /// No description provided for @shichenNote.
   ///
-  /// In en, this message translates to:
-  /// **'The hour is known to a two-hour period; readings that rely on the hour pillar are approximate.'**
+  /// In zh, this message translates to:
+  /// **'只知道时辰：时柱只精确到两小时，相关解读会标明为参考。'**
   String get shichenNote;
 
   /// No description provided for @trendTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Fortune trend'**
+  /// In zh, this message translates to:
+  /// **'运势走势'**
   String get trendTitle;
 
   /// No description provided for @trendDayun.
   ///
-  /// In en, this message translates to:
-  /// **'By age (luck pillars)'**
+  /// In zh, this message translates to:
+  /// **'按年龄（大运）'**
   String get trendDayun;
 
   /// No description provided for @trendLiunian.
   ///
-  /// In en, this message translates to:
-  /// **'By year'**
+  /// In zh, this message translates to:
+  /// **'按年份（流年）'**
   String get trendLiunian;
 
   /// No description provided for @trendCombined.
   ///
-  /// In en, this message translates to:
-  /// **'Combined'**
+  /// In zh, this message translates to:
+  /// **'综合'**
   String get trendCombined;
 
   /// No description provided for @trendTotal.
   ///
-  /// In en, this message translates to:
-  /// **'Total'**
+  /// In zh, this message translates to:
+  /// **'总分'**
   String get trendTotal;
 
   /// No description provided for @trendCompare.
   ///
-  /// In en, this message translates to:
-  /// **'Compare'**
+  /// In zh, this message translates to:
+  /// **'叠加对比'**
   String get trendCompare;
 
   /// No description provided for @trendTapHint.
   ///
-  /// In en, this message translates to:
-  /// **'Tap a period on the chart to see its scores and basis.'**
+  /// In zh, this message translates to:
+  /// **'点击图上的时期，查看各项分数和依据。'**
   String get trendTapHint;
 
   /// No description provided for @trendAge.
   ///
-  /// In en, this message translates to:
-  /// **'Nominal age {ages}'**
+  /// In zh, this message translates to:
+  /// **'虚岁 {ages}'**
   String trendAge(String ages);
 
   /// No description provided for @expandAll.
   ///
-  /// In en, this message translates to:
-  /// **'Expand all'**
+  /// In zh, this message translates to:
+  /// **'展开全部'**
   String get expandAll;
 
   /// No description provided for @collapseAll.
   ///
-  /// In en, this message translates to:
-  /// **'Collapse all'**
+  /// In zh, this message translates to:
+  /// **'收起全部'**
   String get collapseAll;
 
   /// No description provided for @remedyTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Fortune remedies'**
+  /// In zh, this message translates to:
+  /// **'破除运势'**
   String get remedyTitle;
 
   /// No description provided for @remedyDesc.
   ///
-  /// In en, this message translates to:
-  /// **'A targeted plan for one topic: it names the topic and periods it addresses and gives concrete steps. Each topic is unlocked separately.'**
+  /// In zh, this message translates to:
+  /// **'针对单个项目的改运方案：写明针对哪一项、哪些时期，并给出具体做法。每个项目单独解锁。'**
   String get remedyDesc;
 
   /// No description provided for @remedyFor.
   ///
-  /// In en, this message translates to:
-  /// **'Remedy: {topic}'**
+  /// In zh, this message translates to:
+  /// **'破除运势：{topic}'**
   String remedyFor(String topic);
 
   /// No description provided for @remedyUnlock.
   ///
-  /// In en, this message translates to:
-  /// **'Unlock · {price}'**
+  /// In zh, this message translates to:
+  /// **'解锁 · {price}'**
   String remedyUnlock(String price);
 
   /// No description provided for @remedyView.
   ///
-  /// In en, this message translates to:
-  /// **'View plan'**
+  /// In zh, this message translates to:
+  /// **'查看方案'**
   String get remedyView;
 
   /// No description provided for @remedyConfirmTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Unlock the {topic} remedy'**
+  /// In zh, this message translates to:
+  /// **'解锁“{topic}”破除运势方案'**
   String remedyConfirmTitle(String topic);
 
   /// No description provided for @remedyConfirmBody.
   ///
-  /// In en, this message translates to:
-  /// **'This plan is charged separately for {topic}: {price}.\nPayments are not connected yet (TODO): confirming charges directly as a demo and nothing is actually billed.'**
+  /// In zh, this message translates to:
+  /// **'这个方案针对“{topic}”单独收费：{price}。\n支付功能尚未接入（TODO）：现在点确认会直接扣款（演示，不会真实收费）。'**
   String remedyConfirmBody(String topic, String price);
 
   /// No description provided for @remedyPay.
   ///
-  /// In en, this message translates to:
-  /// **'Pay {price}'**
+  /// In zh, this message translates to:
+  /// **'确认支付 {price}'**
   String remedyPay(String price);
 
   /// No description provided for @remedyGenerating.
   ///
-  /// In en, this message translates to:
-  /// **'AI is writing the {topic} plan…'**
+  /// In zh, this message translates to:
+  /// **'AI 正在为“{topic}”制定方案…'**
   String remedyGenerating(String topic);
 
   /// No description provided for @remedyTarget.
   ///
-  /// In en, this message translates to:
-  /// **'Target'**
+  /// In zh, this message translates to:
+  /// **'针对项目'**
   String get remedyTarget;
 
   /// No description provided for @remedyFocus.
   ///
-  /// In en, this message translates to:
-  /// **'Focus periods'**
+  /// In zh, this message translates to:
+  /// **'重点时期'**
   String get remedyFocus;
 
   /// No description provided for @remedySteps.
   ///
-  /// In en, this message translates to:
-  /// **'Steps'**
+  /// In zh, this message translates to:
+  /// **'具体做法'**
   String get remedySteps;
 
   /// No description provided for @remedyBasis.
   ///
-  /// In en, this message translates to:
-  /// **'Basis in the chart'**
+  /// In zh, this message translates to:
+  /// **'命理依据'**
   String get remedyBasis;
 
   /// No description provided for @remedySave.
   ///
-  /// In en, this message translates to:
-  /// **'Save'**
+  /// In zh, this message translates to:
+  /// **'保存'**
   String get remedySave;
 
   /// No description provided for @remedySend.
   ///
-  /// In en, this message translates to:
-  /// **'Send'**
+  /// In zh, this message translates to:
+  /// **'发送'**
   String get remedySend;
 
   /// No description provided for @remedyPrint.
   ///
-  /// In en, this message translates to:
-  /// **'Print'**
+  /// In zh, this message translates to:
+  /// **'打印'**
   String get remedyPrint;
 
   /// No description provided for @remedyHeld.
   ///
-  /// In en, this message translates to:
-  /// **'This plan is held for review and is not available yet.'**
+  /// In zh, this message translates to:
+  /// **'方案正在审核中，暂时无法显示。'**
   String get remedyHeld;
 
   /// No description provided for @remedyFailed.
   ///
-  /// In en, this message translates to:
-  /// **'Generation failed. Retry; you won\'t be charged again.'**
+  /// In zh, this message translates to:
+  /// **'生成失败，请重试（不会重复收费）。'**
   String get remedyFailed;
 
   /// No description provided for @remedyDemoPaid.
   ///
-  /// In en, this message translates to:
-  /// **'Demo payment (not billed)'**
+  /// In zh, this message translates to:
+  /// **'演示支付（未真实扣款）'**
   String get remedyDemoPaid;
 
   /// No description provided for @placePick.
   ///
-  /// In en, this message translates to:
-  /// **'Choose birthplace'**
+  /// In zh, this message translates to:
+  /// **'选择出生地'**
   String get placePick;
 
   /// No description provided for @placeCountry.
   ///
-  /// In en, this message translates to:
-  /// **'Country or region'**
+  /// In zh, this message translates to:
+  /// **'国家和地区'**
   String get placeCountry;
 
   /// No description provided for @placeRegion.
   ///
-  /// In en, this message translates to:
-  /// **'Province / state'**
+  /// In zh, this message translates to:
+  /// **'省／州'**
   String get placeRegion;
 
   /// No description provided for @placeCity.
   ///
-  /// In en, this message translates to:
-  /// **'City'**
+  /// In zh, this message translates to:
+  /// **'城市'**
   String get placeCity;
 
   /// No description provided for @placeSearch.
   ///
-  /// In en, this message translates to:
-  /// **'Search'**
+  /// In zh, this message translates to:
+  /// **'搜索'**
   String get placeSearch;
 
   /// No description provided for @placeCommon.
   ///
-  /// In en, this message translates to:
-  /// **'Common'**
+  /// In zh, this message translates to:
+  /// **'常用'**
   String get placeCommon;
 
   /// No description provided for @placeAll.
   ///
-  /// In en, this message translates to:
-  /// **'All'**
+  /// In zh, this message translates to:
+  /// **'全部'**
   String get placeAll;
 
   /// No description provided for @placeNone.
   ///
-  /// In en, this message translates to:
-  /// **'No match'**
+  /// In zh, this message translates to:
+  /// **'没有符合的结果'**
   String get placeNone;
 
   /// No description provided for @placeDetail.
   ///
-  /// In en, this message translates to:
-  /// **'Time zone {tz} · longitude {lon}'**
+  /// In zh, this message translates to:
+  /// **'时区 {tz} · 经度 {lon}'**
   String placeDetail(String tz, String lon);
 
   /// No description provided for @placeSource.
   ///
-  /// In en, this message translates to:
-  /// **'Place data: GeoNames (CC BY 4.0)'**
+  /// In zh, this message translates to:
+  /// **'地点数据：GeoNames（CC BY 4.0）'**
   String get placeSource;
 
   /// No description provided for @serverUnreachable.
   ///
-  /// In en, this message translates to:
-  /// **'Can\'t reach the server at {url}.\nOn a phone, 127.0.0.1 is the phone itself: start `npm run api:lan` on the computer and open http://<computer\'s Wi-Fi address>:5000. From an https page, add ?api=<https server address> to the page URL.'**
+  /// In zh, this message translates to:
+  /// **'无法连接服务器 {url}。\n手机上的 127.0.0.1 指的是手机本身：请在电脑上运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。如果页面是 https，请在网址后面加上 ?api=https 服务器地址。'**
   String serverUnreachable(String url);
 
   /// No description provided for @lifeTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Your situation (optional)'**
+  /// In zh, this message translates to:
+  /// **'个人情况（选填）'**
   String get lifeTitle;
 
   /// No description provided for @lifeHint.
   ///
-  /// In en, this message translates to:
-  /// **'Two people born at the same time and place share a chart; your situation is what makes the reading yours. Stored on this device; sent to the AI only with a reading.'**
+  /// In zh, this message translates to:
+  /// **'同时同地出生的人命盘相同，填上你的实际情况，解读才会贴近你本人。信息只保存在本机，只在生成解读时和命盘一起发给 AI。'**
   String get lifeHint;
 
   /// No description provided for @lifeUseName.
   ///
-  /// In en, this message translates to:
-  /// **'Address me by name in readings'**
+  /// In zh, this message translates to:
+  /// **'解读时用名字称呼我'**
   String get lifeUseName;
 
   /// No description provided for @lifeResidence.
   ///
-  /// In en, this message translates to:
-  /// **'Where you live now'**
+  /// In zh, this message translates to:
+  /// **'现居地'**
   String get lifeResidence;
 
   /// No description provided for @lifeNotSet.
   ///
-  /// In en, this message translates to:
-  /// **'Not set'**
+  /// In zh, this message translates to:
+  /// **'未填写'**
   String get lifeNotSet;
 
   /// No description provided for @lifeMarital.
   ///
-  /// In en, this message translates to:
-  /// **'Relationship status'**
+  /// In zh, this message translates to:
+  /// **'婚姻状况'**
   String get lifeMarital;
 
   /// No description provided for @maritalSingle.
   ///
-  /// In en, this message translates to:
-  /// **'Single'**
+  /// In zh, this message translates to:
+  /// **'单身'**
   String get maritalSingle;
 
   /// No description provided for @maritalDating.
   ///
-  /// In en, this message translates to:
-  /// **'In a relationship'**
+  /// In zh, this message translates to:
+  /// **'恋爱中'**
   String get maritalDating;
 
   /// No description provided for @maritalMarried.
   ///
-  /// In en, this message translates to:
-  /// **'Married'**
+  /// In zh, this message translates to:
+  /// **'已婚'**
   String get maritalMarried;
 
   /// No description provided for @maritalSeparated.
   ///
-  /// In en, this message translates to:
-  /// **'Separated'**
+  /// In zh, this message translates to:
+  /// **'分居'**
   String get maritalSeparated;
 
   /// No description provided for @maritalDivorced.
   ///
-  /// In en, this message translates to:
-  /// **'Divorced'**
+  /// In zh, this message translates to:
+  /// **'离婚'**
   String get maritalDivorced;
 
   /// No description provided for @maritalWidowed.
   ///
-  /// In en, this message translates to:
-  /// **'Widowed'**
+  /// In zh, this message translates to:
+  /// **'丧偶'**
   String get maritalWidowed;
 
   /// No description provided for @lifeChildren.
   ///
-  /// In en, this message translates to:
-  /// **'Children'**
+  /// In zh, this message translates to:
+  /// **'子女'**
   String get lifeChildren;
 
   /// No description provided for @childrenNone.
   ///
-  /// In en, this message translates to:
-  /// **'None'**
+  /// In zh, this message translates to:
+  /// **'没有'**
   String get childrenNone;
 
   /// No description provided for @childrenHas.
   ///
-  /// In en, this message translates to:
-  /// **'Yes'**
+  /// In zh, this message translates to:
+  /// **'有'**
   String get childrenHas;
 
   /// No description provided for @lifeOccupation.
   ///
-  /// In en, this message translates to:
-  /// **'Occupation / industry'**
+  /// In zh, this message translates to:
+  /// **'职业／行业'**
   String get lifeOccupation;
 
   /// No description provided for @lifeFamily.
   ///
-  /// In en, this message translates to:
-  /// **'Family situation'**
+  /// In zh, this message translates to:
+  /// **'家庭情况'**
   String get lifeFamily;
 
   /// No description provided for @lifeFamilyHint.
   ///
-  /// In en, this message translates to:
-  /// **'e.g. live with my parents, caring for an elder'**
+  /// In zh, this message translates to:
+  /// **'例如：和父母同住、需要照顾老人'**
   String get lifeFamilyHint;
 
   /// No description provided for @lifeConcern.
   ///
-  /// In en, this message translates to:
-  /// **'What do you want to know?'**
+  /// In zh, this message translates to:
+  /// **'想问的事'**
   String get lifeConcern;
 
   /// No description provided for @lifeConcernHint.
   ///
-  /// In en, this message translates to:
-  /// **'e.g. is next year good for changing jobs?'**
+  /// In zh, this message translates to:
+  /// **'例如：明年适合跳槽吗？'**
   String get lifeConcernHint;
 
   /// No description provided for @sectionSummary.
   ///
-  /// In en, this message translates to:
-  /// **'In short'**
+  /// In zh, this message translates to:
+  /// **'一句话重点'**
   String get sectionSummary;
 
   /// No description provided for @remedyReady.
   ///
-  /// In en, this message translates to:
-  /// **'Ready'**
+  /// In zh, this message translates to:
+  /// **'已备好'**
   String get remedyReady;
 
   /// No description provided for @lifeEntry.
   ///
-  /// In en, this message translates to:
-  /// **'Life report'**
+  /// In zh, this message translates to:
+  /// **'一生运势报告'**
   String get lifeEntry;
 
   /// No description provided for @lifeEntryDesc.
   ///
-  /// In en, this message translates to:
-  /// **'I Ching natal hexagram, Plum Blossom and Five Elements, read together over a whole life'**
+  /// In zh, this message translates to:
+  /// **'易经本命卦、梅花易数、五行八卦，三法合看一生走势'**
   String get lifeEntryDesc;
 
   /// No description provided for @lifeGenerate.
   ///
-  /// In en, this message translates to:
-  /// **'Create life report'**
+  /// In zh, this message translates to:
+  /// **'生成一生运势报告'**
   String get lifeGenerate;
 
   /// No description provided for @lifeSubtitle.
   ///
-  /// In en, this message translates to:
-  /// **'I Ching natal hexagram  |  Plum Blossom  |  Five Elements'**
+  /// In zh, this message translates to:
+  /// **'易经本命卦　|　梅花易数　|　五行八卦'**
   String get lifeSubtitle;
 
   /// No description provided for @lifeReportOf.
   ///
-  /// In en, this message translates to:
-  /// **'{name} · Life report'**
+  /// In zh, this message translates to:
+  /// **'{name} 一生运势报告'**
   String lifeReportOf(String name);
 
   /// No description provided for @lifeItem.
   ///
-  /// In en, this message translates to:
-  /// **'Item'**
+  /// In zh, this message translates to:
+  /// **'项目'**
   String get lifeItem;
 
   /// No description provided for @lifeContent.
   ///
-  /// In en, this message translates to:
-  /// **'Details'**
+  /// In zh, this message translates to:
+  /// **'内容'**
   String get lifeContent;
 
   /// No description provided for @lifeName.
   ///
-  /// In en, this message translates to:
-  /// **'Name'**
+  /// In zh, this message translates to:
+  /// **'姓名'**
   String get lifeName;
 
   /// No description provided for @lifeBirthLunar.
   ///
-  /// In en, this message translates to:
-  /// **'Born (lunar)'**
+  /// In zh, this message translates to:
+  /// **'出生（农历）'**
   String get lifeBirthLunar;
 
   /// No description provided for @lifeBirthSolar.
   ///
-  /// In en, this message translates to:
-  /// **'Born (Gregorian)'**
+  /// In zh, this message translates to:
+  /// **'出生（公历）'**
   String get lifeBirthSolar;
 
   /// No description provided for @lifeBirthPlace.
   ///
-  /// In en, this message translates to:
-  /// **'Birthplace'**
+  /// In zh, this message translates to:
+  /// **'出生地'**
   String get lifeBirthPlace;
 
   /// No description provided for @lifeTrueSolar.
   ///
-  /// In en, this message translates to:
-  /// **'True solar time'**
+  /// In zh, this message translates to:
+  /// **'真太阳时'**
   String get lifeTrueSolar;
 
   /// No description provided for @lifeGanzhi.
   ///
-  /// In en, this message translates to:
-  /// **'Four pillars'**
+  /// In zh, this message translates to:
+  /// **'生辰干支'**
   String get lifeGanzhi;
 
   /// No description provided for @lifeNote.
   ///
-  /// In en, this message translates to:
-  /// **'This report follows traditional methods and is for entertainment and metaphysics study only, not scientific prediction. The three methods are worked out separately and then read together.'**
+  /// In zh, this message translates to:
+  /// **'说明：本报告依传统术数推演，仅供娱乐和玄学学习使用，不是科学预测。三种方法各自独立推演，最后再合看。'**
   String get lifeNote;
 
   /// No description provided for @lifeSec1.
   ///
-  /// In en, this message translates to:
-  /// **'1. I Ching natal hexagram'**
+  /// In zh, this message translates to:
+  /// **'一、易经本命卦'**
   String get lifeSec1;
 
   /// No description provided for @lifeQigua.
   ///
-  /// In en, this message translates to:
-  /// **'Casting'**
+  /// In zh, this message translates to:
+  /// **'起卦'**
   String get lifeQigua;
 
   /// No description provided for @lifeBenGua.
   ///
-  /// In en, this message translates to:
-  /// **'Natal hexagram'**
+  /// In zh, this message translates to:
+  /// **'本命卦'**
   String get lifeBenGua;
 
   /// No description provided for @lifeHuGua.
   ///
-  /// In en, this message translates to:
-  /// **'Nuclear'**
+  /// In zh, this message translates to:
+  /// **'互卦'**
   String get lifeHuGua;
 
   /// No description provided for @lifeZhiGuaShort.
   ///
-  /// In en, this message translates to:
-  /// **'Changed'**
+  /// In zh, this message translates to:
+  /// **'之卦'**
   String get lifeZhiGuaShort;
 
   /// No description provided for @lifeGuaYi.
   ///
-  /// In en, this message translates to:
-  /// **'Meaning: the base tone of a life'**
+  /// In zh, this message translates to:
+  /// **'卦义：一生的底色'**
   String get lifeGuaYi;
 
   /// No description provided for @lifeMingYao.
   ///
-  /// In en, this message translates to:
-  /// **'The life line'**
+  /// In zh, this message translates to:
+  /// **'命爻'**
   String get lifeMingYao;
 
   /// No description provided for @lifeZhiGua.
   ///
-  /// In en, this message translates to:
-  /// **'Changed hexagram: where life arrives'**
+  /// In zh, this message translates to:
+  /// **'之卦：人生归宿'**
   String get lifeZhiGua;
 
   /// No description provided for @lifeSixLines.
   ///
-  /// In en, this message translates to:
-  /// **'Six lines and life stages'**
+  /// In zh, this message translates to:
+  /// **'六爻配人生阶段'**
   String get lifeSixLines;
 
   /// No description provided for @lifeLine.
   ///
-  /// In en, this message translates to:
-  /// **'Line'**
+  /// In zh, this message translates to:
+  /// **'爻'**
   String get lifeLine;
 
   /// No description provided for @lifeAge.
   ///
-  /// In en, this message translates to:
-  /// **'Age'**
+  /// In zh, this message translates to:
+  /// **'年龄'**
   String get lifeAge;
 
   /// No description provided for @lifeYaoCi.
   ///
-  /// In en, this message translates to:
-  /// **'Line text'**
+  /// In zh, this message translates to:
+  /// **'爻辞'**
   String get lifeYaoCi;
 
   /// No description provided for @lifeForLife.
   ///
-  /// In en, this message translates to:
-  /// **'For your life'**
+  /// In zh, this message translates to:
+  /// **'对应人生'**
   String get lifeForLife;
 
   /// No description provided for @lifeSec2.
   ///
-  /// In en, this message translates to:
-  /// **'2. Plum Blossom numerology'**
+  /// In zh, this message translates to:
+  /// **'二、梅花易数'**
   String get lifeSec2;
 
   /// No description provided for @lifeMhGua.
   ///
-  /// In en, this message translates to:
-  /// **'Trigram'**
+  /// In zh, this message translates to:
+  /// **'卦'**
   String get lifeMhGua;
 
   /// No description provided for @lifeMhRel.
   ///
-  /// In en, this message translates to:
-  /// **'To the self trigram'**
+  /// In zh, this message translates to:
+  /// **'与体卦的关系'**
   String get lifeMhRel;
 
   /// No description provided for @lifeMhStage.
   ///
-  /// In en, this message translates to:
-  /// **'Governs'**
+  /// In zh, this message translates to:
+  /// **'主管'**
   String get lifeMhStage;
 
   /// No description provided for @lifeTi.
   ///
-  /// In en, this message translates to:
-  /// **'Self (体)'**
+  /// In zh, this message translates to:
+  /// **'体卦'**
   String get lifeTi;
 
   /// No description provided for @lifeYong.
   ///
-  /// In en, this message translates to:
-  /// **'Use (用)'**
+  /// In zh, this message translates to:
+  /// **'用卦'**
   String get lifeYong;
 
   /// No description provided for @lifeHu.
   ///
-  /// In en, this message translates to:
-  /// **'Nuclear (互)'**
+  /// In zh, this message translates to:
+  /// **'互卦'**
   String get lifeHu;
 
   /// No description provided for @lifeBian.
   ///
-  /// In en, this message translates to:
-  /// **'Changed (变)'**
+  /// In zh, this message translates to:
+  /// **'变卦'**
   String get lifeBian;
 
   /// No description provided for @lifeSelf.
   ///
-  /// In en, this message translates to:
-  /// **'Yourself'**
+  /// In zh, this message translates to:
+  /// **'代表本人'**
   String get lifeSelf;
 
   /// No description provided for @lifeEarly.
   ///
-  /// In en, this message translates to:
-  /// **'Early life'**
+  /// In zh, this message translates to:
+  /// **'早年'**
   String get lifeEarly;
 
   /// No description provided for @lifeMiddle.
   ///
-  /// In en, this message translates to:
-  /// **'Middle age'**
+  /// In zh, this message translates to:
+  /// **'中年'**
   String get lifeMiddle;
 
   /// No description provided for @lifeLate.
   ///
-  /// In en, this message translates to:
-  /// **'Later life'**
+  /// In zh, this message translates to:
+  /// **'晚年'**
   String get lifeLate;
 
   /// No description provided for @lifeSeason.
   ///
-  /// In en, this message translates to:
-  /// **'Season'**
+  /// In zh, this message translates to:
+  /// **'时令'**
   String get lifeSeason;
 
   /// No description provided for @lifeMhConclusion.
   ///
-  /// In en, this message translates to:
-  /// **'Plum Blossom conclusion'**
+  /// In zh, this message translates to:
+  /// **'梅花结论'**
   String get lifeMhConclusion;
 
   /// No description provided for @relBihe.
   ///
-  /// In en, this message translates to:
-  /// **'Harmony'**
+  /// In zh, this message translates to:
+  /// **'比和（同气相助）'**
   String get relBihe;
 
   /// No description provided for @relShengti.
   ///
-  /// In en, this message translates to:
-  /// **'Supports you'**
+  /// In zh, this message translates to:
+  /// **'生体（得助）'**
   String get relShengti;
 
   /// No description provided for @relTisheng.
   ///
-  /// In en, this message translates to:
-  /// **'Drains you'**
+  /// In zh, this message translates to:
+  /// **'体生（耗泄）'**
   String get relTisheng;
 
   /// No description provided for @relTike.
   ///
-  /// In en, this message translates to:
-  /// **'You control it (effort brings gain)'**
+  /// In zh, this message translates to:
+  /// **'体克（我克为财，辛苦得）'**
   String get relTike;
 
   /// No description provided for @relKeti.
   ///
-  /// In en, this message translates to:
-  /// **'Pressures you'**
+  /// In zh, this message translates to:
+  /// **'克体（受压）'**
   String get relKeti;
 
   /// No description provided for @lifeSec3.
   ///
-  /// In en, this message translates to:
-  /// **'3. Five Elements and Eight Mansions'**
+  /// In zh, this message translates to:
+  /// **'三、五行八卦'**
   String get lifeSec3;
 
   /// No description provided for @lifeWuxingDist.
   ///
-  /// In en, this message translates to:
-  /// **'Five Elements (weighted, simplified)'**
+  /// In zh, this message translates to:
+  /// **'五行分布（加权，简化计分）'**
   String get lifeWuxingDist;
 
   /// No description provided for @lifeFavorable.
   ///
-  /// In en, this message translates to:
-  /// **'Favourable'**
+  /// In zh, this message translates to:
+  /// **'喜'**
   String get lifeFavorable;
 
   /// No description provided for @lifeUnfavorable.
   ///
-  /// In en, this message translates to:
-  /// **'Unfavourable'**
+  /// In zh, this message translates to:
+  /// **'忌'**
   String get lifeUnfavorable;
 
   /// No description provided for @lifeBazhai.
   ///
-  /// In en, this message translates to:
-  /// **'Eight Mansions life gua'**
+  /// In zh, this message translates to:
+  /// **'八卦命卦（八宅）'**
   String get lifeBazhai;
 
   /// No description provided for @lifeKua.
   ///
-  /// In en, this message translates to:
-  /// **'Life gua {kua} · {name} ({group}, {wuxing})'**
+  /// In zh, this message translates to:
+  /// **'命卦 {kua} · {name}卦（{group}，五行属{wuxing}）'**
   String lifeKua(String kua, String name, String group, String wuxing);
 
   /// No description provided for @lifeDaily.
   ///
-  /// In en, this message translates to:
-  /// **'Everyday use'**
+  /// In zh, this message translates to:
+  /// **'日常宜用'**
   String get lifeDaily;
 
   /// No description provided for @lifeSec4.
   ///
-  /// In en, this message translates to:
-  /// **'4. Life topics'**
+  /// In zh, this message translates to:
+  /// **'四、分项运势'**
   String get lifeSec4;
 
   /// No description provided for @lifeTopicPersonality.
   ///
-  /// In en, this message translates to:
-  /// **'Personality'**
+  /// In zh, this message translates to:
+  /// **'性格'**
   String get lifeTopicPersonality;
 
   /// No description provided for @lifeTopicCareer.
   ///
-  /// In en, this message translates to:
-  /// **'Career'**
+  /// In zh, this message translates to:
+  /// **'事业'**
   String get lifeTopicCareer;
 
   /// No description provided for @lifeTopicWealth.
   ///
-  /// In en, this message translates to:
-  /// **'Money'**
+  /// In zh, this message translates to:
+  /// **'财运'**
   String get lifeTopicWealth;
 
   /// No description provided for @lifeTopicRelationships.
   ///
-  /// In en, this message translates to:
-  /// **'Love and marriage'**
+  /// In zh, this message translates to:
+  /// **'情感与婚姻'**
   String get lifeTopicRelationships;
 
   /// No description provided for @lifeTopicChildren.
   ///
-  /// In en, this message translates to:
-  /// **'Family and children'**
+  /// In zh, this message translates to:
+  /// **'家庭与子女'**
   String get lifeTopicChildren;
 
   /// No description provided for @lifeTopicParents.
   ///
-  /// In en, this message translates to:
-  /// **'Parents'**
+  /// In zh, this message translates to:
+  /// **'父母'**
   String get lifeTopicParents;
 
   /// No description provided for @lifeTopicHealth.
   ///
-  /// In en, this message translates to:
-  /// **'Wellbeing'**
+  /// In zh, this message translates to:
+  /// **'健康'**
   String get lifeTopicHealth;
 
   /// No description provided for @lifeSec5.
   ///
-  /// In en, this message translates to:
-  /// **'5. Life stages'**
+  /// In zh, this message translates to:
+  /// **'五、人生阶段总览'**
   String get lifeSec5;
 
   /// No description provided for @lifeYears.
   ///
-  /// In en, this message translates to:
-  /// **'Years'**
+  /// In zh, this message translates to:
+  /// **'年份'**
   String get lifeYears;
 
   /// No description provided for @lifeFortune.
   ///
-  /// In en, this message translates to:
-  /// **'Outlook'**
+  /// In zh, this message translates to:
+  /// **'运势'**
   String get lifeFortune;
 
   /// No description provided for @lifeFocus.
   ///
-  /// In en, this message translates to:
-  /// **'Focus'**
+  /// In zh, this message translates to:
+  /// **'重点'**
   String get lifeFocus;
 
   /// No description provided for @lifeSec6.
   ///
-  /// In en, this message translates to:
-  /// **'6. Overall reading and advice'**
+  /// In zh, this message translates to:
+  /// **'六、总评与建议'**
   String get lifeSec6;
 
   /// No description provided for @lifeDownload.
   ///
-  /// In en, this message translates to:
-  /// **'Download report package'**
+  /// In zh, this message translates to:
+  /// **'下载报告包'**
   String get lifeDownload;
 
   /// No description provided for @lifePrint.
   ///
-  /// In en, this message translates to:
-  /// **'Print / save as PDF'**
+  /// In zh, this message translates to:
+  /// **'打印 / 保存 PDF'**
   String get lifePrint;
 
   /// No description provided for @lifeGenerating.
   ///
-  /// In en, this message translates to:
-  /// **'AI is writing your life report…'**
+  /// In zh, this message translates to:
+  /// **'AI 正在撰写一生运势报告…'**
   String get lifeGenerating;
 
   /// No description provided for @lifeStageMethods.
   ///
-  /// In en, this message translates to:
-  /// **'Reading the I Ching, Plum Blossom and Eight Mansions'**
+  /// In zh, this message translates to:
+  /// **'推演易经、梅花与八宅'**
   String get lifeStageMethods;
 
   /// No description provided for @lifeStageTopics.
   ///
-  /// In en, this message translates to:
-  /// **'Writing the topics and life stages'**
+  /// In zh, this message translates to:
+  /// **'撰写分项运势与人生阶段'**
   String get lifeStageTopics;
 
   /// No description provided for @lifeTook.
   ///
-  /// In en, this message translates to:
-  /// **'About 3–5 minutes. You can leave this page; it keeps going.'**
+  /// In zh, this message translates to:
+  /// **'大约需要 3–5 分钟。可以先离开这个页面，完成后回来查看。'**
   String get lifeTook;
 
   /// No description provided for @lifeDirection.
   ///
-  /// In en, this message translates to:
-  /// **'Direction'**
+  /// In zh, this message translates to:
+  /// **'方位'**
   String get lifeDirection;
 
   /// No description provided for @lifeStar.
   ///
-  /// In en, this message translates to:
-  /// **'Star'**
+  /// In zh, this message translates to:
+  /// **'星名'**
   String get lifeStar;
 
   /// No description provided for @lifeLuck.
   ///
-  /// In en, this message translates to:
-  /// **'Luck'**
+  /// In zh, this message translates to:
+  /// **'吉凶'**
   String get lifeLuck;
 
   /// No description provided for @lifeMhName.
   ///
-  /// In en, this message translates to:
-  /// **'Name'**
+  /// In zh, this message translates to:
+  /// **'卦名'**
   String get lifeMhName;
 
   /// No description provided for @lifeWuxing.
   ///
-  /// In en, this message translates to:
-  /// **'Element'**
+  /// In zh, this message translates to:
+  /// **'五行'**
   String get lifeWuxing;
 
   /// No description provided for @reviewTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Content review'**
+  /// In zh, this message translates to:
+  /// **'内容审核'**
   String get reviewTitle;
 
   /// No description provided for @reviewEmpty.
   ///
-  /// In en, this message translates to:
-  /// **'Nothing is waiting for review.'**
+  /// In zh, this message translates to:
+  /// **'目前没有待审核的内容。'**
   String get reviewEmpty;
 
   /// No description provided for @reviewHint.
   ///
-  /// In en, this message translates to:
-  /// **'Readings the compliance checks held back. Release only what is acceptable; rule-layer blocks can only be rejected.'**
+  /// In zh, this message translates to:
+  /// **'这里是被合规检查拦下的内容。确认没有问题才通过；规则层拦截的只能查看或驳回。'**
   String get reviewHint;
 
   /// No description provided for @kindReport.
   ///
-  /// In en, this message translates to:
-  /// **'Reading'**
+  /// In zh, this message translates to:
+  /// **'AI 解读'**
   String get kindReport;
 
   /// No description provided for @kindRemedy.
   ///
-  /// In en, this message translates to:
-  /// **'Remedy plan'**
+  /// In zh, this message translates to:
+  /// **'破除运势方案'**
   String get kindRemedy;
 
   /// No description provided for @kindLife.
   ///
-  /// In en, this message translates to:
-  /// **'Life report'**
+  /// In zh, this message translates to:
+  /// **'一生运势报告'**
   String get kindLife;
 
   /// No description provided for @reviewHeld.
   ///
-  /// In en, this message translates to:
-  /// **'Held for review'**
+  /// In zh, this message translates to:
+  /// **'待审核'**
   String get reviewHeld;
 
   /// No description provided for @reviewBlocked.
   ///
-  /// In en, this message translates to:
-  /// **'Blocked by rules'**
+  /// In zh, this message translates to:
+  /// **'规则层拦截'**
   String get reviewBlocked;
 
   /// No description provided for @reviewReasons.
   ///
-  /// In en, this message translates to:
-  /// **'Why it was held'**
+  /// In zh, this message translates to:
+  /// **'拦截原因'**
   String get reviewReasons;
 
   /// No description provided for @reviewRuleHits.
   ///
-  /// In en, this message translates to:
-  /// **'Rule hits'**
+  /// In zh, this message translates to:
+  /// **'规则命中'**
   String get reviewRuleHits;
 
   /// No description provided for @reviewGuard.
   ///
-  /// In en, this message translates to:
-  /// **'AI reviewer\'s findings'**
+  /// In zh, this message translates to:
+  /// **'AI 审核意见'**
   String get reviewGuard;
 
   /// No description provided for @reviewContent.
   ///
-  /// In en, this message translates to:
-  /// **'Content'**
+  /// In zh, this message translates to:
+  /// **'内容'**
   String get reviewContent;
 
   /// No description provided for @reviewNote.
   ///
-  /// In en, this message translates to:
-  /// **'Review note (optional)'**
+  /// In zh, this message translates to:
+  /// **'审核备注（可选）'**
   String get reviewNote;
 
   /// No description provided for @reviewApprove.
   ///
-  /// In en, this message translates to:
-  /// **'Approve and release'**
+  /// In zh, this message translates to:
+  /// **'通过并发布'**
   String get reviewApprove;
 
   /// No description provided for @reviewReject.
   ///
-  /// In en, this message translates to:
-  /// **'Reject'**
+  /// In zh, this message translates to:
+  /// **'驳回'**
   String get reviewReject;
 
   /// No description provided for @reviewBlockedOnly.
   ///
-  /// In en, this message translates to:
-  /// **'A rule-layer block is a hard violation: it can only be rejected.'**
+  /// In zh, this message translates to:
+  /// **'规则层拦截属于硬性违规，只能驳回，不能发布。'**
   String get reviewBlockedOnly;
 
   /// No description provided for @reviewApproved.
   ///
-  /// In en, this message translates to:
-  /// **'Released to the user'**
+  /// In zh, this message translates to:
+  /// **'已通过并发布给用户'**
   String get reviewApproved;
 
   /// No description provided for @reviewRejected.
   ///
-  /// In en, this message translates to:
-  /// **'Rejected'**
+  /// In zh, this message translates to:
+  /// **'已驳回'**
   String get reviewRejected;
 
   /// No description provided for @reviewNoContent.
   ///
-  /// In en, this message translates to:
-  /// **'No content was kept for this item.'**
+  /// In zh, this message translates to:
+  /// **'这条没有保留内容。'**
   String get reviewNoContent;
 
   /// No description provided for @modeChart.
   ///
-  /// In en, this message translates to:
-  /// **'Chart & reading'**
+  /// In zh, this message translates to:
+  /// **'排盘解读'**
   String get modeChart;
 
   /// No description provided for @addTester.
   ///
-  /// In en, this message translates to:
-  /// **'Add a new person'**
+  /// In zh, this message translates to:
+  /// **'添加新的测试者'**
   String get addTester;
 
   /// No description provided for @editCurrent.
   ///
-  /// In en, this message translates to:
-  /// **'Edit {name}\'s details'**
+  /// In zh, this message translates to:
+  /// **'编辑“{name}”的资料'**
   String editCurrent(String name);
 
   /// No description provided for @leaveReadingTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Going back starts over'**
+  /// In zh, this message translates to:
+  /// **'返回将重新开始'**
   String get leaveReadingTitle;
 
   /// No description provided for @leaveReadingBody.
   ///
-  /// In en, this message translates to:
-  /// **'This reading isn\'t finished: going back means starting it again.'**
+  /// In zh, this message translates to:
+  /// **'这次测算还没有完成，返回后需要重新开始。'**
   String get leaveReadingBody;
 
   /// No description provided for @leaveFormBody.
   ///
-  /// In en, this message translates to:
-  /// **'What you entered for this reading won\'t be kept.'**
+  /// In zh, this message translates to:
+  /// **'本次填写的内容不会保留，返回后需要重新填写。'**
   String get leaveFormBody;
 
   /// No description provided for @leaveChartBody.
   ///
-  /// In en, this message translates to:
-  /// **'You\'ll need to compute the chart again to see it. Readings you generated stay in History.'**
+  /// In zh, this message translates to:
+  /// **'返回后要重新排盘才能再看到这个命盘。已生成的解读会保存在历史记录里。'**
   String get leaveChartBody;
 
   /// No description provided for @leaveTarotBody.
   ///
-  /// In en, this message translates to:
-  /// **'These cards won\'t be kept: you\'ll draw again next time. Readings you generated stay in History.'**
+  /// In zh, this message translates to:
+  /// **'这次抽到的牌不会保留，下次要重新抽牌。已生成的解读会保存在历史记录里。'**
   String get leaveTarotBody;
 
   /// No description provided for @leaveReadingStay.
   ///
-  /// In en, this message translates to:
-  /// **'Keep going'**
+  /// In zh, this message translates to:
+  /// **'继续测算'**
   String get leaveReadingStay;
 
   /// No description provided for @leaveReadingGo.
   ///
-  /// In en, this message translates to:
-  /// **'Go back'**
+  /// In zh, this message translates to:
+  /// **'返回'**
   String get leaveReadingGo;
 
   /// No description provided for @leaveEditsTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Discard unsaved changes?'**
+  /// In zh, this message translates to:
+  /// **'放弃未保存的修改？'**
   String get leaveEditsTitle;
 
   /// No description provided for @leaveEditsBody.
   ///
-  /// In en, this message translates to:
-  /// **'Your changes won\'t be saved.'**
+  /// In zh, this message translates to:
+  /// **'返回后，这次的修改不会保存。'**
   String get leaveEditsBody;
 
   /// No description provided for @leaveEditsStay.
   ///
-  /// In en, this message translates to:
-  /// **'Keep editing'**
+  /// In zh, this message translates to:
+  /// **'继续编辑'**
   String get leaveEditsStay;
 
   /// No description provided for @leaveEditsGo.
   ///
-  /// In en, this message translates to:
-  /// **'Discard'**
+  /// In zh, this message translates to:
+  /// **'放弃修改'**
   String get leaveEditsGo;
 
   /// No description provided for @keysTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Keyboard shortcuts'**
+  /// In zh, this message translates to:
+  /// **'键盘快捷键'**
   String get keysTitle;
 
   /// No description provided for @keysTab.
   ///
-  /// In en, this message translates to:
-  /// **'Move to the next / previous control'**
+  /// In zh, this message translates to:
+  /// **'移到下一个 / 上一个控件'**
   String get keysTab;
 
   /// No description provided for @keySpace.
   ///
-  /// In en, this message translates to:
-  /// **'Space'**
+  /// In zh, this message translates to:
+  /// **'空格'**
   String get keySpace;
 
   /// No description provided for @keysPress.
   ///
-  /// In en, this message translates to:
-  /// **'Press the focused button; expand or collapse a section'**
+  /// In zh, this message translates to:
+  /// **'按下按钮；展开或收起段落'**
   String get keysPress;
 
   /// No description provided for @keysEsc.
   ///
-  /// In en, this message translates to:
-  /// **'Back one level: menus and dialogs close first; an unfinished reading asks first'**
+  /// In zh, this message translates to:
+  /// **'返回上一层：先关闭菜单和对话框；测算未完成时会先提醒'**
   String get keysEsc;
 
   /// No description provided for @keysArrows.
   ///
-  /// In en, this message translates to:
-  /// **'Switch options (e.g. Gregorian / Lunar) and chart periods; scroll the luck and annual pillars'**
+  /// In zh, this message translates to:
+  /// **'切换选项（如 公历 / 农历）和图表时期；滚动 大运 / 流年'**
   String get keysArrows;
 
   /// No description provided for @keysScroll.
   ///
-  /// In en, this message translates to:
-  /// **'Scroll the page; move through a menu'**
+  /// In zh, this message translates to:
+  /// **'滚动页面；在菜单里上下选择'**
   String get keysScroll;
 
   /// No description provided for @keysSubmit.
   ///
-  /// In en, this message translates to:
-  /// **'Submit the form: sign in, compute the chart, draw the cards, save'**
+  /// In zh, this message translates to:
+  /// **'提交表单：登录、排盘、抽牌、保存'**
   String get keysSubmit;
 
   /// No description provided for @keysHelp.
   ///
-  /// In en, this message translates to:
-  /// **'Show this list'**
+  /// In zh, this message translates to:
+  /// **'打开这个列表'**
   String get keysHelp;
 
   /// No description provided for @keysBrowser.
   ///
-  /// In en, this message translates to:
-  /// **'Switches browser tabs: the browser\'s own key, which the app leaves alone. Inside the app, switch options with ← →'**
+  /// In zh, this message translates to:
+  /// **'切换浏览器标签页：这是浏览器自己的快捷键，本应用不占用。应用内切换选项请用 ← →'**
   String get keysBrowser;
 
   /// No description provided for @close.
   ///
-  /// In en, this message translates to:
-  /// **'Close'**
+  /// In zh, this message translates to:
+  /// **'关闭'**
   String get close;
 
   /// No description provided for @cardHidden.
   ///
-  /// In en, this message translates to:
-  /// **'{position}, face down'**
+  /// In zh, this message translates to:
+  /// **'{position}，未翻开'**
   String cardHidden(String position);
 
   /// No description provided for @tarotQuestion.
   ///
-  /// In en, this message translates to:
-  /// **'Your question (optional)'**
+  /// In zh, this message translates to:
+  /// **'你想问的问题（可选）'**
   String get tarotQuestion;
 
   /// No description provided for @tarotQuestionHint.
   ///
-  /// In en, this message translates to:
-  /// **'Think of one question before you draw; the reading will answer it.'**
+  /// In zh, this message translates to:
+  /// **'抽牌前先在心里想好一个问题，解读会围绕它展开。'**
   String get tarotQuestionHint;
 
   /// No description provided for @tarotFocus.
   ///
-  /// In en, this message translates to:
-  /// **'Focus on (optional)'**
+  /// In zh, this message translates to:
+  /// **'想看哪方面（可选）'**
   String get tarotFocus;
 
   /// No description provided for @focusAny.
   ///
-  /// In en, this message translates to:
-  /// **'Anything'**
+  /// In zh, this message translates to:
+  /// **'不限'**
   String get focusAny;
 
   /// No description provided for @focusCareer.
   ///
-  /// In en, this message translates to:
-  /// **'Work'**
+  /// In zh, this message translates to:
+  /// **'事业'**
   String get focusCareer;
 
   /// No description provided for @focusLove.
   ///
-  /// In en, this message translates to:
-  /// **'Love'**
+  /// In zh, this message translates to:
+  /// **'感情'**
   String get focusLove;
 
   /// No description provided for @focusHealth.
   ///
-  /// In en, this message translates to:
-  /// **'Health'**
+  /// In zh, this message translates to:
+  /// **'健康'**
   String get focusHealth;
 
   /// No description provided for @focusSelf.
   ///
-  /// In en, this message translates to:
-  /// **'Myself'**
+  /// In zh, this message translates to:
+  /// **'自我'**
   String get focusSelf;
 
   /// No description provided for @tarotSections.
   ///
-  /// In en, this message translates to:
-  /// **'The reading has three parts: card by card, the whole spread, and advice.'**
+  /// In zh, this message translates to:
+  /// **'解读分三部分：逐张解读、综合解读、建议。'**
   String get tarotSections;
 
   /// No description provided for @tarotQuestionShown.
   ///
-  /// In en, this message translates to:
-  /// **'Question: {question}'**
+  /// In zh, this message translates to:
+  /// **'问题：{question}'**
   String tarotQuestionShown(String question);
 
   /// No description provided for @tarotSlot.
   ///
-  /// In en, this message translates to:
-  /// **'Card {n} · {position}'**
+  /// In zh, this message translates to:
+  /// **'第 {n} 张 · {position}'**
   String tarotSlot(int n, String position);
 
   /// No description provided for @tarotNext.
   ///
-  /// In en, this message translates to:
-  /// **'Turn the cards in order. Next: {slot}'**
+  /// In zh, this message translates to:
+  /// **'按牌阵顺序翻牌，下一张：{slot}'**
   String tarotNext(String slot);
 
   /// No description provided for @tarotNextShort.
   ///
-  /// In en, this message translates to:
-  /// **'next'**
+  /// In zh, this message translates to:
+  /// **'下一张'**
   String get tarotNextShort;
 
   /// No description provided for @tarotZoomHint.
   ///
-  /// In en, this message translates to:
-  /// **'Tap a small card to see it large and turn it there.'**
+  /// In zh, this message translates to:
+  /// **'点击小牌放大，在大图里翻开。'**
   String get tarotZoomHint;
 
   /// No description provided for @tarotAllTurned.
   ///
-  /// In en, this message translates to:
-  /// **'All cards are turned. Tap a card to see it large with its position\'s meaning.'**
+  /// In zh, this message translates to:
+  /// **'牌已全部翻开。点击任意一张，看大图和位置含义。'**
   String get tarotAllTurned;
 
   /// No description provided for @tarotTapToTurn.
   ///
-  /// In en, this message translates to:
-  /// **'Tap the card to turn it over'**
+  /// In zh, this message translates to:
+  /// **'点击牌面翻开'**
   String get tarotTapToTurn;
 
   /// No description provided for @shenshaTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Stars, void and conception pillar'**
+  /// In zh, this message translates to:
+  /// **'神煞 · 空亡 · 胎元'**
   String get shenshaTitle;
 
   /// No description provided for @relationsTitle.
   ///
-  /// In en, this message translates to:
-  /// **'Combinations and clashes in the chart'**
+  /// In zh, this message translates to:
+  /// **'原局刑冲合害'**
   String get relationsTitle;
 
   /// No description provided for @ziNextDay.
   ///
-  /// In en, this message translates to:
-  /// **'Born 23:00–24:00: take the next day\'s day pillar'**
+  /// In zh, this message translates to:
+  /// **'23:00–24:00 出生，日柱算次日'**
   String get ziNextDay;
 
   /// No description provided for @ziNextDayHint.
   ///
-  /// In en, this message translates to:
-  /// **'Two schools; by default a birth after 23:00 keeps the same day'**
+  /// In zh, this message translates to:
+  /// **'子时有两种算法；默认 23:00 后出生仍算当天'**
   String get ziNextDayHint;
 
   /// No description provided for @notDeLing.
   ///
-  /// In en, this message translates to:
-  /// **'Not in season'**
+  /// In zh, this message translates to:
+  /// **'不得令'**
   String get notDeLing;
 
   /// No description provided for @favorableIs.
   ///
-  /// In en, this message translates to:
-  /// **'Favourable: {elements}'**
+  /// In zh, this message translates to:
+  /// **'喜用：{elements}'**
   String favorableIs(String elements);
 
   /// No description provided for @unfavorableIs.
   ///
-  /// In en, this message translates to:
-  /// **'Unfavourable: {elements}'**
+  /// In zh, this message translates to:
+  /// **'忌：{elements}'**
   String unfavorableIs(String elements);
 
   /// No description provided for @specialNote.
   ///
-  /// In en, this message translates to:
-  /// **'worth a closer look by a practitioner'**
+  /// In zh, this message translates to:
+  /// **'宜请有经验的师傅细看'**
   String get specialNote;
 
   /// No description provided for @termTipHint.
   ///
-  /// In en, this message translates to:
-  /// **'Tap a dotted term to see what it means.'**
+  /// In zh, this message translates to:
+  /// **'点击带虚线的术语，查看它的意思。'**
   String get termTipHint;
 
   /// No description provided for @termTipAbout.
   ///
-  /// In en, this message translates to:
-  /// **'About {term}'**
+  /// In zh, this message translates to:
+  /// **'什么是{term}？'**
   String termTipAbout(String term);
 
   /// No description provided for @shenshaName.
   ///
-  /// In en, this message translates to:
-  /// **'Symbolic stars (Shen Sha)'**
+  /// In zh, this message translates to:
+  /// **'神煞'**
   String get shenshaName;
 
   /// No description provided for @timelineNow.
   ///
-  /// In en, this message translates to:
-  /// **'Now'**
+  /// In zh, this message translates to:
+  /// **'当前'**
   String get timelineNow;
 
   /// No description provided for @timelineThisYear.
   ///
-  /// In en, this message translates to:
-  /// **'This year'**
+  /// In zh, this message translates to:
+  /// **'今年'**
   String get timelineThisYear;
 
   /// No description provided for @dayunTapHint.
   ///
-  /// In en, this message translates to:
-  /// **'Tap a luck pillar to see its ten years.'**
+  /// In zh, this message translates to:
+  /// **'点击一步大运，查看它的十年。'**
   String get dayunTapHint;
 
   /// No description provided for @dayunYears.
   ///
-  /// In en, this message translates to:
-  /// **'{ganzhi} luck pillar, {from}–{to}'**
+  /// In zh, this message translates to:
+  /// **'{ganzhi}大运 · {from}–{to}年'**
   String dayunYears(String ganzhi, int from, int to);
 
   /// No description provided for @liuyueOf.
   ///
-  /// In en, this message translates to:
-  /// **'Months of {year}'**
+  /// In zh, this message translates to:
+  /// **'{year}年流月'**
   String liuyueOf(int year);
+
+  /// No description provided for @pillarRelation.
+  ///
+  /// In zh, this message translates to:
+  /// **'{pillar}{relation}'**
+  String pillarRelation(String pillar, String relation);
 
   /// No description provided for @jumpTo.
   ///
-  /// In en, this message translates to:
-  /// **'Jump to'**
+  /// In zh, this message translates to:
+  /// **'跳到'**
   String get jumpTo;
 
   /// No description provided for @jumpActions.
   ///
-  /// In en, this message translates to:
-  /// **'Actions'**
+  /// In zh, this message translates to:
+  /// **'行动建议'**
   String get jumpActions;
 
   /// No description provided for @shareImage.
   ///
-  /// In en, this message translates to:
-  /// **'Share as image'**
+  /// In zh, this message translates to:
+  /// **'分享图片'**
   String get shareImage;
 
   /// No description provided for @shareImageFailed.
   ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t make the share image just now. Please try again later.'**
+  /// In zh, this message translates to:
+  /// **'暂时无法生成分享图，请稍后再试。'**
   String get shareImageFailed;
-
-  /// No description provided for @pillarRelation.
-  ///
-  /// In en, this message translates to:
-  /// **'{pillar} {relation}'**
-  String pillarRelation(String pillar, String relation);
 
   /// No description provided for @homeQiuqian.
   ///
-  /// In en, this message translates to:
-  /// **'Fortune Sticks'**
+  /// In zh, this message translates to:
+  /// **'求签'**
   String get homeQiuqian;
 
   /// No description provided for @homeQiuqianDesc.
   ///
-  /// In en, this message translates to:
-  /// **'Shake out a lot and confirm it with the moon blocks, for entertainment and metaphysics study only'**
+  /// In zh, this message translates to:
+  /// **'摇签、掷筊，求一首签诗，仅供娱乐和玄学学习使用'**
   String get homeQiuqianDesc;
 
   /// No description provided for @qiuqianQuestion.
   ///
-  /// In en, this message translates to:
-  /// **'What you ask about'**
+  /// In zh, this message translates to:
+  /// **'所求之事'**
   String get qiuqianQuestion;
 
   /// No description provided for @qiuqianQuestionHint.
   ///
-  /// In en, this message translates to:
-  /// **'Keep it in mind or write it down. It is used only for the reading and never appears on a share image.'**
+  /// In zh, this message translates to:
+  /// **'心中默念或写下来都可以。问题只用于解签，不会出现在分享图上。'**
   String get qiuqianQuestionHint;
 
   /// No description provided for @qiuqianExample1.
   ///
-  /// In en, this message translates to:
-  /// **'Will work go well this year?'**
+  /// In zh, this message translates to:
+  /// **'今年的工作会顺利吗？'**
   String get qiuqianExample1;
 
   /// No description provided for @qiuqianExample2.
   ///
-  /// In en, this message translates to:
-  /// **'How should I care for this relationship?'**
+  /// In zh, this message translates to:
+  /// **'这段关系该怎么经营？'**
   String get qiuqianExample2;
 
   /// No description provided for @qiuqianExample3.
   ///
-  /// In en, this message translates to:
-  /// **'How should I decide about moving?'**
+  /// In zh, this message translates to:
+  /// **'搬家的事该怎么决定？'**
   String get qiuqianExample3;
 
   /// No description provided for @qiuqianHowTo.
   ///
-  /// In en, this message translates to:
-  /// **'Shake the cylinder until a stick falls, then throw the moon blocks. A yes throw (one flat, one round) confirms the stick; otherwise it goes back and you shake again.'**
+  /// In zh, this message translates to:
+  /// **'摇签筒，一支签落下；再掷筊请示：圣筊（一平一凸）就是这一支，笑筊或阴筊就把签放回再摇。'**
   String get qiuqianHowTo;
 
   /// No description provided for @qiuqianDraw.
   ///
-  /// In en, this message translates to:
-  /// **'Draw a lot'**
+  /// In zh, this message translates to:
+  /// **'求签'**
   String get qiuqianDraw;
 
   /// No description provided for @qiuqianThrow.
   ///
-  /// In en, this message translates to:
-  /// **'Throw the blocks'**
+  /// In zh, this message translates to:
+  /// **'掷筊'**
   String get qiuqianThrow;
 
   /// No description provided for @qiuqianAgain.
   ///
-  /// In en, this message translates to:
-  /// **'Put it back and shake again'**
+  /// In zh, this message translates to:
+  /// **'放回再摇'**
   String get qiuqianAgain;
 
   /// No description provided for @qiuqianSkip.
   ///
-  /// In en, this message translates to:
-  /// **'Show the result'**
+  /// In zh, this message translates to:
+  /// **'直接看结果'**
   String get qiuqianSkip;
 
   /// No description provided for @qiuqianStickFell.
   ///
-  /// In en, this message translates to:
-  /// **'Out fell {title}'**
+  /// In zh, this message translates to:
+  /// **'摇出{title}'**
   String qiuqianStickFell(String title);
 
   /// No description provided for @qiuqianSheng.
   ///
-  /// In en, this message translates to:
-  /// **'Yes throw: this is your lot'**
+  /// In zh, this message translates to:
+  /// **'圣筊：神明应允，就是这一支'**
   String get qiuqianSheng;
 
   /// No description provided for @qiuqianXiao.
   ///
-  /// In en, this message translates to:
-  /// **'Laughing throw: put the stick back and ask again'**
+  /// In zh, this message translates to:
+  /// **'笑筊：神明一笑，把签放回再求'**
   String get qiuqianXiao;
 
   /// No description provided for @qiuqianYin.
   ///
-  /// In en, this message translates to:
-  /// **'No throw: put the stick back and ask again'**
+  /// In zh, this message translates to:
+  /// **'阴筊：神明未允，把签放回再求'**
   String get qiuqianYin;
 
   /// No description provided for @qiuqianYourLot.
   ///
-  /// In en, this message translates to:
-  /// **'Your lot'**
+  /// In zh, this message translates to:
+  /// **'你求得的签'**
   String get qiuqianYourLot;
 
   /// No description provided for @qiuqianTextNote.
   ///
-  /// In en, this message translates to:
-  /// **'The poem is shown in the original Chinese, as Taiwanese temples print it; the reading explains it line by line.'**
+  /// In zh, this message translates to:
+  /// **'签诗依台湾庙宇通行文本，并以清代刻本校订。'**
   String get qiuqianTextNote;
 
   /// No description provided for @qiuqianSections.
   ///
-  /// In en, this message translates to:
-  /// **'The reading has three parts: the poem, your question, and advice.'**
+  /// In zh, this message translates to:
+  /// **'解签分三部分：签诗、所问之事、建议。'**
   String get qiuqianSections;
 
   /// No description provided for @leaveQiuqianBody.
   ///
-  /// In en, this message translates to:
-  /// **'This lot won\'t be kept: you\'ll draw again next time. Readings you generated stay in History.'**
+  /// In zh, this message translates to:
+  /// **'这次求得的签不会保留，下次要重新求签。已生成的解读会保存在历史记录里。'**
   String get leaveQiuqianBody;
 
   /// No description provided for @topicQiuqianPoem.
   ///
-  /// In en, this message translates to:
-  /// **'The poem'**
+  /// In zh, this message translates to:
+  /// **'签诗'**
   String get topicQiuqianPoem;
 
   /// No description provided for @topicQiuqianAnswer.
   ///
-  /// In en, this message translates to:
-  /// **'Your question'**
+  /// In zh, this message translates to:
+  /// **'所问之事'**
   String get topicQiuqianAnswer;
 
   /// No description provided for @topicQiuqianAdvice.
   ///
-  /// In en, this message translates to:
-  /// **'Advice'**
+  /// In zh, this message translates to:
+  /// **'建议'**
   String get topicQiuqianAdvice;
 
   /// No description provided for @blockFlat.
   ///
-  /// In en, this message translates to:
-  /// **'flat side up'**
+  /// In zh, this message translates to:
+  /// **'平面朝上'**
   String get blockFlat;
 
   /// No description provided for @blockRound.
   ///
-  /// In en, this message translates to:
-  /// **'round side up'**
+  /// In zh, this message translates to:
+  /// **'凸面朝上'**
   String get blockRound;
 
   /// No description provided for @homeFengshui.
   ///
-  /// In en, this message translates to:
-  /// **'Feng Shui'**
+  /// In zh, this message translates to:
+  /// **'风水'**
   String get homeFengshui;
 
   /// No description provided for @homeFengshuiDesc.
   ///
-  /// In en, this message translates to:
-  /// **'General principles for a room\'s layout: light, air and movement. No judgement of luck'**
+  /// In zh, this message translates to:
+  /// **'房间布局的通用原则：采光、通风与动线，不论吉凶'**
   String get homeFengshuiDesc;
 
   /// No description provided for @fengshuiRoom.
   ///
-  /// In en, this message translates to:
-  /// **'Which room'**
+  /// In zh, this message translates to:
+  /// **'哪个房间'**
   String get fengshuiRoom;
 
   /// No description provided for @fengshuiFacing.
   ///
-  /// In en, this message translates to:
-  /// **'Which way the main window faces (optional)'**
+  /// In zh, this message translates to:
+  /// **'主要窗户朝向（可不选）'**
   String get fengshuiFacing;
 
   /// No description provided for @fengshuiFacingUnknown.
   ///
-  /// In en, this message translates to:
-  /// **'Not sure'**
+  /// In zh, this message translates to:
+  /// **'不确定'**
   String get fengshuiFacingUnknown;
 
   /// No description provided for @fengshuiDescription.
   ///
-  /// In en, this message translates to:
-  /// **'How the room is now (optional)'**
+  /// In zh, this message translates to:
+  /// **'房间现状（可不填）'**
   String get fengshuiDescription;
 
   /// No description provided for @fengshuiDescriptionHint.
   ///
-  /// In en, this message translates to:
-  /// **'For example, \"the bed is under the window, the door on the left\". Used only for the reading; no address or floor plan is kept.'**
+  /// In zh, this message translates to:
+  /// **'例如“床在窗下，门在左边”。只用于解读，不会保存地址或平面图。'**
   String get fengshuiDescriptionHint;
 
   /// No description provided for @fengshuiLook.
   ///
-  /// In en, this message translates to:
-  /// **'See the layout'**
+  /// In zh, this message translates to:
+  /// **'看布局'**
   String get fengshuiLook;
 
   /// No description provided for @fengshuiPrinciples.
   ///
-  /// In en, this message translates to:
-  /// **'What to look at in this room'**
+  /// In zh, this message translates to:
+  /// **'这个房间可以留意'**
   String get fengshuiPrinciples;
 
   /// No description provided for @fengshuiNote.
   ///
-  /// In en, this message translates to:
-  /// **'These are general principles of space, not a judgement of your home.'**
+  /// In zh, this message translates to:
+  /// **'这些是通用的空间原则，不是对住宅吉凶的判断。'**
   String get fengshuiNote;
 
   /// No description provided for @fengshuiSections.
   ///
-  /// In en, this message translates to:
-  /// **'The reading has three parts: layout, light and movement, and advice.'**
+  /// In zh, this message translates to:
+  /// **'解读分三部分：布局、光线与动线、建议。'**
   String get fengshuiSections;
 
   /// No description provided for @fengshuiDirection.
   ///
-  /// In en, this message translates to:
-  /// **'Traditionally: {direction} · {trigram} · {element}'**
+  /// In zh, this message translates to:
+  /// **'传统上：{direction} · {trigram} · {element}'**
   String fengshuiDirection(String direction, String trigram, String element);
 
   /// No description provided for @topicFengshuiLayout.
   ///
-  /// In en, this message translates to:
-  /// **'Layout'**
+  /// In zh, this message translates to:
+  /// **'布局'**
   String get topicFengshuiLayout;
 
   /// No description provided for @topicFengshuiFlow.
   ///
-  /// In en, this message translates to:
-  /// **'Light and movement'**
+  /// In zh, this message translates to:
+  /// **'光线与动线'**
   String get topicFengshuiFlow;
 
   /// No description provided for @topicFengshuiAdvice.
   ///
-  /// In en, this message translates to:
-  /// **'Advice'**
+  /// In zh, this message translates to:
+  /// **'建议'**
   String get topicFengshuiAdvice;
 
   /// No description provided for @homeNaming.
   ///
-  /// In en, this message translates to:
-  /// **'Naming'**
+  /// In zh, this message translates to:
+  /// **'起名'**
   String get homeNaming;
 
   /// No description provided for @namingFromChart.
   ///
-  /// In en, this message translates to:
-  /// **'Suggest names for this chart'**
+  /// In zh, this message translates to:
+  /// **'为这个命盘起名'**
   String get namingFromChart;
 
   /// No description provided for @namingSurname.
   ///
-  /// In en, this message translates to:
-  /// **'Surname'**
+  /// In zh, this message translates to:
+  /// **'姓氏'**
   String get namingSurname;
 
   /// No description provided for @namingSurnameHint.
   ///
-  /// In en, this message translates to:
-  /// **'One or two Chinese characters, e.g. 陳 or 歐陽'**
+  /// In zh, this message translates to:
+  /// **'一或两个汉字，例如“陈”或“欧阳”'**
   String get namingSurnameHint;
 
   /// No description provided for @namingLength.
   ///
-  /// In en, this message translates to:
-  /// **'Given name'**
+  /// In zh, this message translates to:
+  /// **'名字'**
   String get namingLength;
 
   /// No description provided for @namingOne.
   ///
-  /// In en, this message translates to:
-  /// **'One character'**
+  /// In zh, this message translates to:
+  /// **'单字名'**
   String get namingOne;
 
   /// No description provided for @namingTwo.
   ///
-  /// In en, this message translates to:
-  /// **'Two characters'**
+  /// In zh, this message translates to:
+  /// **'双字名'**
   String get namingTwo;
 
   /// No description provided for @namingSuggest.
   ///
-  /// In en, this message translates to:
-  /// **'Suggest names'**
+  /// In zh, this message translates to:
+  /// **'起名'**
   String get namingSuggest;
 
   /// No description provided for @namingElements.
   ///
-  /// In en, this message translates to:
-  /// **'Names that serve: {elements}'**
+  /// In zh, this message translates to:
+  /// **'名字所补：{elements}'**
   String namingElements(String elements);
 
   /// No description provided for @namingBalance.
   ///
-  /// In en, this message translates to:
-  /// **'This chart has no favourable element, so the names keep a balance.'**
+  /// In zh, this message translates to:
+  /// **'这个命盘没有明显的喜用，名字以五行平衡为主。'**
   String get namingBalance;
 
   /// No description provided for @namingCandidates.
   ///
-  /// In en, this message translates to:
-  /// **'Candidate names'**
+  /// In zh, this message translates to:
+  /// **'候选名字'**
   String get namingCandidates;
 
   /// No description provided for @namingDraft.
   ///
-  /// In en, this message translates to:
-  /// **'The character library behind these names is still awaiting expert review.'**
+  /// In zh, this message translates to:
+  /// **'这些名字所用的字义库仍待专家校订。'**
   String get namingDraft;
 
   /// No description provided for @namingNote.
   ///
-  /// In en, this message translates to:
-  /// **'A name is a wish and a sound; it decides no one\'s fate.'**
+  /// In zh, this message translates to:
+  /// **'名字是祝福与声音，不决定任何人的命运。'**
   String get namingNote;
 
   /// No description provided for @namingSections.
   ///
-  /// In en, this message translates to:
-  /// **'The reading has two parts: the names, and how to choose.'**
+  /// In zh, this message translates to:
+  /// **'解读分两部分：候选名字、怎么挑选。'**
   String get namingSections;
 
   /// No description provided for @topicNamingCandidates.
   ///
-  /// In en, this message translates to:
-  /// **'The names'**
+  /// In zh, this message translates to:
+  /// **'候选名字'**
   String get topicNamingCandidates;
 
   /// No description provided for @topicNamingAdvice.
   ///
-  /// In en, this message translates to:
-  /// **'Advice'**
+  /// In zh, this message translates to:
+  /// **'建议'**
   String get topicNamingAdvice;
 }
 
@@ -2781,7 +2779,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'zh'].contains(locale.languageCode);
+      <String>['zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2802,8 +2800,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
     case 'zh':
       return AppLocalizationsZh();
   }

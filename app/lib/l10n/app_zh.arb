@@ -32,8 +32,22 @@
   "wuxingWeighted": "五行（加权，简化计分）",
   "dayun": "大运",
   "dayunFrom": "{date} 起运",
+  "@dayunFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "liunian": "流年",
   "age": "虚岁 {age}",
+  "@age": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
   "aiReport": "AI 解读",
   "chooseTopics": "分析方面",
   "generate": "生成 AI 解读",
@@ -74,8 +88,32 @@
   "ritualShuffle": "洗牌",
   "ritualCutHint": "切牌：选一叠，放到最上面。",
   "ritualPile": "第 {n} 叠",
+  "@ritualPile": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "ritualPickHint": "选牌：凭直觉选 {count} 张（已选 {picked} 张）",
+  "@ritualPickHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "picked": {
+        "type": "int"
+      }
+    }
+  },
   "ritualCard": "第 {n} 张牌，背面朝上",
+  "@ritualCard": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "ritualSkip": "让牌组替我选",
   "ritualNote": "牌由系统公平洗好，你在背面朝上时选择；每次抽牌事后都可以核对。",
   "tarotGlossary": "牌义图鉴",
@@ -153,13 +191,41 @@
   "stageGuard": "内容合规审查",
   "stageWaiting": "排队中",
   "elapsed": "已用时 {time}",
+  "@elapsed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "retrying": "上一稿未通过检查，正在重写（第 {n} 次）",
+  "@retrying": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "download": "下载",
   "copyAll": "复制全文",
   "copied": "已复制",
   "more": "更多",
   "chartOf": "{name} 的命盘",
+  "@chartOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "greeting": "你好，{name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "reportTitle": "命理大师 AI 解读",
   "openChart": "查看命盘",
   "timeExact": "精确时间",
@@ -176,17 +242,69 @@
   "trendCompare": "叠加对比",
   "trendTapHint": "点击图上的时期，查看各项分数和依据。",
   "trendAge": "虚岁 {ages}",
+  "@trendAge": {
+    "placeholders": {
+      "ages": {
+        "type": "String"
+      }
+    }
+  },
   "expandAll": "展开全部",
   "collapseAll": "收起全部",
   "remedyTitle": "破除运势",
   "remedyDesc": "针对单个项目的改运方案：写明针对哪一项、哪些时期，并给出具体做法。每个项目单独解锁。",
   "remedyFor": "破除运势：{topic}",
+  "@remedyFor": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
   "remedyUnlock": "解锁 · {price}",
+  "@remedyUnlock": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "remedyView": "查看方案",
   "remedyConfirmTitle": "解锁“{topic}”破除运势方案",
+  "@remedyConfirmTitle": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
   "remedyConfirmBody": "这个方案针对“{topic}”单独收费：{price}。\n支付功能尚未接入（TODO）：现在点确认会直接扣款（演示，不会真实收费）。",
+  "@remedyConfirmBody": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "remedyPay": "确认支付 {price}",
+  "@remedyPay": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "remedyGenerating": "AI 正在为“{topic}”制定方案…",
+  "@remedyGenerating": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      }
+    }
+  },
   "remedyTarget": "针对项目",
   "remedyFocus": "重点时期",
   "remedySteps": "具体做法",
@@ -206,8 +324,25 @@
   "placeAll": "全部",
   "placeNone": "没有符合的结果",
   "placeDetail": "时区 {tz} · 经度 {lon}",
+  "@placeDetail": {
+    "placeholders": {
+      "tz": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
   "placeSource": "地点数据：GeoNames（CC BY 4.0）",
   "serverUnreachable": "无法连接服务器 {url}。\n手机上的 127.0.0.1 指的是手机本身：请在电脑上运行 npm run api:lan，再用手机打开 http://电脑的局域网地址:5000。如果页面是 https，请在网址后面加上 ?api=https 服务器地址。",
+  "@serverUnreachable": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "lifeTitle": "个人情况（选填）",
   "lifeHint": "同时同地出生的人命盘相同，填上你的实际情况，解读才会贴近你本人。信息只保存在本机，只在生成解读时和命盘一起发给 AI。",
   "lifeUseName": "解读时用名字称呼我",
@@ -235,6 +370,13 @@
   "lifeGenerate": "生成一生运势报告",
   "lifeSubtitle": "易经本命卦　|　梅花易数　|　五行八卦",
   "lifeReportOf": "{name} 一生运势报告",
+  "@lifeReportOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "lifeItem": "项目",
   "lifeContent": "内容",
   "lifeName": "姓名",
@@ -282,6 +424,22 @@
   "lifeUnfavorable": "忌",
   "lifeBazhai": "八卦命卦（八宅）",
   "lifeKua": "命卦 {kua} · {name}卦（{group}，五行属{wuxing}）",
+  "@lifeKua": {
+    "placeholders": {
+      "kua": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      },
+      "wuxing": {
+        "type": "String"
+      }
+    }
+  },
   "lifeDaily": "日常宜用",
   "lifeSec4": "四、分项运势",
   "lifeTopicPersonality": "性格",
@@ -329,6 +487,13 @@
   "modeChart": "排盘解读",
   "addTester": "添加新的测试者",
   "editCurrent": "编辑“{name}”的资料",
+  "@editCurrent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "leaveReadingTitle": "返回将重新开始",
   "leaveReadingBody": "这次测算还没有完成，返回后需要重新开始。",
   "leaveFormBody": "本次填写的内容不会保留，返回后需要重新填写。",
@@ -352,6 +517,13 @@
   "keysBrowser": "切换浏览器标签页：这是浏览器自己的快捷键，本应用不占用。应用内切换选项请用 ← →",
   "close": "关闭",
   "cardHidden": "{position}，未翻开",
+  "@cardHidden": {
+    "placeholders": {
+      "position": {
+        "type": "String"
+      }
+    }
+  },
   "tarotQuestion": "你想问的问题（可选）",
   "tarotQuestionHint": "抽牌前先在心里想好一个问题，解读会围绕它展开。",
   "tarotFocus": "想看哪方面（可选）",
@@ -362,8 +534,32 @@
   "focusSelf": "自我",
   "tarotSections": "解读分三部分：逐张解读、综合解读、建议。",
   "tarotQuestionShown": "问题：{question}",
+  "@tarotQuestionShown": {
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  },
   "tarotSlot": "第 {n} 张 · {position}",
+  "@tarotSlot": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "position": {
+        "type": "String"
+      }
+    }
+  },
   "tarotNext": "按牌阵顺序翻牌，下一张：{slot}",
+  "@tarotNext": {
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
   "tarotNextShort": "下一张",
   "tarotZoomHint": "点击小牌放大，在大图里翻开。",
   "tarotAllTurned": "牌已全部翻开。点击任意一张，看大图和位置含义。",
@@ -374,17 +570,68 @@
   "ziNextDayHint": "子时有两种算法；默认 23:00 后出生仍算当天",
   "notDeLing": "不得令",
   "favorableIs": "喜用：{elements}",
+  "@favorableIs": {
+    "placeholders": {
+      "elements": {
+        "type": "String"
+      }
+    }
+  },
   "unfavorableIs": "忌：{elements}",
+  "@unfavorableIs": {
+    "placeholders": {
+      "elements": {
+        "type": "String"
+      }
+    }
+  },
   "specialNote": "宜请有经验的师傅细看",
   "termTipHint": "点击带虚线的术语，查看它的意思。",
   "termTipAbout": "什么是{term}？",
+  "@termTipAbout": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
   "shenshaName": "神煞",
   "timelineNow": "当前",
   "timelineThisYear": "今年",
   "dayunTapHint": "点击一步大运，查看它的十年。",
   "dayunYears": "{ganzhi}大运 · {from}–{to}年",
+  "@dayunYears": {
+    "placeholders": {
+      "ganzhi": {
+        "type": "String"
+      },
+      "from": {
+        "type": "int"
+      },
+      "to": {
+        "type": "int"
+      }
+    }
+  },
   "liuyueOf": "{year}年流月",
+  "@liuyueOf": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
   "pillarRelation": "{pillar}{relation}",
+  "@pillarRelation": {
+    "placeholders": {
+      "pillar": {
+        "type": "String"
+      },
+      "relation": {
+        "type": "String"
+      }
+    }
+  },
   "jumpTo": "跳到",
   "jumpActions": "行动建议",
   "shareImage": "分享图片",
@@ -402,6 +649,13 @@
   "qiuqianAgain": "放回再摇",
   "qiuqianSkip": "直接看结果",
   "qiuqianStickFell": "摇出{title}",
+  "@qiuqianStickFell": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "qiuqianSheng": "圣筊：神明应允，就是这一支",
   "qiuqianXiao": "笑筊：神明一笑，把签放回再求",
   "qiuqianYin": "阴筊：神明未允，把签放回再求",
@@ -426,6 +680,19 @@
   "fengshuiNote": "这些是通用的空间原则，不是对住宅吉凶的判断。",
   "fengshuiSections": "解读分三部分：布局、光线与动线、建议。",
   "fengshuiDirection": "传统上：{direction} · {trigram} · {element}",
+  "@fengshuiDirection": {
+    "placeholders": {
+      "direction": {
+        "type": "String"
+      },
+      "trigram": {
+        "type": "String"
+      },
+      "element": {
+        "type": "String"
+      }
+    }
+  },
   "topicFengshuiLayout": "布局",
   "topicFengshuiFlow": "光线与动线",
   "topicFengshuiAdvice": "建议",
@@ -438,6 +705,13 @@
   "namingTwo": "双字名",
   "namingSuggest": "起名",
   "namingElements": "名字所补：{elements}",
+  "@namingElements": {
+    "placeholders": {
+      "elements": {
+        "type": "String"
+      }
+    }
+  },
   "namingBalance": "这个命盘没有明显的喜用，名字以五行平衡为主。",
   "namingCandidates": "候选名字",
   "namingDraft": "这些名字所用的字义库仍待专家校订。",

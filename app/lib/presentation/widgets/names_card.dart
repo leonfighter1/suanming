@@ -28,7 +28,7 @@ class NamesCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            chart.basis == 'balance' ? l10n.namingBalance : l10n.namingElements(chart.elements.join(locale == 'en' ? ', ' : '、')),
+            chart.basis == 'balance' ? l10n.namingBalance : l10n.namingElements(chart.elements.join('、')),
             key: const Key('naming-elements'),
             style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary),
           ),
@@ -77,7 +77,7 @@ class NamesCard extends ConsumerWidget {
             ),
           // Until the owner has reviewed the 字义库, the card says so.
           Text(
-            chart.reviewed ? l10n.namingNote : '${l10n.namingDraft}${locale == 'en' ? ' ' : ''}${l10n.namingNote}',
+            chart.reviewed ? l10n.namingNote : '${l10n.namingDraft}${l10n.namingNote}',
             key: const Key('naming-note'),
             style: theme.textTheme.bodySmall,
           ),

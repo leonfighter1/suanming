@@ -2,6 +2,21 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ag): S11, the owner's updates; release v5.4.0
+
+- v5.3.0 committed and tagged (b26a1e4) after a harness PASS. As rule 23 predicts, the first run failed at the app gate and the second passed.
+- **Owner request** (mid-S10): the same-size tarot spread icons with the name below; English removed (「这个软件不需要英文支持」); the admin located in Beijing.
+- WP11.1: `SpreadIcon`, one 56 px square per spread with the card width fitted (borders keep their thickness); choices 84 px wide. Looked at with Noto Sans SC in a throwaway golden.
+- WP11.2:
+  - the ARB template is now app_zh.arb, with the 34 metadata entries moved over;
+  - app_en.arb and its generated class are deleted;
+  - supportedAppLocales is zh only, the language menu is two items, and a saved 'en' starts in 简体;
+  - the English branches are removed;
+  - the English-only tests are rewritten for Chinese (timeline, locale, top bar, keyboard shell) or dropped (term tips).
+  - The server's en is kept, unused; that's the owner's call.
+- WP11.3: 管理员 is seeded with 北京 (CN · 北京市 · 北京, GeoNames 1816670), and an untouched old Taipei seed moves on the device. The admin's chart changes with it, including China's 1988 summer time (checked: UTC+9 on 1988-08-08).
+- v5.4.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (af): S10 算卦, the server half; the owner's updates planned (S11); release v5.3.0
 
 - **Owner request: 算卦** (the coins cast automatically, half-automatically by picking from coins laid out before, or by the reader with the exact time and a reminder first; the 八卦, the texts at once or an AI reading; 「卦辞都是直抒胸臆，不用绕」). 六爻 had been parked in S6 as not in the owner's document; now it is their own request.

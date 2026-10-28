@@ -130,6 +130,29 @@ List<MapEntry<int, Rect>> _painted(Map<int, Rect> rects) =>
 
 /// A spread drawn small, before the draw (v2.5.0): each card an outline where it will lie, card 2
 /// of a Celtic Cross across card 1. The same geometry as [TarotSpread] ([spreadRects]).
+/// A spread's diagram in a square of [size] (v5.4.0, the owner): every spread's icon is the same size,
+/// one card or ten, with its cards as large as the square allows, so the choices line up.
+class SpreadIcon extends StatelessWidget {
+  const SpreadIcon({super.key, required this.spreadId, required this.count, this.size = 56});
+  final String spreadId;
+  final int count;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    // The diagram in card widths: a row of cards, or a laid-out spread.
+    final row = spreadRects(spreadId, 1) == null;
+    final wide = row ? (count - 1) * 1.4 + 1 : _spreadWide[spreadId]!;
+    final tall = row ? _ratio : _spreadTall[spreadId]!;
+    return SizedBox.square(
+      dimension: size,
+      child: Center(
+        child: SpreadDiagram(spreadId: spreadId, count: count, cardWidth: min(size / wide, size / tall)),
+      ),
+    );
+  }
+}
+
 class SpreadDiagram extends StatelessWidget {
   const SpreadDiagram({super.key, required this.spreadId, required this.count, this.cardWidth = 8});
   final String spreadId;
@@ -195,7 +218,7 @@ class TarotSpread extends ConsumerWidget {
     String meaning(TarotCardFact c) => terms?.positionMeaning(c.positionKey, locale) ?? '';
     String name(TarotCardFact c) => terms?.card(c.cardId, locale) ?? c.cardId;
     String slot(TarotCardFact c) => l10n.tarotSlot(c.position, position(c));
-    final sep = locale == 'en' ? ', ' : '，';
+    const sep = '，';
     final next = chart.cards.where((c) => !revealed.contains(c.position)).firstOrNull;
     final celtic = chart.spreadId == 'celtic_cross';
 
@@ -590,7 +613,7 @@ class _CardDialogState extends State<_CardDialog> {
     final size = MediaQuery.sizeOf(context);
     final width = min(min(size.width - 136, (size.height - 330) / _ratio), 320.0).clamp(120.0, 320.0).floorToDouble();
     final card = widget.card;
-    final sep = Localizations.localeOf(context).languageCode == 'en' ? ', ' : '，';
+    const sep = '，';
     return compactButtons(
       context,
       AlertDialog(

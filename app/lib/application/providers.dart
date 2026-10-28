@@ -18,15 +18,11 @@ import '../domain/terms.dart';
 
 const zhHant = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
 const zhHans = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
-/// 简体中文 first: the main language (Mainland usage).
-const supportedAppLocales = [zhHans, zhHant, Locale('en')];
+/// 简体中文 first: the main language (Mainland usage). Chinese only: the owner removed English (2026-10-28).
+const supportedAppLocales = [zhHans, zhHant];
 
 /// The API's locale code for an app locale.
-String apiLocale(Locale l) => l.languageCode == 'en'
-    ? 'en'
-    : l.scriptCode == 'Hans'
-        ? 'zh-Hans'
-        : 'zh-Hant';
+String apiLocale(Locale l) => l.scriptCode == 'Hans' ? 'zh-Hans' : 'zh-Hant';
 
 class Settings {
   const Settings({required this.locale});
@@ -54,12 +50,12 @@ final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(SettingsNo
 final settingsStoreProvider = Provider<SettingsStore>((ref) => SecureSettingsStore());
 
 /// The language to start in: the one the reader last picked, else 简体中文 (owner, 2026-10-26).
-/// Storage that can't be read (a private window, no secure context) starts in 简体 too.
+/// Storage that can't be read (a private window, no secure context) starts in 简体 too, and so does
+/// English saved before the owner removed it (v5.4.0).
 Future<Locale> startLocale(SettingsStore store) async {
   try {
     return switch (await store.language()) {
       'zh-Hant' => zhHant,
-      'en' => const Locale('en'),
       _ => zhHans,
     };
   } catch (_) {
@@ -152,6 +148,18 @@ BirthProfile sampleProfile(String name) => BirthProfile(
       cityKey: 'hk',
     );
 
+/// 北京 as the places table has it (CN, 北京市, GeoNames 1816670): the admin's birthplace (owner, v5.4.0).
+const beijing = BirthPlace(
+  country: 'CN',
+  countryNames: PlaceNames('中國', '中国', 'China'),
+  region: '22',
+  regionNames: PlaceNames('北京市', '北京市', 'Beijing'),
+  cityId: 1816670,
+  city: PlaceNames('北京', '北京', 'Beijing'),
+  timezone: 'Asia/Shanghai',
+  longitude: 116.3972,
+);
+
 /// Test accounts get ready-made profiles so testing starts at once.
 bool isTestAccount(AppUser u) {
   final e = (u.email ?? '').toLowerCase();
@@ -175,7 +183,8 @@ List<BirthProfile> testProfiles(AppUser u) => switch ((u.email ?? '').toLowerCas
           name: '管理员',
           gender: 'female',
           birthLocal: DateTime(1988, 8, 8, 8),
-          cityKey: 'taipei',
+          cityKey: 'beijing',
+          place: beijing,
           timeMode: 'shichen',
           shichen: '辰',
         ),
@@ -194,6 +203,19 @@ List<BirthProfile> testProfiles(AppUser u) => switch ((u.email ?? '').toLowerCas
       _ => [sampleProfile('测试用户')],
     };
 
+/// The admin's profile as seeded before v5.4.0 (born in 台北), still untouched on a device, moves to 北京 (the
+/// owner). A profile someone has edited keeps what they chose. Null when there is nothing to move.
+ProfileBook? movedAdminSeed(AppUser u, ProfileBook book) {
+  if ((u.email ?? '').toLowerCase() != 'admin') return null;
+  final i = book.profiles.indexWhere(
+    (p) => p.id == 'default' && p.name == '管理员' && p.place == null && p.cityKey == 'taipei',
+  );
+  if (i < 0) return null;
+  final list = [...book.profiles];
+  list[i] = list[i].copyWith(cityKey: 'beijing', place: beijing);
+  return book.copyWith(profiles: list);
+}
+
 class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
   String? _userId;
   ProfileStore get _store => ref.read(profileStoreProvider);
@@ -206,6 +228,11 @@ class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
     var book = ProfileBook.decode(await _store.read(user.id));
     if (book.profiles.isEmpty && isTestAccount(user)) {
       book = ProfileBook(profiles: testProfiles(user), defaultId: 'default');
+      await _store.write(user.id, book.encode());
+    }
+    final moved = movedAdminSeed(user, book);
+    if (moved != null) {
+      book = moved;
       await _store.write(user.id, book.encode());
     }
     return book;

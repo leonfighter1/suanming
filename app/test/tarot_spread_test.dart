@@ -1,8 +1,10 @@
 // 塔罗 the classic way: each spread laid out as it prescribes, cards turned in dealing order,
 // thumbnails opened large on a phone, the question asked before the draw.
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -104,6 +106,25 @@ void main() {
     ]) {
       final diagram = find.descendant(of: find.byKey(Key('spread-$id')), matching: find.byType(SpreadDiagram));
       expect(find.descendant(of: diagram, matching: find.byType(DecoratedBox)), findsNWidgets(n), reason: id);
+    }
+  });
+
+  testWidgets('every spread choice is the same size: the same icon, its name below in full (owner, v5.4.0)', (tester) async {
+    await openTarot(tester);
+    const ids = ['single', 'three_card', 'celtic_cross', 'two_paths', 'relationship'];
+    Finder within(String id, Finder f) => find.descendant(of: find.byKey(Key('spread-$id')), matching: f);
+    final chips = {for (final id in ids) id: tester.getSize(find.byKey(Key('spread-$id')))};
+    final icons = {for (final id in ids) id: tester.getSize(within(id, find.byType(SpreadIcon)))};
+    expect(chips.values.toSet(), hasLength(1), reason: '$chips');
+    expect(icons.values.toSet(), {const Size(56, 56)});
+    for (final id in ids) {
+      final icon = tester.getRect(within(id, find.byType(SpreadIcon)));
+      final name = within(id, find.byType(Text));
+      expect(tester.getRect(name).top, greaterThan(icon.bottom), reason: id);
+      expect(tester.renderObject<RenderParagraph>(name).didExceedMaxLines, isFalse, reason: id);
+      // The diagram fills its square on its long side, whatever the spread.
+      final drawn = tester.getSize(within(id, find.byType(SpreadDiagram)));
+      expect(max(drawn.width, drawn.height), closeTo(56, 0.01), reason: id);
     }
   });
 

@@ -37,11 +37,13 @@ void main() {
 
     await tester.tap(find.byKey(const Key('language-menu')));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('language-en')));
+    // Chinese only (the owner removed English, v5.4.0): the menu offers 简体 and 繁體, nothing else.
+    expect(find.byKey(const Key('language-zh-Hans')), findsOneWidget);
+    expect(find.byKey(const Key('language-en')), findsNothing);
+    await tester.tap(find.byKey(const Key('language-zh-Hant')));
     await settle(tester);
-    expect(current(tester), 'EN');
-    expect(find.descendant(of: find.byKey(const Key('entry-bazi')), matching: find.text('Bazi chart')), findsOneWidget);
-    expect(find.byTooltip('Settings'), findsOneWidget);
+    expect(current(tester), '繁');
+    expect(find.descendant(of: find.byKey(const Key('entry-bazi')), matching: find.text('八字排盤')), findsOneWidget);
   });
 
   testWidgets('signed out, the sign-in bar has 语言 too', (tester) async {
@@ -69,13 +71,10 @@ void main() {
         final r = tester.getRect(find.byKey(Key(key)));
         expect(r.left >= 0 && r.right <= 360, isTrue, reason: '$key at $r');
       }
-      // The Chinese titles stay whole. (The test font is wider than real Latin
-      // fonts, so the English title may be shortened with … here.)
-      if (locale.languageCode == 'zh') {
-        final name = locale.scriptCode == 'Hans' ? '命理大师' : '命理大師';
-        final title = tester.renderObject<RenderParagraph>(find.descendant(of: find.byType(AppBar), matching: find.text(name)));
-        expect(title.getMaxIntrinsicWidth(double.infinity), lessThanOrEqualTo(title.size.width + 0.5));
-      }
+      // The title stays whole.
+      final name = locale.scriptCode == 'Hans' ? '命理大师' : '命理大師';
+      final title = tester.renderObject<RenderParagraph>(find.descendant(of: find.byType(AppBar), matching: find.text(name)));
+      expect(title.getMaxIntrinsicWidth(double.infinity), lessThanOrEqualTo(title.size.width + 0.5));
     });
   }
 }

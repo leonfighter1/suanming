@@ -9,7 +9,7 @@ import 'keys.dart';
 /// The keyboard layer on its own (no API, no fixtures): runs on the VM and with
 /// `flutter test --platform chrome test/keyboard_shell_test.dart`.
 Widget shellApp(Widget home) => MaterialApp(
-      locale: const Locale('en'),
+      locale: const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (_, navigator) => KeyboardShell(child: navigator!),
@@ -138,7 +138,7 @@ void main() {
 
     await press(tester, LogicalKeyboardKey.escape);
     expect(confirm, findsOneWidget);
-    expect(find.text('Going back starts over'), findsOneWidget);
+    expect(find.text('返回将重新开始'), findsOneWidget);
     await press(tester, LogicalKeyboardKey.escape); // stay
     expect(confirm, findsNothing);
     expect(onPage, findsOneWidget);
@@ -165,7 +165,7 @@ void main() {
 
     await press(tester, LogicalKeyboardKey.slash, control: true);
     expect(list, findsOneWidget);
-    expect(find.text('Keyboard shortcuts'), findsOneWidget);
+    expect(find.text('键盘快捷键'), findsOneWidget);
     expect(find.text('Ctrl + Tab'), findsOneWidget);
     await press(tester, LogicalKeyboardKey.slash, control: true); // already open: no second copy
     expect(list, findsOneWidget);
