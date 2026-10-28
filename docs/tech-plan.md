@@ -248,10 +248,10 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 
 ## S4 八字与全局 UI (big → v4.0.0)
 
-Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, then one X.Y.0 per WP;
-the last goes out as **v4.0.0** with the S4 summary, pushed with every release since v3.1.0. Lessons to read first:
-P7 (buttons in rows), P15 (no dart format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), the keyboard-access
-checklist.
+Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, **v3.2.0** = WP4.2, then
+one X.Y.0 per WP; the last goes out as **v4.0.0** with the S4 summary, pushed with every release since v3.1.0. Lessons
+to read first: P7 (buttons in rows), P15 (no dart format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), P32
+(non-empty checks), the keyboard-access checklist.
 
 - WP4.1 Stems and branches coloured by 五行; 藏干 / 长生 / 纳音 rows folded under 更多.
   - As built (v3.1.0):
@@ -266,12 +266,48 @@ checklist.
       so the small coloured 藏干 keep their contrast).
 - WP4.2 Term tips: a glossary (十神, 十二长生, 纳音, 空亡, 神煞, 大运, 流年, 旺衰 …) in three languages, one source on
   the server, synced; tapping a term opens its plain explanation.
+  - As built (v3.2.0):
+    - One source, `src/ai/term-tips.ts`, synced as `app/assets/i18n/term_tips.json`. It has 63 tips. 简体 and
+      English are written by hand. 繁體 is built at sync: protected terms first, then OpenCC cn → tw, then the
+      reviewed fixes.
+    - The G18 review of all 63 found five slips, now fixed:
+      - the branch 丑 had become 醜;
+      - 三合 had become 三閤;
+      - 藏干 had become 藏幹 once;
+      - 克 appeared where 命理 writes 剋;
+      - the 简体 “” quotes needed to be 「」.
+    - The tips use tendency language only: 羊刃 is drive, 桃花 charm, 空亡 a quieter area, and 死 strength at rest.
+    - On the 命盘 page, these terms are underlined with dots and open their tip (`TermTip`, built on `Pressable`, so
+      Tab and Enter work):
+      - the 四柱 row labels, every 十神 and every 十二长生;
+      - the 旺衰 pills (one tip covers 喜用 and 忌);
+      - 神煞, 空亡 and 胎元;
+      - the 刑冲合害 types.
+    - The 五行, 神煞, 大运 and 流年 cards have a 什么是…？ button (`TermTipButton`), and a line under the table says
+      the dotted terms can be tapped.
+    - Found and fixed: 衰, 病, 死, 墓 and 胎 were missing from the term table, so the English page showed them in
+      Chinese. They are single characters, which `glossaryFor`, `normalizeTerms` and the faithfulness check skip,
+      so no prompt changed and no fixture changed.
+    - Tests (`test/term-tips.test.ts`):
+      - Every term the page can show has a tip. The 十神 and 十二长生 come from the engine's own `tenGod` and
+        `diShi`. A `Record` over each engine union (relations, 神煞, 旺衰) fails the typecheck when a new member is
+        added.
+      - Quotes are right for each script.
+      - The G18 fixes hold.
+      - A hash pins the reviewed tips, so any change means a new review (`scripts/print-term-tips.ts`).
+      - The compliance rule layer finds nothing in any region.
+    - App tests: tap, English, and keyboard (Tab, Enter, Esc; the focus returns to the term).
+    - Not yet: the 一生运势报告 page's terms (WP4.6 gives them `TermTip` when it splits the page) and short English
+      names in the table (WP4.8).
 - WP4.3 Timeline: the current 大运 and 流年 marked; tapping a 大运 shows its ten years; 流月 shown.
 - WP4.4 首页: 一生运势报告 as its own entry, 今日 (每日一牌), recent readings.
 - WP4.5 Reading page: the chart or spread on top, a jump list, share as an image.
-- WP4.6 Split `life_report_page.dart` (991 lines) and `profiles_page.dart` (596) into widgets.
+- WP4.6 Split `life_report_page.dart` (991 lines) and `profiles_page.dart` (596) into widgets. The split
+  life report's terms get the WP4.2 tips (`TermTip`).
 - WP4.7 (found in S1) Widget tests reach cards through `scrollTo()` in `test/support.dart` (rule 27). Ten test files
   still call `scrollUntilVisible` directly.
+- WP4.8 (found in WP4.2) On a phone, the English names in the 四柱 table break mid-word ("Compani on (Bi Jian)"):
+  give the table a short English form (Companion), with the full name kept for the tip's title.
 
 ## S5 数据持久化 (medium → v4.1.0)
 
@@ -416,5 +452,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP3.5     | done                       | v2.8.0          |
 | WP3.6     | done                       | v3.0.0          |
 | WP4.1     | done                       | v3.1.0          |
-| WP4.2–4.7 | todo                       | v3.2.0 … v4.0.0 |
+| WP4.2     | done                       | v3.2.0          |
+| WP4.3–4.8 | todo                       | v3.3.0 … v4.0.0 |
 | S5–S6     | todo                       | above           |

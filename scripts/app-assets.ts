@@ -3,6 +3,7 @@
  * never keeps its own copy:
  *   app/assets/i18n/terms.json      ← i18n/terms.json (protected terms)
  *   app/assets/i18n/tarot_deck.json ← src/engines/tarot/deck.ts (78 card names)
+ *   app/assets/i18n/term_tips.json  ← src/ai/term-tips.ts (what each 八字 term means)
  *   app/test/fixtures/*.json        ← real engine + pipeline (mock provider) outputs
  * test/app-assets.test.ts fails when these are stale. Run: npm run sync:app
  * (this module only builds; scripts/sync-app-assets.ts writes).
@@ -15,6 +16,7 @@ import {
   MockProvider,
   NO_PLAN_TOPICS,
   TAROT_FOCUS,
+  termTips,
   TOPICS_BY_SYSTEM,
 } from "../src/ai/index.js";
 import {
@@ -217,6 +219,8 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       // Each card's three keywords, as painted on the art (牌义图鉴, v2.7.0).
       keywords: KEYWORDS,
     },
+    // Tapping a term on the 命盘 opens its plain explanation (v3.2.0).
+    "app/assets/i18n/term_tips.json": { tips: termTips() },
     "app/test/fixtures/chart_bazi.json": {
       chart_id: "22222222-2222-4222-8222-222222222222",
       chart_fact: bazi,

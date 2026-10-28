@@ -12,6 +12,7 @@ import 'labels.dart';
 import 'theme.dart';
 import 'life_report_page.dart';
 import 'widgets/report_request.dart';
+import 'widgets/term_tip.dart';
 
 /// 四柱 · 農曆對照 · 五行 · 大運 · 流年, then the AI reading request.
 class BaziChartPage extends ConsumerWidget {
@@ -67,6 +68,7 @@ class BaziChartPage extends ConsumerWidget {
       AppCard(
         title: l10n.wuxingWeighted,
         icon: Icons.donut_large,
+        trailing: TermTipButton('五行', t('五行')),
         child: Column(
           children: [
             for (final e in b.wuxingWeighted.entries) _WuxingBar(e.key, e.value, t(e.key)),
@@ -80,13 +82,14 @@ class BaziChartPage extends ConsumerWidget {
                   spacing: Space.s,
                   runSpacing: Space.s,
                   children: [
-                    Pill(t(s.verdict)),
-                    Pill(s.deLing ? t('得令') : l10n.notDeLing),
+                    TermTip(s.verdict, t(s.verdict), pill: true),
+                    TermTip('得令', s.deLing ? t('得令') : l10n.notDeLing, pill: true),
                     if (s.special != null)
-                      Pill('${t(s.special!)} · ${l10n.specialNote}')
+                      TermTip(s.special!, '${t(s.special!)} · ${l10n.specialNote}', title: t(s.special!), pill: true)
                     else if (s.favorable.isNotEmpty) ...[
-                      Pill(l10n.favorableIs(s.favorable.map(t).join('、'))),
-                      Pill(l10n.unfavorableIs(s.unfavorable.map(t).join('、'))),
+                      // One tip explains both 喜用 and 忌.
+                      TermTip('喜用', l10n.favorableIs(s.favorable.map(t).join('、')), pill: true),
+                      TermTip('喜用', l10n.unfavorableIs(s.unfavorable.map(t).join('、')), pill: true),
                     ],
                   ],
                 ),
@@ -101,15 +104,20 @@ class BaziChartPage extends ConsumerWidget {
           key: const Key('shensha-card'),
           title: l10n.shenshaTitle,
           icon: Icons.auto_awesome_outlined,
+          trailing: TermTipButton('神煞', l10n.shenshaName),
           child: Wrap(
             spacing: Space.s,
             runSpacing: Space.s,
             children: [
-              for (final s in b.shensha) Pill('${t(s.name)} · ${s.pillars.map(l10n.pillar).join('、')}'),
-              Pill(
+              for (final s in b.shensha)
+                TermTip(s.name, '${t(s.name)} · ${s.pillars.map(l10n.pillar).join('、')}', title: t(s.name), pill: true),
+              TermTip(
+                '空亡',
                 '${t('空亡')} ${b.kongwang}${b.kongwangPillars.isEmpty ? '' : ' · ${b.kongwangPillars.map(l10n.pillar).join('、')}'}',
+                title: t('空亡'),
+                pill: true,
               ),
-              if (b.taiyuan != null) Pill('${t('胎元')} ${b.taiyuan}'),
+              if (b.taiyuan != null) TermTip('胎元', '${t('胎元')} ${b.taiyuan}', title: t('胎元'), pill: true),
             ],
           ),
         ),
@@ -126,6 +134,7 @@ class BaziChartPage extends ConsumerWidget {
                   t(r.type),
                   '${r.members.map((m) => '${l10n.pillar(m.$1)}${m.$2}').join(' · ')}'
                       '${r.element == null ? '' : '（${t(r.element!)}）'}',
+                  tip: r.type,
                 ),
             ],
           ),
@@ -133,9 +142,15 @@ class BaziChartPage extends ConsumerWidget {
       AppCard(
         title: l10n.dayun,
         icon: Icons.timeline,
-        trailing: Text(
-          '${t(b.dayunForward ? '顺行' : '逆行')} · ${l10n.dayunFrom(b.dayunStartDate)}',
-          style: Theme.of(context).textTheme.bodySmall,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${t(b.dayunForward ? '顺行' : '逆行')} · ${l10n.dayunFrom(b.dayunStartDate)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            TermTipButton('大运', l10n.dayun),
+          ],
         ),
         child: _Timeline(
           key: const Key('dayun-strip'),
@@ -146,6 +161,7 @@ class BaziChartPage extends ConsumerWidget {
       AppCard(
         title: l10n.liunian,
         icon: Icons.calendar_view_month,
+        trailing: TermTipButton('流年', l10n.liunian),
         child: _Timeline(
           key: const Key('liunian-strip'),
           label: l10n.liunian,
@@ -193,23 +209,31 @@ class BaziChartPage extends ConsumerWidget {
 }
 
 class _KV extends StatelessWidget {
-  const _KV(this.k, this.v);
+  const _KV(this.k, this.v, {this.tip});
   final String k;
   final String v;
 
+  /// The term [k] names, when tapping it explains it (a relation type).
+  final String? tip;
+
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: Space.xs),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 64,
-              child: Text(k, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-            ),
-            Expanded(child: Text(v, style: Theme.of(context).textTheme.bodyLarge)),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Space.xs),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 64,
+            child: tip == null
+                ? Text(k, style: style)
+                : Align(alignment: Alignment.centerLeft, child: TermTip(tip!, k, style: style)),
+          ),
+          Expanded(child: Text(v, style: Theme.of(context).textTheme.bodyLarge)),
+        ],
+      ),
+    );
+  }
 }
 
 /// The four pillars: 十神, 天干 and 地支 always; 藏干, its 十神, 长生 and 纳音 under 更多 (v3.1.0),
@@ -234,12 +258,13 @@ class _PillarGridState extends State<_PillarGrid> {
     final p = [for (final k in BaziChart.pillarOrder) chart.pillars[k]!];
     final small = Theme.of(context).textTheme.bodySmall;
     final scheme = Theme.of(context).colorScheme;
-    TableRow row(String label, Widget Function(Pillar) cell, {bool shaded = false}) => TableRow(
+    // [tip]: the term the row label names, so tapping the label explains the row.
+    TableRow row(String label, Widget Function(Pillar) cell, {String? tip, bool shaded = false}) => TableRow(
           decoration: shaded ? BoxDecoration(color: scheme.surfaceContainerHighest.withValues(alpha: 0.5)) : null,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: Space.s - 2, horizontal: Space.xs),
-              child: Text(label, style: small),
+              child: tip == null ? Text(label, style: small) : TermTip(tip, label, style: small),
             ),
             for (final x in p)
               Center(child: Padding(padding: const EdgeInsets.symmetric(vertical: Space.s - 2), child: cell(x))),
@@ -255,18 +280,31 @@ class _PillarGridState extends State<_PillarGrid> {
             columnWidths: const {0: IntrinsicColumnWidth()},
             children: [
               row('', (x) => Text(l10n.pillar(BaziChart.pillarOrder[p.indexOf(x)]), style: small), shaded: true),
-              row(l10n.rowTenGod, (x) => Text(t(x.shishenGan))),
-              row(l10n.rowStem, (x) => GanZhiText(x.gan, size: 30)),
-              row(l10n.rowBranch, (x) => GanZhiText(x.zhi, size: 30)),
+              // Each 十神 and 长生 opens its tip (v3.2.0); the day pillar's own cell is 日主.
+              row(l10n.rowTenGod, (x) => TermTip(x.shishenGan, t(x.shishenGan), textAlign: TextAlign.center), tip: '十神'),
+              row(l10n.rowStem, (x) => GanZhiText(x.gan, size: 30), tip: '天干'),
+              row(l10n.rowBranch, (x) => GanZhiText(x.zhi, size: 30), tip: '地支'),
               // Coloured 藏干 lie on the card itself, not a shaded row: small text keeps its contrast.
               if (_more) ...[
-                row(l10n.rowHidden, (x) => GanZhiText(x.hiddenGan.join(), size: 14)),
-                row(l10n.rowTenGod, (x) => Text(x.shishenZhi.map(t).join(' '), style: small, textAlign: TextAlign.center)),
-                row(l10n.rowLifeStage, (x) => Text(t(x.dishi))),
-                row(l10n.rowNayin, (x) => Text(t(x.nayin), style: small)),
+                row(l10n.rowHidden, (x) => GanZhiText(x.hiddenGan.join(), size: 14), tip: '藏干'),
+                row(
+                  l10n.rowTenGod,
+                  (x) => Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: Space.xs,
+                    children: [for (final s in x.shishenZhi) TermTip(s, t(s), style: small, textAlign: TextAlign.center)],
+                  ),
+                  tip: '十神',
+                ),
+                row(l10n.rowLifeStage, (x) => TermTip(x.dishi, t(x.dishi), textAlign: TextAlign.center), tip: '十二长生'),
+                row(l10n.rowNayin, (x) => Text(t(x.nayin), style: small), tip: '纳音'),
               ],
             ],
           ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: Space.s),
+          child: Text(l10n.termTipHint, style: small?.copyWith(color: scheme.onSurfaceVariant)),
         ),
         Align(
           alignment: Alignment.centerRight,

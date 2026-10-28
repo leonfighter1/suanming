@@ -1,6 +1,6 @@
 {
   "_readme": "Protected term table (Phase 1 §2.3). Keys are the canonical engine form (simplified, as lunar-javascript emits). Values are the only allowed display form per locale. Hand-curated; never machine-translated. Shipped with the app and hot-updatable.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "terms": {
     "比肩": {
       "zh-Hant": "比肩",
@@ -82,10 +82,35 @@
       "zh-Hans": "帝旺",
       "en": "Peak (Di Wang)"
     },
+    "衰": {
+      "zh-Hant": "衰",
+      "zh-Hans": "衰",
+      "en": "Decline (Shuai)"
+    },
+    "病": {
+      "zh-Hant": "病",
+      "zh-Hans": "病",
+      "en": "Sickness (Bing)"
+    },
+    "死": {
+      "zh-Hant": "死",
+      "zh-Hans": "死",
+      "en": "Death (Si)"
+    },
+    "墓": {
+      "zh-Hant": "墓",
+      "zh-Hans": "墓",
+      "en": "Tomb (Mu)"
+    },
     "绝": {
       "zh-Hant": "絕",
       "zh-Hans": "绝",
       "en": "Severed (Jue)"
+    },
+    "胎": {
+      "zh-Hant": "胎",
+      "zh-Hans": "胎",
+      "en": "Conception (Tai)"
     },
     "养": {
       "zh-Hant": "養",

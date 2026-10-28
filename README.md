@@ -12,6 +12,35 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v3.2.0 (2026-10-28): tap a term on the 命盘 to see what it means
+
+Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.2. A medium update: committed
+locally, pushed with v4.0.0.
+
+- 命盘 page: terms underlined with dots can be tapped. Each opens a short, plain explanation in the reader's script
+  (简体, 繁體 or English), for someone who has never studied 命理. Close it with 关闭 or Esc.
+  - The 四柱 table: each row's name (十神, 天干, 地支, 藏干, 十二长生, 纳音) and every 十神 and 十二长生 in it.
+  - 旺衰: 身强 / 身弱 / 中和, 得令, and 喜用 and 忌 (one tip explains both).
+  - 神煞 (天乙贵人, 文昌, 禄神, 羊刃, 桃花, 驿马, 华盖), 空亡 and 胎元.
+  - 原局刑冲合害: each type, from 天干五合 to 相破.
+  - The 五行, 神煞, 大运 and 流年 cards have a ? button that explains the card's subject.
+- Tone: the tips describe tendencies and never frighten. 羊刃 is drive, not danger. 桃花 is charm, not an affair. 空亡
+  is a quieter area, not loss. 死 is strength at rest, not death.
+- English page: the 十二长生 stages 衰, 病, 死, 墓 and 胎 had no English name and showed in Chinese. They now read
+  Decline, Sickness, Death, Tomb and Conception.
+- Keyboard: Tab reaches each term, Enter opens it, and Esc closes it and returns to the same term.
+- How it was made: one source on the server (`src/ai/term-tips.ts`), copied to the app by `npm run sync:app`. The
+  繁體 is converted from the 简体 and every tip was checked by hand. Five conversion slips are fixed, among them
+  丑 (not 醜) and 剋. Readings and prompts are unchanged.
+- Verified:
+  - 6 new server tests:
+    - every term the page can show has a tip, derived from the engine;
+    - quotes and characters are right for each script;
+    - the reviewed text is pinned;
+    - the compliance rules find nothing.
+  - 3 new app tests: tapping in 繁體, the English page, and the keyboard path.
+  - All 308 server tests and 108 app tests pass; harness PASS.
+
 ### v3.1.0 (2026-10-28): 五行 colours you can read, and a calmer 四柱 table
 
 Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.1. A medium update: committed

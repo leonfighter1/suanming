@@ -1191,6 +1191,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get specialNote => '宜请有经验的师傅细看';
+
+  @override
+  String get termTipHint => '点击带虚线的术语，查看它的意思。';
+
+  @override
+  String termTipAbout(String term) {
+    return '什么是$term？';
+  }
+
+  @override
+  String get shenshaName => '神煞';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2379,4 +2390,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get specialNote => '宜請有經驗的師傅細看';
+
+  @override
+  String get termTipHint => '點選帶虛線的術語，查看它的意思。';
+
+  @override
+  String termTipAbout(String term) {
+    return '什麼是$term？';
+  }
+
+  @override
+  String get shenshaName => '神煞';
 }

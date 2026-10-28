@@ -307,7 +307,8 @@ it("every 纳音 and 十神/十二长生 name the engine can emit is in the prot
   );
   expect(nayin).toHaveLength(30);
   const tenGods = ["比肩", "劫财", "食神", "伤官", "偏财", "正财", "七杀", "正官", "偏印", "正印"];
-  const stages = ["长生", "沐浴", "冠带", "临官", "帝旺", "绝", "养"];
+  // All twelve since v3.2.0: 衰 病 死 墓 胎 read the same in both scripts but need an English name.
+  const stages = ["长生", "沐浴", "冠带", "临官", "帝旺", "衰", "病", "死", "墓", "绝", "胎", "养"];
   expect([...nayin, ...tenGods, ...stages].filter((k) => !terms[k])).toEqual([]);
 });
 

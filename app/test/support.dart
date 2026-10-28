@@ -20,6 +20,7 @@ Map<String, dynamic> fixture(String name) =>
 final testTerms = Terms.parse(
   File('assets/i18n/terms.json').readAsStringSync(),
   File('assets/i18n/tarot_deck.json').readAsStringSync(),
+  File('assets/i18n/term_tips.json').readAsStringSync(),
 );
 
 /// The page's main vertical list (pages also contain horizontal timelines).

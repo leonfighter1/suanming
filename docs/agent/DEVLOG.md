@@ -2,6 +2,29 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (t): S4 WP4.2, term tips on the 命盘; release v3.2.0
+
+- Server:
+  - `src/ai/term-tips.ts` holds 63 tips. 简体 and English are written by hand; 繁體 goes through `normalizeTerms`, then OpenCC, then `TERM_TIP_HANT_FIXES`.
+  - The G18 review (`scripts/print-term-tips.ts`, plus a scratch sweep of the one-to-many characters) found 子醜, 三閤, 藏幹, 克 for 剋, and “” in 繁體. All are fixed.
+  - The tips are synced as `term_tips.json`.
+  - `test/term-tips.test.ts` derives every 十神 and 十二长生 from the engine, and uses `Record`s over the engine unions so a new relation or 神煞 fails the typecheck. It also pins the reviewed text with a hash and runs the rule layer over all regions.
+- Found: 衰 病 死 墓 胎 were missing from `i18n/terms.json`, so the English page showed them in Chinese. They are added (term table 1.1.0). Single characters stay out of the glossary and normalisation, so no fixture changed, which confirms the prompts are untouched. The pipeline test now lists all 12 stages.
+- App:
+  - `Terms.tip`; `TermTip` (dotted underline, `Pressable`); `TermTipButton` (the cards' ? button); `Pill(dotted:)`.
+  - Applied to the 四柱 labels and cells, the 旺衰 pills, 神煞 / 空亡 / 胎元 and the relation types.
+  - Hint line under the table.
+  - Checked by rendering the page and the dialog in both languages.
+- Mistakes:
+  - Rule 32 (`expect.any(String)` matches `''`, caught on review).
+  - Rule 22 widened: render the root layer to include a dialog.
+  - Rule 30 widened: no `tsx -e`; check CJK in a script, since Git Bash's grep isn't UTF-8 here.
+  - G3 again: I reached for `python` for an edit, and it is still the store stub.
+- Plan:
+  - WP4.6 now also gives the split life report its tips.
+  - New WP4.8: short English names for the 四柱 table, whose cells break mid-word on a phone.
+- v3.2.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (s): v3.0.0 pushed; S4 WP4.1, readable 五行 colours, folded 四柱 rows; release v3.1.0
 
 - v3.0.0 pushed with v2.1.0–v2.8.0 after a fresh harness PASS; CI and Pages green for ca14148.

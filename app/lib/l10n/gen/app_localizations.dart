@@ -2354,6 +2354,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'worth a closer look by a practitioner'**
   String get specialNote;
+
+  /// No description provided for @termTipHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a dotted term to see what it means.'**
+  String get termTipHint;
+
+  /// No description provided for @termTipAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About {term}'**
+  String termTipAbout(String term);
+
+  /// No description provided for @shenshaName.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbolic stars (Shen Sha)'**
+  String get shenshaName;
 }
 
 class _AppLocalizationsDelegate

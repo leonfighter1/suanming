@@ -250,10 +250,13 @@ class HeroBanner extends StatelessWidget {
 
 /// Small rounded label (status, source level, stage).
 class Pill extends StatelessWidget {
-  const Pill(this.text, {super.key, this.color, this.icon});
+  const Pill(this.text, {super.key, this.color, this.icon, this.dotted = false});
   final String text;
   final Color? color;
   final IconData? icon;
+
+  /// Underline the text with dots: a term that opens its tip (TermTip).
+  final bool dotted;
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +268,15 @@ class Pill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[Icon(icon, size: 14, color: c), const SizedBox(width: Space.xs)],
-          Text(text, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: c, fontWeight: FontWeight.w600)),
+          Text(
+            text,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: c,
+                  fontWeight: FontWeight.w600,
+                  decoration: dotted ? TextDecoration.underline : null,
+                  decorationStyle: dotted ? TextDecorationStyle.dotted : null,
+                ),
+          ),
         ],
       ),
     );

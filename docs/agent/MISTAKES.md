@@ -23,7 +23,7 @@
 19. In widget tests, pump a frame between enterText (or any setState) and the next key press; use press() from test/keys.dart.
 20. Check whether a DropdownMenu is open with find.text(entry).hitTestable(), never a plain find.text.
 21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
-22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead.
+22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead. A dialog lies in the overlay, above the page's first RepaintBoundary: to include it, render the root layer, `(tester.binding.renderViews.first.debugLayer as OffsetLayer).toImage(...)` (v3.2.0).
 23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; the guard blocks `cmd /c rmdir` on a junction that points at the repo, so when it can't be removed, leave it and expect the next harness run to need a second try. After a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more.
 24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
 25. In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta.
@@ -31,10 +31,17 @@
 27. Pump a frame after scrollUntilVisible or tester.ensureVisible, before the next finder, tap or scroll: both jump without a frame, so the next step sees the old layout (a tap goes to the old position). Use scrollTo() from test/support.dart for each card.
 28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
 29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one.
-30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up.
+30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports (never `tsx -e`: Git Bash passes the newlines as `\n`), and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up. Check CJK text in such a script or with the Grep tool: Git Bash's grep here is not UTF-8 (`-P` refuses, `-o` splits characters) (v3.2.0).
 31. In 简体 copy (app_zh.arb, 简体 prompts), quote with “”, never 「」; write each script on its own instead of converting, and let locale_test check.
+32. To check that text is not empty, assert `expect(text.trim()).not.toBe('')`: `expect.any(String)` also matches `''`. Read each new assertion once for what it would let through.
 
 ## Log
+
+### 2026-10-28: A non-empty check accepted an empty string
+- **Symptom:** The new term tips test checked that every tip has text with expect.any(String); an empty tip would have passed. Caught on review, before any tip was empty.
+- **Root cause:** expect.any(String) checks only the type, and an empty string is a String.
+- **Fix:** Each script is checked with `expect(text.trim(), name).not.toBe('')`.
+- **Rule:** To check that text is not empty, assert `expect(text.trim()).not.toBe('')`: `expect.any(String)` also matches `''`. Read each new assertion once for what it would let through. (Rule 32)
 
 ### 2026-10-28: 简体 copy quoted with 「」
 - **Symptom:** locale_test failed: the new 简体 ritual hint read 按「洗牌」

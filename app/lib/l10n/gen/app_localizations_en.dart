@@ -1234,4 +1234,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get specialNote => 'worth a closer look by a practitioner';
+
+  @override
+  String get termTipHint => 'Tap a dotted term to see what it means.';
+
+  @override
+  String termTipAbout(String term) {
+    return 'About $term';
+  }
+
+  @override
+  String get shenshaName => 'Symbolic stars (Shen Sha)';
 }

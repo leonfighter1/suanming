@@ -375,5 +375,8 @@
   "notDeLing": "不得令",
   "favorableIs": "喜用：{elements}",
   "unfavorableIs": "忌：{elements}",
-  "specialNote": "宜請有經驗的師傅細看"
+  "specialNote": "宜請有經驗的師傅細看",
+  "termTipHint": "點選帶虛線的術語，查看它的意思。",
+  "termTipAbout": "什麼是{term}？",
+  "shenshaName": "神煞"
 }

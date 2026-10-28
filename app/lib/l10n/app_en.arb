@@ -564,5 +564,15 @@
       }
     }
   },
-  "specialNote": "worth a closer look by a practitioner"
+  "specialNote": "worth a closer look by a practitioner",
+  "termTipHint": "Tap a dotted term to see what it means.",
+  "termTipAbout": "About {term}",
+  "@termTipAbout": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "shenshaName": "Symbolic stars (Shen Sha)"
 }
