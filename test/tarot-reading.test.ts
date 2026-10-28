@@ -61,14 +61,15 @@ describe("tarot reading, the classic way", () => {
     const tarotAi = spy();
     const tarot = await generateReport(
       celtic,
-      { locale: "zh-Hans", country: "HK", topics: ["career_wealth"], question: "我该不该换工作？" },
+      { locale: "zh-Hans", country: "HK", focus: "career_wealth", question: "我该不该换工作？" },
       { providers: { deepseek: tarotAi, anthropic: tarotAi }, now: FIXED_NOW },
     );
-    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@1,action_tarot@1,guard@2");
+    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@2,action_tarot@2,guard@2");
     const reading = tarotAi.sent.find((r) => r.agent === "narrative")!;
     expect(reading.system).toBe(PROMPTS.narrative_tarot.system);
     expect(reading.user).toContain("<spread>");
     expect(reading.user).toContain("<user_question>\n我该不该换工作？");
+    expect(reading.user).toContain("<focus>\ncareer_wealth (事业财运)\n</focus>");
 
     const baziAi = spy();
     const bazi = computeBazi(
@@ -88,6 +89,77 @@ describe("tarot reading, the classic way", () => {
     expect(PROMPTS.narrative.id).toBe("narrative@4");
     expect(promptHash(PROMPTS.narrative)).toBe("49007c9a8aba351e");
     expect(baziReading.user).not.toContain("<spread>");
+  });
+
+  it("a tarot reading has its own sections: every card in order, the whole spread, the advice", async () => {
+    const ai = spy();
+    const r = await generateReport(
+      celtic,
+      { locale: "zh-Hans", country: "HK", focus: "relationships", question: "这段关系会怎样？" },
+      { providers: { deepseek: ai, anthropic: ai }, now: FIXED_NOW },
+    );
+    expect(r.status).toBe("passed");
+    expect(r.topics).toEqual(["tarot_cards", "tarot_synthesis", "tarot_advice"]);
+    const [cardsSection, story, advice] = r.layers!.interpretation;
+    expect([cardsSection!.topic, story!.topic, advice!.topic]).toEqual(r.topics);
+    // One paragraph per card, in dealing order: all ten of a Celtic Cross, past the cap of four.
+    expect(cardsSection!.paragraphs.map((p) => p.fact_refs)).toEqual(
+      cards.map((_, i) => [`/cards/${i}`]),
+    );
+    // A tarot reading's actions follow its advice.
+    expect(new Set(r.layers!.actions.map((a) => a.topic))).toEqual(new Set(["tarot_advice"]));
+    expect(ai.sent.find((x) => x.agent === "narrative")!.user).toContain(
+      "<focus>\nrelationships (婚姻感情)\n</focus>",
+    );
+  });
+
+  it("a reading that skips a card is asked again, naming the card", async () => {
+    const three = draw("three_card");
+    const section = (topic: string, refs: string[][]) => ({
+      topic,
+      summary: "x",
+      paragraphs: refs.map((fact_refs) => ({
+        text: "（示范）牌义。",
+        source_level: "traditional_text",
+        fact_refs,
+      })),
+    });
+    const skipping = {
+      kind: "ok" as const,
+      data: {
+        sections: [
+          section("tarot_cards", [["/cards/0"], ["/cards/1"]]), // card 3 (/cards/2) left out
+          section("tarot_synthesis", [["/cards/0"]]),
+          section("tarot_advice", [["/cards/2"]]),
+        ],
+      },
+    };
+    const mock = new MockProvider({ narrative: [skipping] });
+    await generateReport(
+      three,
+      { locale: "zh-Hans", country: "HK" },
+      { providers: { deepseek: mock }, now: FIXED_NOW },
+    );
+    const asks = mock.calls.filter((c) => c.agent === "narrative");
+    expect(asks).toHaveLength(2);
+    expect(asks[1]!.user).toContain(
+      "tarot_cards must read every card in dealing order; not read: /cards/2",
+    );
+  });
+
+  it("focus is a tarot option, and only the four areas", async () => {
+    const mock = new MockProvider();
+    const deps = { providers: { deepseek: mock }, now: FIXED_NOW };
+    const bazi = computeBazi(
+      { local: "1990-03-15T14:30", timezone: "Asia/Hong_Kong", longitude: 114.17, gender: "male" },
+      { digestPepper: PEPPER, now: FIXED_NOW },
+    );
+    await expect(
+      generateReport(bazi, { locale: "zh-Hans", country: "HK", focus: "health" }, deps),
+    ).rejects.toThrow(/focus is for tarot readings/);
+    await expect(
+      generateReport(celtic, { locale: "zh-Hans", country: "HK", focus: "money" as never }, deps),
+    ).rejects.toThrow(/focus is for tarot readings/);
   });
 
   it("the tarot prompt stands on its own: no 八字 rules in it", () => {

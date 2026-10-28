@@ -18,12 +18,16 @@ class ReportRequest extends ConsumerStatefulWidget {
     this.context,
     this.place,
     this.question,
+    this.focus,
   });
   final String chartId;
   final String system;
 
   /// 塔罗: what the user asked before drawing (POST /v1/reports `question`).
   final String? question;
+
+  /// 塔罗: the area of life the reading looks at (POST /v1/reports `focus`, contract `tarotFocus`).
+  final String? focus;
 
   /// What the user told us about their life (POST /v1/reports `context`).
   final Map<String, Object?>? context;
@@ -54,6 +58,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             locale: settings.apiLocaleCode,
             topics: _available.where(_selected.contains).toList(),
             question: widget.question,
+            focus: widget.focus,
             context: widget.context,
           );
       ref.invalidate(historyProvider);
@@ -78,20 +83,25 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.chooseTopics, style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: Space.s),
-          Wrap(
-            spacing: Space.s,
-            runSpacing: Space.s,
-            children: [
-              for (final t in _available)
-                FilterChip(
-                  label: Text(l10n.topic(t)),
-                  selected: _selected.contains(t),
-                  onSelected: (on) => setState(() => on ? _selected.add(t) : _selected.remove(t)),
-                ),
-            ],
-          ),
+          // A tarot reading's sections are fixed (v2.3.0): card by card, the whole spread, the advice.
+          if (widget.system == 'tarot')
+            Text(l10n.tarotSections, key: const Key('tarot-sections'), style: Theme.of(context).textTheme.bodyMedium)
+          else ...[
+            Text(l10n.chooseTopics, style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: Space.s),
+            Wrap(
+              spacing: Space.s,
+              runSpacing: Space.s,
+              children: [
+                for (final t in _available)
+                  FilterChip(
+                    label: Text(l10n.topic(t)),
+                    selected: _selected.contains(t),
+                    onSelected: (on) => setState(() => on ? _selected.add(t) : _selected.remove(t)),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: Space.l),
           FilledButton.icon(
             key: const Key('generate-report'),

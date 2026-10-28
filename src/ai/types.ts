@@ -4,7 +4,10 @@ import type { Locale } from "./terms.js";
 export type AgentName =
   "narrative" | "action" | "trend" | "remedy" | "life_methods" | "life_topics" | "guard";
 
-/** The six analysis areas. `wuxing` and `dayun_liunian` exist only for bazi. */
+/**
+ * The sections a report can have: the six analysis areas (`wuxing` and `dayun_liunian` only for
+ * bazi) and, since v2.3.0, tarot's own three: card by card, the whole spread, the advice.
+ */
 export const TOPICS = [
   "wuxing",
   "personality",
@@ -12,14 +15,25 @@ export const TOPICS = [
   "relationships",
   "dayun_liunian",
   "health",
+  "tarot_cards",
+  "tarot_synthesis",
+  "tarot_advice",
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
+// Each method lists its own (rule 8): no method takes another's list.
 export const TOPICS_BY_SYSTEM: Record<ChartSystem, readonly Topic[]> = {
-  bazi: TOPICS,
-  tarot: ["personality", "career_wealth", "relationships", "health"],
+  bazi: ["wuxing", "personality", "career_wealth", "relationships", "dayun_liunian", "health"],
+  tarot: ["tarot_cards", "tarot_synthesis", "tarot_advice"],
   astrology: ["personality", "career_wealth", "relationships", "health"],
 };
+
+/** The area of life a tarot reading may focus on (POST /v1/reports `focus`, tarot only). */
+export const TAROT_FOCUS = ["career_wealth", "relationships", "health", "personality"] as const;
+export type TarotFocus = (typeof TAROT_FOCUS)[number];
+
+/** Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice. */
+export const NO_PLAN_TOPICS: readonly Topic[] = ["tarot_cards", "tarot_synthesis"];
 
 export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   wuxing: { "zh-Hant": "五行", "zh-Hans": "五行", en: "Five Elements" },
@@ -28,6 +42,9 @@ export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   relationships: { "zh-Hant": "婚姻感情", "zh-Hans": "婚姻感情", en: "Relationships" },
   dayun_liunian: { "zh-Hant": "大運流年", "zh-Hans": "大运流年", en: "Luck pillars & years" },
   health: { "zh-Hant": "健康", "zh-Hans": "健康", en: "Wellbeing" },
+  tarot_cards: { "zh-Hant": "逐張解讀", "zh-Hans": "逐张解读", en: "Card by card" },
+  tarot_synthesis: { "zh-Hant": "綜合解讀", "zh-Hans": "综合解读", en: "The whole spread" },
+  tarot_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
 };
 
 export interface Paragraph {

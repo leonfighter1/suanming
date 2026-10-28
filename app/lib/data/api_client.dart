@@ -121,6 +121,7 @@ class ApiClient {
     required String locale,
     List<String>? topics,
     String? question,
+    String? focus,
     Map<String, Object?>? context,
   }) async =>
       ReportView.fromJson(await _authed('POST', '/v1/reports', {
@@ -128,6 +129,7 @@ class ApiClient {
         'locale': locale,
         if (topics != null && topics.isNotEmpty) 'topics': topics,
         if (question != null && question.isNotEmpty) 'question': question,
+        'focus': ?focus,
         'context': ?context,
       }));
 

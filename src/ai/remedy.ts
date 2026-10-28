@@ -27,7 +27,7 @@ import { guardUser, METHOD_PROMPTS, remedyUser, todayLine } from "./prompts.js";
 import { loadRouting, routeFor } from "./routing.js";
 import { guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
-import { HORIZONS, type AgentName, type GuardOutput, type Topic } from "./types.js";
+import { HORIZONS, NO_PLAN_TOPICS, type AgentName, type GuardOutput, type Topic } from "./types.js";
 
 export interface RemedyContent {
   target: string;
@@ -110,6 +110,7 @@ export async function generateRemedy(
   const layers = report.layers;
   if (report.status !== "passed" || !layers) throw new Error("report has no passed layers");
   if (!report.topics.includes(topic)) throw new Error(`topic ${topic} is not in this report`);
+  if (NO_PLAN_TOPICS.includes(topic)) throw new Error(`the ${topic} section has no 破除運勢 plan`);
   const prompt = METHOD_PROMPTS[chart.system].remedy;
   const closing = CLOSING[chart.system]?.[locale];
   if (!prompt || !closing) throw new Error(`no 破除運勢 plan for ${chart.system} readings`);

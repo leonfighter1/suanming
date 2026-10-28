@@ -319,6 +319,12 @@ paths:
                   description: Optional user question (tarot)
                   type: string
                   maxLength: 300
+                focus:
+                  description: |
+                    Tarot only: the area of life the reading looks at. Not stored, like
+                    the question. 400 for any other chart system.
+                  type: string
+                  enum: [career_wealth, relationships, health, personality]
                 context:
                   description: |
                     What the user tells us about their life, so the reading relates
@@ -733,7 +739,9 @@ paths:
         is charged. Buying a topic that already has a plan returns that plan (200).
         Plans exist for bazi and tarot reports only: an astrology report gets a 400
         before anything is charged, and none is preloaded for it. Each method writes
-        its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`).
+        its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`). A tarot
+        reading's tarot_cards and tarot_synthesis sections have no plan (400): its
+        plan is on tarot_advice.
       requestBody:
         required: true
         content:
@@ -1221,8 +1229,24 @@ components:
               description: Fixed disclaimer copy (not model-generated)
 
     Topic:
+      description: |
+        A report section. bazi: the six areas; astrology: personality, career_wealth,
+        relationships, health; tarot (since v2.3.0): tarot_cards (card by card),
+        tarot_synthesis (the whole spread) and tarot_advice. Older tarot reports keep
+        their four areas.
       type: string
-      enum: [wuxing, personality, career_wealth, relationships, dayun_liunian, health]
+      enum:
+        [
+          wuxing,
+          personality,
+          career_wealth,
+          relationships,
+          dayun_liunian,
+          health,
+          tarot_cards,
+          tarot_synthesis,
+          tarot_advice,
+        ]
 
     AiDisclosure:
       type: object

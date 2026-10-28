@@ -28,6 +28,10 @@ const REFS: Record<Topic, string[]> = {
   relationships: ["/pillars/day"],
   dayun_liunian: ["/dayun", "/liunian/0"],
   health: ["/wuxing_weighted"],
+  // Tarot's sections cite cards (tarot_cards: one paragraph per card, see generateJson).
+  tarot_cards: ["/cards/0"],
+  tarot_synthesis: ["/cards/0"],
+  tarot_advice: ["/cards/0"],
 };
 
 const TEXT: Record<Locale, Record<Topic, string>> = {
@@ -39,6 +43,10 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
     relationships: "（示範）日支在傳統上與親密關係的相處模式有關，可多留意溝通節奏。",
     dayun_liunian: "（示範）目前大運與今年流年的十神組合，可視為這段時間值得關注的主題。",
     health: "（示範）傳統五行說法會把作息與情緒平衡連結起來。以上不構成醫療建議，如有不適請就醫。",
+    tarot_cards:
+      "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+    tarot_synthesis: "（示範）把幾張牌連起來看，傳統上可以讀成一段變化的過程，供你參考。",
+    tarot_advice: "（示範）牌面傳統上提示可以先放慢腳步，整理想法後再做決定。",
   },
   "zh-Hans": {
     wuxing:
@@ -48,6 +56,10 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
     relationships: "（示范）日支在传统上与亲密关系的相处模式有关，可多留意沟通节奏。",
     dayun_liunian: "（示范）目前大运与今年流年的十神组合，可视为这段时间值得关注的主题。",
     health: "（示范）传统五行说法会把作息与情绪平衡联系起来。以上不构成医疗建议，如有不适请就医。",
+    tarot_cards:
+      "（示范）这张牌在这个位置上，传统上被看作与问题相关的一个面向，可作为自我观察的参考。",
+    tarot_synthesis: "（示范）把几张牌连起来看，传统上可以读成一段变化的过程，供你参考。",
+    tarot_advice: "（示范）牌面传统上提示可以先放慢脚步，整理想法后再做决定。",
   },
   en: {
     wuxing:
@@ -62,6 +74,12 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "(Demo) The current luck pillar and this year's pillar suggest themes worth paying attention to.",
     health:
       "(Demo) Traditional five-element thinking links rest and emotional balance. This is not medical advice; see a doctor if unwell.",
+    tarot_cards:
+      "(Demo) In this position the card is traditionally read as one side of the question; use it as a prompt for reflection.",
+    tarot_synthesis:
+      "(Demo) Read together, the cards traditionally tell a story of change; take it as one view to consider.",
+    tarot_advice:
+      "(Demo) The cards traditionally suggest slowing down and sorting your thoughts before deciding.",
   },
 };
 
@@ -161,24 +179,32 @@ export class MockProvider implements LLMProvider {
     const model = `mock/${req.model}`;
 
     if (req.agent === "narrative") {
-      const p = req.payload as { topics: Topic[]; system: string };
+      const p = req.payload as { topics: Topic[]; system: string; cards?: number };
+      const paragraph = (topic: Topic, refs: string[]) => ({
+        text: TEXT[locale][topic],
+        source_level: (topic === "wuxing" || topic === "health"
+          ? "simplified_rule"
+          : "traditional_text") as "simplified_rule" | "traditional_text",
+        fact_refs: refs,
+      });
       const data: NarrativeOutput = {
         sections: p.topics.map((topic) => ({
           topic,
           summary: SUMMARY[locale],
-          paragraphs: [
-            {
-              text: TEXT[locale][topic],
-              source_level:
-                topic === "wuxing" || topic === "health" ? "simplified_rule" : "traditional_text",
-              fact_refs:
-                p.system === "bazi"
-                  ? REFS[topic]
-                  : p.system === "tarot"
-                    ? ["/cards/0"]
-                    : ["/bodies/0"],
-            },
-          ],
+          paragraphs:
+            topic === "tarot_cards"
+              ? // One paragraph per card, in dealing order, as narrative_tarot@2 asks.
+                Array.from({ length: p.cards ?? 1 }, (_, i) => paragraph(topic, [`/cards/${i}`]))
+              : [
+                  paragraph(
+                    topic,
+                    p.system === "bazi"
+                      ? REFS[topic]
+                      : p.system === "tarot"
+                        ? ["/cards/0"]
+                        : ["/bodies/0"],
+                  ),
+                ],
         })),
       };
       return { kind: "ok", data, model, usage: USAGE };

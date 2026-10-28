@@ -8,7 +8,13 @@
 import type { ChartFact } from "../chart-fact/index.js";
 import { periodRelations, type Relation } from "../engines/bazi/relations.js";
 import { strength } from "../engines/bazi/strength.js";
-import { trendScores, type Family, type PeriodScore } from "../engines/bazi/trend-scores.js";
+import {
+  TREND_TOPICS,
+  trendScores,
+  type Family,
+  type PeriodScore,
+  type TrendTopic,
+} from "../engines/bazi/trend-scores.js";
 import type { Locale } from "./terms.js";
 import type { Topic } from "./types.js";
 
@@ -168,9 +174,17 @@ const METHOD_NOTE: Record<Locale, string> = {
 const mean = (xs: number[]) =>
   xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0;
 
-export function trendLayer(chart: ChartFact, topics: readonly Topic[], locale: Locale): TrendLayer {
+export function trendLayer(
+  chart: ChartFact,
+  requested: readonly Topic[],
+  locale: Locale,
+): TrendLayer {
   const f = chart.facts as unknown as Facts;
   const engine = engineTrend(chart);
+  // A 八字 report's topics are all the engine's (TREND_TOPICS); nothing else gets a score.
+  const topics = requested.filter((t): t is TrendTopic =>
+    (TREND_TOPICS as readonly string[]).includes(t),
+  );
   const point = (gz: string, p: PeriodScore): TrendPoint => {
     const scores = Object.fromEntries(topics.map((t) => [t, p.scores[t]])) as TrendPoint["scores"];
     return {

@@ -19,7 +19,7 @@ const blocking = {
   data: {
     sections: [
       {
-        topic: "health",
+        topic: "tarot_advice",
         summary: "x",
         paragraphs: [
           { text: "你注定会失去健康。", source_level: "derived", fact_refs: ["/cards/0"] },
@@ -75,7 +75,7 @@ async function tarotReport(who: string) {
     await call(who, "/v1/charts", { system: "tarot", spread: "three_card" })
   ).json();
   const r = await (
-    await call(who, "/v1/reports", { chart_id, locale: "zh-Hans", topics: ["health"] })
+    await call(who, "/v1/reports", { chart_id, locale: "zh-Hans", topics: ["tarot_advice"] })
   ).json();
   await api.drain();
   return r.report_id as string;
@@ -99,14 +99,18 @@ describe("内容审核 (review console)", () => {
 
     const list = await (await call("boss", "/v1/admin/reviews")).json();
     const item = list.items.find((x: { id: string }) => x.id === id);
-    expect(item).toMatchObject({ kind: "report", status: "manual_review", topics: ["health"] });
+    expect(item).toMatchObject({
+      kind: "report",
+      status: "manual_review",
+      topics: ["tarot_advice"],
+    });
     expect(item.guard).toEqual([
       { quote: "你今年一定发财。", category: "fatalism", reason: "certainty" },
     ]);
     expect(item.owner).toHaveLength(8); // a short id, never the account
 
     const detail = await (await call("boss", `/v1/admin/reviews/report/${id}`)).json();
-    expect(detail.content.interpretation[0].topic).toBe("health");
+    expect(detail.content.interpretation[0].topic).toBe("tarot_advice");
 
     const released = await call("boss", `/v1/admin/reviews/report/${id}`, {
       decision: "approve",
@@ -121,7 +125,7 @@ describe("内容审核 (review console)", () => {
 
     const now = await (await call("user1", `/v1/reports/${id}`)).json();
     expect(now.status).toBe("passed");
-    expect(now.layers.interpretation[0].topic).toBe("health");
+    expect(now.layers.interpretation[0].topic).toBe("tarot_advice");
     // Released items leave the queue.
     expect(
       (await (await call("boss", "/v1/admin/reviews")).json()).items.some(

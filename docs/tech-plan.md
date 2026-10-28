@@ -25,14 +25,14 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status      |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | in progress |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned     |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned     |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
+| Stage                      | What                                                        | Size   | Release when done | Status  |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | planned |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -142,6 +142,26 @@ Releases, one per work package (medium, committed and tagged locally; pushed wit
     `test/method-prompts.test.ts` pins all 15 hashes (the nine older ones taken from the file before the change).
 - WP2.2 A tarot-native reading: sections 逐张解读 / 综合 / 建议 instead of 八字's four topics, with an optional focus
   (事业, 感情, 健康, 自我) beside the question.
+  - As built (v2.3.0), as designed below, plus: 逐张解读 is exempt from the four-paragraph cap (a Celtic Cross
+    has ten cards); a skipped card brings one retry naming its path; a tarot report fixture
+    (`report_tarot_passed.json`) for the app; the focus chips are `ChoiceChip`s (they wrap on a phone, and the
+    theme gives chips the focus border), tested with Tab and Space.
+  - Design (v2.3.0):
+    - Sections are tarot's own topic keys `tarot_cards`, `tarot_synthesis` and `tarot_advice`, appended to
+      `TOPICS`. 八字 gets an explicit list, since `bazi: TOPICS` would otherwise pick them up (rule 8). The labels
+      are 逐张解读 / 综合解读 / 建议.
+    - Focus: an optional `focus` on POST /v1/reports, tarot only (`career_wealth`, `relationships`, `health`,
+      `personality`). It travels like the question (not stored) into `<focus>` of the tarot reading.
+    - `narrative_tarot@2`: one paragraph per card in dealing order (the pipeline checks that every card path is
+      cited), the whole story with the answer to the question, then the advice. `action_tarot@2`: 3–5 actions,
+      all on `tarot_advice`.
+    - Plans: `tarot_cards` and `tarot_synthesis` get none (`NO_PLAN_TOPICS`, refused by the API and never
+      preloaded), so a new tarot reading offers one plan, on 建议 (`remedy_tarot@2`). Old tarot reports keep
+      their per-area plans.
+    - App: focus chips under the question, taken at draw time with it. For tarot, no topic chips (the sections
+      are fixed). The plan buttons skip `noPlanTopics` (synced from the server).
+    - Accept: the three sections in order, with every card read; the focus reaches the prompt; one plan; old
+      tarot reports still show and sell their plans; 八字 untouched (its topics, prompts and hashes).
 - WP2.3 (found in S1) What each agent reads. The 八字 facts sent to the narrative agent grew from 3.3k to 17.0k
   characters over S1 (relations and 神煞 on every period, 流月, `trend`), and the guard reads them all too while
   review is on. Give each agent the facts it needs (the natal chart, strength, relations, 神煞, the current 大运, the
@@ -199,7 +219,25 @@ Releases, one per work package (medium, committed and tagged locally; pushed wit
 
 ## 阶段总结 (stage summaries)
 
-Written when a stage completes, before its X.0.0 release (dev-workflow skill).
+Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S2 方法独立 + 塔罗解读结构 (done 2026-10-28: v2.1.0–v2.3.0, medium)
+
+1. **Delivered**
+   - v2.1.0, WP2.1: `METHOD_PROMPTS`; every method's own narrative, action and plan prompts; astrology without plans.
+   - v2.2.0, WP2.3: `bazi-view.ts`, so the AI reads a focused copy of a 八字 chart; the life agents read less too.
+   - v2.3.0, WP2.2: tarot's own sections (逐张解读 / 综合解读 / 建议), the focus beside the question, one plan per
+     reading.
+2. **Numbers**
+   - Server tests: 271 → 287. App tests: 90 → 92.
+   - Characters sent for a 八字 reading, its six plans and the life report: 304.5k → 168.2k (without the reviewer).
+   - Prompt versions pinned by hash: 15.
+3. **Changed against the plan**: one release per work package instead of a single v2.1.0. WP2.3 came before WP2.2,
+   being smaller and server-only. Astrology kept its readings (its own prompts) but lost its plans.
+4. **Mistakes recorded**: rules 27 (widened to ensureVisible), 28, 29 and 30. They teach: run a frame after any jump
+   in a widget test; take examples and measurements from real output; keep a checker in step with the facts it
+   checks.
+5. **Next**: S3 塔罗体验 (big → v3.0.0, pushed with v2.1.0–v2.3.0).
 
 ### S1 八字引擎：完整、确定 (done 2026-10-27: v1.3.0 + v2.0.0)
 
@@ -268,5 +306,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill).
 | WP1.8 | waiting for a reference    | —       |
 | WP2.1 | done                       | v2.1.0  |
 | WP2.3 | done                       | v2.2.0  |
-| WP2.2 | todo                       | v2.3.0  |
+| WP2.2 | done                       | v2.3.0  |
 | S3–S6 | todo                       | above   |

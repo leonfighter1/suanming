@@ -2,6 +2,26 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (l): S2 WP2.2, a tarot-native reading; S2 done; release v2.3.0
+
+- Sections `tarot_cards`, `tarot_synthesis` and `tarot_advice` (TOPICS); 八字 got an explicit list (`bazi: TOPICS` would have taken them, rule 8).
+- `focus` (tarot only, validated in the pipeline and the API) goes into `<focus>`.
+- New prompts: narrative_tarot@2, action_tarot@2 (actions on 建议 only) and remedy_tarot@2, all derived from @1 through swap().
+- The pipeline:
+  - The four-paragraph cap is lifted for 逐张解读.
+  - A skipped card brings one retry naming its path.
+- Plans: NO_PLAN_TOPICS (逐张解读, 综合解读) are refused by the API and never preloaded. A new tarot reading gets one plan; old readings keep theirs.
+- App:
+  - Focus chips under the question.
+  - No topic chips for tarot.
+  - Plan buttons skip `noPlanTopics`.
+  - The contract and a tarot report fixture come through sync:app.
+- Failures fixed:
+  - Two phone tests tapped an old position after ensureVisible. The tap warning gave y 873 on an 800-px screen. Fixed with a pump; rule 27 widened in place.
+  - My own test read `layers.actions.actions` (the layer is the array).
+- S2 summary written; S2 done. Next: S3 塔罗体验 (big, v3.0.0, pushed with v2.1.0–v2.3.0).
+- v2.3.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (k): S2 WP2.3, what each agent reads; release v2.2.0
 
 - v2.1.0: the first harness run failed at analyze (rule 23: the IDE's pub get after the pubspec bump); the second passed. Committed and tagged locally.

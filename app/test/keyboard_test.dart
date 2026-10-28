@@ -198,6 +198,23 @@ void main() {
       await press(tester, LogicalKeyboardKey.enter);
       expect(entry, findsOneWidget);
     });
+
+    testWidgets('Tab reaches the focus chips after the question, in order; Space picks one', (tester) async {
+      await start(tester, width: 1000);
+      await tapAndWait(tester, find.byKey(const Key('entry-tarot')));
+      await tabTo(tester, 'focus-any');
+      final order = <String?>[];
+      for (var i = 0; i < 4; i++) {
+        await press(tester, LogicalKeyboardKey.tab);
+        order.add(focusedKey());
+      }
+      expect(order, ['focus-career_wealth', 'focus-relationships', 'focus-health', 'focus-personality']);
+      await press(tester, LogicalKeyboardKey.space);
+      expect(tester.widget<ChoiceChip>(find.byKey(const Key('focus-personality'))).selected, isTrue);
+      expect(tester.widget<ChoiceChip>(find.byKey(const Key('focus-any'))).selected, isFalse);
+      await press(tester, LogicalKeyboardKey.tab);
+      expect(focusedKey(), 'spread'); // then the spread and the draw, as before
+    });
   });
 
   group('区5 · 解读报告', () {

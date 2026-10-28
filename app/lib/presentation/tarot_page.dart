@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import '../domain/models.dart';
+import '../generated/contract.g.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'labels.dart';
 import 'widgets/report_request.dart';
 import 'widgets/tarot_spread.dart';
 
@@ -26,6 +28,10 @@ class _TarotPageState extends ConsumerState<TarotPage> {
 
   /// The question as it was when the cards were drawn; it goes with the reading.
   String _asked = '';
+
+  /// The area of life to look at (contract `tarotFocus`), or none; taken at the draw like the question.
+  String? _focus;
+  String? _askedFocus;
   final Set<int> _revealed = {};
   bool _busy = false;
 
@@ -44,6 +50,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
       setState(() {
         _chart = chart;
         _asked = _question.text.trim();
+        _askedFocus = _focus;
         _revealed.clear();
       });
       // Load the pictures while the cards lie face down, so each one is there as it turns.
@@ -97,6 +104,29 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                           helperMaxLines: 2,
                         ),
                       ),
+                      const SizedBox(height: Space.m),
+                      // Beside the question: the area of life the reading should look at (optional).
+                      Text(l10n.tarotFocus, style: Theme.of(context).textTheme.labelLarge),
+                      const SizedBox(height: Space.s),
+                      Wrap(
+                        spacing: Space.s,
+                        runSpacing: Space.s,
+                        children: [
+                          ChoiceChip(
+                            key: const Key('focus-any'),
+                            label: Text(l10n.focusAny),
+                            selected: _focus == null,
+                            onSelected: (_) => setState(() => _focus = null),
+                          ),
+                          for (final f in tarotFocus)
+                            ChoiceChip(
+                              key: Key('focus-$f'),
+                              label: Text(l10n.tarotFocusLabel(f)),
+                              selected: _focus == f,
+                              onSelected: (on) => setState(() => _focus = on ? f : null),
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: Space.l),
                       DropdownMenu<String>(
                         key: const Key('spread'),
@@ -136,7 +166,13 @@ class _TarotPageState extends ConsumerState<TarotPage> {
               ),
               if (chart != null && _revealed.length == chart.tarot.cards.length)
                 FadeSlideIn(
-                  child: ReportRequest(chartId: chart.chartId, system: 'tarot', title: l10n.homeTarot, question: _asked),
+                  child: ReportRequest(
+                    chartId: chart.chartId,
+                    system: 'tarot',
+                    title: l10n.homeTarot,
+                    question: _asked,
+                    focus: _askedFocus,
+                  ),
                 ),
             ],
           ),

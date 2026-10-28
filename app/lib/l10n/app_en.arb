@@ -66,6 +66,9 @@
   "topicRelationships": "Relationships",
   "topicDayunLiunian": "Luck & years",
   "topicHealth": "Wellbeing",
+  "topicTarotCards": "Card by card",
+  "topicTarotSynthesis": "The whole spread",
+  "topicTarotAdvice": "Advice",
   "srcTraditional": "Classical texts",
   "srcConsensus": "Common practice",
   "srcSimplified": "Simplified rule",
@@ -470,6 +473,13 @@
   },
   "tarotQuestion": "Your question (optional)",
   "tarotQuestionHint": "Think of one question before you draw; the reading will answer it.",
+  "tarotFocus": "Focus on (optional)",
+  "focusAny": "Anything",
+  "focusCareer": "Work",
+  "focusLove": "Love",
+  "focusHealth": "Health",
+  "focusSelf": "Myself",
+  "tarotSections": "The reading has three parts: card by card, the whole spread, and advice.",
   "tarotQuestionShown": "Question: {question}",
   "@tarotQuestionShown": {
     "placeholders": {

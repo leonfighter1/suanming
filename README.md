@@ -12,6 +12,37 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v2.3.0 (2026-10-28): 塔罗 reads like a tarot reading
+
+Stage S2 of the [tech plan](docs/tech-plan.md), work package 2.2, which completes the stage (v2.1.0–v2.3.0). A medium
+update: committed locally, pushed with the next big update.
+
+- 塔罗 page
+  - Under the question, a new row 「想看哪方面（可选）」: 不限, 事业, 感情, 健康 or 自我. It is taken when the cards
+    are drawn, like the question, and the reading looks at that part of life. 不限 is the default.
+  - Before the reading, the request card says the reading has three parts, instead of offering topic chips.
+- The tarot reading
+  - It has three parts, in the order of a classic reading:
+    - 逐张解读: every card in dealing order, one paragraph each (all ten of a Celtic Cross).
+    - 综合解读: the spread as one story, answering the question.
+    - 建议: what the cards suggest doing.
+  - Before, the spread was read four times over, for 性格, 事业财运, 婚姻感情 and 健康, which is 八字's way.
+  - The actions follow the 建议.
+  - One 破除运势 plan per reading, on 建议; 逐张解读 and 综合解读 have none. Readings made before keep their four
+    plans.
+  - If the AI leaves a card out, it is asked again and told which card.
+- Keyboard: Tab reaches the focus chips right after the question, in order; Space or Enter picks one.
+- API: POST /v1/reports takes `focus` for a tarot reading (400 for any other method), and the tarot sections are new
+  topic values.
+- Verified:
+  - 4 new server tests: the three sections with every card read, the focus reaching the AI, a skipped card asked
+    again, and focus refused for 八字 and for unknown values. Others now expect one tarot plan.
+  - 2 new app tests: the focus in the request, with the three parts and one plan on the report page; Tab and Space
+    on the focus chips. Two phone tests needed a frame after `ensureVisible` (rule 27, widened).
+  - All 287 server tests and 92 app tests pass; harness PASS.
+- S2 in short (v2.1.0–v2.3.0): every method has its own instructions; the AI reads a focused copy of a 八字 chart
+  (about half the characters); 塔罗 reads like a tarot reading.
+
 ### v2.2.0 (2026-10-28): the AI reads less, and what it reads matters
 
 Stage S2 of the [tech plan](docs/tech-plan.md), work package 2.3. A medium update: committed locally, pushed with the

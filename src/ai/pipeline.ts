@@ -40,6 +40,7 @@ import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schema
 import { glossaryFor, LOCALES, normalizeTerms, type Locale } from "./terms.js";
 import { trendLayer, type TrendLayer } from "./trend.js";
 import {
+  TAROT_FOCUS,
   TOPICS,
   TOPICS_BY_SYSTEM,
   type ActionOutput,
@@ -47,6 +48,7 @@ import {
   type GuardOutput,
   type LLMProvider,
   type NarrativeOutput,
+  type TarotFocus,
   type Topic,
   type Usage,
 } from "./types.js";
@@ -65,6 +67,8 @@ export interface ReportOptions {
   topics?: Topic[];
   /** Optional user question (tarot) */
   question?: string;
+  /** The area of life a tarot reading looks at (tarot only, v2.3.0) */
+  focus?: TarotFocus;
   /** What the user told us about their life (src/ai/context.ts) */
   context?: UserContext;
   /** Return the held draft for blocked/manual_review reports. Internal tools only. */
@@ -325,6 +329,9 @@ export async function generateReport(
   if (bad.length)
     throw new ReportInputError(`topics not available for ${chart.system}: ${bad.join(", ")}`);
   const topics = TOPICS.filter((t) => requested.includes(t));
+  if (opts.focus !== undefined && (chart.system !== "tarot" || !TAROT_FOCUS.includes(opts.focus))) {
+    throw new ReportInputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
+  }
 
   const rules = compileRules(loadRuleSet(), region.rule_groups);
   // A 八字 reading reads its focused view (WP2.3); the other methods' facts are small already.
@@ -360,12 +367,16 @@ export async function generateReport(
   const prompts = METHOD_PROMPTS[chart.system];
   const tarot = chart.system === "tarot";
   const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
+  const maxParagraphs = (t: Topic) => (t === "tarot_cards" && spread ? spread.cards.length : 4);
+  // A tarot reading's actions follow its advice (v2.3.0); other methods act on every topic.
+  const actionTopics: Topic[] =
+    tarot && topics.includes("tarot_advice") ? ["tarot_advice"] : topics;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
     prompt: prompts.narrative,
     ...providerFor("narrative"),
     schema: narrativeSchema(topics),
-    payload: { topics, system: chart.system },
+    payload: { topics, system: chart.system, ...(spread && { cards: spread.cards.length }) },
     maxRetries,
     enforce,
     onProgress: deps.onProgress,
@@ -378,6 +389,7 @@ export async function generateReport(
             locale: opts.locale,
             glossary,
             question: opts.question,
+            focus: opts.focus,
             context: opts.context,
             today: todayLine(now),
             feedback,
@@ -400,7 +412,8 @@ export async function generateReport(
       const sections = data.sections.map((s) => ({
         topic: s.topic,
         ...(s.summary && { summary: normalizeTerms(s.summary, opts.locale).text }),
-        paragraphs: s.paragraphs.slice(0, 4).flatMap((p) => {
+        // 逐张解读 has one paragraph per card (ten for a Celtic Cross); other sections up to four.
+        paragraphs: s.paragraphs.slice(0, maxParagraphs(s.topic)).flatMap((p) => {
           const { text, fixes } = normalizeTerms(p.text, opts.locale);
           termFixes.push(...fixes);
           const refs = p.fact_refs.filter((r) => resolvePointer(facts, r));
@@ -418,6 +431,16 @@ export async function generateReport(
         (t) => !sections.some((s) => s.topic === t && s.paragraphs.length),
       );
       if (missing.length) feedback.push(`missing topics: ${missing.join(", ")}`);
+      if (spread && topics.includes("tarot_cards")) {
+        const read = new Set(
+          sections.find((s) => s.topic === "tarot_cards")?.paragraphs.flatMap((p) => p.fact_refs),
+        );
+        const unread = spread.cards.map((c) => c.path).filter((p) => !read.has(p));
+        if (unread.length)
+          feedback.push(
+            `tarot_cards must read every card in dealing order; not read: ${unread.join(", ")}`,
+          );
+      }
       dropped = ungrounded;
       const value = { sections: sections.filter((s) => s.paragraphs.length) };
       return {
@@ -451,8 +474,8 @@ export async function generateReport(
       agent: "action",
       prompt: prompts.action,
       ...providerFor("action"),
-      schema: actionSchema(topics),
-      payload: { topics },
+      schema: actionSchema(actionTopics),
+      payload: { topics: actionTopics },
       maxRetries,
       enforce,
       onProgress: deps.onProgress,
@@ -473,7 +496,9 @@ export async function generateReport(
           return { ...a, text };
         });
         const value = {
-          actions: list.filter((a) => topics.includes(a.topic)).slice(0, topics.length * 3),
+          actions: list
+            .filter((a) => actionTopics.includes(a.topic))
+            .slice(0, tarot ? 5 : topics.length * 3),
         };
         return {
           value,

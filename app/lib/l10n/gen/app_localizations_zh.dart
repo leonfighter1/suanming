@@ -170,6 +170,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get topicHealth => '健康';
 
   @override
+  String get topicTarotCards => '逐张解读';
+
+  @override
+  String get topicTarotSynthesis => '综合解读';
+
+  @override
+  String get topicTarotAdvice => '建议';
+
+  @override
   String get srcTraditional => '典籍';
 
   @override
@@ -1015,6 +1024,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tarotQuestionHint => '抽牌前先在心里想好一个问题，解读会围绕它展开。';
 
   @override
+  String get tarotFocus => '想看哪方面（可选）';
+
+  @override
+  String get focusAny => '不限';
+
+  @override
+  String get focusCareer => '事业';
+
+  @override
+  String get focusLove => '感情';
+
+  @override
+  String get focusHealth => '健康';
+
+  @override
+  String get focusSelf => '自我';
+
+  @override
+  String get tarotSections => '解读分三部分：逐张解读、综合解读、建议。';
+
+  @override
   String tarotQuestionShown(String question) {
     return '问题：$question';
   }
@@ -1233,6 +1263,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get topicHealth => '健康';
+
+  @override
+  String get topicTarotCards => '逐張解讀';
+
+  @override
+  String get topicTarotSynthesis => '綜合解讀';
+
+  @override
+  String get topicTarotAdvice => '建議';
 
   @override
   String get srcTraditional => '典籍';
@@ -2078,6 +2117,27 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tarotQuestionHint => '抽牌前先在心裡想好一個問題，解讀會圍繞它展開。';
+
+  @override
+  String get tarotFocus => '想看哪方面（可選）';
+
+  @override
+  String get focusAny => '不限';
+
+  @override
+  String get focusCareer => '事業';
+
+  @override
+  String get focusLove => '感情';
+
+  @override
+  String get focusHealth => '健康';
+
+  @override
+  String get focusSelf => '自我';
+
+  @override
+  String get tarotSections => '解讀分三部分：逐張解讀、綜合解讀、建議。';
 
   @override
   String tarotQuestionShown(String question) {

@@ -30,11 +30,13 @@ const tarot = computeTarot(
 );
 const cards = (tarot.facts as { cards: { card_id: string; reversed: boolean }[] }).cards;
 
-async function reportWith(chart: typeof bazi, texts: string[], topic = "personality") {
+async function reportWith(chart: typeof bazi, texts: string[]) {
+  // A tarot reading has its own sections since v2.3.0; the whole-spread one fits any text.
+  const topic = chart.system === "tarot" ? "tarot_synthesis" : "personality";
   const narrative: NarrativeOutput = {
     sections: [
       {
-        topic: topic as "personality",
+        topic,
         paragraphs: texts.map((text) => ({
           text,
           source_level: "traditional_text",
@@ -46,7 +48,7 @@ async function reportWith(chart: typeof bazi, texts: string[], topic = "personal
   // Run the real pipeline (mock model); stay clear of the rule layer by using neutral text.
   return generateReport(
     chart,
-    { locale: "zh-Hant", country: "HK", topics: ["personality"] },
+    { locale: "zh-Hant", country: "HK", topics: [topic] },
     {
       providers: { deepseek: new MockProvider({ narrative: [{ kind: "ok", data: narrative }] }) },
       now: FIXED_NOW,

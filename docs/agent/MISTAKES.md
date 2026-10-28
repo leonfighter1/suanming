@@ -28,7 +28,7 @@
 24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
 25. In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta.
 26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
-27. Pump a frame between scrollUntilVisible and the next finder or scroll; use scrollTo() from test/support.dart for each card.
+27. Pump a frame after scrollUntilVisible or tester.ensureVisible, before the next finder, tap or scroll: both jump without a frame, so the next step sees the old layout (a tap goes to the old position). Use scrollTo() from test/support.dart for each card.
 28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
 29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one.
 30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up.
@@ -56,8 +56,8 @@
 ### 2026-10-27: Back-to-back scrollUntilVisible skipped the next card
 - **Symptom:** A chart-page test found the strength pills, then scrollUntilVisible for the 神煞 card right below them dragged to the end of the list: Bad state: No element
 - **Root cause:** scrollUntilVisible ends on Scrollable.ensureVisible without a frame; the next call checked the layout of the old offset (card not on screen yet) and its first 300 px drag carried the list past the card before it was ever laid out (finders only see sliver children on screen). Probe: px 907 after the jump, 1207 after one drag, card never found
-- **Fix:** scrollTo() in app/test/support.dart pumps a frame before and after scrollUntilVisible
-- **Rule:** Pump a frame between scrollUntilVisible and the next finder or scroll; use scrollTo() from test/support.dart for each card. (Rule 27)
+- **Fix:** scrollTo() in app/test/support.dart pumps a frame before and after scrollUntilVisible. In v2.3.0 the same gap broke two phone tests: ensureVisible, then a tap that went to y 873 on an 800-px screen (the card's place before the jump, once the focus chips made the page taller); a pump after ensureVisible fixed it
+- **Rule:** Pump a frame after scrollUntilVisible or tester.ensureVisible, before the next finder, tap or scroll: both jump without a frame, so the next step sees the old layout (a tap goes to the old position). Use scrollTo() from test/support.dart for each card. (Rule 27)
 
 ### 2026-10-27: Edits to synced sources need sync:app before app tests
 - **Symptom:** New 神煞 terms showed untranslated (禄神 instead of 祿神) in an app test

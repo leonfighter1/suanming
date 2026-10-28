@@ -16,18 +16,33 @@ Future<void> settle(WidgetTester tester) async {
   }
 }
 
-/// A fresh app of [size] on the 塔罗 page, [question] typed, [spread] picked, cards drawn.
-Future<FakeApi> drawAt(WidgetTester tester, Size size, {String? spread, String question = ''}) async {
+/// A fresh app of [size] on the 塔罗 page, [question] typed, [focus] chosen, [spread] picked,
+/// cards drawn. With [finalReport], a requested reading comes back as that report at once.
+Future<FakeApi> drawAt(
+  WidgetTester tester,
+  Size size, {
+  String? spread,
+  String question = '',
+  String? focus,
+  Map<String, dynamic>? finalReport,
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final api = FakeApi();
+  final api = finalReport == null ? FakeApi() : FakeApi(finalReport: finalReport, pendingPolls: 0);
   await tester.pumpWidget(const SizedBox.shrink()); // a fresh app, not the last one updated (rule 24)
   await tester.pumpWidget(testApp(api));
   await settle(tester);
   await tester.tap(find.byKey(const Key('entry-tarot')));
   await settle(tester);
   if (question.isNotEmpty) await tester.enterText(find.byKey(const Key('tarot-question')), question);
+  if (focus != null) {
+    await tester.pump(); // a frame after enterText (rule 19)
+    await tester.ensureVisible(find.byKey(Key('focus-$focus')));
+    await tester.pump(); // a frame after the jump, before the tap (rule 27)
+    await tester.tap(find.byKey(Key('focus-$focus')));
+    await settle(tester);
+  }
   if (spread != null) {
     await tester.tap(find.byKey(const Key('spread')));
     await settle(tester);
@@ -35,6 +50,7 @@ Future<FakeApi> drawAt(WidgetTester tester, Size size, {String? spread, String q
     await settle(tester);
   }
   await tester.ensureVisible(find.byKey(const Key('draw')));
+  await tester.pump(); // a frame after the jump, before the tap (rule 27)
   await tester.tap(find.byKey(const Key('draw')));
   await settle(tester);
   return api;
@@ -118,6 +134,7 @@ void main() {
     expect(card(tester, 1).width, 51);
     // Touching any face-down thumbnail opens the next card, card 1, still face down.
     await tester.ensureVisible(find.byKey(const Key('tarot-card-5')));
+    await tester.pump(); // a frame after the jump, before the tap (rule 27)
     await tester.tap(find.byKey(const Key('tarot-card-5')));
     await settle(tester);
     final view = find.byKey(const Key('tarot-card-view'));
@@ -137,6 +154,7 @@ void main() {
   testWidgets('keyboard: the enlarged card has the focus, Enter turns it, Esc closes it', (tester) async {
     await drawAt(tester, const Size(360, 800), spread: celtic);
     await tester.ensureVisible(find.byKey(const Key('tarot-card-5')));
+    await tester.pump(); // a frame after the jump, before the tap (rule 27)
     await tester.tap(find.byKey(const Key('tarot-card-5'))); // opens card 1, face down
     await settle(tester);
     await press(tester, LogicalKeyboardKey.enter);
@@ -160,5 +178,40 @@ void main() {
     await settle(tester);
     final sent = api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports');
     expect((jsonDecode(sent.body) as Map)['question'], '我該不該換工作？');
+    expect((jsonDecode(sent.body) as Map).containsKey('focus'), isFalse); // 不限 by default
+  });
+
+  testWidgets('the focus beside the question goes with the request; the reading has three parts and one plan', (
+    tester,
+  ) async {
+    final api = await drawAt(
+      tester,
+      const Size(1000, 2000),
+      question: '這份工作還要繼續嗎？',
+      focus: 'career_wealth',
+      finalReport: fixture('report_tarot_passed'),
+    );
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.byKey(const Key('tarot-card-3')));
+      await settle(tester);
+    }
+    // A tarot reading's parts are fixed: no topic chips to pick.
+    await scrollTo(tester, const Key('generate-report'));
+    expect(find.byKey(const Key('tarot-sections')), findsOneWidget);
+    expect(find.byType(FilterChip), findsNothing);
+    await tester.tap(find.byKey(const Key('generate-report')));
+    await settle(tester);
+    final sent = jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports').body) as Map;
+    expect(sent['focus'], 'career_wealth');
+    expect(sent['topics'], ['tarot_cards', 'tarot_synthesis', 'tarot_advice']);
+
+    // The reading: 逐張解讀, 綜合解讀 and 建議, in that order; a plan for 建議 only.
+    final tops = [for (final t in ['逐張解讀', '綜合解讀', '建議']) tester.getTopLeft(find.text(t).first).dy];
+    expect(tops, [...tops]..sort());
+    expect(find.byKey(const Key('remedy-inline-tarot_cards')), findsNothing); // the first part, open
+    await scrollTo(tester, const Key('remedy-card'));
+    expect(find.byKey(const Key('remedy-buy-tarot_advice')), findsOneWidget);
+    expect(find.byKey(const Key('remedy-buy-tarot_cards')), findsNothing);
+    expect(find.byKey(const Key('remedy-buy-tarot_synthesis')), findsNothing);
   });
 }

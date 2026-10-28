@@ -1,0 +1,93 @@
+{
+  "report_id": "55555555-5555-4555-8555-555555555555",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "locale": "zh-Hant",
+  "topics": [
+    "tarot_cards",
+    "tarot_synthesis",
+    "tarot_advice"
+  ],
+  "layers": {
+    "facts": [
+      "1. 過去: 隱士",
+      "2. 現在: 教皇 (逆位)",
+      "3. 未來: 寶劍七"
+    ],
+    "interpretation": [
+      {
+        "topic": "tarot_cards",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/cards/0"
+            ]
+          },
+          {
+            "text": "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/cards/1"
+            ]
+          },
+          {
+            "text": "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/cards/2"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "tarot_synthesis",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）把幾張牌連起來看，傳統上可以讀成一段變化的過程，供你參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/cards/0"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "tarot_advice",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）牌面傳統上提示可以先放慢腳步，整理想法後再做決定。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/cards/0"
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "topic": "tarot_advice",
+        "text": "（示範）本週花十分鐘寫下與「建議」相關的一個觀察。",
+        "horizon": "this_week"
+      }
+    ],
+    "expectation": {
+      "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
+      "ai_label": "本解讀由 AI 依據命盤資料生成，僅供娛樂和玄學學習使用。",
+      "label_required": false
+    }
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "narrative_tarot@2,action_tarot@2,guard@2",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

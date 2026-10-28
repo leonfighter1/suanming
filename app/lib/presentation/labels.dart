@@ -9,7 +9,19 @@ extension ApiLabels on AppLocalizations {
         'relationships' => topicRelationships,
         'dayun_liunian' => topicDayunLiunian,
         'health' => topicHealth,
+        'tarot_cards' => topicTarotCards,
+        'tarot_synthesis' => topicTarotSynthesis,
+        'tarot_advice' => topicTarotAdvice,
         _ => t,
+      };
+
+  /// The area of life a tarot reading looks at (contract `tarotFocus`).
+  String tarotFocusLabel(String f) => switch (f) {
+        'career_wealth' => focusCareer,
+        'relationships' => focusLove,
+        'health' => focusHealth,
+        'personality' => focusSelf,
+        _ => f,
       };
 
   String sourceLevel(String s) => switch (s) {

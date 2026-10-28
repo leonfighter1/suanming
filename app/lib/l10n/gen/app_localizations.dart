@@ -411,6 +411,24 @@ abstract class AppLocalizations {
   /// **'Wellbeing'**
   String get topicHealth;
 
+  /// No description provided for @topicTarotCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Card by card'**
+  String get topicTarotCards;
+
+  /// No description provided for @topicTarotSynthesis.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole spread'**
+  String get topicTarotSynthesis;
+
+  /// No description provided for @topicTarotAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Advice'**
+  String get topicTarotAdvice;
+
   /// No description provided for @srcTraditional.
   ///
   /// In en, this message translates to:
@@ -2030,6 +2048,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Think of one question before you draw; the reading will answer it.'**
   String get tarotQuestionHint;
+
+  /// No description provided for @tarotFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on (optional)'**
+  String get tarotFocus;
+
+  /// No description provided for @focusAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything'**
+  String get focusAny;
+
+  /// No description provided for @focusCareer.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get focusCareer;
+
+  /// No description provided for @focusLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Love'**
+  String get focusLove;
+
+  /// No description provided for @focusHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get focusHealth;
+
+  /// No description provided for @focusSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Myself'**
+  String get focusSelf;
+
+  /// No description provided for @tarotSections.
+  ///
+  /// In en, this message translates to:
+  /// **'The reading has three parts: card by card, the whole spread, and advice.'**
+  String get tarotSections;
 
   /// No description provided for @tarotQuestionShown.
   ///

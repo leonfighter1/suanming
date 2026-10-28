@@ -16,13 +16,16 @@ import {
   parseUserContext,
   GeoRefusedError,
   LOCALES,
+  NO_PLAN_TOPICS,
   ReportInputError,
+  TAROT_FOCUS,
   TOPICS,
   TOPICS_BY_SYSTEM,
   type LLMProvider,
   type Locale,
   type Report,
   type RoutingTable,
+  type TarotFocus,
   type Topic,
 } from "../ai/index.js";
 import { SCHEMA_VERSION, type ChartFact } from "../chart-fact/index.js";
@@ -359,6 +362,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     fact: Parameters<typeof generateReport>[0],
     c: Caller,
     question?: string,
+    focus?: TarotFocus,
   ) {
     let next: ReportRecord;
     try {
@@ -369,6 +373,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           country: c.country,
           topics: record.topics,
           question,
+          ...(focus && { focus }),
           context: record.context,
         },
         {
@@ -414,7 +419,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   async function preloadRemedies(record: ReportRecord, report: Report, fact: ChartFact, c: Caller) {
     if (!remedyAvailable(fact.system)) return;
     const queue: RemedyRecord[] = [];
-    for (const topic of record.topics) {
+    for (const topic of record.topics.filter((t) => !NO_PLAN_TOPICS.includes(t))) {
       if (!takeBackgroundQuota()) break; // on-demand generation still works later
       const ts = now().toISOString();
       const r: RemedyRecord = {
@@ -509,6 +514,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (!record.topics.includes(topic)) {
       throw new InputError(
         `topic must be one of this report's topics: ${record.topics.join(", ")}`,
+      );
+    }
+    if (NO_PLAN_TOPICS.includes(topic)) {
+      throw new InputError(
+        `the ${topic} section has no 破除運勢 plan; a tarot plan is on tarot_advice`,
       );
     }
     assertServed(c.country, fact.system);
@@ -798,6 +808,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     assertServed(c.country, chart.fact.system);
     takeAiQuota(c.user);
     const question = typeof body.question === "string" ? body.question.slice(0, 300) : undefined;
+    const focus = body.focus as TarotFocus | undefined;
+    if (focus !== undefined && (chart.fact.system !== "tarot" || !TAROT_FOCUS.includes(focus))) {
+      throw new InputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
+    }
     const context = parseUserContext(body.context);
 
     const ts = now().toISOString();
@@ -813,7 +827,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       ...(context && { context }),
     };
     await store.putReport(record);
-    const job = runJob(record, chart.fact, c, question).finally(() => jobs.delete(job));
+    const job = runJob(record, chart.fact, c, question, focus).finally(() => jobs.delete(job));
     jobs.add(job);
     return {
       status: 202,

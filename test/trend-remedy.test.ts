@@ -132,9 +132,12 @@ describe("generateRemedy", () => {
     );
     const mock = new MockProvider();
     const report = await generateReport(tarot, zhHantHK, deps(mock));
-    const plan = await generateRemedy(tarot, report, "health", { country: "HK" }, deps(mock));
+    await expect(
+      generateRemedy(tarot, report, "tarot_cards", { country: "HK" }, deps(mock)),
+    ).rejects.toThrow(/no 破除運勢 plan/);
+    const plan = await generateRemedy(tarot, report, "tarot_advice", { country: "HK" }, deps(mock));
     expect(plan.status).toBe("passed");
-    expect(plan.agents[0]!.prompt_version).toBe("remedy_tarot@1");
+    expect(plan.agents[0]!.prompt_version).toBe("remedy_tarot@2");
     expect(mock.calls.find((c) => c.agent === "remedy")!.system).toBe(PROMPTS.remedy_tarot.system);
     expect(mock.calls.find((c) => c.agent === "remedy")!.user).not.toContain("<trend>");
     expect(plan.content!.closing).toMatch(/^以上建議依據所抽塔羅牌的牌義整理/);
@@ -224,13 +227,13 @@ describe("remedy API", () => {
   });
 
   it("a preloaded plan the guard held is regenerated on purchase, never sold as is", async () => {
-    // Guard: the report passes (1st guard call), the 4 tarot preloads are all held.
+    // Guard: the report passes (1st guard call); the tarot reading's one preload (its 建议) is held.
     const held = {
       kind: "ok" as const,
       data: { pass: false, violations: [{ quote: "x", category: "other", reason: "test" }] },
     };
     const ok = { kind: "ok" as const, data: { pass: true, violations: [] } };
-    const m = new MockProvider({ guard: [ok, held, held, held, held] });
+    const m = new MockProvider({ guard: [ok, held] });
     const logs: string[] = [];
     const api4 = createApiServer({
       secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
@@ -253,6 +256,7 @@ describe("remedy API", () => {
       const r = await (await send("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
       await api4.drain();
       const items = (await (await send(`/v1/reports/${r.report_id}/remedies`)).json()).items;
+      expect(items.map((x: { topic: string }) => x.topic)).toEqual(["tarot_advice"]);
       expect(
         items.every(
           (x: { status: string; locked: boolean }) => x.status === "manual_review" && x.locked,
@@ -262,7 +266,7 @@ describe("remedy API", () => {
       expect(logs.some((l) => /held: .*guard other/.test(l))).toBe(true);
       expect(logs.join("\n")).not.toContain('"x"');
 
-      const p = await send(`/v1/reports/${r.report_id}/remedies`, { topic: "health" });
+      const p = await send(`/v1/reports/${r.report_id}/remedies`, { topic: "tarot_advice" });
       expect(p.status).toBe(202); // generated afresh, not the held one
       const fresh = await p.json();
       await api4.drain();
@@ -296,7 +300,11 @@ describe("remedy API", () => {
       const r = await (await send("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
       await api2.drain();
       expect((await (await send(`/v1/reports/${r.report_id}/remedies`)).json()).items).toEqual([]);
-      const p = await send(`/v1/reports/${r.report_id}/remedies`, { topic: "health" });
+      // 逐张解读 and 综合解读 have no plan (v2.3.0): a tarot reading's plan is on its 建议.
+      for (const topic of ["tarot_cards", "tarot_synthesis"]) {
+        expect((await send(`/v1/reports/${r.report_id}/remedies`, { topic })).status).toBe(400);
+      }
+      const p = await send(`/v1/reports/${r.report_id}/remedies`, { topic: "tarot_advice" });
       expect(p.status).toBe(202);
       const pending = await p.json();
       expect(pending).toMatchObject({ status: "pending", locked: false });
@@ -304,7 +312,7 @@ describe("remedy API", () => {
       await api2.drain();
       const done = await (await send(`/v1/remedies/${pending.remedy_id}`)).json();
       expect(done.status).toBe("passed");
-      expect(done.content.target).toContain("健康");
+      expect(done.content.target).toContain("建議");
     } finally {
       await new Promise<void>((done) => api2.close(() => done()));
     }
@@ -382,7 +390,7 @@ describe("remedy API", () => {
       data: {
         sections: [
           {
-            topic: "health",
+            topic: "tarot_advice",
             paragraphs: [
               {
                 text: "不轉運的話，下半年就會出事。",
@@ -413,13 +421,13 @@ describe("remedy API", () => {
       await send("/v1/charts", { system: "tarot", spread: "three_card" })
     ).json();
     const r = await (
-      await send("/v1/reports", { chart_id, locale: "zh-Hant", topics: ["health"] })
+      await send("/v1/reports", { chart_id, locale: "zh-Hant", topics: ["tarot_advice"] })
     ).json();
     await api2.drain();
     expect((await (await send(`/v1/reports/${r.report_id}`)).json()).status).not.toBe("passed");
-    expect((await send(`/v1/reports/${r.report_id}/remedies`, { topic: "health" })).status).toBe(
-      409,
-    );
+    expect(
+      (await send(`/v1/reports/${r.report_id}/remedies`, { topic: "tarot_advice" })).status,
+    ).toBe(409);
     await new Promise<void>((done) => api2.close(() => done()));
   });
 

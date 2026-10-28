@@ -176,6 +176,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get topicHealth => 'Wellbeing';
 
   @override
+  String get topicTarotCards => 'Card by card';
+
+  @override
+  String get topicTarotSynthesis => 'The whole spread';
+
+  @override
+  String get topicTarotAdvice => 'Advice';
+
+  @override
   String get srcTraditional => 'Classical texts';
 
   @override
@@ -1048,6 +1057,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tarotQuestionHint =>
       'Think of one question before you draw; the reading will answer it.';
+
+  @override
+  String get tarotFocus => 'Focus on (optional)';
+
+  @override
+  String get focusAny => 'Anything';
+
+  @override
+  String get focusCareer => 'Work';
+
+  @override
+  String get focusLove => 'Love';
+
+  @override
+  String get focusHealth => 'Health';
+
+  @override
+  String get focusSelf => 'Myself';
+
+  @override
+  String get tarotSections =>
+      'The reading has three parts: card by card, the whole spread, and advice.';
 
   @override
   String tarotQuestionShown(String question) {

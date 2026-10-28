@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/models.dart';
+import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../labels.dart';
@@ -135,7 +136,8 @@ class _FourLayerReportState extends State<FourLayerReport> {
                               ],
                             ),
                           ),
-                        if (widget.reportId != null)
+                        // 逐张解读 and 综合解读 have no plan; a tarot plan is on 建议 (contract noPlanTopics).
+                        if (widget.reportId != null && !noPlanTopics.contains(s.topic))
                           Padding(
                             padding: const EdgeInsets.only(bottom: Space.s),
                             child: RemedyButton(reportId: widget.reportId!, topic: s.topic, compact: true),
@@ -188,7 +190,13 @@ class _FourLayerReportState extends State<FourLayerReport> {
         if (widget.reportId != null)
           FadeSlideIn(
             index: i++,
-            child: RemedyCard(reportId: widget.reportId!, topics: [for (final s in layers.interpretation) s.topic]),
+            child: RemedyCard(
+              reportId: widget.reportId!,
+              topics: [
+                for (final s in layers.interpretation)
+                  if (!noPlanTopics.contains(s.topic)) s.topic,
+              ],
+            ),
           ),
       ],
     );

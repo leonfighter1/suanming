@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import { yearGanZhi } from "../engines/bazi/index.js";
 import type { ChartSystem } from "../chart-fact/index.js";
 import type { Locale } from "./terms.js";
-import { TOPIC_LABELS, type Topic } from "./types.js";
+import { TOPIC_LABELS, type TarotFocus, type Topic } from "./types.js";
 
 export interface PromptVersion {
   id: string;
@@ -453,19 +453,66 @@ const REMEDY_BAZI_V4 = `${REMEDY_BAZI_V3}
 
 What you read (v2.2.0): chart_facts.view names the periods this plan targets: focus_cycles and focus_years, where this topic scores lowest from now on. Only those carry relations and shensha. Target them in target and focus_periods, and say nothing about the relations or 神煞 of other periods.`;
 
+/**
+ * v2.3.0 (WP2.2): a tarot reading has its own sections, card by card, the whole spread, and the
+ * advice, instead of 八字's areas of life; an optional <focus> names the area it looks at.
+ */
+const NARRATIVE_TAROT_V2 = [
+  [
+    "Topics: read the whole spread for each requested area of life, in the order asked:",
+    "Sections: write the sections requested, in this order:",
+  ],
+  [
+    "- personality: the user themself in this matter: attitude, inner state and strengths.",
+    "- tarot_cards: the cards one by one in dealing order, one paragraph per card and nothing else. Name the position, the card and its orientation, say what the card means in that position and how it bears on the question. Cite only that card's path. About 80–160 Chinese characters or 60–110 English words per card.",
+  ],
+  [
+    "- career_wealth: work, study and money. No investment, trading or gambling advice, no amounts, no promised income.",
+    "- tarot_synthesis: the whole spread as one story, read the classic way for this spread (above), answering the question directly. 2–3 paragraphs, citing the cards each one ties together.",
+  ],
+  [
+    "- relationships: feelings and close relationships. Never predict a breakup, divorce, an affair, a partner's death or a specific partner.",
+    "- tarot_advice: what the cards suggest the user could do, from the cards that speak to it (for example the outcome card, the self card's attitude, the lesson of the challenge). 1–2 paragraphs, citing those cards.",
+  ],
+  [
+    "- health: general wellbeing only. Never name a disease, diagnose, or suggest treatment or supplements; end the section with a sentence saying it is not medical advice and to see a doctor when unwell.",
+    "<focus>, when present, is the area of life the user wants the reading to look at; read every section in its light. career_wealth is work, study and money (no investment, trading or gambling advice, no amounts, no promised income); relationships is feelings and close relationships (never predict a breakup, divorce, an affair, a partner's death or a specific partner); health is general wellbeing only (never name a disease, diagnose, or suggest treatment or supplements, and end tarot_advice with a sentence saying it is not medical advice and to see a doctor when unwell); personality is the user themself: attitude, inner state and strengths. Without <focus>, read the spread for the question as a whole, with the same limits wherever money, relationships or health come up.",
+  ],
+  [
+    "Shape each topic by the spread: for the Celtic Cross, one paragraph on cards 1–2, one on cards 3–6, and one or two on the staff (cards 7–10) and the outcome; for three cards, past, present and future in order; for one card, two paragraphs. 2–4 paragraphs per topic, about 150–260 Chinese characters or 100–170 English words each. End each topic with what the cards suggest the user could do.",
+    "Shape tarot_synthesis by the spread: for the Celtic Cross, one paragraph on the cross (cards 1–6) and one on the staff (cards 7–10) and the outcome; for three cards, past, present and future as one line of development; for one card, one paragraph. Paragraphs of tarot_synthesis and tarot_advice run about 150–260 Chinese characters or 100–170 English words.",
+  ],
+  ["answer it directly in the topic closest to it.", "answer it directly in tarot_synthesis."],
+].reduce((text, [from, to]) => swap(text, from!, to!), NARRATIVE_TAROT_V1);
+
+const ACTION_TAROT_V2 = [
+  ["(the reading, by topic)", "(the reading: card by card, the whole spread, and its advice)"],
+  ["- For each topic, give 2–3 actions.", "- Give 3–5 actions, all with topic tarot_advice."],
+  [
+    "what the reading says about the cards for its topic",
+    "the reading's advice and the cards behind it",
+  ],
+].reduce((text, [from, to]) => swap(text, from!, to!), ACTION_TAROT_V1);
+
+const REMEDY_TAROT_V2 = swap(
+  REMEDY_TAROT_V1,
+  "You write a short plan for ONE topic of a tarot reading that the user has unlocked: concrete steps that work with what the cards show.",
+  "You write a short plan for a tarot reading that the user has unlocked: concrete steps that work with what the cards show. <topic> is tarot_advice, the reading as a whole (its question and its advice), or, for a reading made before v2.3.0, one area of life.",
+);
+
 export const PROMPTS = {
   narrative: version("narrative", 4, NARRATIVE_V4),
   narrative_bazi: version("narrative_bazi", 6, NARRATIVE_BAZI_V6),
-  narrative_tarot: version("narrative_tarot", 1, NARRATIVE_TAROT_V1),
+  narrative_tarot: version("narrative_tarot", 2, NARRATIVE_TAROT_V2),
   narrative_astrology: version("narrative_astrology", 1, NARRATIVE_ASTROLOGY_V1),
   action: version("action", 3, ACTION_V3),
   action_bazi: version("action_bazi", 4, ACTION_BAZI_V4),
-  action_tarot: version("action_tarot", 1, ACTION_TAROT_V1),
+  action_tarot: version("action_tarot", 2, ACTION_TAROT_V2),
   action_astrology: version("action_astrology", 1, ACTION_ASTROLOGY_V1),
   trend: version("trend", 2, TREND_V2),
   remedy: version("remedy", 2, REMEDY_V2),
   remedy_bazi: version("remedy_bazi", 4, REMEDY_BAZI_V4),
-  remedy_tarot: version("remedy_tarot", 1, REMEDY_TAROT_V1),
+  remedy_tarot: version("remedy_tarot", 2, REMEDY_TAROT_V2),
   life_methods: version("life_methods", 2, LIFE_METHODS_V2),
   life_topics: version("life_topics", 2, LIFE_TOPICS_V2),
   guard: version("guard", 2, GUARD_V2),
@@ -534,7 +581,10 @@ export function narrativeUser(args: {
     .join("\n\n");
 }
 
-/** Tarot readings (narrative_tarot): the draw, the spread ready to read and the user's question. */
+/**
+ * Tarot readings (narrative_tarot): the draw, the spread ready to read, the user's question and
+ * the area of life it focuses on.
+ */
 export function tarotUser(args: {
   facts: unknown;
   spread: unknown;
@@ -542,6 +592,7 @@ export function tarotUser(args: {
   locale: Locale;
   glossary: Record<string, string>;
   question?: string;
+  focus?: TarotFocus;
   context?: unknown;
   today?: string;
   feedback?: string[];
@@ -552,6 +603,7 @@ export function tarotUser(args: {
     tag("spread", args.spread),
     tag("glossary", args.glossary),
     args.question ? tag("user_question", args.question) : "",
+    args.focus ? tag("focus", `${args.focus} (${TOPIC_LABELS[args.focus][args.locale]})`) : "",
     args.context ? tag("user_context", args.context) : "",
     `Write these topics, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
     `Write in ${LANGUAGE[args.locale]}.`,

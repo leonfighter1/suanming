@@ -13,6 +13,8 @@ import {
   generateRemedy,
   generateReport,
   MockProvider,
+  NO_PLAN_TOPICS,
+  TAROT_FOCUS,
   TOPICS_BY_SYSTEM,
 } from "../src/ai/index.js";
 import {
@@ -88,6 +90,27 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     created_at: ts,
     updated_at: ts,
     report,
+  });
+  // A tarot reading (v2.3.0): card by card, the whole spread and the advice, with a focus.
+  const tarotReport = await generateReport(
+    tarot,
+    { locale: "zh-Hant", country: "HK", question: "這份工作還要繼續嗎？", focus: "career_wealth" },
+    {
+      providers: { deepseek: mock, anthropic: mock },
+      now,
+      newId: () => "55555555-5555-4555-8555-555555555555",
+    },
+  );
+  const tarotView = publicReport({
+    id: tarotReport.report_id,
+    owner: "fixture",
+    chart_id: "66666666-6666-4666-8666-666666666666",
+    status: tarotReport.status,
+    locale: tarotReport.locale,
+    topics: tarotReport.topics,
+    created_at: ts,
+    updated_at: ts,
+    report: tarotReport,
   });
 
   const remedy = await generateRemedy(
@@ -191,6 +214,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       chart_fact: single,
     },
     "app/test/fixtures/report_passed.json": view,
+    "app/test/fixtures/report_tarot_passed.json": tarotView,
     "app/test/fixtures/remedy_passed.json": remedyView,
     "app/test/fixtures/life_passed.json": lifeView,
     "app/test/fixtures/review_report.json": reviewView,
@@ -238,6 +262,12 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
         ([sys, ts]) => `  '${sys}': [${ts.map((t) => `'${t}'`).join(", ")}],`,
       ),
       "};",
+      "",
+      "/// Sections that get no 破除運勢 plan (NO_PLAN_TOPICS on the server).",
+      `const noPlanTopics = <String>{${NO_PLAN_TOPICS.map((t) => `'${t}'`).join(", ")}};`,
+      "",
+      "/// The areas of life a tarot reading may focus on (TAROT_FOCUS on the server).",
+      `const tarotFocus = <String>[${TAROT_FOCUS.map((t) => `'${t}'`).join(", ")}];`,
       "",
     ].join("\n"),
   };

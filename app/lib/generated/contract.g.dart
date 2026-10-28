@@ -3,6 +3,12 @@
 /// Topics each chart system supports (TOPICS_BY_SYSTEM on the server).
 const topicsBySystem = <String, List<String>>{
   'bazi': ['wuxing', 'personality', 'career_wealth', 'relationships', 'dayun_liunian', 'health'],
-  'tarot': ['personality', 'career_wealth', 'relationships', 'health'],
+  'tarot': ['tarot_cards', 'tarot_synthesis', 'tarot_advice'],
   'astrology': ['personality', 'career_wealth', 'relationships', 'health'],
 };
+
+/// Sections that get no 破除運勢 plan (NO_PLAN_TOPICS on the server).
+const noPlanTopics = <String>{'tarot_cards', 'tarot_synthesis'};
+
+/// The areas of life a tarot reading may focus on (TAROT_FOCUS on the server).
+const tarotFocus = <String>['career_wealth', 'relationships', 'health', 'personality'];

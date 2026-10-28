@@ -20,7 +20,7 @@ import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 const HASHES: Record<string, string> = {
   "narrative@4": "49007c9a8aba351e",
   "narrative_bazi@6": "d7c2c79e4aed5cc0",
-  "narrative_tarot@1": "4539f0f1184b8d18",
+  "narrative_tarot@2": "6f51cb586f537368",
   "action@3": "87f6e73c8dd8d3de",
   "trend@2": "80a95937498e19fc",
   "remedy@2": "8a54bed1ea13dffa",
@@ -29,10 +29,10 @@ const HASHES: Record<string, string> = {
   "guard@2": "49e59c41bbcd38bb",
   "narrative_astrology@1": "65a19de24e0f0c90",
   "action_bazi@4": "effdf6065ae231c6",
-  "action_tarot@1": "8240f4ad84d43389",
+  "action_tarot@2": "33ab0ed8c7aa7a27",
   "action_astrology@1": "3da662668915d1f0",
   "remedy_bazi@4": "1953c4f923cf05ab",
-  "remedy_tarot@1": "ccb65119b225516a",
+  "remedy_tarot@2": "5ea0b8e2f95f8ce9",
 };
 
 const charts = {
