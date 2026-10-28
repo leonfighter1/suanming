@@ -2,6 +2,16 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (d): tarot card art from JingyaoPaint; release v1.1.0
+
+- Owner request: bring the tarot cards in `C:\AIProjects\JingyaoPaint\local_art\out\tarot` into the app's cards, in a folder of their own in the repo.
+- Source: 78 PNGs (1400×2400 = 7:12, opaque) and their .jypaint files, painted by code in JingyaoPaint's `local_art/tarot` (git-ignored there, so on this computer only). Names `NN 名字 Name.png` in deck order, matching `deck.ts` (wands, cups, swords, pentacles).
+- Built: `scripts/tarot-art.ts` (names, file → card check by number and English name, WebP header) and `scripts/mirror-tarot-art.ts` (`npm run mirror:tarot`; sharp 0.35.5 dev dependency): 350×600 WebP q85, lanczos3, only changed cards written, strays removed; a second run changes 0 of 78. `app/assets/tarot/<card id>.webp`, 1.7 MB. CLAUDE.md rule 4 now names the folder.
+- App: the face shows the picture (104 × 178, radius 8 so the painted gold frame isn't cut), reversed = upside down, the name in the reader's language under the card, back in the deck's navy and gold, pictures precached on draw, the name as fallback. Picture and captions are left out of semantics (the card's label reads them).
+- Checks: all text painted on the art (367 names and keywords) through every compliance rule group: 0 hits. Rendered light and dark and looked at.
+- For the owner: six painted names differ from the deck's (愚人/愚者, 皇后/女皇, 权杖一…星币一 vs …王牌); the painted text is 简体 in every language.
+- Mistakes: a golden is captured at 1× logical size whatever the view's pixel ratio (rule 22). Every first `flutter pub get` after a pubspec change (manual, the IDE's, the app gate's) deleted the committed l10n files, so the first harness run failed at analyze; `flutter gen-l10n` restored them unchanged and the rerun passed (rule 23).
+
 ## 2026-10-27 (c): keyboard access for web users; release v1.0.0
 
 - Owner request: keyboard support for web users. Esc goes back one level, and on a 测算 page it first reminds that going back starts over; Tab, Enter to expand, Ctrl+Tab and the rest considered. Plan listed by area first, then built area by area.

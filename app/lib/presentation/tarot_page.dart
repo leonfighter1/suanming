@@ -10,6 +10,20 @@ import 'design.dart';
 import 'keyboard.dart';
 import 'widgets/report_request.dart';
 
+// A card has the art's own shape, 7:12 (app/assets/tarot, made by `npm run mirror:tarot`).
+// The corners stay small enough not to cut the gold frame painted 16/700 in from the edge.
+const _cardWidth = 104.0;
+const _cardHeight = _cardWidth * 12 / 7;
+const _cardRadius = 8.0;
+
+// The deck's own colours (JingyaoPaint tarot_card.dart), so the back matches the faces
+// in light and dark alike, as a real deck would.
+const _navy = Color(0xFF1E2546);
+const _navyLight = Color(0xFF34407A);
+const _gold = Color(0xFFE4BC62);
+
+String _art(String cardId) => 'assets/tarot/$cardId.webp';
+
 class TarotPage extends ConsumerStatefulWidget {
   const TarotPage({super.key});
 
@@ -33,6 +47,10 @@ class _TarotPageState extends ConsumerState<TarotPage> {
         _chart = chart;
         _revealed.clear();
       });
+      // Load the pictures while the cards lie face down, so each one is there as it turns.
+      for (final c in chart.tarot.cards) {
+        precacheImage(AssetImage(_art(c.cardId)), context, onError: (_, _) {});
+      }
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
     } finally {
@@ -157,25 +175,19 @@ class _FlipCard extends ConsumerWidget {
                   ..setEntry(3, 2, 0.001)
                   ..rotateY(pi * v),
                 child: Container(
-                  width: 104,
-                  height: 164,
-                  padding: const EdgeInsets.all(Space.s + 2),
+                  width: _cardWidth,
+                  height: _cardHeight,
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Radii.field),
+                    borderRadius: BorderRadius.circular(_cardRadius),
                     color: showFace ? scheme.surfaceContainerHighest : null,
-                    gradient: showFace
-                        ? null
-                        : LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [scheme.primary, scheme.tertiary],
-                          ),
+                    gradient: showFace ? null : const RadialGradient(colors: [_navyLight, _navy]),
                     border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
                     boxShadow: [
                       BoxShadow(color: scheme.shadow.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 6)),
                     ],
                   ),
-                  // Mirror the face back so text reads correctly after the flip,
+                  // Mirror the face back so the art reads correctly after the flip,
                   // and turn it upside down for a reversed card.
                   child: showFace
                       ? Transform(
@@ -183,23 +195,60 @@ class _FlipCard extends ConsumerWidget {
                           transform: Matrix4.identity()
                             ..rotateY(pi)
                             ..rotateZ(card.reversed ? pi : 0),
-                          child: Center(
-                            child: Text(
-                              name,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                          child: Image.asset(
+                            _art(card.cardId),
+                            fit: BoxFit.cover,
+                            excludeFromSemantics: true, // the card's label says it
+                            // Without its picture, a card shows its name.
+                            errorBuilder: (_, _, _) => Padding(
+                              padding: const EdgeInsets.all(Space.s + 2),
+                              child: Center(
+                                child: Text(
+                                  name,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              ),
                             ),
                           ),
                         )
-                      : Icon(Icons.auto_awesome, color: scheme.onPrimary),
+                      : Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: _gold.withValues(alpha: 0.8)),
+                              borderRadius: BorderRadius.circular(_cardRadius - 4),
+                            ),
+                            child: const Center(child: Icon(Icons.auto_awesome, color: _gold)),
+                          ),
+                        ),
                 ),
               );
             },
           ),
           const SizedBox(height: 4),
-          Text(position),
-          if (revealed && card.reversed)
-            Text(l10n.reversed, style: TextStyle(color: scheme.error, fontSize: 12)),
+          // The name in the reader's language: the art's own is small and in 简体.
+          // Read out through the card's label above.
+          ExcludeSemantics(
+            child: SizedBox(
+              width: _cardWidth,
+              child: Column(
+                children: [
+                  Text(position, textAlign: TextAlign.center),
+                  if (revealed)
+                    Text(
+                      name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  if (revealed && card.reversed)
+                    Text(l10n.reversed, style: TextStyle(color: scheme.error, fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

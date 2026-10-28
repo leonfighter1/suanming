@@ -103,6 +103,11 @@ void main() {
       await scrollAndTap(tester, find.text(pos));
       await settle(tester);
     }
+    // Each turned card shows its art; the name in the reader's language goes under it.
+    for (final id in ['major_09', 'major_05', 'swords_07']) {
+      expect(find.image(AssetImage('assets/tarot/$id.webp')), findsOneWidget);
+    }
+    expect(find.text('隱士'), findsOneWidget);
     await tester.scrollUntilVisible(find.byKey(const Key('generate-report')), 300, scrollable: mainScrollable);
     expect(find.byKey(const Key('generate-report')), findsOneWidget);
   });

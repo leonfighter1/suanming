@@ -38,7 +38,9 @@ Records:
    (set at sign-up), never from a client header outside dev mode.
 4. **One source per fact.** Terms, the tarot deck and positions, and topics
    live on the server and reach the app via `npm run sync:app`. Never hand-edit
-   `app/assets/i18n`, `app/test/fixtures` or `app/lib/generated`.
+   `app/assets/i18n`, `app/test/fixtures` or `app/lib/generated`. The tarot card
+   art comes from JingyaoPaint through `npm run mirror:tarot`; never edit
+   `app/assets/tarot` by hand either.
 5. **Secrets only in `.env`** (git-ignored) or the secrets manager. Tests force
    the mock AI provider and never spend money. **The owner's AI switch:**
    `IS_AI_MOCK=TRUE` in `.env` keeps every AI step on the mock to save tokens

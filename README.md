@@ -11,6 +11,40 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. The steps that finish an update (harness, this entry, version) are in
 [.claude/skills/keyboard-access/SKILL.md](.claude/skills/keyboard-access/SKILL.md).
 
+### v1.1.0 (2026-10-27): tarot card art
+
+**塔罗 cards with pictures** (new): every card of the 78-card deck now has its own picture, painted in
+JingyaoPaint.
+
+- 塔罗
+  - Turning a card shows its picture: the scene, its number, its name (简体 and English) and three keywords, in the
+    deck's navy and gold. A reversed card lies upside down, with 逆位 under it, as with a real deck.
+  - Under each card: the position, and once the card is turned, its name in the chosen language (the name painted on
+    the picture is small and always 简体).
+  - Cards have the pictures' shape (7:12, 104 × 178) with small rounded corners. The back is the deck's navy and gold
+    in light and dark mode alike (before: the app's red-to-green gradient).
+  - The pictures load while the cards lie face down, so each card shows its picture as it turns. A card whose picture
+    can't load shows its name, as before.
+  - Keyboard and screen readers work as before: Tab to a card, Enter or Space turns it; the card is read out as its
+    position, then its name and 逆位.
+- For developers
+  - `app/assets/tarot/`: one picture per card, named by card id (`major_00.webp` … `pentacles_14.webp`), 350×600
+    WebP, 1.7 MB for all 78.
+  - `npm run mirror:tarot` makes that folder from JingyaoPaint's `local_art/out/tarot` (1400×2400 PNG, about 2.4 MB
+    each). It checks every file against the deck by its number and English name, fits it to 350×600 (enough for the
+    104-pt card on a 3× screen), and makes the folder match: changed cards are rewritten, unchanged ones left alone,
+    anything else removed. Run it again whenever the art changes (another folder: `npm run mirror:tarot -- <folder>`).
+    Never edit the folder by hand.
+  - New dev dependency: sharp 0.35.5 (image resizing; only the mirror script uses it).
+- Verified: new server test (the folder holds exactly the deck's 78 cards, each a 350×600 WebP; file names map to
+  cards by number and English name) and app test (all 78 pictures in the app bundle decode in Flutter at 350×600;
+  turned cards show their picture and name); all 82 app tests and 247 server tests pass; harness PASS. The page was
+  checked on rendered images in light and dark. The text painted on the cards (names and keywords, 367 in all) hits no
+  compliance rule.
+- Note: six cards are named differently on the picture and in the app (the deck in `src/engines/tarot/deck.ts`):
+  愚人 (app: 愚者), 皇后 (女皇), 权杖一 / 圣杯一 / 宝剑一 / 星币一 (app: …王牌). The app shows its own name under the
+  card.
+
 ### v1.0.0 (2026-10-27): keyboard access; first numbered release
 
 The first numbered version. It contains everything delivered so far ([docs/SUMMARY.md](docs/SUMMARY.md)) and the

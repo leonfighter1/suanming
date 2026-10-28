@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
@@ -29,7 +29,8 @@
     "api:lan": "tsx scripts/api-server.ts --lan",
     "api:public": "tsx scripts/api-server.ts --public",
     "public": "tsx scripts/public.ts",
-    "build:yijing": "tsx scripts/build-yijing.ts"
+    "build:yijing": "tsx scripts/build-yijing.ts",
+    "mirror:tarot": "tsx scripts/mirror-tarot-art.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",
@@ -49,6 +50,7 @@
     "@types/node": "^22.0.0",
     "opencc-js": "1.4.2",
     "prettier": "^3.6.0",
+    "sharp": "0.35.5",
     "sweph": "2.10.3-8",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",

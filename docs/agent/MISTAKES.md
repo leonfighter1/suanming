@@ -23,8 +23,22 @@
 19. In widget tests, pump a frame between enterText (or any setState) and the next key press; use press() from test/keys.dart.
 20. Check whether a DropdownMenu is open with find.text(entry).hitTestable(), never a plain find.text.
 21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
+22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead.
+23. After any change to app/pubspec.yaml, run flutter pub get and then flutter gen-l10n through the junction, check git status, and only then run the harness.
 
 ## Log
+
+### 2026-10-27: A pubspec change makes the next pub get delete the l10n files
+- **Symptom:** After adding assets/tarot/ and the version to app/pubspec.yaml, the harness app gate failed at analyze: lib/l10n/gen/app_localizations*.dart missing
+- **Root cause:** The first flutter pub get after a pubspec change (manual, the IDE's automatic one, or the app gate's) treats the gen-l10n output recorded under another path as stale and deletes it; the harness regenerates only before and after the app check
+- **Fix:** flutter gen-l10n through the junction restored the files unchanged; the second harness run (pub get with nothing to do) passed
+- **Rule:** After any change to app/pubspec.yaml, run flutter pub get and then flutter gen-l10n through the junction, check git status, and only then run the harness. (Rule 23)
+
+### 2026-10-27: Golden images are captured at logical size
+- **Symptom:** Cropping a tarot golden at 2x coordinates failed (bad extract area): the PNG was 400x1250, not 800x2500
+- **Root cause:** Assumed matchesGoldenFile renders at tester.view.devicePixelRatio; it captures the repaint boundary at 1x logical pixels
+- **Fix:** Cropped at logical coordinates; the art had already been checked at full size on its own
+- **Rule:** matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead. (Rule 22)
 
 ### 2026-10-27: flutter test --platform chrome never loads on this machine
 - **Symptom:** Failed to load: Connection closed before test suite loaded, then the run hung until the timeout; an untouched existing test failed the same way.
