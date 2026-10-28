@@ -16,8 +16,11 @@ import {
   type LLMJsonResult,
   type LLMProvider,
 } from "../ai/index.js";
+import type { Store } from "../api/store.js";
 import { noCaptcha, TurnstileVerifier } from "../auth/limits.js";
-import { AuthService } from "../auth/service.js";
+import { AuthService, type UserStore } from "../auth/service.js";
+import { parseKek } from "../db/envelope.js";
+import { PgStore } from "../db/pg-store.js";
 import { SocialVerifier } from "../auth/social.js";
 import { TokenService } from "../auth/tokens.js";
 import type { EngineSecrets } from "./charts.js";
@@ -180,7 +183,11 @@ export function describeAi(p: Providers): string {
  * GOOGLE_CLIENT_IDS (comma-separated audiences), MINGLI_TURNSTILE_SECRET (captcha).
  * Without a captcha secret, captcha is off; that is refused outside dev mode.
  */
-export function buildAuth(secrets: EngineSecrets, devMode: boolean): AuthService {
+export function buildAuth(
+  secrets: EngineSecrets,
+  devMode: boolean,
+  users?: UserStore,
+): AuthService {
   const jwt = hexSecret("MINGLI_JWT_SECRET");
   if (!jwt && !devMode) throw new Error("MINGLI_JWT_SECRET is required outside dev mode");
   const turnstile = process.env.MINGLI_TURNSTILE_SECRET;
@@ -191,7 +198,45 @@ export function buildAuth(secrets: EngineSecrets, devMode: boolean): AuthService
     tokens: new TokenService(jwt ?? randomBytes(32)),
     social: SocialVerifier.fromEnv(),
     captcha: turnstile ? new TurnstileVerifier(turnstile) : noCaptcha,
+    ...(users && { users }),
   });
+}
+
+/** Where readings and accounts are kept: in memory (the default), or the encrypted database. */
+export interface Persistence {
+  /** Undefined: the API's in-memory store. */
+  store?: Store;
+  users?: UserStore;
+  /** The folder of the database, when there is one. */
+  dataDir?: string;
+  close(): Promise<void>;
+}
+
+/**
+ * MINGLI_STORE=pglite keeps readings and accounts across restarts (tech plan S5), in the folder
+ * MINGLI_DATA_DIR (default .data, git-ignored), every body sealed under its owner's data key, which
+ * MINGLI_DATA_KEY wraps. Without it, everything stays in memory, as before. It refuses to start
+ * without a valid key, or with per-process secrets: a random pepper would lose every email lookup
+ * at the next start.
+ */
+export async function openStore(
+  secrets: EngineSecrets & { ephemeral: boolean },
+): Promise<Persistence> {
+  const kind = process.env.MINGLI_STORE?.trim().toLowerCase() || "memory";
+  if (kind === "memory") return { close: async () => {} };
+  if (kind !== "pglite") throw new Error(`MINGLI_STORE must be memory or pglite, not ${kind}`);
+  if (secrets.ephemeral) {
+    throw new Error(
+      "MINGLI_STORE=pglite needs MINGLI_DIGEST_PEPPER and MINGLI_TAROT_DRAW_KEY in .env (npm run keygen prints them)",
+    );
+  }
+  const dataDir = process.env.MINGLI_DATA_DIR?.trim() || ".data";
+  const pg = await PgStore.open({
+    dataDir,
+    kek: parseKek(process.env.MINGLI_DATA_KEY),
+    pepper: secrets.digestPepper,
+  });
+  return { store: pg, users: pg, dataDir, close: () => pg.close() };
 }
 
 /** Test accounts seeded on every dev-mode start (the store is in-memory). */

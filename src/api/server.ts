@@ -284,6 +284,18 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   >();
   const matrix = loadGeoMatrix();
 
+  /**
+   * Runs a background job, tracked for drain(). A failure is logged, never left unhandled: the
+   * database store (v4.1.0) can throw where memory never did, e.g. on a write for an account
+   * deleted a moment before, and an unhandled rejection would end the process.
+   */
+  function track(what: string, work: Promise<void>) {
+    const job: Promise<void> = work
+      .catch((e: unknown) => log(`${what} failed to finish`, e))
+      .finally(() => jobs.delete(job));
+    jobs.add(job);
+  }
+
   const admins = new Set((opts.admins ?? []).map((a) => a.trim().toLowerCase()).filter(Boolean));
   /** The reviewer's login when the caller is a reviewer, else undefined. */
   async function reviewer(c: Caller): Promise<string | undefined> {
@@ -572,10 +584,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       payment: { status: "placeholder", ...REMEDY_PRICE },
     };
     await store.putRemedy(remedy);
-    const job = runRemedyJob(remedy, report, fact, c, record.context).finally(() =>
-      jobs.delete(job),
-    );
-    jobs.add(job);
+    track(`plan ${remedy.id}`, runRemedyJob(remedy, report, fact, c, record.context));
     return {
       status: 202,
       body: publicRemedy(remedy),
@@ -653,8 +662,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       updated_at: ts,
     };
     await store.putLifeReport(record);
-    const job = runLifeJob(record, chart.fact, c, context).finally(() => jobs.delete(job));
-    jobs.add(job);
+    track(`life report ${record.id}`, runLifeJob(record, chart.fact, c, context));
     return {
       status: 202,
       body: publicLifeReport(record),
@@ -830,8 +838,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       ...(context && { context }),
     };
     await store.putReport(record);
-    const job = runJob(record, chart.fact, c, question, focus).finally(() => jobs.delete(job));
-    jobs.add(job);
+    track(`report ${record.id}`, runJob(record, chart.fact, c, question, focus));
     return {
       status: 202,
       body: publicReport(record),

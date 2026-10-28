@@ -31,7 +31,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
 | S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done    |
 | S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done    |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done    |
 | S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
 | S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v5.1.0            | planned |
 
@@ -392,6 +392,66 @@ keyboard-access checklist.
 
 - WP5.1 A PGlite store on disk (`db/schema_v0.sql` and migrations) behind the same `Store` interface, report and fact
   bodies encrypted (AES-GCM, key in `.env`), data in a git-ignored folder; the store tests run on both stores.
+  - Spec, detailed 2026-10-28 from the owner's documents (rule 34). The phase document asks for AES-256 at rest for
+    birth data and consultation content, and keys never in the database or the code. `db/schema_v0.sql` and
+    `docs/data-retention.md` fix the rest:
+    - Envelope encryption. Each user gets a data key (DEK, 32 random bytes), stored only wrapped by the key
+      encryption key (KEK). The KEK is `MINGLI_DATA_KEY` in `.env` here and a KMS in production. Facts, report,
+      plan and life report bodies, the life context and the email are sealed with the owner's DEK (AES-256-GCM,
+      random nonce, the table and row id as associated data, so a body can't be moved to another row).
+    - Plain columns only where the schema has them: ids, owner, system, versions, digest, status, locale, topics,
+      times. Raw birth data is never stored. That is already so: a chart record holds only the ChartFact.
+    - Deletion follows data-retention.md:
+      1. a `deletion_requests` row first;
+      2. the DEK shredded with the user row, which cascades to everything they own;
+      3. evidence recorded (counts, `dek_shredded`), then `completed_at`.
+         The request row holds no PII (`subject_hash`).
+    - Reports expire 24 months after creation (`expires_at`). Purging them is a later WP; this one only records the
+      date.
+    - The store is opt-in: `MINGLI_STORE=pglite` with `MINGLI_DATA_DIR` (git-ignored). Without it, the server keeps
+      the in-memory store, so tests and the owner's setup are unchanged until the owner turns it on.
+    - When on, the server refuses to start without a valid `MINGLI_DATA_KEY`, or with ephemeral secrets: a random
+      pepper would break email lookups after a restart.
+    - Tests:
+      - one contract suite run on both stores;
+      - a restart (close, reopen the folder, read);
+      - no plaintext in the stored rows (a birth date, a reading's text, an email);
+      - a wrong KEK, or a body moved to another row, fails loudly;
+      - deletion leaves only its evidence.
+- WP5.2 Accounts survive a restart too: the same database's `users` table behind `UserStore`. The email is sealed with
+  the user's DEK, with the HMAC lookup column beside it. Readings that survive while their owners vanish would be of
+  no use.
+- As built (v4.1.0, WP5.1 + WP5.2):
+  - `src/db/envelope.ts`: AES-256-GCM with a version byte, a random 96-bit nonce and the row as associated data;
+    each DEK is wrapped under the KEK and bound to its user.
+  - `src/db/pg-store.ts`: `PgStore` is both `Store` and `UserStore` on PGlite. It applies `schema_v0.sql`, then the
+    migrations it hasn't recorded (`schema_migrations`).
+  - `db/migrations/002_store.sql` adds:
+    - `failed` to the status enum, and nullable region and matrix for pending reports;
+    - `updated_at`, the 每日一牌 date and the social lookups;
+    - tables for plans and life reports;
+    - a `seq` that keeps rows of one millisecond in the order they came, as the in-memory lists do.
+  - The bodies are the whole records, sealed. The plain columns are the schema's lookup columns only, and the
+    violations are rule ids only.
+  - Wiring:
+    - `openStore` in `src/service/runtime.ts` (memory by default) and `npm run keygen`;
+    - `.data/` git-ignored;
+    - the X-Dev-User shortcut off with the store;
+    - the database closed after the jobs drain;
+    - how to turn it on in docs/web-test.md.
+  - Found on the way:
+    - Every background job now goes through `track()`: a failed write is logged, not an unhandled rejection that
+      would end the process. Memory never threw; a database can.
+    - PGlite moved into `dependencies`. The term tips stopped reaching the server through the ai index: since
+      v3.2.0 they had pulled OpenCC, a dev tool, into every server process. `test/runtime-deps.test.ts` now walks
+      the server's imports. Rule 36.
+  - Tests (`test/pg-store.test.ts`, 12, plus the dependency walk):
+    - one contract on both stores (round trip, replace, lists and their order, held, deletion);
+    - a restart, and a wrong key;
+    - no plaintext in any stored row (birth date, reading, life context, email, social subject);
+    - deletion leaving only its record, without the id or its bytes;
+    - the real API end to end on the database, the deletion race included;
+    - the envelope itself.
 
 ## S6 新玩法 (big → v5.0.0)
 
@@ -414,6 +474,26 @@ From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（�
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S5 数据持久化 (done 2026-10-28: v4.1.0, medium)
+
+1. **Delivered**: WP5.1 + WP5.2 in v4.1.0.
+   - Readings, plans, life reports and accounts survive a restart in an encrypted database (PGlite), when the owner
+     turns it on (`MINGLI_STORE=pglite`).
+   - Envelope encryption with a key per user. Deletion as docs/data-retention.md says.
+2. **Numbers**
+   - Server tests: 312 → 325. App tests: 121 (unchanged).
+   - Migrations: 001 → 002.
+3. **Changed against the plan**
+   - WP5.2 (accounts) was added once the spec was read against the owner's documents (rule 34): readings that
+     outlive their owners would be no use.
+   - The store is opt-in, so the owner's setup didn't change.
+   - Two finds came along: unhandled job failures, and a dev tool loaded by the server since v3.2.0.
+4. **Mistakes recorded**
+   - Rule 35: PGlite and enum arrays.
+   - Rule 36: sync-only code reached the server through an index.
+   - Rule 32 caught a vacuous assertion before it was committed (a value compared with itself).
+5. **Next**: S6 新玩法 (big → v5.0.0), then S7 分享图.
 
 ### S4 八字与全局 UI (done 2026-10-28: v3.1.0–v4.0.0)
 
@@ -601,4 +681,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP4.6–4.7 | done                       | v3.5.0  |
 | WP4.8     | done                       | v4.0.0  |
 | WP4.9     | moved to S7 (WP7.1)        | —       |
-| S5–S7     | todo                       | above   |
+| WP5.1–5.2 | done                       | v4.1.0  |
+| S6–S7     | todo                       | above   |

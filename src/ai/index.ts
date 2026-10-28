@@ -1,6 +1,5 @@
 export * from "./types.js";
 export * from "./terms.js";
-export { termTips, tipHant, TERM_TIPS, TERM_TIP_HANT_FIXES } from "./term-tips.js";
 export * from "./routing.js";
 export * from "./prompts.js";
 export * from "./layers.js";

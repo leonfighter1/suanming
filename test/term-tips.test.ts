@@ -2,7 +2,8 @@
 // three scripts. 简体 and English are written by hand; 繁體 is converted and reviewed (G18).
 import { createHash } from "node:crypto";
 import { expect, it } from "vitest";
-import { loadTerms, TERM_TIPS, termTips } from "../src/ai/index.js";
+import { loadTerms } from "../src/ai/index.js";
+import { TERM_TIPS, termTips } from "../src/ai/term-tips.js";
 import { compileRules, loadRuleSet, scan } from "../src/compliance/index.js";
 import { diShi, tenGod } from "../src/engines/bazi/index.js";
 import type { RelationType } from "../src/engines/bazi/relations.js";

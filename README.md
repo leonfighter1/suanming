@@ -12,6 +12,37 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v4.1.0 (2026-10-28): readings and accounts can survive a restart, encrypted
+
+Stage S5 of the [tech plan](docs/tech-plan.md) (数据持久化), complete: work packages 5.1 and 5.2. A medium update:
+committed locally, pushed with the next big update.
+
+- New, off until you turn it on: the API can keep accounts, readings, 破除运势 plans and 一生运势报告 in a database on
+  this computer, so a restart no longer loses them. How to turn it on: docs/web-test.md, 「Keep readings and accounts
+  across restarts」.
+  - `npm run keygen` prints the lines for `.env`. Then restart the API.
+  - The data folder is `.data/` (never committed). **Back up `MINGLI_DATA_KEY`**: without it the data can't be read.
+- Privacy, as your documents ask:
+  - Each account has its own key. Every chart, reading, plan, life report, the 个人情况 sent with a reading, and the
+    email are encrypted with it.
+  - No birth date, reading or email is stored in the clear; a test checks that every row holds none.
+  - Deleting an account deletes its key with it, so nothing of it can be read again. A deletion record without
+    personal data stays as proof.
+- Without the setting nothing changes: everything stays in memory, as before.
+- Also fixed:
+  - A background job that fails while saving is now logged instead of stopping the server.
+  - Since v3.2.0 the server had loaded a development-only tool (OpenCC) at start; it no longer does, and a test keeps
+    it so.
+- Verified:
+  - 13 new server tests:
+    - the same checks on both stores;
+    - a restart, and a wrong key;
+    - no plaintext anywhere;
+    - deletion;
+    - the real API end to end on the database;
+    - the server's dependencies.
+  - All 325 server tests and 121 app tests pass; harness PASS.
+
 ### v4.0.0 (2026-10-28): 八字与全局 UI, complete: the English 命盘 reads cleanly
 
 Stage S4 of the [tech plan](docs/tech-plan.md) is complete: work package 4.8 here, 4.1–4.7 in v3.1.0–v3.5.0. The

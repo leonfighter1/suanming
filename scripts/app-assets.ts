@@ -16,9 +16,10 @@ import {
   MockProvider,
   NO_PLAN_TOPICS,
   TAROT_FOCUS,
-  termTips,
   TOPICS_BY_SYSTEM,
 } from "../src/ai/index.js";
+// Not through the ai index: the tips need OpenCC (a dev tool), which the server must not load.
+import { termTips } from "../src/ai/term-tips.js";
 import {
   publicLifeReport,
   publicRemedy,

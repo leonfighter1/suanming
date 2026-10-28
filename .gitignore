@@ -7,3 +7,5 @@ coverage/
 *.key
 report.json
 .cache/
+# The database store's default folder (MINGLI_STORE=pglite): encrypted, but personal data all the same.
+.data/

@@ -2,6 +2,20 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (y): S5 数据持久化, the encrypted database store; release v4.1.0
+
+- v4.0.0 pushed with v3.1.0–v3.5.0 after a fresh harness PASS on the final tree (second run, rule 23). CI and Pages green for 1770341. No gh CLI here: the Actions REST API was polled from node.
+- Spec first (rule 34): the phase document (AES-256 at rest; keys never in the DB or code), `schema_v0.sql` (DEK per user, KEK, crypto-shred, deletion_requests) and data-retention.md gave the design. WP5.2 (accounts) was added because readings without their owners are useless.
+- Probed PGlite types in a scratch script before writing the store: jsonb objects, bytea, `timestamptz` → Date, `date::text`, text[], `affectedRows`, transactions. The one surprise came later: an enum array parameter (rule 35).
+- `PgStore` seals whole records and fills only the schema's lookup columns. The DEK is cached only after its row is in. `rawRows` is limited to the store's tables.
+- Rule 32 at work: an assertion compared `users.get(b)` with itself (`x && await y`), and the deletion record's "no PII" check missed the bytes of `subject_hash`. Both fixed before commit.
+- Found: jobs had no catch, so a database write failure would have been an unhandled rejection (`track()` now). And the term tips' OpenCC import reached the server through the ai index (since v3.2.0); rule 36 and `runtime-deps.test.ts` cover it.
+- Smoke run of the real `scripts/api-server.ts` with the store on (throwaway keys and folder in the child's environment only; `.env` untouched; AI on the mock):
+  - the start line says `data: kept in …, encrypted`;
+  - register gives 201 and X-Dev-User 401;
+  - after a SIGKILL (no shutdown handler) and a restart, login gives 200.
+- v4.1.0 committed and tagged locally, not pushed (a medium update).
+
 ## 2026-10-28 (x): S4 WP4.8, English names that fit; S4 summary; release v4.0.0
 
 - v3.5.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (3b9a904).

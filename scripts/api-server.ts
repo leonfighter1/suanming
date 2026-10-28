@@ -14,6 +14,7 @@ import {
   describeAi,
   DEV_ACCOUNTS,
   loadSecrets,
+  openStore,
   seedDevAccounts,
   watchAiMode,
 } from "../src/service/runtime.js";
@@ -56,7 +57,9 @@ const aiQuota = {
   totalPerDay: Number(process.env.MINGLI_AI_DAILY_TOTAL ?? 100),
 };
 
-const auth = buildAuth(secrets, true);
+// Readings and accounts: in memory, or kept in the encrypted database (MINGLI_STORE=pglite, S5).
+const persistence = await openStore(secrets);
+const auth = buildAuth(secrets, true, persistence.users);
 await seedDevAccounts(auth, true);
 // The GitHub Pages web test (docs/web-test.md) calls this API from its https origin.
 const corsOrigins = (process.env.MINGLI_CORS_ORIGINS ?? "https://leonfighter1.github.io")
@@ -70,7 +73,9 @@ const server = createApiServer({
   devMode: true,
   corsOrigins,
   corsPrivateNetwork: lan,
-  devHeaders: loopbackOnly,
+  // The database keeps records only for accounts: no X-Dev-User shortcut with it.
+  devHeaders: loopbackOnly && !persistence.store,
+  ...(persistence.store && { store: persistence.store }),
   // Content review is paused by owner decision (2026-10-26) until the legal &
   // obligations work: MINGLI_REVIEW=on turns holds, the guard and 内容审核 back on.
   review: process.env.MINGLI_REVIEW === "on",
@@ -110,6 +115,11 @@ server.listen(port, host, () => {
     `CORS origins: localhost${loopbackOnly ? "" : ", private-network http"}, ${corsOrigins.join(", ")}`,
   );
   console.log(`dev accounts: ${DEV_ACCOUNTS.map((a) => `${a.login} / ${a.password}`).join(", ")}`);
+  console.log(
+    persistence.dataDir
+      ? `data: kept in ${persistence.dataDir}, encrypted (MINGLI_STORE=pglite); the X-Dev-User shortcut is off`
+      : "data: in memory, gone at the next start (MINGLI_STORE=pglite keeps it; docs/web-test.md)",
+  );
   if (secrets.ephemeral) {
     console.log(
       "warning: MINGLI_DIGEST_PEPPER / MINGLI_TAROT_DRAW_KEY not set; using per-process keys",
@@ -120,7 +130,10 @@ server.listen(port, host, () => {
 for (const sig of ["SIGINT", "SIGTERM"] as const) {
   process.on(sig, () => {
     server.close();
-    // Let in-flight reports finish before exiting.
-    void server.drain().then(() => process.exit(0));
+    // Let in-flight reports finish (and write their results) before the database closes.
+    void server
+      .drain()
+      .then(() => persistence.close())
+      .then(() => process.exit(0));
   });
 }

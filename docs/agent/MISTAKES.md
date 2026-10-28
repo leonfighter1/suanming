@@ -36,8 +36,22 @@
 32. To check that text is not empty, assert `expect(text.trim()).not.toBe('')`: `expect.any(String)` also matches `''`. Read each new assertion once for what it would let through.
 33. Give widget keys an explicit type, ValueKey<String>(id), never ValueKey(x) on a nullable value: a ValueKey<String?> matches no find.byKey(Key(...)) and focusedKey() ignores it.
 34. Before building a plan item, search the DEVLOG, the README and git log for an owner decision on the same thing (owner, Owner request); a plan item never overrides one. Label owner requests as such in the DEVLOG.
+35. With PGlite, pass a JS array only for a column of a known array type such as text[]; for an enum array, write constant values into the SQL or pass text[] and cast it there. Probe a new parameter type in a scratch script before relying on it.
+36. Code that only scripts need (sync, review, build) is imported from its own module, never re-exported from an index the server imports; runtime-deps.test.ts holds the server to its dependencies.
 
 ## Log
+
+### 2026-10-28: A sync-only module reached the server through the ai index
+- **Symptom:** Found in v4.1.0: since v3.2.0 the ai index re-exported the term tips, and with them opencc-js, a devDependency, so every API server process loaded a dev tool; a production install without devDependencies would not have started.
+- **Root cause:** An export added for one script (the app sync) to the index that the server also imports.
+- **Fix:** The tips are imported from their own module by the scripts and tests that need them; test/runtime-deps.test.ts walks the server import graph and fails on any devDependency.
+- **Rule:** Code that only scripts need (sync, review, build) is imported from its own module, never re-exported from an index the server imports; runtime-deps.test.ts holds the server to its dependencies. (Rule 36)
+
+### 2026-10-28: PGlite sent an enum array parameter as a,b
+- **Symptom:** The database store held list failed with malformed array literal: manual_review,blocked.
+- **Root cause:** PGlite serializes a JS array only for array types it knows (text[]); for an enum array (report_status[]) it sends String(array), which PostgreSQL refuses.
+- **Fix:** The held statuses are constants, written into the query.
+- **Rule:** With PGlite, pass a JS array only for a column of a known array type such as text[]; for an enum array, write constant values into the SQL or pass text[] and cast it there. Probe a new parameter type in a scratch script before relying on it. (Rule 35)
 
 ### 2026-10-28: A plan item would have undone an owner decision
 - **Symptom:** WP4.4 asked for a separate home entry for the life report. The owner had asked on 2026-10-27 to move it inside the bazi form, and the home card was removed then. Caught before any code, from the commit history.

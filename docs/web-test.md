@@ -123,6 +123,28 @@ trend scores, 破除运势 plans and the 一生运势报告 come back at once, e
 - A variable set in the shell itself wins over `.env`. `npm run eval:ai -- --live`
   refuses to run while the switch says mock.
 
+## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
+
+By default the API keeps everything in memory: a restart loses every account and reading. The
+database store keeps them, encrypted, in a folder on this computer. It is off until you turn it on:
+
+1. `npm run keygen` prints five lines. Paste them into `.env`:
+   - `MINGLI_STORE=pglite` turns the store on.
+   - `MINGLI_DATA_KEY` is the key everything is encrypted under.
+   - `MINGLI_DIGEST_PEPPER`, `MINGLI_TAROT_DRAW_KEY` and `MINGLI_JWT_SECRET` are fixed keys, so email
+     sign-in, tarot replays and sign-in tokens survive a restart.
+2. Restart the API. The console says `data: kept in .data, encrypted`. `MINGLI_DATA_DIR` picks
+   another folder.
+
+- **Back up `MINGLI_DATA_KEY`.** Without it, nothing in the folder can be read, by design. A
+  wrong key fails loudly; it never shows garbage.
+- The folder `.data/` is git-ignored. It holds no plain birth date, reading, life context or email:
+  each is sealed under its owner's own key (docs/data-retention.md).
+- With the store on, the `X-Dev-User` shortcut is off: records are kept only for accounts, so sign
+  in (the dev accounts are created at every start, as before).
+- Deleting an account in the app removes its records and its key, and keeps a deletion record
+  without personal data.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:
