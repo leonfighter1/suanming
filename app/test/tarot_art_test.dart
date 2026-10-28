@@ -17,7 +17,7 @@ void main() {
         final data = await rootBundle.load('assets/tarot/$id.webp');
         final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
         final image = (await codec.getNextFrame()).image;
-        expect((image.width, image.height), (350, 600), reason: id);
+        expect((image.width, image.height), (700, 1200), reason: id);
         image.dispose();
         codec.dispose();
       }

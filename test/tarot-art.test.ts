@@ -9,7 +9,7 @@ describe("tarot card art in app/assets/tarot (run `npm run mirror:tarot` if this
     expect(readdirSync(ART_DIR).sort()).toEqual(DECK.map(artFile).sort());
   });
 
-  it("every picture is a 350×600 WebP, the card's 7:12", () => {
+  it("every picture is a 700×1200 WebP, the card's 7:12", () => {
     for (const card of DECK) {
       expect(webpSize(readFileSync(join(ART_DIR, artFile(card)))), card.id).toEqual(ART_SIZE);
     }

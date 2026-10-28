@@ -24,15 +24,15 @@
 20. Check whether a DropdownMenu is open with find.text(entry).hitTestable(), never a plain find.text.
 21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
 22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead.
-23. After any change to app/pubspec.yaml, run flutter pub get and then flutter gen-l10n through the junction, check git status, and only then run the harness.
+23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; after a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more.
 
 ## Log
 
-### 2026-10-27: A pubspec change makes the next pub get delete the l10n files
-- **Symptom:** After adding assets/tarot/ and the version to app/pubspec.yaml, the harness app gate failed at analyze: lib/l10n/gen/app_localizations*.dart missing
-- **Root cause:** The first flutter pub get after a pubspec change (manual, the IDE's automatic one, or the app gate's) treats the gen-l10n output recorded under another path as stale and deletes it; the harness regenerates only before and after the app check
-- **Fix:** flutter gen-l10n through the junction restored the files unchanged; the second harness run (pub get with nothing to do) passed
-- **Rule:** After any change to app/pubspec.yaml, run flutter pub get and then flutter gen-l10n through the junction, check git status, and only then run the harness. (Rule 23)
+### 2026-10-27: Flutter deletes the l10n files after a run from another path
+- **Symptom:** The harness app gate failed at analyze with lib/l10n/gen/app_localizations*.dart missing, in v1.1.0 and again in v1.1.1, each time after app/pubspec.yaml changed
+- **Root cause:** Flutter's build records where it last generated the l10n files; a run from another path (the app gate's fresh junction) deletes the files recorded under the old path as stale. That only bites when the old path still exists: the IDE's automatic pub get on the real path after a pubspec edit, or the kept scratchpad junction. A first guess (the first pub get after a pubspec change) was wrong: pub get + gen-l10n right after the edit did not prevent the v1.1.1 failure
+- **Fix:** flutter gen-l10n restored the files unchanged each time; a second harness run passed each time, because the last recorded path was then the first run's junction, already removed
+- **Rule:** Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; after a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more. (Rule 23)
 
 ### 2026-10-27: Golden images are captured at logical size
 - **Symptom:** Cropping a tarot golden at 2x coordinates failed (bad extract area): the PNG was 400x1250, not 800x2500

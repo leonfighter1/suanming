@@ -11,6 +11,23 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. The steps that finish an update (harness, this entry, version) are in
 [.claude/skills/keyboard-access/SKILL.md](.claude/skills/keyboard-access/SKILL.md).
 
+### v1.1.1 (2026-10-27): tarot cards twice as large
+
+- 塔罗 (owner request: the cards and their text twice as large)
+  - Cards are twice the size: 208 × 357 instead of 104 × 178. The text in the card area is doubled with them: the
+    hint 点击卡牌翻开 and each card's position and name (28 instead of 14), and 逆位 (24 instead of 12). The back's
+    gold frame and star grow too.
+  - At this size the name, English name and keywords painted on a card can be read on the card itself.
+  - Wide screens (tablet, desktop) show a three-card spread in one row. A phone has room for one card per row, so the
+    cards stack and the page scrolls.
+  - The rest of the page (牌阵, 抽牌, the reading request) keeps its size.
+- For developers
+  - The pictures are now 700×1200, the size the art was painted at and enough for the 208-pt card on a 3× screen:
+    4.4 MB for all 78, made again with `npm run mirror:tarot`.
+  - One constant, `_scale` in `app/lib/presentation/tarot_page.dart`, sets the size of the cards and their text.
+- Verified: all 82 app tests and 247 server tests pass (the bundle test now checks 700×1200); harness PASS. The page
+  was rendered at phone and desktop width and looked at.
+
 ### v1.1.0 (2026-10-27): tarot card art
 
 **塔罗 cards with pictures** (new): every card of the 78-card deck now has its own picture, painted in

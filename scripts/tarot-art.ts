@@ -5,9 +5,9 @@
  *
  * The cards are painted by code in the JingyaoPaint project (local_art/tarot, kept on
  * that computer only) at 700×1200 and exported at 1400×2400, 2.5 MB each. The app shows
- * a card 104 pt wide in the same 7:12 shape, so 350×600 covers a 3× screen; WebP keeps
- * one at about 25 KB. `npm run mirror:tarot` writes the folder; this module only names
- * and checks things (test/tarot-art.test.ts uses it without the image library).
+ * a card 208 pt wide in the same 7:12 shape, so 700×1200 covers a 3× screen (624 px);
+ * WebP keeps one at about 65 KB. `npm run mirror:tarot` writes the folder; this module
+ * only names and checks things (test/tarot-art.test.ts uses it without the image library).
  */
 import { fileURLToPath } from "node:url";
 import { DECK, type TarotCard } from "../src/engines/tarot/deck.js";
@@ -15,7 +15,7 @@ import { DECK, type TarotCard } from "../src/engines/tarot/deck.js";
 export const ART_DIR = fileURLToPath(new URL("../app/assets/tarot/", import.meta.url));
 /** Where JingyaoPaint writes the cards (another folder: npm run mirror:tarot -- <folder>). */
 export const DEFAULT_SOURCE = "C:\\AIProjects\\JingyaoPaint\\local_art\\out\\tarot";
-export const ART_SIZE = { width: 350, height: 600 } as const;
+export const ART_SIZE = { width: 700, height: 1200 } as const;
 
 export const artFile = (card: TarotCard) => `${card.id}.webp`;
 

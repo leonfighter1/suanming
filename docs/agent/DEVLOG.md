@@ -2,6 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-27 (e): tarot cards twice as large; release v1.1.1
+
+- Owner request: 卡牌界面字体和牌面需要放大2倍. Cards 104 → 208 pt wide (7:12, 357 tall); the card area's text at twice the body size (hint, position, name; 逆位 12 → 24); the back's frame and star scaled too. Corners 12: at 16 the clip would touch the painted gold frame. One `_scale` constant in tarot_page.dart.
+- Pictures made again at 700×1200 (350×600 would be stretched 1.8× on a 3× phone): 4.4 MB for 78, largest 78 KB.
+- Phones fit one 208-pt card per row, so spreads stack (three-card about three screens, Celtic cross ten rows); told the owner, with a phone-fitted size as an option.
+- The first harness run failed at analyze again (l10n files deleted) although pub get + gen-l10n had run right after the pubspec change, so rule 23's cause was wrong: the deletion follows a Flutter run from another path that still exists (the kept scratchpad junction, the IDE's real path). Rule 23 corrected; the rerun passed.
+- Not pushed: the v1.1.0 push was blocked by the permission system; v1.1.0 and v1.1.1 wait for the owner.
+
 ## 2026-10-27 (d): tarot card art from JingyaoPaint; release v1.1.0
 
 - Owner request: bring the tarot cards in `C:\AIProjects\JingyaoPaint\local_art\out\tarot` into the app's cards, in a folder of their own in the repo.
