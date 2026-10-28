@@ -259,6 +259,19 @@ final dailyCardProvider = FutureProvider.autoDispose<ChartResult>((ref) {
   return ref.watch(apiClientProvider).dailyCard('${d.year}-${two(d.month)}-${two(d.day)}');
 });
 
+/// The methods the home page offers, in the region's entry order (GET /v1/methods, v4.3.0); the
+/// app shows the ones it has a page for. Unreachable or refused: the default order.
+const defaultMethods = ['bazi', 'tarot', 'qiuqian'];
+final methodsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
+  try {
+    final order = await ref.watch(apiClientProvider).methods();
+    final shown = order.where(defaultMethods.contains).toList();
+    return shown.isEmpty ? defaultMethods : shown;
+  } catch (_) {
+    return defaultMethods;
+  }
+});
+
 /// A chart by id (life reports opened from history need its 八字).
 final chartProvider = FutureProvider.autoDispose.family<ChartResult, String>(
   (ref, id) => ref.watch(apiClientProvider).getChart(id),

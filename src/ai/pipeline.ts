@@ -30,10 +30,12 @@ import {
   METHOD_PROMPTS,
   narrativeUser,
   PROMPTS,
+  qiuqianUser,
   tarotUser,
   todayLine,
   type PromptVersion,
 } from "./prompts.js";
+import { lotBrief, QIUQIAN_TERMS, qiuqianView } from "./qiuqian.js";
 import { spreadBrief } from "./tarot.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
 import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schemas.js";
@@ -65,7 +67,7 @@ export interface ReportOptions {
   /** ISO 3166-1 alpha-2 of the user (from account, verified server-side) */
   country: string;
   topics?: Topic[];
-  /** Optional user question (tarot) */
+  /** Optional user question (tarot, 求籤) */
   question?: string;
   /** The area of life a tarot reading looks at (tarot only, v2.3.0) */
   focus?: TarotFocus;
@@ -334,7 +336,8 @@ export async function generateReport(
   }
 
   const rules = compileRules(loadRuleSet(), region.rule_groups);
-  // A 八字 reading reads its focused view (WP2.3); the other methods' facts are small already.
+  // A 八字 reading reads its focused view (WP2.3), a 求籤 reading the lot without the rounds that
+  // confirmed it; the other methods' facts are small already.
   const facts =
     chart.system === "bazi"
       ? baziView(
@@ -342,8 +345,12 @@ export async function generateReport(
           readingFocus(chart.facts, now.getUTCFullYear(), opts.question),
           { trend: true },
         )
-      : modelFacts(chart);
-  const glossary = glossaryFor(JSON.stringify(facts), opts.locale);
+      : chart.system === "qiuqian"
+        ? qiuqianView(modelFacts(chart))
+        : modelFacts(chart);
+  const lot = chart.system === "qiuqian" ? lotBrief(chart, opts.locale) : undefined;
+  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體, so 求籤 names its own.
+  const glossary = glossaryFor(lot ? QIUQIAN_TERMS.join(" ") : JSON.stringify(facts), opts.locale);
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
   const providerFor = (agent: AgentName) => {
     const route = routeFor(routing, agent, opts.locale);
@@ -368,15 +375,21 @@ export async function generateReport(
   const tarot = chart.system === "tarot";
   const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
   const maxParagraphs = (t: Topic) => (t === "tarot_cards" && spread ? spread.cards.length : 4);
-  // A tarot reading's actions follow its advice (v2.3.0); other methods act on every topic.
-  const actionTopics: Topic[] =
-    tarot && topics.includes("tarot_advice") ? ["tarot_advice"] : topics;
+  // A tarot or 求籤 reading's actions follow its advice (v2.3.0, v4.3.0); other methods act on every
+  // topic.
+  const advice: Topic | undefined = tarot ? "tarot_advice" : lot ? "qiuqian_advice" : undefined;
+  const actionTopics: Topic[] = advice && topics.includes(advice) ? [advice] : topics;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
     prompt: prompts.narrative,
     ...providerFor("narrative"),
     schema: narrativeSchema(topics),
-    payload: { topics, system: chart.system, ...(spread && { cards: spread.cards.length }) },
+    payload: {
+      topics,
+      system: chart.system,
+      ...(spread && { cards: spread.cards.length }),
+      ...(lot && { lines: lot.lines.length }),
+    },
     maxRetries,
     enforce,
     onProgress: deps.onProgress,
@@ -394,18 +407,30 @@ export async function generateReport(
             today: todayLine(now),
             feedback,
           })
-        : narrativeUser({
-            system: chart.system,
-            facts,
-            provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
-            topics,
-            locale: opts.locale,
-            glossary,
-            question: opts.question,
-            context: opts.context,
-            today: todayLine(now),
-            feedback,
-          }),
+        : lot
+          ? qiuqianUser({
+              facts,
+              lot,
+              topics,
+              locale: opts.locale,
+              glossary,
+              question: opts.question,
+              context: opts.context,
+              today: todayLine(now),
+              feedback,
+            })
+          : narrativeUser({
+              system: chart.system,
+              facts,
+              provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
+              topics,
+              locale: opts.locale,
+              glossary,
+              question: opts.question,
+              context: opts.context,
+              today: todayLine(now),
+              feedback,
+            }),
     check: (data) => {
       const feedback: string[] = [];
       let ungrounded = 0;
@@ -440,6 +465,14 @@ export async function generateReport(
           feedback.push(
             `tarot_cards must read every card in dealing order; not read: ${unread.join(", ")}`,
           );
+      }
+      if (lot && topics.includes("qiuqian_poem")) {
+        const read = new Set(
+          sections.find((s) => s.topic === "qiuqian_poem")?.paragraphs.flatMap((p) => p.fact_refs),
+        );
+        const unread = lot.lines.map((l) => l.path).filter((p) => !read.has(p));
+        if (unread.length)
+          feedback.push(`qiuqian_poem must read all four lines; not cited: ${unread.join(", ")}`);
       }
       dropped = ungrounded;
       const value = { sections: sections.filter((s) => s.paragraphs.length) };
@@ -498,7 +531,7 @@ export async function generateReport(
         const value = {
           actions: list
             .filter((a) => actionTopics.includes(a.topic))
-            .slice(0, tarot ? 5 : topics.length * 3),
+            .slice(0, advice ? 5 : topics.length * 3),
         };
         return {
           value,
@@ -607,7 +640,7 @@ export async function generateReport(
     facts: chartSummary,
     interpretation,
     actions: actions?.actions ?? [],
-    expectation: expectationLayer(opts.locale, labelRequired),
+    expectation: expectationLayer(opts.locale, labelRequired, chart.system),
     ...(trend && { trend }),
   };
   if (status === "passed" && candidate && actions) {

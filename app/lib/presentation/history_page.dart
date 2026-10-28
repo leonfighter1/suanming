@@ -122,9 +122,12 @@ class HistoryTile extends ConsumerWidget {
       'failed' => (l10n.statusFailed, scheme.error),
       _ => (l10n.statusReview, scheme.outline),
     };
-    final title = item.system == 'bazi'
-        ? (label == null ? l10n.homeBazi : l10n.chartOf(label))
-        : l10n.homeTarot;
+    final title = switch (item.system) {
+      'bazi' => label == null ? l10n.homeBazi : l10n.chartOf(label),
+      'qiuqian' => l10n.homeQiuqian,
+      _ => l10n.homeTarot,
+    };
+    final lot = item.lotNumber == null ? null : terms?.lots?.lot(item.lotNumber!);
     return AppCard(
       padding: const EdgeInsets.all(Space.l),
       onTap: () => Navigator.of(context).push(
@@ -138,7 +141,14 @@ class HistoryTile extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(item.system == 'bazi' ? Icons.grid_view_rounded : Icons.style_rounded, color: scheme.primary),
+          Icon(
+            switch (item.system) {
+              'bazi' => Icons.grid_view_rounded,
+              'qiuqian' => Icons.temple_buddhist_outlined,
+              _ => Icons.style_rounded,
+            },
+            color: scheme.primary,
+          ),
           const SizedBox(width: Space.m),
           Expanded(
             child: Column(
@@ -148,6 +158,14 @@ class HistoryTile extends ConsumerWidget {
                 const SizedBox(height: Space.xs),
                 if (item.fourPillars != null)
                   GanZhiText(item.fourPillars!, size: 15)
+                else if (lot != null)
+                  // 求籤: the lot's title and label, and the poem's first line.
+                  Text(
+                    '${lot.title(locale)} · ${lot.ganzhi} · ${lot.poem(locale).first}',
+                    key: const Key('history-lot'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  )
                 else if (item.cardIds.isNotEmpty) ...[
                   // The cards' art, small (v2.4.0); a reversed card upside down, as it was drawn.
                   Row(

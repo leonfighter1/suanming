@@ -1,0 +1,66 @@
+{
+  "chart_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "qiuqian",
+      "version": "0.1.0"
+    },
+    "system": "qiuqian",
+    "input_digest": "hmac-sha256:e88f6aa2152d0c5b832562ee5ca6f5dc0d340c8b84ec4a1c7ebf55ccf96c04e4",
+    "rule_versions": {
+      "lot_set": "guandi_100@1.0.0",
+      "rng": "hmac-sha256-drbg/v1"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "lot_set": "guandi_100",
+      "lot": {
+        "n": 89,
+        "ganzhi": "壬壬",
+        "poem": [
+          "樽前無事且高歌",
+          "時未來時奈若何",
+          "白馬渡江嘶日暮",
+          "虎頭城裏看巍峨"
+        ]
+      },
+      "rounds": [
+        {
+          "lot": 34,
+          "blocks": [
+            "round",
+            "round"
+          ],
+          "result": "yin"
+        },
+        {
+          "lot": 89,
+          "blocks": [
+            "round",
+            "flat"
+          ],
+          "result": "sheng"
+        }
+      ],
+      "audit": {
+        "draw_id": "00000000-0000-4000-8000-000000000006",
+        "drawn_at": "2026-10-25T00:00:00.000Z",
+        "rng": "hmac-sha256-drbg/v1",
+        "result_digest": "sha256:e58e740159973848b3a0ecc128d503f445ce71ab4ebea3a91cccc2be161f97c2"
+      }
+    },
+    "provenance": [
+      {
+        "path": "/lot/poem",
+        "source_level": "traditional_text",
+        "note": "關聖帝君一百籤（雷雨師一百籤），臺灣廟宇通行文本，以清刊本《關帝靈籤》校（docs/verification/qiuqian-guandi-100.md）"
+      },
+      {
+        "path": "/rounds",
+        "source_level": "common_consensus",
+        "note": "得聖筊即為此籤，笑筊、陰筊則放回重抽；每塊筊正反各半（簡化）"
+      }
+    ]
+  }
+}

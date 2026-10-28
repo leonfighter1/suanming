@@ -5,6 +5,8 @@
 import type { ChartFact } from "../chart-fact/index.js";
 import { computeAstrology } from "../engines/astrology/index.js";
 import { computeBazi, type InputBasis } from "../engines/bazi/index.js";
+import { computeQiuqian } from "../engines/qiuqian/index.js";
+import { LOT_SET_IDS, type LotSetId } from "../engines/qiuqian/lots.js";
 import { SPREADS, type SpreadId } from "../engines/tarot/deck.js";
 import { computeTarot, ritualProblem, type TarotRitual } from "../engines/tarot/index.js";
 
@@ -26,7 +28,8 @@ export type ChartRequest =
       options?: { trueSolarTime?: boolean; ziHourSect?: 1 | 2; liunianFrom?: number };
     }
   | { system: "tarot"; spread: SpreadId; draw_id?: string; ritual?: TarotRitual }
-  | { system: "astrology"; local: string; timezone: string; latitude: number; longitude: number };
+  | { system: "astrology"; local: string; timezone: string; latitude: number; longitude: number }
+  | { system: "qiuqian"; lot_set?: LotSetId; draw_id?: string };
 
 export function str(v: unknown, name: string): string {
   if (typeof v !== "string" || !v.trim()) throw new InputError(`${name} is required`);
@@ -122,7 +125,22 @@ export function computeChart(raw: unknown, secrets: EngineSecrets, now?: () => D
           { digestPepper: secrets.digestPepper, now },
         ),
       );
+    case "qiuqian": {
+      // 求籤 (v4.3.0): the engine draws the stick and throws the blocks; the app shows the rounds.
+      const lotSetId = (req.lot_set ?? "guandi_100") as LotSetId;
+      if (!LOT_SET_IDS.includes(lotSetId)) {
+        throw new InputError(`lot_set must be one of ${LOT_SET_IDS.join(", ")}`);
+      }
+      const drawId = req.draw_id;
+      if (drawId !== undefined && (typeof drawId !== "string" || !UUID_RE.test(drawId))) {
+        throw new InputError("draw_id must be a UUID");
+      }
+      return computeQiuqian(
+        { lot_set: lotSetId },
+        { ...secrets, now, ...(drawId && { newDrawId: () => drawId as string }) },
+      );
+    }
     default:
-      throw new InputError("system must be bazi | tarot | astrology");
+      throw new InputError("system must be bazi | tarot | astrology | qiuqian");
   }
 }

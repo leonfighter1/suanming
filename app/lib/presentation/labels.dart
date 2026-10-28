@@ -12,6 +12,9 @@ extension ApiLabels on AppLocalizations {
         'tarot_cards' => topicTarotCards,
         'tarot_synthesis' => topicTarotSynthesis,
         'tarot_advice' => topicTarotAdvice,
+        'qiuqian_poem' => topicQiuqianPoem,
+        'qiuqian_answer' => topicQiuqianAnswer,
+        'qiuqian_advice' => topicQiuqianAdvice,
         _ => t,
       };
 

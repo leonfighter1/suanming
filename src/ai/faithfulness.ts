@@ -6,6 +6,7 @@
  * - every 干支 pair mentioned exists in the chart (pillars, 大運, 流年, 農曆年);
  * - "YYYY年 + 干支" / "YYYY 干支" pairings match the year's real 干支;
  * - every tarot card named is in the spread, and 正位/逆位 claims match;
+ * - a 求籤 reading quotes only its lot's lines, word for word, and keeps the lot's number;
  * - zh-Hant text contains no simplified forms of protected terms (and vice versa).
  * Not checked: 十神/五行 reasoning, which needs a human reviewer.
  */
@@ -13,6 +14,7 @@ import type { ChartFact } from "../chart-fact/index.js";
 import { DECK, NAME_ALIASES } from "../engines/tarot/deck.js";
 import { yearGanZhi } from "../engines/bazi/index.js";
 import type { Report } from "./pipeline.js";
+import { lotBrief } from "./qiuqian.js";
 import { loadTerms, type Locale } from "./terms.js";
 
 export interface FaithfulnessIssue {
@@ -22,7 +24,9 @@ export interface FaithfulnessIssue {
     | "card_not_in_spread"
     | "wrong_orientation"
     | "wrong_script"
-    | "wrong_relative_year";
+    | "wrong_relative_year"
+    | "misquoted_line"
+    | "wrong_lot";
   detail: string;
   quote: string;
 }
@@ -51,6 +55,21 @@ const RELATIVE_OFFSET: Record<string, number> = {
 };
 const YEAR_GZ =
   /((?:19|20|21)\d{2})\s*年?\s*的?\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g;
+
+/** A quotation: 「…」, “…” or "…". */
+const QUOTE = /[「“"]([^」”"]{1,40})[」”"]/g;
+/** 第五十二籤, 第52签, Lot 52 */
+const LOT_NUMBER = /第([〇零一二三四五六七八九十百\d]{1,4})[籤签]|\blot\s+(\d{1,3})\b/gi;
+
+/** 1–100 in Chinese numerals or digits (一, 十, 十一, 二十, 五十二, 一百), or NaN. */
+function lotNumber(s: string): number {
+  if (/^\d+$/.test(s)) return Number(s);
+  if (s === "一百") return 100;
+  const d = (c: string | undefined) => "〇一二三四五六七八九".indexOf(c ?? "〇");
+  const m = /^([一二三四五六七八九])?(十)?([一二三四五六七八九])?$/.exec(s);
+  if (!m || (!m[2] && m[1] && m[3])) return NaN;
+  return m[2] ? (m[1] ? d(m[1]) : 1) * 10 + (m[3] ? d(m[3]) : 0) : d(m[1] ?? m[3]);
+}
 
 function reportTexts(r: Report): string[] {
   const l = r.layers;
@@ -147,6 +166,29 @@ export function checkFaithfulness(chart: ChartFact, report: Report): Faithfulnes
             quote: t,
           });
         }
+      }
+    }
+  }
+
+  if (chart.system === "qiuqian") {
+    // Every seven-character run in a quotation must be one of the lot's lines, in the reader's script
+    // (English readers quote the original). Shorter quotes (a term, part of a line) aren't checked.
+    const n = (chart.facts as { lot: { n: number } }).lot.n;
+    const lines = new Set(lotBrief(chart, locale).lines.map((l) => l.text));
+    for (const t of texts) {
+      for (const q of t.matchAll(QUOTE)) {
+        for (const run of q[1]!.split(/[，。、；！？,.;!?\s]+/)) {
+          if (/^\p{Script=Han}{7}$/u.test(run) && !lines.has(run))
+            issues.push({
+              kind: "misquoted_line",
+              detail: `「${run}」 is not a line of this lot`,
+              quote: t,
+            });
+        }
+      }
+      for (const m of t.matchAll(LOT_NUMBER)) {
+        if (lotNumber(m[1] ?? m[2]!) !== n)
+          issues.push({ kind: "wrong_lot", detail: `this is lot ${n}, not ${m[0]}`, quote: t });
       }
     }
   }

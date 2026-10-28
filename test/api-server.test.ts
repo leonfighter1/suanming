@@ -44,7 +44,8 @@ describe("v1 API", () => {
     const res = await fetch(base + "/v1/health");
     const data = await res.json();
     expect(res.status).toBe(200);
-    expect(data.versions).toMatchObject({ chart_fact_schema: "0.1.0", geo_rule_matrix: "0.1.0" });
+    // geo_rule_matrix 0.2.0 since v4.3.0 (求籤, and its entry first in Taiwan and Hong Kong).
+    expect(data.versions).toMatchObject({ chart_fact_schema: "0.1.0", geo_rule_matrix: "0.2.0" });
   });
 
   it("creates a chart, then a report that completes asynchronously", async () => {

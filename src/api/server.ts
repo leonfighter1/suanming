@@ -28,8 +28,8 @@ import {
   type TarotFocus,
   type Topic,
 } from "../ai/index.js";
-import { SCHEMA_VERSION, type ChartFact } from "../chart-fact/index.js";
-import { loadGeoMatrix, loadRuleSet, resolveRegion } from "../compliance/index.js";
+import { SCHEMA_VERSION, type ChartFact, type ChartSystem } from "../chart-fact/index.js";
+import { loadGeoMatrix, loadRuleSet, methodsFor, resolveRegion } from "../compliance/index.js";
 import { AuthError, AuthService, publicUser } from "../auth/service.js";
 import {
   CalendarInputError,
@@ -45,7 +45,14 @@ import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../servic
 import { dailyDate, dailyIds, drawDaily } from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
 import { shareFont } from "../share/font.js";
+import { renderQiuqianShare } from "../share/qiuqian-image.js";
 import { renderTarotShare } from "../share/tarot-image.js";
+
+/** The methods with a share image, each drawn its own way (rule 8). */
+const SHARE_RENDERERS: Partial<Record<ChartSystem, typeof renderTarotShare>> = {
+  tarot: renderTarotShare,
+  qiuqian: renderQiuqianShare,
+};
 import {
   InMemoryStore,
   type ReviewDecision,
@@ -138,6 +145,10 @@ export function chartSummary(fact: ChartFact) {
         reversed: c.reversed,
       })),
     };
+  }
+  if (fact.system === "qiuqian") {
+    const lot = f.lot as { n: number; ganzhi: string };
+    return { system: "qiuqian", lot_set: f.lot_set as string, lot: lot.n, ganzhi: lot.ganzhi };
   }
   return { system: fact.system };
 }
@@ -945,6 +956,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
     const c = await caller(req);
 
+    // The methods the caller's region offers, in its entry order (v4.3.0, WP6.2): the home page orders
+    // its entries by it, so the matrix can put 求籤 first in Taiwan and Hong Kong without a release.
+    if (path === "/v1/methods" && req.method === "GET") {
+      assertServed(c.country);
+      return send(res, 200, {
+        region: c.country,
+        matrix_version: matrix.matrix_version,
+        methods: methodsFor(resolveRegion(matrix, c.country)!),
+      });
+    }
+
     // ---- account ----
     if (path === "/v1/me" && req.method === "GET") {
       if (!auth) throw new HttpError(404, "auth not configured");
@@ -1024,14 +1046,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       return send(res, 200, publicRemedy(r));
     }
 
-    // 分享图 (S7, v4.2.0): a passed tarot reading as an image, made here, as the owner's spec asks.
+    // 分享图 (S7, v4.2.0): a passed tarot or (v4.3.0) 求籤 reading as an image, made here, as the
+    // owner's spec asks. Each method draws its own.
     const sm = /^\/v1\/reports\/([^/]+)\/share\.jpg$/.exec(path);
     if (sm && req.method === "GET") {
       const r = UUID_RE.test(sm[1]!) ? await store.getReport(sm[1]!) : undefined;
       if (!r || r.owner !== c.user) throw new HttpError(404, "report not found");
       const chart = await store.getChart(r.chart_id);
-      if (r.status !== "passed" || !r.report?.layers || chart?.fact.system !== "tarot") {
-        throw new HttpError(409, "only a finished tarot reading can be shared as an image");
+      const render = chart && SHARE_RENDERERS[chart.fact.system];
+      if (r.status !== "passed" || !r.report?.layers || !render) {
+        throw new HttpError(409, "only a finished tarot or 求籤 reading can be shared as an image");
       }
       const font = shareFont(r.locale);
       if (!font) {
@@ -1040,7 +1064,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           "share images need a CJK font on the server: install fonts-noto-cjk or set MINGLI_SHARE_FONT",
         );
       }
-      const jpg = await renderTarotShare(r.report, chart.fact, { font, locale: r.locale });
+      const jpg = await render(r.report, chart.fact, { font, locale: r.locale });
       res.writeHead(200, {
         "content-type": "image/jpeg",
         "content-length": String(jpg.length),

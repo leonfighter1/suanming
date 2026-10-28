@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-10-28T13:52:07.850Z",
+  "draws": 100000,
+  "checks": [
+    {
+      "name": "the first stick is uniform over 100 lots",
+      "statistic": 115.56,
+      "critical": 148.28,
+      "pass": true
+    },
+    {
+      "name": "the confirmed lot is uniform over 100 lots",
+      "statistic": 105.03,
+      "critical": 148.28,
+      "pass": true
+    },
+    {
+      "name": "each block lands flat half the time",
+      "statistic": 0.03,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "50.00 %"
+    },
+    {
+      "name": "the two blocks land independently",
+      "statistic": 0.03,
+      "critical": 11.16,
+      "pass": true
+    },
+    {
+      "name": "throws are 聖筊 ½, 笑筊 ¼, 陰筊 ¼",
+      "statistic": 0.04,
+      "critical": 14.13,
+      "pass": true,
+      "detail": "100000 / 49952 / 49963"
+    },
+    {
+      "name": "rounds per draw are geometric (½)",
+      "statistic": 9.29,
+      "critical": 22.67,
+      "pass": true,
+      "detail": "mean 1.999 (expected 2)"
+    },
+    {
+      "name": "the second stick is independent of the first (deciles)",
+      "statistic": 94.73,
+      "critical": 126.14,
+      "pass": true
+    },
+    {
+      "name": "consecutive draws are independent (deciles)",
+      "statistic": 87.51,
+      "critical": 126.14,
+      "pass": true
+    }
+  ],
+  "pass": true,
+  "seconds": 2
+}

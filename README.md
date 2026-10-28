@@ -12,6 +12,65 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v4.3.0 (2026-10-28): 求籤 · 擲筊, the first new method, first in Taiwan and Hong Kong
+
+Stage S6 of the [tech plan](docs/tech-plan.md) (新玩法), work packages 6.1 and 6.2. You said 「继续吧不要停」 without
+choosing, so S6 follows your phase document:
+
+- 擲筊 / 求签 first, the entry for Taiwan and Hong Kong;
+- then 风水;
+- then 起名.
+
+六爻 and 合婚 were only this plan's proposals, and they are parked. A medium update: committed locally, and pushed with
+S6's big update.
+
+- New on the home page: 「求籤」. How to use it:
+  1. Type what you ask about (optional), then tap 求籤. A stick falls (「搖出第三十四籤」).
+  2. Tap 擲筊 and the two blocks land:
+     - 聖筊 (one flat, one round) confirms the stick;
+     - 笑筊 or 陰筊 sends it back, and you tap 放回再搖.
+  3. 「直接看結果」 shows every round at once. On a keyboard, Enter throws.
+  4. Then your lot, on its slip: 關聖帝君一百籤, the lot (e.g. 第八十九籤 · 壬壬) and its four lines.
+  5. 「生成 AI 解讀」 reads it in three parts: 籤詩 (couplet by couplet), 所問之事 and 建議, then actions.
+- In Taiwan and Hong Kong, 求籤 is the first entry, as your phase document asks (「台湾/香港（擲筊/求签入口前置）」).
+  Elsewhere the order is 八字, 塔羅, 求籤. The order comes from the server's Geo-Rule matrix, so it can change without
+  an app update.
+- 分享图片 works for 求籤 readings too.
+  - The image shows the slip and the poem's main point, with the AI label and the watermark.
+  - It never shows your question, nor the part of the reading that answers it.
+- History lists 求籤 readings with the lot and the poem's first line.
+- The lot set is the 關聖帝君一百籤 (雷雨師一百籤), used at 臺北行天宮, 日月潭文武廟 and 新竹城隍廟. How its text was
+  checked ([docs/verification/qiuqian-guandi-100.md](docs/verification/qiuqian-guandi-100.md)):
+  - Two transcriptions online, compared character by character: 85 of the 100 lots are the same in both.
+  - All 100 lots then read in a Qing woodblock print, the 關帝靈籤 (姑蘇鈕氏藏板; Harvard, public domain).
+  - The print settled the 16 lines where the transcriptions disagree, and 5 errors both share: 寅午戍 → 寅午戌,
+    敵圖 → 敵國, 咨嘆 → 咨嗟, 步多 → 步步, 祗 → 祇.
+  - Otherwise the text stays as temples print it. The 38 places where the Qing print reads differently are listed in
+    that file.
+  - No 吉凶 grade (上上, 下下): editions disagree on them, and many Taiwanese temples print none. The reading follows
+    the poem.
+- The reading's own rules:
+  - Tendency language. A sad lot asks for patience, never a fixed fate.
+  - Never 添香油錢, 點光明燈, 安太歲, 祭改 or a second lot to "undo" one.
+  - No health, money or legal predictions.
+  - A new compliance rule (G008) holds such upsell phrasing. A check catches a misquoted line or a wrong lot number.
+- For whoever runs the server: nothing to do. With the database on, it adds the new method itself at the next start
+  (migration 003).
+- Verified:
+  - 35 new server tests:
+    - the text: shape, the decisions, 简体;
+    - the draw: replay, audit, 4000-draw statistics, and a battery that catches biased draws;
+    - the reading: its own prompts, faithfulness;
+    - the entry order, the API, the share image, the database, the compliance rule.
+  - A new harness gate, `npm run verify:qiuqian`: 100 000 draws, 8 of 8 checks pass. Sticks are uniform, the blocks
+    fair, 聖筊 comes half the time, and the rounds are geometric.
+  - 5 new app tests:
+    - the entry order, in Taiwan / Hong Kong and elsewhere;
+    - the ritual round by round;
+    - Enter and 直接看結果;
+    - the reading page with its lot, the history, and 分享图片.
+  - All 364 server tests and 127 app tests pass; harness PASS.
+
 ### v4.2.0 (2026-10-28): share a tarot reading as an image
 
 Stage S7 of the [tech plan](docs/tech-plan.md) (分享图), work package 7.1. A medium update: committed locally, pushed

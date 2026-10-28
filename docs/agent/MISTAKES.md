@@ -31,7 +31,7 @@
 27. Pump a frame after scrollUntilVisible or tester.ensureVisible, before the next finder, tap or scroll: both jump without a frame, so the next step sees the old layout (a tap goes to the old position). Use scrollTo() from test/support.dart for each card, or scrollToFinder() for any other finder; since v3.5.0 test_rules_test.dart fails on a scrollUntilVisible anywhere else.
 28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
 29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one. The exception is a fact no prompt reads that would make the check toothless: dayun_years (v3.3.0, 80 years, so every 干支) stays out, and the 甲子 test pins that.
-30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports (never `tsx -e`: Git Bash passes the newlines as `\n`), and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up. Check CJK text in such a script or with the Grep tool: Git Bash's grep here is not UTF-8 (`-P` refuses, `-o` splits characters) (v3.2.0).
+30. Write scratch tsx scripts as .ts with an async main() in the project root, importing with relative paths (`./src/…`, `./test/helpers.js`): inside the package tsx loads them as ESM, where an absolute `C:/` import fails with ERR_UNSUPPORTED_ESM_URL_SCHEME (corrected v4.3.0). Never `tsx -e` (Git Bash passes the newlines as `\n`), take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up, and delete the script after use. Check CJK text in such a script or with the Grep tool: Git Bash's grep here is not UTF-8 (`-P` refuses, `-o` splits characters) (v3.2.0).
 31. In 简体 copy (app_zh.arb, 简体 prompts), quote with “”, never 「」; write each script on its own instead of converting, and let locale_test check.
 32. To check that text is not empty, assert `expect(text.trim()).not.toBe('')`: `expect.any(String)` also matches `''`. Read each new assertion once for what it would let through.
 33. Give widget keys an explicit type, ValueKey<String>(id), never ValueKey(x) on a nullable value: a ValueKey<String?> matches no find.byKey(Key(...)) and focusedKey() ignores it.
@@ -39,8 +39,36 @@
 35. With PGlite, pass a JS array only for a column of a known array type such as text[]; for an enum array, write constant values into the SQL or pass text[] and cast it there. Probe a new parameter type in a scratch script before relying on it.
 36. Code that only scripts need (sync, review, build) is imported from its own module, never re-exported from an index the server imports; runtime-deps.test.ts holds the server to its dependencies.
 37. Against the mock provider, never assert that a report is still pending: drain the jobs and assert the end state, or give the test a provider that waits until released.
+38. Copy the project path from the environment or an earlier tool call; never retype a path with CJK characters. The folder is `C:\命理大师` (简体 师); `C:\命理大師` is a stray folder the guard won't let go of (v4.3.0).
+39. To verify a traditional text, read the primary source for every item; agreement between modern copies can hide a shared error. v4.3.0: both modern 籤詩 copies had 寅午戍 (no such branch), 敵圖, 咨嘆 and 步多; the Qing print had 戌, 敵國, 咨嗟 and 步步.
+40. Never put the owner email or any personal data in a request to an outside service, not even in a User-Agent; use a generic agent string.
+41. For exact text, download the raw source (action=raw, the API with continue, the file itself) into its own folder; never take verbatim text from a summarising fetch.
 
 ## Log
+
+### 2026-10-28: Fetch tools did not return verbatim text
+- **Symptom:** WebFetch declined to reproduce a page word for word; the MediaWiki query API returned content for only 10 of 50 titles
+- **Root cause:** WebFetch answers through a summarising model; the query API batches page content and expects continuation
+- **Fix:** Downloaded each page with action=raw into its own folder and parsed it locally
+- **Rule:** For exact text, download the raw source (action=raw, the API with continue, the file itself) into its own folder; never take verbatim text from a summarising fetch. (Rule 41)
+
+### 2026-10-28: Sent the owner email in a User-Agent header
+- **Symptom:** One curl request to Wikisource carried the owner email address in its User-Agent
+- **Root cause:** Followed the Wikimedia User-Agent etiquette with the owner address
+- **Fix:** Every later request used a generic agent string; the owner was told
+- **Rule:** Never put the owner email or any personal data in a request to an outside service, not even in a User-Agent; use a generic agent string. (Rule 40)
+
+### 2026-10-28: Two transcriptions agreed on the same errors
+- **Symptom:** A and B matched on 85 of 100 lots, yet both carried misprints (a wrong branch, non-words, a broken rhyme) that only the Qing print revealed
+- **Root cause:** Both modern copies descend from one upstream text, so their agreement is not independent evidence
+- **Fix:** Read all 100 lots in the primary source and settled every difference; documented in docs/verification/qiuqian-guandi-100.md
+- **Rule:** To verify a traditional text, read the primary source for every item; agreement between modern copies can hide a shared error. (Rule 39)
+
+### 2026-10-28: Wrote a file to a mistyped project folder
+- **Symptom:** lots.ts landed in a new top-level folder whose name used the traditional form of the last character; the guard keeps that empty stray folder
+- **Root cause:** Retyped the project path by hand instead of copying it
+- **Fix:** Removed the stray contents and wrote the file at the real path
+- **Rule:** Copy the project path from the environment or an earlier tool call; never retype a path with CJK characters. (Rule 38)
 
 ### 2026-10-28: A test expected a reading to be still pending
 - **Symptom:** The share image endpoint test asserted 409 for a pending tarot reading and got 200: the reading had already passed.
@@ -88,7 +116,7 @@
 - **Symptom:** A measuring script in the scratchpad failed with top-level await in cjs, then ERR_UNSUPPORTED_ESM_URL_SCHEME as .mts, then digest pepper must be >= 32 bytes
 - **Root cause:** Outside the package tsx runs a .ts file as CommonJS; as ESM, absolute Windows paths need file:// URLs; the pepper was a made-up short string
 - **Fix:** A .ts file with an async main(), absolute C:/ imports of src, and PEPPER imported from test/helpers.ts
-- **Rule:** Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up. (Rule 30)
+- **Rule:** Write scratch tsx scripts as .ts with an async main() in the project root with relative imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up. (Rule 30; corrected in v4.3.0: absolute C:/ imports fail there as ESM)
 
 ### 2026-10-28: The faithfulness check did not know the new 干支 facts
 - **Symptom:** Since v1.3.0 the model saw 胎元 and the 流月 (both 干支), but checkFaithfulness would flag either as unknown_ganzhi; found while measuring what the model reads (WP2.3)

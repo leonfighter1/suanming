@@ -1,7 +1,7 @@
-# 八字 / 塔羅 technical verification (2026-10-26)
+# 八字 / 塔羅 / 求籤 technical verification (2026-10-26; 求籤 2026-10-28)
 
-Reproduce: `npm run verify:bazi`, `npm run verify:tarot`, `npm run eval:ai -- --live`.
-The first two are harness and CI gates.
+Reproduce: `npm run verify:bazi`, `npm run verify:tarot`, `npm run verify:qiuqian`, `npm run eval:ai -- --live`.
+The first three are harness and CI gates.
 
 ## 八字: engine vs an independent oracle
 
@@ -35,6 +35,22 @@ school (every late-子 case).
 
 **Non-vacuity:** a never-reversed draw, a 4 % bias toward one card, and repeated
 cards are each caught.
+
+## 求籤 (v4.3.0)
+
+Reproduce: `npm run verify:qiuqian` (a harness and CI gate).
+
+- **The text** of the 關聖帝君一百籤 is checked against two transcriptions and a Qing print, all 100 lots read in
+  the print. The sources, the 16 decisions, the 5 corrections and the 38 variants are in
+  [qiuqian-guandi-100.md](qiuqian-guandi-100.md).
+- **The draw**, 100 000 draws at α = 0.001, passes 8 of 8 checks (`qiuqian-results.json`):
+  - the first stick and the confirmed lot are each uniform over 100;
+  - each block lands flat half the time, and the two blocks land independently;
+  - throws are 聖筊 ½, 笑筊 ¼, 陰筊 ¼;
+  - the rounds per draw are geometric (½), mean 2;
+  - the second stick is independent of the first, and consecutive draws are independent.
+- **Non-vacuity:** a block that always lands flat, a lot that comes one draw in 25, and a first throw that always
+  confirms are each caught.
 
 ## AI faithfulness (DeepSeek `deepseek-v4-pro`, live)
 

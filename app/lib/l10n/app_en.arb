@@ -595,5 +595,33 @@
   "pillarRelation": "{pillar} {relation}",
   "@pillarRelation": {
     "placeholders": { "pillar": { "type": "String" }, "relation": { "type": "String" } }
-  }
+  },
+  "homeQiuqian": "Fortune Sticks",
+  "homeQiuqianDesc": "Shake out a lot and confirm it with the moon blocks, for entertainment and metaphysics study only",
+  "qiuqianQuestion": "What you ask about",
+  "qiuqianQuestionHint": "Keep it in mind or write it down. It is used only for the reading and never appears on a share image.",
+  "qiuqianExample1": "Will work go well this year?",
+  "qiuqianExample2": "How should I care for this relationship?",
+  "qiuqianExample3": "How should I decide about moving?",
+  "qiuqianHowTo": "Shake the cylinder until a stick falls, then throw the moon blocks. A yes throw (one flat, one round) confirms the stick; otherwise it goes back and you shake again.",
+  "qiuqianDraw": "Draw a lot",
+  "qiuqianThrow": "Throw the blocks",
+  "qiuqianAgain": "Put it back and shake again",
+  "qiuqianSkip": "Show the result",
+  "qiuqianStickFell": "Out fell {title}",
+  "@qiuqianStickFell": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "qiuqianSheng": "Yes throw: this is your lot",
+  "qiuqianXiao": "Laughing throw: put the stick back and ask again",
+  "qiuqianYin": "No throw: put the stick back and ask again",
+  "qiuqianYourLot": "Your lot",
+  "qiuqianTextNote": "The poem is shown in the original Chinese, as Taiwanese temples print it; the reading explains it line by line.",
+  "qiuqianSections": "The reading has three parts: the poem, your question, and advice.",
+  "leaveQiuqianBody": "This lot won't be kept: you'll draw again next time. Readings you generated stay in History.",
+  "topicQiuqianPoem": "The poem",
+  "topicQiuqianAnswer": "Your question",
+  "topicQiuqianAdvice": "Advice",
+  "blockFlat": "flat side up",
+  "blockRound": "round side up"
 }

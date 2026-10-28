@@ -28,6 +28,7 @@ import { TokenService } from "../src/auth/tokens.js";
 import { open, parseKek, seal } from "../src/db/envelope.js";
 import { PgStore } from "../src/db/pg-store.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
+import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 
@@ -265,6 +266,33 @@ describe("the database store", () => {
       const wrong = await PgStore.open({ dataDir, kek: randomBytes(32), pepper: PEPPER });
       await expect(wrong.getReport(r.reading.id)).rejects.toThrow();
       await wrong.close();
+    },
+    PG,
+  );
+
+  it(
+    "keeps a 求籤 chart (migration 003 adds the method to chart_system)",
+    async () => {
+      const pg = await PgStore.open({ kek: KEK, pepper: PEPPER });
+      const owner = randomUUID();
+      await pg.put(user(owner, "qiuqian@example.com"));
+      const lot: ChartRecord = {
+        id: randomUUID(),
+        owner,
+        fact: computeQiuqian(
+          {},
+          {
+            drawKey: DRAW_KEY,
+            digestPepper: PEPPER,
+            now: FIXED_NOW,
+            newDrawId: () => randomUUID(),
+          },
+        ),
+        created_at: at(6),
+      };
+      await pg.putChart(lot);
+      expect(await pg.getChart(lot.id)).toEqual(lot);
+      await pg.close();
     },
     PG,
   );

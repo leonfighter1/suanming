@@ -9,6 +9,7 @@ import { validateChartFact } from "../src/chart-fact/index.js";
 import { compileRules, loadGeoMatrix, loadRuleSet } from "../src/compliance/index.js";
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
+import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
 const addFormats = addFormatsModule as unknown as (ajv: Ajv2020) => Ajv2020;
@@ -45,6 +46,7 @@ const samples = {
     { local: "1990-03-15T14:30", timezone: "Asia/Hong_Kong", latitude: 22.32, longitude: 114.17 },
     ctx,
   ),
+  qiuqian: computeQiuqian({}, ctx),
 };
 for (const [name, fact] of Object.entries(samples)) {
   const r = validateChartFact(fact);

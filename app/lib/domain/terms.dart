@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'qiuqian.dart';
+
 typedef _Names = Map<String, Map<String, String>>;
 
 /// Protected term table, tarot card and position names, position meanings, each spread's
-/// positions and what each 八字 term means. All copied from the server's single source by
-/// `npm run sync:app` (never edited here).
+/// positions, what each 八字 term means, and 求籤's lot set. All copied from the server's single
+/// source by `npm run sync:app` (never edited here).
 class Terms {
   const Terms(
     this._terms,
@@ -16,6 +18,7 @@ class Terms {
     this._spreads = const {},
     this._keywords = const {},
     this._tips = const {},
+    this.lots,
   ]);
 
   static _Names _names(Object? v) => (v as Map<String, dynamic>).map(
@@ -26,9 +29,10 @@ class Terms {
         await bundle.loadString('assets/i18n/terms.json'),
         await bundle.loadString('assets/i18n/tarot_deck.json'),
         await bundle.loadString('assets/i18n/term_tips.json'),
+        await bundle.loadString('assets/i18n/qiuqian_lots.json'),
       );
 
-  factory Terms.parse(String termsJson, String deckJson, [String? tipsJson]) {
+  factory Terms.parse(String termsJson, String deckJson, [String? tipsJson, String? lotsJson]) {
     final terms = jsonDecode(termsJson) as Map<String, dynamic>;
     final deck = jsonDecode(deckJson) as Map<String, dynamic>;
     return Terms(
@@ -44,8 +48,12 @@ class Terms {
         ),
       ),
       tipsJson == null ? const {} : _names((jsonDecode(tipsJson) as Map<String, dynamic>)['tips']),
+      lotsJson == null ? null : LotSet.parse(lotsJson),
     );
   }
+
+  /// 求籤's lot set (v4.3.0), when loaded.
+  final LotSet? lots;
 
   final _Names _terms;
   final _Names _cards;

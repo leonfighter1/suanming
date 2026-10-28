@@ -2,6 +2,44 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (aa): S6 WP6.1 + 6.2, 求籤 · 擲筊 and the entry order by region; release v4.3.0
+
+- **Owner (2026-10-28): 「继续吧不要停」**, after v4.2.0 asked which S6 methods come first. No choice made, so (rule 34) S6 follows the owner's phase document:
+  - Phase 3 §2.1: 起名 and 风水;
+  - §2.4: the 擲筊 / 求签 entry first for Taiwan and Hong Kong.
+  - The plan's own 六爻 / 合婚 are parked.
+  - WP7.2 stays open, and pushing waits for S6's big update (both unanswered; the defaults kept).
+- The lot set (G4, rule 39):
+  - Searched for verifiable texts: 六十甲子籤 and 黃大仙靈籤 have no full primary source online; the 關聖帝君一百籤 (雷雨師一百籤, 行天宮) has two transcriptions (Wikisource, temples.tw) and a Qing print scan (Harvard DRS 53239458, public domain).
+  - A ∩ B agreed on 85 lots. Reading the print showed they also share errors, so all 100 lots were read in it (montages of the poem columns, zooms on each difference).
+  - Policy: the temples' text, with the print settling the 16 disagreements and 5 plain errors; 38 variants listed. Evidence: docs/verification/qiuqian-guandi-100.md. 简体 via OpenCC in `npm run build:qiuqian`, with 乾坤 / 乾亥 kept and three fixes (G18).
+- Engine: rounds of one stick and one throw, until a 聖筊 (cap 64), from HMAC-DRBG on its own seed label. `verifyDraw` replays it. `npm run verify:qiuqian` (100k draws, 8 checks) is a new harness gate, with a non-vacuity test.
+- AI, rule 8:
+  - `narrative_qiuqian@1` and `action_qiuqian@1`, pinned;
+  - no plan;
+  - its own brief (`src/ai/qiuqian.ts`: the lot in the reader's script; rounds hidden from the model);
+  - its own AI label (「依據所得籤詩生成」: the shared one said 命盤);
+  - faithfulness: a quoted line must be the lot's, and the lot keeps its number;
+  - compliance rule G008 (offerings or rituals framed as what undoes a lot).
+- API and data:
+  - `/v1/methods` (matrix 0.2.0: qiuqian 1.5 in TW and HK);
+  - the share image for 求籤 (`src/share/qiuqian-image.ts`, laid out and looked at in 繁體 and English);
+  - migration 003 (enum value).
+- App:
+  - home order from `methodsProvider` (default order offline);
+  - `QiuqianPage` (the rounds revealed one step at a time, Enter throws, skip);
+  - `LotCard` and `JiaobeiBlocks`;
+  - the reading page, history and 分享图片 for 求籤;
+  - the lot set synced with each lot's title from the server's `lotTitle`;
+  - rendered and checked in a throwaway test with Noto Sans SC loaded.
+- Mistakes recorded:
+  - 38: a file written to a retyped `C:\命理大師`. The empty folder stays: the guard blocks removing it.
+  - 39: modern copies share errors.
+  - 40: the owner's email went out once in a User-Agent; told the owner.
+  - 41: summarising fetches don't give verbatim text.
+  - 30 corrected in place: absolute `C:/` imports fail in project-root scratch scripts.
+- v4.3.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (z): S6 waits for the owner; S7 WP7.1, the tarot share image; release v4.2.0
 
 - v4.1.0: the first harness run failed at the app gate (rule 23, the pubspec bump); the second passed. Committed and tagged (188d1c6).

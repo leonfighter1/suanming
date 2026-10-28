@@ -171,6 +171,38 @@ paths:
         "204": { description: Session revoked }
         "400": { $ref: "#/components/responses/Problem" }
 
+  /v1/methods:
+    get:
+      tags: [charts]
+      operationId: listMethods
+      summary: The methods the caller's region offers, in entry order
+      description: |
+        Since v4.3.0. The Geo-Rule matrix's methods for the caller's region (from the account),
+        available ones only, heaviest entry_weight first; ties keep bazi, tarot, qiuqian,
+        astrology. The app orders its home page by it, so the matrix can put 求籤 first in
+        Taiwan and Hong Kong without an app release. 451 where the service isn't offered.
+      responses:
+        "200":
+          description: The region's methods
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [region, matrix_version, methods]
+                properties:
+                  region: { type: string }
+                  matrix_version: { type: string }
+                  methods:
+                    type: array
+                    items:
+                      type: object
+                      required: [system, entry_weight]
+                      properties:
+                        system: { type: string, enum: [bazi, tarot, astrology, qiuqian] }
+                        entry_weight: { type: number }
+        "401": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
   /v1/me:
     get:
       tags: [account]
@@ -740,11 +772,13 @@ paths:
     get:
       tags: [reports]
       operationId: getReportShareImage
-      summary: A passed tarot reading as a share image (v4.2.0)
+      summary: A passed tarot or 求籤 reading as a share image (v4.2.0; 求籤 since v4.3.0)
       description: |
-        1080 × 1350 JPEG made on the server: the cards with their positions, the reading's main
-        point, the report's AI label (the disclaimer) and a watermark. Never the question, the life
-        context or a name. Only the report's owner; only passed tarot readings for now.
+        1080 × 1350 JPEG made on the server, with the report's AI label (the disclaimer) and a
+        watermark. Tarot: the cards with their positions and the reading's main point. 求籤: the
+        籤詩 slip (the set, the lot's title and label, its four lines) and the main point of the
+        poem's reading. Never the question, the life context or a name. Only the report's owner;
+        only passed tarot and 求籤 readings.
       parameters:
         - name: report_id
           in: path
@@ -762,7 +796,7 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "409":
-          description: Not a passed tarot reading
+          description: Not a passed tarot or 求籤 reading
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
@@ -805,8 +839,8 @@ paths:
         Paid per topic. TODO(Phase 4 payments): the purchase receipt will be
         verified here; until then `payment.status` is `placeholder` and nothing
         is charged. Buying a topic that already has a plan returns that plan (200).
-        Plans exist for bazi and tarot reports only: an astrology report gets a 400
-        before anything is charged, and none is preloaded for it. Each method writes
+        Plans exist for bazi and tarot reports only: an astrology or 求籤 report gets a
+        400 before anything is charged, and none is preloaded for it. Each method writes
         its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`). A tarot
         reading's tarot_cards and tarot_synthesis sections have no plan (400): its
         plan is on tarot_advice.
@@ -955,12 +989,14 @@ components:
         - $ref: "#/components/schemas/BaziChartRequest"
         - $ref: "#/components/schemas/TarotChartRequest"
         - $ref: "#/components/schemas/AstrologyChartRequest"
+        - $ref: "#/components/schemas/QiuqianChartRequest"
       discriminator:
         propertyName: system
         mapping:
           bazi: "#/components/schemas/BaziChartRequest"
           tarot: "#/components/schemas/TarotChartRequest"
           astrology: "#/components/schemas/AstrologyChartRequest"
+          qiuqian: "#/components/schemas/QiuqianChartRequest"
 
     BirthMoment:
       type: object
@@ -1033,6 +1069,23 @@ components:
             system: { const: astrology }
             latitude: { type: number, minimum: -90, maximum: 90 }
             longitude: { type: number, minimum: -180, maximum: 180 }
+
+    QiuqianChartRequest:
+      description: |
+        求籤 (since v4.3.0): the engine shakes a stick out of the 籤筒 and confirms it by 擲筊.
+        A 聖筊 (one block flat, one round) confirms it; 笑筊 or 陰筊 puts it back for another
+        draw. The facts hold every round and the lot, with its poem. The draw replays from the
+        server's key and the draw id, like a tarot draw.
+      type: object
+      additionalProperties: false
+      required: [system]
+      properties:
+        system: { const: qiuqian }
+        lot_set:
+          type: string
+          enum: [guandi_100]
+          default: guandi_100
+          description: 關聖帝君一百籤 (雷雨師一百籤), as Taiwanese temples print it
 
     Report:
       type: object
@@ -1322,7 +1375,8 @@ components:
         A report section. bazi: the six areas; astrology: personality, career_wealth,
         relationships, health; tarot (since v2.3.0): tarot_cards (card by card),
         tarot_synthesis (the whole spread) and tarot_advice. Older tarot reports keep
-        their four areas.
+        their four areas. qiuqian (since v4.3.0): qiuqian_poem (the poem, couplet by
+        couplet), qiuqian_answer (what it says to the question) and qiuqian_advice.
       type: string
       enum:
         [
@@ -1335,6 +1389,9 @@ components:
           tarot_cards,
           tarot_synthesis,
           tarot_advice,
+          qiuqian_poem,
+          qiuqian_answer,
+          qiuqian_advice,
         ]
 
     AiDisclosure:

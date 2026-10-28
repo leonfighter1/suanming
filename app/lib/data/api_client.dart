@@ -114,6 +114,13 @@ class ApiClient {
 
   // ---- charts & reports ----
 
+  /// The methods the account's region offers, in its entry order (GET /v1/methods, v4.3.0):
+  /// 求籤 first in Taiwan and Hong Kong.
+  Future<List<String>> methods() async {
+    final j = await _authed('GET', '/v1/methods');
+    return [for (final m in j['methods'] as List) (m as Json)['system'] as String];
+  }
+
   Future<ChartResult> createChart(Map<String, Object?> request) async =>
       ChartResult.fromJson(await _authed('POST', '/v1/charts', request));
 
@@ -136,7 +143,7 @@ class ApiClient {
 
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 
-  /// A passed tarot reading as a share image, made by the server (JPEG, v4.2.0).
+  /// A passed tarot (v4.2.0) or 求籤 (v4.3.0) reading as a share image, made by the server (JPEG).
   Future<Uint8List> shareImage(String reportId) =>
       _withAccess((access) => _bytes('/v1/reports/$reportId/share.jpg', access));
 

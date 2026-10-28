@@ -8,6 +8,7 @@ import 'daily_card.dart';
 import 'design.dart';
 import 'history_page.dart';
 import 'profiles_page.dart';
+import 'qiuqian_page.dart';
 import 'settings_page.dart';
 import 'tarot_page.dart';
 import 'widgets/language_menu.dart';
@@ -72,28 +73,37 @@ class HomePage extends ConsumerWidget {
                 child: Text(l10n.noProfileBody),
               ),
             ),
-          FadeSlideIn(
-            index: 2,
-            child: _Entry(
-              key: const Key('entry-bazi'),
-              icon: Icons.grid_view_rounded,
-              title: l10n.homeBazi,
-              subtitle: l10n.homeBaziDesc,
-              onTap: () => push(context, const BaziFormPage()),
+          // The methods in the region's entry order (GET /v1/methods, v4.3.0): 求籤 first in Taiwan
+          // and Hong Kong, the default order elsewhere and while the order loads.
+          for (final (i, system) in (ref.watch(methodsProvider).value ?? defaultMethods).indexed)
+            FadeSlideIn(
+              index: 2 + i,
+              child: switch (system) {
+                'bazi' => _Entry(
+                    key: const Key('entry-bazi'),
+                    icon: Icons.grid_view_rounded,
+                    title: l10n.homeBazi,
+                    subtitle: l10n.homeBaziDesc,
+                    onTap: () => push(context, const BaziFormPage()),
+                  ),
+                'tarot' => _Entry(
+                    key: const Key('entry-tarot'),
+                    icon: Icons.style_rounded,
+                    title: l10n.homeTarot,
+                    subtitle: l10n.homeTarotDesc,
+                    onTap: () => push(context, const TarotPage()),
+                  ),
+                _ => _Entry(
+                    key: const Key('entry-qiuqian'),
+                    icon: Icons.temple_buddhist_outlined,
+                    title: l10n.homeQiuqian,
+                    subtitle: l10n.homeQiuqianDesc,
+                    onTap: () => push(context, const QiuqianPage()),
+                  ),
+              },
             ),
-          ),
-          FadeSlideIn(
-            index: 3,
-            child: _Entry(
-              key: const Key('entry-tarot'),
-              icon: Icons.style_rounded,
-              title: l10n.homeTarot,
-              subtitle: l10n.homeTarotDesc,
-              onTap: () => push(context, const TarotPage()),
-            ),
-          ),
-          const FadeSlideIn(index: 4, child: DailyCard()),
-          const FadeSlideIn(index: 5, child: RecentHistory()),
+          const FadeSlideIn(index: 5, child: DailyCard()),
+          const FadeSlideIn(index: 6, child: RecentHistory()),
         ],
       ),
     );

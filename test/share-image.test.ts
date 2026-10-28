@@ -7,8 +7,12 @@ import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { generateReport, MockProvider } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
+import { lotTitle } from "../src/ai/qiuqian.js";
+import type { Locale } from "../src/ai/terms.js";
+import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { shareFont } from "../src/share/font.js";
+import { qiuqianShareTexts, renderQiuqianShare } from "../src/share/qiuqian-image.js";
 import { renderTarotShare, shareTexts } from "../src/share/tarot-image.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 
@@ -18,7 +22,7 @@ const draw = (spread: "three_card" | "celtic_cross", id: string) =>
     { spread },
     { drawKey: DRAW_KEY, digestPepper: PEPPER, now: FIXED_NOW, newDrawId: () => id },
   );
-const read = (chart: ReturnType<typeof draw>, locale: "zh-Hant" | "en") =>
+const read = (chart: ReturnType<typeof draw>, locale: Locale) =>
   generateReport(
     chart,
     { locale, country: "HK", question: QUESTION },
@@ -46,8 +50,30 @@ describe("what the share image says", () => {
   });
 });
 
+describe("what a 求籤 share image says (v4.3.0)", () => {
+  it("the set, the lot's title and label, its four lines and the poem's point; never the question or the answer", async () => {
+    const chart = computeQiuqian(
+      {},
+      { drawKey: DRAW_KEY, digestPepper: PEPPER, now: FIXED_NOW, newDrawId: () => randomUUID() },
+    );
+    const report = await read(chart, "zh-Hant");
+    const t = qiuqianShareTexts(report, chart, "zh-Hant");
+    const f = chart.facts as { lot: { n: number; ganzhi: string; poem: string[] } };
+    expect(t.title).toBe("命理大師 · 求籤");
+    expect(t.set).toBe("關聖帝君一百籤");
+    expect(t.lot).toBe(`${lotTitle(f.lot.n, "zh-Hant")} · ${f.lot.ganzhi}`);
+    expect(t.lines).toEqual(f.lot.poem);
+    const poem = report.layers!.interpretation.find((s) => s.topic === "qiuqian_poem")!;
+    expect(t.point).toBe(poem.summary);
+    expect(t.label).toBe(report.layers!.expectation.ai_label);
+    expect(JSON.stringify(t)).not.toContain(QUESTION);
+    const answer = report.layers!.interpretation.find((s) => s.topic === "qiuqian_answer")!;
+    expect(JSON.stringify(t)).not.toContain(answer.paragraphs[0]!.text);
+  });
+});
+
 describe("the image", () => {
-  const font = (l: "zh-Hant" | "en") => {
+  const font = (l: Locale) => {
     const f = shareFont(l, {});
     if (!f) throw new Error("no CJK font: install fonts-noto-cjk (Linux) or set MINGLI_SHARE_FONT");
     return f;
@@ -64,6 +90,24 @@ describe("the image", () => {
         locale,
       });
       expect([...jpg.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+      expect(await sharp(jpg).metadata()).toMatchObject({
+        format: "jpeg",
+        width: 1080,
+        height: 1350,
+      });
+    }
+  }, 30_000);
+
+  it("is a 1080 × 1350 JPEG for a 求籤 reading in 简体 and in English", async () => {
+    for (const locale of ["zh-Hans", "en"] as const) {
+      const chart = computeQiuqian(
+        {},
+        { drawKey: DRAW_KEY, digestPepper: PEPPER, now: FIXED_NOW, newDrawId: () => randomUUID() },
+      );
+      const jpg = await renderQiuqianShare(await read(chart, locale), chart, {
+        font: font(locale),
+        locale,
+      });
       expect(await sharp(jpg).metadata()).toMatchObject({
         format: "jpeg",
         width: 1080,
@@ -110,6 +154,12 @@ describe("GET /v1/reports/{id}/share.jpg", () => {
     expect(
       (await fetch(`${base}/v1/reports/${tarot.report_id}/share.jpg`, { headers: H("u2") })).status,
     ).toBe(404);
+    // A 求籤 reading has one too (v4.3.0).
+    const lot = await reading({ system: "qiuqian" });
+    await api.drain();
+    const lotImage = await fetch(`${base}/v1/reports/${lot.report_id}/share.jpg`, { headers: H() });
+    expect(lotImage.status).toBe(200);
+    expect(lotImage.headers.get("content-type")).toBe("image/jpeg");
     // A 八字 reading has no share image yet.
     const bazi = await reading({
       system: "bazi",

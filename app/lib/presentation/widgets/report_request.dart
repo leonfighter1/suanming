@@ -23,7 +23,7 @@ class ReportRequest extends ConsumerStatefulWidget {
   final String chartId;
   final String system;
 
-  /// 塔罗: what the user asked before drawing (POST /v1/reports `question`).
+  /// 塔罗, 求籤: what the user asked before drawing (POST /v1/reports `question`).
   final String? question;
 
   /// 塔罗: the area of life the reading looks at (POST /v1/reports `focus`, contract `tarotFocus`).
@@ -83,9 +83,12 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // A tarot reading's sections are fixed (v2.3.0): card by card, the whole spread, the advice.
+          // A tarot reading's sections are fixed (v2.3.0): card by card, the whole spread, the advice;
+          // so are a 求籤 reading's (v4.3.0): the poem, the question, the advice.
           if (widget.system == 'tarot')
             Text(l10n.tarotSections, key: const Key('tarot-sections'), style: Theme.of(context).textTheme.bodyMedium)
+          else if (widget.system == 'qiuqian')
+            Text(l10n.qiuqianSections, key: const Key('qiuqian-sections'), style: Theme.of(context).textTheme.bodyMedium)
           else ...[
             Text(l10n.chooseTopics, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: Space.s),

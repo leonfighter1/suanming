@@ -4,6 +4,7 @@
  *   app/assets/i18n/terms.json      ← i18n/terms.json (protected terms)
  *   app/assets/i18n/tarot_deck.json ← src/engines/tarot/deck.ts (78 card names)
  *   app/assets/i18n/term_tips.json  ← src/ai/term-tips.ts (what each 八字 term means)
+ *   app/assets/i18n/qiuqian_lots.json ← data/qiuqian (求籤's lot set, v4.3.0)
  *   app/test/fixtures/*.json        ← real engine + pipeline (mock provider) outputs
  * test/app-assets.test.ts fails when these are stale. Run: npm run sync:app
  * (this module only builds; scripts/sync-app-assets.ts writes).
@@ -18,8 +19,10 @@ import {
   TAROT_FOCUS,
   TOPICS_BY_SYSTEM,
 } from "../src/ai/index.js";
+import { lotTitle } from "../src/ai/qiuqian.js";
 // Not through the ai index: the tips need OpenCC (a dev tool), which the server must not load.
 import { termTips } from "../src/ai/term-tips.js";
+import { LOCALES } from "../src/ai/terms.js";
 import {
   publicLifeReport,
   publicRemedy,
@@ -43,6 +46,8 @@ import {
 } from "../src/engines/tarot/deck.js";
 import { KEYWORDS } from "../src/engines/tarot/keywords.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
+import { computeQiuqian } from "../src/engines/qiuqian/index.js";
+import { lotSet } from "../src/engines/qiuqian/lots.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
 const root = new URL("../", import.meta.url);
@@ -131,6 +136,33 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     updated_at: ts,
     report: tarotReport,
   });
+
+  // A 求籤 draw and its reading (v4.3.0).
+  const qiuqian = computeQiuqian(
+    {},
+    { ...secrets, now, newDrawId: () => "00000000-0000-4000-8000-000000000006" },
+  );
+  const qiuqianReport = await generateReport(
+    qiuqian,
+    { locale: "zh-Hant", country: "TW", question: "今年適合換工作嗎？" },
+    {
+      providers: { deepseek: mock, anthropic: mock },
+      now,
+      newId: () => "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    },
+  );
+  const qiuqianView = publicReport({
+    id: qiuqianReport.report_id,
+    owner: "fixture",
+    chart_id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd", // chart_qiuqian.json, the draw it reads
+    status: qiuqianReport.status,
+    locale: qiuqianReport.locale,
+    topics: qiuqianReport.topics,
+    created_at: ts,
+    updated_at: ts,
+    report: qiuqianReport,
+  });
+  const lots = lotSet("guandi_100");
 
   const remedy = await generateRemedy(
     bazi,
@@ -222,6 +254,18 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     },
     // Tapping a term on the 命盘 opens its plain explanation (v3.2.0).
     "app/assets/i18n/term_tips.json": { tips: termTips() },
+    // 求籤's lot set (v4.3.0): every lot's title, label and poem in both scripts, for the lot card.
+    "app/assets/i18n/qiuqian_lots.json": {
+      id: lots.id,
+      version: lots.version,
+      name: lots.name,
+      lots: lots.lots.map((l) => ({
+        n: l.n,
+        title: Object.fromEntries(LOCALES.map((loc) => [loc, lotTitle(l.n, loc)])),
+        ganzhi: l.ganzhi,
+        poem: l.poem,
+      })),
+    },
     "app/test/fixtures/chart_bazi.json": {
       chart_id: "22222222-2222-4222-8222-222222222222",
       chart_fact: bazi,
@@ -246,8 +290,13 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       chart_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       chart_fact: relationship,
     },
+    "app/test/fixtures/chart_qiuqian.json": {
+      chart_id: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      chart_fact: qiuqian,
+    },
     "app/test/fixtures/report_passed.json": view,
     "app/test/fixtures/report_tarot_passed.json": tarotView,
+    "app/test/fixtures/report_qiuqian_passed.json": qiuqianView,
     "app/test/fixtures/remedy_passed.json": remedyView,
     "app/test/fixtures/life_passed.json": lifeView,
     "app/test/fixtures/review_report.json": reviewView,

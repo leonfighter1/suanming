@@ -147,10 +147,19 @@ database store keeps them, encrypted, in a folder on this computer. It is off un
 
 ## Share images: a Chinese font on the server (v4.2.0)
 
-「分享图片」 on a tarot reading asks the API for an image it makes itself. The API needs a font with
+「分享图片」 on a tarot or (v4.3.0) 求籤 reading asks the API for an image it makes itself. The API needs a font with
 Chinese characters. On Windows it finds Noto Sans SC or 微软雅黑; on Linux, install
 `fonts-noto-cjk`; on a Mac it finds PingFang. Any other font: `MINGLI_SHARE_FONT=<file>` and
 `MINGLI_SHARE_FONT_FAMILY=<its family name>`. Without one, the app says the image can't be made.
+
+## 求籤 and the home order (v4.3.0)
+
+- 首页 → 求籤: type a question (optional), then 求籤.
+- Each round is a stick, then 擲筊. 聖筊 confirms it; 笑筊 or 陰筊 sends it back (放回再搖). 直接看結果 skips to the
+  lot.
+- 生成 AI 解讀 reads the lot. With `IS_AI_MOCK=TRUE` the reading is the mock's demo text.
+- The home order follows the account's region (`GET /v1/methods`): an account registered in Taiwan or Hong Kong sees
+  求籤 first. In dev mode, `X-Dev-Country: TW` does the same.
 
 ## Cache
 

@@ -32,6 +32,10 @@ const REFS: Record<Topic, string[]> = {
   tarot_cards: ["/cards/0"],
   tarot_synthesis: ["/cards/0"],
   tarot_advice: ["/cards/0"],
+  // 求籤's sections cite the poem's lines (qiuqian_poem: one paragraph per couplet, see generateJson).
+  qiuqian_poem: ["/lot/poem/0", "/lot/poem/1"],
+  qiuqian_answer: ["/lot/poem/0"],
+  qiuqian_advice: ["/lot/poem/3"],
 };
 
 const TEXT: Record<Locale, Record<Topic, string>> = {
@@ -47,6 +51,10 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
     tarot_synthesis: "（示範）把幾張牌連起來看，傳統上可以讀成一段變化的過程，供你參考。",
     tarot_advice: "（示範）牌面傳統上提示可以先放慢腳步，整理想法後再做決定。",
+    qiuqian_poem:
+      "（示範）這兩句籤詩描繪的景象，傳統上被讀作一段心境的變化，可作為自我觀察的參考。",
+    qiuqian_answer: "（示範）就你所問的事，這支籤傳統上提示先看清情勢，再一步步來。",
+    qiuqian_advice: "（示範）籤詩傳統上提示可以放慢腳步，先做眼前做得到的事。",
   },
   "zh-Hans": {
     wuxing:
@@ -60,6 +68,10 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "（示范）这张牌在这个位置上，传统上被看作与问题相关的一个面向，可作为自我观察的参考。",
     tarot_synthesis: "（示范）把几张牌连起来看，传统上可以读成一段变化的过程，供你参考。",
     tarot_advice: "（示范）牌面传统上提示可以先放慢脚步，整理想法后再做决定。",
+    qiuqian_poem:
+      "（示范）这两句签诗描绘的景象，传统上被读作一段心境的变化，可作为自我观察的参考。",
+    qiuqian_answer: "（示范）就你所问的事，这支签传统上提示先看清情势，再一步步来。",
+    qiuqian_advice: "（示范）签诗传统上提示可以放慢脚步，先做眼前做得到的事。",
   },
   en: {
     wuxing:
@@ -80,6 +92,12 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "(Demo) Read together, the cards traditionally tell a story of change; take it as one view to consider.",
     tarot_advice:
       "(Demo) The cards traditionally suggest slowing down and sorting your thoughts before deciding.",
+    qiuqian_poem:
+      "(Demo) These two lines traditionally picture a change of mood; take them as a prompt for reflection.",
+    qiuqian_answer:
+      "(Demo) For what you asked, the lot traditionally suggests seeing the situation clearly first, then going step by step.",
+    qiuqian_advice:
+      "(Demo) The poem traditionally suggests slowing down and starting with what you can do now.",
   },
 };
 
@@ -195,16 +213,22 @@ export class MockProvider implements LLMProvider {
             topic === "tarot_cards"
               ? // One paragraph per card, in dealing order, as narrative_tarot@2 asks.
                 Array.from({ length: p.cards ?? 1 }, (_, i) => paragraph(topic, [`/cards/${i}`]))
-              : [
-                  paragraph(
-                    topic,
-                    p.system === "bazi"
-                      ? REFS[topic]
-                      : p.system === "tarot"
-                        ? ["/cards/0"]
-                        : ["/bodies/0"],
-                  ),
-                ],
+              : topic === "qiuqian_poem"
+                ? // One paragraph per couplet, as narrative_qiuqian@1 asks.
+                  [
+                    paragraph(topic, ["/lot/poem/0", "/lot/poem/1"]),
+                    paragraph(topic, ["/lot/poem/2", "/lot/poem/3"]),
+                  ]
+                : [
+                    paragraph(
+                      topic,
+                      p.system === "bazi" || p.system === "qiuqian"
+                        ? REFS[topic]
+                        : p.system === "tarot"
+                          ? ["/cards/0"]
+                          : ["/bodies/0"],
+                    ),
+                  ],
         })),
       };
       return { kind: "ok", data, model, usage: USAGE };

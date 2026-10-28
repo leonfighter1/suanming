@@ -22,6 +22,7 @@ final testTerms = Terms.parse(
   File('assets/i18n/terms.json').readAsStringSync(),
   File('assets/i18n/tarot_deck.json').readAsStringSync(),
   File('assets/i18n/term_tips.json').readAsStringSync(),
+  File('assets/i18n/qiuqian_lots.json').readAsStringSync(),
 );
 
 /// The page's main vertical list (pages also contain horizontal timelines).
@@ -54,6 +55,9 @@ class FakeApi {
 
   /// GET /v1/reports items, when a test needs other readings than the one 八字 report.
   final List<Map<String, dynamic>>? history;
+
+  /// GET /v1/methods: the region's methods in entry order (v4.3.0). Tests of the order set it.
+  List<String> methods = const ['bazi', 'tarot', 'qiuqian', 'astrology'];
 
   /// The signed-in user's email (`test…` accounts get a seeded default profile).
   final String email;
@@ -194,7 +198,26 @@ class FakeApi {
         'relationship' => 'chart_tarot_relationship',
         _ => 'chart_tarot',
       };
-      return _json(fixture(body['system'] == 'tarot' ? tarot : 'chart_bazi'), 201);
+      return _json(
+        fixture(switch (body['system']) {
+          'tarot' => tarot,
+          'qiuqian' => 'chart_qiuqian',
+          _ => 'chart_bazi',
+        }),
+        201,
+      );
+    }
+    // The region's methods in entry order (v4.3.0): the default order unless a test sets [methods].
+    if (req.method == 'GET' && path == '/v1/methods') {
+      return _json({
+        'region': 'HK',
+        'matrix_version': '0.2.0',
+        'methods': [for (final m in methods) {'system': m, 'entry_weight': 1}],
+      }, 200);
+    }
+    // The 求籤 draw that report_qiuqian_passed reads (v4.3.0).
+    if (req.method == 'GET' && path == '/v1/charts/dddddddd-dddd-4ddd-8ddd-dddddddddddd') {
+      return _json(fixture('chart_qiuqian'), 200);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
     // 一生运势报告: real engine facts for the owner's sample (life_passed.json).

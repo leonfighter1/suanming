@@ -14,6 +14,7 @@ import 'design.dart';
 import 'labels.dart';
 import 'theme.dart' show GanZhiText;
 import 'widgets/four_layer_report.dart';
+import 'widgets/lot_card.dart';
 import 'widgets/tarot_spread.dart';
 
 /// Shows a report, polling until generation finishes. While pending it shows
@@ -49,9 +50,10 @@ class ReportPage extends ConsumerWidget {
     final report = ref.watch(reportProvider(reportId));
     final r = report.value;
     final layers = r?.layers;
-    // The chart the reading is of (the header loads it too): only a tarot reading has a share image.
+    // The chart the reading is of (the header loads it too): tarot and 求籤 readings have a share image.
     final chartId = r?.chartId;
-    final tarot = chartId != null && ref.watch(chartProvider(chartId)).value?.system == 'tarot';
+    final system = chartId == null ? null : ref.watch(chartProvider(chartId)).value?.system;
+    final shareable = system == 'tarot' || system == 'qiuqian';
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +76,7 @@ class ReportPage extends ConsumerWidget {
                   // 分享图 (v4.2.0): the server makes it, with the watermark and the disclaimer.
                   try {
                     final jpg = await ref.read(apiClientProvider).shareImage(r.id);
-                    final name = 'mingli-tarot-${r.id.substring(0, 8)}.jpg';
+                    final name = 'mingli-$system-${r.id.substring(0, 8)}.jpg';
                     await share(
                       ShareParams(
                         files: [XFile.fromData(jpg, mimeType: 'image/jpeg', name: name)],
@@ -98,8 +100,8 @@ class ReportPage extends ConsumerWidget {
                 }
               },
               itemBuilder: (_) => [
-                // Tarot readings only, for now (the server's image is the spread).
-                if (tarot)
+                // Tarot and 求籤 readings (the server's image is the spread, or the lot's slip).
+                if (shareable)
                   PopupMenuItem(
                     key: const Key('share-image'),
                     value: 'image',
@@ -150,8 +152,9 @@ class ReportPage extends ConsumerWidget {
   }
 }
 
-/// A reading's chart on top: a tarot spread with its art, every card turned (v2.4.0), or a 八字
-/// chart's four pillars and 日主 (v3.4.0). Astrology shows nothing here: its facts are in the layers.
+/// A reading's chart on top: a tarot spread with its art, every card turned (v2.4.0), a 八字 chart's
+/// four pillars and 日主 (v3.4.0), or the 求籤 lot's slip (v4.3.0). Astrology shows nothing here: its
+/// facts are in the layers.
 class ReadingChart extends ConsumerWidget {
   const ReadingChart({super.key, required this.chartId});
   final String chartId;
@@ -170,6 +173,8 @@ class ReadingChart extends ConsumerWidget {
         );
       case 'bazi':
         return _ReadingPillars(chart: chart!.bazi);
+      case 'qiuqian':
+        return LotCard(key: const Key('reading-lot'), lotNumber: chart!.qiuqian.lotNumber);
       default:
         return const SizedBox.shrink();
     }

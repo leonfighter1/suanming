@@ -26,7 +26,7 @@
       "additionalProperties": false,
       "required": ["name", "version"],
       "properties": {
-        "name": { "type": "string", "enum": ["bazi", "tarot", "astrology"] },
+        "name": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian"] },
         "version": {
           "description": "Engine semver, including upstream library pin, e.g. 0.1.0+lunar-javascript.1.7.7",
           "type": "string",
@@ -34,7 +34,7 @@
         }
       }
     },
-    "system": { "type": "string", "enum": ["bazi", "tarot", "astrology"] },
+    "system": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian"] },
     "input_digest": {
       "description": "Keyed digest (HMAC-SHA256) of canonical input + engine version + rule versions. See src/chart-fact/digest.ts.",
       "type": "string",
@@ -74,6 +74,10 @@
     {
       "if": { "properties": { "system": { "const": "astrology" } } },
       "then": { "properties": { "facts": { "$ref": "#/$defs/astrology_facts" } } }
+    },
+    {
+      "if": { "properties": { "system": { "const": "qiuqian" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/qiuqian_facts" } } }
     }
   ],
   "$defs": {
@@ -665,6 +669,67 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "qiuqian_facts": {
+      "description": "求籤 (since v4.3.0): a lot drawn from the 籤筒 and confirmed by 擲筊. Each round is one stick and one throw; the last is the 聖筊 that confirmed the lot.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lot_set", "lot", "rounds", "audit"],
+      "properties": {
+        "lot_set": { "type": "string", "enum": ["guandi_100"] },
+        "lot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["n", "ganzhi", "poem"],
+          "properties": {
+            "n": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "ganzhi": { "type": "string", "pattern": "^[甲乙丙丁戊己庚辛壬癸]{2}$" },
+            "poem": {
+              "description": "The poem in 繁體, as the lot set gives it: four lines of seven characters.",
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": { "type": "string", "minLength": 7, "maxLength": 7 }
+            }
+          }
+        },
+        "rounds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["lot", "blocks", "result"],
+            "properties": {
+              "lot": { "type": "integer", "minimum": 1, "maximum": 100 },
+              "blocks": {
+                "description": "Which face of each block lies up.",
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "string", "enum": ["flat", "round"] }
+              },
+              "result": {
+                "description": "sheng 聖筊 (one of each), xiao 笑筊 (both flat), yin 陰筊 (both round).",
+                "type": "string",
+                "enum": ["sheng", "xiao", "yin"]
+              }
+            }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["draw_id", "drawn_at", "rng", "result_digest"],
+          "properties": {
+            "draw_id": { "type": "string", "format": "uuid" },
+            "drawn_at": { "type": "string", "format": "date-time" },
+            "rng": { "type": "string", "enum": ["hmac-sha256-drbg/v1"] },
+            "result_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
           }
         }
       }

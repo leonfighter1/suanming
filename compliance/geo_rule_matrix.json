@@ -1,6 +1,6 @@
 {
   "$schema": "../schemas/geo-rule-matrix.schema.json",
-  "matrix_version": "0.1.0",
+  "matrix_version": "0.2.0",
   "notes": "legal_review=provisional for all regions: product-owner sign-off on 2026-10-26; formal legal review (at least US/GB/AU/CA) deferred and required before each region's launch. Unknown countries resolve to null => service refused.",
   "defaults": {
     "service_available": true,
@@ -14,6 +14,10 @@
         "entry_weight": 1
       },
       "astrology": {
+        "available": true,
+        "entry_weight": 1
+      },
+      "qiuqian": {
         "available": true,
         "entry_weight": 1
       }
@@ -72,6 +76,10 @@
         "bazi": {
           "available": true,
           "entry_weight": 1.2
+        },
+        "qiuqian": {
+          "available": true,
+          "entry_weight": 1.5
         }
       }
     },
@@ -85,6 +93,10 @@
         "bazi": {
           "available": true,
           "entry_weight": 1.2
+        },
+        "qiuqian": {
+          "available": true,
+          "entry_weight": 1.5
         }
       }
     },

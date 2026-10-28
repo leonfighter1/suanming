@@ -1238,6 +1238,83 @@ class AppLocalizationsZh extends AppLocalizations {
   String pillarRelation(String pillar, String relation) {
     return '$pillar$relation';
   }
+
+  @override
+  String get homeQiuqian => '求签';
+
+  @override
+  String get homeQiuqianDesc => '摇签、掷筊，求一首签诗，仅供娱乐和玄学学习使用';
+
+  @override
+  String get qiuqianQuestion => '所求之事';
+
+  @override
+  String get qiuqianQuestionHint => '心中默念或写下来都可以。问题只用于解签，不会出现在分享图上。';
+
+  @override
+  String get qiuqianExample1 => '今年的工作会顺利吗？';
+
+  @override
+  String get qiuqianExample2 => '这段关系该怎么经营？';
+
+  @override
+  String get qiuqianExample3 => '搬家的事该怎么决定？';
+
+  @override
+  String get qiuqianHowTo => '摇签筒，一支签落下；再掷筊请示：圣筊（一平一凸）就是这一支，笑筊或阴筊就把签放回再摇。';
+
+  @override
+  String get qiuqianDraw => '求签';
+
+  @override
+  String get qiuqianThrow => '掷筊';
+
+  @override
+  String get qiuqianAgain => '放回再摇';
+
+  @override
+  String get qiuqianSkip => '直接看结果';
+
+  @override
+  String qiuqianStickFell(String title) {
+    return '摇出$title';
+  }
+
+  @override
+  String get qiuqianSheng => '圣筊：神明应允，就是这一支';
+
+  @override
+  String get qiuqianXiao => '笑筊：神明一笑，把签放回再求';
+
+  @override
+  String get qiuqianYin => '阴筊：神明未允，把签放回再求';
+
+  @override
+  String get qiuqianYourLot => '你求得的签';
+
+  @override
+  String get qiuqianTextNote => '签诗依台湾庙宇通行文本，并以清代刻本校订。';
+
+  @override
+  String get qiuqianSections => '解签分三部分：签诗、所问之事、建议。';
+
+  @override
+  String get leaveQiuqianBody => '这次求得的签不会保留，下次要重新求签。已生成的解读会保存在历史记录里。';
+
+  @override
+  String get topicQiuqianPoem => '签诗';
+
+  @override
+  String get topicQiuqianAnswer => '所问之事';
+
+  @override
+  String get topicQiuqianAdvice => '建议';
+
+  @override
+  String get blockFlat => '平面朝上';
+
+  @override
+  String get blockRound => '凸面朝上';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2473,4 +2550,81 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String pillarRelation(String pillar, String relation) {
     return '$pillar$relation';
   }
+
+  @override
+  String get homeQiuqian => '求籤';
+
+  @override
+  String get homeQiuqianDesc => '搖籤、擲筊，求一首籤詩，僅供娛樂和玄學學習使用';
+
+  @override
+  String get qiuqianQuestion => '所求之事';
+
+  @override
+  String get qiuqianQuestionHint => '心中默念或寫下來都可以。問題只用於解籤，不會出現在分享圖上。';
+
+  @override
+  String get qiuqianExample1 => '今年的工作會順利嗎？';
+
+  @override
+  String get qiuqianExample2 => '這段關係該怎麼經營？';
+
+  @override
+  String get qiuqianExample3 => '搬家的事該怎麼決定？';
+
+  @override
+  String get qiuqianHowTo => '搖籤筒，一支籤落下；再擲筊請示：聖筊（一平一凸）就是這一支，笑筊或陰筊就把籤放回再搖。';
+
+  @override
+  String get qiuqianDraw => '求籤';
+
+  @override
+  String get qiuqianThrow => '擲筊';
+
+  @override
+  String get qiuqianAgain => '放回再搖';
+
+  @override
+  String get qiuqianSkip => '直接看結果';
+
+  @override
+  String qiuqianStickFell(String title) {
+    return '搖出$title';
+  }
+
+  @override
+  String get qiuqianSheng => '聖筊：神明應允，就是這一支';
+
+  @override
+  String get qiuqianXiao => '笑筊：神明一笑，把籤放回再求';
+
+  @override
+  String get qiuqianYin => '陰筊：神明未允，把籤放回再求';
+
+  @override
+  String get qiuqianYourLot => '你求得的籤';
+
+  @override
+  String get qiuqianTextNote => '籤詩依臺灣廟宇通行文本，並以清代刻本校訂。';
+
+  @override
+  String get qiuqianSections => '解籤分三部分：籤詩、所問之事、建議。';
+
+  @override
+  String get leaveQiuqianBody => '這次求得的籤不會保留，下次要重新求籤。已生成的解讀會保存在歷史紀錄裡。';
+
+  @override
+  String get topicQiuqianPoem => '籤詩';
+
+  @override
+  String get topicQiuqianAnswer => '所問之事';
+
+  @override
+  String get topicQiuqianAdvice => '建議';
+
+  @override
+  String get blockFlat => '平面朝上';
+
+  @override
+  String get blockRound => '凸面朝上';
 }

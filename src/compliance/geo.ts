@@ -24,6 +24,24 @@ export interface GeoRuleMatrix {
   >;
 }
 
+/** Ties in entry weight keep this order. */
+const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "astrology"];
+
+/**
+ * The methods a region offers, heaviest entry weight first (Phase 3 §2.4: 擲筊 / 求签 first in Taiwan and
+ * Hong Kong). The matrix decides, so the order changes without an app release.
+ */
+export function methodsFor(region: RegionRule): { system: string; entry_weight: number }[] {
+  const rank = (s: string) => {
+    const i = DEFAULT_ORDER.indexOf(s);
+    return i < 0 ? DEFAULT_ORDER.length : i;
+  };
+  return Object.entries(region.systems)
+    .filter(([, s]) => s.available)
+    .map(([system, s]) => ({ system, entry_weight: s.entry_weight }))
+    .sort((a, b) => b.entry_weight - a.entry_weight || rank(a.system) - rank(b.system));
+}
+
 export function loadGeoMatrix(
   path = new URL("../../compliance/geo_rule_matrix.json", import.meta.url),
 ): GeoRuleMatrix {

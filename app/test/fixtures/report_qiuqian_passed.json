@@ -1,0 +1,91 @@
+{
+  "report_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "chart_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "locale": "zh-Hant",
+  "topics": [
+    "qiuqian_poem",
+    "qiuqian_answer",
+    "qiuqian_advice"
+  ],
+  "layers": {
+    "facts": [
+      "關聖帝君一百籤 · 第八十九籤（壬壬）",
+      "樽前無事且高歌",
+      "時未來時奈若何",
+      "白馬渡江嘶日暮",
+      "虎頭城裏看巍峨"
+    ],
+    "interpretation": [
+      {
+        "topic": "qiuqian_poem",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）這兩句籤詩描繪的景象，傳統上被讀作一段心境的變化，可作為自我觀察的參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/lot/poem/0",
+              "/lot/poem/1"
+            ]
+          },
+          {
+            "text": "（示範）這兩句籤詩描繪的景象，傳統上被讀作一段心境的變化，可作為自我觀察的參考。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/lot/poem/2",
+              "/lot/poem/3"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "qiuqian_answer",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）就你所問的事，這支籤傳統上提示先看清情勢，再一步步來。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/lot/poem/0"
+            ]
+          }
+        ]
+      },
+      {
+        "topic": "qiuqian_advice",
+        "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
+        "paragraphs": [
+          {
+            "text": "（示範）籤詩傳統上提示可以放慢腳步，先做眼前做得到的事。",
+            "source_level": "traditional_text",
+            "fact_refs": [
+              "/lot/poem/3"
+            ]
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "topic": "qiuqian_advice",
+        "text": "（示範）本週花十分鐘寫下與「建議」相關的一個觀察。",
+        "horizon": "this_week"
+      }
+    ],
+    "expectation": {
+      "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
+      "ai_label": "本解讀由 AI 依據所得籤詩生成，僅供娛樂和玄學學習使用。",
+      "label_required": false
+    }
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "narrative_qiuqian@1,action_qiuqian@1,guard@2",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

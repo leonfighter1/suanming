@@ -1,6 +1,6 @@
 {
   "_readme": "Protected term table (Phase 1 §2.3). Keys are the canonical engine form (simplified, as lunar-javascript emits). Values are the only allowed display form per locale. Hand-curated; never machine-translated. Shipped with the app and hot-updatable.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "terms": {
     "比肩": { "zh-Hant": "比肩", "zh-Hans": "比肩", "en": "Companion (Bi Jian)" },
     "劫财": { "zh-Hant": "劫財", "zh-Hans": "劫财", "en": "Rob Wealth (Jie Cai)" },
@@ -109,6 +109,18 @@
     "水": { "zh-Hant": "水", "zh-Hans": "水", "en": "Water" },
     "正位": { "zh-Hant": "正位", "zh-Hans": "正位", "en": "upright" },
     "逆位": { "zh-Hant": "逆位", "zh-Hans": "逆位", "en": "reversed" },
+    "求签": { "zh-Hant": "求籤", "zh-Hans": "求签", "en": "Fortune Sticks (Qiu Qian)" },
+    "掷筊": { "zh-Hant": "擲筊", "zh-Hans": "掷筊", "en": "Moon Blocks (Zhi Jiao)" },
+    "签诗": { "zh-Hant": "籤詩", "zh-Hans": "签诗", "en": "Lot Poem" },
+    "签筒": { "zh-Hant": "籤筒", "zh-Hans": "签筒", "en": "Stick Cylinder" },
+    "圣筊": { "zh-Hant": "聖筊", "zh-Hans": "圣筊", "en": "Yes Throw (Sheng Jiao)" },
+    "笑筊": { "zh-Hant": "笑筊", "zh-Hans": "笑筊", "en": "Laughing Throw (Xiao Jiao)" },
+    "阴筊": { "zh-Hant": "陰筊", "zh-Hans": "阴筊", "en": "No Throw (Yin Jiao)" },
+    "关圣帝君": {
+      "zh-Hant": "關聖帝君",
+      "zh-Hans": "关圣帝君",
+      "en": "Lord Guan (Guan Sheng Di Jun)"
+    },
     "太阳": { "zh-Hant": "太陽", "zh-Hans": "太阳", "en": "Sun" },
     "月亮": { "zh-Hant": "月亮", "zh-Hans": "月亮", "en": "Moon" },
     "双子": { "zh-Hant": "雙子", "zh-Hans": "双子", "en": "Gemini" },

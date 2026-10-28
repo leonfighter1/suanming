@@ -25,15 +25,15 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status                   |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------------------------ |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done                     |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done                     |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done                     |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done                     |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done                     |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | waiting (owner's choice) |
-| S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress              |
+| Stage                      | What                                                        | Size   | Release when done | Status      |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done        |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done        |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | done        |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done        |
+| S6 新玩法                  | 求籤 · 擲筊, 风水, 起名 (the owner's phase document)        | big    | v5.0.0 + summary  | in progress |
+| S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -455,20 +455,164 @@ keyboard-access checklist.
 
 ## S6 新玩法 (big → v5.0.0)
 
-**Waiting for the owner's choice (rule 34, 2026-10-28).**
+**Owner (2026-10-28): 「继续吧不要停」**, with no choice made between the methods. So S6 follows the owner's phase
+document (rule 34), which this plan's own ideas never override:
 
-- What the owner's phase document plans:
-  - 起名 and 风水, in Phase 3, each with its own spec. 起名 means 五行补益, a hand-checked 字义库 and 音律
-    rules. 风水 means general principles of direction and space, never a 吉凶 judgement of a home.
-  - 擲筊 / 求签 put first for Taiwan and Hong Kong.
-- The two packages below came from this plan's own review. The document mentions neither 六爻 nor 合婚.
-- Which new methods come first, and with which compliance rules, is the owner's decision. S7 goes first meanwhile:
-  it is the owner's own spec, and S5's stored readings unblocked it.
+- Phase 3 §2.1: 起名 and 风水, each with its own spec.
+- Phase 3 §2.4: the 擲筊 / 求签 entry comes first for Taiwan and Hong Kong (「台湾/香港（擲筊/求签入口前置）」), and
+  风水 gets more weight in Malaysia.
+- This plan's own proposals, 六爻 / 梅花 起卦 and 合婚, are parked: the document mentions neither.
 
-- WP6.1 易经起卦 as its own method: 六爻 (three coins, six tosses: 本卦, 变卦, 动爻) and 梅花 (time or numbers),
-  its own engine, prompts and screens.
-- WP6.2 合婚 between two saved profiles: 日柱 / 年柱 relations, 五行 complement, 生肖, its own prompt (every relationship
-  type the same, never a prediction of a breakup).
+Order: WP6.1 求籤 (+ WP6.2, the entry order) as v4.3.0, WP6.3 风水 as v4.4.0, WP6.4 起名 as v4.5.0, then the stage
+summary and v5.0.0.
+
+### WP6.1 求籤 · 擲筊, its own method (medium → v4.3.0)
+
+**The lot set: 關聖帝君一百籤 (雷雨師一百籤, 關帝籤).** It is used at 臺北行天宮, 日月潭文武廟 and 新竹城隍廟, and is
+Taiwan's second most used set (六十甲子籤 first, 觀音一百籤 third, by the survey temples.tw cites). It comes first
+because its text can be verified:
+
+- two independent transcriptions:
+  - A: 維基文庫 「關聖帝君靈籤」. Lots 1–10 are from a Qing print, 11–100 from another transcription.
+  - B: temples.tw 「關聖帝君一百籤」.
+- a public-domain primary source to settle their disagreements: the Qing print 「關帝靈籤」 (姑蘇鈕氏藏板), Harvard DRS
+  53239458, scanned on Wikimedia Commons (page = lot + 2).
+
+六十甲子籤 (the 媽祖 temples) and 黃大仙靈籤 (Hong Kong) have no such sources yet. They wait for a reference, like
+WP1.8.
+
+**The text (G4, G7):**
+
+- The poem is the temples' text, where A and B agree character for character: 85 of 100 lots (measured 2026-10-28).
+- Where they disagree (16 lines in 15 lots), the print decides, written in the modern form (the print's 孝弟 is
+  孝悌). In #35 neither has the print's reading (A 分折, B 分析, print 分拆).
+- All 100 lots were then read in the print. A and B share a few plain errors, so their agreement alone is not
+  proof.
+  - 5 such lines take the print's reading: #25 戍 → 戌 (the branch), #47 祗 → 祇, #50 步多 → 步步, #87 敵圖 → 敵國,
+    #90 咨嘆 → 咨嗟 (the rhyme).
+  - 38 other lines differ from the print as variants that read well either way. They stay as the temples print
+    them, and the print's reading is listed. For example, #1 「玉殿千官」 (print 仙官; its own note gives both) and #81
+    「幸有高臺」 (print 當堂).
+- 干支 labels follow the set's rule, 甲甲 … 癸癸 (lot n = 天干[(n−1) ÷ 10] + 天干[(n−1) mod 10]). All 100 headings
+  in the print follow it.
+- **No 吉凶 grade.** Editions disagree (2 of the 14 lots checked differ between A and the print), and many Taiwanese
+  temples print none. The reading follows the poem.
+- No 聖意, 典故 or modern commentary in v1: only the verified poem.
+- 简体 by OpenCC in the build script (`npm run build:qiuqian`), never on the server (rule 36). It keeps 乾 in 乾坤 and
+  乾亥 and makes three fixes (祇欲 → 只欲, 斲 → 斫, 𫗴 → 饘), with the G18 one-to-many check.
+- The evidence is in `docs/verification/qiuqian-guandi-100.md`: the sources, the 16 decisions with their scan pages,
+  the 5 corrections and the 38 variants.
+
+**The ritual**, as temples commonly do it, simplified:
+
+1. The user may type what they ask. It is private, like a tarot question: never on the share image.
+2. 搖籤筒: a stick falls.
+3. 擲筊 confirms it.
+   - 聖筊 (one block flat, one round) confirms the stick.
+   - 笑筊 (both flat) or 陰筊 (both round) puts it back, and the user draws again.
+   - Each block lands either way with probability ½, a simplification, so a 聖筊 comes half the time.
+   - The engine stops at 64 rounds (2⁻⁶⁴).
+4. The engine draws everything from the seed (HMAC-DRBG, HMAC(drawKey, draw id)), so a draw replays like a tarot
+   draw. The app reveals the recorded steps one by one.
+
+**Facts** (ChartFact `system: "qiuqian"`, additive):
+
+- `{ lot_set: "guandi_100", lot: { n, ganzhi, poem[4] }, rounds: [{ lot, blocks: [face, face], result }], audit }`
+- provenance: `/lot/poem` is traditional_text; `/rounds` is common_consensus.
+
+**The reading**, with its own prompts: narrative_qiuqian@1 and action_qiuqian@1. There is no plan (破除運勢), as
+for astrology. Sections:
+
+- 籤詩 (`qiuqian_poem`): the poem couplet by couplet, in plain words.
+- 所問之事 (`qiuqian_answer`): what the lot says to the question, or to the reader's situation without one.
+- 建議 (`qiuqian_advice`): what the lot invites the reader to do.
+- The actions follow the advice.
+
+Limits on the reading:
+
+- Tendency language. A sad lot asks for patience and care, never a fixed fate.
+- Never donations, 添香油錢, 點光明燈, 安太歲, 祭改, amulets, or going back to undo a lot.
+- No health, legal or money predictions.
+- Faithfulness: a quoted poem line must be one of the lot's lines.
+
+**API and data:**
+
+- `POST /v1/charts {system: "qiuqian"}`; reports as for tarot (a question, no focus).
+- 分享图片 for passed 求籤 readings: the lot, its poem, the main point; never the question.
+- Migration 003 adds `qiuqian` to `chart_system`.
+- Geo matrix: `qiuqian` available by default.
+
+**App:**
+
+- a 求籤 entry on the home page;
+- the 求籤 page: the question, the ritual (Enter / Space), the lot card;
+- the lot card on the reading page;
+- history;
+- term tips for 聖筊, 笑筊, 陰筊 and 籤詩.
+
+**Tests:**
+
+- engine:
+  - replay;
+  - the stop rule;
+  - 100 000 draws: 聖筊 half the time, lots uniform, rounds geometric. `npm run verify:qiuqian` becomes a harness gate.
+- data:
+  - 100 lots × 4 lines × 7 characters;
+  - the 15 decisions pinned;
+  - the 干支 rule;
+  - the 简体 checks.
+- prompts: pinned and distinct.
+- pipeline: a passed mock reading.
+- faithfulness: a misquoted line is caught.
+- API: chart, report, share, methods, geo.
+- app:
+  - the ritual;
+  - the reading page;
+  - the home order for TW;
+  - keyboard.
+
+Lessons: G4, G7 / P12, G18, P26, P27, P33, P37, rules 29 and 36.
+
+As built (v4.3.0), beyond the spec above:
+
+- The text policy changed once the print was read in full: the two transcriptions share errors (rule 39). The
+  numbers and lists are in the evidence file.
+- 求籤 has its own AI label (「依據所得籤詩生成」); the shared one says 命盤. Other methods are unchanged.
+- The model sees the lot without the rounds, so it never reads meaning into how many draws it took.
+- Compliance rule G008 holds offerings or rituals framed as what undoes a lot.
+- The app reveals the rounds one step at a time (擲筊, 放回再搖, 直接看結果). Each lot's title comes from the server's
+  `lotTitle`, synced with the set.
+
+### WP6.2 The entry order by region (with WP6.1, v4.3.0)
+
+- `GET /v1/methods` returns the caller's region's methods in `entry_weight` order (the matrix, so it changes without a
+  release).
+- Taiwan and Hong Kong give `qiuqian` 1.5, ahead of 八字's 1.2.
+- The home page orders its entries by it. Offline, it keeps the default order.
+
+### WP6.3 风水 (medium → v4.4.0)
+
+The owner's spec (Phase 3 §2.1):
+
+- Only general principles of direction and space (「书桌宜背靠实墙」), from the room's use and, optionally, its
+  facing. The input is anonymous.
+- Never a 吉凶 judgement of a home.
+- ChartFact `system: "fengshui"`, every principle tagged `simplified_rule`.
+- A compliance rule set against 吉凶 phrasing.
+- Malaysia gives it more weight (§2.4).
+
+### WP6.4 起名 (medium → v4.5.0)
+
+The owner's spec (Phase 3 §2.1, §4):
+
+- 五行补益 from the 八字 五行 count.
+- A 字义库 with 繁 and 简 forms, checked by hand. It ships marked unreviewed until the owner checks it, like the 50
+  八字 cases.
+- 音律 rules (tone patterns).
+- ChartFact `system: "naming"` with candidates, each with its basis and `source_level`.
+- Tests: 字义库 coverage 100 %, unit tests for the tone rules, and checks of the 繁體 forms.
+
+Parked, not in the owner's document: 六爻 / 梅花 起卦 as its own method, and 合婚 between two saved profiles.
 
 ## S7 分享图 (medium → v4.2.0, before S6 while S6 waits)
 
@@ -743,4 +887,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP7.1     | done                       | v4.2.0  |
 | WP7.2     | waits for the owner        | —       |
 | WP7.3     | waits for the stores       | —       |
-| S6        | waits for the owner        | above   |
+| WP6.1–6.2 | done                       | v4.3.0  |
+| WP6.3     | planned                    | v4.4.0  |
+| WP6.4     | planned                    | v4.5.0  |

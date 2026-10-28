@@ -1282,4 +1282,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String pillarRelation(String pillar, String relation) {
     return '$pillar $relation';
   }
+
+  @override
+  String get homeQiuqian => 'Fortune Sticks';
+
+  @override
+  String get homeQiuqianDesc =>
+      'Shake out a lot and confirm it with the moon blocks, for entertainment and metaphysics study only';
+
+  @override
+  String get qiuqianQuestion => 'What you ask about';
+
+  @override
+  String get qiuqianQuestionHint =>
+      'Keep it in mind or write it down. It is used only for the reading and never appears on a share image.';
+
+  @override
+  String get qiuqianExample1 => 'Will work go well this year?';
+
+  @override
+  String get qiuqianExample2 => 'How should I care for this relationship?';
+
+  @override
+  String get qiuqianExample3 => 'How should I decide about moving?';
+
+  @override
+  String get qiuqianHowTo =>
+      'Shake the cylinder until a stick falls, then throw the moon blocks. A yes throw (one flat, one round) confirms the stick; otherwise it goes back and you shake again.';
+
+  @override
+  String get qiuqianDraw => 'Draw a lot';
+
+  @override
+  String get qiuqianThrow => 'Throw the blocks';
+
+  @override
+  String get qiuqianAgain => 'Put it back and shake again';
+
+  @override
+  String get qiuqianSkip => 'Show the result';
+
+  @override
+  String qiuqianStickFell(String title) {
+    return 'Out fell $title';
+  }
+
+  @override
+  String get qiuqianSheng => 'Yes throw: this is your lot';
+
+  @override
+  String get qiuqianXiao => 'Laughing throw: put the stick back and ask again';
+
+  @override
+  String get qiuqianYin => 'No throw: put the stick back and ask again';
+
+  @override
+  String get qiuqianYourLot => 'Your lot';
+
+  @override
+  String get qiuqianTextNote =>
+      'The poem is shown in the original Chinese, as Taiwanese temples print it; the reading explains it line by line.';
+
+  @override
+  String get qiuqianSections =>
+      'The reading has three parts: the poem, your question, and advice.';
+
+  @override
+  String get leaveQiuqianBody =>
+      'This lot won\'t be kept: you\'ll draw again next time. Readings you generated stay in History.';
+
+  @override
+  String get topicQiuqianPoem => 'The poem';
+
+  @override
+  String get topicQiuqianAnswer => 'Your question';
+
+  @override
+  String get topicQiuqianAdvice => 'Advice';
+
+  @override
+  String get blockFlat => 'flat side up';
+
+  @override
+  String get blockRound => 'round side up';
 }

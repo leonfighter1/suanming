@@ -6,7 +6,8 @@ export type AgentName =
 
 /**
  * The sections a report can have: the six analysis areas (`wuxing` and `dayun_liunian` only for
- * bazi) and, since v2.3.0, tarot's own three: card by card, the whole spread, the advice.
+ * bazi); since v2.3.0, tarot's own three (card by card, the whole spread, the advice); since v4.3.0,
+ * 求籤's own three (the poem, the question, the advice).
  */
 export const TOPICS = [
   "wuxing",
@@ -18,6 +19,9 @@ export const TOPICS = [
   "tarot_cards",
   "tarot_synthesis",
   "tarot_advice",
+  "qiuqian_poem",
+  "qiuqian_answer",
+  "qiuqian_advice",
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -26,14 +30,24 @@ export const TOPICS_BY_SYSTEM: Record<ChartSystem, readonly Topic[]> = {
   bazi: ["wuxing", "personality", "career_wealth", "relationships", "dayun_liunian", "health"],
   tarot: ["tarot_cards", "tarot_synthesis", "tarot_advice"],
   astrology: ["personality", "career_wealth", "relationships", "health"],
+  qiuqian: ["qiuqian_poem", "qiuqian_answer", "qiuqian_advice"],
 };
 
 /** The area of life a tarot reading may focus on (POST /v1/reports `focus`, tarot only). */
 export const TAROT_FOCUS = ["career_wealth", "relationships", "health", "personality"] as const;
 export type TarotFocus = (typeof TAROT_FOCUS)[number];
 
-/** Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice. */
-export const NO_PLAN_TOPICS: readonly Topic[] = ["tarot_cards", "tarot_synthesis"];
+/**
+ * Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice, and 求籤 has no plan
+ * at all (a lot is read once, for the question asked).
+ */
+export const NO_PLAN_TOPICS: readonly Topic[] = [
+  "tarot_cards",
+  "tarot_synthesis",
+  "qiuqian_poem",
+  "qiuqian_answer",
+  "qiuqian_advice",
+];
 
 export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   wuxing: { "zh-Hant": "五行", "zh-Hans": "五行", en: "Five Elements" },
@@ -45,6 +59,9 @@ export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   tarot_cards: { "zh-Hant": "逐張解讀", "zh-Hans": "逐张解读", en: "Card by card" },
   tarot_synthesis: { "zh-Hant": "綜合解讀", "zh-Hans": "综合解读", en: "The whole spread" },
   tarot_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
+  qiuqian_poem: { "zh-Hant": "籤詩", "zh-Hans": "签诗", en: "The poem" },
+  qiuqian_answer: { "zh-Hant": "所問之事", "zh-Hans": "所问之事", en: "Your question" },
+  qiuqian_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
 };
 
 export interface Paragraph {

@@ -2432,6 +2432,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{pillar} {relation}'**
   String pillarRelation(String pillar, String relation);
+
+  /// No description provided for @homeQiuqian.
+  ///
+  /// In en, this message translates to:
+  /// **'Fortune Sticks'**
+  String get homeQiuqian;
+
+  /// No description provided for @homeQiuqianDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Shake out a lot and confirm it with the moon blocks, for entertainment and metaphysics study only'**
+  String get homeQiuqianDesc;
+
+  /// No description provided for @qiuqianQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What you ask about'**
+  String get qiuqianQuestion;
+
+  /// No description provided for @qiuqianQuestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it in mind or write it down. It is used only for the reading and never appears on a share image.'**
+  String get qiuqianQuestionHint;
+
+  /// No description provided for @qiuqianExample1.
+  ///
+  /// In en, this message translates to:
+  /// **'Will work go well this year?'**
+  String get qiuqianExample1;
+
+  /// No description provided for @qiuqianExample2.
+  ///
+  /// In en, this message translates to:
+  /// **'How should I care for this relationship?'**
+  String get qiuqianExample2;
+
+  /// No description provided for @qiuqianExample3.
+  ///
+  /// In en, this message translates to:
+  /// **'How should I decide about moving?'**
+  String get qiuqianExample3;
+
+  /// No description provided for @qiuqianHowTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Shake the cylinder until a stick falls, then throw the moon blocks. A yes throw (one flat, one round) confirms the stick; otherwise it goes back and you shake again.'**
+  String get qiuqianHowTo;
+
+  /// No description provided for @qiuqianDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw a lot'**
+  String get qiuqianDraw;
+
+  /// No description provided for @qiuqianThrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Throw the blocks'**
+  String get qiuqianThrow;
+
+  /// No description provided for @qiuqianAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Put it back and shake again'**
+  String get qiuqianAgain;
+
+  /// No description provided for @qiuqianSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the result'**
+  String get qiuqianSkip;
+
+  /// No description provided for @qiuqianStickFell.
+  ///
+  /// In en, this message translates to:
+  /// **'Out fell {title}'**
+  String qiuqianStickFell(String title);
+
+  /// No description provided for @qiuqianSheng.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes throw: this is your lot'**
+  String get qiuqianSheng;
+
+  /// No description provided for @qiuqianXiao.
+  ///
+  /// In en, this message translates to:
+  /// **'Laughing throw: put the stick back and ask again'**
+  String get qiuqianXiao;
+
+  /// No description provided for @qiuqianYin.
+  ///
+  /// In en, this message translates to:
+  /// **'No throw: put the stick back and ask again'**
+  String get qiuqianYin;
+
+  /// No description provided for @qiuqianYourLot.
+  ///
+  /// In en, this message translates to:
+  /// **'Your lot'**
+  String get qiuqianYourLot;
+
+  /// No description provided for @qiuqianTextNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The poem is shown in the original Chinese, as Taiwanese temples print it; the reading explains it line by line.'**
+  String get qiuqianTextNote;
+
+  /// No description provided for @qiuqianSections.
+  ///
+  /// In en, this message translates to:
+  /// **'The reading has three parts: the poem, your question, and advice.'**
+  String get qiuqianSections;
+
+  /// No description provided for @leaveQiuqianBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This lot won\'t be kept: you\'ll draw again next time. Readings you generated stay in History.'**
+  String get leaveQiuqianBody;
+
+  /// No description provided for @topicQiuqianPoem.
+  ///
+  /// In en, this message translates to:
+  /// **'The poem'**
+  String get topicQiuqianPoem;
+
+  /// No description provided for @topicQiuqianAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your question'**
+  String get topicQiuqianAnswer;
+
+  /// No description provided for @topicQiuqianAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Advice'**
+  String get topicQiuqianAdvice;
+
+  /// No description provided for @blockFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'flat side up'**
+  String get blockFlat;
+
+  /// No description provided for @blockRound.
+  ///
+  /// In en, this message translates to:
+  /// **'round side up'**
+  String get blockRound;
 }
 
 class _AppLocalizationsDelegate
