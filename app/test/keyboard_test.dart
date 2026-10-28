@@ -182,6 +182,10 @@ void main() {
       await tapAndWait(tester, entry);
       await tabTo(tester, 'draw');
       await press(tester, LogicalKeyboardKey.enter);
+      // The ritual opens (v3.0.0); the deck picks here (the ritual's keys: tarot_ritual_test.dart).
+      await tabTo(tester, 'ritual-skip');
+      await press(tester, LogicalKeyboardKey.enter);
+      await frames(tester);
       final semantics = tester.ensureSemantics();
       String spoken(int n) => tester.getSemantics(find.byKey(Key('tarot-card-$n'))).label;
       expect(spoken(1), contains('过去，未翻开')); // face down: only the position

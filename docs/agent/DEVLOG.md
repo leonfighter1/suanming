@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (r): S3 WP3.6, 洗牌 → 切牌 → 选牌; S3 summary; release v3.0.0
+
+- v2.8.0: harness PASS after the rule 23 retry; committed and tagged.
+- WP3.6:
+  - Engine: `drawWithRitual` (full seeded shuffle, orientation per place, cut, picks), `ritualProblem`, `audit.ritual` (schema: optional), `verifyDraw` replays either path.
+  - Service and API: `ritual` on the chart request (OpenAPI).
+  - Battery: `spreadChecks` refactor (names unchanged), plus 9 ritual checks. 64/64 pass.
+- App:
+  - `TarotRitualSteps`, `CardBack`. 抽牌 starts the ritual; skipping it draws the classic way.
+  - Tests that draw now skip the ritual (`drawAt`, widget_test, keyboard_test).
+- Failure fixed: 「洗牌」 in 简体 copy (locale_test caught it), rule 31.
+- S3 summary written; S3 done. v3.0.0 committed, tagged and pushed with v2.1.0–v2.8.0 after a fresh harness PASS.
+
 ## 2026-10-28 (q): S3 WP3.5, 二选一 and 关系牌阵; release v2.8.0
 
 - v2.7.0: harness PASS after the rule 23 retry; committed and tagged.

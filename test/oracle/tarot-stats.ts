@@ -4,7 +4,7 @@
  * values), on deterministic draw ids so results are reproducible.
  */
 import { DECK, SPREADS, type SpreadId } from "../../src/engines/tarot/deck.js";
-import { deriveSeed, drawWithSeed } from "../../src/engines/tarot/index.js";
+import { deriveSeed, drawWithRitual, drawWithSeed } from "../../src/engines/tarot/index.js";
 
 const Z_999 = 3.09;
 export const chi2Critical = (df: number, z = Z_999) => {
@@ -58,7 +58,11 @@ export const realDraw =
   (id, spread) =>
     drawWithSeed(deriveSeed(key, id), spread);
 
-export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
+export function tarotBattery(
+  n: number,
+  draw: DrawFn = realDraw(),
+  ritualKey = Buffer.alloc(32, 9),
+) {
   const checks: Check[] = [];
   const add = (name: string, statistic: number, df: number, detail?: string) => {
     const critical = chi2Critical(df);
@@ -71,7 +75,12 @@ export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
     });
   };
 
-  for (const spread of Object.keys(SPREADS) as SpreadId[]) {
+  // The checks of one spread drawn by [drawOne], named after [label].
+  const spreadChecks = (
+    label: string,
+    spread: SpreadId,
+    drawOne: (id: string) => ReturnType<typeof drawWithSeed>,
+  ) => {
     const k = SPREADS[spread].length;
     const perPos = Array.from({ length: k }, () => new Array<number>(78).fill(0));
     const revByCard = Array.from({ length: 78 }, () => [0, 0]);
@@ -82,7 +91,7 @@ export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
     let prevFirst: string | undefined;
 
     for (let i = 0; i < n; i++) {
-      const cards = draw(drawId(i), spread);
+      const cards = drawOne(drawId(i));
       if (new Set(cards.map((c) => c.card_id)).size !== cards.length) duplicates++;
       cards.forEach((c, p) => {
         perPos[p]![INDEX.get(c.card_id)!]!++;
@@ -97,7 +106,7 @@ export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
     // Uniformity: every position is uniform over the 78 cards.
     perPos.forEach((counts, p) =>
       add(
-        `${spread} · position ${p + 1} uniform over 78 cards`,
+        `${label} · position ${p + 1} uniform over 78 cards`,
         chi2(counts, new Array(78).fill(n / 78)),
         77,
       ),
@@ -106,14 +115,14 @@ export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
     const total = n * k;
     const z = Math.abs((reversed - total / 2) / Math.sqrt(total / 4));
     checks.push({
-      name: `${spread} · reversal rate 50 %`,
+      name: `${label} · reversal rate 50 %`,
       statistic: round(z),
       critical: Z_999,
       pass: z < Z_999,
       detail: `${((reversed / total) * 100).toFixed(2)} %`,
     });
     const ind = independence(revByCard);
-    add(`${spread} · reversal independent of card`, ind.s, ind.df);
+    add(`${label} · reversal independent of card`, ind.s, ind.df);
     // Positions 1 and 2 follow sampling WITHOUT replacement (not independence: card 2
     // can't repeat card 1). Expected P(c2 = j | c1 = i) = (N_j − [i = j]) / 77.
     if (k >= 2) {
@@ -127,19 +136,19 @@ export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
         }
       }
       add(
-        `${spread} · positions 1→2 match sampling without replacement`,
+        `${label} · positions 1→2 match sampling without replacement`,
         chi2(observed, expected),
         24,
       );
     }
     // Consecutive draws independent (first card of draw i vs draw i+1).
     const sr = independence(serial);
-    add(`${spread} · consecutive draws independent`, sr.s, sr.df);
+    add(`${label} · consecutive draws independent`, sr.s, sr.df);
     // Category mix matches the deck (22 major / 56 minor).
     const catCounts = [0, 0, 0, 0, 0];
     perPos[0]!.forEach((c, i) => (catCounts[category(IDS[i]!)]! += c));
     add(
-      `${spread} · major/suit mix matches the deck`,
+      `${label} · major/suit mix matches the deck`,
       chi2(
         catCounts,
         CAT_P.map((q) => q * n),
@@ -147,12 +156,21 @@ export function tarotBattery(n: number, draw: DrawFn = realDraw()) {
       4,
     );
     checks.push({
-      name: `${spread} · no repeated card within a spread`,
+      name: `${label} · no repeated card within a spread`,
       statistic: duplicates,
       critical: 0,
       pass: duplicates === 0,
     });
+  };
+
+  for (const spread of Object.keys(SPREADS) as SpreadId[]) {
+    spreadChecks(spread, spread, (id) => draw(id, spread));
   }
+  // 洗牌 → 切牌 → 选牌 (v3.0.0): the whole deck is shuffled from the seed, so a fixed cut and
+  // fixed picks give the same fair draw. One spread (a full shuffle costs more per draw).
+  spreadChecks("ritual three_card (cut 26, picks 7·61·0)", "three_card", (id) =>
+    drawWithRitual(deriveSeed(ritualKey, id), "three_card", { cut: 26, picks: [7, 61, 0] }),
+  );
 
   // Seed sensitivity: ids that differ in one character give unrelated spreads.
   let sameFirst = 0;

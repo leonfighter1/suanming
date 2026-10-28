@@ -215,6 +215,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get spreadCeltic => '凯尔特十字（10 张）';
 
   @override
+  String get ritualTitle => '洗牌 · 切牌 · 选牌';
+
+  @override
+  String get ritualShuffleHint => '心里想着你的问题，按“洗牌”把牌洗匀。';
+
+  @override
+  String get ritualShuffle => '洗牌';
+
+  @override
+  String get ritualCutHint => '切牌：选一叠，放到最上面。';
+
+  @override
+  String ritualPile(int n) {
+    return '第 $n 叠';
+  }
+
+  @override
+  String ritualPickHint(int count, int picked) {
+    return '选牌：凭直觉选 $count 张（已选 $picked 张）';
+  }
+
+  @override
+  String ritualCard(int n) {
+    return '第 $n 张牌，背面朝上';
+  }
+
+  @override
+  String get ritualSkip => '让牌组替我选';
+
+  @override
+  String get ritualNote => '牌由系统公平洗好，你在背面朝上时选择；每次抽牌事后都可以核对。';
+
+  @override
   String get tarotGlossary => '牌义图鉴';
 
   @override
@@ -1362,6 +1395,39 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get spreadCeltic => '凱爾特十字（10 張）';
+
+  @override
+  String get ritualTitle => '洗牌 · 切牌 · 選牌';
+
+  @override
+  String get ritualShuffleHint => '心裡想著你的問題，按「洗牌」把牌洗勻。';
+
+  @override
+  String get ritualShuffle => '洗牌';
+
+  @override
+  String get ritualCutHint => '切牌：選一疊，放到最上面。';
+
+  @override
+  String ritualPile(int n) {
+    return '第 $n 疊';
+  }
+
+  @override
+  String ritualPickHint(int count, int picked) {
+    return '選牌：憑直覺選 $count 張（已選 $picked 張）';
+  }
+
+  @override
+  String ritualCard(int n) {
+    return '第 $n 張牌，背面朝上';
+  }
+
+  @override
+  String get ritualSkip => '讓牌組替我選';
+
+  @override
+  String get ritualNote => '牌由系統公平洗好，你在背面朝上時選擇；每次抽牌事後都可以核對。';
 
   @override
   String get tarotGlossary => '牌義圖鑑';

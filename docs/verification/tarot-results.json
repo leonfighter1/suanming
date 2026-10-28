@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T06:14:31.607Z",
+  "generated_at": "2026-10-28T06:34:24.815Z",
   "draws_per_spread": 100000,
   "checks": [
     {
@@ -332,6 +332,61 @@
       "pass": true
     },
     {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · position 1 uniform over 78 cards",
+      "statistic": 60.98,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · position 2 uniform over 78 cards",
+      "statistic": 82.28,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · position 3 uniform over 78 cards",
+      "statistic": 62.92,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · reversal rate 50 %",
+      "statistic": 0.46,
+      "critical": 3.09,
+      "pass": true,
+      "detail": "50.04 %"
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · reversal independent of card",
+      "statistic": 74.08,
+      "critical": 121.16,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · positions 1→2 match sampling without replacement",
+      "statistic": 31.91,
+      "critical": 51.29,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · consecutive draws independent",
+      "statistic": 31.58,
+      "critical": 39.39,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · major/suit mix matches the deck",
+      "statistic": 2.42,
+      "critical": 18.72,
+      "pass": true
+    },
+    {
+      "name": "ritual three_card (cut 26, picks 7·61·0) · no repeated card within a spread",
+      "statistic": 0,
+      "critical": 0,
+      "pass": true
+    },
+    {
       "name": "adjacent draw ids: same card at chance rate (1/78)",
       "statistic": 1.49,
       "critical": 3.09,
@@ -340,5 +395,5 @@
     }
   ],
   "pass": true,
-  "seconds": 11
+  "seconds": 22
 }

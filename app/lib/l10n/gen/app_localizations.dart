@@ -501,6 +501,60 @@ abstract class AppLocalizations {
   /// **'Celtic Cross (10 cards)'**
   String get spreadCeltic;
 
+  /// No description provided for @ritualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle · cut · pick'**
+  String get ritualTitle;
+
+  /// No description provided for @ritualShuffleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold your question in mind and shuffle the deck.'**
+  String get ritualShuffleHint;
+
+  /// No description provided for @ritualShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle'**
+  String get ritualShuffle;
+
+  /// No description provided for @ritualCutHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut the deck: choose the pile to go on top.'**
+  String get ritualCutHint;
+
+  /// No description provided for @ritualPile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pile {n}'**
+  String ritualPile(int n);
+
+  /// No description provided for @ritualPickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick {count} cards as you feel drawn ({picked} picked)'**
+  String ritualPickHint(int count, int picked);
+
+  /// No description provided for @ritualCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card {n}, face down'**
+  String ritualCard(int n);
+
+  /// No description provided for @ritualSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Let the deck pick for me'**
+  String get ritualSkip;
+
+  /// No description provided for @ritualNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The deck is shuffled fairly and you pick blind; every draw can be checked afterwards.'**
+  String get ritualNote;
+
   /// No description provided for @tarotGlossary.
   ///
   /// In en, this message translates to:

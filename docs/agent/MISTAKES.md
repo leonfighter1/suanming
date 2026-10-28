@@ -32,8 +32,15 @@
 28. In user-visible text, name each 合冲刑害破 relation by its own type, never several types under one name; pin generated notes in a test, and take release-note examples from real output.
 29. When the engine adds a fact that holds 干支, extend knownGanzhi in src/ai/faithfulness.ts in the same change, with a test that names one.
 30. Write scratch tsx scripts as .ts with an async main() and absolute C:/ imports, and take test constants (PEPPER, FIXED_NOW) from test/helpers.ts instead of making them up.
+31. In 简体 copy (app_zh.arb, 简体 prompts), quote with “”, never 「」; write each script on its own instead of converting, and let locale_test check.
 
 ## Log
+
+### 2026-10-28: 简体 copy quoted with 「」
+- **Symptom:** locale_test failed: the new 简体 ritual hint read 按「洗牌」
+- **Root cause:** I wrote the 简体 string by changing the 繁體 one, which quotes with 「」; Mainland copy uses “”
+- **Fix:** The 简体 string quotes with “洗牌”; the 繁體 keeps 「洗牌」
+- **Rule:** In 简体 copy (app_zh.arb, 简体 prompts), quote with “”, never 「」; write each script on its own instead of converting, and let locale_test check. (Rule 31)
 
 ### 2026-10-28: A tsx scratch script failed three times before it ran
 - **Symptom:** A measuring script in the scratchpad failed with top-level await in cjs, then ERR_UNSUPPORTED_ESM_URL_SCHEME as .mts, then digest pepper must be >= 32 bytes

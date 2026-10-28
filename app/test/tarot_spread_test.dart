@@ -56,6 +56,11 @@ Future<FakeApi> drawAt(
   await tester.pump(); // a frame after the jump, before the tap (rule 27)
   await tester.tap(find.byKey(const Key('draw')));
   await settle(tester);
+  // The ritual (v3.0.0) has its own tests (tarot_ritual_test.dart); here the deck picks, as before.
+  await tester.ensureVisible(find.byKey(const Key('ritual-skip')));
+  await tester.pump(); // rule 27
+  await tester.tap(find.byKey(const Key('ritual-skip')));
+  await settle(tester);
   return api;
 }
 

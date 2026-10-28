@@ -6,7 +6,7 @@ import type { ChartFact } from "../chart-fact/index.js";
 import { computeAstrology } from "../engines/astrology/index.js";
 import { computeBazi, type InputBasis } from "../engines/bazi/index.js";
 import { SPREADS, type SpreadId } from "../engines/tarot/deck.js";
-import { computeTarot } from "../engines/tarot/index.js";
+import { computeTarot, ritualProblem, type TarotRitual } from "../engines/tarot/index.js";
 
 /** Bad user input (→ HTTP 400/422). */
 export class InputError extends Error {}
@@ -25,7 +25,7 @@ export type ChartRequest =
       gender: "male" | "female";
       options?: { trueSolarTime?: boolean; ziHourSect?: 1 | 2; liunianFrom?: number };
     }
-  | { system: "tarot"; spread: SpreadId; draw_id?: string }
+  | { system: "tarot"; spread: SpreadId; draw_id?: string; ritual?: TarotRitual }
   | { system: "astrology"; local: string; timezone: string; latitude: number; longitude: number };
 
 export function str(v: unknown, name: string): string {
@@ -99,8 +99,14 @@ export function computeChart(raw: unknown, secrets: EngineSecrets, now?: () => D
       if (drawId !== undefined && (typeof drawId !== "string" || !UUID_RE.test(drawId))) {
         throw new InputError("draw_id must be a UUID");
       }
+      // 洗牌 → 切牌 → 选牌 (v3.0.0): the user's cut and picks in the deck the engine shuffles.
+      const ritual = req.ritual;
+      if (ritual !== undefined) {
+        const problem = ritualProblem(spread, ritual);
+        if (problem) throw new InputError(problem);
+      }
       return computeTarot(
-        { spread },
+        { spread, ...(ritual !== undefined && { ritual: ritual as TarotRitual }) },
         { ...secrets, now, ...(drawId && { newDrawId: () => drawId as string }) },
       );
     }

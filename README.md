@@ -12,6 +12,36 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v3.0.0 (2026-10-28): 塔罗体验, complete: shuffle, cut and pick your own cards
+
+Stage S3 of the [tech plan](docs/tech-plan.md) is complete: work package 3.6 here, 3.1–3.5 in v2.4.0–v2.8.0. The stage
+summary is in the plan under 阶段总结. A big update: pushed, together with every update since v2.1.0.
+
+- 塔罗 page: 「抽牌」 now opens the ritual: 洗牌 · 切牌 · 选牌.
+  - 洗牌: hold your question in mind and press 洗牌.
+  - 切牌: choose one of three piles to go on top.
+  - 选牌: pick the cards yourself from the 78 lying face down, as many as the spread has. Each picked card shows its
+    number.
+  - The spread then lies face down as before, to be turned card by card.
+  - 「让牌组替我选」 at every step draws the way it always has.
+- Fairness: the system still shuffles the deck, fairly and the same way every time from the draw's own number. You
+  only choose where to cut and which places to take. Your cut and picks are kept with the draw, so every draw can be
+  checked afterwards. Checked over 100,000 draws: the cards and their orientation come out as evenly as without the
+  ritual.
+- Keyboard: Enter shuffles; Tab and Enter cut and pick.
+- Stage S3 in short (v2.4.0–v3.0.0):
+  - A reading shows its spread, and 历史记录 its cards' art.
+  - The picker draws every spread small, with its positions and example questions.
+  - 每日一牌 on 首页.
+  - 牌义图鉴: the 78 cards with the keywords on their art.
+  - Two more spreads, 二选一 and 关系牌阵.
+  - The ritual.
+- Verified:
+  - 3 new server tests: the cards lie where the cut and picks say; the ritual kept and replayed, a draw without it
+    unchanged; bad picks refused. 9 new checks in the 100,000-draw battery.
+  - 3 new app tests: shuffle, cut and pick into the request; 「让牌组替我选」; the ritual by keyboard.
+  - All 301 server tests and 103 app tests pass; harness PASS.
+
 ### v2.8.0 (2026-10-28): two more spreads, 二选一 and 关系牌阵
 
 Stage S3 of the [tech plan](docs/tech-plan.md) (塔罗体验), work package 3.5. A medium update: committed locally,

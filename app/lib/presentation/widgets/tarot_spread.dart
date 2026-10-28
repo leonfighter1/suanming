@@ -57,6 +57,32 @@ Map<int, Rect> celticRects(double w) {
   };
 }
 
+/// A card face down in the deck's own colours, [width] wide; [label] (a pick's number) on it.
+class CardBack extends StatelessWidget {
+  const CardBack({super.key, required this.width, this.label});
+  final double width;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: width,
+        height: width * _ratio,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [_navyLight, _navy],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(width * 0.08),
+          border: Border.all(color: _gold, width: max(1, width * 0.03)),
+        ),
+        child: label == null
+            ? null
+            : Text(label!, style: TextStyle(color: _gold, fontWeight: FontWeight.w700, fontSize: width * 0.4)),
+      );
+}
+
 /// The gap between columns of 二选一 and 关系牌阵, in card widths.
 const _gp = 0.25;
 

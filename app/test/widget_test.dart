@@ -98,6 +98,9 @@ void main() {
     await settle(tester);
     await scrollAndTap(tester, find.byKey(const Key('draw')));
     await settle(tester);
+    // The ritual opens first (v3.0.0); here the deck picks (tarot_ritual_test.dart has the rest).
+    await scrollAndTap(tester, find.byKey(const Key('ritual-skip')));
+    await settle(tester);
     expect(find.byKey(const Key('generate-report')), findsNothing);
     for (final pos in ['過去', '現在', '未來']) {
       await scrollAndTap(tester, find.text(pos));

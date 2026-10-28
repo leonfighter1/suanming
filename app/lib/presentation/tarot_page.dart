@@ -11,6 +11,7 @@ import 'keyboard.dart';
 import 'labels.dart';
 import 'tarot_glossary_page.dart';
 import 'widgets/report_request.dart';
+import 'widgets/tarot_ritual.dart';
 import 'widgets/tarot_spread.dart';
 
 /// 塔罗 the classic way: think of a question, choose a spread, draw; the cards are laid
@@ -33,6 +34,9 @@ class _TarotPageState extends ConsumerState<TarotPage> {
   /// The area of life to look at (contract `tarotFocus`), or none; taken at the draw like the question.
   String? _focus;
   String? _askedFocus;
+
+  /// Between 抽牌 and the draw: the user shuffles, cuts and picks (v3.0.0).
+  bool _inRitual = false;
   final Set<int> _revealed = {};
   bool _busy = false;
 
@@ -42,13 +46,26 @@ class _TarotPageState extends ConsumerState<TarotPage> {
     super.dispose();
   }
 
-  Future<void> _draw() async {
+  /// 抽牌 starts the ritual (v3.0.0): shuffle, cut, pick. A spread already out is put away.
+  void _start() => setState(() {
+        _chart = null;
+        _revealed.clear();
+        _inRitual = true;
+      });
+
+  /// The draw: with the user's cut and picks from the ritual, or the engine's own pick.
+  Future<void> _draw({Map<String, Object?>? ritual}) async {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final chart = await ref.read(apiClientProvider).createChart({'system': 'tarot', 'spread': _spread});
+      final chart = await ref.read(apiClientProvider).createChart({
+        'system': 'tarot',
+        'spread': _spread,
+        'ritual': ?ritual,
+      });
       if (!mounted) return; // left the page meanwhile
       setState(() {
+        _inRitual = false;
         _chart = chart;
         _asked = _question.text.trim();
         _askedFocus = _focus;
@@ -77,7 +94,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
       message: l10n.leaveTarotBody,
       // Ctrl+Enter draws, until cards are out (a second draw would replace them).
       child: SubmitShortcut(
-        onSubmit: _busy || chart != null ? null : _draw,
+        onSubmit: _busy || chart != null || _inRitual ? null : _start,
         child: Scaffold(
           appBar: AppBar(
             title: Text(l10n.homeTarot),
@@ -112,7 +129,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                         controller: _question,
                         textInputAction: TextInputAction.done,
                         inputFormatters: [LengthLimitingTextInputFormatter(300)],
-                        onSubmitted: (_) => _busy ? null : _draw(),
+                        onSubmitted: (_) => _busy ? null : _start(),
                         decoration: InputDecoration(
                           labelText: l10n.tarotQuestion,
                           helperText: l10n.tarotQuestionHint,
@@ -183,7 +200,10 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                               key: Key('spread-$id'),
                               showCheckmark: false,
                               selected: _spread == id,
-                              onSelected: (_) => setState(() => _spread = id),
+                              onSelected: (_) => setState(() {
+                                _spread = id;
+                                _inRitual = false; // a ritual is for one spread's count
+                              }),
                               label: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: Space.s),
                                 child: Column(
@@ -210,7 +230,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                       const SizedBox(height: Space.l),
                       FilledButton.icon(
                         key: const Key('draw'),
-                        onPressed: _busy ? null : _draw,
+                        onPressed: _busy ? null : _start,
                         icon: const Icon(Icons.style),
                         label: Text(l10n.draw),
                       ),
@@ -221,7 +241,14 @@ class _TarotPageState extends ConsumerState<TarotPage> {
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
                 child: chart == null
-                    ? const SizedBox.shrink()
+                    ? (_inRitual
+                        ? TarotRitualSteps(
+                            key: ValueKey('ritual-$_spread'),
+                            count: terms?.spreadPositions(_spread).length ?? 1,
+                            onDone: (cut, picks) => _draw(ritual: {'cut': cut, 'picks': picks}),
+                            onSkip: _busy ? () {} : _draw,
+                          )
+                        : const SizedBox.shrink())
                     : AppCard(
                         key: ValueKey(chart.chartId),
                         child: TarotSpread(

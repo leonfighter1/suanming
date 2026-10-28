@@ -25,14 +25,14 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 
 ## Stages
 
-| Stage                      | What                                                        | Size   | Release when done | Status      |
-| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ----------- |
-| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done        |
-| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done        |
-| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | in progress |
-| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned     |
-| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned     |
-| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned     |
+| Stage                      | What                                                        | Size   | Release when done | Status  |
+| -------------------------- | ----------------------------------------------------------- | ------ | ----------------- | ------- |
+| S1 八字引擎：完整、确定    | ages, day basis, relations, 神煞, 旺衰, engine trend scores | big    | v2.0.0 + summary  | done    |
+| S2 方法独立 + 塔罗解读结构 | own prompts for every method; tarot-native reading          | medium | v2.1.0–v2.3.0     | done    |
+| S3 塔罗体验                | cards on readings, 每日一牌, 图鉴, more spreads, the ritual | big    | v3.0.0 + summary  | done    |
+| S4 八字与全局 UI           | 五行 colours, term tips, timeline, home, reading page       | big    | v4.0.0 + summary  | planned |
+| S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | planned |
+| S6 新玩法                  | 易经起卦 (六爻 / 梅花) as its own method, 合婚              | big    | v5.0.0 + summary  | planned |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -234,6 +234,17 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
       segments overflow a phone.
 - WP3.6 洗牌 → 切牌 → 选牌: the engine still shuffles; the user's picks are positions in the seeded deck, stored in
   the draw so the audit replays it.
+  - As built (v3.0.0):
+    - `drawWithRitual`: a full Fisher–Yates of the 78 cards from the seed, each place with its orientation from
+      the seed. The cut moves the cards from it to the top, and each pick is a place in the cut deck.
+    - `ritualProblem` validates (the spread's count, all different, 0–77). `audit.ritual {cut, picks}` is a new
+      optional ChartFact property, and `verifyDraw` replays with it. A draw without a ritual is the old partial
+      shuffle, unchanged.
+    - API: `ritual` on the tarot chart request.
+    - Battery: the same nine checks on a fixed ritual (three cards, cut 26, picks 7·61·0), all passing; the battery
+      takes 25 s instead of 13 s.
+    - App: `TarotRitualSteps` (shuffle as a gesture; three piles of 26 to cut; 78 backs to pick, numbered as picked)
+      opens on 抽牌, with 「让牌组替我选」 at every step. `CardBack` is in the deck's colours.
 
 ## S4 八字与全局 UI (big → v4.0.0)
 
@@ -262,6 +273,40 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S3 塔罗体验 (done 2026-10-28: v2.4.0–v3.0.0)
+
+1. **Delivered**
+   - v2.4.0, WP3.1: a reading shows its spread on top (the report's `chart_id`); 历史记录 shows the cards' art.
+   - v2.5.0, WP3.2: each spread drawn small in the picker, its positions before the draw (deck `SPREADS`
+     synced), example questions, the Celtic Cross list at 1.5× or more.
+   - v2.6.0, WP3.3: 每日一牌 (`GET /v1/tarot/daily`), the same card all day from the account and the date under the
+     draw key, on 首页.
+   - v2.7.0, WP3.4: 牌义图鉴, the 78 cards with the keywords painted on the art, 繁體 reviewed (G18), English to
+     the RWS meanings.
+   - v2.8.0, WP3.5: 二选一 and 关系牌阵, with positions, layouts and their methods (`narrative_tarot@3`).
+   - v3.0.0, WP3.6: 洗牌 → 切牌 → 选牌, the user's cut and picks in the deck the engine shuffles, kept in the audit.
+2. **Numbers**
+   - Server tests: 287 → 301. App tests: 92 → 103.
+   - The draw battery: 64 checks on 100,000 draws each (five spreads and the ritual), 25 s.
+   - Prompt versions pinned by hash: 15.
+3. **Changed against the plan**
+   - The spread picker went from a segmented row (v2.5.0) to wrapping chips (v2.8.0): five spreads overflow a
+     phone row.
+   - "1.5× text" became a floor, max(scale, 1.5): wide screens were already at 2×.
+   - 每日一牌 is kept as the account's chart but not listed among the charts (`ChartRecord.daily`).
+   - The keywords live in `keywords.ts` beside deck.ts: deck.ts reads no files, and the build script needs it.
+   - The ritual's checks run on one spread: a full shuffle costs more per draw.
+4. **Mistakes recorded**:
+   - Rule 4 widened: a synchronous dataset sweep timed out under the full suite.
+   - Rule 27 widened (v2.3.0) and applied again: a frame after `ensureVisible`.
+   - Rule 31: 「」 in 简体 copy.
+   - On the way: the G18 review needed the full output (疗愈 → 療癒 was missing from the one-to-many list), a Tab
+     loop counted one stop short, and an info-level lint would have failed analyze.
+   - What they teach: read every converted string, not only the flagged ones; run the whole suite before calling
+     a test fast; let each script's copy be written as that script.
+5. **Next**: S4 八字与全局 UI (big → v4.0.0): 五行 colours, term tips, the timeline, 首页 and the reading page, and
+   the two long app files split.
 
 ### S2 方法独立 + 塔罗解读结构 (done 2026-10-28: v2.1.0–v2.3.0, medium)
 
@@ -354,5 +399,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP3.3 | done                       | v2.6.0  |
 | WP3.4 | done                       | v2.7.0  |
 | WP3.5 | done                       | v2.8.0  |
-| WP3.6 | todo                       | v3.0.0  |
+| WP3.6 | done                       | v3.0.0  |
 | S4–S6 | todo                       | above   |

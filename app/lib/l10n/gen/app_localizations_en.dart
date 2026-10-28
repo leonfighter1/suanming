@@ -221,6 +221,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spreadCeltic => 'Celtic Cross (10 cards)';
 
   @override
+  String get ritualTitle => 'Shuffle · cut · pick';
+
+  @override
+  String get ritualShuffleHint =>
+      'Hold your question in mind and shuffle the deck.';
+
+  @override
+  String get ritualShuffle => 'Shuffle';
+
+  @override
+  String get ritualCutHint => 'Cut the deck: choose the pile to go on top.';
+
+  @override
+  String ritualPile(int n) {
+    return 'Pile $n';
+  }
+
+  @override
+  String ritualPickHint(int count, int picked) {
+    return 'Pick $count cards as you feel drawn ($picked picked)';
+  }
+
+  @override
+  String ritualCard(int n) {
+    return 'Card $n, face down';
+  }
+
+  @override
+  String get ritualSkip => 'Let the deck pick for me';
+
+  @override
+  String get ritualNote =>
+      'The deck is shuffled fairly and you pick blind; every draw can be checked afterwards.';
+
+  @override
   String get tarotGlossary => 'Card meanings';
 
   @override
