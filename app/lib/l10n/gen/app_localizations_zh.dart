@@ -1223,6 +1223,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get jumpTo => '跳到';
+
+  @override
+  String get jumpActions => '行动建议';
+
+  @override
   String pillarRelation(String pillar, String relation) {
     return '$pillar$relation';
   }
@@ -2444,6 +2450,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String liuyueOf(int year) {
     return '$year年流月';
   }
+
+  @override
+  String get jumpTo => '跳到';
+
+  @override
+  String get jumpActions => '行動建議';
 
   @override
   String pillarRelation(String pillar, String relation) {

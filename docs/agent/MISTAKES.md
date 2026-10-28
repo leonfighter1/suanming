@@ -35,8 +35,15 @@
 31. In 简体 copy (app_zh.arb, 简体 prompts), quote with “”, never 「」; write each script on its own instead of converting, and let locale_test check.
 32. To check that text is not empty, assert `expect(text.trim()).not.toBe('')`: `expect.any(String)` also matches `''`. Read each new assertion once for what it would let through.
 33. Give widget keys an explicit type, ValueKey<String>(id), never ValueKey(x) on a nullable value: a ValueKey<String?> matches no find.byKey(Key(...)) and focusedKey() ignores it.
+34. Before building a plan item, search the DEVLOG, the README and git log for an owner decision on the same thing (owner, Owner request); a plan item never overrides one. Label owner requests as such in the DEVLOG.
 
 ## Log
+
+### 2026-10-28: A plan item would have undone an owner decision
+- **Symptom:** WP4.4 asked for a separate home entry for the life report. The owner had asked on 2026-10-27 to move it inside the bazi form, and the home card was removed then. Caught before any code, from the commit history.
+- **Root cause:** The plan was written from a review of the app as it was, without checking why it was that way; the DEVLOG line read Improve, not Improve (owner).
+- **Fix:** WP4.4 closed with the reason; the DEVLOG line now names the owner request.
+- **Rule:** Before building a plan item, search the DEVLOG, the README and git log for an owner decision on the same thing (owner, Owner request); a plan item never overrides one. Label owner requests as such in the DEVLOG. (Rule 34)
 
 ### 2026-10-28: A key built from a nullable id matched nothing
 - **Symptom:** The new timeline tests found no item by its key, and tabTo never reached it: Tab ran 60 stops and ended elsewhere.

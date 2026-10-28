@@ -1266,6 +1266,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get jumpTo => 'Jump to';
+
+  @override
+  String get jumpActions => 'Actions';
+
+  @override
   String pillarRelation(String pillar, String relation) {
     return '$pillar $relation';
   }

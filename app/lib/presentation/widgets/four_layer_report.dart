@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../../domain/models.dart';
 import '../../generated/contract.g.dart';
@@ -15,7 +16,8 @@ class FourLayerReport extends StatefulWidget {
   const FourLayerReport({super.key, required this.layers, this.reportId, this.birthplace, this.header});
   final ReportLayers layers;
 
-  /// Shown above the layers: a tarot reading's spread (v2.4.0).
+  /// Shown above the layers: the reading's chart, a tarot spread (v2.4.0) or the four pillars
+  /// (v3.4.0).
   final Widget? header;
 
   /// Shown first in the facts card when known.
@@ -42,6 +44,37 @@ class _FourLayerReportState extends State<FourLayerReport> {
         _generation++;
       });
 
+  /// Where the jump list goes (v3.4.0): each topic section, then 行动建议 (the last one).
+  late final _targets = [for (var i = 0; i <= widget.layers.interpretation.length; i++) GlobalKey()];
+
+  /// Focus for a target once jumped to, so Tab goes on from there; Tab itself passes them by.
+  late final _targetFocus = [for (final _ in _targets) FocusNode(skipTraversal: true)];
+
+  @override
+  void dispose() {
+    for (final f in _targetFocus) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Opens section [n] (n = the number of sections: 行动建议), brings it into view and moves the
+  /// focus to it.
+  void _jumpTo(int n) {
+    if (n < widget.layers.interpretation.length && !_open.contains(n)) {
+      setState(() {
+        _open.add(n);
+        _generation++;
+      });
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _targets[n].currentContext;
+      if (!mounted || target == null) return;
+      Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
+      _targetFocus[n].requestFocus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -50,10 +83,43 @@ class _FourLayerReportState extends State<FourLayerReport> {
     final layers = widget.layers;
     final body = theme.textTheme.bodyLarge?.copyWith(height: 1.75);
     var i = 0;
+    Widget target(int n, Widget child) =>
+        Focus(focusNode: _targetFocus[n], child: KeyedSubtree(key: _targets[n], child: child));
 
     return ListView(
       padding: Space.page,
+      // Every card is built, so the jump list can reach the last one from the top.
+      scrollCacheExtent: const ScrollCacheExtent.pixels(100000),
       children: [
+        // The jump list (v3.4.0): a chip per section and 行动建议, in one row that scrolls sideways
+        // on a phone. Not a lazy list: Tab must reach every chip.
+        if (layers.interpretation.length > 1)
+          Padding(
+            key: const Key('jump-list'),
+            padding: const EdgeInsets.only(bottom: Space.m),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Text(l10n.jumpTo, style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
+                  for (final (n, s) in layers.interpretation.indexed)
+                    Padding(
+                      padding: const EdgeInsets.only(left: Space.s),
+                      child: ActionChip(key: Key('jump-${s.topic}'), label: Text(l10n.topic(s.topic)), onPressed: () => _jumpTo(n)),
+                    ),
+                  if (layers.actions.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: Space.s),
+                      child: ActionChip(
+                        key: const Key('jump-actions'),
+                        label: Text(l10n.jumpActions),
+                        onPressed: () => _jumpTo(layers.interpretation.length),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
         // Takes no stagger slot: the cards below keep their timing.
         if (widget.header != null) FadeSlideIn(child: widget.header!),
         if (layers.trend != null) FadeSlideIn(index: i++, child: TrendCard(trend: layers.trend!)),
@@ -105,49 +171,52 @@ class _FourLayerReportState extends State<FourLayerReport> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final (n, s) in layers.interpretation.indexed)
-                  Theme(
-                    data: theme.copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      key: ValueKey('topic-$n-$_generation'),
-                      initiallyExpanded: _open.contains(n),
-                      onExpansionChanged: (open) => setState(() => open ? _open.add(n) : _open.remove(n)),
-                      tilePadding: const EdgeInsets.only(right: Space.s),
-                      childrenPadding: const EdgeInsets.only(right: Space.m, bottom: Space.s),
-                      // Body text reads left-aligned, not centred under the title.
-                      expandedAlignment: Alignment.centerLeft,
-                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                      title: Text(l10n.topic(s.topic), style: theme.textTheme.titleMedium?.copyWith(color: scheme.primary)),
-                      // 一句話重點: the plain main point, visible even while collapsed.
-                      subtitle: s.summary == null
-                          ? null
-                          : Padding(
-                              padding: const EdgeInsets.only(top: Space.xs),
-                              child: Text(
-                                s.summary!,
-                                key: Key('summary-${s.topic}'),
-                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, height: 1.5),
+                  target(
+                    n,
+                    Theme(
+                      data: theme.copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        key: ValueKey('topic-$n-$_generation'),
+                        initiallyExpanded: _open.contains(n),
+                        onExpansionChanged: (open) => setState(() => open ? _open.add(n) : _open.remove(n)),
+                        tilePadding: const EdgeInsets.only(right: Space.s),
+                        childrenPadding: const EdgeInsets.only(right: Space.m, bottom: Space.s),
+                        // Body text reads left-aligned, not centred under the title.
+                        expandedAlignment: Alignment.centerLeft,
+                        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                        title: Text(l10n.topic(s.topic), style: theme.textTheme.titleMedium?.copyWith(color: scheme.primary)),
+                        // 一句話重點: the plain main point, visible even while collapsed.
+                        subtitle: s.summary == null
+                            ? null
+                            : Padding(
+                                padding: const EdgeInsets.only(top: Space.xs),
+                                child: Text(
+                                  s.summary!,
+                                  key: Key('summary-${s.topic}'),
+                                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, height: 1.5),
+                                ),
+                              ),
+                        children: [
+                          for (final p in s.paragraphs)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: Space.m),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(p.text, textAlign: TextAlign.start, style: body),
+                                  const SizedBox(height: Space.s),
+                                  Pill(l10n.sourceLevel(p.sourceLevel), icon: Icons.menu_book_outlined),
+                                ],
                               ),
                             ),
-                      children: [
-                        for (final p in s.paragraphs)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: Space.m),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(p.text, textAlign: TextAlign.start, style: body),
-                                const SizedBox(height: Space.s),
-                                Pill(l10n.sourceLevel(p.sourceLevel), icon: Icons.menu_book_outlined),
-                              ],
+                          // 逐张解读 and 综合解读 have no plan; a tarot plan is on 建议 (contract noPlanTopics).
+                          if (widget.reportId != null && !noPlanTopics.contains(s.topic))
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: Space.s),
+                              child: RemedyButton(reportId: widget.reportId!, topic: s.topic, compact: true),
                             ),
-                          ),
-                        // 逐张解读 and 综合解读 have no plan; a tarot plan is on 建议 (contract noPlanTopics).
-                        if (widget.reportId != null && !noPlanTopics.contains(s.topic))
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: Space.s),
-                            child: RemedyButton(reportId: widget.reportId!, topic: s.topic, compact: true),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
               ],
@@ -156,39 +225,42 @@ class _FourLayerReportState extends State<FourLayerReport> {
         ),
         FadeSlideIn(
           index: i++,
-          child: AppCard(
-            title: l10n.layerActions,
-            icon: Icons.checklist_rtl,
-            trailing: Badge(label: Text(l10n.aiBadge)),
-            color: scheme.primaryContainer.withValues(alpha: 0.5),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final a in layers.actions)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: Space.s),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.check_circle_outline, color: scheme.primary),
-                        const SizedBox(width: Space.m),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(a.text, textAlign: TextAlign.start, style: body),
-                              const SizedBox(height: Space.xs),
-                              Text(
-                                '${l10n.topic(a.topic)} · ${l10n.horizon(a.horizon)}',
-                                style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-                              ),
-                            ],
+          child: target(
+            layers.interpretation.length,
+            AppCard(
+              title: l10n.layerActions,
+              icon: Icons.checklist_rtl,
+              trailing: Badge(label: Text(l10n.aiBadge)),
+              color: scheme.primaryContainer.withValues(alpha: 0.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final a in layers.actions)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: Space.s),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.check_circle_outline, color: scheme.primary),
+                          const SizedBox(width: Space.m),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(a.text, textAlign: TextAlign.start, style: body),
+                                const SizedBox(height: Space.xs),
+                                Text(
+                                  '${l10n.topic(a.topic)} · ${l10n.horizon(a.horizon)}',
+                                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -203,6 +203,10 @@ class FakeApi {
     if (req.method == 'GET' && path == '/v1/charts/66666666-6666-4666-8666-666666666666') {
       return _json(fixture('chart_life'), 200);
     }
+    // The 八字 chart that report_passed reads: its four pillars head the reading (v3.4.0).
+    if (req.method == 'GET' && path == '/v1/charts/22222222-2222-4222-8222-222222222222') {
+      return _json(fixture('chart_bazi'), 200);
+    }
     // 每日一牌: the single-card draw, for any date.
     if (req.method == 'GET' && path == '/v1/tarot/daily') {
       return _json({...fixture('chart_tarot_single'), 'date': '2026-10-25'}, 200);

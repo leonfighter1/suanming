@@ -12,6 +12,29 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v3.4.0 (2026-10-28): a reading opens with your chart and a jump list
+
+Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.5. A medium update: committed
+locally, pushed with v4.0.0.
+
+- Reading page, at the top: 「跳到」 and a chip for every section (五行, 性格, 事业财运 …) and for 行动建议. Tap one
+  to open that section, if it was closed, and bring it into view. On a phone the chips are one row that scrolls
+  sideways.
+- 八字 readings now open with your chart: the four pillars, coloured by 五行, and your 日主. Tarot readings keep
+  their spread there.
+- Keyboard: Tab reaches every chip (the row scrolls along). Enter jumps, and the next Tab continues inside that
+  section, not back at the top.
+- Plan changes, no app change:
+  - The 首页 entry for the 一生运势报告 that the plan listed (WP4.4) is not built. You asked on 2026-10-27 for the
+    report to live inside 八字排盘 as a second option, and that stays. 首页 already shows 今日 (每日一牌) and your
+    recent readings.
+  - Sharing a reading as an image moved to its own work package (WP4.9). Your phase document asks for the share
+    image to be made on the server, with a watermark and the disclaimer, so it is not a screenshot of the app.
+- Verified:
+  - 4 new app tests: the pillars on top; a chip opens and reveals its section, 行动建议 too; on a phone Tab reaches
+    the last chip; Enter jumps and Tab goes on inside.
+  - All 312 server tests and 118 app tests pass; harness PASS.
+
 ### v3.3.0 (2026-10-28): the 命盘 timeline: where you are now, any 大运's ten years, and 流月
 
 Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.3. A medium update: committed

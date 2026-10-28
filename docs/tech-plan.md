@@ -249,8 +249,8 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 ## S4 八字与全局 UI (big → v4.0.0)
 
 Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, **v3.2.0** = WP4.2,
-**v3.3.0** = WP4.3, then one X.Y.0 per WP; the last goes out as **v4.0.0** with the S4 summary, pushed with every
-release since v3.1.0. Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
+**v3.3.0** = WP4.3, **v3.4.0** = WP4.5 (WP4.4 closed), then one X.Y.0 per WP; the last goes out as **v4.0.0** with
+the S4 summary, pushed with every release since v3.1.0. Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
 format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), P32 (non-empty checks), P33 (typed keys), the
 keyboard-access checklist.
 
@@ -323,7 +323,27 @@ keyboard-access checklist.
       - Views: no `dayun_years` in a reading, a plan or a life report prompt.
       - App: the badges, opening and closing, the keyboard path, 流月, the English line and an old chart.
 - WP4.4 首页: 一生运势报告 as its own entry, 今日 (每日一牌), recent readings.
-- WP4.5 Reading page: the chart or spread on top, a jump list, share as an image.
+  - Closed without a release (2026-10-28):
+    - The owner asked on 2026-10-27 to put 一生运势 inside 八字排盘 as a second option ("把一生运势放到八字排盘内，
+      作为同另一个选项"). It became the 排盘解读 / 一生运势报告 switch, and the separate 首页 card was removed. A
+      首页 entry would undo that, so there is none.
+    - 首页 already has the rest: 今日 (每日一牌, v2.6.0) and the three most recent readings with 查看全部.
+    - Lesson (rule 34): check for an owner decision before building a plan item.
+- WP4.5 Reading page: the chart or spread on top, a jump list. (Sharing moved to WP4.9; see there.)
+  - As built (v3.4.0):
+    - `ReadingChart` (was `ReadingSpread`) puts the reading's chart on top. A tarot reading keeps its spread
+      (v2.4.0). A 八字 reading now opens with its four pillars, coloured by 五行, and 日主. Astrology shows nothing
+      there yet; its facts are in the layers.
+    - The jump list is the page's first line, 「跳到」 followed by a chip per section and 行动建议. It is one row,
+      which scrolls sideways on a phone. It is a `Row` in a `SingleChildScrollView`, not a lazy list, so Tab
+      reaches every chip.
+    - A chip opens its section if it was closed, scrolls it into view and moves the focus to it, so the next Tab
+      goes on inside that section. The page now builds all its cards (a large `scrollCacheExtent`), so the last
+      one can be reached from the top.
+    - A reading with a single section shows no jump list.
+    - Tests: the pillars and their order; a chip opens and reveals a closed section, and 行动建议 too; on a phone
+      Tab reaches the last chip, which was off the edge; Enter jumps and Tab goes on inside. The tarot test now
+      finds section titles inside the tiles, since the chips repeat their names.
 - WP4.6 Split `life_report_page.dart` (991 lines) and `profiles_page.dart` (596) into widgets. The split
   life report's terms get the WP4.2 tips (`TermTip`).
 - WP4.7 (found in S1) Widget tests reach cards through `scrollTo()` in `test/support.dart` (rule 27). Ten test files
@@ -331,6 +351,12 @@ keyboard-access checklist.
 - WP4.8 (found in WP4.2) On a phone, the English names in the 四柱 table break mid-word ("Compani on (Bi Jian)"):
   give the table a short English form (Companion), with the full name kept for the tip's title. The strips'
   English lines are cut off too ("nominal age…", "Indirect Res…"), and the short forms serve them as well.
+- WP4.9 (split from WP4.5 by rule 34) Share a reading as an image, to the owner's spec in the phase document
+  (「分享图由服务端生成，带水印与免责声明」):
+  - the server renders the image, with a watermark and the disclaimer, never the app's screen;
+  - a deep link back to the reading, once the app is in the stores.
+  - Needs a server-side renderer that has CJK fonts; measure it first (G4). It may move to its own stage if it
+    turns out big.
 
 ## S5 数据持久化 (medium → v4.1.0)
 
@@ -477,5 +503,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP4.1     | done                       | v3.1.0          |
 | WP4.2     | done                       | v3.2.0          |
 | WP4.3     | done                       | v3.3.0          |
-| WP4.4–4.8 | todo                       | v3.4.0 … v4.0.0 |
+| WP4.4     | closed (owner decision)    | —               |
+| WP4.5     | done                       | v3.4.0          |
+| WP4.6–4.9 | todo                       | v3.5.0 … v4.0.0 |
 | S5–S6     | todo                       | above           |

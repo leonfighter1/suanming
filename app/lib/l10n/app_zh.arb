@@ -384,5 +384,7 @@
   "dayunTapHint": "点击一步大运，查看它的十年。",
   "dayunYears": "{ganzhi}大运 · {from}–{to}年",
   "liuyueOf": "{year}年流月",
-  "pillarRelation": "{pillar}{relation}"
+  "pillarRelation": "{pillar}{relation}",
+  "jumpTo": "跳到",
+  "jumpActions": "行动建议"
 }

@@ -2403,6 +2403,18 @@ abstract class AppLocalizations {
   /// **'Months of {year}'**
   String liuyueOf(int year);
 
+  /// No description provided for @jumpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to'**
+  String get jumpTo;
+
+  /// No description provided for @jumpActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get jumpActions;
+
   /// No description provided for @pillarRelation.
   ///
   /// In en, this message translates to:

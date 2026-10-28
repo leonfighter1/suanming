@@ -299,10 +299,13 @@ void main() {
       expect(tester.getSemantics(c).label, isNot(contains('未翻開')));
     }
     semantics.dispose();
-    expect(tester.getTopLeft(spread).dy, lessThan(tester.getTopLeft(find.text('逐張解讀').first).dy));
+    // The section titles, not the jump list's chips of the same names (v3.4.0), which come first.
+    Finder section(String title) => find.descendant(of: find.byType(ExpansionTile), matching: find.text(title)).first;
+    expect(tester.getTopLeft(find.byKey(const Key('jump-list'))).dy, lessThan(tester.getTopLeft(spread).dy));
+    expect(tester.getTopLeft(spread).dy, lessThan(tester.getTopLeft(section('逐張解讀')).dy));
 
     // The reading: 逐張解讀, 綜合解讀 and 建議, in that order; a plan for 建議 only.
-    final tops = [for (final t in ['逐張解讀', '綜合解讀', '建議']) tester.getTopLeft(find.text(t).first).dy];
+    final tops = [for (final t in ['逐張解讀', '綜合解讀', '建議']) tester.getTopLeft(section(t)).dy];
     expect(tops, [...tops]..sort());
     expect(find.byKey(const Key('remedy-inline-tarot_cards')), findsNothing); // the first part, open
     await scrollTo(tester, const Key('remedy-card'));

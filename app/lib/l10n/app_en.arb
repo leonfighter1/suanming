@@ -588,6 +588,8 @@
   },
   "liuyueOf": "Months of {year}",
   "@liuyueOf": { "placeholders": { "year": { "type": "int" } } },
+  "jumpTo": "Jump to",
+  "jumpActions": "Actions",
   "pillarRelation": "{pillar} {relation}",
   "@pillarRelation": {
     "placeholders": { "pillar": { "type": "String" }, "relation": { "type": "String" } }

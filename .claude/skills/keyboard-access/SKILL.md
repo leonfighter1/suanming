@@ -49,6 +49,7 @@ Where things are:
 | A new shortcut                                          | add it, a row in `ShortcutList`, and its text in the three ARB files                                 |
 | A dialog whose main target should take the focus        | `Pressable(autofocus: true)` (the enlarged tarot card: Enter turns it at once)                       |
 | Targets waiting their turn (tarot cards not yet next)   | `ExcludeFocus(excluding: true)`, so Tab only reaches what can be pressed now                         |
+| A jump list to parts of a long page                     | chips that `ensureVisible` the part and focus a `Focus(skipTraversal)` round it (`FourLayerReport`)  |
 
 ## Checklist for a new screen or widget
 

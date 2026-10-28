@@ -12,6 +12,7 @@ import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'labels.dart';
+import 'theme.dart' show GanZhiText;
 import 'widgets/four_layer_report.dart';
 import 'widgets/tarot_spread.dart';
 
@@ -111,7 +112,7 @@ class ReportPage extends ConsumerWidget {
                 layers: r.layers!,
                 reportId: r.id,
                 birthplace: place,
-                header: r.chartId == null ? null : ReadingSpread(chartId: r.chartId!),
+                header: r.chartId == null ? null : ReadingChart(chartId: r.chartId!),
               ),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
             'manual_review' => _Message(key: const ValueKey('review'), icon: Icons.hourglass_top, text: l10n.statusReview),
@@ -123,22 +124,66 @@ class ReportPage extends ConsumerWidget {
   }
 }
 
-/// A tarot reading's spread with its art, every card turned (v2.4.0). Other charts show nothing
-/// here: their facts are in the layers.
-class ReadingSpread extends ConsumerWidget {
-  const ReadingSpread({super.key, required this.chartId});
+/// A reading's chart on top: a tarot spread with its art, every card turned (v2.4.0), or a 八字
+/// chart's four pillars and 日主 (v3.4.0). Astrology shows nothing here: its facts are in the layers.
+class ReadingChart extends ConsumerWidget {
+  const ReadingChart({super.key, required this.chartId});
   final String chartId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chart = ref.watch(chartProvider(chartId)).value;
-    if (chart == null || chart.system != 'tarot') return const SizedBox.shrink();
-    final tarot = chart.tarot;
+    switch (chart?.system) {
+      case 'tarot':
+        final tarot = chart!.tarot;
+        return AppCard(
+          key: const Key('reading-spread'),
+          title: AppLocalizations.of(context).spread,
+          icon: Icons.style_rounded,
+          child: TarotSpread(chart: tarot, revealed: {for (final c in tarot.cards) c.position}, onReveal: (_) {}),
+        );
+      case 'bazi':
+        return _ReadingPillars(chart: chart!.bazi);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+}
+
+/// A 八字 reading's chart at a glance: the four pillars, coloured by 五行, and 日主.
+class _ReadingPillars extends ConsumerWidget {
+  const _ReadingPillars({required this.chart});
+  final BaziChart chart;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final locale = ref.watch(settingsProvider).apiLocaleCode;
+    final terms = ref.watch(termsProvider).value;
+    String t(String k) => terms?.t(k, locale) ?? k;
+    final small = Theme.of(context).textTheme.bodySmall;
     return AppCard(
-      key: const Key('reading-spread'),
-      title: AppLocalizations.of(context).spread,
-      icon: Icons.style_rounded,
-      child: TarotSpread(chart: tarot, revealed: {for (final c in tarot.cards) c.position}, onReveal: (_) {}),
+      key: const Key('reading-pillars'),
+      title: l10n.fourPillars,
+      icon: Icons.grid_view_rounded,
+      trailing: Text(
+        '${l10n.dayMaster} ${chart.dayMasterGan}${t(chart.dayMasterWuxing)}（${t(chart.dayMasterYinYang)}）',
+        style: small,
+      ),
+      child: Row(
+        children: [
+          for (final k in BaziChart.pillarOrder)
+            Expanded(
+              child: Column(
+                children: [
+                  Text(l10n.pillar(k), style: small),
+                  const SizedBox(height: Space.xs),
+                  GanZhiText(chart.pillars[k]!.ganzhi, size: 26),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,20 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (v): WP4.4 closed (owner decision), WP4.9 split off; S4 WP4.5, the reading page; release v3.4.0
+
+- v3.3.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (385c426).
+- WP4.4:
+  - Before building the 首页 一生运势 entry I read why there was none. The owner had asked on 2026-10-27 to put 一生运势 inside 八字排盘 (「把一生运势放到八字排盘内，作为同另一个选项」), and that change removed the home card. The DEVLOG line had said "Improve" without "(owner)".
+  - WP4.4 is closed with that reason; 首页 already has 今日 and the recent readings. The DEVLOG line is relabelled. Rule 34.
+- Rule 34 on the rest of S4: WP4.5's "share as an image" meets the owner's phase document (「分享图由服务端生成，带水印与免责声明」). It is now WP4.9: server-rendered, a watermark, the disclaimer, a deep link later.
+- WP4.5:
+  - `ReadingChart` (renamed from `ReadingSpread`): a 八字 reading shows `_ReadingPillars`. The fake API serves the 八字 chart now.
+  - `FourLayerReport` has the jump list (chips in a horizontal `SingleChildScrollView`), a `GlobalKey` and a `Focus(skipTraversal)` per target, and `scrollCacheExtent` (the new name of `cacheExtent` in this Flutter).
+  - The tarot spread test found section titles by text and met the chips first; it now looks inside the tiles.
+  - Checked by rendering: the first jump list wrapped to four rows in English, so it is one scrolling row now. The 行动建议 chip read 「行動建議 · AI 生成」, so it has its own string.
+- v3.4.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (u): S4 WP4.3, the 命盘 timeline; release v3.3.0
 
 - v3.2.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (ccd7ab5).
@@ -253,7 +267,7 @@ Newest first. One entry per working session, key points only.
 
 - Bugs (owner): the picked person's name was not editable; the picker looked like an input; no way to add or edit a person from the form.
 - Fix: read-only picker with 添加新的测试者 and 编辑“X”的资料 entries that open a pop-up editor (ProfileDialog, same fields as the profile page); saving stores the person and loads them into the form; cancel keeps the current person. The form has its own editable 姓名 field.
-- Improve: 一生运势报告 is a mode of 八字排盘 (排盘解读 / 一生运势报告 switch); the separate home card is gone.
+- Improve (owner request, 「把一生运势放到八字排盘内，作为同另一个选项」): 一生运势报告 is a mode of 八字排盘 (排盘解读 / 一生运势报告 switch); the separate home card is gone.
 - Bug (owner): 出生地 was in no report. The chart only gets timezone + longitude (privacy), and nothing carried the name. Now: the birthplace label goes with the reading context (UserContext.birthplace), shows first in the facts card and in the 一生运势报告 header, and is kept per chart on the device (ProfileBook.chartPlaces) for reports reopened from history.
 
 ## 2026-10-26 (n): review console, then review paused; disclaimer wording
