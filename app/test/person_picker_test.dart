@@ -48,7 +48,7 @@ void main() {
     await tester.enterText(nameField(), '测试家人（改）');
     await settle(tester);
     // Names never go to the server; the edited name labels the chart locally.
-    await tester.scrollUntilVisible(find.byKey(const Key('compute-chart')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('compute-chart'));
     await tester.tap(find.byKey(const Key('compute-chart')));
     await settle(tester);
     expect(chartBody(api).containsKey('name'), isFalse);

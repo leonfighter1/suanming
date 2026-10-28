@@ -62,7 +62,7 @@ void main() {
     expect(find.text(paragraph(0)), findsOneWidget); // 五行 stays open
 
     final firstAction = ((fixture('report_passed')['layers'] as Map)['actions'] as List).first['text'] as String;
-    await tester.scrollUntilVisible(find.byKey(const Key('jump-list')), -300, scrollable: mainScrollable);
+    await scrollToFinder(tester, find.byKey(const Key('jump-list')), delta: -300);
     await frames(tester);
     await tester.ensureVisible(find.byKey(const Key('jump-actions')));
     await frames(tester);

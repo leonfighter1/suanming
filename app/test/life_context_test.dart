@@ -17,7 +17,7 @@ Future<void> settle(WidgetTester tester) async {
 }
 
 Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 300, scrollable: mainScrollable);
+  await scrollToFinder(tester, finder);
   await tester.ensureVisible(finder);
   await settle(tester);
   await tester.tap(finder);
@@ -79,7 +79,7 @@ void main() {
     await scrollAndTap(tester, find.byKey(const Key('life-marital')));
     await tester.tap(find.text('已婚').last);
     await settle(tester);
-    await tester.scrollUntilVisible(find.byKey(const Key('life-concern')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('life-concern'));
     await tester.enterText(find.byKey(const Key('life-occupation')), '軟件工程師');
     await tester.enterText(find.byKey(const Key('life-concern')), '明年適合轉工嗎？');
     await settle(tester);
@@ -102,7 +102,7 @@ void main() {
     });
     // ...and the report shows it at the top of the facts card.
     await settle(tester);
-    await tester.scrollUntilVisible(find.text('出生地：香港'), 300, scrollable: mainScrollable);
+    await scrollToFinder(tester, find.text('出生地：香港'));
     expect(find.text('出生地：香港'), findsOneWidget);
   });
 
@@ -135,7 +135,7 @@ void main() {
   testWidgets('preloaded 破除運勢 plans show 已備好 and open at once after paying', (tester) async {
     final api = await openReport(tester, preload: true);
     final ready = find.byKey(const Key('remedy-ready-health'));
-    await tester.scrollUntilVisible(ready, 300, scrollable: mainScrollable);
+    await scrollToFinder(tester, ready);
     expect(ready, findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('remedy-buy-health')));

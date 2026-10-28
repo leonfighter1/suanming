@@ -53,7 +53,7 @@ void main() {
     expect(find.byKey(const Key('guard-finding')), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('review-note')), '表述可接受');
-    await tester.scrollUntilVisible(find.byKey(const Key('review-approve')), 300, scrollable: find.byType(Scrollable).first);
+    await scrollTo(tester, const Key('review-approve'));
     await tester.tap(find.byKey(const Key('review-approve')));
     await settle(tester);
 

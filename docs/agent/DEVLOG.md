@@ -2,6 +2,20 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (w): S4 WP4.6 + WP4.7, code health; release v3.5.0
+
+- v3.4.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (c05a1ee).
+- WP4.6:
+  - A node script cut `life_report_page.dart` and `profiles_page.dart` at line boundaries it checked first, then renamed the moved private classes across the files (lookaround regex, split/join, global rule 16).
+  - Then: a key parameter on every newly public widget (the lint asked), six unused imports dropped, and `birth_fields.dart` imported by the 八字 form.
+  - Kept: `LifeReportPage`, `LifeReportButton` and `startLifeReport` stay in the page file (other files use them).
+- Rule 34 again: the tips on the life report are dropped (owner's template, few 八字 terms, its 喜用 is the reading's).
+- WP4.7:
+  - `scrollToFinder` in `support.dart`; 21 calls in 12 files moved onto it or `scrollTo`.
+  - The four local `scrollAndTap` helpers stay: they differ on settling after the tap, and merging them could change what a test sees.
+  - `test_rules_test.dart` scans `test/` for a direct `scrollUntilVisible`; its pattern is escaped so it doesn't match its own source. Rule 27 widened.
+- v3.5.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (v): WP4.4 closed (owner decision), WP4.9 split off; S4 WP4.5, the reading page; release v3.4.0
 
 - v3.3.0: the first harness run failed at the app gate (rule 23); the second passed. Committed and tagged (385c426).

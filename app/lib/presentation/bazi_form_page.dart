@@ -10,6 +10,7 @@ import 'life_report_page.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'profiles_page.dart';
+import 'widgets/birth_fields.dart';
 import 'widgets/life_context_fields.dart';
 
 /// 为谁排盘 picker values that are actions, not people.

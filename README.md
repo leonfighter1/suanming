@@ -12,6 +12,25 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v3.5.0 (2026-10-28): code health, no visible change
+
+Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work packages 4.6 and 4.7. A medium update:
+committed locally, pushed with v4.0.0. The app looks and works as before.
+
+- The two largest app pages are split into smaller pieces:
+  - 一生运势报告: the page file is down from about 1,030 lines to 460. Its text blocks, its figures (卦, 梅花,
+    八宅) and its stage chart are in three widget files.
+  - 个人资料: down from 640 lines to 315. The birth date, time and place inputs, shared with the 八字 form, are
+    in a widget file of their own.
+- Tests: every widget test now scrolls through one helper that waits a frame before and after each scroll. Leaving
+  that wait out made earlier tests tap where a card used to be. A new check fails if any test scrolls on its own.
+- Plan change: the term tips planned for the 一生运势报告 were dropped. The report follows your sample template
+  and has few 八字 terms. Its 喜用 / 忌 come from the reading, not from the simplified count the tip explains.
+- Verified:
+  - all 119 app tests pass, unchanged except for the scrolling (one new: the check);
+  - all 312 server tests pass;
+  - harness PASS.
+
 ### v3.4.0 (2026-10-28): a reading opens with your chart and a jump list
 
 Stage S4 of the [tech plan](docs/tech-plan.md) (八字与全局 UI), work package 4.5. A medium update: committed

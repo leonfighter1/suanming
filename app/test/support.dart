@@ -26,14 +26,18 @@ final testTerms = Terms.parse(
 /// The page's main vertical list (pages also contain horizontal timelines).
 final mainScrollable = find.byType(Scrollable).first;
 
-/// Scroll the main list down to [key]. scrollUntilVisible ends on ensureVisible without a frame, so a
-/// second one checks the old layout and its first drag can carry a short card past unseen: pump around
-/// it (rule 27).
-Future<void> scrollTo(WidgetTester tester, Key key) async {
+/// Scroll [scrollable] (the main list) until [finder] is built and on screen; a negative [delta]
+/// scrolls up (rule 25). scrollUntilVisible ends on ensureVisible without a frame, so a second one
+/// checks the old layout and its first drag can carry a short card past unseen: pump around it
+/// (rule 27). Every widget test scrolls through here or [scrollTo], never scrollUntilVisible itself.
+Future<void> scrollToFinder(WidgetTester tester, Finder finder, {double delta = 300, Finder? scrollable}) async {
   await tester.pump();
-  await tester.scrollUntilVisible(find.byKey(key), 300, scrollable: mainScrollable);
+  await tester.scrollUntilVisible(finder, delta, scrollable: scrollable ?? mainScrollable);
   await tester.pump();
 }
+
+/// Scroll the main list down to [key] (see [scrollToFinder]).
+Future<void> scrollTo(WidgetTester tester, Key key) => scrollToFinder(tester, find.byKey(key));
 
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
 /// fixtures; reports go pending → [finalReport].

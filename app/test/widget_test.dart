@@ -14,7 +14,7 @@ Future<void> settle(WidgetTester tester) async {
 
 /// Scroll a lazily built list until [finder] exists, centre it, then tap it.
 Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 300, scrollable: mainScrollable);
+  await scrollToFinder(tester, finder);
   await tester.ensureVisible(finder);
   await settle(tester);
   await tester.tap(finder);
@@ -48,7 +48,7 @@ void main() {
     expect(find.text('傷官'), findsWidgets);
     expect(find.text('伤官'), findsNothing);
     // ListView builds lazily: scroll before looking for lower cards.
-    await tester.scrollUntilVisible(find.text('流年'), 300, scrollable: mainScrollable);
+    await scrollToFinder(tester, find.text('流年'));
     expect(find.text('流年'), findsOneWidget);
   });
 
@@ -69,7 +69,7 @@ void main() {
     expect(find.byKey(const Key('ai-label')), findsOneWidget);
     // The trend chart comes first; the facts card is below it.
     expect(find.byKey(const Key('trend-card')), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('命盤事實 · 引擎計算，非 AI'), 300, scrollable: mainScrollable);
+    await scrollToFinder(tester, find.text('命盤事實 · 引擎計算，非 AI'));
     expect(find.text('命盤事實 · 引擎計算，非 AI'), findsOneWidget);
     expect(find.textContaining('四柱：庚午 己卯 己卯 辛未'), findsOneWidget);
     final polls = RegExp(r'^/v1/reports/[^/]+$');
@@ -111,7 +111,7 @@ void main() {
       expect(find.image(AssetImage('assets/tarot/$id.webp')), findsOneWidget);
     }
     expect(find.text('隱士'), findsOneWidget);
-    await tester.scrollUntilVisible(find.byKey(const Key('generate-report')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('generate-report'));
     expect(find.byKey(const Key('generate-report')), findsOneWidget);
   });
 }

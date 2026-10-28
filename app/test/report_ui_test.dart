@@ -70,14 +70,14 @@ void main() {
     await tester.tap(find.byKey(const Key('expand-all')));
     await settle(tester);
     expect(find.text('收起全部'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text(secs[1].paragraphs.first.text), 300, scrollable: mainScrollable);
+    await scrollToFinder(tester, find.text(secs[1].paragraphs.first.text));
     expect(find.text(secs[1].paragraphs.first.text), findsOneWidget);
   });
 
   testWidgets('破除運勢: pay popup charges directly (placeholder), then the plan opens', (tester) async {
     final api = await openReport(tester);
     final buy = find.byKey(const Key('remedy-buy-career_wealth'));
-    await tester.scrollUntilVisible(buy, 300, scrollable: mainScrollable);
+    await scrollToFinder(tester, buy);
     await tester.ensureVisible(buy);
     await settle(tester);
     expect(find.textContaining('HKD 18'), findsWidgets);

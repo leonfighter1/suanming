@@ -15,7 +15,7 @@ Future<void> settle(WidgetTester tester) async {
 }
 
 Future<void> scrollAndTap(WidgetTester tester, Finder finder, {Finder? scrollable}) async {
-  await tester.scrollUntilVisible(finder, 300, scrollable: scrollable ?? mainScrollable);
+  await scrollToFinder(tester, finder, scrollable: scrollable);
   await tester.ensureVisible(finder);
   await settle(tester);
   await tester.tap(finder);

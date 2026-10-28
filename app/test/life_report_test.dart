@@ -73,7 +73,7 @@ void main() {
     await tester.tap(find.text('一生运势报告'));
     await settle(tester);
     expect(find.text('生成一生运势报告'), findsOneWidget);
-    await tester.scrollUntilVisible(find.byKey(const Key('compute-chart')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('compute-chart'));
     await tester.tap(find.byKey(const Key('compute-chart')));
     await settle(tester);
     await settle(tester);
@@ -88,7 +88,7 @@ void main() {
       expect(find.byKey(Key(k)), findsOneWidget);
     }
     for (final k in ['life-sec-meihua', 'life-bazhai', 'life-sec-topics', 'life-stage-chart', 'life-sec-summary']) {
-      await tester.scrollUntilVisible(find.byKey(Key(k)), 400, scrollable: mainScrollable);
+      await scrollToFinder(tester, find.byKey(Key(k)), delta: 400);
       expect(find.byKey(Key(k)), findsOneWidget);
     }
     expect(find.byKey(const Key('life-ai-label')), findsOneWidget);

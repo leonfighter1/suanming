@@ -258,7 +258,7 @@ void main() {
       await tester.tap(find.byKey(const Key('tarot-card-3'))); // each touch turns the next card
       await settle(tester);
     }
-    await tester.scrollUntilVisible(find.byKey(const Key('generate-report')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('generate-report'));
     await tester.tap(find.byKey(const Key('generate-report')));
     await settle(tester);
     final sent = api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports');

@@ -16,7 +16,7 @@ Future<void> settle(WidgetTester tester) async {
 }
 
 Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
-  await tester.scrollUntilVisible(finder, 300, scrollable: mainScrollable);
+  await scrollToFinder(tester, finder);
   await tester.ensureVisible(finder);
   await settle(tester);
   await tester.tap(finder);
@@ -46,7 +46,7 @@ void main() {
     expect(body.containsKey('name'), isFalse, reason: 'names never leave the device');
 
     expect(find.text('测试用户 的命盤'), findsWidgets);
-    await tester.scrollUntilVisible(find.byKey(const Key('lunar-card')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('lunar-card'));
     expect(find.textContaining('庚午年二月十九 · 未時'), findsOneWidget);
     expect(find.text('馬'), findsOneWidget);
     // The chart is labelled locally for history.

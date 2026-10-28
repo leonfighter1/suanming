@@ -249,8 +249,8 @@ read first: P19, P24, P25, P27 (widget tests), G18 (繁简 in card text), P26 (s
 ## S4 八字与全局 UI (big → v4.0.0)
 
 Releases, one per work package (medium, committed and tagged locally): **v3.1.0** = WP4.1, **v3.2.0** = WP4.2,
-**v3.3.0** = WP4.3, **v3.4.0** = WP4.5 (WP4.4 closed), then one X.Y.0 per WP; the last goes out as **v4.0.0** with
-the S4 summary, pushed with every release since v3.1.0. Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
+**v3.3.0** = WP4.3, **v3.4.0** = WP4.5 (WP4.4 closed), **v3.5.0** = WP4.6 + WP4.7, then one X.Y.0 per WP; the last
+goes out as **v4.0.0** with the S4 summary, pushed with every release since v3.1.0. Lessons to read first: P3 (borders on fixed boxes), P7 (buttons in rows), P15 (no dart
 format), P19, P24, P25, P27 (widget tests), P31 (简体 copy), P32 (non-empty checks), P33 (typed keys), the
 keyboard-access checklist.
 
@@ -298,8 +298,8 @@ keyboard-access checklist.
       - A hash pins the reviewed tips, so any change means a new review (`scripts/print-term-tips.ts`).
       - The compliance rule layer finds nothing in any region.
     - App tests: tap, English, and keyboard (Tab, Enter, Esc; the focus returns to the term).
-    - Not yet: the 一生运势报告 page's terms (WP4.6 gives them `TermTip` when it splits the page) and short English
-      names in the table (WP4.8).
+    - Not yet: short English names in the table (WP4.8). (The 一生运势报告's terms were planned for WP4.6, which
+      dropped them; see there.)
 - WP4.3 Timeline: the current 大运 and 流年 marked; tapping a 大运 shows its ten years; 流月 shown.
   - As built (v3.3.0):
     - Engine: a new fact, `dayun_years`, holds the ten years of every 大运 (80 for the sample chart). Each year is
@@ -346,8 +346,29 @@ keyboard-access checklist.
       finds section titles inside the tiles, since the chips repeat their names.
 - WP4.6 Split `life_report_page.dart` (991 lines) and `profiles_page.dart` (596) into widgets. The split
   life report's terms get the WP4.2 tips (`TermTip`).
+  - As built (v3.5.0, with WP4.7):
+    - `life_report_page.dart` is down from 1029 lines to about 460: the page, its states and the entry button.
+      The rest moved to three widget files:
+      - `widgets/life_blocks.dart`: the text blocks, `LifeSection`, `LifeQuote`, `LifeLabeled` and the rest;
+      - `widgets/life_figures.dart`: `HexagramFigure`, `MeihuaTable`, `BazhaiCompass` and the other figures;
+      - `widgets/life_stages.dart`: `StageChart` and the topic and stage rows.
+    - `profiles_page.dart` is down from 637 lines to about 315. The birth inputs moved to
+      `widgets/birth_fields.dart` (`BirthFields`, `LunarDatePicker`, `ShichenPicker`, `LunarPreview`).
+    - The moved private classes are public now, with a `Life…` prefix where the name was generic. Each has a key
+      parameter and a doc comment.
+    - A script cut the files at checked line boundaries, so the code itself is unchanged; the 119 app tests are
+      the check.
+    - Dropped by rule 34: the tips on the life report. It follows the owner's sample template (易经, 梅花, 八宅)
+      and holds few 八字 terms. Its 喜用 / 忌 come from the reading, not from the simplified count the 喜用 tip
+      describes, so that tip would mislead there.
 - WP4.7 (found in S1) Widget tests reach cards through `scrollTo()` in `test/support.dart` (rule 27). Ten test files
   still call `scrollUntilVisible` directly.
+  - As built (v3.5.0):
+    - `scrollToFinder(tester, finder, {delta, scrollable})` joins `scrollTo()` in `support.dart`, with the same
+      pumps around `scrollUntilVisible`.
+    - All 21 direct calls in 12 test files go through one or the other, and the four local `scrollAndTap` helpers
+      call it.
+    - `test/test_rules_test.dart` fails on any direct `scrollUntilVisible` outside `support.dart`.
 - WP4.8 (found in WP4.2) On a phone, the English names in the 四柱 table break mid-word ("Compani on (Bi Jian)"):
   give the table a short English form (Companion), with the full name kept for the tip's title. The strips'
   English lines are cut off too ("nominal age…", "Indirect Res…"), and the short forms serve them as well.
@@ -505,5 +526,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP4.3     | done                       | v3.3.0          |
 | WP4.4     | closed (owner decision)    | —               |
 | WP4.5     | done                       | v3.4.0          |
-| WP4.6–4.9 | todo                       | v3.5.0 … v4.0.0 |
+| WP4.6–4.7 | done                       | v3.5.0          |
+| WP4.8–4.9 | todo                       | v3.6.0 … v4.0.0 |
 | S5–S6     | todo                       | above           |

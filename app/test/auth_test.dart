@@ -74,7 +74,7 @@ void main() {
     api.expireAccessOnce = true;
     await tester.tap(find.byKey(const Key('entry-bazi')));
     await settle(tester);
-    await tester.scrollUntilVisible(find.byKey(const Key('compute-chart')), 300, scrollable: mainScrollable);
+    await scrollTo(tester, const Key('compute-chart'));
     await tester.ensureVisible(find.byKey(const Key('compute-chart')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('compute-chart')));
