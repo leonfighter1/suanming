@@ -6,7 +6,12 @@
  * exactly as for reports.
  */
 import type { ChartFact } from "../chart-fact/index.js";
-import { compileRules, loadRuleSet, type Violation } from "../compliance/index.js";
+import {
+  compileRules,
+  contentBlockLine,
+  loadRuleSet,
+  type Violation,
+} from "../compliance/index.js";
 import { yearGanZhi } from "../engines/bazi/index.js";
 import { yijingFacts } from "../engines/yijing/index.js";
 import type { UserContext } from "./context.js";
@@ -232,6 +237,7 @@ export async function generateLifeReport(
   const now = deps.now?.() ?? new Date();
   const { region } = servedRegion(opts.country, chart.system);
   const rules = compileRules(loadRuleSet(), region.rule_groups);
+  const regionLine = contentBlockLine(region);
   const routing = deps.routing ?? loadRouting();
   const providerFor = (agent: AgentName) => {
     const route = routeFor(routing, agent, opts.locale);
@@ -280,6 +286,7 @@ export async function generateLifeReport(
       locale: opts.locale,
       glossary,
       feedback,
+      regionLine,
     });
 
   const [methods, topics] = await Promise.all([
@@ -397,6 +404,7 @@ export async function generateLifeReport(
             code: opts.country.toUpperCase(),
             name: region.name,
             rule_groups: region.rule_groups,
+            content_blocks: region.content_blocks,
           },
           draft: { life_report: { methods: methods.value, topics: topics.value } },
           context: opts.context,

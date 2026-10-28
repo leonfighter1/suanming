@@ -13,6 +13,7 @@ import { randomUUID } from "node:crypto";
 import type { ChartFact, ChartSystem } from "../chart-fact/index.js";
 import {
   compileRules,
+  contentBlockLine,
   loadGeoMatrix,
   loadRuleSet,
   resolveRegion,
@@ -362,6 +363,8 @@ export async function generateReport(
     ...region.rule_groups,
     ...(METHOD_RULE_GROUPS[chart.system] ?? []),
   ]);
+  // A region's content blocks (Indonesia, v5.1.0) reach the model in every call; empty elsewhere.
+  const regionLine = contentBlockLine(region);
   // A 八字 reading reads its focused view (WP2.3), a 求籤 reading the lot without the rounds that
   // confirmed it; the other methods' facts are small already.
   const facts =
@@ -435,6 +438,7 @@ export async function generateReport(
         context: opts.context,
         today: todayLine(now),
         feedback,
+        regionLine,
       };
       if (spread)
         return tarotUser({ ...common, spread, question: opts.question, focus: opts.focus });
@@ -540,6 +544,7 @@ export async function generateReport(
           context: opts.context,
           today: todayLine(now),
           feedback,
+          regionLine,
         }),
       check: (data) => {
         const list = data.actions.map((a) => {
@@ -595,6 +600,7 @@ export async function generateReport(
                   code: opts.country.toUpperCase(),
                   name: region.name,
                   rule_groups: region.rule_groups,
+                  content_blocks: region.content_blocks,
                 },
                 draft,
                 context: opts.context,

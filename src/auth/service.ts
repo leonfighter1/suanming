@@ -94,7 +94,6 @@ export class AuthService {
   private readonly captcha: CaptchaVerifier;
   private readonly limiter: FailureLimiter;
   private readonly now: () => Date;
-  private readonly matrix = loadGeoMatrix();
 
   constructor(private readonly deps: AuthDeps) {
     this.users = deps.users ?? new InMemoryUserStore();
@@ -114,7 +113,8 @@ export class AuthService {
   private profile(p: SignupProfile) {
     const country = String(p.country ?? "").toUpperCase();
     if (!/^[A-Z]{2}$/.test(country)) throw new AuthError(400, "country must be ISO 3166-1 alpha-2");
-    const region = resolveRegion(this.matrix, country);
+    // Read per sign-up, so a region the owner signs off is open without a restart (v5.1.0).
+    const region = resolveRegion(loadGeoMatrix(), country);
     if (!region || !region.service_available) {
       throw new AuthError(451, `service not available in ${country}`, "region");
     }

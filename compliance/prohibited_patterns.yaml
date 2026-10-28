@@ -114,3 +114,25 @@ groups:
       pattern: "(招財|招财|旺財|旺财|破財|破财|漏財|漏财|聚財|聚财|旺丁|損丁|损丁|旺夫|剋夫|克夫|招桃花|旺桃花|轉運|转运|開運|开运|改運|改运)"
       unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关|不必|不需要|不用)[^。！？]{0,8}(招財|招财|旺財|旺财|破財|破财|漏財|漏财|聚財|聚财|旺丁|損丁|损丁|旺夫|剋夫|克夫|招桃花|旺桃花|轉運|转运|開運|开运|改運|改运)"
       action: block
+
+  # Indonesia (v5.1.0; the owner's Phase 3 §2.4: 屏蔽前世/通灵/降头). The region's `content_blocks` also tell
+  # the model, since a recorded hit still reaches the reader while review is paused.
+  id:
+    - id: I001
+      description: 前世、轮回转世 (past lives, reincarnation)
+      pattern: "(前世|前生|轉世|转世|輪迴|轮回|\\bpast[- ]li(fe|ves)\\b|\\bprevious li(fe|ves)\\b|\\breincarnat\\w*)"
+      flags: i
+      unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关)[^。！？]{0,8}(前世|前生|轉世|转世|輪迴|轮回)|\\b(no|not|never|nothing about|without)\\b(\\s+\\S+){0,3}\\s+(past[- ]li(fe|ves)|previous li(fe|ves)|reincarnat\\w*)"
+      action: block
+    - id: I002
+      description: 通灵、灵媒、招魂 (mediumship, contacting the dead)
+      pattern: "(通靈|通灵|靈媒|灵媒|招魂|問米|问米|觀落陰|观落阴|\\bspirit mediums?\\b|\\bmediumship\\b|\\bs[ée]ances?\\b|\\bchannel{1,2}ing (the )?(spirits?|dead)\\b|\\bcontact(ing)? (the )?(dead|spirits?)\\b)"
+      flags: i
+      unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关)[^。！？]{0,8}(通靈|通灵|靈媒|灵媒|招魂|問米|问米|觀落陰|观落阴)|\\b(no|not|never|nothing about|without)\\b(\\s+\\S+){0,3}\\s+(spirit mediums?|mediumship|s[ée]ances?|channel{1,2}ing|contact(ing)?)"
+      action: block
+    - id: I003
+      description: 降头、蛊、黑魔法 (black magic)
+      pattern: "(降頭|降头|下蠱|下蛊|蠱毒|蛊毒|黑魔法|黑巫術|黑巫术|\\bblack magic\\b|\\bsantet\\b|\\bguna-guna\\b|\\bvoodoo\\b)"
+      flags: i
+      unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关)[^。！？]{0,8}(降頭|降头|下蠱|下蛊|蠱毒|蛊毒|黑魔法|黑巫術|黑巫术)|\\b(no|not|never|nothing about|without)\\b(\\s+\\S+){0,3}\\s+(black magic|santet|guna-guna|voodoo)"
+      action: block

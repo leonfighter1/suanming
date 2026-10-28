@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../config.dart';
 import '../data/api_client.dart';
 import '../data/profile_store.dart';
+import '../data/settings_store.dart';
 import '../data/token_store.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
@@ -35,13 +38,34 @@ class SettingsNotifier extends Notifier<Settings> {
   SettingsNotifier([this._initial = zhHans]);
   final Locale _initial;
 
-  /// 简体中文 by default.
+  /// 简体中文 by default (owner, 2026-10-26); main() passes the language the reader last picked.
   @override
   Settings build() => Settings(locale: _initial);
-  void setLocale(Locale l) => state = Settings(locale: l);
+
+  /// Switches the language and keeps it for the next start (v5.1.0). A failed save only loses that.
+  void setLocale(Locale l) {
+    state = Settings(locale: l);
+    unawaited(ref.read(settingsStoreProvider).setLanguage(apiLocale(l)).catchError((Object _) {}));
+  }
 }
 
 final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(SettingsNotifier.new);
+
+final settingsStoreProvider = Provider<SettingsStore>((ref) => SecureSettingsStore());
+
+/// The language to start in: the one the reader last picked, else 简体中文 (owner, 2026-10-26).
+/// Storage that can't be read (a private window, no secure context) starts in 简体 too.
+Future<Locale> startLocale(SettingsStore store) async {
+  try {
+    return switch (await store.language()) {
+      'zh-Hant' => zhHant,
+      'en' => const Locale('en'),
+      _ => zhHans,
+    };
+  } catch (_) {
+    return zhHans;
+  }
+}
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 

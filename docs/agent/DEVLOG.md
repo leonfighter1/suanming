@@ -2,6 +2,27 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ad): S8 地区精细化 from the rest of Phase 3; release v5.1.0
+
+- After v5.0.0, I looked for leftover work as the owner's standing rule asks. The owner's document set (pasted in this session's first message) still lists:
+  - for Phase 3: Action Kit, TikTok support, Geo-Rule 精细化, English everywhere, RAG and fine-tuning;
+  - nothing on any of these in the DEVLOG, README or git log (rule 34).
+- Planned as S8 (tech plan) only what needs no owner input:
+  - §2.4: Indonesia's blocks, Singapore's languages, the five-region gate test;
+  - §2.5: the language kept, and the glossary gaps.
+  - The rest is listed in the plan as waiting for the owner, each with the reason (payment, accounts, consent, the real model, vendors).
+- Owner decision kept (2026-10-26): 简体中文 is the main language, and the app starts in 简体. So Singapore's 「双语权重」 adds English to its languages and changes no start language.
+- WP8.1:
+  - `ID` in the matrix (0.5.0) with `content_blocks` (a new dimension, in the schema too), unserved while `legal_review` is pending;
+  - rule group `id` (I001–I003, zh both scripts + en, with negations);
+  - `contentBlockLine` reaches every model call's user message. System prompts are unchanged, so no prompt versions move;
+  - an invariant: pending ⇒ not served.
+- WP8.2: test/geo-regions.test.ts, the Phase 3 gate. Rules routed per region on a real reading text, orders through `/v1/methods`, languages, and a hot update on a running server.
+- Found: the API server and AuthService cached the matrix at start. My 起名 steps' "no restart" was wrong; both now read it per request (rule 44).
+- WP8.3: `SettingsStore` (secure storage), `startLocale`, read in `main()` before the first frame. Glossary 1.6.0 (双声, 叠韵, also in `NAMING_TERMS`).
+- Test slip: a scripted tarot narrative had one paragraph for three cards. The check retried with the mock's clean text, so the routing test saw no hits. Each scripted 逐张解读 now has one paragraph per card.
+- v5.1.0 committed and tagged locally, not pushed (medium).
+
 ## 2026-10-28 (ac): S6 WP6.4, 起名 behind the owner's review; S6 complete; releases v4.5.0 and v5.0.0
 
 - v4.4.0 committed and tagged (e899046) after a harness PASS (rule 23 again: the first run failed at analyze, the second passed).

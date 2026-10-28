@@ -9,7 +9,12 @@
  * Payment is a Phase 4 TODO: the API records a placeholder charge before calling this.
  */
 import type { ChartFact, ChartSystem } from "../chart-fact/index.js";
-import { compileRules, loadRuleSet, type Violation } from "../compliance/index.js";
+import {
+  compileRules,
+  contentBlockLine,
+  loadRuleSet,
+  type Violation,
+} from "../compliance/index.js";
 import { baziView, planFocus } from "./bazi-view.js";
 import {
   modelFacts,
@@ -117,6 +122,7 @@ export async function generateRemedy(
 
   const { region } = servedRegion(opts.country, chart.system);
   const rules = compileRules(loadRuleSet(), region.rule_groups);
+  const regionLine = contentBlockLine(region);
   const routing = deps.routing ?? loadRouting();
   const providerFor = (agent: AgentName) => {
     const route = routeFor(routing, agent, locale);
@@ -175,6 +181,7 @@ export async function generateRemedy(
         locale,
         glossary,
         feedback,
+        regionLine,
       }),
     check: (data) => {
       const norm = (t: string) => {
@@ -244,6 +251,7 @@ export async function generateRemedy(
                   code: opts.country.toUpperCase(),
                   name: region.name,
                   rule_groups: region.rule_groups,
+                  content_blocks: region.content_blocks,
                 },
                 draft: { remedy_plan: plan.value },
                 context: opts.context,

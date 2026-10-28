@@ -4,8 +4,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
+import 'package:mingli_app/data/settings_store.dart';
 
 import 'support.dart';
+
+/// Storage that can't be read, as in a private window or without a secure context.
+class _BrokenStore implements SettingsStore {
+  @override
+  Future<String?> language() => Future.error(StateError('no storage'));
+  @override
+  Future<void> setLanguage(String apiLocale) => Future.error(StateError('no storage'));
+}
 
 Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 12; i++) {
@@ -37,5 +46,41 @@ void main() {
     expect(arb['email'], '邮箱');
     expect(arb['account'], '账号');
     expect(arb['deleteAccount'], '注销账号并删除数据');
+  });
+
+  // v5.1.0 (tech plan WP8.3): a picked language is kept on the device for the next start.
+  testWidgets('a picked language is kept, and the next start opens in it', (tester) async {
+    final store = InMemorySettingsStore();
+    final api = FakeApi(email: 'test@mingli.local');
+    await tester.pumpWidget(testApp(api, locale: null, settings: store));
+    await settle(tester);
+    expect(find.text('八字排盘'), findsWidgets);
+    await tester.tap(find.byKey(const Key('language-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('language-en')));
+    await settle(tester);
+    expect(store.saved, 'en');
+
+    // A restart: main() reads the saved language before the first frame.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(testApp(api, locale: await startLocale(store), settings: store));
+    await settle(tester);
+    expect(find.text('Bazi chart'), findsWidgets);
+    expect(find.text('八字排盘'), findsNothing);
+    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, 'EN');
+  });
+
+  testWidgets('without a saved language, or without storage, the app starts in 简体中文', (tester) async {
+    expect(await startLocale(InMemorySettingsStore()), zhHans);
+    expect(await startLocale(_BrokenStore()), zhHans);
+    expect(await startLocale(InMemorySettingsStore()..saved = 'zh-Hant'), zhHant);
+    // Picking a language where it can't be saved still switches it.
+    await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null, settings: _BrokenStore()));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('language-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('language-zh-Hant')));
+    await settle(tester);
+    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁');
   });
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/geo-rule-matrix.schema.json",
-  "matrix_version": "0.4.0",
-  "notes": "legal_review=provisional for all regions: product-owner sign-off on 2026-10-26; formal legal review (at least US/GB/AU/CA) deferred and required before each region's launch. Unknown countries resolve to null => service refused. naming (起名, v4.5.0) is off everywhere until the owner has checked its draft 字义库 (人工校订, src/engines/naming/characters.ts): set defaults.systems.naming.available to true then.",
+  "matrix_version": "0.5.0",
+  "notes": "legal_review=provisional for the regions signed off by the product owner on 2026-10-26; formal legal review (at least US/GB/AU/CA) deferred and required before each region's launch. A region with legal_review=pending is not served (ID, v5.1.0: the owner signs off, then sets service_available to true and legal_review to provisional). Unknown countries resolve to null => service refused. content_blocks (v5.1.0, Phase 3 §2.4) name topics a region's readings never touch: the model is told, and the region's rule group records or holds them. naming (起名, v4.5.0) is off everywhere until the owner has checked its draft 字义库 (人工校订, src/engines/naming/characters.ts): set defaults.systems.naming.available to true then.",
   "defaults": {
     "service_available": true,
     "systems": {
@@ -112,7 +112,7 @@
       "name": "Singapore",
       "phase": 1,
       "legal_review": "provisional",
-      "locales": ["zh-Hans", "zh-Hant"],
+      "locales": ["zh-Hans", "en", "zh-Hant"],
       "rule_groups": ["global", "en_common"]
     },
     "MY": {
@@ -127,6 +127,15 @@
           "entry_weight": 1.3
         }
       }
+    },
+    "ID": {
+      "name": "Indonesia",
+      "phase": 3,
+      "legal_review": "pending",
+      "service_available": false,
+      "locales": ["en", "zh-Hans", "zh-Hant"],
+      "rule_groups": ["global", "en_common", "id"],
+      "content_blocks": ["past_lives", "mediumship", "black_magic"]
     },
     "US": {
       "name": "United States",

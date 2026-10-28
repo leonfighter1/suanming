@@ -11,6 +11,7 @@ import 'package:mingli_app/app.dart';
 import 'package:mingli_app/application/providers.dart';
 import 'package:mingli_app/data/api_client.dart';
 import 'package:mingli_app/data/profile_store.dart';
+import 'package:mingli_app/data/settings_store.dart';
 import 'package:mingli_app/data/token_store.dart';
 import 'package:mingli_app/domain/terms.dart';
 
@@ -317,11 +318,14 @@ Widget testApp(
   Locale? locale = zhHant,
   // Replaced providers, e.g. the share sheet.
   List<Override> overrides = const [],
+  // The device's saved settings (the language picked, v5.1.0).
+  SettingsStore? settings,
 }) {
   final store = tokens ?? InMemoryTokenStore(signedIn ? Tokens(api.access, 'refresh-0') : null);
   return ProviderScope(
     overrides: [
       if (locale != null) settingsProvider.overrideWith(() => SettingsNotifier(locale)),
+      settingsStoreProvider.overrideWithValue(settings ?? InMemorySettingsStore()),
       tokenStoreProvider.overrideWithValue(store),
       profileStoreProvider.overrideWithValue(profiles ?? InMemoryProfileStore()),
       apiClientProvider.overrideWith(

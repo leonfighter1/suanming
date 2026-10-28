@@ -57,6 +57,12 @@
             "uniqueItems": true
           },
           "systems": { "$ref": "#/$defs/systems" },
+          "content_blocks": {
+            "description": "Topics this region's readings never touch (Phase 3 §2.4, v5.1.0): the model is told, and the region's rule group records or holds them.",
+            "type": "array",
+            "items": { "enum": ["past_lives", "mediumship", "black_magic"] },
+            "uniqueItems": true
+          },
           "paywall": { "$ref": "#/$defs/paywall" },
           "age_gate": { "$ref": "#/$defs/age_gate" },
           "ai_disclosure": { "$ref": "#/$defs/ai_disclosure" }

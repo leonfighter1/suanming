@@ -9,6 +9,8 @@ export interface RegionRule {
   locales: string[];
   rule_groups: string[];
   systems: Record<string, { available: boolean; entry_weight: number }>;
+  /** Topics the region's readings never touch (Phase 3 §2.4, v5.1.0): Indonesia's 前世, 通灵 and 降头. */
+  content_blocks?: ContentBlock[];
   paywall: { copy_rules: string[] };
   age_gate: { min_age: number; enforcement: "self_declare" | "store_rating" | "verified" };
   ai_disclosure: { visible_label: "required" | "recommended"; machine_readable: boolean };
@@ -22,6 +24,27 @@ export interface GeoRuleMatrix {
     string,
     Partial<RegionRule> & Pick<RegionRule, "name" | "phase" | "legal_review">
   >;
+}
+
+export type ContentBlock = "past_lives" | "mediumship" | "black_magic";
+
+/** What the model is told for each content block, with the words it covers in both scripts. */
+export const CONTENT_BLOCK_TEXT: Record<ContentBlock, string> = {
+  past_lives: "past lives or reincarnation (前世, 轮回 / 輪迴, 转世 / 轉世)",
+  mediumship:
+    "spirit mediums, séances or contacting the dead (通灵 / 通靈, 灵媒 / 靈媒, 问米 / 問米)",
+  black_magic: "降头 / 降頭, 蛊 / 蠱 or any black magic (santet, guna-guna)",
+};
+
+/**
+ * The line that ends every model call's user message in a region with content blocks (v5.1.0). Review
+ * is paused, so a rule hit is recorded but still reaches the reader: the model has to know. Empty without
+ * blocks, so other regions' messages are unchanged.
+ */
+export function contentBlockLine(region: Pick<RegionRule, "content_blocks">): string {
+  const blocks = region.content_blocks ?? [];
+  if (!blocks.length) return "";
+  return `This reader's region rules out these topics. Never write about them, not even to deny them: ${blocks.map((b) => CONTENT_BLOCK_TEXT[b]).join("; ")}.`;
 }
 
 /** Ties in entry weight keep this order. */

@@ -177,11 +177,24 @@ Chinese characters. On Windows it finds Noto Sans SC or 微软雅黑; on Linux, 
 2. In `src/engines/naming/index.ts`, set `LIBRARY` to `{ version: "1.0.0", reviewed: true }`, then
    `npm run sync:app`. The names card then stops calling the 字义库 a draft.
 3. In `compliance/geo_rule_matrix.json`, set `defaults.systems.naming.available` to `true` and raise
-   `matrix_version` (0.4.0 → 0.5.0). The server reads the matrix on each request, so no restart is needed.
+   `matrix_version` by one minor step (e.g. 0.5.0 → 0.6.0). Since v5.1.0 the server reads the matrix on each
+   request, so no restart is needed. Before v5.1.0 it read it once at start: restart it.
 4. Run the harness. Every test still passes after these steps (tried on 2026-10-28, then undone).
 
 Then: 八字排盘 → compute a chart → 為這個命盤起名 at the end of the chart page. Type the surname, choose 單字名 or
 雙字名, then 起名. To try it before the review, point `MINGLI_GEO_MATRIX` at a copy of the matrix with `naming` on.
+
+## Indonesia (v5.1.0): not served until the owner signs off
+
+`ID` is in the matrix with its content blocks (前世, 通灵, 降头) but `service_available: false` and
+`legal_review: "pending"`, so sign-up and every reading there answer 451. After the owner's sign-off, in
+`compliance/geo_rule_matrix.json`:
+
+1. for `ID`, set `service_available` to `true` and `legal_review` to `"provisional"`;
+2. raise `matrix_version` by one minor step.
+
+No restart is needed. In dev mode, `X-Dev-Country: ID` then shows the region. Its readings carry the content-block
+line in every model call, and the `id` rule group records any hit.
 
 ## Cache
 

@@ -39,7 +39,32 @@ block:
   - { text: "厨房这样摆会破财。", groups: [fengshui], rule: F002 }
   - { text: "鏡子這樣放可以招財。", groups: [fengshui], rule: F002 }
   - { text: "You are prone to develop heart disease after 40.", groups: [en_common], rule: E002 }
+  - { text: "你們前世有緣，今生才會再相遇。", groups: [id], rule: I001 }
+  - { text: "这张牌暗示一段轮回中的旧缘。", groups: [id], rule: I001 }
+  - {
+      text: "This card hints at a past-life bond between you.",
+      groups: [en_common, id],
+      rule: I001,
+    }
+  - { text: "可以去問米，和先人說說話。", groups: [id], rule: I002 }
+  - { text: "找一位灵媒帮你通灵。", groups: [id], rule: I002 }
+  - { text: "A spirit medium could help you reach them.", groups: [en_common, id], rule: I002 }
+  - { text: "你最近不順，可能是被人下了降頭。", groups: [id], rule: I003 }
+  - { text: "小心有人对你下蛊。", groups: [id], rule: I003 }
+  - { text: "Someone may be using black magic against you.", groups: [en_common, id], rule: I003 }
 allow:
+  - { text: "這份解讀不涉及前世，只看你眼前的選擇。", groups: [id] }
+  - {
+      text: "This reading says nothing about past lives; it looks at today.",
+      groups: [en_common, id],
+    }
+  - { text: "这里不谈通灵，只谈你自己的选择。", groups: [id] }
+  - { text: "沒有什麼降頭，只是最近太累了。", groups: [id] }
+  - { text: "There is no black magic here, only a tired week.", groups: [en_common, id] }
+  # The same sentence as I001's block case, outside Indonesia: only the `id` group holds it.
+  - { text: "你們前世有緣，今生才會再相遇。", groups: [en_common] }
+  - { text: "The medium-term outlook for your work is steady.", groups: [en_common, id] }
+  - { text: "業績下降時，先休息一下。", groups: [id] }
   - { text: "傳統上，有些人會在廟裡點光明燈祈福，這是個人的選擇。", groups: [] }
   - { text: "不必安太歲才能心安，先照顧好自己的作息就好。", groups: [] }
   - { text: "不需要靠点光明灯才能安心，照顾好眼前的事更实在。", groups: [] }

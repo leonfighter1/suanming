@@ -317,7 +317,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     string,
     { status: number; body: unknown; headers: Record<string, string> }
   >();
-  const matrix = loadGeoMatrix();
+  // The geo matrix is read on every request, as the pipeline reads it on every reading: a changed matrix
+  // (起名 switched on, a region signed off) takes effect without a release or a restart (Phase 3 §2.4).
 
   /**
    * Runs a background job, tracked for drain(). A failure is logged, never left unhandled: the
@@ -410,7 +411,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   /** Geo-Rule: refuse before computing anything for unserved regions. */
   function assertServed(country: string, system?: string) {
-    const region = resolveRegion(matrix, country);
+    const region = resolveRegion(loadGeoMatrix(), country);
     if (!region || !region.service_available)
       throw new GeoRefusedError(`service not available in ${country}`);
     if (system && region.systems[system]?.available === false) {
@@ -905,7 +906,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         versions: {
           api: API_VERSION,
           chart_fact_schema: SCHEMA_VERSION,
-          geo_rule_matrix: matrix.matrix_version,
+          geo_rule_matrix: loadGeoMatrix().matrix_version,
           prohibited_patterns: loadRuleSet().version,
           tzdb: process.versions.tz ?? "unknown",
         },
@@ -993,6 +994,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // its entries by it, so the matrix can put 求籤 first in Taiwan and Hong Kong without a release.
     if (path === "/v1/methods" && req.method === "GET") {
       assertServed(c.country);
+      const matrix = loadGeoMatrix();
       return send(res, 200, {
         region: c.country,
         matrix_version: matrix.matrix_version,

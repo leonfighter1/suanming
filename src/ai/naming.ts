@@ -10,7 +10,7 @@ import type { Candidate } from "../engines/naming/index.js";
 import type { Locale } from "./terms.js";
 
 /** The protected terms a 起名 reading uses (i18n/terms.json keys), for its <glossary>. */
-export const NAMING_TERMS = ["五行", "喜用", "平仄"];
+export const NAMING_TERMS = ["五行", "喜用", "平仄", "双声", "叠韵"];
 
 const ELEMENT_EN: Record<Element, string> = {
   木: "Wood",

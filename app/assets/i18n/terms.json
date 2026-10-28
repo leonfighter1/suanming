@@ -1,6 +1,6 @@
 {
   "_readme": "Protected term table (Phase 1 §2.3). Keys are the canonical engine form (simplified, as lunar-javascript emits). Values are the only allowed display form per locale. Hand-curated; never machine-translated. Shipped with the app and hot-updatable.",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "terms": {
     "比肩": {
       "zh-Hant": "比肩",
@@ -591,6 +591,16 @@
       "zh-Hant": "平仄",
       "zh-Hans": "平仄",
       "en": "Level and Oblique Tones (Ping Ze)"
+    },
+    "双声": {
+      "zh-Hant": "雙聲",
+      "zh-Hans": "双声",
+      "en": "Alliteration (Shuang Sheng)"
+    },
+    "叠韵": {
+      "zh-Hant": "疊韻",
+      "zh-Hans": "叠韵",
+      "en": "Rhyming Finals (Die Yun)"
     },
     "后天八卦": {
       "zh-Hant": "後天八卦",

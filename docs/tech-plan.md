@@ -34,6 +34,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S5 数据持久化              | readings survive a restart (PGlite store, encrypted)        | medium | v4.1.0            | done        |
 | S6 新玩法                  | 求籤 · 擲筊, 风水, 起名 (the owner's phase document)        | big    | v5.0.0 + summary  | done        |
 | S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress |
+| S8 地区精细化              | Indonesia's blocks, the five-region test, languages kept    | medium | v5.1.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -786,9 +787,123 @@ From S4 (WP4.9), to the owner's phase document (「Pick-a-Pile 截图分享（�
     or not exist is the owner's decision.
 - WP7.3 The deep link back to the reading, once the app is in the stores.
 
+## S8 地区精细化 (medium → v5.1.0)
+
+Planned 2026-10-28, after S6, from what the owner's Phase 3 document still lists (rule 34: no owner decision on any
+of it is recorded). Phase 3 §2.4 asks for a 国家 × 内容维度 matrix that covers five markets:
+
+- 印尼: 屏蔽前世 / 通灵 / 降头;
+- 马来西亚: 风水内容权重提升 (done, v4.4.0);
+- 新加坡: 英语 / 中文双语权重;
+- 台湾 / 香港: 擲筊 / 求签入口前置 (done, v4.3.0).
+
+Its gate is 「Geo-Rule 五地区规则路由测试通过」. §2.5 (English everywhere) is mostly in place: every one of the app's
+445 strings exists in English, and the glossary has English for the 风水 and 起名 terms except 双声 and 叠韵.
+
+### WP8.1 Indonesia and its content blocks
+
+- **Matrix 0.5.0:** a region `ID` (Indonesia, phase 3) with:
+  - `legal_review: "pending"` and `service_available: false`, since every launch needs the owner's sign-off (the
+    matrix's own note);
+  - rule groups `global`, `en_common` and `id`;
+  - a new content dimension, `content_blocks: ["past_lives", "mediumship", "black_magic"]`.
+- **Rule group `id`** (compliance/prohibited_patterns.yaml), on top of the region's other groups. Like every rule,
+  it is recorded while review is paused, and holds once it is on:
+  - I001, past lives: 前世, 前生, 轉世 / 转世, 輪迴 / 轮回; past life, previous life, reincarnation.
+  - I002, mediumship: 通靈 / 通灵, 靈媒 / 灵媒, 招魂, 問米 / 问米, 觀落陰 / 观落阴; spirit medium, mediumship,
+    séance, channelling spirits, contacting the dead.
+  - I003, black magic: 降頭 / 降头, 下蠱 / 下蛊, 蠱毒 / 蛊毒, 黑魔法, 黑巫術 / 黑巫术; black magic, santet,
+    guna-guna, voodoo.
+  - Each rule has `unless` negations (「不涉及前世」, "nothing about past lives") and block and allow cases (G5).
+- **The model is told too**, since review is paused and a recorded hit still reaches the reader.
+  - In a region with content blocks, every model call's user message ends with one line naming them:
+    - the report's narrative and action;
+    - 破除運勢 plans;
+    - 一生运势.
+  - The system prompts stay as they are, so no prompt version changes. Without blocks, the user messages are
+    byte-identical to before (a test).
+- **Tests:**
+  - the rule cases;
+  - an Indonesian reading, with ID switched on by a test matrix: the line in every call, a hit recorded;
+  - Hong Kong's messages unchanged;
+  - ID refused as shipped;
+  - an invariant: no region of the shipped matrix serves while its `legal_review` is `pending` (rule 42).
+
+### WP8.2 The five-region routing test, and Singapore's languages
+
+- `test/geo-regions.test.ts`, the Phase 3 gate. For ID, MY, SG, TW and HK it checks:
+  - service;
+  - rule groups and content blocks;
+  - the methods in entry order (起名 left out, rule 42);
+  - the languages.
+    ID is checked switched on by a test matrix, and refused as shipped.
+- Singapore: English joins its languages, alongside 简体 (`locales: ["zh-Hans", "en", "zh-Hant"]`).
+  - The app keeps starting in 简体 (owner, 2026-10-26).
+  - Anything more the bilingual weight should change in the app is left to the owner.
+
+### WP8.3 The reader's language is remembered
+
+- Now: the app starts in 简体 (owner, 2026-10-26), and a language the reader picks is lost at the next start or
+  reload. For English readers (§2.5) that means switching every time.
+- Do:
+  - save the picked language on the device, in secure storage like the profiles (no new dependency);
+  - at start, use the saved language, or 简体 when none is saved.
+- The glossary gains 双声 and 叠韵 (起名's sound notes) in three languages.
+- Tests: a picked language survives a restart; without one the app starts in 简体 (the existing locale test).
+
+Lessons: G5, rules 8, 34 and 42; P23 for the app.
+
+### Phase 3, the rest: waits for the owner
+
+- §2.2 Action Kit:
+  - the tiers are products, and payment is out of scope (owner, 2026-10-27);
+  - the audio tier needs a TTS vendor and its human review;
+  - the 大师包 needs teachers (Phase 2 真人).
+- §2.3 TikTok support:
+  - the `/link` page and the email list need consent wording and a mail provider;
+  - WhatsApp Business needs a Meta account and approved templates;
+  - the free 生肖运势 PDF needs content from the real model (the owner's AI switch).
+- §2.5:
+  - an English model route (the owner chose `deepseek-v4-pro` for every agent);
+  - the App Store English listing (WP7.3).
+- §2.6:
+  - the RAG knowledge base needs a vector store and an embeddings provider, with their cost;
+  - the fine-tuning evaluation spends on the real model.
+- Indonesia's launch (the legal sign-off), and Singapore's bilingual weight beyond its languages.
+
+### As built (v5.1.0)
+
+- The content-block line goes to every user-message builder through `regionLine`. Without blocks it is empty and
+  filtered out: a test compares the builders' output with and without it.
+- The guard's `<region>` carries `content_blocks` too. Without blocks the key is left out, so its JSON is unchanged.
+- **Found on the way:** the API server and `AuthService` read the matrix once, at start.
+  - So docs/web-test.md's "no restart" for 起名 was wrong in v4.5.0 and v5.0.0 (rule 44).
+  - Both now read it per request, as the pipeline always did and as Phase 3 asks (「矩阵支持热更新」).
+  - A test registers in Indonesia on one running server, before and after the change. It fails against the old
+    caching.
+- `withMatrix(edit, work)` in test/helpers.ts replaces the one-off naming helper. `withNaming` and
+  `withIndonesiaOn` are built on it.
+- The saved language is read in `main()` before the first frame, so the app never flashes 简体 first. Storage that
+  can't be read starts in 简体, and a save that fails only loses the choice.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S8 地区精细化 (done 2026-10-28: v5.1.0, medium)
+
+1. **Delivered**, in v5.1.0:
+   - WP8.1: Indonesia, with its content blocks (前世, 通灵, 降头), unserved until the owner's sign-off;
+   - WP8.2: the five-region routing test, the Phase 3 gate; Singapore's English;
+   - WP8.3: the reader's language kept on the device; 双声 and 叠韵 in the glossary.
+2. **Numbers**
+   - Server tests 401 → 429; app tests 137 → 139.
+   - Geo-Rule matrix 0.5.0; glossary 1.6.0.
+3. **Changed against the plan**
+   - The matrix now updates hot in the running server too: a finding, not a plan item (rule 44).
+   - Singapore's weight stayed at its languages: the start language is the owner's decision.
+4. **Mistakes recorded**: rule 44. A claim about a running system needs a test on a running system.
+5. **Next**: the rest of Phase 3 waits for the owner, listed above. So do WP7.2, WP7.3 and WP1.8.
 
 ### S6 新玩法 (done 2026-10-28: v4.3.0–v5.0.0)
 
@@ -1026,37 +1141,40 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 
 ## Status
 
-| WP        | Status                     | Release |
-| --------- | -------------------------- | ------- |
-| WP1.1     | done                       | v1.3.0  |
-| WP1.2     | done                       | v1.3.0  |
-| WP1.3     | done                       | v1.3.0  |
-| WP1.4     | done (命宫 / 身宫 → WP1.8) | v1.3.0  |
-| WP1.5     | done                       | v1.3.0  |
-| WP1.6     | done                       | v2.0.0  |
-| WP1.7     | done                       | v2.0.0  |
-| WP1.8     | waiting for a reference    | —       |
-| WP2.1     | done                       | v2.1.0  |
-| WP2.3     | done                       | v2.2.0  |
-| WP2.2     | done                       | v2.3.0  |
-| WP3.1     | done                       | v2.4.0  |
-| WP3.2     | done                       | v2.5.0  |
-| WP3.3     | done                       | v2.6.0  |
-| WP3.4     | done                       | v2.7.0  |
-| WP3.5     | done                       | v2.8.0  |
-| WP3.6     | done                       | v3.0.0  |
-| WP4.1     | done                       | v3.1.0  |
-| WP4.2     | done                       | v3.2.0  |
-| WP4.3     | done                       | v3.3.0  |
-| WP4.4     | closed (owner decision)    | —       |
-| WP4.5     | done                       | v3.4.0  |
-| WP4.6–4.7 | done                       | v3.5.0  |
-| WP4.8     | done                       | v4.0.0  |
-| WP4.9     | moved to S7 (WP7.1)        | —       |
-| WP5.1–5.2 | done                       | v4.1.0  |
-| WP7.1     | done                       | v4.2.0  |
-| WP7.2     | waits for the owner        | —       |
-| WP7.3     | waits for the stores       | —       |
-| WP6.1–6.2 | done                       | v4.3.0  |
-| WP6.3     | done                       | v4.4.0  |
-| WP6.4     | done (off until review)    | v4.5.0  |
+| WP        | Status                       | Release |
+| --------- | ---------------------------- | ------- |
+| WP1.1     | done                         | v1.3.0  |
+| WP1.2     | done                         | v1.3.0  |
+| WP1.3     | done                         | v1.3.0  |
+| WP1.4     | done (命宫 / 身宫 → WP1.8)   | v1.3.0  |
+| WP1.5     | done                         | v1.3.0  |
+| WP1.6     | done                         | v2.0.0  |
+| WP1.7     | done                         | v2.0.0  |
+| WP1.8     | waiting for a reference      | —       |
+| WP2.1     | done                         | v2.1.0  |
+| WP2.3     | done                         | v2.2.0  |
+| WP2.2     | done                         | v2.3.0  |
+| WP3.1     | done                         | v2.4.0  |
+| WP3.2     | done                         | v2.5.0  |
+| WP3.3     | done                         | v2.6.0  |
+| WP3.4     | done                         | v2.7.0  |
+| WP3.5     | done                         | v2.8.0  |
+| WP3.6     | done                         | v3.0.0  |
+| WP4.1     | done                         | v3.1.0  |
+| WP4.2     | done                         | v3.2.0  |
+| WP4.3     | done                         | v3.3.0  |
+| WP4.4     | closed (owner decision)      | —       |
+| WP4.5     | done                         | v3.4.0  |
+| WP4.6–4.7 | done                         | v3.5.0  |
+| WP4.8     | done                         | v4.0.0  |
+| WP4.9     | moved to S7 (WP7.1)          | —       |
+| WP5.1–5.2 | done                         | v4.1.0  |
+| WP7.1     | done                         | v4.2.0  |
+| WP7.2     | waits for the owner          | —       |
+| WP7.3     | waits for the stores         | —       |
+| WP6.1–6.2 | done                         | v4.3.0  |
+| WP6.3     | done                         | v4.4.0  |
+| WP6.4     | done (off until review)      | v4.5.0  |
+| WP8.1     | done (ID off until sign-off) | v5.1.0  |
+| WP8.2     | done                         | v5.1.0  |
+| WP8.3     | done                         | v5.1.0  |

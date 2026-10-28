@@ -12,6 +12,48 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v5.1.0 (2026-10-28): regions in detail: Indonesia's blocks, five regions tested, your language remembered
+
+Stage S8 of the [tech plan](docs/tech-plan.md) (地区精细化), from what your Phase 3 document still lists (§2.4,
+§2.5). A medium update: committed locally, and pushed with the next big update.
+
+- **Indonesia** is in the Geo-Rule matrix (now 0.5.0), with your document's blocks: 前世, 通灵 and 降头 (past
+  lives, spirit mediums, black magic).
+  - **It is not served yet.** Like every region, it opens after your sign-off. Then, for `ID` in
+    `compliance/geo_rule_matrix.json`, set `service_available` to true and `legal_review` to provisional, and raise
+    the matrix version ([docs/web-test.md](docs/web-test.md), Indonesia).
+  - Its readings stay off the three topics in two ways:
+    - every model call in the region is told: readings, 破除運勢 plans and 一生运势;
+    - a new rule group, `id` (I001–I003), records any that slip through, and holds them once review is on.
+  - Other regions are unchanged: what the model receives there is byte for byte what it was.
+- **Singapore**: English joins 简体 among its languages, for your 「英语/中文双语权重」.
+  - The app still starts in 简体, as you decided on 2026-10-26.
+  - Anything more the weight should change is your call.
+- **The five regions are tested together**, your Phase 3 gate 「Geo-Rule 五地区规则路由测试通过」. Indonesia,
+  Malaysia, Singapore, Taiwan and Hong Kong each get their own rules, blocks, entry order and languages.
+- **The app remembers your language.** Pick 繁體中文 or English once in the 语言 menu, and the app opens in it next
+  time, on the web after a reload too. Without a choice it starts in 简体中文.
+- **Fixed: a matrix change needed a server restart.**
+  - The server read the Geo-Rule matrix only when it started, so switching 起名 on needed a restart, although
+    docs/web-test.md said it didn't.
+  - The server and sign-up now read the matrix on every request, as your 「矩阵支持热更新」 asks.
+  - A test checks this on a server that was already running.
+- Glossary 1.6.0 adds 双声 and 叠韵, the sound notes on 起名's names, in three languages.
+- The rest of Phase 3 waits for you; the tech plan (S8, "Phase 3, the rest") lists it:
+  - Action Kit;
+  - TikTok support (`/link`, the email list, WhatsApp);
+  - RAG and the fine-tuning evaluation;
+  - an English model route;
+  - the store listing.
+- Verified:
+  - 28 new server tests:
+    - 17 rule cases (block and allow for I001–I003, and the same sentence left alone outside Indonesia);
+    - 7 on the content blocks: the matrix, the sign-off invariant, refusal before any model call, the line in
+      every call, byte-for-byte messages elsewhere, a hit recorded, and held while review is on;
+    - 4 on the five regions, the hot update among them.
+  - 2 new app tests: a picked language survives a restart; without one, or without storage, the app starts in 简体.
+  - All 429 server tests and 139 app tests pass; harness PASS.
+
 ### v5.0.0 (2026-10-28): 新玩法, three new methods (stage S6 complete)
 
 The big update that ends stage S6 of the [tech plan](docs/tech-plan.md). It brings the three methods your phase

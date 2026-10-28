@@ -726,6 +726,8 @@ export function narrativeUser(args: {
   context?: unknown;
   today?: string;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -737,6 +739,7 @@ export function narrativeUser(args: {
     args.context ? tag("user_context", args.context) : "",
     `Write these topics, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -758,6 +761,8 @@ export function tarotUser(args: {
   context?: unknown;
   today?: string;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -769,6 +774,7 @@ export function tarotUser(args: {
     args.context ? tag("user_context", args.context) : "",
     `Write these topics, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -785,6 +791,8 @@ export function namingUser(args: {
   context?: unknown;
   today?: string;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -794,6 +802,7 @@ export function namingUser(args: {
     args.context ? tag("user_context", args.context) : "",
     `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -811,6 +820,8 @@ export function fengshuiUser(args: {
   context?: unknown;
   today?: string;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -821,6 +832,7 @@ export function fengshuiUser(args: {
     args.context ? tag("user_context", args.context) : "",
     `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -838,6 +850,8 @@ export function qiuqianUser(args: {
   context?: unknown;
   today?: string;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -848,6 +862,7 @@ export function qiuqianUser(args: {
     args.context ? tag("user_context", args.context) : "",
     `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -862,6 +877,8 @@ export function actionUser(args: {
   context?: unknown;
   today?: string;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -870,6 +887,7 @@ export function actionUser(args: {
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -887,6 +905,8 @@ export function remedyUser(args: {
   locale: Locale;
   glossary: Record<string, string>;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     args.today ? tag("today", args.today) : "",
@@ -898,6 +918,7 @@ export function remedyUser(args: {
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
     `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -912,6 +933,8 @@ export function lifeUser(args: {
   locale: Locale;
   glossary: Record<string, string>;
   feedback?: string[];
+  /** A region's content blocks (v5.1.0), from contentBlockLine; empty elsewhere. */
+  regionLine?: string;
 }): string {
   return [
     tag("today", args.today),
@@ -919,6 +942,7 @@ export function lifeUser(args: {
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
     `Write your part (${args.part}) in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
     feedbackBlock(args.feedback),
   ]
     .filter(Boolean)
@@ -927,7 +951,7 @@ export function lifeUser(args: {
 
 export function guardUser(args: {
   facts: unknown;
-  region: { code: string; name: string; rule_groups: string[] };
+  region: { code: string; name: string; rule_groups: string[]; content_blocks?: string[] };
   draft: unknown;
   context?: unknown;
   trend?: unknown;
