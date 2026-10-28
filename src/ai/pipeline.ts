@@ -300,11 +300,13 @@ export function scanTexts(texts: string[], rules: CompiledRule[]) {
 }
 
 /**
- * Rule groups that apply to one method's output, on top of the region's (v4.4.0): 风水's own rules
- * against 吉凶 phrasing about a home (the owner's Phase 3 §4).
+ * Rule groups that apply to one method's output, on top of the region's: 风水's own rules against 吉凶
+ * phrasing about a home (v4.4.0, the owner's Phase 3 §4), and 起名's against a name deciding fate, curing
+ * luck or being 吉 / 凶 (v5.2.0, the Phase 3 gate's 专项规则).
  */
 export const METHOD_RULE_GROUPS: Partial<Record<ChartSystem, string[]>> = {
   fengshui: ["fengshui"],
+  naming: ["naming"],
 };
 
 /**

@@ -10,6 +10,7 @@ import { createApiServer } from "../src/api/server.js";
 import type { ChartFact } from "../src/chart-fact/index.js";
 import { loadGeoMatrix, resolveRegion } from "../src/compliance/geo.js";
 import { NAME_CHARS, RADICALS, SURNAMES } from "../src/engines/naming/characters.js";
+import { computeTarot } from "../src/engines/tarot/index.js";
 import {
   computeNaming,
   LIBRARY,
@@ -208,6 +209,69 @@ describe("a 起名 reading and the API", () => {
     );
     expect(report.layers!.facts[0]).toBe("張氏 · 火、土");
     expect(report.layers!.expectation.ai_label).toContain("不決定任何人的命運");
+  });
+
+  it("holds a name said to decide fate in a 起名 reading, and only there (v5.2.0, rule 8)", async () => {
+    const text = "好名字決定一生的命運。";
+    const narrative = (
+      topics: string[],
+      refs: (i: number) => string,
+      n: (t: string) => number,
+    ) => ({
+      sections: topics.map((topic) => ({
+        topic,
+        summary: "（示範）重點。",
+        paragraphs: Array.from({ length: n(topic) }, (_, i) => ({
+          text,
+          source_level: "simplified_rule",
+          fact_refs: [refs(i)],
+        })),
+      })),
+    });
+    const names = narrative(
+      ["naming_candidates", "naming_advice"],
+      () => "/candidates/0",
+      () => 1,
+    );
+    const held = await withNamingOn(() =>
+      generateReport(
+        naming,
+        { locale: "zh-Hant", country: "HK" },
+        {
+          providers: providers(
+            new MockProvider({
+              narrative: [
+                { kind: "ok", data: names },
+                { kind: "ok", data: names },
+              ],
+            }),
+          ),
+          now: FIXED_NOW,
+        },
+      ),
+    );
+    expect(held.status).toBe("blocked");
+    expect(held.compliance.rule_violations.map((v) => v.rule_id)).toContain("N001");
+
+    // The same sentence in a three-card tarot reading (one paragraph per card): not 起名's rule.
+    const cards = narrative(
+      ["tarot_cards", "tarot_synthesis", "tarot_advice"],
+      (i) => `/cards/${i}`,
+      (t) => (t === "tarot_cards" ? 3 : 1),
+    );
+    const tarot = await generateReport(
+      computeTarot(
+        { spread: "three_card" },
+        { drawKey: DRAW_KEY, digestPepper: PEPPER, now: FIXED_NOW, newDrawId: () => "draw-1" },
+      ),
+      { locale: "zh-Hant", country: "HK" },
+      {
+        providers: providers(new MockProvider({ narrative: [{ kind: "ok", data: cards }] })),
+        now: FIXED_NOW,
+      },
+    );
+    expect(tarot.compliance.rule_violations.map((v) => v.rule_id)).not.toContain("N001");
+    expect(tarot.status).toBe("passed");
   });
 
   it("reads only the caller's own 八字 chart, and is off for everyone while the matrix says so", async () => {

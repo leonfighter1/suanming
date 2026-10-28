@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T16:10:54.775Z",
+  "generated_at": "2026-10-28T16:29:51.993Z",
   "draws_per_spread": 100000,
   "checks": [
     {
@@ -395,5 +395,5 @@
     }
   ],
   "pass": true,
-  "seconds": 32
+  "seconds": 41
 }

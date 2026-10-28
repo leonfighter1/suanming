@@ -64,3 +64,4 @@ Records:
 - [docs/SUMMARY.md](docs/SUMMARY.md): what each phase delivered
 - [docs/phase-1-status.md](docs/phase-1-status.md): current segment status
 - [docs/phase-0-gate.md](docs/phase-0-gate.md): open Phase 0 gate items
+- [docs/phase-3-gate.md](docs/phase-3-gate.md): the Phase 3 gate (what passed, what waits for the owner; Phase 4 waits for it)

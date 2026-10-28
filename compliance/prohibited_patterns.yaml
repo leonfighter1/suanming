@@ -115,6 +115,27 @@ groups:
       unless: "(不是|并非|並非|沒有|没有|不談|不谈|不說|不说|不涉及|無關|无关|不必|不需要|不用)[^。！？]{0,8}(招財|招财|旺財|旺财|破財|破财|漏財|漏财|聚財|聚财|旺丁|損丁|损丁|旺夫|剋夫|克夫|招桃花|旺桃花|轉運|转运|開運|开运|改運|改运)"
       action: block
 
+  # 起名 output only (v5.2.0; the owner's Phase 3 gate: 起名/风水输出全部通过 Compliance Guard 专项规则). Like
+  # `fengshui`, the pipeline adds it for 起名 readings (METHOD_RULE_GROUPS), on top of the region's.
+  naming:
+    - id: N001
+      description: 名字决定命运 (a name decides fate)
+      pattern: "(名字|姓名|名)[^。！？.!?]{0,8}(決定|决定|注定|主宰|左右)[^。！？.!?]{0,8}(命運|命运|一生|人生|前途|運勢|运势)|\\bnames?\\b[^.!?]{0,30}\\b(decides?|determines?|seals?|controls?)\\b[^.!?]{0,20}\\b(fate|destiny|fortune|life)\\b"
+      flags: i
+      unless: "(不會|不会|不能|並不|并不|不|沒有|没有|無法|无法|並非|并非)[^。！？]{0,4}(決定|决定|注定|主宰|左右)|\\b(not|never|no one's|nobody's|doesn't|does not|don't|cannot|can't|won't)\\b"
+      action: block
+    - id: N002
+      description: 名字当作化解或招财的手段 (a name as a cure or a charm)
+      pattern: "(改名|換名|换名|更名)[^。！？.!?]{0,8}(轉運|转运|改運|改运|開運|开运|化解|招財|招财|旺財|旺财|消災|消灾)|(旺夫|旺妻|招財|招财|旺財|旺财|剋夫|克夫|剋妻|克妻|帶財|带财)之?名|\\bchange (your|the|a) name\\b[^.!?]{0,20}\\b(luck|fortune|fate)\\b|\\b(lucky|unlucky) names?\\b"
+      flags: i
+      unless: "(不必|不需要|不用|不是|並非|并非|沒有|没有|無關|无关|不能|不會|不会)[^。！？]{0,6}(改名|換名|换名|更名|旺夫|旺妻|招財|招财|旺財|旺财)|(改名|換名|换名|更名)[^。！？]{0,4}(不會|不会|不能|無法|无法|並不|并不|不)|\\b(no|not|never|don't|doesn't|no need)\\b"
+      action: block
+    - id: N003
+      description: 对名字下吉凶断语 (a 吉凶 verdict on a name)
+      pattern: "(此名|這個名字|这个名字|名字|姓名|這名|这名)[^。！？.!?]{0,6}(大吉|大凶|不吉|兇|凶)"
+      unless: "(不分|不論|不论|無所謂|无所谓|沒有|没有|不談|不谈|不說|不说|無關|无关)[^。！？]{0,6}(吉凶|大吉|大凶|兇|凶)"
+      action: block
+
   # Indonesia (v5.1.0; the owner's Phase 3 §2.4: 屏蔽前世/通灵/降头). The region's `content_blocks` also tell
   # the model, since a recorded hit still reaches the reader while review is paused.
   id:

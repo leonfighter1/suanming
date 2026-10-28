@@ -2,7 +2,7 @@
 
 Phase 0 (engines, ChartFact, compliance) and Phase 1 in progress (AI pipeline, v1 API, Flutter app).
 **Start here: [docs/SUMMARY.md](docs/SUMMARY.md)** (what each phase delivered).
-Details: [docs/phase-0-gate.md](docs/phase-0-gate.md) · [docs/phase-1-status.md](docs/phase-1-status.md) · agent instructions in [CLAUDE.md](CLAUDE.md).
+Details: [docs/phase-0-gate.md](docs/phase-0-gate.md) · [docs/phase-1-status.md](docs/phase-1-status.md) · [docs/phase-3-gate.md](docs/phase-3-gate.md) · agent instructions in [CLAUDE.md](CLAUDE.md).
 Web test: **https://leonfighter1.github.io/suanming/** ([docs/web-test.md](docs/web-test.md)).
 
 ## 更新记录 (release notes)
@@ -11,6 +11,36 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tech-plan.md) and are the ones pushed;
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
+
+### v5.2.0 (2026-10-28): 起名's own compliance rules, and the Phase 3 gate record
+
+Stage S9 of the [tech plan](docs/tech-plan.md) (Phase 3 门禁). Your documents end with 「Gate 未通过不进入下一阶段」,
+so before anything of Phase 4 this update closes what it can of Phase 3's gate and records the rest for your
+review. A medium update: committed locally, and pushed with the next big update.
+
+- **起名 has its own rules now**, the gate's 「起名/风水输出全部通过 Compliance Guard 专项规则」. 风水 had F001 / F002
+  since v4.4.0. 起名 readings now get N001–N003, in both scripts and English:
+  - N001: a name said to decide fate (「名字決定一生的命運」, "your name determines your fate");
+  - N002: a name as a cure or a charm (「改名就能轉運」, 旺夫名, 招財名, "change your name to fix your luck");
+  - N003: a 吉凶 verdict on a name (「此名大吉」, 「這個名字大凶」).
+  - They apply to 起名 readings only. The same sentence in a tarot reading is left alone.
+  - Negations are allowed, so 起名's AI label and the names card's 「不決定任何人的命運」 pass in all three
+    languages.
+- **[docs/phase-3-gate.md](docs/phase-3-gate.md)**, the Phase 3 gate record, written like the Phase 0 one:
+  - the six deliverables, with where each lives and its state;
+  - the test standards, each with its test or what it waits for;
+  - the five gate items, two passed: the 专项规则 and the five-region test.
+  - The other three wait for you: the Action Kit audio, the WhatsApp templates, and the fine-tuning ADR. So
+    **Phase 4 has not started**.
+  - A table at the end lists your decisions and what each one opens.
+- Two tests now pin English coverage:
+  - the app's three languages have the same strings, and English shows Chinese only in its listed terms;
+  - every glossary term has its 繁體, 简体 and English.
+- Verified:
+  - 20 new server tests: 17 rule cases, the 起名 reading held while the same text in tarot is not, and 2 on the
+    glossary;
+  - 1 new app test (English coverage);
+  - All 449 server tests and 140 app tests pass; harness PASS.
 
 ### v5.1.0 (2026-10-28): regions in detail: Indonesia's blocks, five regions tested, your language remembered
 

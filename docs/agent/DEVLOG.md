@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ae): S9 Phase 3 门禁; release v5.2.0
+
+- The owner's documents end with 「Gate 未通过不进入下一阶段」. So nothing of Phase 4 starts before Phase 3's gate passes.
+- Of the gate's five items, one needed no owner input and was open: 起名's 专项规则. 风水 had F001 / F002; 起名 had nothing.
+- WP9.1: rule group `naming` (N001 a name decides fate, N002 a name as a cure or charm, N003 a 吉凶 verdict), applied to 起名 only.
+  - Negations are exempt both before and after the verb.
+  - The AI labels (all three languages) and the card note are allow cases.
+  - Tests: a 起名 reading is held, and the same text in tarot is not.
+- WP9.2: docs/phase-3-gate.md (deliverables, the §4 tests, the gate checklist, the owner's decisions and what each opens). Linked from the README and CLAUDE.md.
+  - English coverage now has tests: ARB parity and English's Chinese limited to listed keys (app); the glossary in three languages (server).
+- Everything left in the owner's Phase 3 (and Phase 4) now needs the owner: listed in the gate record.
+- v5.2.0 committed and tagged locally, not pushed (medium).
+
 ## 2026-10-28 (ad): S8 地区精细化 from the rest of Phase 3; release v5.1.0
 
 - After v5.0.0, I looked for leftover work as the owner's standing rule asks. The owner's document set (pasted in this session's first message) still lists:

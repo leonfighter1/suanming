@@ -48,6 +48,20 @@ void main() {
     expect(arb['deleteAccount'], '注销账号并删除数据');
   });
 
+  // The Phase 3 gate's 「英语扩展：全量页面英语资源覆盖」 (v5.2.0): every string exists in all three languages,
+  // and English shows Chinese only where it means to (the 体 / 用 / 互 / 变 hexagram roles, the surname example).
+  test('every page is in English: the three languages have the same strings', () {
+    Map<String, dynamic> arb(String f) => jsonDecode(File('lib/l10n/$f').readAsStringSync()) as Map<String, dynamic>;
+    Set<String> keys(Map<String, dynamic> m) => m.keys.where((k) => !k.startsWith('@')).toSet();
+    final en = arb('app_en.arb'), hans = arb('app_zh.arb'), hant = arb('app_zh_Hant.arb');
+    expect(keys(en).length, greaterThan(400));
+    expect(keys(hans), keys(en));
+    expect(keys(hant), keys(en));
+    final cjk = RegExp(r'[㐀-鿿]');
+    final chineseInEnglish = keys(en).where((k) => cjk.hasMatch('${en[k]}')).toSet();
+    expect(chineseInEnglish, {'lifeTi', 'lifeYong', 'lifeHu', 'lifeBian', 'namingSurnameHint'});
+  });
+
   // v5.1.0 (tech plan WP8.3): a picked language is kept on the device for the next start.
   testWidgets('a picked language is kept, and the next start opens in it', (tester) async {
     final store = InMemorySettingsStore();

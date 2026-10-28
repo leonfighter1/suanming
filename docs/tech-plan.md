@@ -35,6 +35,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S6 新玩法                  | 求籤 · 擲筊, 风水, 起名 (the owner's phase document)        | big    | v5.0.0 + summary  | done        |
 | S7 分享图                  | a reading as an image, made on the server (owner's spec)    | medium | v4.2.0            | in progress |
 | S8 地区精细化              | Indonesia's blocks, the five-region test, languages kept    | medium | v5.1.0            | done        |
+| S9 Phase 3 门禁            | 起名's own rule group; the Phase 3 gate record              | medium | v5.2.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -886,9 +887,67 @@ Lessons: G5, rules 8, 34 and 42; P23 for the app.
 - The saved language is read in `main()` before the first frame, so the app never flashes 简体 first. Storage that
   can't be read starts in 简体, and a save that fails only loses the choice.
 
+## S9 Phase 3 门禁 (medium → v5.2.0)
+
+The owner's documents end with: 「建议每个阶段结束前做一次 Gate 评审…Gate 未通过不进入下一阶段」. So Phase 4 (operations,
+monitoring, A/B, the content back office) does not start until Phase 3's gate has passed. Phase 3's gate has five
+items:
+
+| Gate item                                       | State                                                         |
+| ----------------------------------------------- | ------------------------------------------------------------- |
+| 起名/风水输出全部通过 Compliance Guard 专项规则 | 风水: F001 / F002 (v4.4.0). 起名: no rule group yet → WP9.1   |
+| Action Kit 音频审核流程跑通并留痕               | waits for the owner (Action Kit, a TTS vendor)                |
+| WhatsApp 模板消息审核通过                       | waits for the owner (a Meta account, templates)               |
+| Geo-Rule 五地区规则路由测试通过                 | done: test/geo-regions.test.ts (v5.1.0)                       |
+| Fine-tuning 评估结论写入 ADR                    | waits for the owner (the evaluation spends on the real model) |
+
+### WP9.1 起名's own rule group
+
+- `naming` in compliance/prohibited_patterns.yaml, applied to 起名 output only (`METHOD_RULE_GROUPS`, as for 风水):
+  - N001, a name decides fate: 名字 … 決定 / 注定 … 命運 / 一生; "a name decides … fate".
+  - N002, a name as a cure or a charm: 改名 … 轉運 / 化解 / 招財, 旺夫名, 招財名; "change your name to fix your
+    luck", "lucky name".
+  - N003, a 吉凶 verdict on a name: 此名大吉, 名字大凶, 不吉.
+- Negations are exempt (`unless`), so the AI label and the names card's note are allowed in all three languages
+  (「不決定任何人的命運」, "a name decides no one's fate").
+- Tests:
+  - block and allow cases for each rule;
+  - a 起名 reading holds N001;
+  - the same text in a tarot reading is left alone (rule 8).
+
+### WP9.2 The Phase 3 gate record
+
+docs/phase-3-gate.md, in the form of docs/phase-0-gate.md:
+
+- Phase 3's six deliverables, each with where it lives and its state;
+- the five gate items, with evidence or what each waits for.
+
+It is the material for the owner's gate review.
+
+As built (v5.2.0):
+
+- `naming` joins `METHOD_RULE_GROUPS` beside `fengshui`. The `unless` patterns also cover a negation after the
+  verb (「改名不會帶來轉運」).
+- The gate record gained the Phase 3 §4 test table, with each standard's test. Two tests were added for the English
+  rows:
+  - `app/test/locale_test.dart`: the same strings in all three languages, and English's Chinese limited to five
+    listed keys;
+  - `test/glossary.test.ts`: every term in three languages, keyed by its 简体 form.
+- With this, nothing in the owner's Phase 3 can go further without the owner. Phase 4 waits for the gate.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S9 Phase 3 门禁 (done 2026-10-28: v5.2.0, medium)
+
+1. **Delivered** (v5.2.0): WP9.1, 起名's rule group (N001–N003); WP9.2, docs/phase-3-gate.md.
+2. **Numbers**: server tests 429 → 449, app tests 139 → 140. Phase 3 gate: 2 of 5 items passed; the other 3 wait
+   for the owner.
+3. **Changed against the plan**: the English coverage got tests of its own, so the gate record points at tests
+   rather than at a one-off count.
+4. **Mistakes recorded**: none new.
+5. **Next**: the owner's gate review (docs/phase-3-gate.md, its last table). Phase 4 starts after the gate.
 
 ### S8 地区精细化 (done 2026-10-28: v5.1.0, medium)
 
@@ -1178,3 +1237,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP8.1     | done (ID off until sign-off) | v5.1.0  |
 | WP8.2     | done                         | v5.1.0  |
 | WP8.3     | done                         | v5.1.0  |
+| WP9.1     | done                         | v5.2.0  |
+| WP9.2     | done                         | v5.2.0  |
