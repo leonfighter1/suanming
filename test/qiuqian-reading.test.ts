@@ -140,8 +140,11 @@ describe("faithfulness of a 求籤 reading", () => {
 });
 
 describe("the entry order (WP6.2)", () => {
+  // 起名 is left out: it is off until the owner's review, and naming.test.ts covers its switch.
   const order = (cc: string) =>
-    methodsFor(resolveRegion(loadGeoMatrix(), cc)!).map((m) => m.system);
+    methodsFor(resolveRegion(loadGeoMatrix(), cc)!)
+      .map((m) => m.system)
+      .filter((s) => s !== "naming");
 
   it("puts 求籤 first in Taiwan and Hong Kong, and keeps the default order elsewhere", () => {
     // TW, HK: qiuqian 1.5 > bazi 1.2 > tarot 1 = fengshui 1 = astrology 1 (ties keep bazi, tarot,
@@ -213,7 +216,9 @@ describe("the API", () => {
     const tw = await call("GET", "/v1/methods");
     expect(tw.status).toBe(200);
     expect(tw.body.methods.map((m: { system: string }) => m.system)[0]).toBe("qiuqian");
-    expect(tw.body.matrix_version).toBe("0.3.0");
+    expect(tw.body.matrix_version).toBe(
+      loadGeoMatrix("compliance/geo_rule_matrix.json").matrix_version,
+    );
     const sg = await call("GET", "/v1/methods", undefined, "SG");
     expect(sg.body.methods[0].system).toBe("bazi");
     expect((await call("GET", "/v1/methods", undefined, "CN")).status).toBe(451);

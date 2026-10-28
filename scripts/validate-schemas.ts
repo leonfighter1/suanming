@@ -10,6 +10,7 @@ import { compileRules, loadGeoMatrix, loadRuleSet } from "../src/compliance/inde
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeFengshui } from "../src/engines/fengshui/index.js";
+import { computeNaming } from "../src/engines/naming/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 
@@ -50,7 +51,12 @@ const samples = {
   qiuqian: computeQiuqian({}, ctx),
   fengshui: computeFengshui({ room: "study", facing: "south" }, ctx),
 };
-for (const [name, fact] of Object.entries(samples)) {
+// 起名 reads a 八字 chart.
+const samplesWithNaming = {
+  ...samples,
+  naming: computeNaming(samples.bazi, { surname: "陳", length: 2 }, ctx),
+};
+for (const [name, fact] of Object.entries(samplesWithNaming)) {
   const r = validateChartFact(fact);
   check(`ChartFact(${name})`, r.ok, r.ok ? undefined : r.errors);
 }

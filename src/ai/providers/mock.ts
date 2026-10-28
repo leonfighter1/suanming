@@ -40,6 +40,9 @@ const REFS: Record<Topic, string[]> = {
   fengshui_layout: ["/principles/0"],
   fengshui_flow: ["/principles/1"],
   fengshui_advice: ["/principles/2"],
+  // 起名's sections cite the candidates.
+  naming_candidates: ["/candidates/0"],
+  naming_advice: ["/candidates/0"],
 };
 
 const TEXT: Record<Locale, Record<Topic, string>> = {
@@ -62,6 +65,8 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
     fengshui_layout: "（示範）這個房間的佈局可以從主要家具的位置看起，先讓坐臥的地方背後有靠。",
     fengshui_flow: "（示範）讓光線與空氣進得來、走道不被擋住，房間會更舒適。",
     fengshui_advice: "（示範）可以先從最容易的一步做起，例如整理門口或調整燈光。",
+    naming_candidates: "（示範）這個名字的字義與聲調相配，五行也合所需，可作為參考。",
+    naming_advice: "（示範）把名字連同姓氏念出聲、寫下來，再聽聽家人的意見。",
   },
   "zh-Hans": {
     wuxing:
@@ -82,6 +87,8 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
     fengshui_layout: "（示范）这个房间的布局可以从主要家具的位置看起，先让坐卧的地方背后有靠。",
     fengshui_flow: "（示范）让光线与空气进得来、走道不被挡住，房间会更舒适。",
     fengshui_advice: "（示范）可以先从最容易的一步做起，例如整理门口或调整灯光。",
+    naming_candidates: "（示范）这个名字的字义与声调相配，五行也合所需，可作为参考。",
+    naming_advice: "（示范）把名字连同姓氏念出声、写下来，再听听家人的意见。",
   },
   en: {
     wuxing:
@@ -114,6 +121,10 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
       "(Demo) Let light and air in and keep walkways clear, and the room becomes more comfortable.",
     fengshui_advice:
       "(Demo) Begin with the easiest step, such as clearing the doorway or adjusting the light.",
+    naming_candidates:
+      "(Demo) This name's meaning and sound go well together, and its elements serve the chart; take it as one option.",
+    naming_advice:
+      "(Demo) Say each name aloud with the surname, write it down, and ask the family what they think.",
   },
 };
 
@@ -238,7 +249,10 @@ export class MockProvider implements LLMProvider {
                 : [
                     paragraph(
                       topic,
-                      p.system === "bazi" || p.system === "qiuqian" || p.system === "fengshui"
+                      p.system === "bazi" ||
+                        p.system === "qiuqian" ||
+                        p.system === "fengshui" ||
+                        p.system === "naming"
                         ? REFS[topic]
                         : p.system === "tarot"
                           ? ["/cards/0"]

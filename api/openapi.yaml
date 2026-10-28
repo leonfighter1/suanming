@@ -199,7 +199,9 @@ paths:
                       type: object
                       required: [system, entry_weight]
                       properties:
-                        system: { type: string, enum: [bazi, tarot, astrology, qiuqian, fengshui] }
+                        system:
+                          type: string
+                          enum: [bazi, tarot, astrology, qiuqian, fengshui, naming]
                         entry_weight: { type: number }
         "401": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
@@ -840,8 +842,8 @@ paths:
         Paid per topic. TODO(Phase 4 payments): the purchase receipt will be
         verified here; until then `payment.status` is `placeholder` and nothing
         is charged. Buying a topic that already has a plan returns that plan (200).
-        Plans exist for bazi and tarot reports only: an astrology, 求籤 or 风水 report gets
-        a 400 before anything is charged, and none is preloaded for it. Each method writes
+        Plans exist for bazi and tarot reports only: an astrology, 求籤, 风水 or 起名 report
+        gets a 400 before anything is charged, and none is preloaded for it. Each method writes
         its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`). A tarot
         reading's tarot_cards and tarot_synthesis sections have no plan (400): its
         plan is on tarot_advice.
@@ -992,6 +994,7 @@ components:
         - $ref: "#/components/schemas/AstrologyChartRequest"
         - $ref: "#/components/schemas/QiuqianChartRequest"
         - $ref: "#/components/schemas/FengshuiChartRequest"
+        - $ref: "#/components/schemas/NamingChartRequest"
       discriminator:
         propertyName: system
         mapping:
@@ -1000,6 +1003,7 @@ components:
           astrology: "#/components/schemas/AstrologyChartRequest"
           qiuqian: "#/components/schemas/QiuqianChartRequest"
           fengshui: "#/components/schemas/FengshuiChartRequest"
+          naming: "#/components/schemas/NamingChartRequest"
 
     BirthMoment:
       type: object
@@ -1072,6 +1076,21 @@ components:
             system: { const: astrology }
             latitude: { type: number, minimum: -90, maximum: 90 }
             longitude: { type: number, minimum: -180, maximum: 180 }
+
+    NamingChartRequest:
+      description: |
+        起名 (since v4.5.0): candidate given names for a surname, from one of the caller's own 八字
+        charts (五行补益: its 喜用, or a balance), a 字义库 and 音律 rules. Off in the Geo-Rule matrix
+        until the owner has checked the draft 字义库 (451 until then). Another account's chart: 404.
+      type: object
+      additionalProperties: false
+      required: [system, bazi_chart_id, surname]
+      properties:
+        system: { const: naming }
+        bazi_chart_id: { type: string, format: uuid }
+        surname:
+          { type: string, minLength: 1, maxLength: 2, description: One or two Chinese characters }
+        length: { type: integer, enum: [1, 2], default: 2, description: The given name's length }
 
     FengshuiChartRequest:
       description: |
@@ -1398,7 +1417,7 @@ components:
         their four areas. qiuqian (since v4.3.0): qiuqian_poem (the poem, couplet by
         couplet), qiuqian_answer (what it says to the question) and qiuqian_advice.
         fengshui (since v4.4.0): fengshui_layout, fengshui_flow (light and movement) and
-        fengshui_advice.
+        fengshui_advice. naming (since v4.5.0): naming_candidates and naming_advice.
       type: string
       enum:
         [
@@ -1417,6 +1436,8 @@ components:
           fengshui_layout,
           fengshui_flow,
           fengshui_advice,
+          naming_candidates,
+          naming_advice,
         ]
 
     AiDisclosure:

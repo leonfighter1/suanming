@@ -4,6 +4,7 @@ import { MockProvider } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
 import { AuthService } from "../src/auth/service.js";
 import { TokenService } from "../src/auth/tokens.js";
+import { loadGeoMatrix } from "../src/compliance/geo.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
 
 const mock = new MockProvider();
@@ -44,9 +45,15 @@ describe("v1 API", () => {
     const res = await fetch(base + "/v1/health");
     const data = await res.json();
     expect(res.status).toBe(200);
-    // geo_rule_matrix 0.2.0 since v4.3.0 (求籤 first in Taiwan and Hong Kong), 0.3.0 since v4.4.0
-    // (风水, first in Malaysia).
-    expect(data.versions).toMatchObject({ chart_fact_schema: "0.1.0", geo_rule_matrix: "0.3.0" });
+    // geo_rule_matrix: the shipped file's version, which goes up with every change (0.2.0 in v4.3.0, 求籤
+    // first in Taiwan and Hong Kong; 0.3.0 in v4.4.0, 风水 first in Malaysia; 0.4.0 in v4.5.0, 起名 off until
+    // its review), so turning 起名 on after the review needs no test change.
+    const { matrix_version } = loadGeoMatrix("compliance/geo_rule_matrix.json");
+    expect(matrix_version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(data.versions).toMatchObject({
+      chart_fact_schema: "0.1.0",
+      geo_rule_matrix: matrix_version,
+    });
   });
 
   it("creates a chart, then a report that completes asynchronously", async () => {

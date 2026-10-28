@@ -25,7 +25,7 @@ export interface GeoRuleMatrix {
 }
 
 /** Ties in entry weight keep this order. */
-const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "fengshui", "astrology"];
+const DEFAULT_ORDER = ["bazi", "tarot", "qiuqian", "fengshui", "naming", "astrology"];
 
 /**
  * The methods a region offers, heaviest entry weight first (Phase 3 §2.4: 擲筊 / 求签 first in Taiwan and
@@ -42,8 +42,13 @@ export function methodsFor(region: RegionRule): { system: string; entry_weight: 
     .sort((a, b) => b.entry_weight - a.entry_weight || rank(a.system) - rank(b.system));
 }
 
+/**
+ * The matrix: compliance/geo_rule_matrix.json, or the file `MINGLI_GEO_MATRIX` names (ops: a hot-updated
+ * matrix without a release; tests: a matrix with a method switched on, such as 起名 before its review).
+ */
 export function loadGeoMatrix(
-  path = new URL("../../compliance/geo_rule_matrix.json", import.meta.url),
+  path: URL | string = process.env.MINGLI_GEO_MATRIX ??
+    new URL("../../compliance/geo_rule_matrix.json", import.meta.url),
 ): GeoRuleMatrix {
   return JSON.parse(readFileSync(path, "utf8")) as GeoRuleMatrix;
 }

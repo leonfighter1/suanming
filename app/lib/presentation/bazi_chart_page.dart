@@ -11,6 +11,7 @@ import 'keyboard.dart';
 import 'labels.dart';
 import 'theme.dart';
 import 'life_report_page.dart';
+import 'naming_page.dart';
 import 'widgets/report_request.dart';
 import 'widgets/term_tip.dart';
 
@@ -193,6 +194,21 @@ class BaziChartPage extends ConsumerWidget {
         padding: const EdgeInsets.only(top: Space.m),
         child: Center(child: LifeReportButton(chart: chart, profile: profile)),
       ),
+      // 起名 (v4.5.0) for this chart, where the region offers it (off until the owner's review).
+      if ((ref.watch(methodsProvider).value ?? defaultMethods).contains('naming'))
+        Padding(
+          padding: const EdgeInsets.only(top: Space.s),
+          child: Center(
+            child: TextButton.icon(
+              key: const Key('open-naming'),
+              icon: const Icon(Icons.badge_outlined),
+              label: Text(l10n.namingFromChart),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => NamingPage(baziChartId: chart.chartId)),
+              ),
+            ),
+          ),
+        ),
     ];
 
     // Only readings are kept in 历史记录: leaving drops the chart, so ask first.

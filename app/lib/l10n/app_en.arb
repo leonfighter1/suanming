@@ -645,5 +645,24 @@
   },
   "topicFengshuiLayout": "Layout",
   "topicFengshuiFlow": "Light and movement",
-  "topicFengshuiAdvice": "Advice"
+  "topicFengshuiAdvice": "Advice",
+  "homeNaming": "Naming",
+  "namingFromChart": "Suggest names for this chart",
+  "namingSurname": "Surname",
+  "namingSurnameHint": "One or two Chinese characters, e.g. 陳 or 歐陽",
+  "namingLength": "Given name",
+  "namingOne": "One character",
+  "namingTwo": "Two characters",
+  "namingSuggest": "Suggest names",
+  "namingElements": "Names that serve: {elements}",
+  "@namingElements": {
+    "placeholders": { "elements": { "type": "String" } }
+  },
+  "namingBalance": "This chart has no favourable element, so the names keep a balance.",
+  "namingCandidates": "Candidate names",
+  "namingDraft": "The character library behind these names is still awaiting expert review.",
+  "namingNote": "A name is a wish and a sound; it decides no one's fate.",
+  "namingSections": "The reading has two parts: the names, and how to choose.",
+  "topicNamingCandidates": "The names",
+  "topicNamingAdvice": "Advice"
 }

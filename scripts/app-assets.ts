@@ -6,11 +6,14 @@
  *   app/assets/i18n/term_tips.json  ← src/ai/term-tips.ts (what each 八字 term means)
  *   app/assets/i18n/qiuqian_lots.json ← data/qiuqian (求籤's lot set, v4.3.0)
  *   app/assets/i18n/fengshui.json   ← src/engines/fengshui/principles.ts (风水's rooms, v4.4.0)
+ *   app/assets/i18n/naming_chars.json ← src/engines/naming/characters.ts (起名's draft 字义库, v4.5.0)
  *   app/test/fixtures/*.json        ← real engine + pipeline (mock provider) outputs
  * test/app-assets.test.ts fails when these are stale. Run: npm run sync:app
  * (this module only builds; scripts/sync-app-assets.ts writes).
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   generateLifeReport,
   generateRemedy,
@@ -49,6 +52,8 @@ import { KEYWORDS } from "../src/engines/tarot/keywords.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
 import { computeFengshui, PRINCIPLES_VERSION } from "../src/engines/fengshui/index.js";
 import { DIRECTIONS, FACINGS, ROOM_IDS, ROOMS } from "../src/engines/fengshui/principles.js";
+import { NAME_CHARS } from "../src/engines/naming/characters.js";
+import { computeNaming, LIBRARY } from "../src/engines/naming/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { lotSet } from "../src/engines/qiuqian/lots.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
@@ -193,6 +198,43 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     report: fengshuiReport,
   });
 
+  // 起名 from the 八字 fixture, and its reading (v4.5.0). 起名 ships off in the geo matrix until the
+  // owner's review, so the reading runs against a copy with it switched on.
+  const naming = computeNaming(
+    bazi,
+    { surname: "陳", length: 2 },
+    { digestPepper: secrets.digestPepper, now },
+  );
+  const matrix = JSON.parse(readFileSync(at("compliance/geo_rule_matrix.json"), "utf8"));
+  matrix.defaults.systems.naming.available = true;
+  const matrixFile = join(tmpdir(), `mingli-sync-geo-${process.pid}.json`);
+  writeFileSync(matrixFile, JSON.stringify(matrix));
+  const before = process.env.MINGLI_GEO_MATRIX;
+  process.env.MINGLI_GEO_MATRIX = matrixFile;
+  const namingReport = await generateReport(
+    naming,
+    { locale: "zh-Hant", country: "HK" },
+    {
+      providers: { deepseek: mock, anthropic: mock },
+      now,
+      newId: () => "12121212-1212-4212-8212-121212121212",
+    },
+  ).finally(() => {
+    if (before === undefined) delete process.env.MINGLI_GEO_MATRIX;
+    else process.env.MINGLI_GEO_MATRIX = before;
+  });
+  const namingView = publicReport({
+    id: namingReport.report_id,
+    owner: "fixture",
+    chart_id: "34343434-3434-4434-8434-343434343434", // chart_naming.json, the names it reads
+    status: namingReport.status,
+    locale: namingReport.locale,
+    topics: namingReport.topics,
+    created_at: ts,
+    updated_at: ts,
+    report: namingReport,
+  });
+
   const remedy = await generateRemedy(
     bazi,
     report,
@@ -325,6 +367,22 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       rooms: Object.fromEntries(ROOM_IDS.map((id) => [id, ROOMS[id]])),
       facings: Object.fromEntries(FACINGS.map((f) => [f, DIRECTIONS[f]])),
     },
+    // 起名's 字义库 (v4.5.0, a draft awaiting the owner's review), for the candidate cards.
+    "app/assets/i18n/naming_chars.json": {
+      ...LIBRARY,
+      chars: NAME_CHARS.map((c) => ({
+        hant: c.hant,
+        hans: c.hans,
+        pinyin: c.pinyin,
+        element: c.element,
+        meaning: c.meaning,
+      })),
+    },
+    "app/test/fixtures/chart_naming.json": {
+      chart_id: "34343434-3434-4434-8434-343434343434",
+      chart_fact: naming,
+    },
+    "app/test/fixtures/report_naming_passed.json": namingView,
     "app/test/fixtures/chart_fengshui.json": {
       chart_id: "ffffffff-ffff-4fff-8fff-ffffffffffff",
       chart_fact: fengshui,

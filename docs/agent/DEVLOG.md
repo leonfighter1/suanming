@@ -2,6 +2,27 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ac): S6 WP6.4, 起名 behind the owner's review; release v4.5.0
+
+- v4.4.0 committed and tagged (e899046) after a harness PASS (rule 23 again: the first run failed at analyze, the second passed).
+- Spec from the owner's Phase 3 §2.1, §4: 五行补益 from the 八字 chart, a 字义库 in 繁 and 简 checked by hand, 音律 rules, candidates with their basis. Written into the plan before code.
+- The 字义库 is a draft (100 characters, 83 surnames), so the owner's 人工校订 is a gate:
+  - `naming` ships off in the matrix (0.4.0);
+  - `LIBRARY.reviewed` is false;
+  - a test holds the two together (on ⇒ reviewed);
+  - the card's draft note follows the chart's `library.reviewed`.
+- Checks: pinyin against pinyin-pro (G4), 简体 against OpenCC (G18), the element against the radical rule. 鉅 → 鑄: OpenCC makes 鉅 巨 and loses the 金.
+- Engine: the 音律 rules, each its own function, unit-tested with hand-worked values. The tie order is hashed from the surname's 繁 form, so 張 and 张 give one list.
+- AI, rule 8: `narrative_naming@1` and `action_naming@1` (pinned), no plan, its own brief, facts layer and AI label. Each method's user message is now built from shared arguments plus its own.
+- API: `POST /v1/charts {system: "naming", bazi_chart_id, surname, length}`. It reads only the caller's own 八字 chart (404 otherwise). Migration 005, OpenAPI.
+- App: 「為這個命盤起名」 on the 八字 chart page when the region offers it, `NamingPage`, `NamesCard`, the reading page and history (「起名 · 陳」 in the reader's script).
+- Tried the owner's switch (reviewed, on, matrix 0.5.0, sync), ran every test, then undid it:
+  - 7 tests pinned the shipped state. They now use `withNaming(available)` or read the matrix (rule 42).
+  - With the fixes, all pass after the switch.
+- A negative test was vacuous: a scrolled-past widget was still built. It is now anchored on the neighbouring button (rule 43).
+- Owner's steps to turn 起名 on: docs/web-test.md.
+- v4.5.0 committed and tagged locally, not pushed.
+
 ## 2026-10-28 (ab): S6 WP6.3, 风水 to the owner's spec; release v4.4.0
 
 - v4.3.0 committed and tagged (16c00ea) after a harness PASS. The first run failed at analyze (rule 23, the pubspec bump); the second passed.

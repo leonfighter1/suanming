@@ -25,7 +25,7 @@ import type { SocialProvider } from "../auth/social.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
-const MIGRATIONS = ["001_phase1_ai", "002_store", "003_qiuqian", "004_fengshui"];
+const MIGRATIONS = ["001_phase1_ai", "002_store", "003_qiuqian", "004_fengshui", "005_naming"];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
 /** Reports are kept 24 months (docs/data-retention.md); purging them is a later WP. */

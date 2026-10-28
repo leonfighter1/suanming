@@ -1416,4 +1416,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get topicFengshuiAdvice => 'Advice';
+
+  @override
+  String get homeNaming => 'Naming';
+
+  @override
+  String get namingFromChart => 'Suggest names for this chart';
+
+  @override
+  String get namingSurname => 'Surname';
+
+  @override
+  String get namingSurnameHint => 'One or two Chinese characters, e.g. 陳 or 歐陽';
+
+  @override
+  String get namingLength => 'Given name';
+
+  @override
+  String get namingOne => 'One character';
+
+  @override
+  String get namingTwo => 'Two characters';
+
+  @override
+  String get namingSuggest => 'Suggest names';
+
+  @override
+  String namingElements(String elements) {
+    return 'Names that serve: $elements';
+  }
+
+  @override
+  String get namingBalance =>
+      'This chart has no favourable element, so the names keep a balance.';
+
+  @override
+  String get namingCandidates => 'Candidate names';
+
+  @override
+  String get namingDraft =>
+      'The character library behind these names is still awaiting expert review.';
+
+  @override
+  String get namingNote =>
+      'A name is a wish and a sound; it decides no one\'s fate.';
+
+  @override
+  String get namingSections =>
+      'The reading has two parts: the names, and how to choose.';
+
+  @override
+  String get topicNamingCandidates => 'The names';
+
+  @override
+  String get topicNamingAdvice => 'Advice';
 }

@@ -91,6 +91,8 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             Text(l10n.qiuqianSections, key: const Key('qiuqian-sections'), style: Theme.of(context).textTheme.bodyMedium)
           else if (widget.system == 'fengshui')
             Text(l10n.fengshuiSections, key: const Key('fengshui-sections'), style: Theme.of(context).textTheme.bodyMedium)
+          else if (widget.system == 'naming')
+            Text(l10n.namingSections, key: const Key('naming-sections'), style: Theme.of(context).textTheme.bodyMedium)
           else ...[
             Text(l10n.chooseTopics, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: Space.s),

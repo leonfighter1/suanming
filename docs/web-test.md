@@ -168,6 +168,21 @@ Chinese characters. On Windows it finds Noto Sans SC or 微软雅黑; on Linux, 
   room.
 - An account registered in Malaysia (or `X-Dev-Country: MY` in dev mode) sees 風水 first.
 
+## 起名 (v4.5.0): off until the 字义库 is reviewed
+
+起名 ships off for everyone: its 字义库 is a draft awaiting the owner's 人工校订. To turn it on:
+
+1. Check `src/engines/naming/characters.ts`: each character's 繁 and 简 forms, pinyin, 五行 and meaning, and the
+   surnames. `npm test -- naming` says what each entry must satisfy.
+2. In `src/engines/naming/index.ts`, set `LIBRARY` to `{ version: "1.0.0", reviewed: true }`, then
+   `npm run sync:app`. The names card then stops calling the 字义库 a draft.
+3. In `compliance/geo_rule_matrix.json`, set `defaults.systems.naming.available` to `true` and raise
+   `matrix_version` (0.4.0 → 0.5.0). The server reads the matrix on each request, so no restart is needed.
+4. Run the harness. Every test still passes after these steps (tried on 2026-10-28, then undone).
+
+Then: 八字排盘 → compute a chart → 為這個命盤起名 at the end of the chart page. Type the surname, choose 單字名 or
+雙字名, then 起名. To try it before the review, point `MINGLI_GEO_MATRIX` at a copy of the matrix with `naming` on.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

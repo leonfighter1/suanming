@@ -1,0 +1,1106 @@
+{
+  "version": "0.1.0-draft",
+  "reviewed": false,
+  "chars": [
+    {
+      "hant": "江",
+      "hans": "江",
+      "pinyin": "jiāng",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "江河，寬廣",
+        "zh-Hans": "江河，宽广",
+        "en": "great river"
+      }
+    },
+    {
+      "hant": "河",
+      "hans": "河",
+      "pinyin": "hé",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "河流，綿長",
+        "zh-Hans": "河流，绵长",
+        "en": "river"
+      }
+    },
+    {
+      "hant": "涵",
+      "hans": "涵",
+      "pinyin": "hán",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "包容，涵養",
+        "zh-Hans": "包容，涵养",
+        "en": "tolerance, depth"
+      }
+    },
+    {
+      "hant": "清",
+      "hans": "清",
+      "pinyin": "qīng",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "清澈，純淨",
+        "zh-Hans": "清澈，纯净",
+        "en": "clear, pure"
+      }
+    },
+    {
+      "hant": "源",
+      "hans": "源",
+      "pinyin": "yuán",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "源頭，根本",
+        "zh-Hans": "源头，根本",
+        "en": "source"
+      }
+    },
+    {
+      "hant": "沛",
+      "hans": "沛",
+      "pinyin": "pèi",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "充沛，盛大",
+        "zh-Hans": "充沛，盛大",
+        "en": "abundant"
+      }
+    },
+    {
+      "hant": "潤",
+      "hans": "润",
+      "pinyin": "rùn",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "滋潤，溫和",
+        "zh-Hans": "滋润，温和",
+        "en": "nourishing, gentle"
+      }
+    },
+    {
+      "hant": "泓",
+      "hans": "泓",
+      "pinyin": "hóng",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "水深而廣",
+        "zh-Hans": "水深而广",
+        "en": "deep, wide water"
+      }
+    },
+    {
+      "hant": "浩",
+      "hans": "浩",
+      "pinyin": "hào",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "浩大，廣闊",
+        "zh-Hans": "浩大，广阔",
+        "en": "vast"
+      }
+    },
+    {
+      "hant": "澤",
+      "hans": "泽",
+      "pinyin": "zé",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "恩澤，潤澤",
+        "zh-Hans": "恩泽，润泽",
+        "en": "grace, kindness"
+      }
+    },
+    {
+      "hant": "洋",
+      "hans": "洋",
+      "pinyin": "yáng",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "海洋，盛大",
+        "zh-Hans": "海洋，盛大",
+        "en": "ocean, magnificent"
+      }
+    },
+    {
+      "hant": "波",
+      "hans": "波",
+      "pinyin": "bō",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "水波，靈動",
+        "zh-Hans": "水波，灵动",
+        "en": "wave, lively"
+      }
+    },
+    {
+      "hant": "淳",
+      "hans": "淳",
+      "pinyin": "chún",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "淳樸，厚道",
+        "zh-Hans": "淳朴，厚道",
+        "en": "honest, simple"
+      }
+    },
+    {
+      "hant": "瀚",
+      "hans": "瀚",
+      "pinyin": "hàn",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "浩瀚，博大",
+        "zh-Hans": "浩瀚，博大",
+        "en": "vast, broad"
+      }
+    },
+    {
+      "hant": "溪",
+      "hans": "溪",
+      "pinyin": "xī",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "溪流，清新",
+        "zh-Hans": "溪流，清新",
+        "en": "brook, fresh"
+      }
+    },
+    {
+      "hant": "霖",
+      "hans": "霖",
+      "pinyin": "lín",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "甘霖，及時雨",
+        "zh-Hans": "甘霖，及时雨",
+        "en": "timely rain"
+      }
+    },
+    {
+      "hant": "雯",
+      "hans": "雯",
+      "pinyin": "wén",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "雲彩，文采",
+        "zh-Hans": "云彩，文采",
+        "en": "patterned clouds, elegance"
+      }
+    },
+    {
+      "hant": "露",
+      "hans": "露",
+      "pinyin": "lù",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "晨露，清新",
+        "zh-Hans": "晨露，清新",
+        "en": "dew, freshness"
+      }
+    },
+    {
+      "hant": "泉",
+      "hans": "泉",
+      "pinyin": "quán",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "泉水，清冽",
+        "zh-Hans": "泉水，清冽",
+        "en": "spring water"
+      }
+    },
+    {
+      "hant": "汐",
+      "hans": "汐",
+      "pinyin": "xī",
+      "element": "水",
+      "meaning": {
+        "zh-Hant": "潮汐，有節奏",
+        "zh-Hans": "潮汐，有节奏",
+        "en": "evening tide, rhythm"
+      }
+    },
+    {
+      "hant": "林",
+      "hans": "林",
+      "pinyin": "lín",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "樹林，繁茂",
+        "zh-Hans": "树林，繁茂",
+        "en": "woods, flourishing"
+      }
+    },
+    {
+      "hant": "森",
+      "hans": "森",
+      "pinyin": "sēn",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "森林，茂盛",
+        "zh-Hans": "森林，茂盛",
+        "en": "forest, lush"
+      }
+    },
+    {
+      "hant": "松",
+      "hans": "松",
+      "pinyin": "sōng",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "松樹，堅貞",
+        "zh-Hans": "松树，坚贞",
+        "en": "pine, steadfast"
+      }
+    },
+    {
+      "hant": "柏",
+      "hans": "柏",
+      "pinyin": "bǎi",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "柏樹，長青",
+        "zh-Hans": "柏树，长青",
+        "en": "cypress, evergreen"
+      }
+    },
+    {
+      "hant": "桐",
+      "hans": "桐",
+      "pinyin": "tóng",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "梧桐，高潔",
+        "zh-Hans": "梧桐，高洁",
+        "en": "paulownia, noble"
+      }
+    },
+    {
+      "hant": "楠",
+      "hans": "楠",
+      "pinyin": "nán",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "楠木，堅實",
+        "zh-Hans": "楠木，坚实",
+        "en": "nanmu wood, solid"
+      }
+    },
+    {
+      "hant": "杉",
+      "hans": "杉",
+      "pinyin": "shān",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "杉樹，挺拔",
+        "zh-Hans": "杉树，挺拔",
+        "en": "fir, upright"
+      }
+    },
+    {
+      "hant": "樺",
+      "hans": "桦",
+      "pinyin": "huà",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "樺樹，秀美",
+        "zh-Hans": "桦树，秀美",
+        "en": "birch, graceful"
+      }
+    },
+    {
+      "hant": "梓",
+      "hans": "梓",
+      "pinyin": "zǐ",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "梓木，故鄉",
+        "zh-Hans": "梓木，故乡",
+        "en": "catalpa, hometown"
+      }
+    },
+    {
+      "hant": "芸",
+      "hans": "芸",
+      "pinyin": "yún",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "芸香，書香",
+        "zh-Hans": "芸香，书香",
+        "en": "rue, scholarly"
+      }
+    },
+    {
+      "hant": "芳",
+      "hans": "芳",
+      "pinyin": "fāng",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "芬芳，美好",
+        "zh-Hans": "芬芳，美好",
+        "en": "fragrant, fine"
+      }
+    },
+    {
+      "hant": "若",
+      "hans": "若",
+      "pinyin": "ruò",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "杜若，香草",
+        "zh-Hans": "杜若，香草",
+        "en": "fragrant herb"
+      }
+    },
+    {
+      "hant": "菲",
+      "hans": "菲",
+      "pinyin": "fēi",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "芳菲，花草美",
+        "zh-Hans": "芳菲，花草美",
+        "en": "fragrant flowers"
+      }
+    },
+    {
+      "hant": "榮",
+      "hans": "荣",
+      "pinyin": "róng",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "繁榮，興盛",
+        "zh-Hans": "繁荣，兴盛",
+        "en": "flourishing"
+      }
+    },
+    {
+      "hant": "茂",
+      "hans": "茂",
+      "pinyin": "mào",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "茂盛，豐美",
+        "zh-Hans": "茂盛，丰美",
+        "en": "luxuriant"
+      }
+    },
+    {
+      "hant": "蘭",
+      "hans": "兰",
+      "pinyin": "lán",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "蘭花，高雅",
+        "zh-Hans": "兰花，高雅",
+        "en": "orchid, elegant"
+      }
+    },
+    {
+      "hant": "萱",
+      "hans": "萱",
+      "pinyin": "xuān",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "萱草，忘憂",
+        "zh-Hans": "萱草，忘忧",
+        "en": "daylily, carefree"
+      }
+    },
+    {
+      "hant": "笙",
+      "hans": "笙",
+      "pinyin": "shēng",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "笙簫，和樂",
+        "zh-Hans": "笙箫，和乐",
+        "en": "sheng pipes, harmony"
+      }
+    },
+    {
+      "hant": "棟",
+      "hans": "栋",
+      "pinyin": "dòng",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "棟樑，擔當",
+        "zh-Hans": "栋梁，担当",
+        "en": "pillar, dependable"
+      }
+    },
+    {
+      "hant": "蕙",
+      "hans": "蕙",
+      "pinyin": "huì",
+      "element": "木",
+      "meaning": {
+        "zh-Hant": "蕙蘭，美德",
+        "zh-Hans": "蕙兰，美德",
+        "en": "orchid, virtue"
+      }
+    },
+    {
+      "hant": "炎",
+      "hans": "炎",
+      "pinyin": "yán",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "炎熱，熱情",
+        "zh-Hans": "炎热，热情",
+        "en": "blazing, warm-hearted"
+      }
+    },
+    {
+      "hant": "煜",
+      "hans": "煜",
+      "pinyin": "yù",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "照耀，光明",
+        "zh-Hans": "照耀，光明",
+        "en": "shining"
+      }
+    },
+    {
+      "hant": "燁",
+      "hans": "烨",
+      "pinyin": "yè",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "光輝燦爛",
+        "zh-Hans": "光辉灿烂",
+        "en": "brilliant light"
+      }
+    },
+    {
+      "hant": "煒",
+      "hans": "炜",
+      "pinyin": "wěi",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "光彩鮮明",
+        "zh-Hans": "光彩鲜明",
+        "en": "bright and vivid"
+      }
+    },
+    {
+      "hant": "燦",
+      "hans": "灿",
+      "pinyin": "càn",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "燦爛，耀眼",
+        "zh-Hans": "灿烂，耀眼",
+        "en": "radiant"
+      }
+    },
+    {
+      "hant": "煦",
+      "hans": "煦",
+      "pinyin": "xù",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "溫暖，和煦",
+        "zh-Hans": "温暖，和煦",
+        "en": "warm, kindly"
+      }
+    },
+    {
+      "hant": "暉",
+      "hans": "晖",
+      "pinyin": "huī",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "陽光，光輝",
+        "zh-Hans": "阳光，光辉",
+        "en": "sunlight, glow"
+      }
+    },
+    {
+      "hant": "昊",
+      "hans": "昊",
+      "pinyin": "hào",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "廣大的天",
+        "zh-Hans": "广大的天",
+        "en": "vast sky"
+      }
+    },
+    {
+      "hant": "晨",
+      "hans": "晨",
+      "pinyin": "chén",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "清晨，朝氣",
+        "zh-Hans": "清晨，朝气",
+        "en": "morning, vigour"
+      }
+    },
+    {
+      "hant": "昕",
+      "hans": "昕",
+      "pinyin": "xīn",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "黎明，初光",
+        "zh-Hans": "黎明，初光",
+        "en": "dawn"
+      }
+    },
+    {
+      "hant": "曦",
+      "hans": "曦",
+      "pinyin": "xī",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "晨光",
+        "zh-Hans": "晨光",
+        "en": "morning sunlight"
+      }
+    },
+    {
+      "hant": "晴",
+      "hans": "晴",
+      "pinyin": "qíng",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "晴朗，開朗",
+        "zh-Hans": "晴朗，开朗",
+        "en": "clear, cheerful"
+      }
+    },
+    {
+      "hant": "昭",
+      "hans": "昭",
+      "pinyin": "zhāo",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "明亮，彰顯",
+        "zh-Hans": "明亮，彰显",
+        "en": "bright, evident"
+      }
+    },
+    {
+      "hant": "熙",
+      "hans": "熙",
+      "pinyin": "xī",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "光明，和樂",
+        "zh-Hans": "光明，和乐",
+        "en": "bright, joyful"
+      }
+    },
+    {
+      "hant": "照",
+      "hans": "照",
+      "pinyin": "zhào",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "照耀，關照",
+        "zh-Hans": "照耀，关照",
+        "en": "illuminate, care"
+      }
+    },
+    {
+      "hant": "煥",
+      "hans": "焕",
+      "pinyin": "huàn",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "煥發，光彩",
+        "zh-Hans": "焕发，光彩",
+        "en": "glowing, renewed"
+      }
+    },
+    {
+      "hant": "炯",
+      "hans": "炯",
+      "pinyin": "jiǒng",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "明亮有神",
+        "zh-Hans": "明亮有神",
+        "en": "bright-eyed"
+      }
+    },
+    {
+      "hant": "旭",
+      "hans": "旭",
+      "pinyin": "xù",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "旭日，朝氣",
+        "zh-Hans": "旭日，朝气",
+        "en": "rising sun"
+      }
+    },
+    {
+      "hant": "晗",
+      "hans": "晗",
+      "pinyin": "hán",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "天將明",
+        "zh-Hans": "天将明",
+        "en": "daybreak"
+      }
+    },
+    {
+      "hant": "熠",
+      "hans": "熠",
+      "pinyin": "yì",
+      "element": "火",
+      "meaning": {
+        "zh-Hant": "光耀，鮮明",
+        "zh-Hans": "光耀，鲜明",
+        "en": "sparkling"
+      }
+    },
+    {
+      "hant": "坤",
+      "hans": "坤",
+      "pinyin": "kūn",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "大地，包容",
+        "zh-Hans": "大地，包容",
+        "en": "earth, embracing"
+      }
+    },
+    {
+      "hant": "培",
+      "hans": "培",
+      "pinyin": "péi",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "培育，栽培",
+        "zh-Hans": "培育，栽培",
+        "en": "nurture"
+      }
+    },
+    {
+      "hant": "城",
+      "hans": "城",
+      "pinyin": "chéng",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "城池，堅固",
+        "zh-Hans": "城池，坚固",
+        "en": "city wall, secure"
+      }
+    },
+    {
+      "hant": "垣",
+      "hans": "垣",
+      "pinyin": "yuán",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "矮牆，守護",
+        "zh-Hans": "矮墙，守护",
+        "en": "wall, protection"
+      }
+    },
+    {
+      "hant": "堂",
+      "hans": "堂",
+      "pinyin": "táng",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "廳堂，正大",
+        "zh-Hans": "厅堂，正大",
+        "en": "hall, upright"
+      }
+    },
+    {
+      "hant": "堅",
+      "hans": "坚",
+      "pinyin": "jiān",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "堅定，牢固",
+        "zh-Hans": "坚定，牢固",
+        "en": "firm, resolute"
+      }
+    },
+    {
+      "hant": "山",
+      "hans": "山",
+      "pinyin": "shān",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "高山，穩重",
+        "zh-Hans": "高山，稳重",
+        "en": "mountain, steady"
+      }
+    },
+    {
+      "hant": "峰",
+      "hans": "峰",
+      "pinyin": "fēng",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "山峰，卓越",
+        "zh-Hans": "山峰，卓越",
+        "en": "peak, excellence"
+      }
+    },
+    {
+      "hant": "岳",
+      "hans": "岳",
+      "pinyin": "yuè",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "高山，崇高",
+        "zh-Hans": "高山，崇高",
+        "en": "lofty mountain"
+      }
+    },
+    {
+      "hant": "岩",
+      "hans": "岩",
+      "pinyin": "yán",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "岩石，堅毅",
+        "zh-Hans": "岩石，坚毅",
+        "en": "rock, determined"
+      }
+    },
+    {
+      "hant": "磊",
+      "hans": "磊",
+      "pinyin": "lěi",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "光明磊落",
+        "zh-Hans": "光明磊落",
+        "en": "open-hearted"
+      }
+    },
+    {
+      "hant": "碩",
+      "hans": "硕",
+      "pinyin": "shuò",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "碩大，豐碩",
+        "zh-Hans": "硕大，丰硕",
+        "en": "great, fruitful"
+      }
+    },
+    {
+      "hant": "墨",
+      "hans": "墨",
+      "pinyin": "mò",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "筆墨，文采",
+        "zh-Hans": "笔墨，文采",
+        "en": "ink, literary"
+      }
+    },
+    {
+      "hant": "均",
+      "hans": "均",
+      "pinyin": "jūn",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "均衡，公平",
+        "zh-Hans": "均衡，公平",
+        "en": "balanced, fair"
+      }
+    },
+    {
+      "hant": "圭",
+      "hans": "圭",
+      "pinyin": "guī",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "玉圭，端正",
+        "zh-Hans": "玉圭，端正",
+        "en": "jade tablet, upright"
+      }
+    },
+    {
+      "hant": "嵐",
+      "hans": "岚",
+      "pinyin": "lán",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "山間霧氣",
+        "zh-Hans": "山间雾气",
+        "en": "mountain mist"
+      }
+    },
+    {
+      "hant": "崇",
+      "hans": "崇",
+      "pinyin": "chóng",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "崇高，尊敬",
+        "zh-Hans": "崇高，尊敬",
+        "en": "noble, revered"
+      }
+    },
+    {
+      "hant": "峻",
+      "hans": "峻",
+      "pinyin": "jùn",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "高峻，嚴正",
+        "zh-Hans": "高峻，严正",
+        "en": "lofty, stern"
+      }
+    },
+    {
+      "hant": "巍",
+      "hans": "巍",
+      "pinyin": "wēi",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "巍峨，高大",
+        "zh-Hans": "巍峨，高大",
+        "en": "towering"
+      }
+    },
+    {
+      "hant": "坦",
+      "hans": "坦",
+      "pinyin": "tǎn",
+      "element": "土",
+      "meaning": {
+        "zh-Hant": "坦蕩，平和",
+        "zh-Hans": "坦荡，平和",
+        "en": "open, calm"
+      }
+    },
+    {
+      "hant": "鋒",
+      "hans": "锋",
+      "pinyin": "fēng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "鋒芒，銳氣",
+        "zh-Hans": "锋芒，锐气",
+        "en": "edge, drive"
+      }
+    },
+    {
+      "hant": "銘",
+      "hans": "铭",
+      "pinyin": "míng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "銘記，銘刻",
+        "zh-Hans": "铭记，铭刻",
+        "en": "inscribe, remember"
+      }
+    },
+    {
+      "hant": "鈞",
+      "hans": "钧",
+      "pinyin": "jūn",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "千鈞，穩重",
+        "zh-Hans": "千钧，稳重",
+        "en": "weighty, steady"
+      }
+    },
+    {
+      "hant": "銳",
+      "hans": "锐",
+      "pinyin": "ruì",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "敏銳，進取",
+        "zh-Hans": "敏锐，进取",
+        "en": "keen, enterprising"
+      }
+    },
+    {
+      "hant": "錚",
+      "hans": "铮",
+      "pinyin": "zhēng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "錚錚，剛正",
+        "zh-Hans": "铮铮，刚正",
+        "en": "resonant, upright"
+      }
+    },
+    {
+      "hant": "鈺",
+      "hans": "钰",
+      "pinyin": "yù",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "珍寶，堅金",
+        "zh-Hans": "珍宝，坚金",
+        "en": "treasure"
+      }
+    },
+    {
+      "hant": "錦",
+      "hans": "锦",
+      "pinyin": "jǐn",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "錦繡，美好",
+        "zh-Hans": "锦绣，美好",
+        "en": "brocade, splendid"
+      }
+    },
+    {
+      "hant": "鍇",
+      "hans": "锴",
+      "pinyin": "kǎi",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "精鐵，堅韌",
+        "zh-Hans": "精铁，坚韧",
+        "en": "fine iron, resilient"
+      }
+    },
+    {
+      "hant": "鉉",
+      "hans": "铉",
+      "pinyin": "xuàn",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "鼎耳，擔當",
+        "zh-Hans": "鼎耳，担当",
+        "en": "tripod handle, responsibility"
+      }
+    },
+    {
+      "hant": "鈴",
+      "hans": "铃",
+      "pinyin": "líng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "鈴聲，清脆",
+        "zh-Hans": "铃声，清脆",
+        "en": "bell, clear"
+      }
+    },
+    {
+      "hant": "銓",
+      "hans": "铨",
+      "pinyin": "quán",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "衡量，選拔",
+        "zh-Hans": "衡量，选拔",
+        "en": "weigh, select"
+      }
+    },
+    {
+      "hant": "鐸",
+      "hans": "铎",
+      "pinyin": "duó",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "大鈴，宣教",
+        "zh-Hans": "大铃，宣教",
+        "en": "great bell, teaching"
+      }
+    },
+    {
+      "hant": "釗",
+      "hans": "钊",
+      "pinyin": "zhāo",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "勉勵",
+        "zh-Hans": "勉励",
+        "en": "encourage"
+      }
+    },
+    {
+      "hant": "鎔",
+      "hans": "镕",
+      "pinyin": "róng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "熔鑄，陶冶",
+        "zh-Hans": "熔铸，陶冶",
+        "en": "cast, cultivate"
+      }
+    },
+    {
+      "hant": "錫",
+      "hans": "锡",
+      "pinyin": "xī",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "賜予",
+        "zh-Hans": "赐予",
+        "en": "bestow"
+      }
+    },
+    {
+      "hant": "鏡",
+      "hans": "镜",
+      "pinyin": "jìng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "明鏡，明察",
+        "zh-Hans": "明镜，明察",
+        "en": "mirror, insight"
+      }
+    },
+    {
+      "hant": "鑒",
+      "hans": "鉴",
+      "pinyin": "jiàn",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "借鑒，明察",
+        "zh-Hans": "借鉴，明察",
+        "en": "reflect, discern"
+      }
+    },
+    {
+      "hant": "銀",
+      "hans": "银",
+      "pinyin": "yín",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "銀白，純淨",
+        "zh-Hans": "银白，纯净",
+        "en": "silver, pure"
+      }
+    },
+    {
+      "hant": "鏞",
+      "hans": "镛",
+      "pinyin": "yōng",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "大鐘",
+        "zh-Hans": "大钟",
+        "en": "great bell"
+      }
+    },
+    {
+      "hant": "鑄",
+      "hans": "铸",
+      "pinyin": "zhù",
+      "element": "金",
+      "meaning": {
+        "zh-Hant": "鑄造，成器",
+        "zh-Hans": "铸造，成器",
+        "en": "forge, shape"
+      }
+    }
+  ]
+}

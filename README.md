@@ -12,6 +12,84 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v4.5.0 (2026-10-28): 起名, candidate names from a 八字 chart (off until you review its 字义库)
+
+Stage S6 of the [tech plan](docs/tech-plan.md) (新玩法), work package 6.4, built to your phase document's 起名 spec:
+五行补益 from the 八字 chart, a 字义库 with 繁 and 简 forms, and 音律 rules. A medium update: committed locally, and
+pushed with S6's big update.
+
+- **It is off for everyone until you have checked the 字义库.**
+  - Your spec asks for a 字义库 checked by hand (人工校订). The one here is a draft I wrote:
+    - 100 characters, 20 per element, each with its 繁 and 简 forms, pinyin, 五行 by its radical, and a short
+      meaning in three languages;
+    - 83 common surnames with their readings as surnames, 3 of them double (such as 歐陽).
+  - Until then the Geo-Rule matrix (now 0.4.0) keeps 起名 off (`defaults.systems.naming.available: false`), so no
+    one sees it.
+  - To turn it on, see [docs/web-test.md](docs/web-test.md) (起名):
+    1. check `src/engines/naming/characters.ts`;
+    2. mark the 字义库 reviewed in `src/engines/naming/index.ts`, then `npm run sync:app`;
+    3. switch `naming` on in the matrix and raise its version.
+  - I tried these steps (then undid them): every test still passes. Drop any character you disagree with; the tests
+    only ask that each element keep at least 12.
+- How to use it, once it's on:
+  1. 八字排盘 → compute a chart → 「為這個命盤起名」 at the end of the chart page.
+  2. Type the surname (one or two Chinese characters, 繁 or 简), and choose 單字名 or 雙字名.
+  3. 起名 (or Ctrl+Enter) shows 12 candidate names. Each comes with its pinyin, and with each character's 五行 and
+     meaning.
+     - The names serve the chart's 喜用, e.g. 「名字所補：火、土」.
+     - A chart with no clear 喜用 gets names that keep a balance, from its two weakest elements. That is a 中和
+       chart, or one flagged for a closer look.
+  4. 生成 AI 解讀 reads the names in two parts:
+     - 候選名字: the strongest few, one paragraph each, on meaning, 五行 and sound;
+     - 建議: how to choose (say it aloud, write it, hear it in the family's dialect).
+- The rules:
+  - 音律, each rule its own unit test:
+    - never a character of the surname, and never two like syllables side by side;
+    - three syllables never all in one tone;
+    - points for tones that rise and fall (平仄) and for a level-tone ending;
+    - deductions for 双声 and 叠韵.
+  - The same surname always gives the same list, in either script: 張 and 张 give the same names. No character
+    appears in more than two of them.
+  - The reading never says a name decides fate or fortune, and never asks for a fee or a ritual. Its AI label:
+    「名字的字義與聲調僅供參考，不決定任何人的命運」.
+  - No gender filter: every character is open to everyone.
+  - The card says 「這些名字所用的字義庫仍待專家校訂」 while the 字义库 is a draft, and stops once you mark it
+    reviewed.
+  - No share image for 起名: your spec asks for none.
+- Privacy:
+  - The naming chart keeps the surname, the elements the names serve and the 八字 chart's digest. It never keeps
+    the birth data.
+  - You can name only from your own 八字 charts: anyone else's is answered as if it weren't there (404).
+- The 字义库 checks:
+  - each character's pinyin against pinyin-pro, an independent reference;
+  - its 简体 against OpenCC;
+  - its element against the radical rule.
+- For whoever runs the server: nothing to do. The database, if on, adds the method at the next start (migration 005).
+- Found on the way: turning 起名 on would have broken 7 tests that pinned the switch as shipped. 3 were 起名's own,
+  two pinned the matrix version, and two pinned each region's method list.
+  - Each now sets the switch itself, reads the version from the matrix, or leaves 起名 out of the order.
+  - One new test holds the gate itself: 起名 can be on only with a reviewed 字义库.
+- Verified:
+  - 13 new server tests:
+    - the 字义库: each character once, enough per element, meanings in three languages, the radical rule, the pinyin
+      against pinyin-pro (and every surname's reading as a surname), 简体 against OpenCC;
+    - 起名 is on in no region until the 字义库 is reviewed;
+    - 音律: syllables, the two rejections, and the scores, worked by hand;
+    - the elements (喜用, or the balance);
+    - the candidates: serving the 喜用, avoiding the surname, varied, in score order, for a known and an unknown
+      surname;
+    - a mock reading with its own prompts, refused while 起名 is off;
+    - the API: only the caller's own 八字 chart; 451 and absent from `/v1/methods` while off.
+  - 3 new sync checks: the 字义库 and the two 起名 fixtures match what the server makes.
+  - 6 new app tests:
+    - the button is hidden while the region has 起名 off;
+    - the page sends the surname, the length and the 八字 chart, then shows the card and starts the reading;
+    - Ctrl+Enter asks for names, and a new surname puts the old ones away;
+    - the draft note goes once the 字义库 is reviewed;
+    - 简体 names in 简体;
+    - the reading page and history (「起名 · 陳」).
+  - All 401 server tests and 137 app tests pass; harness PASS.
+
 ### v4.4.0 (2026-10-28): 风水, general principles for a room, first in Malaysia
 
 Stage S6 of the [tech plan](docs/tech-plan.md) (新玩法), work package 6.3, built to your phase document's 风水 spec:

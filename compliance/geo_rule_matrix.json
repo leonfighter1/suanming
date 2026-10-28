@@ -1,7 +1,7 @@
 {
   "$schema": "../schemas/geo-rule-matrix.schema.json",
-  "matrix_version": "0.3.0",
-  "notes": "legal_review=provisional for all regions: product-owner sign-off on 2026-10-26; formal legal review (at least US/GB/AU/CA) deferred and required before each region's launch. Unknown countries resolve to null => service refused.",
+  "matrix_version": "0.4.0",
+  "notes": "legal_review=provisional for all regions: product-owner sign-off on 2026-10-26; formal legal review (at least US/GB/AU/CA) deferred and required before each region's launch. Unknown countries resolve to null => service refused. naming (起名, v4.5.0) is off everywhere until the owner has checked its draft 字义库 (人工校订, src/engines/naming/characters.ts): set defaults.systems.naming.available to true then.",
   "defaults": {
     "service_available": true,
     "systems": {
@@ -23,6 +23,10 @@
       },
       "fengshui": {
         "available": true,
+        "entry_weight": 1
+      },
+      "naming": {
+        "available": false,
         "entry_weight": 1
       }
     },

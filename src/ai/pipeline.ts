@@ -32,11 +32,13 @@ import {
   PROMPTS,
   qiuqianUser,
   fengshuiUser,
+  namingUser,
   tarotUser,
   todayLine,
   type PromptVersion,
 } from "./prompts.js";
 import { FENGSHUI_TERMS, fengshuiBrief } from "./fengshui.js";
+import { NAMING_TERMS, namingBrief } from "./naming.js";
 import { lotBrief, QIUQIAN_TERMS, qiuqianView } from "./qiuqian.js";
 import { spreadBrief } from "./tarot.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
@@ -304,6 +306,17 @@ export const METHOD_RULE_GROUPS: Partial<Record<ChartSystem, string[]>> = {
   fengshui: ["fengshui"],
 };
 
+/**
+ * A tarot, 求籤, 风水 or 起名 reading's actions follow its advice section (v2.3.0, v4.3.0, v4.4.0, v4.5.0);
+ * the other methods act on every topic.
+ */
+const ADVICE_TOPIC: Partial<Record<ChartSystem, Topic>> = {
+  tarot: "tarot_advice",
+  qiuqian: "qiuqian_advice",
+  fengshui: "fengshui_advice",
+  naming: "naming_advice",
+};
+
 /** Geo-Rule: the region's rules, or GeoRefusedError when the service/system isn't offered. */
 export function servedRegion(country: string, system: string) {
   const matrix = loadGeoMatrix();
@@ -363,12 +376,11 @@ export async function generateReport(
         : modelFacts(chart);
   const lot = chart.system === "qiuqian" ? lotBrief(chart, opts.locale) : undefined;
   const room = chart.system === "fengshui" ? fengshuiBrief(chart, opts.locale) : undefined;
-  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體 and a room's
-  // principles are ids, so 求籤 and 风水 name their own.
-  const glossary = glossaryFor(
-    lot ? QIUQIAN_TERMS.join(" ") : room ? FENGSHUI_TERMS.join(" ") : JSON.stringify(facts),
-    opts.locale,
-  );
+  const names = chart.system === "naming" ? namingBrief(chart, opts.locale) : undefined;
+  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體, a room's
+  // principles are ids and names are names, so 求籤, 风水 and 起名 name their own.
+  const ownTerms = lot ? QIUQIAN_TERMS : room ? FENGSHUI_TERMS : names ? NAMING_TERMS : undefined;
+  const glossary = glossaryFor(ownTerms ? ownTerms.join(" ") : JSON.stringify(facts), opts.locale);
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
   const providerFor = (agent: AgentName) => {
     const route = routeFor(routing, agent, opts.locale);
@@ -392,16 +404,10 @@ export async function generateReport(
   const prompts = METHOD_PROMPTS[chart.system];
   const tarot = chart.system === "tarot";
   const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
-  const maxParagraphs = (t: Topic) => (t === "tarot_cards" && spread ? spread.cards.length : 4);
-  // A tarot, 求籤 or 风水 reading's actions follow its advice (v2.3.0, v4.3.0, v4.4.0); other methods
-  // act on every topic.
-  const advice: Topic | undefined = tarot
-    ? "tarot_advice"
-    : lot
-      ? "qiuqian_advice"
-      : room
-        ? "fengshui_advice"
-        : undefined;
+  // 逐张解读: one paragraph per card; 起名: one per candidate read (up to six); other sections up to four.
+  const maxParagraphs = (t: Topic) =>
+    t === "tarot_cards" && spread ? spread.cards.length : t === "naming_candidates" ? 6 : 4;
+  const advice = ADVICE_TOPIC[chart.system];
   const actionTopics: Topic[] = advice && topics.includes(advice) ? [advice] : topics;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
@@ -414,60 +420,34 @@ export async function generateReport(
       ...(spread && { cards: spread.cards.length }),
       ...(lot && { lines: lot.lines.length }),
       ...(room && { principles: room.principles.length }),
+      ...(names && { candidates: names.candidates.length }),
     },
     maxRetries,
     enforce,
     onProgress: deps.onProgress,
-    user: (feedback) =>
-      spread
-        ? tarotUser({
-            facts,
-            spread,
-            topics,
-            locale: opts.locale,
-            glossary,
-            question: opts.question,
-            focus: opts.focus,
-            context: opts.context,
-            today: todayLine(now),
-            feedback,
-          })
-        : lot
-          ? qiuqianUser({
-              facts,
-              lot,
-              topics,
-              locale: opts.locale,
-              glossary,
-              question: opts.question,
-              context: opts.context,
-              today: todayLine(now),
-              feedback,
-            })
-          : room
-            ? fengshuiUser({
-                facts,
-                room,
-                topics,
-                locale: opts.locale,
-                glossary,
-                description: opts.question,
-                context: opts.context,
-                today: todayLine(now),
-                feedback,
-              })
-            : narrativeUser({
-                system: chart.system,
-                facts,
-                provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
-                topics,
-                locale: opts.locale,
-                glossary,
-                question: opts.question,
-                context: opts.context,
-                today: todayLine(now),
-                feedback,
-              }),
+    // Each method's own user message (rule 8).
+    user: (feedback) => {
+      const common = {
+        facts,
+        topics,
+        locale: opts.locale,
+        glossary,
+        context: opts.context,
+        today: todayLine(now),
+        feedback,
+      };
+      if (spread)
+        return tarotUser({ ...common, spread, question: opts.question, focus: opts.focus });
+      if (lot) return qiuqianUser({ ...common, lot, question: opts.question });
+      if (room) return fengshuiUser({ ...common, room, description: opts.question });
+      if (names) return namingUser({ ...common, names });
+      return narrativeUser({
+        ...common,
+        system: chart.system,
+        provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
+        question: opts.question,
+      });
+    },
     check: (data) => {
       const feedback: string[] = [];
       let ungrounded = 0;

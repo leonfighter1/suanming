@@ -43,8 +43,22 @@
 39. To verify a traditional text, read the primary source for every item; agreement between modern copies can hide a shared error. v4.3.0: both modern 籤詩 copies had 寅午戍 (no such branch), 敵圖, 咨嘆 and 步多; the Qing print had 戌, 敵國, 咨嗟 and 步步.
 40. Never put the owner email or any personal data in a request to an outside service, not even in a User-Agent; use a generic agent string.
 41. For exact text, download the raw source (action=raw, the API with continue, the file itself) into its own folder; never take verbatim text from a summarising fetch.
+42. When a feature ships behind a switch the owner will flip, no test may pin the switch's shipped value: test both states with an explicit override, assert the gate as an invariant (on => reviewed), and make every on-screen trace of the gate follow its flag. Try the documented steps once, run the tests, then undo them.
+43. A findsNothing needs a positive anchor: first find the neighbour the missing widget would sit beside, and pair it with a test that finds the widget there when it should exist. Never use off-screen or scrolled-past as evidence of absence (lists cache children).
 
 ## Log
+
+### 2026-10-28: A findsNothing proved by scrolling away
+- **Symptom:** naming_test: expect(find.byKey('pillar-grid'), findsNothing) after scrolling to the page end failed: the grid was still built
+- **Root cause:** I took 'scrolled down' as proof the end was reached; a ListView keeps a cache extent of built children, so widgets just off screen still exist
+- **Fix:** Anchor the negative on the widget right next to where the missing one would be: scroll to life-generate (the last button above open-naming), then expect open-naming findsNothing; the paired test finds it in the same place once naming is on
+- **Rule:** A findsNothing needs a positive anchor: first find the neighbour the missing widget would sit beside, and pair it with a test that finds the widget there when it should exist. Never use off-screen or scrolled-past as evidence of absence (lists cache children). (Rule 43)
+
+### 2026-10-28: Tests pinned the state the owner's switch changes
+- **Symptom:** Turning 起名 on as the owner's steps say (matrix available + version bump, LIBRARY.reviewed) would have failed 7 tests (3 of 起名's own that read the shipped matrix or LIBRARY, two matrix_version pins, two region method-list pins), and the card would still have said 仍待專家校訂
+- **Root cause:** Tests asserted the shipped values of a switch meant to be flipped (reviewed:false, 0.4.0, lists without naming), and the draft note was unconditional instead of following library.reviewed
+- **Fix:** withNaming(available) sets the state per test; an invariant test (on in a region => LIBRARY.reviewed); version tests read the matrix; order tests leave naming out; the note follows the chart's library.reviewed. Tried the owner's steps once, ran every test, undid them
+- **Rule:** When a feature ships behind a switch the owner will flip, no test may pin the switch's shipped value: test both states with an explicit override, assert the gate as an invariant (on => reviewed), and make every on-screen trace of the gate follow its flag. Try the documented steps once, run the tests, then undo them. (Rule 42)
 
 ### 2026-10-28: Fetch tools did not return verbatim text
 - **Symptom:** WebFetch declined to reproduce a page word for word; the MediaWiki query API returned content for only 10 of 50 titles

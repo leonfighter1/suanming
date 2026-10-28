@@ -1,0 +1,312 @@
+{
+  "chart_id": "34343434-3434-4434-8434-343434343434",
+  "chart_fact": {
+    "schema_version": "0.1.0",
+    "engine": {
+      "name": "naming",
+      "version": "0.1.0"
+    },
+    "system": "naming",
+    "input_digest": "hmac-sha256:07e5a5378f22b7330a48c39f2e88393a8883b875b0db215cd4c10b8ded7acbd3",
+    "rule_versions": {
+      "library": "naming-chars@0.1.0-draft"
+    },
+    "computed_at": "2026-10-25T00:00:00.000Z",
+    "facts": {
+      "surname": {
+        "zh-Hant": "陳",
+        "zh-Hans": "陈",
+        "pinyin": "chén"
+      },
+      "length": 2,
+      "elements": [
+        "火",
+        "土"
+      ],
+      "basis": "favorable",
+      "bazi_digest": "hmac-sha256:60a9723f529f516ea7eb82678fbfcce685ceaf4bd78a0cca04a8880cce83d191",
+      "library": {
+        "version": "0.1.0-draft",
+        "reviewed": false
+      },
+      "candidates": [
+        {
+          "given": {
+            "zh-Hant": "燁峰",
+            "zh-Hans": "烨峰"
+          },
+          "pinyin": "yè fēng",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "墨晗",
+            "zh-Hans": "墨晗"
+          },
+          "pinyin": "mò hán",
+          "elements": [
+            "土",
+            "火"
+          ],
+          "tones": [
+            4,
+            2
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "燁培",
+            "zh-Hans": "烨培"
+          },
+          "pinyin": "yè péi",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            2
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "煦岩",
+            "zh-Hans": "煦岩"
+          },
+          "pinyin": "xù yán",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            2
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "煥均",
+            "zh-Hans": "焕均"
+          },
+          "pinyin": "huàn jūn",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "旭坤",
+            "zh-Hans": "旭坤"
+          },
+          "pinyin": "xù kūn",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "坦晨",
+            "zh-Hans": "坦晨"
+          },
+          "pinyin": "tǎn chén",
+          "elements": [
+            "土",
+            "火"
+          ],
+          "tones": [
+            3,
+            2
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "煥堅",
+            "zh-Hans": "焕坚"
+          },
+          "pinyin": "huàn jiān",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "熠巍",
+            "zh-Hans": "熠巍"
+          },
+          "pinyin": "yì wēi",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "旭山",
+            "zh-Hans": "旭山"
+          },
+          "pinyin": "xù shān",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "碩暉",
+            "zh-Hans": "硕晖"
+          },
+          "pinyin": "shuò huī",
+          "elements": [
+            "土",
+            "火"
+          ],
+          "tones": [
+            4,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        },
+        {
+          "given": {
+            "zh-Hant": "煒峰",
+            "zh-Hans": "炜峰"
+          },
+          "pinyin": "wěi fēng",
+          "elements": [
+            "火",
+            "土"
+          ],
+          "tones": [
+            3,
+            1
+          ],
+          "score": 7.5,
+          "notes": [
+            "elements",
+            "pingze",
+            "ends_level"
+          ],
+          "source_level": "simplified_rule"
+        }
+      ]
+    },
+    "provenance": [
+      {
+        "path": "/elements",
+        "source_level": "simplified_rule",
+        "note": "八字扶抑法的喜用（簡化判斷）"
+      },
+      {
+        "path": "/candidates",
+        "source_level": "simplified_rule",
+        "note": "字形五行（依部首）與聲調、平仄規則，簡化"
+      }
+    ]
+  }
+}

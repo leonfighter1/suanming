@@ -6,6 +6,7 @@ import type { ChartFact } from "../chart-fact/index.js";
 import { computeAstrology } from "../engines/astrology/index.js";
 import { computeBazi, type InputBasis } from "../engines/bazi/index.js";
 import { computeFengshui } from "../engines/fengshui/index.js";
+import { computeNaming } from "../engines/naming/index.js";
 import { FACINGS, ROOM_IDS, type Facing, type RoomId } from "../engines/fengshui/principles.js";
 import { computeQiuqian } from "../engines/qiuqian/index.js";
 import { LOT_SET_IDS, type LotSetId } from "../engines/qiuqian/lots.js";
@@ -157,7 +158,30 @@ export function computeChart(raw: unknown, secrets: EngineSecrets, now?: () => D
         { digestPepper: secrets.digestPepper, now },
       );
     }
+    case "naming":
+      // 起名 reads one of the caller's 八字 charts: the API loads it and calls computeNamingChart.
+      throw new InputError("a 起名 chart needs bazi_chart_id, one of your 八字 charts");
     default:
-      throw new InputError("system must be bazi | tarot | astrology | qiuqian | fengshui");
+      throw new InputError("system must be bazi | tarot | astrology | qiuqian | fengshui | naming");
   }
+}
+
+/**
+ * 起名 (v4.5.0): candidate names for a surname, from the caller's own 八字 chart (the API loads it and checks
+ * whose it is). The request names the surname (one or two Chinese characters) and the given name's length.
+ */
+export function computeNamingChart(
+  raw: Record<string, unknown>,
+  bazi: ChartFact,
+  secrets: EngineSecrets,
+  now?: () => Date,
+): ChartFact {
+  if (bazi.system !== "bazi") throw new InputError("bazi_chart_id must be a 八字 chart");
+  const surname = str(raw.surname, "surname");
+  if (!/^\p{Script=Han}{1,2}$/u.test(surname)) {
+    throw new InputError("surname must be one or two Chinese characters");
+  }
+  const length = raw.length ?? 2;
+  if (length !== 1 && length !== 2) throw new InputError("length must be 1 or 2");
+  return computeNaming(bazi, { surname, length }, { digestPepper: secrets.digestPepper, now });
 }

@@ -76,7 +76,8 @@ class HomePage extends ConsumerWidget {
             ),
           // The methods in the region's entry order (GET /v1/methods, v4.3.0): 求籤 first in Taiwan
           // and Hong Kong, the default order elsewhere and while the order loads.
-          for (final (i, system) in (ref.watch(methodsProvider).value ?? defaultMethods).indexed)
+          for (final (i, system)
+              in (ref.watch(methodsProvider).value ?? defaultMethods).where(defaultMethods.contains).indexed)
             FadeSlideIn(
               index: 2 + i,
               child: switch (system) {
@@ -101,13 +102,14 @@ class HomePage extends ConsumerWidget {
                     subtitle: l10n.homeFengshuiDesc,
                     onTap: () => push(context, const FengshuiPage()),
                   ),
-                _ => _Entry(
+                'qiuqian' => _Entry(
                     key: const Key('entry-qiuqian'),
                     icon: Icons.temple_buddhist_outlined,
                     title: l10n.homeQiuqian,
                     subtitle: l10n.homeQiuqianDesc,
                     onTap: () => push(context, const QiuqianPage()),
                   ),
+                _ => const SizedBox.shrink(),
               },
             ),
           const FadeSlideIn(index: 6, child: DailyCard()),

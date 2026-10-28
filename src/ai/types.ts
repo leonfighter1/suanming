@@ -25,6 +25,8 @@ export const TOPICS = [
   "fengshui_layout",
   "fengshui_flow",
   "fengshui_advice",
+  "naming_candidates",
+  "naming_advice",
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -35,6 +37,7 @@ export const TOPICS_BY_SYSTEM: Record<ChartSystem, readonly Topic[]> = {
   astrology: ["personality", "career_wealth", "relationships", "health"],
   qiuqian: ["qiuqian_poem", "qiuqian_answer", "qiuqian_advice"],
   fengshui: ["fengshui_layout", "fengshui_flow", "fengshui_advice"],
+  naming: ["naming_candidates", "naming_advice"],
 };
 
 /** The area of life a tarot reading may focus on (POST /v1/reports `focus`, tarot only). */
@@ -43,7 +46,8 @@ export type TarotFocus = (typeof TAROT_FOCUS)[number];
 
 /**
  * Sections that get no 破除運勢 plan: a tarot reading's plan rests on its advice; 求籤 (a lot is read
- * once, for the question asked) and 风水 (its principles are the plan) have none at all.
+ * once, for the question asked), 风水 (its principles are the plan) and 起名 (a name is chosen, not
+ * worked on) have none at all.
  */
 export const NO_PLAN_TOPICS: readonly Topic[] = [
   "tarot_cards",
@@ -54,6 +58,8 @@ export const NO_PLAN_TOPICS: readonly Topic[] = [
   "fengshui_layout",
   "fengshui_flow",
   "fengshui_advice",
+  "naming_candidates",
+  "naming_advice",
 ];
 
 export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
@@ -72,6 +78,8 @@ export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
   fengshui_layout: { "zh-Hant": "佈局", "zh-Hans": "布局", en: "Layout" },
   fengshui_flow: { "zh-Hant": "光線與動線", "zh-Hans": "光线与动线", en: "Light and movement" },
   fengshui_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
+  naming_candidates: { "zh-Hant": "候選名字", "zh-Hans": "候选名字", en: "The names" },
+  naming_advice: { "zh-Hant": "建議", "zh-Hans": "建议", en: "Advice" },
 };
 
 export interface Paragraph {

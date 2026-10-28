@@ -195,8 +195,11 @@ describe("a 风水 reading", () => {
 
 describe("the entry order and the API", () => {
   it("leads with 风水 in Malaysia (§2.4) and keeps the default order elsewhere", () => {
+    // 起名 is left out: it is off until the owner's review, and naming.test.ts covers its switch.
     const order = (cc: string) =>
-      methodsFor(resolveRegion(loadGeoMatrix(), cc)!).map((m) => m.system);
+      methodsFor(resolveRegion(loadGeoMatrix(), cc)!)
+        .map((m) => m.system)
+        .filter((s) => s !== "naming");
     // MY: fengshui 1.3 > every other 1 (ties keep bazi, tarot, qiuqian, fengshui, astrology).
     expect(order("MY")).toEqual(["fengshui", "bazi", "tarot", "qiuqian", "astrology"]);
     expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "fengshui", "astrology"]);

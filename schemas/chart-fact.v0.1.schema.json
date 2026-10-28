@@ -26,7 +26,10 @@
       "additionalProperties": false,
       "required": ["name", "version"],
       "properties": {
-        "name": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui"] },
+        "name": {
+          "type": "string",
+          "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui", "naming"]
+        },
         "version": {
           "description": "Engine semver, including upstream library pin, e.g. 0.1.0+lunar-javascript.1.7.7",
           "type": "string",
@@ -34,7 +37,10 @@
         }
       }
     },
-    "system": { "type": "string", "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui"] },
+    "system": {
+      "type": "string",
+      "enum": ["bazi", "tarot", "astrology", "qiuqian", "fengshui", "naming"]
+    },
     "input_digest": {
       "description": "Keyed digest (HMAC-SHA256) of canonical input + engine version + rule versions. See src/chart-fact/digest.ts.",
       "type": "string",
@@ -82,6 +88,10 @@
     {
       "if": { "properties": { "system": { "const": "fengshui" } } },
       "then": { "properties": { "facts": { "$ref": "#/$defs/fengshui_facts" } } }
+    },
+    {
+      "if": { "properties": { "system": { "const": "naming" } } },
+      "then": { "properties": { "facts": { "$ref": "#/$defs/naming_facts" } } }
     }
   ],
   "$defs": {
@@ -672,6 +682,88 @@
                   "items": { "type": "integer", "minimum": 0, "maximum": 77 }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "naming_facts": {
+      "description": "起名 (since v4.5.0): candidate given names for a surname, from a 八字 chart's elements (only its digest and the elements are kept, never birth data), a 字义库 and 音律 rules.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surname",
+        "length",
+        "elements",
+        "basis",
+        "bazi_digest",
+        "library",
+        "candidates"
+      ],
+      "properties": {
+        "surname": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["zh-Hant", "zh-Hans"],
+          "properties": {
+            "zh-Hant": { "type": "string", "minLength": 1, "maxLength": 2 },
+            "zh-Hans": { "type": "string", "minLength": 1, "maxLength": 2 },
+            "pinyin": { "type": "string" }
+          }
+        },
+        "length": { "type": "integer", "enum": [1, 2] },
+        "elements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": { "type": "string", "enum": ["木", "火", "土", "金", "水"] }
+        },
+        "basis": { "type": "string", "enum": ["favorable", "balance"] },
+        "bazi_digest": { "type": "string", "pattern": "^hmac-sha256:[0-9a-f]{64}$" },
+        "library": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["version", "reviewed"],
+          "properties": {
+            "version": { "type": "string" },
+            "reviewed": { "type": "boolean" }
+          }
+        },
+        "candidates": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["given", "pinyin", "elements", "tones", "score", "notes", "source_level"],
+            "properties": {
+              "given": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["zh-Hant", "zh-Hans"],
+                "properties": {
+                  "zh-Hant": { "type": "string" },
+                  "zh-Hans": { "type": "string" }
+                }
+              },
+              "pinyin": { "type": "string" },
+              "elements": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["木", "火", "土", "金", "水"] }
+              },
+              "tones": {
+                "type": "array",
+                "items": { "type": "integer", "minimum": 1, "maximum": 5 }
+              },
+              "score": { "type": "number" },
+              "notes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["elements", "pingze", "same_tone", "ends_level", "shuangsheng", "dieyun"]
+                }
+              },
+              "source_level": { "$ref": "#/$defs/source_level" }
             }
           }
         }

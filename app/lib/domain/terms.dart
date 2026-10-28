@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'fengshui.dart';
+import 'naming.dart';
 import 'qiuqian.dart';
 
 typedef _Names = Map<String, Map<String, String>>;
@@ -21,6 +22,7 @@ class Terms {
     this._tips = const {},
     this.lots,
     this.fengshui,
+    this.naming,
   ]);
 
   static _Names _names(Object? v) => (v as Map<String, dynamic>).map(
@@ -33,9 +35,17 @@ class Terms {
         await bundle.loadString('assets/i18n/term_tips.json'),
         await bundle.loadString('assets/i18n/qiuqian_lots.json'),
         await bundle.loadString('assets/i18n/fengshui.json'),
+        await bundle.loadString('assets/i18n/naming_chars.json'),
       );
 
-  factory Terms.parse(String termsJson, String deckJson, [String? tipsJson, String? lotsJson, String? fengshuiJson]) {
+  factory Terms.parse(
+    String termsJson,
+    String deckJson, [
+    String? tipsJson,
+    String? lotsJson,
+    String? fengshuiJson,
+    String? namingJson,
+  ]) {
     final terms = jsonDecode(termsJson) as Map<String, dynamic>;
     final deck = jsonDecode(deckJson) as Map<String, dynamic>;
     return Terms(
@@ -53,8 +63,12 @@ class Terms {
       tipsJson == null ? const {} : _names((jsonDecode(tipsJson) as Map<String, dynamic>)['tips']),
       lotsJson == null ? null : LotSet.parse(lotsJson),
       fengshuiJson == null ? null : FengshuiTable.parse(fengshuiJson),
+      namingJson == null ? null : NamingLibrary.parse(namingJson),
     );
   }
+
+  /// 起名's 字义库 (v4.5.0, a draft until the owner's review), when loaded.
+  final NamingLibrary? naming;
 
   /// 求籤's lot set (v4.3.0), when loaded.
   final LotSet? lots;

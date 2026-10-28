@@ -1362,6 +1362,56 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get topicFengshuiAdvice => '建议';
+
+  @override
+  String get homeNaming => '起名';
+
+  @override
+  String get namingFromChart => '为这个命盘起名';
+
+  @override
+  String get namingSurname => '姓氏';
+
+  @override
+  String get namingSurnameHint => '一或两个汉字，例如“陈”或“欧阳”';
+
+  @override
+  String get namingLength => '名字';
+
+  @override
+  String get namingOne => '单字名';
+
+  @override
+  String get namingTwo => '双字名';
+
+  @override
+  String get namingSuggest => '起名';
+
+  @override
+  String namingElements(String elements) {
+    return '名字所补：$elements';
+  }
+
+  @override
+  String get namingBalance => '这个命盘没有明显的喜用，名字以五行平衡为主。';
+
+  @override
+  String get namingCandidates => '候选名字';
+
+  @override
+  String get namingDraft => '这些名字所用的字义库仍待专家校订。';
+
+  @override
+  String get namingNote => '名字是祝福与声音，不决定任何人的命运。';
+
+  @override
+  String get namingSections => '解读分两部分：候选名字、怎么挑选。';
+
+  @override
+  String get topicNamingCandidates => '候选名字';
+
+  @override
+  String get topicNamingAdvice => '建议';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2721,4 +2771,54 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get topicFengshuiAdvice => '建議';
+
+  @override
+  String get homeNaming => '起名';
+
+  @override
+  String get namingFromChart => '為這個命盤起名';
+
+  @override
+  String get namingSurname => '姓氏';
+
+  @override
+  String get namingSurnameHint => '一或兩個漢字，例如「陳」或「歐陽」';
+
+  @override
+  String get namingLength => '名字';
+
+  @override
+  String get namingOne => '單字名';
+
+  @override
+  String get namingTwo => '雙字名';
+
+  @override
+  String get namingSuggest => '起名';
+
+  @override
+  String namingElements(String elements) {
+    return '名字所補：$elements';
+  }
+
+  @override
+  String get namingBalance => '這個命盤沒有明顯的喜用，名字以五行平衡為主。';
+
+  @override
+  String get namingCandidates => '候選名字';
+
+  @override
+  String get namingDraft => '這些名字所用的字義庫仍待專家校訂。';
+
+  @override
+  String get namingNote => '名字是祝福與聲音，不決定任何人的命運。';
+
+  @override
+  String get namingSections => '解讀分兩部分：候選名字、怎麼挑選。';
+
+  @override
+  String get topicNamingCandidates => '候選名字';
+
+  @override
+  String get topicNamingAdvice => '建議';
 }

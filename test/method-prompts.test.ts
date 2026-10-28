@@ -11,9 +11,10 @@ import {
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeFengshui } from "../src/engines/fengshui/index.js";
+import { computeNaming } from "../src/engines/naming/index.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
-import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { DRAW_KEY, FIXED_NOW, PEPPER, withNamingOn } from "./helpers.js";
 
 // The versions older than v2.1.0 were hashed from the committed prompts.ts before WP2.1 touched
 // it; later ones are pinned as released. Changing a prompt's text needs a new version. A version
@@ -42,6 +43,9 @@ const HASHES: Record<string, string> = {
   // v4.4.0 (WP6.3)
   "narrative_fengshui@1": "6bc0422cc8d0cead",
   "action_fengshui@1": "146ae68566106766",
+  // v4.5.0 (WP6.4)
+  "narrative_naming@1": "80799b1d7b8fc49f",
+  "action_naming@1": "34493bd83790f328",
 };
 
 const charts = {
@@ -68,6 +72,15 @@ const charts = {
   ),
   fengshui: computeFengshui({ room: "living" }, { digestPepper: PEPPER, now: FIXED_NOW }),
 };
+// 起名 reads a 八字 chart; it ships off in the matrix, so its reading runs with it switched on.
+const allCharts = {
+  ...charts,
+  naming: computeNaming(
+    charts.bazi,
+    { surname: "陳", length: 2 },
+    { digestPepper: PEPPER, now: FIXED_NOW },
+  ),
+};
 
 describe("each method's own prompts (rule 8)", () => {
   it("every released prompt version keeps its hash", () => {
@@ -84,18 +97,26 @@ describe("each method's own prompts (rule 8)", () => {
       for (const [system, id] of ids) expect(id).toMatch(new RegExp(`^${agent}_${system}@`));
     }
     // No 破除運勢 plan for astrology (its chart has no houses or transits to rest one on), 求籤 (a lot
-    // is read once, for the question asked) or 风水 (its principles are the plan).
+    // is read once, for the question asked), 风水 (its principles are the plan) or 起名 (a name is
+    // chosen, not worked on).
     const noPlan = Object.entries(METHOD_PROMPTS).filter(([, own]) => !own.remedy);
-    expect(noPlan.map(([system]) => system)).toEqual(["astrology", "qiuqian", "fengshui"]);
+    expect(noPlan.map(([system]) => system)).toEqual([
+      "astrology",
+      "qiuqian",
+      "fengshui",
+      "naming",
+    ]);
   });
 
   it("every report is written with its own method's prompts", async () => {
-    for (const [system, chart] of Object.entries(charts)) {
+    for (const [system, chart] of Object.entries(allCharts)) {
       const mock = new MockProvider();
-      const report = await generateReport(
-        chart,
-        { locale: "zh-Hans", country: "HK" },
-        { providers: { deepseek: mock, anthropic: mock }, now: FIXED_NOW },
+      const report = await withNamingOn(() =>
+        generateReport(
+          chart,
+          { locale: "zh-Hans", country: "HK" },
+          { providers: { deepseek: mock, anthropic: mock }, now: FIXED_NOW },
+        ),
       );
       const own = METHOD_PROMPTS[system as keyof typeof METHOD_PROMPTS];
       expect(report.ai_disclosure.prompt_version, system).toBe(
@@ -116,6 +137,8 @@ describe("each method's own prompts (rule 8)", () => {
       PROMPTS.action_qiuqian,
       PROMPTS.narrative_fengshui,
       PROMPTS.action_fengshui,
+      PROMPTS.narrative_naming,
+      PROMPTS.action_naming,
     ];
     for (const p of others) {
       for (const bazi of [

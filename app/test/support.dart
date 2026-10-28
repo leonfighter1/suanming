@@ -24,6 +24,7 @@ final testTerms = Terms.parse(
   File('assets/i18n/term_tips.json').readAsStringSync(),
   File('assets/i18n/qiuqian_lots.json').readAsStringSync(),
   File('assets/i18n/fengshui.json').readAsStringSync(),
+  File('assets/i18n/naming_chars.json').readAsStringSync(),
 );
 
 /// The page's main vertical list (pages also contain horizontal timelines).
@@ -59,6 +60,9 @@ class FakeApi {
 
   /// GET /v1/methods: the region's methods in entry order (v4.3.0). Tests of the order set it.
   List<String> methods = const ['bazi', 'tarot', 'qiuqian', 'fengshui', 'astrology'];
+
+  /// POST /v1/charts for 起名 (v4.5.0): a test's own chart in place of chart_naming.
+  Map<String, dynamic>? namingChart;
 
   /// The signed-in user's email (`test…` accounts get a seeded default profile).
   final String email;
@@ -199,11 +203,13 @@ class FakeApi {
         'relationship' => 'chart_tarot_relationship',
         _ => 'chart_tarot',
       };
+      if (body['system'] == 'naming' && namingChart != null) return _json(namingChart!, 201);
       return _json(
         fixture(switch (body['system']) {
           'tarot' => tarot,
           'qiuqian' => 'chart_qiuqian',
           'fengshui' => 'chart_fengshui',
+          'naming' => 'chart_naming',
           _ => 'chart_bazi',
         }),
         201,
@@ -220,6 +226,10 @@ class FakeApi {
     // The 求籤 draw that report_qiuqian_passed reads (v4.3.0).
     if (req.method == 'GET' && path == '/v1/charts/dddddddd-dddd-4ddd-8ddd-dddddddddddd') {
       return _json(fixture('chart_qiuqian'), 200);
+    }
+    // The 起名 candidates that report_naming_passed reads (v4.5.0).
+    if (req.method == 'GET' && path == '/v1/charts/34343434-3434-4434-8434-343434343434') {
+      return _json(fixture('chart_naming'), 200);
     }
     // The 风水 room that report_fengshui_passed reads (v4.4.0).
     if (req.method == 'GET' && path == '/v1/charts/ffffffff-ffff-4fff-8fff-ffffffffffff') {

@@ -41,7 +41,13 @@ import {
 import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
-import { computeChart, InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
+import {
+  computeChart,
+  computeNamingChart,
+  InputError,
+  UUID_RE,
+  type EngineSecrets,
+} from "../service/charts.js";
 import { dailyDate, dailyIds, drawDaily } from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
 import { shareFont } from "../share/font.js";
@@ -155,6 +161,15 @@ export function chartSummary(fact: ChartFact) {
       system: "fengshui",
       room: f.room as string,
       ...(typeof f.facing === "string" && { facing: f.facing }),
+    };
+  }
+  if (fact.system === "naming") {
+    const surname = f.surname as { "zh-Hant": string; "zh-Hans": string };
+    const first = (f.candidates as { given: Record<string, string> }[])[0];
+    return {
+      system: "naming",
+      surname,
+      ...(first && { first: first.given }),
     };
   }
   return { system: fact.system };
@@ -380,6 +395,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (!/^[A-Z]{2}$/.test(country))
       throw new HttpError(400, "X-Dev-Country header required (ISO 3166-1 alpha-2)");
     return { user: String(req.headers["x-dev-user"] ?? "dev-user"), country };
+  }
+
+  /** 起名 (v4.5.0): reads the caller's own 八字 chart; anyone else's is as if it weren't there. */
+  async function namingChart(body: Record<string, unknown>, c: Caller) {
+    const id = body.bazi_chart_id;
+    if (typeof id !== "string" || !UUID_RE.test(id)) {
+      throw new InputError("bazi_chart_id must be a UUID");
+    }
+    const bazi = await store.getChart(id);
+    if (!bazi || bazi.owner !== c.user) throw new HttpError(404, "chart not found");
+    return computeNamingChart(body, bazi.fact, opts.secrets, now);
   }
 
   /** Geo-Rule: refuse before computing anything for unserved regions. */
@@ -1168,7 +1194,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       if (path === "/v1/charts") {
         const body = (await readJson(req)) as { system?: string };
         assertServed(c.country, body.system);
-        const fact = computeChart(body, opts.secrets, now);
+        const fact =
+          body.system === "naming"
+            ? await namingChart(body as Record<string, unknown>, c)
+            : computeChart(body, opts.secrets, now);
         const id = randomUUID();
         await store.putChart({ id, owner: c.user, fact, created_at: now().toISOString() });
         out = {

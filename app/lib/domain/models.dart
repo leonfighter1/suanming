@@ -2,9 +2,11 @@
 // Parsing is tolerant of extra fields: the contract is additive-only.
 
 import 'fengshui.dart';
+import 'naming.dart';
 import 'qiuqian.dart';
 
 export 'fengshui.dart';
+export 'naming.dart';
 export 'qiuqian.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -365,6 +367,7 @@ class ChartResult {
   TarotChart get tarot => TarotChart.fromFacts(facts);
   QiuqianChart get qiuqian => QiuqianChart.fromFacts(facts);
   FengshuiChart get fengshui => FengshuiChart.fromFacts(facts);
+  NamingChart get naming => NamingChart.fromFacts(facts);
 }
 
 class Paragraph {
@@ -699,6 +702,7 @@ class HistoryItem {
     this.lotGanzhi,
     this.room,
     this.facing,
+    this.surnames = const {},
   });
 
   factory HistoryItem.fromJson(Json j) {
@@ -716,6 +720,7 @@ class HistoryItem {
       lotGanzhi: chart['ganzhi'] as String?,
       room: chart['room'] as String?,
       facing: chart['facing'] as String?,
+      surnames: ((chart['surname'] as Json?) ?? const {}).cast<String, String>(),
     );
   }
 
@@ -737,4 +742,8 @@ class HistoryItem {
   /// 风水 (v4.4.0): the room and its facing.
   final String? room;
   final String? facing;
+
+  /// 起名 (v4.5.0): the surname in both scripts; [surname] picks the reader's.
+  final Map<String, String> surnames;
+  String? surname(String apiLocale) => surnames[apiLocale == 'zh-Hans' ? 'zh-Hans' : 'zh-Hant'];
 }

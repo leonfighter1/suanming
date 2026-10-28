@@ -7,10 +7,11 @@ const topicsBySystem = <String, List<String>>{
   'astrology': ['personality', 'career_wealth', 'relationships', 'health'],
   'qiuqian': ['qiuqian_poem', 'qiuqian_answer', 'qiuqian_advice'],
   'fengshui': ['fengshui_layout', 'fengshui_flow', 'fengshui_advice'],
+  'naming': ['naming_candidates', 'naming_advice'],
 };
 
 /// Sections that get no 破除運勢 plan (NO_PLAN_TOPICS on the server).
-const noPlanTopics = <String>{'tarot_cards', 'tarot_synthesis', 'qiuqian_poem', 'qiuqian_answer', 'qiuqian_advice', 'fengshui_layout', 'fengshui_flow', 'fengshui_advice'};
+const noPlanTopics = <String>{'tarot_cards', 'tarot_synthesis', 'qiuqian_poem', 'qiuqian_answer', 'qiuqian_advice', 'fengshui_layout', 'fengshui_flow', 'fengshui_advice', 'naming_candidates', 'naming_advice'};
 
 /// The areas of life a tarot reading may focus on (TAROT_FOCUS on the server).
 const tarotFocus = <String>['career_wealth', 'relationships', 'health', 'personality'];

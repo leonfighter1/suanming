@@ -18,6 +18,8 @@ extension ApiLabels on AppLocalizations {
         'fengshui_layout' => topicFengshuiLayout,
         'fengshui_flow' => topicFengshuiFlow,
         'fengshui_advice' => topicFengshuiAdvice,
+        'naming_candidates' => topicNamingCandidates,
+        'naming_advice' => topicNamingAdvice,
         _ => t,
       };
 

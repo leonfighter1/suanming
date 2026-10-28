@@ -2672,6 +2672,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advice'**
   String get topicFengshuiAdvice;
+
+  /// No description provided for @homeNaming.
+  ///
+  /// In en, this message translates to:
+  /// **'Naming'**
+  String get homeNaming;
+
+  /// No description provided for @namingFromChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest names for this chart'**
+  String get namingFromChart;
+
+  /// No description provided for @namingSurname.
+  ///
+  /// In en, this message translates to:
+  /// **'Surname'**
+  String get namingSurname;
+
+  /// No description provided for @namingSurnameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One or two Chinese characters, e.g. 陳 or 歐陽'**
+  String get namingSurnameHint;
+
+  /// No description provided for @namingLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Given name'**
+  String get namingLength;
+
+  /// No description provided for @namingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One character'**
+  String get namingOne;
+
+  /// No description provided for @namingTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Two characters'**
+  String get namingTwo;
+
+  /// No description provided for @namingSuggest.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest names'**
+  String get namingSuggest;
+
+  /// No description provided for @namingElements.
+  ///
+  /// In en, this message translates to:
+  /// **'Names that serve: {elements}'**
+  String namingElements(String elements);
+
+  /// No description provided for @namingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'This chart has no favourable element, so the names keep a balance.'**
+  String get namingBalance;
+
+  /// No description provided for @namingCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate names'**
+  String get namingCandidates;
+
+  /// No description provided for @namingDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'The character library behind these names is still awaiting expert review.'**
+  String get namingDraft;
+
+  /// No description provided for @namingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A name is a wish and a sound; it decides no one\'s fate.'**
+  String get namingNote;
+
+  /// No description provided for @namingSections.
+  ///
+  /// In en, this message translates to:
+  /// **'The reading has two parts: the names, and how to choose.'**
+  String get namingSections;
+
+  /// No description provided for @topicNamingCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'The names'**
+  String get topicNamingCandidates;
+
+  /// No description provided for @topicNamingAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'Advice'**
+  String get topicNamingAdvice;
 }
 
 class _AppLocalizationsDelegate

@@ -428,5 +428,21 @@
   "fengshuiDirection": "传统上：{direction} · {trigram} · {element}",
   "topicFengshuiLayout": "布局",
   "topicFengshuiFlow": "光线与动线",
-  "topicFengshuiAdvice": "建议"
+  "topicFengshuiAdvice": "建议",
+  "homeNaming": "起名",
+  "namingFromChart": "为这个命盘起名",
+  "namingSurname": "姓氏",
+  "namingSurnameHint": "一或两个汉字，例如“陈”或“欧阳”",
+  "namingLength": "名字",
+  "namingOne": "单字名",
+  "namingTwo": "双字名",
+  "namingSuggest": "起名",
+  "namingElements": "名字所补：{elements}",
+  "namingBalance": "这个命盘没有明显的喜用，名字以五行平衡为主。",
+  "namingCandidates": "候选名字",
+  "namingDraft": "这些名字所用的字义库仍待专家校订。",
+  "namingNote": "名字是祝福与声音，不决定任何人的命运。",
+  "namingSections": "解读分两部分：候选名字、怎么挑选。",
+  "topicNamingCandidates": "候选名字",
+  "topicNamingAdvice": "建议"
 }

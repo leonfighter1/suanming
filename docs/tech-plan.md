@@ -667,6 +667,64 @@ The owner's spec (Phase 3 §2.1, §4):
 - ChartFact `system: "naming"` with candidates, each with its basis and `source_level`.
 - Tests: 字义库 coverage 100 %, unit tests for the tone rules, and checks of the 繁體 forms.
 
+Design:
+
+- **Input:**
+  - one of the user's own 八字 charts (`bazi_chart_id`);
+  - the surname, one or two characters;
+  - the given name's length, one or two.
+  - Nothing else. There is no gender filter: every character is open to everyone.
+- **五行补益:** from the 八字 engine's 喜用 (`strength.favorable`).
+  - Without one (中和, or a chart flagged for a closer look), the names keep a balance instead: the two weakest
+    elements by `wuxing_weighted`.
+  - The naming chart copies only those elements and the 八字 chart's digest, never birth data.
+- **字义库** (`src/engines/naming/characters.ts`): a draft of about 100 characters. Each has its 繁 and 简 forms,
+  pinyin with tone, a 五行 by 字形 (its radical, one simplified school of several), and a short meaning in three
+  languages. Tests check:
+  - the pinyin against pinyin-pro, an independent reference (G4);
+  - the 简体 against OpenCC (G18);
+  - the element against the radical rule.
+- **It ships unreviewed:** the owner's 人工校订 is a gate. Until the owner has checked it, `naming` is off in the
+  geo matrix (`available: false`), so nobody sees it; the owner turns it on.
+- **音律** (each rule a unit test):
+  - no character repeats the surname;
+  - no two adjacent syllables alike;
+  - the tones are not all the same;
+  - points for tones that rise and fall (平仄), deductions for 双声 and 叠韵.
+- **Candidates:**
+  - every combination whose elements serve the 喜用 is scored, and the top 12 are kept;
+  - each carries its basis (五行, 音律);
+  - source_level is simplified_rule for 五行 and 音律, common_consensus for the meanings.
+- **Reading:** `narrative_naming@1` and `action_naming@1`, no plan. Sections:
+  - 候選名字 (`naming_candidates`): the strongest few, one paragraph each, on meaning, 五行 and sound;
+  - 建議 (`naming_advice`): how to choose (say it aloud, write it, hear it in the family's dialect).
+  - Never a verdict on fate or fortune from a name; never a fee or a ritual.
+- **API:** `POST /v1/charts {system: "naming", bazi_chart_id, surname, length}`; migration 005; OpenAPI.
+- **App:** on a 八字 chart, 「為此命盤起名」 when the region offers `naming`: the surname and the length, 起名, the
+  candidate cards, then the reading.
+
+As built (v4.5.0):
+
+- The draft 字义库: 100 characters (20 per element) and 83 surnames with their readings as surnames (3 double).
+  Characters whose meaning is wealth itself (鑫) are left out, and so are polyphones whose name reading is unsure.
+  鉅 became 鑄: OpenCC turns 鉅 into 巨, which loses the 金 radical.
+- The score: 2 per character that serves the targets, +1 when a two-character name covers both, plus the sound.
+  Ties fall in a hashed order from the surname's 繁 form, so 張 and 张 give one list. No character is in more than
+  two names.
+- The review gate holds both ways:
+  - a test fails if any region of the shipped matrix offers 起名 while `LIBRARY.reviewed` is false;
+  - the card's draft note follows the chart's `library.reviewed`.
+  - The owner's steps are in docs/web-test.md. Tried on 2026-10-28 and undone: after them every test passes, once
+    `npm run sync:app` has run.
+- Tests switch the matrix through `MINGLI_GEO_MATRIX` (`withNaming` in test/helpers.ts), which the server also
+  honours for ops.
+  - Four tests would have failed on the owner's switch: two pinned the matrix version, two each region's method
+    list. They now read the version from the matrix, and leave 起名 out of the order checks.
+- Each method's user message is now built from shared `common` arguments plus the method's own. Every other method
+  gets the same fields as before, and the prompt hashes still hold.
+- 起名 has its own AI label (「依據候選名字生成」), its own facts layer (「陳氏 · 火、土」), and up to six
+  paragraphs in 候選名字. History shows 「起名 · 陳」 in the reader's script.
+
 Parked, not in the owner's document: 六爻 / 梅花 起卦 as its own method, and 合婚 between two saved profiles.
 
 ## S7 分享图 (medium → v4.2.0, before S6 while S6 waits)
@@ -944,4 +1002,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP7.3     | waits for the stores       | —       |
 | WP6.1–6.2 | done                       | v4.3.0  |
 | WP6.3     | done                       | v4.4.0  |
-| WP6.4     | planned                    | v4.5.0  |
+| WP6.4     | done (off until review)    | v4.5.0  |

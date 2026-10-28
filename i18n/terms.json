@@ -1,6 +1,6 @@
 {
   "_readme": "Protected term table (Phase 1 §2.3). Keys are the canonical engine form (simplified, as lunar-javascript emits). Values are the only allowed display form per locale. Hand-curated; never machine-translated. Shipped with the app and hot-updatable.",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "terms": {
     "比肩": { "zh-Hant": "比肩", "zh-Hans": "比肩", "en": "Companion (Bi Jian)" },
     "劫财": { "zh-Hant": "劫財", "zh-Hans": "劫财", "en": "Rob Wealth (Jie Cai)" },
@@ -122,6 +122,8 @@
       "en": "Lord Guan (Guan Sheng Di Jun)"
     },
     "风水": { "zh-Hant": "風水", "zh-Hans": "风水", "en": "Feng Shui" },
+    "起名": { "zh-Hant": "起名", "zh-Hans": "起名", "en": "Naming" },
+    "平仄": { "zh-Hant": "平仄", "zh-Hans": "平仄", "en": "Level and Oblique Tones (Ping Ze)" },
     "后天八卦": { "zh-Hant": "後天八卦", "zh-Hans": "后天八卦", "en": "Later Heaven Bagua" },
     "太阳": { "zh-Hant": "太陽", "zh-Hans": "太阳", "en": "Sun" },
     "月亮": { "zh-Hant": "月亮", "zh-Hans": "月亮", "en": "Moon" },

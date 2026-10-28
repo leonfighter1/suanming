@@ -262,10 +262,14 @@ final dailyCardProvider = FutureProvider.autoDispose<ChartResult>((ref) {
 /// The methods the home page offers, in the region's entry order (GET /v1/methods, v4.3.0); the
 /// app shows the ones it has a page for. Unreachable or refused: the default order.
 const defaultMethods = ['bazi', 'tarot', 'qiuqian', 'fengshui'];
+
+/// The methods the app has a page for: the home page's four, and 起名, reached from a 八字 chart (v4.5.0;
+/// off in the matrix until the owner's review, so absent unless the region offers it).
+const appMethods = [...defaultMethods, 'naming'];
 final methodsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
   try {
     final order = await ref.watch(apiClientProvider).methods();
-    final shown = order.where(defaultMethods.contains).toList();
+    final shown = order.where(appMethods.contains).toList();
     return shown.isEmpty ? defaultMethods : shown;
   } catch (_) {
     return defaultMethods;

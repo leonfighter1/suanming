@@ -15,6 +15,7 @@ import 'labels.dart';
 import 'theme.dart' show GanZhiText;
 import 'widgets/four_layer_report.dart';
 import 'widgets/lot_card.dart';
+import 'widgets/names_card.dart';
 import 'widgets/principles_card.dart';
 import 'widgets/tarot_spread.dart';
 
@@ -179,6 +180,8 @@ class ReadingChart extends ConsumerWidget {
       case 'fengshui':
         final room = chart!.fengshui;
         return PrinciplesCard(key: const Key('reading-room'), room: room.room, facing: room.facing);
+      case 'naming':
+        return NamesCard(key: const Key('reading-names'), chart: chart!.naming);
       default:
         return const SizedBox.shrink();
     }

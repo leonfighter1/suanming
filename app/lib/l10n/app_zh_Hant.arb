@@ -428,5 +428,21 @@
   "fengshuiDirection": "傳統上：{direction} · {trigram} · {element}",
   "topicFengshuiLayout": "佈局",
   "topicFengshuiFlow": "光線與動線",
-  "topicFengshuiAdvice": "建議"
+  "topicFengshuiAdvice": "建議",
+  "homeNaming": "起名",
+  "namingFromChart": "為這個命盤起名",
+  "namingSurname": "姓氏",
+  "namingSurnameHint": "一或兩個漢字，例如「陳」或「歐陽」",
+  "namingLength": "名字",
+  "namingOne": "單字名",
+  "namingTwo": "雙字名",
+  "namingSuggest": "起名",
+  "namingElements": "名字所補：{elements}",
+  "namingBalance": "這個命盤沒有明顯的喜用，名字以五行平衡為主。",
+  "namingCandidates": "候選名字",
+  "namingDraft": "這些名字所用的字義庫仍待專家校訂。",
+  "namingNote": "名字是祝福與聲音，不決定任何人的命運。",
+  "namingSections": "解讀分兩部分：候選名字、怎麼挑選。",
+  "topicNamingCandidates": "候選名字",
+  "topicNamingAdvice": "建議"
 }

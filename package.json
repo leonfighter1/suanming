@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
@@ -54,6 +54,7 @@
     "@redocly/cli": "^2.0.0",
     "@types/node": "^22.0.0",
     "opencc-js": "1.4.2",
+    "pinyin-pro": "^3.29.5",
     "prettier": "^3.6.0",
     "sweph": "2.10.3-8",
     "tsx": "^4.20.0",
