@@ -16,6 +16,7 @@ import { PGlite, type Transaction } from "@electric-sql/pglite";
 import type {
   ChartRecord,
   FollowUpRecord,
+  InquiryRecord,
   LifeReportRecord,
   RemedyRecord,
   ReportRecord,
@@ -35,6 +36,7 @@ const MIGRATIONS = [
   "006_liuyao",
   "007_followups",
   "008_logins",
+  "009_inquiries",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -478,13 +480,34 @@ export class PgStore implements Store, UserStore {
     return Promise.all(rows.rows.map((r) => this.open<FollowUpRecord>("followups", r)));
   }
 
+  async putInquiry(i: InquiryRecord) {
+    const body = sealJson(await this.dek(i.owner), i, `inquiries:${i.id}`);
+    await this.db.query(
+      `INSERT INTO inquiries (id, user_id, chart_fact_id, report_id, status, body_ciphertext, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO UPDATE SET report_id = EXCLUDED.report_id, status = EXCLUDED.status,
+         body_ciphertext = EXCLUDED.body_ciphertext, updated_at = EXCLUDED.updated_at`,
+      [i.id, i.owner, i.chart_id, i.report_id ?? null, i.status, body, i.created_at, i.updated_at],
+    );
+  }
+
+  async getInquiry(id: string) {
+    const row = (
+      await this.db.query<Row>("SELECT id, user_id, body_ciphertext FROM inquiries WHERE id = $1", [
+        id,
+      ])
+    ).rows[0];
+    return row && this.open<InquiryRecord>("inquiries", row);
+  }
+
   async deleteReport(id: string) {
     return this.db.transaction(async (tx) => {
       const n = async (sql: string) => (await tx.query(sql, [id])).affectedRows ?? 0;
       const followups = await n("DELETE FROM followups WHERE parent_id = $1");
       const remedies = await n("DELETE FROM remedies WHERE report_id = $1");
+      const inquiries = await n("DELETE FROM inquiries WHERE report_id = $1");
       const reports = await n("DELETE FROM reports WHERE id = $1");
-      return { reports, remedies, followups };
+      return { reports, remedies, followups, inquiries };
     });
   }
 
@@ -539,11 +562,12 @@ export class PgStore implements Store, UserStore {
       const purge = async (table: string) =>
         (await tx.query(`DELETE FROM ${table} WHERE user_id = $1`, [owner])).affectedRows ?? 0;
       const followups = await purge("followups");
+      const inquiries = await purge("inquiries");
       const remedies = await purge("remedies");
       const life_reports = await purge("life_reports");
       const reports = await purge("reports");
       const charts = await purge("chart_facts");
-      const counts = { charts, reports, remedies, life_reports, followups };
+      const counts = { charts, reports, remedies, life_reports, followups, inquiries };
       await tx.query(
         "INSERT INTO deletion_requests (subject_hash, channel, status, evidence) VALUES ($1, 'app', 'in_progress', $2)",
         [this.hmac(`subject:${owner}`), counts],
@@ -566,5 +590,6 @@ const TABLES = [
   "remedies",
   "life_reports",
   "followups",
+  "inquiries",
   "deletion_requests",
 ] as const;

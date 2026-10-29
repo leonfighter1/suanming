@@ -1,6 +1,16 @@
 import type { ChartSystem, SourceLevel } from "../chart-fact/index.js";
 import type { Locale } from "./terms.js";
 
+/**
+ * A 深度分析 as a reading reads it (v10.0.0, S19): the user's goal, every question the master asked with what it said
+ * before it and the user's answer, and what the master understood they most want to know.
+ */
+export interface InquiryContext {
+  goal: string;
+  turns: { say: string; question: string; answer: string }[];
+  understanding?: string;
+}
+
 export type AgentName =
   | "narrative"
   | "action"
@@ -10,6 +20,8 @@ export type AgentName =
   | "life_topics"
   // 追问 (v7.0.0, S13): a follow-up question on a passed reading or 一生运势报告.
   | "followup"
+  // 深度分析 (v10.0.0, S19): the master's questions before a reading, one turn at a time.
+  | "inquiry"
   | "guard";
 
 /**

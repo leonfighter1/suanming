@@ -23,6 +23,37 @@ import {
 
 export type Scripted = LLMJsonResult | { kind: "ok"; data: unknown };
 
+/** The demo master's 深度分析 (v10.0.0): an opening, two questions, an inference, and its closing words. */
+const INQUIRY_DEMO: Record<
+  Locale,
+  { opening: string; inference: string; done: string; questions: string[]; focus: string }
+> = {
+  "zh-Hant": {
+    opening: "（示範）從你的結果看，這件事確實有需要留意的地方。",
+    inference: "（示範）你的回答說明你心裡已經有了打算，我們就順著這個方向看。",
+    done: "（示範）好，我了解了，現在給你做最終解答。",
+    questions: ["（示範）這件事裡你最擔心的是什麼？", "（示範）你希望事情最後變成什麼樣子？"],
+    focus: "（示範）這件事接下來怎麼走",
+  },
+  "zh-Hans": {
+    opening: "（示范）从你的结果看，这件事确实有需要留意的地方。",
+    inference: "（示范）你的回答说明你心里已经有了打算，我们就顺着这个方向看。",
+    done: "（示范）好，我了解了，现在给你做最终解答。",
+    questions: ["（示范）这件事里你最担心的是什么？", "（示范）你希望事情最后变成什么样子？"],
+    focus: "（示范）这件事接下来怎么走",
+  },
+  en: {
+    opening: "(Demo) Your result shows there is something here to watch.",
+    inference: "(Demo) Your answer shows you have a plan in mind; let's look that way.",
+    done: "(Demo) Thank you, I understand. Here is your final reading.",
+    questions: [
+      "(Demo) What worries you most about this?",
+      "(Demo) How would you like it to turn out?",
+    ],
+    focus: "(Demo) How this goes from here",
+  },
+};
+
 /** The chart paths each part of the demo 总结 cites (八字, v9.3.0). */
 const CONCLUSION_REFS: Record<ConclusionPart, string[]> = {
   portrait: ["/day_master", "/month_command"],
@@ -444,6 +475,21 @@ export class MockProvider implements LLMProvider {
           },
         ],
         suggestions: f.suggestions,
+      };
+      return { kind: "ok", data, model, usage: USAGE };
+    }
+    if (req.agent === "inquiry") {
+      // 深度分析 (v10.0.0): the demo master plans two questions, then is done; it cites a path the pipeline passes.
+      const p = req.payload as { refs: string[]; asked: number };
+      const d = INQUIRY_DEMO[locale];
+      const done = p.asked >= 2;
+      const data = {
+        say: done ? d.done : p.asked === 0 ? d.opening : d.inference,
+        question: done ? "" : d.questions[p.asked]!,
+        done,
+        planned: 2,
+        focus: d.focus,
+        fact_refs: done ? [] : p.refs,
       };
       return { kind: "ok", data, model, usage: USAGE };
     }

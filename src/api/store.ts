@@ -3,7 +3,15 @@
  * (db/schema_v0.sql + migrations, encrypted facts/report bodies) implements the
  * same interface later.
  */
-import type { FollowUp, LifeReport, Remedy, Report, UserContext } from "../ai/index.js";
+import type {
+  AgentTrace,
+  FollowUp,
+  InquiryTurn,
+  LifeReport,
+  Remedy,
+  Report,
+  UserContext,
+} from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
 import type { AgentName, TarotFocus, Topic } from "../ai/types.js";
@@ -60,6 +68,57 @@ export interface ReportRecord {
   focus?: TarotFocus;
   /** 测算完成后发到邮箱 (v9.0.0): the last time the report was mailed when done, and how it went. */
   mail?: ReportMail;
+  /** 深度分析 (v10.0.0): the conversation the reading read; deleted with the report. */
+  inquiry_id?: string;
+}
+
+/**
+ * Where a 深度分析 stands (v10.0.0): the master is writing its next turn (thinking), waits for an answer (asking), has
+ * asked enough (ready), couldn't ask its first question (failed), or a reading has read it (closed).
+ */
+export type InquiryRecordStatus = "thinking" | "asking" | "ready" | "failed" | "closed";
+
+/**
+ * A 深度分析 (v10.0.0, S19): the master's questions before a reading and the user's answers. Sealed under the owner's
+ * key like every body; deleted with its reading, and with the account.
+ */
+export interface InquiryRecord {
+  id: string;
+  owner: string;
+  chart_id: string;
+  locale: Locale;
+  status: InquiryRecordStatus;
+  /** What the user wants to know from the reading. */
+  goal: string;
+  /** What the reading is asked for (a tarot, 求籤 or 算卦 question; 风水's room description), and a tarot focus. */
+  question?: string;
+  focus?: TarotFocus;
+  context?: UserContext;
+  turns: InquiryTurn[];
+  /** How many questions the master planned (1–6). */
+  planned?: number;
+  /** What the user most wants to know, as the master understands it now. */
+  understanding?: string;
+  /** The master's last words, once it asks nothing more. */
+  closing?: string;
+  /** The reading made from it. */
+  report_id?: string;
+  /** Who wrote the turns, as every AI output says (the last turn's). */
+  ai_disclosure?: {
+    generated: true;
+    model: string;
+    prompt_version: string;
+    label_required: boolean;
+    generated_at: string;
+  };
+  created_at: string;
+  updated_at: string;
+  /** Live stage while thinking. */
+  progress?: { stage: AgentName; attempt: number; updated_at: string };
+  /** Why the last turn didn't come, for the log; never shown. */
+  error?: string;
+  /** Each turn's model, prompt and token use (no text), for audit. */
+  agents?: AgentTrace[];
 }
 
 /** How mailing a finished report went (v9.0.0, tech plan WP15.4). A failure is not retried on its own. */
@@ -153,8 +212,14 @@ export interface Store {
   getFollowUp(id: string): Promise<FollowUpRecord | undefined>;
   /** A reading's 追问, oldest first. */
   listFollowUps(parentId: string): Promise<FollowUpRecord[]>;
-  /** 删除 (v8.0.0): one reading with its 破除運勢 plans and its 追问. Counts for the receipt. */
-  deleteReport(id: string): Promise<{ reports: number; remedies: number; followups: number }>;
+  putInquiry(i: InquiryRecord): Promise<void>;
+  getInquiry(id: string): Promise<InquiryRecord | undefined>;
+  /**
+   * 删除 (v8.0.0): one reading with its 破除運勢 plans, its 追问 and (v10.0.0) its 深度分析. Counts for the receipt.
+   */
+  deleteReport(
+    id: string,
+  ): Promise<{ reports: number; remedies: number; followups: number; inquiries: number }>;
   /** 删除 (v8.0.0): one 一生运势报告 with its 追问. */
   deleteLifeReport(id: string): Promise<{ life_reports: number; followups: number }>;
   /** A chart, unless a reading or a 一生运势报告 still reads it, or it is a 每日一牌's; true when it went. */
@@ -166,6 +231,7 @@ export interface Store {
     remedies: number;
     life_reports: number;
     followups: number;
+    inquiries: number;
   }>;
 }
 
@@ -175,6 +241,14 @@ export class InMemoryStore implements Store {
   private remedies = new Map<string, RemedyRecord>();
   private lifeReports = new Map<string, LifeReportRecord>();
   private followUps = new Map<string, FollowUpRecord>();
+  private inquiries = new Map<string, InquiryRecord>();
+  async putInquiry(i: InquiryRecord) {
+    this.inquiries.set(i.id, structuredClone(i));
+  }
+  async getInquiry(id: string) {
+    const i = this.inquiries.get(id);
+    return i && structuredClone(i);
+  }
   async listHeld() {
     const held = (s: ReportRecordStatus) => s === "manual_review" || s === "blocked";
     return {
@@ -220,7 +294,10 @@ export class InMemoryStore implements Store {
     for (const [k, r] of this.remedies)
       if (r.report_id === id && this.remedies.delete(k)) remedies++;
     const followups = this.dropFollowUps(id);
-    return { reports: this.reports.delete(id) ? 1 : 0, remedies, followups };
+    let inquiries = 0;
+    for (const [k, i] of this.inquiries)
+      if (i.report_id === id && this.inquiries.delete(k)) inquiries++;
+    return { reports: this.reports.delete(id) ? 1 : 0, remedies, followups, inquiries };
   }
   async deleteLifeReport(id: string) {
     const followups = this.dropFollowUps(id);
@@ -301,7 +378,10 @@ export class InMemoryStore implements Store {
     let followups = 0;
     for (const [id, f] of this.followUps)
       if (f.owner === owner && this.followUps.delete(id)) followups++;
-    return { charts, reports, remedies, life_reports, followups };
+    let inquiries = 0;
+    for (const [id, i] of this.inquiries)
+      if (i.owner === owner && this.inquiries.delete(id)) inquiries++;
+    return { charts, reports, remedies, life_reports, followups, inquiries };
   }
 }
 

@@ -33,7 +33,8 @@ Records:
    the chart itself: see the ai-reading skill.
 2. **Every output goes through a pipeline.** Anything model-generated goes through
    `generateReport`, `generateRemedy`, `generateLifeReport` or, for 追问 (v7.0.0),
-   `generateFollowUp` (`src/ai/`). Nothing calls a model directly. **Content review (rule-layer holds, the guard, 内容审核)
+   `generateFollowUp`, or, for the 深度分析's questions (v10.0.0), `generateInquiryTurn`
+   (`src/ai/`). Nothing calls a model directly. **Content review (rule-layer holds, the guard, 内容审核)
    is PAUSED by owner decision (2026-10-26)** until the legal & obligations work:
    hits are still scanned and recorded. `MINGLI_REVIEW=on` turns it back on; tests
    run with it on. Don't re-enable or remove it without the owner.

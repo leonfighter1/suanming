@@ -66,8 +66,15 @@
 62. Test a provider through its real SDK client with a fake fetch (an SSE body for streams), at the largest max_tokens a route uses, not only with a fake client object. Call Claude through messages.stream(...).finalMessage(): the SDK refuses unstreamed requests over about 21,000 max_tokens, and thinking counts toward max_tokens.
 63. A test that scripts or breaks a provider puts it under every provider key (or passes its own routing), never only the key the shipped routes use. Check that a failure test fails for its own reason (the logged error), not only that something failed.
 64. On a page that builds cards past the screen, a finder for one below the fold needs skipOffstage: false, whether it checks that the card exists, measures its position or asserts findsNothing (rule 43). Scroll to it first only when the test is about what the user sees.
+65. In a list whose parts replace each other (a field, then a card), give each BringIntoView its own key: an unkeyed one at the same place takes over the old state and never brings its part into view. Prove it on a 360 x 740 phone with content past the fold, and check the test fails with the keys removed.
 
 ## Log
+
+### 2026-10-29: A new BringIntoView took over the one it replaced and never scrolled
+- **Symptom:** On a 360 x 740 phone the 深度分析 start button stayed below the screen after the last answer; every earlier question came into view.
+- **Root cause:** The start card's BringIntoView sat where the answer field's had been in the ListView's children. Unkeyed, Flutter reused the old state, so initState never ran and nothing asked to scroll.
+- **Fix:** A ValueKey on each BringIntoView of the page (bring-thinking, bring-composer, bring-ready); a test answers five questions on a 360 x 740 phone and fails with the keys removed.
+- **Rule:** In a list whose parts replace each other (a field, then a card), give each BringIntoView its own key: an unkeyed one at the same place takes over the old state and never brings its part into view. Prove it on a 360 x 740 phone with content past the fold, and check the test fails with the keys removed. (Rule 65)
 
 ### 2026-10-29: A card below the screen is offstage to find() (v9.3.0)
 - **Symptom:** The new reading-page tests found no 总结 card (find.byKey(conclusion) found 0) and getRect threw, though the card was built: FourLayerReport builds every card (scrollCacheExtent 100000), and those below the screen are offstage to the default finder.

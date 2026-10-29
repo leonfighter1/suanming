@@ -3954,6 +3954,233 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'这份报告没能发到邮箱，可以在“以往记录”里再发一次'**
   String get reportMailFailed;
+
+  /// No description provided for @inquiryButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'深度分析'**
+  String get inquiryButton;
+
+  /// No description provided for @inquiryButtonNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师先问你几个问题（最多 {n} 个），再给出更贴合你的最终解答'**
+  String inquiryButtonNote(int n);
+
+  /// No description provided for @inquiryGoalTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'先说说你的目标'**
+  String get inquiryGoalTitle;
+
+  /// No description provided for @inquiryGoalBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用深度分析，一定要先给出一个明确的目标：你最想通过这次测算知道什么？'**
+  String get inquiryGoalBody;
+
+  /// No description provided for @inquiryGoalHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'比如：明年适不适合换工作？'**
+  String get inquiryGoalHint;
+
+  /// No description provided for @inquiryGoalShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'目标太短了，请写清楚你最想知道什么'**
+  String get inquiryGoalShort;
+
+  /// No description provided for @inquiryGoalStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始深度分析'**
+  String get inquiryGoalStart;
+
+  /// No description provided for @inquiryTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'深度分析'**
+  String get inquiryTitle;
+
+  /// No description provided for @inquiryAsking.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师现在有问题要问你'**
+  String get inquiryAsking;
+
+  /// No description provided for @inquiryAskingNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'回答完这些问题，大师才能给你最终解答。'**
+  String get inquiryAskingNote;
+
+  /// No description provided for @inquiryGoalLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'你的目标：{goal}'**
+  String inquiryGoalLine(String goal);
+
+  /// No description provided for @inquiryProgress.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {n} 个问题 · 大师打算问 {planned} 个（最多 {max} 个）'**
+  String inquiryProgress(int n, int planned, int max);
+
+  /// No description provided for @inquiryThinking.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师正在思考…'**
+  String get inquiryThinking;
+
+  /// No description provided for @inquiryMaster.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师'**
+  String get inquiryMaster;
+
+  /// No description provided for @inquiryYou.
+  ///
+  /// In zh, this message translates to:
+  /// **'你'**
+  String get inquiryYou;
+
+  /// No description provided for @inquiryAnswerHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'说说你的情况'**
+  String get inquiryAnswerHint;
+
+  /// No description provided for @inquiryAnswerSend.
+  ///
+  /// In zh, this message translates to:
+  /// **'回答'**
+  String get inquiryAnswerSend;
+
+  /// No description provided for @inquirySkip.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过剩下的问题，直接解答'**
+  String get inquirySkip;
+
+  /// No description provided for @inquiryReady.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师已经了解你的情况，可以开始最终解答了。'**
+  String get inquiryReady;
+
+  /// No description provided for @inquiryUnderstanding.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师的理解：{text}'**
+  String inquiryUnderstanding(String text);
+
+  /// No description provided for @inquiryStartReading.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始最终解答'**
+  String get inquiryStartReading;
+
+  /// No description provided for @inquiryFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师这次没能想好问题。可以重新开始深度分析，或者回到上一页直接生成解读。'**
+  String get inquiryFailed;
+
+  /// No description provided for @inquiryRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新开始'**
+  String get inquiryRetry;
+
+  /// No description provided for @inquiryBusy.
+  ///
+  /// In zh, this message translates to:
+  /// **'大师还在思考，请稍候'**
+  String get inquiryBusy;
+
+  /// No description provided for @inquiryLeaveBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'深度分析还没做完，返回后这次的问答就结束了。'**
+  String get inquiryLeaveBody;
+
+  /// No description provided for @inquiryCardTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'深度分析 · 大师问了你 {n} 个问题'**
+  String inquiryCardTitle(int n);
+
+  /// No description provided for @micStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'语音输入'**
+  String get micStart;
+
+  /// No description provided for @micStop.
+  ///
+  /// In zh, this message translates to:
+  /// **'停止语音输入'**
+  String get micStop;
+
+  /// No description provided for @micListening.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在听，请说话…'**
+  String get micListening;
+
+  /// No description provided for @micUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个浏览器暂时不能语音输入，可以用输入法自带的语音输入'**
+  String get micUnavailable;
+
+  /// No description provided for @micDenied.
+  ///
+  /// In zh, this message translates to:
+  /// **'需要允许使用麦克风，才能语音输入'**
+  String get micDenied;
+
+  /// No description provided for @micNoMatch.
+  ///
+  /// In zh, this message translates to:
+  /// **'没听清，请再说一次'**
+  String get micNoMatch;
+
+  /// No description provided for @recalcTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'之前已经算过'**
+  String get recalcTitle;
+
+  /// No description provided for @recalcBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'“{name}”在 {date} 已经算过{method}。是否还要重新再算一次？'**
+  String recalcBody(String name, String date, String method);
+
+  /// No description provided for @recalcBodyQuestion.
+  ///
+  /// In zh, this message translates to:
+  /// **'“{name}”在 {date} 已经算过{method}，问的是“{question}”。是否还要重新再算一次？'**
+  String recalcBodyQuestion(
+    String name,
+    String date,
+    String method,
+    String question,
+  );
+
+  /// No description provided for @recalcView.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看之前的'**
+  String get recalcView;
+
+  /// No description provided for @recalcAgain.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新再算'**
+  String get recalcAgain;
 }
 
 class _AppLocalizationsDelegate

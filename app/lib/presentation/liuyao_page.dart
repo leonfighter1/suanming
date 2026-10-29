@@ -10,6 +10,7 @@ import 'design.dart';
 import 'keyboard.dart';
 import 'widgets/copper_coin.dart';
 import 'widgets/hexagram_card.dart';
+import 'widgets/recalc_check.dart';
 import 'widgets/report_request.dart';
 
 /// 算卦 (v6.0.0, tech plan S10, the owner's request): 六爻 by three coins, cast three ways. A reminder comes first.
@@ -71,6 +72,10 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
   static String _local(DateTime t) => '${t.year}-${_two(t.month)}-${_two(t.day)}T${_two(t.hour)}:${_two(t.minute)}';
 
   Future<void> _cast(Map<String, Object?> request) async {
+    // 同名重算 (v10.0.0): the same question cast for before? Ask first.
+    final name = ref.read(profilesProvider).value?.defaultProfile?.name;
+    if (!await confirmRecalc(context, ref, system: 'liuyao', name: name, question: _question.text)) return;
+    if (!mounted) return;
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     try {

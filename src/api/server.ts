@@ -13,9 +13,16 @@ import {
   FOLLOWUP_QUESTION_MAX,
   followUpAvailable,
   generateFollowUp,
+  generateInquiryTurn,
   generateLifeReport,
   generateRemedy,
   generateReport,
+  INQUIRY_ANSWER_MAX,
+  INQUIRY_GOAL_MAX,
+  INQUIRY_GOAL_MIN,
+  INQUIRY_MAX_QUESTIONS,
+  inquiryAvailable,
+  inquiryGoal,
   remedyAvailable,
   parseUserContext,
   GeoRefusedError,
@@ -27,6 +34,8 @@ import {
   TOPICS_BY_SYSTEM,
   type FollowUpParent,
   type FollowUpTurn,
+  type InquiryContext,
+  type InquiryStep,
   type LLMProvider,
   type Locale,
   type Report,
@@ -92,6 +101,7 @@ const SHARE_RENDERERS: Partial<Record<ChartSystem, typeof renderTarotShare>> = {
 import {
   InMemoryStore,
   type FollowUpRecord,
+  type InquiryRecord,
   type ReviewDecision,
   type LifeReportRecord,
   type ReportMail,
@@ -256,6 +266,39 @@ export function publicReport(r: ReportRecord) {
     layers: rep.layers,
     ai_disclosure: rep.ai_disclosure,
     ...(r.mail && { mail: r.mail }),
+    // 深度分析 (v10.0.0): the conversation this reading read, at /v1/inquiries/{id}.
+    ...(r.inquiry_id && { inquiry_id: r.inquiry_id }),
+  };
+}
+
+/**
+ * What the user may see of a 深度分析 (v10.0.0): their goal, the master's turns with their answers, how many questions
+ * it plans, and once it is done its last words and what it understood they most want to know.
+ */
+export function publicInquiry(r: InquiryRecord) {
+  const done = r.status === "ready" || r.status === "closed";
+  return {
+    inquiry_id: r.id,
+    chart_id: r.chart_id,
+    status: r.status,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+    goal: r.goal,
+    max_questions: INQUIRY_MAX_QUESTIONS,
+    ...(r.planned !== undefined && { planned: r.planned }),
+    turns: r.turns.map((t) => ({
+      say: t.say,
+      question: t.question,
+      ...(t.answer !== undefined && { answer: t.answer }),
+    })),
+    ...(done && r.closing && { closing: r.closing }),
+    ...(done && r.understanding && { understanding: r.understanding }),
+    ...(r.report_id && { report_id: r.report_id }),
+    ...(r.status === "thinking" && r.progress && { progress: r.progress }),
+    ...(r.status === "failed" && {
+      message: "the master could not ask its first question; try again, or read without 深度分析",
+    }),
+    ...(r.ai_disclosure && { ai_disclosure: r.ai_disclosure }),
   };
 }
 
@@ -595,6 +638,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     c: Caller,
     question?: string,
     focus?: TarotFocus,
+    inquiry?: InquiryContext,
   ) {
     let next: ReportRecord;
     try {
@@ -607,6 +651,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           question,
           ...(focus && { focus }),
           context: record.context,
+          ...(inquiry && { inquiry }),
         },
         {
           providers: opts.providers,
@@ -954,6 +999,195 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
+  /**
+   * 深度分析 (v10.0.0, S19): the master's next turn, in the background. A question goes on the record and waits for its
+   * answer (asking); when the master asks nothing more it is ready, with its last words. A turn that fails or is held
+   * ends the questions there (ready: the reading goes on with what was said), or, on the first turn, fails the 深度分析.
+   */
+  async function runInquiryTurn(record: InquiryRecord, fact: ChartFact, c: Caller) {
+    let step: InquiryStep | undefined;
+    let error: string | undefined;
+    try {
+      step = await generateInquiryTurn(
+        fact,
+        {
+          goal: record.goal,
+          ...(record.question && { question: record.question }),
+          ...(record.focus && { focus: record.focus }),
+          ...(record.context && { context: record.context }),
+          turns: record.turns,
+          ...(record.planned !== undefined && { planned: record.planned }),
+        },
+        { locale: record.locale, country: c.country },
+        {
+          providers: opts.providers,
+          routing: opts.routing?.(),
+          review: opts.review !== false,
+          now,
+          onProgress: async ({ stage, attempt }) => {
+            const current = await store.getInquiry(record.id);
+            if (current?.status !== "thinking") return;
+            await store.putInquiry({
+              ...current,
+              progress: { stage, attempt, updated_at: now().toISOString() },
+            });
+          },
+        },
+      );
+      if (step.status !== "passed") {
+        error = step.reasons.join("; ");
+        log(`inquiry ${record.id} turn held: ${heldWhy(step)}`);
+      }
+    } catch (e) {
+      const upstream = upstreamMessage(e);
+      error = upstream ?? "internal error";
+      log(
+        `inquiry ${record.id} turn failed: ${upstream ?? (e as Error).message}`,
+        upstream ? undefined : e,
+      );
+    }
+    // The account or the reading may have gone, or the user moved on, meanwhile: never resurrect or overwrite.
+    const current = await store.getInquiry(record.id);
+    if (!current || current.status !== "thinking") return;
+    const { progress: _p, error: _e, ...rest } = current;
+    const base: InquiryRecord = {
+      ...rest,
+      updated_at: now().toISOString(),
+      agents: [...(current.agents ?? []), ...(step?.agents ?? [])],
+      ...(step && { ai_disclosure: step.ai_disclosure }),
+    };
+    const turn = step?.status === "passed" ? step.turn : undefined;
+    let next: InquiryRecord;
+    if (step && turn && !step.done && turn.question) {
+      next = {
+        ...base,
+        status: "asking",
+        turns: [...current.turns, turn],
+        planned: step.planned,
+        ...(step.focus && { understanding: step.focus }),
+      };
+    } else if (step && turn) {
+      next = {
+        ...base,
+        status: "ready",
+        planned: step.planned,
+        ...(turn.say && { closing: turn.say }),
+        ...(step.focus && { understanding: step.focus }),
+      };
+    } else {
+      next = {
+        ...base,
+        status: current.turns.length === 0 ? "failed" : "ready",
+        ...(error && { error }),
+      };
+    }
+    await store.putInquiry(next);
+  }
+
+  /** The caller's 深度分析, or 404. */
+  async function ownedInquiry(id: string, c: Caller) {
+    const r = UUID_RE.test(id) ? await store.getInquiry(id) : undefined;
+    if (!r || r.owner !== c.user) throw new HttpError(404, "inquiry not found");
+    return r;
+  }
+
+  /**
+   * 深度分析 (v10.0.0): the master's questions on a chart before its reading. It needs a goal (the owner:
+   * 「使用这一功能一定要给出个明确的目标才行」): 400 goal_required without one. The first question comes in the background.
+   * One from the daily AI caps, as a reading takes.
+   */
+  async function createInquiry(req: IncomingMessage, c: Caller) {
+    const body = (await readJson(req)) as Record<string, unknown>;
+    const chartId = body.chart_id;
+    if (typeof chartId !== "string" || !UUID_RE.test(chartId))
+      throw new InputError("chart_id must be a UUID");
+    const chart = await store.getChart(chartId);
+    if (!chart || chart.owner !== c.user) throw new HttpError(404, "chart not found");
+    if (!inquiryAvailable(chart.fact)) {
+      throw new InputError(`深度分析 is not offered for ${chart.fact.system} readings`);
+    }
+    const locale = body.locale as Locale;
+    if (!LOCALES.includes(locale))
+      throw new InputError(`locale must be one of ${LOCALES.join(", ")}`);
+    const goal = inquiryGoal(body.goal);
+    if (!goal) {
+      throw new HttpError(
+        400,
+        `a 深度分析 needs a clear goal: what you want to know, ${INQUIRY_GOAL_MIN}–${INQUIRY_GOAL_MAX} characters`,
+        "goal_required",
+      );
+    }
+    const focus = body.focus as TarotFocus | undefined;
+    if (focus !== undefined && (chart.fact.system !== "tarot" || !TAROT_FOCUS.includes(focus))) {
+      throw new InputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
+    }
+    assertServed(c.country, chart.fact.system);
+    const context = parseUserContext(body.context);
+    const question =
+      typeof body.question === "string" && body.question.trim()
+        ? body.question.trim().slice(0, 300)
+        : undefined;
+    takeAiQuota(c.user);
+    const ts = now().toISOString();
+    const record: InquiryRecord = {
+      id: randomUUID(),
+      owner: c.user,
+      chart_id: chart.id,
+      locale,
+      status: "thinking",
+      goal,
+      ...(question && { question }),
+      ...(focus && { focus }),
+      ...(context && { context }),
+      turns: [],
+      created_at: ts,
+      updated_at: ts,
+    };
+    await store.putInquiry(record);
+    track(`inquiry ${record.id}`, runInquiryTurn(record, chart.fact, c));
+    return {
+      status: 202,
+      body: publicInquiry(record),
+      headers: { location: `/v1/inquiries/${record.id}`, "retry-after": "3" },
+    };
+  }
+
+  /** The user's answer to the master's question; the master's next turn comes in the background. */
+  async function answerInquiry(req: IncomingMessage, id: string, c: Caller) {
+    const body = (await readJson(req)) as Record<string, unknown>;
+    const answer = typeof body.answer === "string" ? body.answer.trim() : "";
+    if (!answer) throw new InputError("answer is required");
+    if ([...answer].length > INQUIRY_ANSWER_MAX) {
+      throw new InputError(`answer must be at most ${INQUIRY_ANSWER_MAX} characters`);
+    }
+    const record = await ownedInquiry(id, c);
+    if (record.status === "thinking") {
+      throw new HttpError(409, "the master is still thinking", "inquiry_thinking");
+    }
+    if (record.status !== "asking") {
+      throw new HttpError(409, "the master has no question waiting", "inquiry_not_asking");
+    }
+    const chart = await store.getChart(record.chart_id);
+    if (!chart) throw new HttpError(404, "chart not found");
+    assertServed(c.country, chart.fact.system);
+    const turns = record.turns.map((t, i) =>
+      i === record.turns.length - 1 ? { ...t, answer } : t,
+    );
+    const next: InquiryRecord = {
+      ...record,
+      status: "thinking",
+      turns,
+      updated_at: now().toISOString(),
+    };
+    await store.putInquiry(next);
+    track(`inquiry ${record.id}`, runInquiryTurn(next, chart.fact, c));
+    return {
+      status: 202,
+      body: publicInquiry(next),
+      headers: { location: `/v1/inquiries/${record.id}`, "retry-after": "3" },
+    };
+  }
+
   async function runLifeJob(
     record: LifeReportRecord,
     fact: ChartFact,
@@ -1210,13 +1444,40 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (bad.length)
       throw new InputError(`topics not available for ${chart.fact.system}: ${bad.join(", ")}`);
     assertServed(c.country, chart.fact.system);
+    // 深度分析 (v10.0.0): the conversation held on this chart, read by the reading. The last question may go unanswered
+    // (the user skipped the rest); a conversation is read by one reading only.
+    let inquiry: InquiryRecord | undefined;
+    if (body.inquiry_id !== undefined) {
+      const id = body.inquiry_id;
+      if (typeof id !== "string" || !UUID_RE.test(id))
+        throw new InputError("inquiry_id must be a UUID");
+      inquiry = await ownedInquiry(id, c);
+      if (inquiry.chart_id !== chart.id) throw new InputError("the 深度分析 is for another chart");
+      if (inquiry.status === "thinking") {
+        throw new HttpError(409, "the master is still thinking", "inquiry_thinking");
+      }
+      if (inquiry.status === "closed" || inquiry.report_id) {
+        throw new HttpError(409, "this 深度分析 already has its reading", "inquiry_used");
+      }
+      if (inquiry.status === "failed") {
+        throw new HttpError(409, "this 深度分析 failed: read without it", "inquiry_failed");
+      }
+    }
     takeAiQuota(c.user);
-    const question = typeof body.question === "string" ? body.question.slice(0, 300) : undefined;
-    const focus = body.focus as TarotFocus | undefined;
+    const question =
+      typeof body.question === "string" ? body.question.slice(0, 300) : inquiry?.question;
+    const focus = (body.focus ?? inquiry?.focus) as TarotFocus | undefined;
     if (focus !== undefined && (chart.fact.system !== "tarot" || !TAROT_FOCUS.includes(focus))) {
       throw new InputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
     }
-    const context = parseUserContext(body.context);
+    const context = parseUserContext(body.context) ?? inquiry?.context;
+    const conversation: InquiryContext | undefined = inquiry && {
+      goal: inquiry.goal,
+      turns: inquiry.turns.flatMap((t) =>
+        t.answer ? [{ say: t.say, question: t.question, answer: t.answer }] : [],
+      ),
+      ...(inquiry.understanding && { understanding: inquiry.understanding }),
+    };
 
     const ts = now().toISOString();
     const record: ReportRecord = {
@@ -1232,9 +1493,18 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       // What the reading was asked for, kept for its 追问 (v7.0.0), sealed with it.
       ...(question && { question }),
       ...(focus && { focus }),
+      ...(inquiry && { inquiry_id: inquiry.id }),
     };
     await store.putReport(record);
-    track(`report ${record.id}`, runJob(record, chart.fact, c, question, focus));
+    if (inquiry) {
+      await store.putInquiry({
+        ...inquiry,
+        status: "closed",
+        report_id: record.id,
+        updated_at: ts,
+      });
+    }
+    track(`report ${record.id}`, runJob(record, chart.fact, c, question, focus, conversation));
     return {
       status: 202,
       body: publicReport(record),
@@ -1597,6 +1867,21 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
     }
 
+    // ---- 深度分析 (v10.0.0, S19): the master's questions before a reading ----
+    if (path === "/v1/inquiries" && req.method === "POST") {
+      const out = await createInquiry(req, c);
+      return send(res, out.status, out.body, out.headers);
+    }
+    const iq = /^\/v1\/inquiries\/([^/]+)(\/answers)?$/.exec(path);
+    if (iq && !iq[2] && req.method === "GET") {
+      const r = await ownedInquiry(iq[1]!, c);
+      return send(res, 200, publicInquiry(r), aiHeaders(r.ai_disclosure));
+    }
+    if (iq && iq[2] && req.method === "POST") {
+      const out = await answerInquiry(req, iq[1]!, c);
+      return send(res, out.status, out.body, out.headers);
+    }
+
     // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 ----
     const fq = /^\/v1\/(reports|life-reports)\/([^/]+)\/followups$/.exec(path);
     if (fq && req.method === "POST") {
@@ -1733,6 +2018,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
               chart_id: r.chart_id,
               chart: chart && chartSummary(chart.fact),
               ...(chart?.person && { person: chart.person }),
+              // 同名重算 (v10.0.0): what the reading was asked, so the app can tell the same question asked again.
+              ...(r.question && { question: r.question }),
             };
           }),
         );

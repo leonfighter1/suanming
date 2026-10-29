@@ -60,7 +60,7 @@ describe("generateReport — happy path", () => {
     expect(Object.keys(r.layers!.conclusion!)).toEqual([...CONCLUSION_PARTS]);
     expect(r.layers!.actions).toEqual([]);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
-    expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@8,guard@2");
+    expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@9,guard@2");
     // The routed model, as the mock reports it (mock/<model>); which model ships is pinned in ai-models.test.ts.
     expect(r.ai_disclosure.model).toContain(loadRouting().routes.narrative.default.model);
     // No trend agent: the engine scores the trend chart (v2.0.0). No action agent for 八字 (v9.3.0).

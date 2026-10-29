@@ -9,6 +9,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import 'reading_paragraph.dart';
 import 'remedy.dart' show compactButtons;
+import 'voice_input.dart';
 
 /// Where a reading's 追问 card and its floating button meet (v7.0.0): the card's place on the page, its question field
 /// and whether that field is on screen.
@@ -229,6 +230,8 @@ class _FollowUpCardState extends ConsumerState<FollowUpCard> {
                   decoration: InputDecoration(
                     hintText: left > 0 ? l10n.followUpHint : l10n.followUpLimit,
                     helperText: list != null && left > 0 ? l10n.followUpLeft(left) : null,
+                    // 麦克风 (v10.0.0): say the question instead of typing it, where the browser can listen.
+                    suffixIcon: left > 0 ? VoiceInputButton.suffix(ref, controller: _question, id: 'followup', maxLength: 200) : null,
                   ),
                 ),
                 Align(

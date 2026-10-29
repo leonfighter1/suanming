@@ -64,7 +64,7 @@ describe("tarot reading, the classic way", () => {
       { locale: "zh-Hans", country: "HK", focus: "career_wealth", question: "我该不该换工作？" },
       { providers: { deepseek: tarotAi, anthropic: tarotAi }, now: FIXED_NOW },
     );
-    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@4,action_tarot@2,guard@2");
+    expect(tarot.ai_disclosure.prompt_version).toBe("narrative_tarot@5,action_tarot@2,guard@2");
     const reading = tarotAi.sent.find((r) => r.agent === "narrative")!;
     expect(reading.system).toBe(PROMPTS.narrative_tarot.system);
     expect(reading.user).toContain("<spread>");

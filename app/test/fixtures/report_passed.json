@@ -484,7 +484,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/claude-opus-5-5",
-    "prompt_version": "narrative_bazi@8,guard@2",
+    "prompt_version": "narrative_bazi@9,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

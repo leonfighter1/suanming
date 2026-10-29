@@ -131,6 +131,24 @@ export const followUpSchema = {
   },
 };
 
+/**
+ * A 深度分析 turn (v10.0.0, S19): what the master says, the next question, how many it plans, what the user most wants
+ * to know, or done. Lengths and the 1–6 range are checked after parsing (inquiry.ts).
+ */
+export const inquirySchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["say", "question", "done", "planned", "focus", "fact_refs"],
+  properties: {
+    say: str,
+    question: str,
+    done: { type: "boolean" },
+    planned: { type: "integer" },
+    focus: str,
+    fact_refs: { type: "array", items: str },
+  },
+};
+
 export const guardSchema = {
   type: "object",
   additionalProperties: false,

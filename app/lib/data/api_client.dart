@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../domain/document.dart';
+import '../domain/inquiry.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/places.dart';
@@ -203,6 +204,7 @@ class ApiClient {
     String? question,
     String? focus,
     Map<String, Object?>? context,
+    String? inquiryId,
   }) async =>
       ReportView.fromJson(await _authed('POST', '/v1/reports', {
         'chart_id': chartId,
@@ -211,7 +213,35 @@ class ApiClient {
         if (question != null && question.isNotEmpty) 'question': question,
         'focus': ?focus,
         'context': ?context,
+        'inquiry_id': ?inquiryId,
       }));
+
+  // ---- 深度分析 (v10.0.0) ----
+
+  /// Starts a 深度分析 on a chart: the master's first question comes in the background (202), so poll [getInquiry].
+  /// 400 `goal_required` without a clear goal.
+  Future<InquiryView> startInquiry({
+    required String chartId,
+    required String locale,
+    required String goal,
+    String? question,
+    String? focus,
+    Map<String, Object?>? context,
+  }) async =>
+      InquiryView.fromJson(await _authed('POST', '/v1/inquiries', {
+        'chart_id': chartId,
+        'locale': locale,
+        'goal': goal,
+        if (question != null && question.isNotEmpty) 'question': question,
+        'focus': ?focus,
+        'context': ?context,
+      }));
+
+  Future<InquiryView> getInquiry(String id) async => InquiryView.fromJson(await _authed('GET', '/v1/inquiries/$id'));
+
+  /// The answer to the master's question; its next turn comes in the background (202).
+  Future<InquiryView> answerInquiry(String id, String answer) async =>
+      InquiryView.fromJson(await _authed('POST', '/v1/inquiries/$id/answers', {'answer': answer}));
 
   Future<ReportView> getReport(String id) async => ReportView.fromJson(await _authed('GET', '/v1/reports/$id'));
 

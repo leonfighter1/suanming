@@ -37,3 +37,16 @@ export {
   type FollowUpParent,
   type FollowUpTurn,
 } from "./followup.js";
+export {
+  generateInquiryTurn,
+  INQUIRY_ANSWER_MAX,
+  INQUIRY_GOAL_MAX,
+  INQUIRY_GOAL_MIN,
+  INQUIRY_MAX_QUESTIONS,
+  inquiryAvailable,
+  inquiryGoal,
+  InquiryInputError,
+  type InquiryState,
+  type InquiryStep,
+  type InquiryTurn,
+} from "./inquiry.js";

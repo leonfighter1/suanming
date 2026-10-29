@@ -20,17 +20,19 @@ import { buildProviders, modelChoice, watchAi } from "../src/service/runtime.js"
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 
 describe("the models to choose from (S17, v9.2.0)", () => {
-  it("every route answers with Claude Opus 5.5 at medium effort (owner, 2026-10-29)", () => {
+  it("every route answers with Claude Opus 5.5 (owner, 2026-10-29), at medium effort but the 深度分析's", () => {
     const table = loadRouting();
-    for (const routes of Object.values(table.routes)) {
-      expect(routes.default).toMatchObject({
+    for (const [agent, routes] of Object.entries(table.routes)) {
+      expect(routes.default, agent).toMatchObject({
         provider: "anthropic",
         model: "claude-opus-5-5",
-        effort: "medium",
+        // v10.0.0: the user waits for each 深度分析 question, a short one, so it thinks briefly.
+        effort: agent === "inquiry" ? "low" : "medium",
       });
     }
     // Its thinking counts toward max_tokens: twice what DeepSeek had (32,000 for the reading).
     expect(table.routes.narrative.default.max_tokens).toBe(64_000);
+    expect(table.routes.inquiry.default.max_tokens).toBe(8_000);
     expect(checkRouting(table)).toEqual([]);
   });
 

@@ -21,6 +21,10 @@ import {
   generateLifeReport,
   generateRemedy,
   generateReport,
+  INQUIRY_ANSWER_MAX,
+  INQUIRY_GOAL_MIN,
+  INQUIRY_MAX_QUESTIONS,
+  METHOD_PROMPTS,
   MockProvider,
   NO_PLAN_TOPICS,
   TAROT_FOCUS,
@@ -518,6 +522,16 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       "",
       "/// The parts of a 八字 reading's 总结, in order (CONCLUSION_PARTS on the server, v9.3.0).",
       `const conclusionParts = <String>[${CONCLUSION_PARTS.map((p) => `'${p}'`).join(", ")}];`,
+      "",
+      "/// 深度分析 (v10.0.0): the methods whose readings take one (an inquiry prompt in METHOD_PROMPTS), the most",
+      "/// questions it asks, the shortest goal and the longest answer (INQUIRY_* on the server).",
+      `const inquirySystems = <String>{${Object.entries(METHOD_PROMPTS)
+        .filter(([, own]) => own.inquiry)
+        .map(([system]) => `'${system}'`)
+        .join(", ")}};`,
+      `const inquiryMaxQuestions = ${INQUIRY_MAX_QUESTIONS};`,
+      `const inquiryGoalMin = ${INQUIRY_GOAL_MIN};`,
+      `const inquiryAnswerMax = ${INQUIRY_ANSWER_MAX};`,
       "",
     ].join("\n"),
   };

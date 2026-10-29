@@ -12,6 +12,41 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v10.0.0 (2026-10-29): 深度分析 — the master asks first; the mic; 同名重算
+
+Your requests of today, as stage S19 of the [tech plan](docs/tech-plan.md). A big update: pushed, with v9.1.0–v9.3.0.
+积分 is planned for later, as you asked (S20 in the tech plan, with what each reading costs at Opus 5.5's prices).
+
+- **深度分析 (细节对话):** on 八字, 塔罗, 求签, 算卦 and 风水, a second button under the AI button. Before the reading,
+  the master asks about your situation, one question at a time, from what the chart or the cards show and what you
+  want to know.
+  - Each question comes with what the master sees, or what it makes of your last answer (合理推断). What you most want
+    to know may change with your answers (your example: from whether to break up, to whether you will find someone
+    after): the master follows it, and the final reading answers that.
+  - Fewer questions for a smooth chart, more for a hard one, never more than 6. The master decides on its first
+    turn, and the page shows which question it is: 第 2 个问题 · 大师打算问 3 个（最多 6 个）.
+  - The page says 大师现在有问题要问你 and 回答完这些问题，大师才能给你最终解答. 跳过剩下的问题，直接解答 goes straight to the
+    reading with what was said. When the master is done, it says what it understood and 开始最终解答 makes the reading.
+  - The final reading reads every question and answer, answers what you most want to know first (八字: in the 总结
+    too), and shows the conversation at its top, folded.
+  - It needs a clear goal: the question asked before drawing, or for 八字 为谁排盘's 想了解的事. Without one, a dialog
+    asks for it first: 使用深度分析，一定要先给出一个明确的目标.
+  - The master asks about you and what you know, never hints that someone cheats or lies: your example
+    「可能是她在外面有了别的什么事」 becomes 「她那边最近有没有什么你还不清楚的情况？」.
+- **麦克风:** a mic button beside the 深度分析 answer, the goal and the 追问 fields: tap, speak, and the words appear in
+  the field. It uses the browser's speech recognition. Chrome sends speech to Google, which mainland China can't
+  reach: there Edge and Safari work, or the phone keyboard's own voice input. Where the browser can't listen
+  (Firefox), there is no button.
+- **同名重算:** before a new 测算, if the same person already has a finished one, the app asks
+  之前已经算过，是否还要重新再算一次？ with 查看之前的 and 重新再算. For 八字 (and 一生运势) the same person counts; for a 卦
+  (塔罗, 求签, 算卦, 风水) the same person with the same question, since a new question is a new 卦.
+- **How to try it:** restart `npm run public`. While `IS_AI_MOCK=TRUE` the master is a demo (two （示范） questions);
+  with the real model it judges the chart and plans its own questions. The questions use Claude Opus 5.5 at effort
+  low, so each comes quickly; the readings stay at medium.
+- **Verified:** 18 new server tests (the pipeline, each method's own prompt, the reading reading the conversation, the
+  API), 612 in all; 12 new app tests (the page, the goal reminder, the mic, 同名重算, keyboard, a 360 × 740 phone),
+  225 in all; harness PASS. Not tried: a real conversation, which waits for your switch.
+
 ### v9.3.0 (2026-10-29): 八字's AI reading is the AI's own, with a 总结; no 行动建议 or 比如 examples
 
 Your two requests of today, as stage S18 of the [tech plan](docs/tech-plan.md). A medium update: kept locally until

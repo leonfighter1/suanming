@@ -12,6 +12,7 @@ import 'keyboard.dart';
 import 'profiles_page.dart';
 import 'widgets/birth_fields.dart';
 import 'widgets/life_context_fields.dart';
+import 'widgets/recalc_check.dart';
 
 /// 为谁排盘 picker values that are actions, not people.
 const _addPerson = '__add__';
@@ -56,6 +57,9 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
   }
 
   Future<void> _submit(BirthProfile p) async {
+    // 同名重算 (v10.0.0): this person's chart has been read before? Ask first.
+    if (!await confirmRecalc(context, ref, system: _life ? 'life' : 'bazi', name: p.name)) return;
+    if (!mounted) return;
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);

@@ -208,6 +208,7 @@ describe("以往记录, the API (WP14.1–14.2)", () => {
       reports: 1,
       remedies: plans,
       followups: 1,
+      inquiries: 0,
       charts: 1,
     });
     expect((await get(`/v1/reports/${report_id}`, u)).status).toBe(404);

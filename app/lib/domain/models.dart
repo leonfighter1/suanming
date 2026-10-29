@@ -713,6 +713,7 @@ class ReportView {
     this.progressAttempt = 1,
     this.createdAt,
     this.mailStatus,
+    this.inquiryId,
   });
 
   factory ReportView.fromJson(Json j) => ReportView(
@@ -727,6 +728,7 @@ class ReportView {
         progressAttempt: ((j['progress'] as Json?)?['attempt'] as int?) ?? 1,
         createdAt: DateTime.tryParse(j['created_at'] as String? ?? ''),
         mailStatus: (j['mail'] as Json?)?['status'] as String?,
+        inquiryId: j['inquiry_id'] as String?,
       );
 
   final String id;
@@ -748,6 +750,9 @@ class ReportView {
 
   /// 测算完成后发到邮箱 (v9.0.0): sent or failed, once the report was mailed when done; null otherwise.
   final String? mailStatus;
+
+  /// 深度分析 (v10.0.0): the conversation this reading read, if any (`GET /v1/inquiries/<id>`).
+  final String? inquiryId;
 
   bool get isTerminal => status != 'pending';
 }
@@ -823,6 +828,7 @@ class HistoryItem {
     this.surnames = const {},
     this.hexagrams = const {},
     this.person,
+    this.question,
   });
 
   factory HistoryItem.fromJson(Json j) {
@@ -843,6 +849,7 @@ class HistoryItem {
       facing: chart['facing'] as String?,
       surnames: ((chart['surname'] as Json?) ?? const {}).cast<String, String>(),
       hexagrams: ((chart['primary'] as Json?) ?? const {}).cast<String, String>(),
+      question: j['question'] as String?,
     );
   }
 
@@ -875,4 +882,7 @@ class HistoryItem {
 
   /// Whose chart the reading is of (v6.2.0), as the server keeps it.
   final ChartPerson? person;
+
+  /// What the reading was asked (v10.0.0): a tarot, 求籤 or 算卦 question, 风水's room description.
+  final String? question;
 }

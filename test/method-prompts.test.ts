@@ -26,9 +26,9 @@ import { DRAW_KEY, FIXED_NOW, PEPPER, withNamingOn } from "./helpers.js";
 // stays pinned through the successor's hash: an edit changes that hash, or makes swap() throw.
 const HASHES: Record<string, string> = {
   "narrative@4": "49007c9a8aba351e",
-  // v9.3.0 (S18): 八字's own AI reading, self-contained.
-  "narrative_bazi@8": "d19232f14a20dbc2",
-  "narrative_tarot@4": "6bbf24df455a522a",
+  // v10.0.0 (S19): each reading the 深度分析 reaches reads its conversation.
+  "narrative_bazi@9": "f6d2371f21803495",
+  "narrative_tarot@5": "170df1168bd58ece",
   "action@3": "87f6e73c8dd8d3de",
   "trend@2": "80a95937498e19fc",
   "remedy@2": "8a54bed1ea13dffa",
@@ -41,16 +41,16 @@ const HASHES: Record<string, string> = {
   "remedy_bazi@4": "1953c4f923cf05ab",
   "remedy_tarot@2": "5ea0b8e2f95f8ce9",
   // v4.3.0 (WP6.1)
-  "narrative_qiuqian@2": "50793c67dabf468d",
+  "narrative_qiuqian@3": "cac6d1787161dbf7",
   "action_qiuqian@1": "4d491e5caa9e0306",
   // v4.4.0 (WP6.3)
-  "narrative_fengshui@2": "5d880d4dbbfbfa33",
+  "narrative_fengshui@3": "0f2e037ffac0fa2b",
   "action_fengshui@1": "146ae68566106766",
   // v4.5.0 (WP6.4)
   "narrative_naming@2": "65d36ae6e56a3b4f",
   "action_naming@1": "34493bd83790f328",
   // v5.3.0 (S10)
-  "narrative_liuyao@2": "193c6eda8248674b",
+  "narrative_liuyao@3": "eabd6c9e8af3c92d",
   "action_liuyao@1": "82a59b90dfa30a15",
   // v7.0.0 (S13 WP13.2): 追问, one prompt per method and one for the 一生运势报告
   "followup_bazi@1": "4e43565d20de349b",
@@ -61,12 +61,23 @@ const HASHES: Record<string, string> = {
   "followup_naming@1": "bf56ee25c0f11bb0",
   "followup_liuyao@1": "3f21effd4153d3e1",
   "followup_life@1": "874e9b6dbae185b6",
+  // v10.0.0 (S19): 深度分析, one prompt per method with a page
+  "inquiry_bazi@1": "986d6854fdcc449d",
+  "inquiry_tarot@1": "e076f8c65ef59b83",
+  "inquiry_qiuqian@1": "0a9a6288b6cd69f7",
+  "inquiry_liuyao@1": "59e792dc56fa35be",
+  "inquiry_fengshui@1": "03c198be5bcbbd6d",
 };
 
-// Released prompts no new reading uses (v9.3.0): their pins as released, so their text never changes either.
+// Released prompts no new reading uses (v9.3.0, v10.0.0): their pins as released, so their text never changes either.
 const RETIRED_HASHES: Record<string, string> = {
   "narrative_bazi@7": "5b0438907f183cd3",
   "action_bazi@4": "effdf6065ae231c6",
+  "narrative_bazi@8": "d19232f14a20dbc2",
+  "narrative_tarot@4": "6bbf24df455a522a",
+  "narrative_qiuqian@2": "50793c67dabf468d",
+  "narrative_liuyao@2": "193c6eda8248674b",
+  "narrative_fengshui@2": "5d880d4dbbfbfa33",
 };
 
 const charts = {
@@ -123,7 +134,7 @@ describe("each method's own prompts (rule 8)", () => {
   });
 
   it("no two methods share a reading, action, plan or 追问 prompt", () => {
-    for (const agent of ["narrative", "action", "remedy", "followup"] as const) {
+    for (const agent of ["narrative", "action", "remedy", "followup", "inquiry"] as const) {
       const ids = Object.entries(METHOD_PROMPTS).flatMap(([system, own]) =>
         own[agent] ? [[system, own[agent]!.id] as const] : [],
       );
@@ -191,6 +202,11 @@ describe("each method's own prompts (rule 8)", () => {
       PROMPTS.followup_fengshui,
       PROMPTS.followup_naming,
       PROMPTS.followup_liuyao,
+      // 深度分析 (v10.0.0): each method asks in its own terms.
+      PROMPTS.inquiry_tarot,
+      PROMPTS.inquiry_qiuqian,
+      PROMPTS.inquiry_fengshui,
+      PROMPTS.inquiry_liuyao,
     ];
     for (const p of others) {
       for (const bazi of [
@@ -215,7 +231,7 @@ describe("each method's own prompts (rule 8)", () => {
     );
   });
 
-  it("八字's AI reading (narrative_bazi@8) judges the chart itself, writes a 总结, and no 举例 or 行动建议", () => {
+  it("八字's AI reading (narrative_bazi@8 and on) judges the chart itself, writes a 总结, and no 举例 or 行动建议", () => {
     const p = PROMPTS.narrative_bazi.system;
     // The owner (2026-10-29): 「ai解读时尽量不采用引擎数据」. The prompt names no engine judgement to lean on.
     expect(p).toContain("chart_facts carries no verdicts and no scores");

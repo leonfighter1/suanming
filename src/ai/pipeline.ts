@@ -63,6 +63,7 @@ import {
   type AgentName,
   type Conclusion,
   type GuardOutput,
+  type InquiryContext,
   type LLMProvider,
   type NarrativeOutput,
   type Paragraph,
@@ -89,6 +90,8 @@ export interface ReportOptions {
   focus?: TarotFocus;
   /** What the user told us about their life (src/ai/context.ts) */
   context?: UserContext;
+  /** 深度分析 (v10.0.0): the conversation held before this reading, for a method with an inquiry prompt. */
+  inquiry?: InquiryContext;
   /** Return the held draft for blocked/manual_review reports. Internal tools only. */
   includeDraft?: boolean;
 }
@@ -448,6 +451,19 @@ export async function generateReport(
   if (opts.focus !== undefined && (chart.system !== "tarot" || !TAROT_FOCUS.includes(opts.focus))) {
     throw new ReportInputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
   }
+  if (opts.inquiry && !METHOD_PROMPTS[chart.system].inquiry) {
+    throw new ReportInputError(`${chart.system} readings have no 深度分析`);
+  }
+  // 深度分析 (v10.0.0): the conversation as the reading's prompt names it (inquiryRules).
+  const inquiry = opts.inquiry && {
+    goal: opts.inquiry.goal,
+    turns: opts.inquiry.turns.map((t) => ({
+      ...(t.say && { said: t.say }),
+      asked: t.question,
+      answer: t.answer,
+    })),
+    ...(opts.inquiry.understanding && { understanding: opts.inquiry.understanding }),
+  };
 
   const rules = compileRules(loadRuleSet(), [
     ...region.rule_groups,
@@ -524,16 +540,23 @@ export async function generateReport(
         regionLine,
       };
       if (spread)
-        return tarotUser({ ...common, spread, question: opts.question, focus: opts.focus });
-      if (lot) return qiuqianUser({ ...common, lot, question: opts.question });
-      if (room) return fengshuiUser({ ...common, room, description: opts.question });
+        return tarotUser({
+          ...common,
+          spread,
+          question: opts.question,
+          focus: opts.focus,
+          inquiry,
+        });
+      if (lot) return qiuqianUser({ ...common, lot, question: opts.question, inquiry });
+      if (room) return fengshuiUser({ ...common, room, description: opts.question, inquiry });
       if (names) return namingUser({ ...common, names });
-      if (cast) return liuyaoUser({ ...common, cast, question: opts.question });
+      if (cast) return liuyaoUser({ ...common, cast, question: opts.question, inquiry });
       return narrativeUser({
         ...common,
         system: chart.system,
         provenance: chart.provenance.filter((p) => resolvePointer(facts, p.path)),
         question: opts.question,
+        inquiry,
       });
     },
     check: (data) => {

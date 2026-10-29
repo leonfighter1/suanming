@@ -10,6 +10,7 @@ import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
 import 'tarot_glossary_page.dart';
+import 'widgets/recalc_check.dart';
 import 'widgets/report_request.dart';
 import 'widgets/tarot_ritual.dart';
 import 'widgets/tarot_spread.dart';
@@ -57,13 +58,19 @@ class _TarotPageState extends ConsumerState<TarotPage> {
     super.dispose();
   }
 
-  /// 抽牌 starts the ritual (v3.0.0): shuffle, cut, pick. A spread already out is put away.
-  void _start() => setState(() {
-        _chart = null;
-        _revealed.clear();
-        _inRitual = true;
-        _draws++;
-      });
+  /// 抽牌 starts the ritual (v3.0.0): shuffle, cut, pick. A spread already out is put away. Since v10.0.0 it asks
+  /// first when this person has read the same question before (同名重算).
+  Future<void> _start() async {
+    final name = ref.read(profilesProvider).value?.defaultProfile?.name;
+    if (!await confirmRecalc(context, ref, system: 'tarot', name: name, question: _question.text)) return;
+    if (!mounted) return;
+    setState(() {
+      _chart = null;
+      _revealed.clear();
+      _inRitual = true;
+      _draws++;
+    });
+  }
 
   /// The draw: with the user's cut and picks from the ritual, or the engine's own pick.
   Future<void> _draw({Map<String, Object?>? ritual}) async {

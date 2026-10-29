@@ -1,6 +1,6 @@
 {
-  "_readme": "Model routing v6 (S17, owner 2026-10-29: Claude Opus 5.5 for every agent). Per agent: a default route plus optional per-locale overrides. Models come from src/ai/models.ts (npm run ai:models lists them; test/ai-models.test.ts checks this table against it). effort is mapped per provider (DeepSeek: low|high|max); Claude Opus 5.5 starts at medium, its own default. max_tokens leaves room for Claude's thinking, which counts toward it. ACTIVE_AI_MODEL=<id> in .env puts every route on one model, each max_tokens kept within its limit.",
-  "version": "6",
+  "_readme": "Model routing v7 (S17, owner 2026-10-29: Claude Opus 5.5 for every agent; v7, S19: the 深度分析's questions, inquiry, at effort low, since the user waits for each one). Per agent: a default route plus optional per-locale overrides. Models come from src/ai/models.ts (npm run ai:models lists them; test/ai-models.test.ts checks this table against it). effort is mapped per provider (DeepSeek: low|high|max); Claude Opus 5.5 starts at medium, its own default. max_tokens leaves room for Claude's thinking, which counts toward it. ACTIVE_AI_MODEL=<id> in .env puts every route on one model, each max_tokens kept within its limit.",
+  "version": "7",
   "routes": {
     "narrative": {
       "default": {
@@ -56,6 +56,14 @@
         "model": "claude-opus-5-5",
         "effort": "medium",
         "max_tokens": 32000
+      }
+    },
+    "inquiry": {
+      "default": {
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "low",
+        "max_tokens": 8000
       }
     },
     "guard": {

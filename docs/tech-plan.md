@@ -45,6 +45,8 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S16 Owner updates          | home bar, new parts come into view, the 求签 altar          | medium | v9.1.0            | done        |
 | S17 Claude 与模型选择      | Claude as the AI service; the models to choose from         | medium | v9.2.0            | done        |
 | S18 八字 AI 解读           | the AI's own reading, a 总结, no 行动建议, the skill        | medium | v9.3.0            | done        |
+| S19 深度分析               | the master asks first; 麦克风; 同名重算                     | big    | v10.0.0 + summary | done        |
+| S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | later             | waits       |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1765,9 +1767,160 @@ As built (v9.3.0):
 - **Not done:** a real reading, which waits for the owner's switch. `npm run eval:ai` now records each 八字 case's
   总结 and how many of its parts came back.
 
+## S19 深度分析、麦克风、同名重算 (big → v10.0.0)
+
+**Owner requests (2026-10-29), after v9.3.0, in several messages** (the 积分 ones went to S20 when the owner wrote
+「收费系统可以留到以后做，现在主要要精炼一下ai测算系统」):
+
+> 可以添加补充细节功能，细节对话功能，相当于在进行ai分析结果的时候会根据卦象或者推算结果再去问对方问题，越多了解越好。对于打字不方便的
+> 用户可以增加麦克风输入的要求。还可以根据用户的问题进行补充，打个比方，·你说你最近像要跟对方分手，你对象知道吗？· 然后他说，知道，可以以此
+> 再做补充，，你还可以说，·我从结果上看到你跟她现在的确有问题，可能事她在外面有了别的什么事你都了解吗· 他说·不知道，不过我也不想知道，我就像
+> 跟她分了之后我还能不能找到对象等等...· 要根据用户的输入做出合理推断。使用细节对话可能要需要更多的token，但是功能更加齐全，如果用户一开始没有
+> 给出具体背景，要提醒用户，使用这一功能一定要给出个明确的目标才行。
+>
+> 对于已经算完的卦，对于同一人名的人要提问说之前已经算过，是否还要重新再算一次
+>
+> 引入积分系统，按 10元=1000积分 …… 保证利润在50%基础以上查看一下目前opus5.5的token兑换，做一个详细的规划和实现。看看有没有办法知道当前的
+> 提交问题给花费了多少，以此反馈到积分上去。为了节省预算，我们可以暂时采用模拟策略。给所有dev给个相应的分数去进行计算。
+>
+> 对话了解阶段给一个统一的收费，对于比较不顺的命盘可以多问几个问题，顺的命盘少问一些，最多不超过6个问题。
+>
+> 在深度分析时，问问题时要提醒用户，~大师现在有问题要问你~，问完后才能给你最终解答
+>
+> 需要更改一下，50快不是1250积分。是增加25%。我算错了。每多10块加5%
+
+Read as:
+
+- **深度分析** (the owner's 细节对话 / 对话了解阶段): before the reading, the master asks the user about their
+  situation, one question at a time, from what the chart or the draw shows and what they said they want to know. It
+  infers from every answer (「合理推断」), may shift what the reading answers (the breakup example: from "does she
+  have someone" to "will I find someone after"), and asks 1–6 questions: fewer for a smooth chart, more for a hard
+  one, never more than six. The page says 「大师现在有问题要问你」 and that the final reading comes after the
+  questions. It needs a clear goal: without one the app asks for it first. The final reading then reads the whole
+  conversation. For 八字, 塔罗, 求签, 算卦 and 风水 (起名 is off; astrology has no page).
+- **麦克风:** a mic button types what the user says, where the browser can (the web's speech recognition); elsewhere
+  it isn't shown, and the phone keyboard's own voice input does the same.
+- **同名重算:** before a new 测算 for a person with a finished one of the same method (for a 卦, the same question too),
+  the app asks 「之前已经算过，是否还要重新再算一次？」 and offers the earlier one.
+- **积分** waits (S20), and with it the 深度分析's flat fee.
+
+### WP19.1 深度分析, the server (→ v10.0.0)
+
+- `generateInquiryTurn` (src/ai/inquiry.ts), a fifth pipeline (CLAUDE.md rule 2): Geo-Rule → the method's own
+  inquiry prompt (`inquiry_<method>@1`, rule 8) → grounding, faithfulness and the rule scan. A turn: what the master
+  says (an opening observation, or an inference from the last answer, citing the facts it rests on), the next
+  question, how many questions it plans (1–6, by how smooth the chart is for the goal), what the user most wants to
+  know now (focus), or done. It reads the reading's own view of the chart (for 八字 the 排盘 alone, S18).
+- `POST /v1/inquiries` (a chart and a goal of at least 4 characters, else 400 `goal_required`),
+  `POST /v1/inquiries/{id}/answers`, `GET /v1/inquiries/{id}`: one turn at a time in the background, at most six
+  questions; when the master is done, or the sixth is answered, it is ready. A failed turn after the first ends
+  the questions (the reading goes on with what was said); a failed first turn fails the 深度分析.
+- `POST /v1/reports` with `inquiry_id`: the reading reads the conversation (`<inquiry>`: the goal, every question
+  and answer, the master's understanding), through a new narrative prompt version per method with the rules for
+  it. The report keeps the `inquiry_id`; deleting the report deletes its conversation.
+- The store keeps the conversation sealed under its owner's key (PGlite migration 009).
+
+### WP19.2 深度分析, the app (→ v10.0.0)
+
+- 深度分析 beside the AI button, for the methods that have it. Without a goal (the question asked before the draw,
+  or the profile's 想了解的事 for 八字), a dialog asks for one first: 使用深度分析，一定要先给出一个明确的目标.
+- The conversation page: 「大师现在有问题要问你」 and 回答完才能给你最终解答, the master's words and question, the
+  answers, which question it is, 跳过剩下的问题, then 开始最终解读 to the reading. Leaving asks first.
+- The reading shows its conversation (大师问了你 N 个问题), folded.
+
+### WP19.3 麦克风 (→ v10.0.0)
+
+- A mic button on the 深度分析 answer, the goal and the 追问 fields: the browser's speech recognition on the web
+  (简体 zh-CN, 繁體 zh-TW), hidden where there is none. Chrome sends speech to Google, which mainland China can't
+  reach: Edge and Safari work there; the button says so when the browser fails.
+
+### WP19.4 同名重算 (→ v10.0.0)
+
+- The history items carry the reading's question. Before 排盘 (八字) for a person with a chart, or a new 卦 (塔罗,
+  求签, 算卦, 风水) for the same person and the same question as a finished reading: 「之前已经算过，是否还要重新再算一
+  次？」 with 查看之前的 and 重新再算.
+
+Lessons: rules 17, 37, 42, 44, 52, 53, 55, 58, 59, 61, 63, 64; the keyboard-access and ai-reading skills.
+
+As built (v10.0.0):
+
+- **WP19.1:**
+  - `inquiry_bazi@1`, `inquiry_tarot@1`, `inquiry_qiuqian@1`, `inquiry_liuyao@1`, `inquiry_fengshui@1`, written from one
+    frame: what each method reads, what makes its result smooth or hard for the goal (more questions for a hard one),
+    the turn's fields, and the safety basics. A question may ask what the user knows of another person's situation,
+    never claim or hint that anyone cheats, lies, is ill or breaks the law: the owner's example
+    「可能是她在外面有了别的什么事你都了解吗」 becomes 「她那边最近有没有什么你还不清楚的情况？」.
+  - The pipeline drops `fact_refs` that don't exist, sends back a turn naming a card, a line or a 干支 the result
+    doesn't have, a repeated question and a first turn without a question; `planned` is clamped to 1–6, and after
+    the sixth answer the master only closes. The `inquiry` route is Claude Opus 5.5 at effort low (the user waits for
+    each question), max_tokens 8,000.
+  - The readings: `narrative_bazi@9`, `narrative_tarot@5`, `narrative_qiuqian@3`, `narrative_liuyao@3`,
+    `narrative_fengshui@3` = the released texts plus `inquiryRules`; the five released versions moved to
+    `RETIRED_PROMPTS`, still hashing to their pins.
+  - The API: `/v1/inquiries` (thinking → asking → … → ready, failed, closed), `inquiry_id` on a reading, the
+    receipts count `inquiries`; migration 009 (sealed bodies); history items carry `question`.
+- **WP19.2:** `InquiryPage` (banner, bubbles, progress, answer field, 跳过, ready card, 重新开始); the 深度分析 button and
+  its note on the methods in `inquirySystems` (synced from the server); the goal dialog; `InquiryRecap` on the
+  reading. Each BringIntoView has its own key (rule 65).
+- **WP19.3:** `SpeechInput` with the browser's recognition on the web (`webkitSpeechRecognition` or
+  `SpeechRecognition`), `VoiceInputButton.suffix` on the answer, goal and 追问 fields; errors say what to do.
+- **WP19.4:** `confirmRecalc` before 排盘 (八字, and 一生运势 by its reports), 抽牌, 求签, 摇卦 and 看布局.
+- **Not done:** a real conversation, which waits for the owner's switch; 追问 after a 深度分析 reading reads the
+  reading, not the conversation; exports don't carry the conversation; held turns have no review console.
+
+## S20 积分 (waits for the owner)
+
+**Owner (2026-10-29):** 「收费系统可以留到以后做，现在主要要精炼一下ai测算系统」. Planned in S19's first messages and kept
+here for then, with what was measured:
+
+- **Packs:** 1 元 = 100 积分, 5% more for each 10 元 from 20 元 up, to 25% at 50 元: 10 元 = 1000, 20 元 = 2200,
+  30 元 = 3450, 40 元 = 4800, 50 元 = 6250 (the owner: 10元=1000积分, 50元 +25%, 每多10块加5%).
+- **What a request costs is known:** every call reports its tokens (input, output, cache reads and writes); each
+  report keeps them per step (`agents[].usage`), and `costUsd` prices them at the model's list price. Claude Opus
+  5.5: $4 / $20 per million input / output tokens, cache reads $0.20, 5-minute cache writes $5 (the claude-api
+  skill, 2026-10-29). The charge would be that cost at a markup keeping ≥ 50% gross margin on the cheapest 积分 (the
+  50 元 pack's: 0.008 元), after the payment fee (0.6%, 微信 / 支付宝; an app store takes 15–30% and needs its own
+  packs) and VAT (6%), at a cautious 7.3 CNY per USD: about 1,950 积分 per dollar of tokens.
+- **Measured prompts** (2026-10-29, the real prompts built from the app's fixtures; tokens estimated at 1.3 per
+  CJK character and 3.5 other characters per token), and the output a reading of each kind should write (including
+  Opus 5.5's thinking, which bills as output):
+
+  | Reading                  | Input tokens   | Output tokens  | Cost (Opus 5.5) | 积分   |
+  | ------------------------ | -------------- | -------------- | --------------- | ------ |
+  | 八字 AI 解读             | ~9,000         | ~16,000        | ~$0.35          | ~690   |
+  | 塔罗 (10 cards) + 行动   | ~5,000 + 8,000 | ~7,000 + 2,500 | ~$0.24          | ~470   |
+  | 求签 + 行动              | ~3,000 + 4,000 | ~4,500 + 2,500 | ~$0.17          | ~320   |
+  | 一生运势报告 (two steps) | ~26,000        | ~26,000        | ~$0.62          | ~1,220 |
+  | 追问 (八字)              | ~18,000        | ~3,500         | ~$0.14          | ~280   |
+  | 深度分析, one question   | ~8,000         | ~1,200         | ~$0.06          | ~110   |
+
+- **Before it ships:** 破除运势 plans must stop preloading (every passed report generates every topic's plan in the
+  background, tokens nobody pays for); the 深度分析's flat fee (five typical questions plus one at its largest, with
+  a guard that asks no further question once the money spent would break the margin); a ledger (memory and PGlite);
+  402 when short; holds so two requests can't spend the same 积分; simulated 充值 and dev grants in dev mode; real
+  payments (Phase 4) with their own legal review (receipts, refunds, how long records are kept).
+- **Levers on cost**, the owner's call: a cheaper model for some steps (Claude Sonnet 5.5 halves the price, Claude
+  Haiku 5.5 is a twentieth), effort low for the 深度分析, caching the chart beside the system prompt across a
+  conversation's turns.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S19 深度分析、麦克风、同名重算 (done 2026-10-29: v10.0.0)
+
+1. **Delivered (v10.0.0):** WP19.1 the 深度分析 pipeline, its five prompts, the API and the readings that read it;
+   WP19.2 its page, the goal reminder and the conversation on the reading; WP19.3 the mic on the web; WP19.4 同名重算
+   before every method's new 测算.
+2. **Numbers:** 18 new server tests (test/inquiry.test.ts), 612 in all; 12 new app tests (app/test/inquiry_test.dart),
+   225 in all. Ten new prompt pins and five retired ones; migration 009.
+3. **Against the plan:** the owner moved 积分 to later mid-stage (「收费系统可以留到以后做」), and with it the
+   深度分析's flat fee; S20 keeps what was measured. The owner's affair example became a question about what the user
+   knows, not a hint. 同名重算 matches a 卦 only on the same question, since a new question is a new 卦.
+4. **Mistakes:** rule 65 (a BringIntoView that takes another's place in a list needs its own key).
+5. **Next:** the owner tries a real 深度分析 with the real model. Open: 追问 and the exports with the conversation;
+   S20 积分 when the owner wants it; still waiting for the owner: the mail and SMS providers, the Phase 3 gate,
+   WP7.2, WP7.3, WP1.8.
 
 ### S18 八字 AI 解读 (done 2026-10-29: v9.3.0)
 
@@ -2291,3 +2444,8 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP18.2    | done                         | v9.3.0  |
 | WP18.3    | done                         | v9.3.0  |
 | WP18.4    | done                         | v9.3.0  |
+| WP19.1    | done                         | v10.0.0 |
+| WP19.2    | done                         | v10.0.0 |
+| WP19.3    | done                         | v10.0.0 |
+| WP19.4    | done                         | v10.0.0 |
+| S20 积分  | waits for the owner          | —       |

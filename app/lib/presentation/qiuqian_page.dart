@@ -9,6 +9,7 @@ import 'design.dart';
 import 'keyboard.dart';
 import 'widgets/lot_card.dart';
 import 'widgets/qiuqian_stage.dart';
+import 'widgets/recalc_check.dart';
 import 'widgets/report_request.dart';
 
 /// 求籤 (v4.3.0, tech plan WP6.1) as temples do it: keep the question in mind, shake the cylinder until
@@ -48,6 +49,10 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
   }
 
   Future<void> _draw() async {
+    // 同名重算 (v10.0.0): the same question drawn for before? Ask first.
+    final name = ref.read(profilesProvider).value?.defaultProfile?.name;
+    if (!await confirmRecalc(context, ref, system: 'qiuqian', name: name, question: _question.text)) return;
+    if (!mounted) return;
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     try {

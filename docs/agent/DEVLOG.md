@@ -2,6 +2,39 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (g): S19, the owner's requests — 深度分析, the mic, 同名重算; 积分 planned for later; release v10.0.0
+
+- Owner requests (several messages), quoted in the tech plan:
+  - 细节对话: the AI asks the user questions from the result before its answer, infers from each answer (the breakup
+    example), a mic for those who can't type well, and a reminder to give a clear goal;
+  - 同名重算: a 测算 already done for the same name asks whether to do it again;
+  - 积分: 10元=1000积分, 50元 +25% (corrected from 1250 by the owner), 每多10块加5%, ≥ 50% margin at Opus 5.5's prices,
+    the cost of each request measured, simulated with points for the dev accounts;
+  - the conversation stage at one flat fee, fewer questions for a smooth chart, more for a hard one, at most six;
+  - 「大师现在有问题要问你」 on the page, the final reading after the questions;
+  - then: 「收费系统可以留到以后做，现在主要要精炼一下ai测算系统」.
+- Decided: 积分 became S20 (waits), with the measured prompt sizes and the pricing worked out; its config was removed.
+  The packs read as 10 = 1000, 20 = 2200, 30 = 3450, 40 = 4800, 50 = 6250 (both of the owner's numbers hold); said so.
+- Built (v10.0.0):
+  - `generateInquiryTurn`, the fifth pipeline (CLAUDE.md rule 2), with `inquiry_<method>@1` for 八字, 塔罗, 求签, 算卦,
+    风水; grounding, faithfulness, the rule scan; 1–6 questions; the route at effort low;
+  - `/v1/inquiries` (start, answer, read), `inquiry_id` on a reading; narrative @9/@5/@3/@3/@3 with `inquiryRules`,
+    the released ones retired and still pinned; migration 009; history items carry the question;
+  - the app: the 深度分析 button, the goal dialog, the conversation page, the recap on the reading; the mic on the web
+    (`SpeechInput`, `VoiceInputButton`); `confirmRecalc` before every method's new 测算;
+  - the ai-reading skill's 深度分析 section; MODULES rows; web-test.
+- The owner's affair example became a question about what the user knows (「她那边最近有没有什么你还不清楚的情况？」): a
+  hint of an affair from a divination is the kind of claim the safety basics rule out.
+- Mistakes:
+  - rule 65: on a 360 × 740 phone the start button stayed below the screen: its BringIntoView took over the answer
+    field's state in the list and never asked; keyed each one; the test fails with the keys removed;
+  - a probe found the first phone test proved nothing (the conversation fitted the screen): rewritten with five
+    questions on 360 × 740;
+  - twice a script through the shell lost a `$` (rule G16): fixed with the editor;
+  - a `..` path from the project root pointed at `C:\` and the guard stopped the removal: scripts go to the
+    scratchpad.
+- 612 server tests, 225 app tests; harness PASS. Not tried: a real conversation (the owner's switch says mock).
+
 ## 2026-10-29 (f): S18, the owner's request — 八字's AI reading is the AI's own, with a 总结; release v9.3.0
 
 - Owner requests (two messages), quoted in the tech plan:

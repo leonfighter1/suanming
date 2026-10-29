@@ -103,7 +103,7 @@ describe("demo server", () => {
     });
     expect(res.status).toBe(200);
     expect(res.headers.get("x-ai-generated")).toBe("true");
-    expect(res.headers.get("x-ai-model")).toContain(`${narrativeModel};prompt=narrative_bazi@8`);
+    expect(res.headers.get("x-ai-model")).toContain(`${narrativeModel};prompt=narrative_bazi@9`);
     const data = await res.json();
     expect(data.report.status).toBe("passed");
     expect(data.report.layers.interpretation.map((s: { topic: string }) => s.topic)).toEqual([

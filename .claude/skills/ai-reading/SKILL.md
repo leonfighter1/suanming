@@ -1,6 +1,6 @@
 ---
 name: ai-reading
-description: The owner's requirements for the AI readings of 命理大师 - what the model reads, what it writes, how a prompt is written and how the output is checked. Use when writing or changing an AI prompt, what a reading sends the model, a reading's output shape, a pipeline step, or a reading's page, export or email; above all 八字's AI reading. The finishing steps are in the dev-workflow skill.
+description: The owner's requirements for the AI readings of 命理大师 - what the model reads, what it writes, how a prompt is written and how the output is checked. Use when writing or changing an AI prompt, what a reading sends the model, a reading's output shape, a pipeline step, the 深度分析 (the master's questions before a reading), or a reading's page, export or email; above all 八字's AI reading. The finishing steps are in the dev-workflow skill.
 ---
 
 # AI readings (命理大师): the owner's requirements
@@ -107,12 +107,44 @@ Set by the owner on 2026-10-29 (tech plan S18, v9.3.0). Where a requirement is q
   - the report email (src/export/report-doc.ts);
   - 追问's `<reading>`.
 
+## 深度分析: the master asks first (v10.0.0)
+
+Set by the owner on 2026-10-29 (tech plan S19).
+
+- **What it is** (「在进行ai分析结果的时候会根据卦象或者推算结果再去问对方问题，越多了解越好」): before the reading, the
+  master asks about the user's situation, one question at a time, from what the result shows and what they want to
+  know. `generateInquiryTurn` (src/ai/inquiry.ts) is its own pipeline; each method asks with its own prompt
+  (`inquiry_<method>@N`: 八字, 塔罗, 求签, 算卦, 风水; rule 8). It reads the reading's own view (for 八字 the 排盘 alone).
+- **Infer from every answer** (「要根据用户的输入做出合理推断」): each turn's `say` says what the last answer tells, how it
+  fits the result, and what it changes; `focus` follows what they most want to know as it shifts (the owner's
+  example: from whether to break up, to whether they will find someone after). The reading answers that focus.
+- **1–6 questions, by the chart** (「对于比较不顺的命盘可以多问几个问题，顺的命盘少问一些，最多不超过6个问题」): the master
+  plans its number on the first turn (`planned`, each method's prompt says what makes its result smooth or hard); the
+  pipeline clamps it to 1–6 and never asks a seventh; after the sixth answer it only closes.
+- **A goal first** (「使用这一功能一定要给出个明确的目标才行」): the API refuses a goal under 4 characters
+  (`goal_required`); the app asks for one when the question or the profile's 想了解的事 is missing. A vague goal makes
+  the first question ask what they most want to know.
+- **The page says it** (「问问题时要提醒用户，大师现在有问题要问你，问完后才能给你最终解答」): 大师现在有问题要问你 and
+  回答完这些问题，大师才能给你最终解答 above the conversation, until the master is done.
+- **Its safety:** questions about the user's own situation and wishes; they may ask what the user knows of another
+  person's situation, never claim or hint that someone cheats, lies, is ill or breaks the law; no reading, advice or
+  prediction yet; never a birth time, an address, an ID or money; self-harm or danger ends the questions kindly.
+- **Grounded like a reading:** `fact_refs` that don't exist are dropped; a `say` or question naming a card, a line or a
+  干支 the result doesn't have is sent back, then left out; the first turn must ask; a repeated question is sent back.
+- **The reading reads it:** `inquiryRules` in each method's narrative prompt: answer the focus directly (八字 also in
+  its 总结), fit every section to the answers, never cite an answer as a fact of the result, ask nothing more.
+- **Not yet:** 追问 after a 深度分析 reading reads the reading, not the conversation; exports don't carry the
+  conversation (the reading page shows it, folded); the review console doesn't list held turns (a held turn ends
+  the questions).
+
 ## Checking a change
 
 - **Server tests:**
   - test/bazi-ai-reading.test.ts: what is read and written;
   - test/method-prompts.test.ts: the pins, and each method's own prompts;
   - test/plain-reading.test.ts: term and example.
+- **深度分析:** test/inquiry.test.ts (server: the pipeline, each method's prompt, the reading's `<inquiry>`, the API)
+  and app/test/inquiry_test.dart (the page, the goal reminder, the mic, 同名重算, a 360 × 740 phone).
 - **App tests:** reading_page_test, report_ui_test, features_test (exports) and archive_test.
 - **After the reading's shape changes,** run `npm run sync:app`: the app's fixtures come from the mock pipeline.
 - **A real reading runs only on the owner's switch.** `IS_AI_MOCK` is the owner's and is never flipped by an agent.

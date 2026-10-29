@@ -123,7 +123,7 @@ describe("a 风水 reading", () => {
     expect(report.status).toBe("passed");
     expect(report.topics).toEqual(["fengshui_layout", "fengshui_flow", "fengshui_advice"]);
     expect(report.ai_disclosure.prompt_version).toBe(
-      "narrative_fengshui@2,action_fengshui@1,guard@2",
+      "narrative_fengshui@3,action_fengshui@1,guard@2",
     );
     const narrative = mock.calls.find((c) => c.agent === "narrative")!;
     expect(narrative.user).toContain(`<user_description>\n${DESCRIPTION}`);

@@ -2050,6 +2050,136 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reportMailFailed => '这份报告没能发到邮箱，可以在“以往记录”里再发一次';
+
+  @override
+  String get inquiryButton => '深度分析';
+
+  @override
+  String inquiryButtonNote(int n) {
+    return '大师先问你几个问题（最多 $n 个），再给出更贴合你的最终解答';
+  }
+
+  @override
+  String get inquiryGoalTitle => '先说说你的目标';
+
+  @override
+  String get inquiryGoalBody => '使用深度分析，一定要先给出一个明确的目标：你最想通过这次测算知道什么？';
+
+  @override
+  String get inquiryGoalHint => '比如：明年适不适合换工作？';
+
+  @override
+  String get inquiryGoalShort => '目标太短了，请写清楚你最想知道什么';
+
+  @override
+  String get inquiryGoalStart => '开始深度分析';
+
+  @override
+  String get inquiryTitle => '深度分析';
+
+  @override
+  String get inquiryAsking => '大师现在有问题要问你';
+
+  @override
+  String get inquiryAskingNote => '回答完这些问题，大师才能给你最终解答。';
+
+  @override
+  String inquiryGoalLine(String goal) {
+    return '你的目标：$goal';
+  }
+
+  @override
+  String inquiryProgress(int n, int planned, int max) {
+    return '第 $n 个问题 · 大师打算问 $planned 个（最多 $max 个）';
+  }
+
+  @override
+  String get inquiryThinking => '大师正在思考…';
+
+  @override
+  String get inquiryMaster => '大师';
+
+  @override
+  String get inquiryYou => '你';
+
+  @override
+  String get inquiryAnswerHint => '说说你的情况';
+
+  @override
+  String get inquiryAnswerSend => '回答';
+
+  @override
+  String get inquirySkip => '跳过剩下的问题，直接解答';
+
+  @override
+  String get inquiryReady => '大师已经了解你的情况，可以开始最终解答了。';
+
+  @override
+  String inquiryUnderstanding(String text) {
+    return '大师的理解：$text';
+  }
+
+  @override
+  String get inquiryStartReading => '开始最终解答';
+
+  @override
+  String get inquiryFailed => '大师这次没能想好问题。可以重新开始深度分析，或者回到上一页直接生成解读。';
+
+  @override
+  String get inquiryRetry => '重新开始';
+
+  @override
+  String get inquiryBusy => '大师还在思考，请稍候';
+
+  @override
+  String get inquiryLeaveBody => '深度分析还没做完，返回后这次的问答就结束了。';
+
+  @override
+  String inquiryCardTitle(int n) {
+    return '深度分析 · 大师问了你 $n 个问题';
+  }
+
+  @override
+  String get micStart => '语音输入';
+
+  @override
+  String get micStop => '停止语音输入';
+
+  @override
+  String get micListening => '正在听，请说话…';
+
+  @override
+  String get micUnavailable => '这个浏览器暂时不能语音输入，可以用输入法自带的语音输入';
+
+  @override
+  String get micDenied => '需要允许使用麦克风，才能语音输入';
+
+  @override
+  String get micNoMatch => '没听清，请再说一次';
+
+  @override
+  String get recalcTitle => '之前已经算过';
+
+  @override
+  String recalcBody(String name, String date, String method) {
+    return '“$name”在 $date 已经算过$method。是否还要重新再算一次？';
+  }
+
+  @override
+  String recalcBodyQuestion(
+    String name,
+    String date,
+    String method,
+    String question,
+  ) {
+    return '“$name”在 $date 已经算过$method，问的是“$question”。是否还要重新再算一次？';
+  }
+
+  @override
+  String get recalcView => '查看之前的';
+
+  @override
+  String get recalcAgain => '重新再算';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4097,4 +4227,134 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get reportMailFailed => '這份報告沒能發到電子郵件，可以在「以往紀錄」裡再發一次';
+
+  @override
+  String get inquiryButton => '深度分析';
+
+  @override
+  String inquiryButtonNote(int n) {
+    return '大師先問你幾個問題（最多 $n 個），再給出更貼合你的最終解答';
+  }
+
+  @override
+  String get inquiryGoalTitle => '先說說你的目標';
+
+  @override
+  String get inquiryGoalBody => '使用深度分析，一定要先給出一個明確的目標：你最想透過這次測算知道什麼？';
+
+  @override
+  String get inquiryGoalHint => '例如：明年適不適合換工作？';
+
+  @override
+  String get inquiryGoalShort => '目標太短了，請寫清楚你最想知道什麼';
+
+  @override
+  String get inquiryGoalStart => '開始深度分析';
+
+  @override
+  String get inquiryTitle => '深度分析';
+
+  @override
+  String get inquiryAsking => '大師現在有問題要問你';
+
+  @override
+  String get inquiryAskingNote => '回答完這些問題，大師才能給你最終解答。';
+
+  @override
+  String inquiryGoalLine(String goal) {
+    return '你的目標：$goal';
+  }
+
+  @override
+  String inquiryProgress(int n, int planned, int max) {
+    return '第 $n 個問題 · 大師打算問 $planned 個（最多 $max 個）';
+  }
+
+  @override
+  String get inquiryThinking => '大師正在思考…';
+
+  @override
+  String get inquiryMaster => '大師';
+
+  @override
+  String get inquiryYou => '你';
+
+  @override
+  String get inquiryAnswerHint => '說說你的情況';
+
+  @override
+  String get inquiryAnswerSend => '回答';
+
+  @override
+  String get inquirySkip => '跳過剩下的問題，直接解答';
+
+  @override
+  String get inquiryReady => '大師已經了解你的情況，可以開始最終解答了。';
+
+  @override
+  String inquiryUnderstanding(String text) {
+    return '大師的理解：$text';
+  }
+
+  @override
+  String get inquiryStartReading => '開始最終解答';
+
+  @override
+  String get inquiryFailed => '大師這次沒能想好問題。可以重新開始深度分析，或者回到上一頁直接生成解讀。';
+
+  @override
+  String get inquiryRetry => '重新開始';
+
+  @override
+  String get inquiryBusy => '大師還在思考，請稍候';
+
+  @override
+  String get inquiryLeaveBody => '深度分析還沒做完，返回後這次的問答就結束了。';
+
+  @override
+  String inquiryCardTitle(int n) {
+    return '深度分析 · 大師問了你 $n 個問題';
+  }
+
+  @override
+  String get micStart => '語音輸入';
+
+  @override
+  String get micStop => '停止語音輸入';
+
+  @override
+  String get micListening => '正在聽，請說話…';
+
+  @override
+  String get micUnavailable => '這個瀏覽器暫時不能語音輸入，可以用輸入法內建的語音輸入';
+
+  @override
+  String get micDenied => '需要允許使用麥克風，才能語音輸入';
+
+  @override
+  String get micNoMatch => '沒聽清楚，請再說一次';
+
+  @override
+  String get recalcTitle => '之前已經算過';
+
+  @override
+  String recalcBody(String name, String date, String method) {
+    return '「$name」在 $date 已經算過$method。是否還要重新再算一次？';
+  }
+
+  @override
+  String recalcBodyQuestion(
+    String name,
+    String date,
+    String method,
+    String question,
+  ) {
+    return '「$name」在 $date 已經算過$method，問的是「$question」。是否還要重新再算一次？';
+  }
+
+  @override
+  String get recalcView => '查看之前的';
+
+  @override
+  String get recalcAgain => '重新再算';
 }

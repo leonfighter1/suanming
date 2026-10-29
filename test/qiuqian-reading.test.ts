@@ -51,7 +51,7 @@ describe("a 求籤 reading", () => {
     expect(report.status).toBe("passed");
     expect(report.topics).toEqual(["qiuqian_poem", "qiuqian_answer", "qiuqian_advice"]);
     expect(report.ai_disclosure.prompt_version).toBe(
-      "narrative_qiuqian@2,action_qiuqian@1,guard@2",
+      "narrative_qiuqian@3,action_qiuqian@1,guard@2",
     );
     const narrative = mock.calls.find((c) => c.agent === "narrative")!;
     // <lot> carries the 简体 lines for a 简体 reader; <chart_facts> the lot without the rounds.

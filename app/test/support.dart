@@ -152,6 +152,12 @@ class FakeApi {
   /// Asking answers with this problem instead, e.g. {'status': 409, 'code': 'followup_pending'}.
   Map<String, dynamic>? followUpError;
 
+  /// 深度分析 (v10.0.0): the conversations so far by id, the questions the fake master plans, and whether its turns
+  /// fail (the first one: failed; a later one: ready with what was said).
+  final inquiries = <String, Map<String, dynamic>>{};
+  int inquiryPlanned = 2;
+  bool inquiryFails = false;
+
   /// 以往记录 (v8.0.0): the documents asked for, the records deleted and the charts filed under a person.
   final documents = <Map<String, dynamic>>[];
   final deleted = <String>[];
@@ -369,7 +375,62 @@ class FakeApi {
     if (req.method == 'GET' && path == '/v1/charts/ffffffff-ffff-4fff-8fff-ffffffffffff') {
       return _json(fixture('chart_fengshui'), 200);
     }
-    if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
+    // 深度分析 (v10.0.0): the fake master asks [inquiryPlanned] questions, one per poll after each answer, then is done.
+    if (req.method == 'POST' && path == '/v1/inquiries') {
+      final body = jsonDecode(req.body) as Map<String, dynamic>;
+      final goal = (body['goal'] as String? ?? '').trim();
+      if (goal.characters.length < 4) return _problem(400, 'a 深度分析 needs a clear goal', 'goal_required');
+      final id = '99999999-9999-4999-8999-${(inquiries.length + 1).toString().padLeft(12, '0')}';
+      inquiries[id] = {
+        'inquiry_id': id,
+        'chart_id': body['chart_id'],
+        'status': 'thinking',
+        'goal': goal,
+        'max_questions': 6,
+        'turns': <Map<String, dynamic>>[],
+        'created_at': '2026-10-29T00:00:00Z',
+        'updated_at': '2026-10-29T00:00:00Z',
+      };
+      return _json(inquiries[id]!, 202);
+    }
+    final iq = RegExp(r'^/v1/inquiries/([^/]+)(/answers)?$').firstMatch(path);
+    if (iq != null) {
+      final inquiry = inquiries[iq.group(1)];
+      if (inquiry == null) return _json({'title': 'not found', 'status': 404}, 404);
+      final turns = inquiry['turns'] as List<Map<String, dynamic>>;
+      if (req.method == 'POST') {
+        if (inquiry['status'] != 'asking') return _problem(409, 'the master has no question waiting', 'inquiry_not_asking');
+        turns.last['answer'] = (jsonDecode(req.body) as Map)['answer'];
+        inquiry['status'] = 'thinking';
+        return _json(inquiry, 202);
+      }
+      if (inquiry['status'] == 'thinking') {
+        if (inquiryFails) {
+          inquiry['status'] = turns.isEmpty ? 'failed' : 'ready';
+        } else if (turns.length < inquiryPlanned) {
+          final n = turns.length + 1;
+          turns.add({'say': '（示範）大師的第$n句話。', 'question': '（示範）大師的第$n個問題？'});
+          inquiry
+            ..['status'] = 'asking'
+            ..['planned'] = inquiryPlanned;
+        } else {
+          inquiry
+            ..['status'] = 'ready'
+            ..['closing'] = '（示範）好，我了解了，現在給你做最終解答。'
+            ..['understanding'] = '（示範）你最想知道的事';
+        }
+      }
+      return _json(inquiry, 200);
+    }
+    if (req.method == 'POST' && path == '/v1/reports') {
+      final id = (jsonDecode(req.body) as Map)['inquiry_id'] as String?;
+      if (id != null && inquiries[id] != null) {
+        inquiries[id]!
+          ..['status'] = 'closed'
+          ..['report_id'] = finalReport['report_id'];
+      }
+      return _json(_pending, 202);
+    }
     // 以往记录 (v8.0.0): a document's bytes (a PDF's or a zip's first bytes are enough); deleting; filing.
     if (req.method == 'POST' && path == '/v1/documents') {
       documents.add(jsonDecode(req.body) as Map<String, dynamic>);

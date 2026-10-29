@@ -13,6 +13,7 @@ import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'archive_actions.dart';
 import 'design.dart';
+import 'inquiry_page.dart' show InquiryRecap;
 import 'labels.dart';
 import 'theme.dart' show GanZhiText;
 import 'widgets/four_layer_report.dart';
@@ -183,7 +184,7 @@ class ReportPage extends ConsumerWidget {
                 layers: r.layers!,
                 reportId: r.id,
                 birthplace: place,
-                header: _withMailNote(r, r.chartId == null ? null : ReadingChart(chartId: r.chartId!)),
+                header: _withMailNote(r, _header(r)),
                 system: system,
               ),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
@@ -194,6 +195,16 @@ class ReportPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Over the reading: its chart, then (v10.0.0) the 深度分析 it read, folded.
+Widget? _header(ReportView r) {
+  final chart = r.chartId == null ? null : ReadingChart(chartId: r.chartId!);
+  if (r.inquiryId == null) return chart;
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [?chart, InquiryRecap(inquiryId: r.inquiryId!)],
+  );
 }
 
 /// 测算完成后发到邮箱 (v9.0.0): over the reading, a line saying it went to the email, or that it could not.

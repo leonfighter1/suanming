@@ -13,6 +13,7 @@ import {
   InMemoryStore,
   type ChartRecord,
   type FollowUpRecord,
+  type InquiryRecord,
   type LifeReportRecord,
   type RemedyRecord,
   type ReportRecord,
@@ -123,7 +124,29 @@ function records(owner: string) {
     created_at: at(6),
     updated_at: at(6),
   };
-  return { chart, daily, reading, plan, life, ask };
+  // 深度分析 (v10.0.0): the goal and the answers are the user's own words, sealed like a reading; read by the reading.
+  const talk: InquiryRecord = {
+    id: randomUUID(),
+    owner,
+    chart_id: chart.id,
+    locale: "zh-Hant",
+    status: "closed",
+    goal: "想知道明年適不適合換工作",
+    turns: [
+      {
+        say: "你的命盤裡，今年的流年和月柱相沖。",
+        question: "你現在的工作最讓你不滿意的是什麼？",
+        fact_refs: ["/pillars/month"],
+        answer: "老闆一直不給加薪",
+      },
+    ],
+    planned: 2,
+    understanding: "換工作能不能多賺一些",
+    report_id: reading.id,
+    created_at: at(6),
+    updated_at: at(6),
+  };
+  return { chart, daily, reading, plan, life, ask, talk };
 }
 
 async function fill(store: Store, r: ReturnType<typeof records>) {
@@ -133,6 +156,7 @@ async function fill(store: Store, r: ReturnType<typeof records>) {
   await store.putRemedy(r.plan);
   await store.putLifeReport(r.life);
   await store.putFollowUp(r.ask);
+  await store.putInquiry(r.talk);
 }
 
 const dirs: string[] = [];
@@ -182,10 +206,12 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
         reports: 1,
         remedies: 1,
         followups: 1,
+        inquiries: 1,
       });
       expect(await store.getReport(r.reading.id)).toBeUndefined();
       expect(await store.getRemedy(r.plan.id)).toBeUndefined();
       expect(await store.getFollowUp(r.ask.id)).toBeUndefined();
+      expect(await store.getInquiry(r.talk.id)).toBeUndefined();
       expect(await store.deleteChartIfUnused(r.chart.id)).toBe(false);
       expect(await store.deleteLifeReport(r.life.id)).toEqual({ life_reports: 1, followups: 0 });
       expect(await store.deleteChartIfUnused(r.chart.id)).toBe(true);
@@ -198,6 +224,7 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
         reports: 0,
         remedies: 0,
         followups: 0,
+        inquiries: 0,
       });
       await close();
     },
@@ -217,7 +244,18 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
       expect(await store.getReport(r.reading.id)).toEqual(r.reading);
       expect(await store.getRemedy(r.plan.id)).toEqual(r.plan);
       expect(await store.getLifeReport(r.life.id)).toEqual(r.life);
+      expect(await store.getInquiry(r.talk.id)).toEqual(r.talk);
       expect(await store.getReport(randomUUID())).toBeUndefined();
+      expect(await store.getInquiry(randomUUID())).toBeUndefined();
+
+      const asking = {
+        ...r.talk,
+        status: "asking" as const,
+        report_id: undefined,
+        updated_at: at(9),
+      };
+      await store.putInquiry(asking);
+      expect(await store.getInquiry(r.talk.id)).toEqual(asking);
 
       const passed = { ...r.reading, status: "passed" as const, updated_at: at(9) };
       await store.putReport(passed);
@@ -285,7 +323,10 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
         remedies: 1,
         life_reports: 1,
         followups: 1,
+        inquiries: 1,
       });
+      expect(await store.getInquiry(ra.talk.id)).toBeUndefined();
+      expect(await store.getInquiry(rb.talk.id)).toEqual(rb.talk);
       await users.delete(a);
       expect(await store.getChart(ra.chart.id)).toBeUndefined();
       expect(await store.getReport(ra.reading.id)).toBeUndefined();
@@ -423,6 +464,8 @@ describe("the database store", () => {
         "陳大文",
         "高雄市",
         "我和同事的相处会好转吗",
+        "老闆一直不給加薪",
+        "適不適合換工作",
       ];
       const tables = [
         "users",
@@ -431,6 +474,7 @@ describe("the database store", () => {
         "remedies",
         "life_reports",
         "followups",
+        "inquiries",
       ] as const;
       const stored: Buffer[] = [];
       for (const t of tables) {
@@ -471,6 +515,7 @@ describe("the database store", () => {
         "remedies",
         "life_reports",
         "followups",
+        "inquiries",
       ] as const) {
         expect(await pg.rawRows(t), t).toEqual([]);
       }
@@ -572,6 +617,7 @@ describe("the API on the database store", () => {
         remedies: 1,
         life_reports: 0,
         followups: 0,
+        inquiries: 0,
       });
       expect(await pg.rawRows("reports")).toEqual([]);
 

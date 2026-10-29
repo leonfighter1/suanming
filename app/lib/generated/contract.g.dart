@@ -19,3 +19,10 @@ const tarotFocus = <String>['career_wealth', 'relationships', 'health', 'persona
 
 /// The parts of a 八字 reading's 总结, in order (CONCLUSION_PARTS on the server, v9.3.0).
 const conclusionParts = <String>['portrait', 'past', 'present', 'challenges', 'gains', 'future', 'caution', 'momentum', 'coping'];
+
+/// 深度分析 (v10.0.0): the methods whose readings take one (an inquiry prompt in METHOD_PROMPTS), the most
+/// questions it asks, the shortest goal and the longest answer (INQUIRY_* on the server).
+const inquirySystems = <String>{'bazi', 'tarot', 'qiuqian', 'fengshui', 'liuyao'};
+const inquiryMaxQuestions = 6;
+const inquiryGoalMin = 4;
+const inquiryAnswerMax = 300;

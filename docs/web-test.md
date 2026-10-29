@@ -168,6 +168,23 @@ card and the trend chart. The AI's reading is its own:
 - While `IS_AI_MOCK=TRUE`, every part reads （示范）: switch to the real model for a real one.
 - Readings made before keep their 行动建议 and examples.
 
+## 深度分析, the mic, 同名重算 (v10.0.0)
+
+- **深度分析:** on 八字, 塔罗, 求签, 算卦 and 风水, under the AI button. The master asks about your situation first, one
+  question at a time (fewer for a smooth chart, more for a hard one, at most 6). The page says 大师现在有问题要问你;
+  answer, or 跳过剩下的问题，直接解答; when it is done, 开始最终解答 makes the reading, which reads every answer. The
+  reading shows the conversation at its top, folded.
+- **It needs a goal:** the question asked before drawing, or for 八字 为谁排盘's 想了解的事. Without one, a dialog asks
+  for it first.
+- While `IS_AI_MOCK=TRUE` the master is a demo: two （示范） questions, then done. The real model judges the chart and
+  plans 1–6 itself.
+- **The mic:** beside the answer, the goal and the 追问 fields, where the browser can listen. Chrome sends what you say
+  to Google, which mainland China can't reach: there use Edge or Safari, or the phone keyboard's own voice input.
+  Firefox has none, and the button isn't shown there. The browser asks for the microphone the first time.
+- **同名重算:** 排盘 again for a person with a 八字 reading, or ask a 塔罗, 求签, 算卦 or 风水 the same question for the same
+  person, and the app asks 之前已经算过，是否还要重新再算一次？ with 查看之前的 and 重新再算. The person is 为谁排盘 for
+  八字 and your default profile for the others.
+
 ## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
 
 By default the API keeps everything in memory: a restart loses every account and reading. The

@@ -84,7 +84,7 @@ describe("v1 API", () => {
       "wuxing",
       "health",
     ]);
-    expect(view.ai_disclosure.prompt_version).toBe("narrative_bazi@8,guard@2");
+    expect(view.ai_disclosure.prompt_version).toBe("narrative_bazi@9,guard@2");
     // internal details never reach the client
     for (const k of ["draft", "agents", "compliance"]) expect(view).not.toHaveProperty(k);
   });

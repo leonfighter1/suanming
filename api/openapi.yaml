@@ -27,6 +27,8 @@ tags:
     description: Paid per-topic 破除運勢 plans (payment is a Phase 4 TODO)
   - name: followups
     description: 追问, follow-up questions on a passed reading or 一生运势报告 (v7.0.0)
+  - name: inquiries
+    description: 深度分析, the master's questions on a chart before its reading (v10.0.0)
   - name: archive
     description: 以往记录 — documents (Word / PDF), deleting a record, filing it under a person (v8.0.0)
   - name: ops
@@ -437,6 +439,10 @@ paths:
                       charts: { type: integer }
                       reports: { type: integer }
                       remedies: { type: integer }
+                      life_reports: { type: integer }
+                      followups: { type: integer }
+                      inquiries:
+                        { type: integer, description: 深度分析 conversations (since v10.0.0) }
                   completed_at: { type: string, format: date-time }
         "401": { $ref: "#/components/responses/Problem" }
 
@@ -511,7 +517,7 @@ paths:
           }
       responses:
         "200":
-          description: Report views without layers, plus chart_id, a chart summary and (since v6.2.0) the chart's person
+          description: Report views without layers, plus chart_id, a chart summary, (since v6.2.0) the chart's person and (since v10.0.0) the question the reading was asked
           content:
             application/json:
               schema:
@@ -559,6 +565,16 @@ paths:
                     the question. 400 for any other chart system.
                   type: string
                   enum: [career_wealth, relationships, health, personality]
+                inquiry_id:
+                  description: |
+                    Since v10.0.0: a 深度分析 held on this chart (POST /v1/inquiries). The reading reads the
+                    conversation: the goal, every answered question with what the master said before it, and what the
+                    master understood the user most wants to know. A last question left unanswered (the user skipped
+                    the rest) stays out. One reading per conversation; its question, focus and context are the
+                    reading's when the request gives none. 409 `inquiry_thinking` while the master writes its turn,
+                    `inquiry_used` once read, `inquiry_failed` when its first question never came.
+                  type: string
+                  format: uuid
                 context:
                   description: |
                     What the user tells us about their life, so the reading relates
@@ -596,6 +612,116 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: The 深度分析 named is still thinking, has its reading already, or failed
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/inquiries:
+    post:
+      tags: [inquiries]
+      operationId: startInquiry
+      summary: Start a 深度分析 on a chart (async)
+      description: |
+        Since v10.0.0. Before the reading, the master asks the user about their situation, one question at a time,
+        from what the chart shows and the goal: fewer questions for a smooth result, more for a hard one, never more
+        than `max_questions` (6). Each turn says what the master sees or infers from the last answer, then asks. It
+        needs a goal, what the user wants to know: 400 `goal_required` without one of 4–300 characters. Offered for
+        八字, 塔罗, 求签, 算卦 and 风水 charts (400 otherwise). Geo-Rule first; it takes one from the daily AI caps.
+        Returns 202 `thinking`; poll Location until the first question (`asking`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chart_id, locale, goal]
+              properties:
+                chart_id: { type: string, format: uuid }
+                locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+                goal: { type: string, minLength: 4, maxLength: 300 }
+                question:
+                  description: What the reading is asked for (a tarot, 求籤 or 算卦 question; 风水's room description)
+                  type: string
+                  maxLength: 300
+                focus:
+                  description: Tarot only, as for POST /v1/reports
+                  type: string
+                  enum: [career_wealth, relationships, health, personality]
+                context:
+                  description: What the user tells us about their life, as for POST /v1/reports
+                  type: object
+      responses:
+        "202":
+          description: Accepted; the master is writing its first question
+          headers:
+            Location: { schema: { type: string } }
+            Retry-After: { schema: { type: integer } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/inquiries/{inquiry_id}:
+    parameters:
+      - { name: inquiry_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [inquiries]
+      operationId: getInquiry
+      summary: Where a 深度分析 stands, with its turns
+      responses:
+        "200":
+          description: The 深度分析; X-AI-Generated once the master has written a turn
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/inquiries/{inquiry_id}/answers:
+    parameters:
+      - { name: inquiry_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [inquiries]
+      operationId: answerInquiry
+      summary: Answer the master's question (async)
+      description: |
+        The answer to the question waiting (`asking`); the master's next turn comes in the background
+        (`thinking`): another question, or, when it knows enough or the sixth is answered, its last words
+        (`ready`). A turn that fails after the first ends the questions (`ready`: the reading goes on with what
+        was said). 409 `inquiry_thinking` while it writes, `inquiry_not_asking` when no question waits.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answer]
+              properties:
+                answer: { type: string, minLength: 1, maxLength: 300 }
+      responses:
+        "202":
+          description: Accepted; the master is writing its next turn
+          headers:
+            Location: { schema: { type: string } }
+            Retry-After: { schema: { type: integer } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: The master is thinking, or has no question waiting
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
   /v1/calendar/lunar:
@@ -1410,7 +1536,7 @@ components:
               deleted:
                 type: object
                 additionalProperties: { type: integer }
-                description: reports or life_reports, remedies, followups, charts
+                description: reports or life_reports, remedies, followups, inquiries (since v10.0.0), charts
               completed_at: { type: string, format: date-time }
     FollowUpList:
       description: Oldest first, with the most a reading may have
@@ -1763,6 +1889,10 @@ components:
           description: User-safe explanation when status is not passed or pending
           type: string
         mail: { $ref: "#/components/schemas/ReportMail" }
+        inquiry_id:
+          description: The 深度分析 this reading read (since v10.0.0), at GET /v1/inquiries/{inquiry_id}
+          type: string
+          format: uuid
         progress:
           description: Present while pending; the pipeline stage currently running
           type: object
@@ -2033,6 +2163,60 @@ components:
               description: Up to three next questions this reading can answer
               type: array
               items: { type: string }
+        ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
+
+    Inquiry:
+      description: A 深度分析, the master's questions on a chart before its reading (since v10.0.0)
+      type: object
+      required: [inquiry_id, chart_id, status, created_at, updated_at, goal, max_questions, turns]
+      properties:
+        inquiry_id: { type: string, format: uuid }
+        chart_id: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [thinking, asking, ready, failed, closed]
+          description: |
+            thinking: the master writes its next turn; asking: a question waits for its answer; ready: it asks
+            nothing more; failed: its first question never came; closed: a reading has read it (report_id)
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        goal: { type: string }
+        max_questions: { type: integer, description: "6" }
+        planned:
+          {
+            type: integer,
+            minimum: 1,
+            maximum: 6,
+            description: How many questions the master plans,
+          }
+        turns:
+          description: The master's turns, oldest first; the last one's answer is missing while it waits
+          type: array
+          items:
+            type: object
+            required: [say, question]
+            properties:
+              say:
+                {
+                  type: string,
+                  description: "What the master sees in the result, or infers from the last answer",
+                }
+              question: { type: string }
+              answer: { type: string }
+        closing: { type: string, description: "The master's last words, once ready" }
+        understanding:
+          {
+            type: string,
+            description: "What the master understood the user most wants to know, once ready",
+          }
+        report_id: { type: string, format: uuid }
+        message: { type: string }
+        progress:
+          type: object
+          properties:
+            stage: { type: string, enum: [inquiry, guard] }
+            attempt: { type: integer, minimum: 1 }
+            updated_at: { type: string, format: date-time }
         ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
 
     Price:

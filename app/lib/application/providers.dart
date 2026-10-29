@@ -10,11 +10,13 @@ import '../data/api_client.dart';
 import '../data/profile_store.dart';
 import '../data/settings_store.dart';
 import '../data/token_store.dart';
+import '../domain/inquiry.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/places.dart';
 import '../domain/profile.dart';
 import '../domain/terms.dart';
+import '../platform/speech.dart';
 
 const zhHant = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
 const zhHans = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
@@ -409,6 +411,21 @@ final followUpsProvider = StreamProvider.autoDispose.family<FollowUpList, String
     await Future<void>.delayed(interval);
   }
 });
+
+/// 深度分析 (v10.0.0), polled while the master writes its next turn.
+final inquiryProvider = StreamProvider.autoDispose.family<InquiryView, String>((ref, id) async* {
+  final api = ref.watch(apiClientProvider);
+  final interval = ref.watch(pollIntervalProvider);
+  while (true) {
+    final inquiry = await api.getInquiry(id);
+    yield inquiry;
+    if (!inquiry.thinking) return;
+    await Future<void>.delayed(interval);
+  }
+});
+
+/// The mic button's speech recognition (v10.0.0): the browser's on the web, none elsewhere. Tests put in their own.
+final speechInputProvider = Provider<SpeechInput>((ref) => createSpeechInput());
 
 /// Polls a report until it leaves `pending`.
 final reportProvider = StreamProvider.autoDispose.family<ReportView, String>((ref, id) async* {

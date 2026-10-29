@@ -8,6 +8,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'widgets/principles_card.dart';
+import 'widgets/recalc_check.dart';
 import 'widgets/report_request.dart';
 
 /// 风水 (v4.4.0, tech plan WP6.3, the owner's Phase 3 spec): choose a room and, if known, the way its main
@@ -48,6 +49,10 @@ class _FengshuiPageState extends ConsumerState<FengshuiPage> {
   }
 
   Future<void> _look() async {
+    // 同名重算 (v10.0.0): the same room description read before? Ask first.
+    final name = ref.read(profilesProvider).value?.defaultProfile?.name;
+    if (!await confirmRecalc(context, ref, system: 'fengshui', name: name, question: _description.text)) return;
+    if (!mounted) return;
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     try {
