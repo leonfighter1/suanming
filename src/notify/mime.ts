@@ -30,15 +30,15 @@ function base64Lines(b: Buffer): string {
 }
 
 /**
- * A header value as RFC 2047 encoded words. Each word holds at most 45 bytes of UTF-8 (60 in base64, 72 with its
- * markers, under the limit of 75), split between characters, never inside one.
+ * A header value as RFC 2047 encoded words. Each word holds at most 39 bytes of UTF-8 (52 in base64, 64 with its
+ * markers), split between characters, never inside one, so even the first, after its header's name, stays within 78.
  */
 export function encodeWords(s: string): string {
   if (printable(s)) return s;
   const chunks: string[] = [];
   let chunk = "";
   for (const ch of s) {
-    if (chunk && Buffer.byteLength(chunk + ch) > 45) {
+    if (chunk && Buffer.byteLength(chunk + ch) > 39) {
       chunks.push(chunk);
       chunk = "";
     }
@@ -53,10 +53,39 @@ export function mailbox(name: string, address: string) {
   return `${encodeWords(name)} <${address}>`;
 }
 
-/** An attachment's file name: an ASCII stand-in for old programs, and the real one (RFC 2231). */
-function filenameParams(name: string) {
-  const ascii = printable(name) ? name : `attachment.${name.split(".").pop() ?? "bin"}`;
-  return `filename="${ascii.replace(/["\\]/g, "")}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+/**
+ * A parameter in UTF-8 (RFC 2231): percent-encoded and cut into numbered pieces of at most 45 characters (never
+ * inside an escape), `name*0*=UTF-8''…`, `name*1*=…`, each on its own line, so no header line grows past 78.
+ */
+function extParam(name: string, value: string): string[] {
+  const enc = encodeURIComponent(value).replace(
+    /['()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  const pieces: string[] = [];
+  for (let i = 0; i < enc.length;) {
+    let end = Math.min(i + 45, enc.length);
+    if (enc[end - 1] === "%") end -= 1;
+    else if (enc[end - 2] === "%") end -= 2;
+    pieces.push(enc.slice(i, end));
+    i = end;
+  }
+  return pieces.map((p, k) => `${name}*${k}*=${k === 0 ? "UTF-8''" : ""}${p}`);
+}
+
+/** A header with parameters, one to a line: `Content-Type: application/pdf;` then ` name="…"`. */
+function withParams(header: string, params: string[]) {
+  return [header, ...params].join(`;${CRLF} `);
+}
+
+/** An attachment's name: as is when plain ASCII; else an ASCII stand-in for old programs, and the real one. */
+function nameParams(filename: string, param: "name" | "filename"): string[] {
+  if (printable(filename) && !/["\\]/.test(filename)) return [`${param}="${filename}"`];
+  const stand = `attachment.${filename.split(".").pop() ?? "bin"}`;
+  return [
+    ...(param === "filename" ? [`filename="${stand.replace(/[^A-Za-z0-9._-]/g, "")}"`] : []),
+    ...extParam(param, filename),
+  ];
 }
 
 function part(headers: string[], body: string) {
@@ -65,7 +94,7 @@ function part(headers: string[], body: string) {
 
 function multipart(kind: "mixed" | "alternative", boundary: string, parts: string[]) {
   return {
-    header: `Content-Type: multipart/${kind}; boundary="${boundary}"`,
+    header: withParams(`Content-Type: multipart/${kind}`, [`boundary="${boundary}"`]),
     body: [...parts.map((p) => `--${boundary}${CRLF}${p}`), `--${boundary}--`].join(CRLF),
   };
 }
@@ -103,8 +132,8 @@ export function buildMime(
     const files = m.attachments.map((a) =>
       part(
         [
-          `Content-Type: ${a.contentType}; name="${encodeWords(a.filename)}"`,
-          `Content-Disposition: attachment; ${filenameParams(a.filename)}`,
+          withParams(`Content-Type: ${a.contentType}`, nameParams(a.filename, "name")),
+          withParams("Content-Disposition: attachment", nameParams(a.filename, "filename")),
           "Content-Transfer-Encoding: base64",
         ],
         base64Lines(a.content),

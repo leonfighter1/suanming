@@ -179,6 +179,9 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text('${user.signInMethods.map((m) => _methodLabel(l10n, m)).join('、')}\n${l10n.loginsNote}'),
             isThreeLine: true,
           ),
+          // 报告 (v9.0.0, WP15.4): 测算完成后发到邮箱, 否 by default (the owner).
+          SettingsGroup(l10n.settingsReportsGroup, key: const Key('settings-reports')),
+          const _EmailReportsTile(),
           const Divider(),
           ListTile(
             key: const Key('sign-out'),
@@ -198,6 +201,73 @@ class SettingsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 测算完成后发到邮箱 (v9.0.0, tech plan WP15.4; the owner: 默认为否，改为是后自动发送): on only with a verified email.
+/// Under it, when the server has no mail provider yet, what happens to the mail.
+class _EmailReportsTile extends ConsumerStatefulWidget {
+  const _EmailReportsTile();
+
+  @override
+  ConsumerState<_EmailReportsTile> createState() => _EmailReportsTileState();
+}
+
+class _EmailReportsTileState extends ConsumerState<_EmailReportsTile> {
+  bool _busy = false;
+
+  Future<void> _set(bool on) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final auth = ref.read(authProvider.notifier);
+    setState(() => _busy = true);
+    try {
+      await ref.read(apiClientProvider).setEmailReports(on);
+      await auth.reload();
+    } catch (e) {
+      final text = e is ApiException && e.code == 'email_unverified' ? l10n.emailReportsNeedsEmail : accountProblem(l10n, e);
+      messenger.showSnackBar(SnackBar(content: Text(text)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final user = ref.watch(authProvider).value;
+    if (user == null) return const SizedBox.shrink();
+    final delivery = ref.watch(accountSettingsProvider).value?.mailDelivery;
+    final email = user.email;
+    final ready = email != null && user.emailVerified;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SwitchListTile(
+          key: const Key('email-reports'),
+          value: user.emailReports,
+          onChanged: ready && !_busy ? _set : null,
+          title: Text(l10n.emailReports),
+          subtitle: Text(
+            !ready
+                ? l10n.emailReportsNeedsEmail
+                : user.emailReports
+                    ? l10n.emailReportsOn(email)
+                    : l10n.emailReportsOff(email),
+          ),
+        ),
+        if (delivery == 'outbox' || delivery == 'off')
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.l, 0, Space.l, Space.s),
+            child: Text(
+              delivery == 'outbox' ? l10n.mailOutboxNotice : l10n.mailOffNotice,
+              key: const Key('mail-delivery-notice'),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+      ],
     );
   }
 }

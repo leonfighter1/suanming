@@ -285,6 +285,23 @@ line in every model call, and the `id` rule group records any hit.
 - A code is valid 10 minutes, 5 tries. A new code at most once a minute; five an hour to one number or address; ten
   a day per account. Codes live in memory only: after a restart, ask for a new one.
 
+## Reports by email (v9.0.0)
+
+- **设置 → 报告 → 测算完成后发到邮箱**, 否 by default. It turns on only once the email is verified (设置 → 邮箱, a
+  code). When on, every reading (any method) and every 一生运势报告 that passes is mailed when it is done: the report
+  in the message, and the PDF attached. A held report goes when a reviewer releases it.
+- **以往记录 → ⋮ → 发到邮箱**, or 选择 → 发邮箱: the chosen records as PDF or Word, in one mail to the verified email
+  (at most 10 records a message, 20 messages a day).
+- The reading page says 这份报告已发到你的邮箱, or that it could not be sent.
+- **To try it now, with no provider:**
+  1. Sign in, then 设置 → 邮箱: type any address and 发送验证码. The code is in the subject of the newest
+     `.outbox/mail/*.txt`.
+  2. Turn on 测算完成后发到邮箱, then make a reading.
+  3. The report arrives as a new `.outbox/mail/*.eml`. Open it in Outlook, Thunderbird or Windows Mail to see it as
+     the reader would, PDF attached.
+- PDF attachments need the Chinese font on the server, as downloads do. Without it the report still goes, in the
+  message alone.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

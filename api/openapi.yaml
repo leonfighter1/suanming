@@ -1022,6 +1022,58 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
 
+  /v1/documents/email:
+    post:
+      tags: [archive]
+      operationId: emailDocuments
+      summary: 发到邮箱 — mail chosen records, as Word or PDF, to the account's verified email (v9.0.0)
+      description: |
+        The documents are the ones `POST /v1/documents` takes, 1 to 10 of them, built by the app. All are rendered in
+        one format and attached to one message, to the account's own verified email only. Nothing is kept. At most
+        20 such messages a day per account (429 `too_many`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format, documents]
+              properties:
+                format: { type: string, enum: [pdf, docx] }
+                locale: { type: string, enum: [zh-Hans, zh-Hant] }
+                documents:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: object
+                    required: [document]
+                    properties:
+                      filename: { type: string, maxLength: 120 }
+                      document: { type: object, description: "As POST /v1/documents takes it" }
+      responses:
+        "202":
+          description: The message is on its way
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sent_to, count, delivery]
+                properties:
+                  sent_to: { type: string, description: "Masked: s***@example.com" }
+                  count: { type: integer }
+                  delivery: { type: string }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: "No verified email (`code: email_unverified`)"
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "502": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+
   /v1/tarot/daily:
     get:
       tags: [charts]
@@ -1436,6 +1488,15 @@ components:
           type: string
           enum: [user, admin]
           description: admin = 内容审核 reviewer (MINGLI_ADMINS); returned by /v1/me
+    ReportMail:
+      type: object
+      description: >-
+        测算完成后发到邮箱 (v9.0.0): the last time a finished report was mailed to its owner, and how it went.
+        Present only once tried; a failure is not retried on its own.
+      required: [status, at]
+      properties:
+        status: { type: string, enum: [sent, failed] }
+        at: { type: string, format: date-time }
     AccountSettings:
       type: object
       required: [email_reports]
@@ -1696,6 +1757,7 @@ components:
         message:
           description: User-safe explanation when status is not passed or pending
           type: string
+        mail: { $ref: "#/components/schemas/ReportMail" }
         progress:
           description: Present while pending; the pipeline stage currently running
           type: object
@@ -1853,6 +1915,7 @@ components:
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
         message: { type: string }
+        mail: { $ref: "#/components/schemas/ReportMail" }
         person:
           $ref: "#/components/schemas/ChartPerson"
           description: Whose report it is, from its chart (since v6.2.0); absent when the chart has none.

@@ -93,6 +93,9 @@ class FakeApi {
   /// 测算完成后发到邮箱 (v8.2.0, WP15.4).
   bool emailReports = false;
 
+  /// 发到邮箱 (v9.0.0): the requests, as sent.
+  final emailed = <Map<String, dynamic>>[];
+
   /// GET /v1/reports items, when a test needs other readings than the one 八字 report.
   final List<Map<String, dynamic>>? history;
 
@@ -372,6 +375,14 @@ class FakeApi {
       documents.add(jsonDecode(req.body) as Map<String, dynamic>);
       final pdf = documents.last['format'] == 'pdf';
       return http.Response.bytes(pdf ? utf8.encode('%PDF-1.7') : [0x50, 0x4b, 0x03, 0x04], 200);
+    }
+    // 发到邮箱 (v9.0.0): only to a verified email.
+    if (req.method == 'POST' && path == '/v1/documents/email') {
+      if (!emailVerified) return _problem(409, 'verify an email first', 'email_unverified');
+      final body = jsonDecode(req.body) as Map<String, dynamic>;
+      emailed.add(body);
+      final to = '${accountEmail![0]}***@${accountEmail!.split('@').last}';
+      return _json({'sent_to': to, 'count': (body['documents'] as List).length, 'delivery': delivery}, 202);
     }
     final gone = RegExp(r'^/v1/(?:life-)?reports/([^/]+)$').firstMatch(path);
     if (req.method == 'DELETE' && gone != null) {

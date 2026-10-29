@@ -149,6 +149,8 @@ void main() {
     expect(find.widgetWithText(AppBar, '設定'), findsOneWidget);
     // The email row shows the address and whether it is verified (v8.2.0).
     expect(find.text('me@example.com · 未驗證，點此驗證'), findsOneWidget);
+    // At the foot of 設定, below 報告 (v9.0.0): out of a test screen's lazily built list until scrolled to.
+    await scrollTo(tester, const Key('delete-account'));
     await tester.tap(find.byKey(const Key('delete-account')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('confirm-delete')));

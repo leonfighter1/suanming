@@ -1949,6 +1949,62 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deliveryOff => '服务器还没有接入短信或邮件服务';
+
+  @override
+  String get settingsReportsGroup => '报告';
+
+  @override
+  String get emailReports => '测算完成后发到邮箱';
+
+  @override
+  String emailReportsOn(String email) {
+    return '每次 AI 测算完成，报告都会发到 $email';
+  }
+
+  @override
+  String emailReportsOff(String email) {
+    return '开启后，每次 AI 测算完成都会把报告发到 $email';
+  }
+
+  @override
+  String get emailReportsNeedsEmail => '先在上面验证邮箱，才能开启';
+
+  @override
+  String get mailOutboxNotice => '测试环境：还没有接入邮件服务，邮件写在服务器的 .outbox 文件夹里，不会真的发出。';
+
+  @override
+  String get mailOffNotice => '服务器还没有接入邮件服务，暂时不会发出。';
+
+  @override
+  String get archiveEmail => '发到邮箱';
+
+  @override
+  String get archiveEmailShort => '发邮箱';
+
+  @override
+  String get emailFirst => '先在“设置”里验证邮箱，才能发到邮箱';
+
+  @override
+  String emailedTo(String to) {
+    return '已发到 $to';
+  }
+
+  @override
+  String emailedOutbox(String to) {
+    return '已发到 $to（测试环境：写在服务器的 .outbox 文件夹里）';
+  }
+
+  @override
+  String get emailFailed => '没能发出，请稍后再试';
+
+  @override
+  String get emailTooMany => '今天发得太多了，明天再试';
+
+  @override
+  String get reportMailed => '这份报告已发到你的邮箱';
+
+  @override
+  String get reportMailFailed => '这份报告没能发到邮箱，可以在“以往记录”里再发一次';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3895,4 +3951,60 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get deliveryOff => '伺服器尚未接入短訊或郵件服務';
+
+  @override
+  String get settingsReportsGroup => '報告';
+
+  @override
+  String get emailReports => '測算完成後發到電子郵件';
+
+  @override
+  String emailReportsOn(String email) {
+    return '每次 AI 測算完成，報告都會發到 $email';
+  }
+
+  @override
+  String emailReportsOff(String email) {
+    return '開啟後，每次 AI 測算完成都會把報告發到 $email';
+  }
+
+  @override
+  String get emailReportsNeedsEmail => '先在上面驗證電子郵件，才能開啟';
+
+  @override
+  String get mailOutboxNotice => '測試環境：尚未接入郵件服務，郵件寫在伺服器的 .outbox 資料夾裡，不會真的發出。';
+
+  @override
+  String get mailOffNotice => '伺服器尚未接入郵件服務，暫時不會發出。';
+
+  @override
+  String get archiveEmail => '發到電子郵件';
+
+  @override
+  String get archiveEmailShort => '發郵件';
+
+  @override
+  String get emailFirst => '先在「設定」裡驗證電子郵件，才能發到電子郵件';
+
+  @override
+  String emailedTo(String to) {
+    return '已發到 $to';
+  }
+
+  @override
+  String emailedOutbox(String to) {
+    return '已發到 $to（測試環境：寫在伺服器的 .outbox 資料夾裡）';
+  }
+
+  @override
+  String get emailFailed => '沒能發出，請稍後再試';
+
+  @override
+  String get emailTooMany => '今天發得太多了，明天再試';
+
+  @override
+  String get reportMailed => '這份報告已發到你的電子郵件';
+
+  @override
+  String get reportMailFailed => '這份報告沒能發到電子郵件，可以在「以往紀錄」裡再發一次';
 }

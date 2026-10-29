@@ -57,9 +57,23 @@
 53. Give every child an AnimatedSwitcher can show its own key, whenever two of them can follow each other: two unkeyed children at once are duplicate keys. Test a page along every way users reach it (from history as well as right after making it).
 54. Run npx prettier --check . as the very last step before the harness, after the final edit to any Markdown, YAML or TypeScript file; a check made before a later edit proves nothing about it.
 55. A floating control must never cover what it leads to: hide it (out of the hit test and the Tab order too) while its target is on screen, and test the target with hitTestable after opening it at a phone size. When code both scrolls to a field and focuses it, await the scroll first.
-56. The Write/Edit tools turn a \uXXXX in new_string or content into the character itself. For a literal \u escape, use numeric code units instead, or build it in a script with String.fromCharCode(92), and check the bytes afterwards (od -c, or a test).
+56. The Write/Edit tools turn a \uXXXX in new_string or content into the character itself. For a literal \u escape, use numeric code units instead, or build it in a script with String.fromCharCode(92), and check the bytes afterwards (od -c, or a test). (G16 recurred 2026-10-29: a `node -e` edit turned `/\s+/g` into `/s+/g` in server.ts; caught by grepping the line after the edit. A regex goes in with the Edit tool, never through a shell string.)
+57. When an action shows a 'working' SnackBar and then its result, hide the current SnackBar before showing the result: SnackBars queue, and the result would wait out the first one's duration.
+58. After adding anything to a page, run every test that opens it (grep for its open key) before the harness, not only the new ones. A test that finds a row below the new content must scroll to it: lazily built lists drop what lies past the fold.
 
 ## Log
+
+### 2026-10-29: New rows in 设置 pushed tested rows out of the built list
+- **Symptom:** The v9.0.0 harness failed in auth_test and top_bar_test: sign-out and delete-account were not found after 设置 gained its 报告 group.
+- **Root cause:** Only the new tests were run after adding the group; older tests found the rows at the foot of 设置 without scrolling, and the new content moved them below what a lazily built ListView builds on a test screen.
+- **Fix:** Both tests scroll to the rows first (scrollTo, in page order); every test that opens 设置 was run before the next harness. (Recording it, add-mistake.ps1 ran with `-Project .` while the shell stood in app/ and wrote a new app/docs/agent/MISTAKES.md: it was moved here and the stray file deleted. Pass the repository root, not `.`, after any command that may have moved the shell.)
+- **Rule:** After adding anything to a page, run every test that opens it (grep for its open key) before the harness, not only the new ones. A test that finds a row below the new content must scroll to it: lazily built lists drop what lies past the fold. (Rule 58)
+
+### 2026-10-29: A result SnackBar queued behind a working one
+- **Symptom:** After 发到邮箱 the test found no 已发到 message: it was waiting behind the 2-second 正在生成 SnackBar.
+- **Root cause:** ScaffoldMessenger queues SnackBars: a second one shows only when the first has run its time, so the reader (and the test) waited seconds for the result.
+- **Fix:** The result calls hideCurrentSnackBar() before showSnackBar(), so it takes the place of 正在生成 at once.
+- **Rule:** When an action shows a 'working' SnackBar and then its result, hide the current SnackBar before showing the result: SnackBars queue, and the result would wait out the first one's duration. (Rule 57)
 
 ### 2026-10-28: Edit tool decoded \u escapes (meant for the global list: access denied)
 - **Symptom:** A C++ title written as L\u547D\u7406\u5927\u5E08 through the Edit tool landed in main.cpp as the raw UTF-8 characters.

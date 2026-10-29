@@ -67,7 +67,12 @@ void main() {
     expect(find.widgetWithText(AppBar, '设置'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('settings-account')), matching: find.text('账号与登录')), findsOneWidget);
     expect(find.text('test@mingli.local · 未验证，点此验证'), findsOneWidget);
+    // Then 报告 (v9.0.0), then the account's end, in page order (rule 25).
+    await scrollTo(tester, const Key('settings-reports'));
+    expect(find.descendant(of: find.byKey(const Key('settings-reports')), matching: find.text('报告')), findsOneWidget);
+    await scrollTo(tester, const Key('sign-out'));
     expect(find.byKey(const Key('sign-out')), findsOneWidget);
+    await scrollTo(tester, const Key('delete-account'));
     expect(find.byKey(const Key('delete-account')), findsOneWidget);
   });
 

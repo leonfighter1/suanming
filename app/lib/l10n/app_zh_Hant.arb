@@ -610,5 +610,21 @@
   "phoneInvalid": "手機號碼格式不正確",
   "alreadyBound": "已經綁定好了",
   "lastLogin": "至少要保留一種登入方式：用戶名稱、電子郵件或手機號碼",
-  "deliveryOff": "伺服器尚未接入短訊或郵件服務"
+  "deliveryOff": "伺服器尚未接入短訊或郵件服務",
+  "settingsReportsGroup": "報告",
+  "emailReports": "測算完成後發到電子郵件",
+  "emailReportsOn": "每次 AI 測算完成，報告都會發到 {email}",
+  "emailReportsOff": "開啟後，每次 AI 測算完成都會把報告發到 {email}",
+  "emailReportsNeedsEmail": "先在上面驗證電子郵件，才能開啟",
+  "mailOutboxNotice": "測試環境：尚未接入郵件服務，郵件寫在伺服器的 .outbox 資料夾裡，不會真的發出。",
+  "mailOffNotice": "伺服器尚未接入郵件服務，暫時不會發出。",
+  "archiveEmail": "發到電子郵件",
+  "archiveEmailShort": "發郵件",
+  "emailFirst": "先在「設定」裡驗證電子郵件，才能發到電子郵件",
+  "emailedTo": "已發到 {to}",
+  "emailedOutbox": "已發到 {to}（測試環境：寫在伺服器的 .outbox 資料夾裡）",
+  "emailFailed": "沒能發出，請稍後再試",
+  "emailTooMany": "今天發得太多了，明天再試",
+  "reportMailed": "這份報告已發到你的電子郵件",
+  "reportMailFailed": "這份報告沒能發到電子郵件，可以在「以往紀錄」裡再發一次"
 }

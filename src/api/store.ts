@@ -58,6 +58,14 @@ export interface ReportRecord {
    */
   question?: string;
   focus?: TarotFocus;
+  /** 测算完成后发到邮箱 (v9.0.0): the last time the report was mailed when done, and how it went. */
+  mail?: ReportMail;
+}
+
+/** How mailing a finished report went (v9.0.0, tech plan WP15.4). A failure is not retried on its own. */
+export interface ReportMail {
+  status: "sent" | "failed";
+  at: string;
 }
 
 /** A paid 破除運勢 plan for one topic of a report (payment: Phase 4 TODO). */
@@ -97,6 +105,8 @@ export interface LifeReportRecord {
   progress?: { stage: AgentName; attempt: number; updated_at: string };
   /** What the user told us (v7.0.0), kept for the report's 追问; deleted with the account. */
   context?: UserContext;
+  /** 测算完成后发到邮箱 (v9.0.0). */
+  mail?: ReportMail;
 }
 
 /** A 追问 on a passed reading or 一生运势报告 (v7.0.0, S13 WP13.2): the question, then its answer. */

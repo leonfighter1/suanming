@@ -691,6 +691,7 @@ class ReportView {
     this.progressStage,
     this.progressAttempt = 1,
     this.createdAt,
+    this.mailStatus,
   });
 
   factory ReportView.fromJson(Json j) => ReportView(
@@ -704,6 +705,7 @@ class ReportView {
         progressStage: (j['progress'] as Json?)?['stage'] as String?,
         progressAttempt: ((j['progress'] as Json?)?['attempt'] as int?) ?? 1,
         createdAt: DateTime.tryParse(j['created_at'] as String? ?? ''),
+        mailStatus: (j['mail'] as Json?)?['status'] as String?,
       );
 
   final String id;
@@ -722,6 +724,9 @@ class ReportView {
   final String? progressStage;
   final int progressAttempt;
   final DateTime? createdAt;
+
+  /// 测算完成后发到邮箱 (v9.0.0): sent or failed, once the report was mailed when done; null otherwise.
+  final String? mailStatus;
 
   bool get isTerminal => status != 'pending';
 }

@@ -1544,9 +1544,78 @@ As built (v8.2.0):
   logged and never retried on its own.
 - Lessons: rules 16, 17, 32, 36, 37, 42, 44, 52 and 54; G6.
 
+As built (v9.0.0):
+
+- **The documents the server writes** (`src/export/report-doc.ts`):
+  - they use the app's labels in 简体 and 繁體, the time in the account's region, and the title as the app gives it;
+  - a reading carries its details, the facts layer, the trend, the reading in three parts, the actions, the
+    expectation and the AI label with the model;
+  - a 一生运势报告 carries its six sections with the 卦辭 and 爻辭, and every text of the report. The figures stay
+    in the app, and the mail says where to find them.
+- **The mail** (`src/notify/report-mail.ts`, `src/export/render-html.ts`):
+  - HTML with every style inline, a text part, and the PDF (named as the app names a download);
+  - a line saying why it came and how to turn it off;
+  - without a Chinese font on the server, the message goes alone.
+- **When:** `mailWhenDone` runs after a reading or a 一生运势报告 is stored as passed, and when a reviewer releases a
+  held one. It skips a held, blocked or failed report, a setting at 否, an unverified email, and a server with mail
+  off.
+- **发到邮箱** (`POST /v1/documents/email`):
+  - 1–10 of the app's documents in one message;
+  - 409 without a verified email, 503 with mail off, 502 when the provider fails, 429 past 20 a day.
+- **The MIME** keeps every line within 78 characters:
+  - encoded words of at most 39 bytes, so even the first, after the header's name, fits;
+  - RFC 2231 pieces for file names;
+  - parameters each on a line of their own.
+  - The first draft let a header's name and its first piece run to 81.
+- **The app:**
+  - 设置 → 报告 has the switch, disabled until the email is verified, and a line when the server has no provider;
+  - 发到邮箱 is in the record menu, and 发邮箱 in the select bar. The bar is now four equal slots, an icon over its
+    label: four labelled buttons side by side overflowed a 360-wide phone by 15 px (caught by the test, rule 49);
+  - the result replaces the 正在生成 note (rule 57);
+  - the reading page shows 这份报告已发到你的邮箱, or that it failed. The 一生运势 page doesn't yet.
+- **Looked at:** a real reading's mail in headless Chrome at 480 px wide; the select bar and 设置 → 报告 with Noto
+  Sans SC.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S15 菜单、图标、多种登录、报告发到邮箱 (done 2026-10-29: v8.1.0–v9.0.0)
+
+1. **Delivered**, the owner's request of 2026-10-28:
+   - WP15.1 (v8.1.0): the ☰ menu. The home bar holds ☰, the title and 历史记录; 设置 is grouped.
+   - WP15.2 (v8.1.0): the app icon, a 太极 in the 先天八卦 drawn once and written in 40 files for every platform; the
+     name under it is 命理大师.
+   - WP15.3 (v8.2.0): sign-in by username, email or bound phone; phones bound and emails verified by a code; mail
+     and SMS transports with the development outbox.
+   - WP15.4 (v9.0.0): 测算完成后发到邮箱 (否 by default) and 发到邮箱; the record notes its mailing.
+2. **Numbers:**
+   - server tests 528 → 571; app tests 175 → 196;
+   - harness runs: v8.1.0 and v8.2.0 passed the first time; v9.0.0 failed once, in two app tests that the new 报告
+     group broke (rule 58), then passed;
+   - renders looked at: the icon at 16–1024 px; the menu, the sign-in pages, 设置, the binding dialog and the
+     select bar with the real font; a mail in headless Chrome.
+3. **Against the plan:**
+   - The icon's source is the drawing in the script, not a hand-made SVG; the SVG is written out from it.
+   - The mailed 一生运势报告 has every text but not the figures, which the app draws from the facts.
+   - The select bar's buttons became icon-over-label slots, since four labelled buttons didn't fit.
+   - Only the reading page shows the mail line, not the 一生运势 page.
+   - The providers wait for the owner, as asked (留到下一步): until then the server writes to `.outbox/`.
+4. **Mistakes recorded:**
+   - **Rule 56:** the Edit tool turns `\u` escapes into characters, so the Windows title is written as code units.
+     It also notes G16 recurring: a shell script dropped a regex's backslash.
+   - **Rule 57:** a result SnackBar waited behind the 正在生成 one.
+   - **Rule 58:** adding 报告 to 设置 pushed two older tests' rows past the built part of the list. Only the new tests
+     had been run; now every test that opens a changed page runs before the harness.
+   - **Rules that worked:** rule 49's test caught the bar overflowing; rule 27 explained the taps that missed after
+     an error line; working the Malaysian number out by hand (G7) caught the trunk-0 bug.
+5. **Next:**
+   - The owner chooses the providers: an SMTP service or a mail API, and an SMS gateway. Each plugs in as a
+     transport in `src/notify`, and the outbox stays for development.
+   - Possible follow-ups, if the owner wants them: sign-up or sign-in by phone code alone; the mail line on the
+     一生运势 page; 发到邮箱 on the reading pages too.
+   - Still waiting for the owner: WP7.2, WP7.3, WP1.8, the 起名 review, Indonesia's sign-off, and the Phase 3 gate
+     before any Phase 4.
 
 ### S14 以往记录：整理、下载、发送、删除 (done 2026-10-28: v8.0.0)
 
@@ -1980,4 +2049,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP15.1    | done                         | v8.1.0  |
 | WP15.2    | done                         | v8.1.0  |
 | WP15.3    | done                         | v8.2.0  |
-| WP15.4    | in progress                  | —       |
+| WP15.4    | done                         | v9.0.0  |

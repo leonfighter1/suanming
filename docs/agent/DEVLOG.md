@@ -2,6 +2,33 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (c): S15 WP15.4 — reports by email; stage S15 complete; release v9.0.0
+
+- Server:
+  - `src/export/report-doc.ts`: documents the server writes itself, in the app's labels;
+  - `src/export/render-html.ts`: inline-styled HTML and text;
+  - `src/notify/report-mail.ts`: the two mails;
+  - `mailWhenDone` after a passed reading or 一生运势报告, and on a reviewer's release;
+  - `POST /v1/documents/email`, with limits;
+  - the record's `mail` (sent or failed, when), shown by publicReport and publicLifeReport.
+- MIME: every line within 78 (encoded words of 39 bytes, RFC 2231 file-name pieces, a parameter per line). The first
+  draft ran two lines to 79 and 81; the test found them.
+- App:
+  - 设置 → 报告 (the switch, disabled until verified, the outbox line);
+  - 发到邮箱 in the record menu, 发邮箱 in the select bar (now four icon-over-label slots: four labelled buttons
+    overflowed 360 px, caught by the test);
+  - the reading page's mail line.
+- Mistakes:
+  - a `node -e` edit dropped a regex backslash (`/\s+/g` → `/s+/g`): G16 recurred, noted on rule 56, fixed with the
+    Edit tool;
+  - the result SnackBar waited behind the 2-second 正在生成 one, now hidden first (rule 57);
+  - the file-name expectation was a guess, corrected from `docFileName` itself;
+  - the first v9.0.0 harness failed in auth_test and top_bar_test: 报告 pushed 退出登录 / 注销账号 past what a test
+    screen's list builds, and only the new tests had run. They scroll now (rule 58). The rule's script first wrote
+    to a new app/docs/ (the shell stood in app/), and was moved to the right list.
+- Looked at a real reading's mail in headless Chrome (480 px), and the bar and 设置 → 报告 with Noto Sans SC.
+- Tests: server 556 → 571; app 188 → 196.
+
 ## 2026-10-29 (b): S15 WP15.3 — username, email or phone login; codes; release v8.2.0
 
 - Server:

@@ -105,6 +105,9 @@ class AuthNotifier extends AsyncNotifier<AppUser?> {
   /// The account as an account call returned it (a new username, a bound phone, a verified email).
   void changed(AppUser user) => state = AsyncData(user);
 
+  /// The account read again, after a change made elsewhere than an account call (a setting).
+  Future<void> reload() async => state = AsyncData(await _api.me());
+
   Future<void> register({
     String? username,
     String? email,
@@ -138,6 +141,11 @@ class AuthNotifier extends AsyncNotifier<AppUser?> {
 }
 
 final authProvider = AsyncNotifierProvider<AuthNotifier, AppUser?>(AuthNotifier.new);
+
+/// 设置 → 报告 (v9.0.0): the account's settings and what delivers mail on the server, read when 设置 opens.
+final accountSettingsProvider = FutureProvider.autoDispose<AccountSettings>(
+  (ref) => ref.read(apiClientProvider).settings(),
+);
 
 final termsProvider = FutureProvider<Terms>((ref) => Terms.load(rootBundle));
 

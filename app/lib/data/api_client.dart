@@ -81,8 +81,20 @@ class AppUser {
   String get login => username ?? email ?? phone ?? '—';
 }
 
-/// Where a code went (POST /v1/account/{email|phone}, v8.2.0), masked, and what delivered it: "outbox" while the
-/// server has no provider, so nothing really left it.
+/// The account's settings (GET /v1/account/settings, v9.0.0), and what delivers mail on this server: "outbox" while it
+/// has no provider (nothing really leaves), "off", or the provider's name.
+class AccountSettings {
+  const AccountSettings({required this.emailReports, required this.mailDelivery});
+  factory AccountSettings.fromJson(Json j) => AccountSettings(
+        emailReports: (j['settings'] as Map)['email_reports'] as bool,
+        mailDelivery: (j['delivery'] as Map)['mail'] as String,
+      );
+  final bool emailReports;
+  final String mailDelivery;
+}
+
+/// Where a code or a mail went (POST /v1/account/{email|phone}, v8.2.0; /v1/documents/email, v9.0.0), masked, and
+/// what delivered it: "outbox" while the server has no provider, so nothing really left it.
 class CodeSent {
   const CodeSent({required this.sentTo, required this.delivery});
   factory CodeSent.fromJson(Json j) => CodeSent(sentTo: j['sent_to'] as String, delivery: j['delivery'] as String);
@@ -258,6 +270,22 @@ class ApiClient {
           'document': doc.toJson(),
         }, access),
       );
+
+  /// 发到邮箱 (v9.0.0): [docs] (each with its file name) in [format], in one mail to the account's verified email.
+  Future<CodeSent> emailDocuments(List<(Doc, String)> docs, DocFormat format, {required String locale}) async =>
+      CodeSent.fromJson(await _authed('POST', '/v1/documents/email', {
+        'format': format.ext,
+        'locale': locale,
+        'documents': [
+          for (final (doc, name) in docs) {'filename': name, 'document': doc.toJson()},
+        ],
+      }));
+
+  /// 测算完成后发到邮箱 and what delivers mail here (v9.0.0).
+  Future<AccountSettings> settings() async => AccountSettings.fromJson(await _authed('GET', '/v1/account/settings'));
+
+  Future<AccountSettings> setEmailReports(bool on) async =>
+      AccountSettings.fromJson(await _authed('PATCH', '/v1/account/settings', {'email_reports': on}));
 
   /// Deletes one reading with its plans and 追问 (and its chart when nothing else reads it).
   Future<Json> deleteReport(String id) => _authed('DELETE', '/v1/reports/$id');

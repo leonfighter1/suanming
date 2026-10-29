@@ -37,9 +37,18 @@ import {
 import { SCHEMA_VERSION, type ChartFact, type ChartSystem } from "../chart-fact/index.js";
 import { loadGeoMatrix, loadRuleSet, methodsFor, resolveRegion } from "../compliance/index.js";
 import { AccountError, AccountService } from "../auth/account.js";
+import { maskEmail } from "../auth/identifiers.js";
 import { AuthError, AuthService, publicUser } from "../auth/service.js";
 import { VerifyError, type ContactKind } from "../auth/verify.js";
-import { NoMail, NoSms, type MailTransport, type SmsTransport } from "../notify/index.js";
+import { lifeDocument, localTime, readingDocument } from "../export/report-doc.js";
+import {
+  NoMail,
+  NoSms,
+  type MailAttachment,
+  type MailTransport,
+  type SmsTransport,
+} from "../notify/index.js";
+import { recordsMail, reportMail } from "../notify/report-mail.js";
 import {
   CalendarInputError,
   lunarDate,
@@ -85,12 +94,17 @@ import {
   type FollowUpRecord,
   type ReviewDecision,
   type LifeReportRecord,
+  type ReportMail,
   type RemedyRecord,
   type ReportRecord,
   type Store,
 } from "./store.js";
 
 export const API_VERSION = "0.2.0";
+
+/** 发到邮箱 (v9.0.0): records in one message, and messages a day per account. */
+export const MAIL_DOCUMENTS = 10;
+export const MAIL_PER_DAY = 20;
 
 export interface ApiOptions {
   secrets: EngineSecrets;
@@ -231,7 +245,12 @@ export function publicReport(r: ReportRecord) {
   if (r.status !== "passed") {
     return { ...base, message: "this report is held for review and is not available yet" };
   }
-  return { ...base, layers: rep.layers, ai_disclosure: rep.ai_disclosure };
+  return {
+    ...base,
+    layers: rep.layers,
+    ai_disclosure: rep.ai_disclosure,
+    ...(r.mail && { mail: r.mail }),
+  };
 }
 
 /**
@@ -280,6 +299,7 @@ export function publicLifeReport(r: LifeReportRecord) {
     facts: r.life.facts,
     layers: r.life.layers,
     ai_disclosure: r.life.ai_disclosure,
+    ...(r.mail && { mail: r.mail }),
   };
 }
 
@@ -431,6 +451,21 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     aiUse.set(`${day}:u:${user}`, mine + 1);
     aiUse.set(`${day}:all`, all + 1);
   }
+  /** 发到邮箱 messages sent today per account (UTC day): a provider charges for each. */
+  const mailUse = new Map<string, number>();
+  function takeMailQuota(user: string) {
+    const day = now().toISOString().slice(0, 10);
+    for (const k of [...mailUse.keys()]) if (!k.startsWith(day)) mailUse.delete(k);
+    const used = mailUse.get(`${day}:${user}`) ?? 0;
+    if (used >= MAIL_PER_DAY) {
+      throw new HttpError(
+        429,
+        `at most ${MAIL_PER_DAY} mails a day; try again tomorrow`,
+        "too_many",
+      );
+    }
+    mailUse.set(`${day}:${user}`, used + 1);
+  }
   /** Background jobs (preloads) take only from the daily total; false = skip. */
   function takeBackgroundQuota(): boolean {
     const q = opts.aiQuota;
@@ -489,6 +524,65 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
   }
 
+  /**
+   * 测算完成后发到邮箱 (v9.0.0, tech plan WP15.4): a reading or a 一生运势报告 that passed goes to its owner's verified
+   * email, when the owner turned the setting on (否 by default). Never a held, blocked or failed one: a released one
+   * goes when the reviewer releases it. The report is in the message and attached as a PDF. How it went is noted on
+   * the record; a failure is logged, without the address, and never retried on its own.
+   */
+  async function mailWhenDone(kind: "report" | "life_report", id: string) {
+    if (!auth || mail.name === "off") return;
+    const record = kind === "report" ? await store.getReport(id) : await store.getLifeReport(id);
+    if (!record || record.status !== "passed") return;
+    const owner = await auth.users.get(record.owner);
+    if (!owner?.settings?.email_reports || !owner.email || !owner.email_verified_at) return;
+    const chart = await store.getChart(record.chart_id);
+    const context = {
+      locale: record.locale,
+      region: owner.country,
+      created_at: record.created_at,
+      ...(chart?.person && { person: chart.person }),
+    };
+    let status: ReportMail["status"] = "sent";
+    try {
+      const doc =
+        kind === "report"
+          ? readingDocument((record as ReportRecord).report!, {
+              ...context,
+              system: chart?.fact.system ?? "bazi",
+              ...((record as ReportRecord).question && {
+                question: (record as ReportRecord).question,
+              }),
+            })
+          : lifeDocument((record as LifeReportRecord).life!, context);
+      // Without a Chinese font on the server the report still goes, in the message alone.
+      const font = shareFont(record.locale);
+      const day = localTime(record.created_at, owner.country).slice(0, 10);
+      const pdf = font && {
+        // As the app names a downloaded file (docFileName): spaces become dashes.
+        filename: documentName(`命理大师-${doc.title.replace(/\s+/g, "-")}-${day}`, "pdf"),
+        contentType: "application/pdf",
+        content: await renderPdf(doc, font),
+      };
+      await mail.send(
+        reportMail({ to: owner.email, doc, locale: record.locale, ...(pdf && { pdf }) }),
+      );
+    } catch (e) {
+      status = "failed";
+      const why = ((e as Error).message ?? String(e)).replace(/[^\s@]+@[^\s@]+/g, "<address>");
+      log(`mailing ${kind} ${id} failed: ${why}`);
+    }
+    const at = now().toISOString();
+    // Read again: the record may have changed, or gone, meanwhile.
+    if (kind === "report") {
+      const current = await store.getReport(id);
+      if (current) await store.putReport({ ...current, mail: { status, at } });
+    } else {
+      const current = await store.getLifeReport(id);
+      if (current) await store.putLifeReport({ ...current, mail: { status, at } });
+    }
+  }
+
   async function runJob(
     record: ReportRecord,
     fact: Parameters<typeof generateReport>[0],
@@ -542,6 +636,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // The account may have been deleted while this ran; never resurrect its data.
     if (!(await store.getReport(record.id))) return;
     await store.putReport(next);
+    if (next.status === "passed") await mailWhenDone("report", record.id);
     if (next.status === "passed" && next.report && opts.preloadRemedies !== false) {
       await preloadRemedies(next, next.report, fact, c);
     }
@@ -896,6 +991,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
     if (!(await store.getLifeReport(record.id))) return;
     await store.putLifeReport(next);
+    if (next.status === "passed") await mailWhenDone("life_report", record.id);
   }
 
   async function createLifeReport(req: IncomingMessage, c: Caller) {
@@ -1083,6 +1179,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
     }
     log(`review ${item.kind} ${item.r.id}: ${review.decision} by ${who}`);
+    // Released: now it is done, and goes out as any passed report does.
+    if (status === "passed" && (item.kind === "report" || item.kind === "life_report")) {
+      track("report mail", mailWhenDone(item.kind, item.r.id));
+    }
     const after = await heldItem(item.kind, item.r.id);
     return send(res, 200, after!.summary);
   }
@@ -1419,6 +1519,75 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
       res.end(bytes);
       return;
+    }
+
+    // 发到邮箱 (v9.0.0, tech plan WP15.4): the chosen records, as the app builds them for 下载, rendered to Word or PDF
+    // and mailed in one message to the account's verified email. Nothing is kept.
+    if (path === "/v1/documents/email" && req.method === "POST") {
+      if (!auth) throw new HttpError(404, "auth not configured");
+      const body = (await readJson(req, 4 * 1024 * 1024)) as Record<string, unknown>;
+      const format = body.format === "pdf" || body.format === "docx" ? body.format : undefined;
+      if (!format) throw new InputError("format must be pdf or docx");
+      const list = body.documents;
+      if (!Array.isArray(list) || list.length < 1 || list.length > MAIL_DOCUMENTS) {
+        throw new InputError(`documents must hold 1 to ${MAIL_DOCUMENTS} documents`);
+      }
+      const owner = (await auth.users.get(c.user))!;
+      if (!owner.email || !owner.email_verified_at) {
+        throw new HttpError(
+          409,
+          "verify an email first: documents go only to a verified email",
+          "email_unverified",
+        );
+      }
+      if (mail.name === "off") {
+        throw new HttpError(503, "mail is not set up on this server yet", "delivery_unavailable");
+      }
+      const locale = LOCALES.includes(body.locale as Locale) ? (body.locale as Locale) : "zh-Hans";
+      const font = format === "pdf" ? shareFont(locale) : undefined;
+      if (format === "pdf" && !font) {
+        throw new HttpError(
+          503,
+          "PDF documents need a CJK font on the server: install fonts-noto-cjk or set MINGLI_SHARE_FONT",
+        );
+      }
+      const docs = list.map((item, i) => {
+        const { document, filename } = (item ?? {}) as Record<string, unknown>;
+        try {
+          return { doc: parseDocument(document), filename };
+        } catch (e) {
+          if (e instanceof DocumentInputError)
+            throw new InputError(`documents[${i}]: ${e.message}`);
+          throw e;
+        }
+      });
+      takeMailQuota(c.user);
+      const files: MailAttachment[] = [];
+      for (const { doc, filename } of docs) {
+        files.push({
+          filename: documentName(filename, format),
+          contentType:
+            format === "pdf"
+              ? "application/pdf"
+              : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          content: format === "pdf" ? await renderPdf(doc, font!) : await renderDocx(doc, locale),
+        });
+      }
+      try {
+        await mail.send(
+          recordsMail({ to: owner.email, titles: docs.map((d) => d.doc.title), locale, files }),
+        );
+      } catch (e) {
+        log(
+          `mailing documents failed: ${(e as Error).message?.replace(/[^\s@]+@[^\s@]+/g, "<address>")}`,
+        );
+        throw new HttpError(502, "the mail could not be sent; try again later", "delivery_failed");
+      }
+      return send(res, 202, {
+        sent_to: maskEmail(owner.email),
+        count: files.length,
+        delivery: mail.name,
+      });
     }
 
     // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 ----

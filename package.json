@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "8.2.0",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",

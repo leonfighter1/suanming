@@ -52,11 +52,17 @@ List<Map<String, dynamic>> history({bool pending = false}) => [
     ];
 
 /// Opens 以往记录 on a tall screen, with every record built.
-Future<(FakeApi, List<ShareParams>)> openArchive(WidgetTester tester, {bool pending = false}) async {
-  tester.view.physicalSize = const Size(1000, 2600);
+Future<(FakeApi, List<ShareParams>)> openArchive(
+  WidgetTester tester, {
+  bool pending = false,
+  bool verified = false,
+  Map<String, dynamic>? finalReport,
+  Size size = const Size(1000, 2600),
+}) async {
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final api = FakeApi(pendingPolls: 0, history: history(pending: pending));
+  final api = FakeApi(pendingPolls: 0, history: history(pending: pending), emailVerified: verified, finalReport: finalReport);
   final shared = <ShareParams>[];
   await tester.pumpWidget(
     testApp(api, locale: zhHans, overrides: [shareProvider.overrideWithValue((p) async => shared.add(p))]),
@@ -251,5 +257,70 @@ void main() {
     final blocks = ((api.documents.last['document'] as Map)['blocks'] as List).cast<Map<String, dynamic>>();
     expect(blocks.first['type'], 'kv'); // the report's 项目 / 内容 rows
     expect(shared, hasLength(2));
+  });
+
+  // 发到邮箱 (v9.0.0, tech plan WP15.4).
+  testWidgets('发到邮箱 without a verified email says to verify it first, and sends nothing', (tester) async {
+    final (api, _) = await openArchive(tester);
+    await pickFromMenu(tester, r1, '发到邮箱');
+    expect(find.text('先在“设置”里验证邮箱，才能发到邮箱'), findsOneWidget);
+    expect(find.byKey(const Key('format-pdf')), findsNothing);
+    expect(api.emailed, isEmpty);
+  });
+
+  testWidgets('发到邮箱 asks PDF or Word, then mails the record to the verified email', (tester) async {
+    final (api, shared) = await openArchive(tester, verified: true);
+    await pickFromMenu(tester, r1, '发到邮箱');
+    await tester.tap(find.byKey(const Key('format-pdf')));
+    await settle(tester);
+    final body = api.emailed.single;
+    expect(body['format'], 'pdf');
+    final docs = (body['documents'] as List).cast<Map<String, dynamic>>();
+    expect(docs.map((d) => (d['document'] as Map)['title']), ['徐梅 的命盘']);
+    // As a download is named (docFileName): the title with dashes for spaces, then the day.
+    expect(docs.single['filename'], '命理大师-徐梅-的命盘-2026-10-20');
+    expect(find.text('已发到 m***@example.com（测试环境：写在服务器的 .outbox 文件夹里）'), findsOneWidget);
+    // Mail, not the share sheet.
+    expect(shared, isEmpty);
+  });
+
+  testWidgets('选择 then 发邮箱 mails every chosen record in one message; the bar fits a 360-wide phone', (tester) async {
+    final (api, _) = await openArchive(tester, verified: true, size: const Size(360, 2600));
+    await tester.tap(find.byKey(const Key('archive-select')));
+    await settle(tester);
+    for (final key in ['archive-download', 'archive-send', 'archive-email', 'archive-delete']) {
+      final r = tester.getRect(find.byKey(Key(key)));
+      expect(r.left >= 0 && r.right <= 360, isTrue, reason: '$key at $r');
+    }
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byKey(const ValueKey<String>('pick-report:$r1')));
+    await tester.tap(find.byKey(const ValueKey<String>('pick-report:$r3')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('archive-email')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('format-docx')));
+    await settle(tester);
+    final body = api.emailed.single;
+    expect(body['format'], 'docx');
+    expect((body['documents'] as List), hasLength(2));
+    // Done: the selection ends.
+    expect(find.byKey(const Key('archive-email')), findsNothing);
+  });
+
+  testWidgets('a reading mailed when it was done says so on its page', (tester) async {
+    final mailed = {...fixture('report_passed'), 'mail': {'status': 'sent', 'at': '2026-10-29T01:30:00.000Z'}};
+    await openArchive(tester, finalReport: mailed);
+    await tester.tap(find.text('徐梅 的命盘'));
+    await settle(tester);
+    expect(tester.widget<Text>(find.byKey(const Key('report-mail'))).data, '这份报告已发到你的邮箱');
+  });
+
+  testWidgets('a reading never mailed shows no line about mail', (tester) async {
+    await openArchive(tester);
+    await tester.tap(find.text('徐梅 的命盘'));
+    await settle(tester);
+    // A positive anchor first (rule 43): the reading is open, and the line that would sit over it is absent.
+    expect(find.byKey(const Key('report-menu')), findsOneWidget);
+    expect(find.byKey(const Key('report-mail')), findsNothing);
   });
 }

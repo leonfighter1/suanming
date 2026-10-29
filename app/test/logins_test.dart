@@ -176,4 +176,50 @@ void main() {
     expect(find.text('手机号已解绑'), findsOneWidget);
     expect(subtitle(tester, 'settings-phone'), '未绑定，点此绑定');
   });
+
+  // 测算完成后发到邮箱 (v9.0.0, WP15.4; the owner: 默认为否，改为是后自动发送).
+  SwitchListTile reportsSwitch(WidgetTester tester) => tester.widget<SwitchListTile>(find.byKey(const Key('email-reports')));
+
+  testWidgets('报告: 否 by default; the switch waits for a verified email; the outbox is named', (tester) async {
+    await tester.pumpWidget(testApp(FakeApi(email: 'me@example.com'), locale: zhHans));
+    await settle(tester);
+    await openSettings(tester);
+    await scrollTo(tester, const Key('email-reports'));
+    expect(reportsSwitch(tester).value, isFalse);
+    expect(reportsSwitch(tester).onChanged, isNull);
+    expect(find.text('先在上面验证邮箱，才能开启'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('mail-delivery-notice'))).data,
+      '测试环境：还没有接入邮件服务，邮件写在服务器的 .outbox 文件夹里，不会真的发出。',
+    );
+  });
+
+  testWidgets('报告: with a verified email the switch turns on, and the server keeps it', (tester) async {
+    final api = FakeApi(email: 'me@example.com', emailVerified: true);
+    await tester.pumpWidget(testApp(api, locale: zhHans));
+    await settle(tester);
+    await openSettings(tester);
+    await scrollTo(tester, const Key('email-reports'));
+    expect(find.text('开启后，每次 AI 测算完成都会把报告发到 me@example.com'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('email-reports')));
+    await settle(tester);
+    expect(lastBody(api, '/v1/account/settings'), {'email_reports': true});
+    expect(api.emailReports, isTrue);
+    expect(reportsSwitch(tester).value, isTrue);
+    expect(find.text('每次 AI 测算完成，报告都会发到 me@example.com'), findsOneWidget);
+  });
+
+  testWidgets('removing the email turns 测算完成后发到邮箱 back to 否', (tester) async {
+    final api = FakeApi(email: 'me@example.com', emailVerified: true)..emailReports = true;
+    await tester.pumpWidget(testApp(api, locale: zhHans));
+    await settle(tester);
+    await openSettings(tester);
+    await tester.tap(find.byKey(const Key('remove-email')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('confirm-remove')));
+    await settle(tester);
+    await scrollTo(tester, const Key('email-reports'));
+    expect(reportsSwitch(tester).value, isFalse);
+    expect(reportsSwitch(tester).onChanged, isNull);
+  });
 }

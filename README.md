@@ -12,6 +12,52 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v9.0.0 (2026-10-29): reports by email; stage S15 complete (menu, icon, logins, email)
+
+Stage S15 of the [tech plan](docs/tech-plan.md) is complete, and its summary is there. It covers your whole request:
+the ☰ menu and the icon (v8.1.0), signing in with a username, email or phone (v8.2.0), and now reports by email. A big
+update: pushed. As you asked, this is the framework: no mail or SMS service is connected yet. Choosing them is the next
+step; until then the server writes everything to the `.outbox/` folder instead of sending it.
+
+- **设置 → 报告 → 测算完成后发到邮箱:** 否 by default.
+  - It can be turned on once your email is verified (设置 → 邮箱, with a code).
+  - When on, every reading (八字, 塔罗, 求签, 算卦, 风水, 起名) and every 一生运势报告 is mailed to that email when it
+    is done. The report is in the message itself, and attached as a PDF named as a download is.
+  - A report held for review goes when a reviewer releases it. A failed one never goes.
+  - The mail ends by saying why it came and where to turn it off. It carries the AI label and the disclaimer, as
+    every export does.
+  - A mailed 一生运势报告 has all its text, with the 卦辭 and 爻辭. The 卦图 and tables stay in the app, and the mail
+    says so.
+- **以往记录 → ⋮ → 发到邮箱**, or **选择 → 发邮箱** for several: asks PDF or Word, then mails the files in one message to
+  your verified email. It's the same document as 下载, and goes to your own email only.
+- **The reading page** shows 这份报告已发到你的邮箱, or that it could not be sent. You can send it again from 以往记录.
+- **The 选择 bar** now has four actions, 下载 · 发送 · 发邮箱 · 删除, each an icon over its label, so they fit a phone.
+- **Without a mail service yet:**
+  - 设置 says so under the switch.
+  - Each mail is written to `.outbox/mail/` as an .eml file (open it in Outlook, Thunderbird or Windows Mail to see
+    the report as the reader would, PDF attached), with a .txt beside it.
+  - docs/web-test.md has the steps to try it.
+- **Limits:** a message holds at most 10 records; 20 messages a day per account; a failed mail is noted on the record
+  and not retried on its own.
+- **The whole stage, for users:**
+  - a clean home bar with the ☰ menu;
+  - the app icon and the name 命理大师 on every platform;
+  - sign-in by username, email or bound phone, with codes;
+  - reports by email.
+- Verified:
+  - 15 new server tests:
+    - times in each region's zone;
+    - the reading and 一生运势 documents in 简体 and 繁體;
+    - the HTML (everything escaped) and the text;
+    - the MIME: the subject decodes back, lines within 78, the file name in RFC 2231 pieces;
+    - mailed when done, not when off, a failing provider noted, a held report mailed on release, a 一生运势报告;
+    - 发到邮箱 with two Word files, too many, no verified email, and no mail service (503).
+  - 8 new app tests: the switch (否, waits for a verified email, turns on, back to 否 when the email goes), 发到邮箱
+    without and with a verified email, the select bar at 360 wide, the reading page's mail line, and its absence.
+  - Looked at rendered: a real reading's mail in headless Chrome, the select bar on a 360-wide phone, and 设置 → 报告
+    with the real font.
+  - 571 server tests and 196 app tests pass; harness PASS before the push.
+
 ### v8.2.0 (2026-10-29): sign in with a username, an email or a phone; codes that bind a phone to its owner
 
 The third part of stage S15 (your request: 用户名、邮箱或手机号登录，手机号需要绑定用户本人). A medium update, kept

@@ -181,7 +181,7 @@ class ReportPage extends ConsumerWidget {
                 layers: r.layers!,
                 reportId: r.id,
                 birthplace: place,
-                header: r.chartId == null ? null : ReadingChart(chartId: r.chartId!),
+                header: _withMailNote(r, r.chartId == null ? null : ReadingChart(chartId: r.chartId!)),
                 system: system,
               ),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
@@ -189,6 +189,44 @@ class ReportPage extends ConsumerWidget {
             _ => _Message(key: const ValueKey('failed'), icon: Icons.error_outline, text: l10n.statusFailed),
           },
         ),
+      ),
+    );
+  }
+}
+
+/// 测算完成后发到邮箱 (v9.0.0): over the reading, a line saying it went to the email, or that it could not.
+Widget? _withMailNote(ReportView r, Widget? header) {
+  final status = r.mailStatus;
+  if (status == null) return header;
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [_MailNote(sent: status == 'sent'), ?header],
+  );
+}
+
+class _MailNote extends StatelessWidget {
+  const _MailNote({required this.sent});
+  final bool sent;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final color = sent ? theme.colorScheme.primary : theme.colorScheme.error;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.m),
+      child: Row(
+        children: [
+          Icon(sent ? Icons.mark_email_read_outlined : Icons.mail_outline, size: 18, color: color),
+          const SizedBox(width: Space.s),
+          Expanded(
+            child: Text(
+              sent ? l10n.reportMailed : l10n.reportMailFailed,
+              key: const Key('report-mail'),
+              style: theme.textTheme.bodySmall?.copyWith(color: color),
+            ),
+          ),
+        ],
       ),
     );
   }

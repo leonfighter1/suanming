@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
+import '../data/api_client.dart';
 import '../domain/archive.dart';
 import '../domain/document.dart';
 import '../domain/life_report.dart';
@@ -14,8 +15,8 @@ import 'design.dart';
 import 'keyboard.dart' show SegmentKeys;
 import 'life_report_page.dart';
 import 'report_page.dart';
+import 'settings_page.dart';
 import 'theme.dart';
-import 'widgets/remedy.dart' show compactButtons;
 import 'widgets/tarot_spread.dart';
 
 /// 以往记录 (v8.0.0, the owner): every reading and 一生运势报告, by year and month (newest first) or by person. Each can be
@@ -28,7 +29,7 @@ class HistoryPage extends ConsumerStatefulWidget {
   ConsumerState<HistoryPage> createState() => _HistoryPageState();
 }
 
-enum _Act { pdf, docx, send, file, delete }
+enum _Act { pdf, docx, send, email, file, delete }
 
 class _HistoryPageState extends ConsumerState<HistoryPage> {
   bool _byPerson = false;
@@ -87,6 +88,56 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     });
   }
 
+  /// 发到邮箱 (v9.0.0): the records' documents, PDF or Word as asked, in one mail to the account's verified email.
+  Future<void> _email(List<ArchiveRecord> records) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final user = ref.read(authProvider).value;
+    if (user == null || user.email == null || !user.emailVerified) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.emailFirst),
+          action: SnackBarAction(
+            label: l10n.settings,
+            onPressed: () => navigator.push(MaterialPageRoute<void>(builder: (_) => const SettingsPage())),
+          ),
+        ),
+      );
+      return;
+    }
+    final ready = records.where((r) => r.passed).toList();
+    if (ready.isEmpty) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.archiveNotReady)));
+      return;
+    }
+    final as = await chooseFormat(context);
+    if (as == null || !mounted) return;
+    messenger.showSnackBar(SnackBar(content: Text(l10n.archiveWorking), duration: const Duration(seconds: 2)));
+    setState(() => _busy = true);
+    try {
+      final docs = [for (final r in ready) await recordDocument(ref, l10n, r)];
+      final locale = ref.read(settingsProvider).apiLocaleCode;
+      final sent = await ref.read(apiClientProvider).emailDocuments(docs, as, locale: locale);
+      // The result takes the place of 正在生成.
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(sent.outbox ? l10n.emailedOutbox(sent.sentTo) : l10n.emailedTo(sent.sentTo))));
+      if (_selecting) _stopSelecting();
+    } catch (e) {
+      final text = switch (e) {
+        ApiException(code: 'email_unverified') => l10n.emailFirst,
+        ApiException(status: 429) => l10n.emailTooMany,
+        _ => l10n.emailFailed,
+      };
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(text)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _delete(List<ArchiveRecord> records) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -124,6 +175,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         _Act.pdf => _share([r], format: DocFormat.pdf),
         _Act.docx => _share([r], format: DocFormat.docx),
         _Act.send => _share([r]),
+        _Act.email => _email([r]),
         _Act.file => _file(r),
         _Act.delete => _delete([r]),
       };
@@ -151,6 +203,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                 PopupMenuItem(value: _Act.pdf, child: Text(l10n.archiveDownloadPdf)),
                 PopupMenuItem(value: _Act.docx, child: Text(l10n.archiveDownloadWord)),
                 PopupMenuItem(value: _Act.send, child: Text(l10n.archiveSend)),
+                PopupMenuItem(value: _Act.email, child: Text(l10n.archiveEmail)),
                 PopupMenuItem(value: _Act.file, child: Text(l10n.archiveFile)),
                 PopupMenuItem(value: _Act.delete, child: Text(l10n.archiveDelete, style: TextStyle(color: scheme.error))),
               ],
@@ -247,32 +300,37 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               child: SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.s),
-                  child: compactButtons(
-                    context,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton.icon(
-                          key: const Key('archive-download'),
-                          onPressed: chosen.isEmpty || _busy ? null : () => _share(chosen),
-                          icon: const Icon(Icons.download_outlined),
-                          label: Text(l10n.download),
-                        ),
-                        TextButton.icon(
-                          key: const Key('archive-send'),
-                          onPressed: chosen.isEmpty || _busy ? null : () => _share(chosen),
-                          icon: const Icon(Icons.send_outlined),
-                          label: Text(l10n.archiveSend),
-                        ),
-                        TextButton.icon(
-                          key: const Key('archive-delete'),
-                          onPressed: chosen.isEmpty || _busy ? null : () => _delete(chosen),
-                          icon: Icon(Icons.delete_outline, color: chosen.isEmpty ? null : scheme.error),
-                          label: Text(l10n.archiveDelete, style: TextStyle(color: chosen.isEmpty ? null : scheme.error)),
-                        ),
-                      ],
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.xs),
+                  // Four actions since 发邮箱 (v9.0.0): four equal slots, each an icon over its label, so they fit a
+                  // 360-wide phone (side by side they overflowed it).
+                  child: Row(
+                    children: [
+                      _BarAction(
+                        key: const Key('archive-download'),
+                        icon: Icons.download_outlined,
+                        label: l10n.download,
+                        onPressed: chosen.isEmpty || _busy ? null : () => _share(chosen),
+                      ),
+                      _BarAction(
+                        key: const Key('archive-send'),
+                        icon: Icons.send_outlined,
+                        label: l10n.archiveSend,
+                        onPressed: chosen.isEmpty || _busy ? null : () => _share(chosen),
+                      ),
+                      _BarAction(
+                        key: const Key('archive-email'),
+                        icon: Icons.mail_outline,
+                        label: l10n.archiveEmailShort,
+                        onPressed: chosen.isEmpty || _busy ? null : () => _email(chosen),
+                      ),
+                      _BarAction(
+                        key: const Key('archive-delete'),
+                        icon: Icons.delete_outline,
+                        label: l10n.archiveDelete,
+                        color: chosen.isEmpty ? null : scheme.error,
+                        onPressed: chosen.isEmpty || _busy ? null : () => _delete(chosen),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -321,6 +379,36 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
 }
 
 /// A 一生运势报告 in the archive.
+/// One action of the 选择 bar: an icon over its label, a quarter of the bar wide. A TextButton, so Tab reaches it
+/// and Enter presses it.
+class _BarAction extends StatelessWidget {
+  const _BarAction({super.key, required this.icon, required this.label, this.onPressed, this.color});
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, 52),
+            padding: const EdgeInsets.symmetric(horizontal: Space.xs, vertical: Space.xs),
+            foregroundColor: color,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon),
+              const SizedBox(height: 2),
+              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ),
+      );
+}
+
 class _LifeTile extends ConsumerWidget {
   const _LifeTile({required this.record, required this.trailing, this.onTap, this.onLongPress});
   final ArchiveRecord record;

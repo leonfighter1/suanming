@@ -3768,6 +3768,102 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'服务器还没有接入短信或邮件服务'**
   String get deliveryOff;
+
+  /// No description provided for @settingsReportsGroup.
+  ///
+  /// In zh, this message translates to:
+  /// **'报告'**
+  String get settingsReportsGroup;
+
+  /// No description provided for @emailReports.
+  ///
+  /// In zh, this message translates to:
+  /// **'测算完成后发到邮箱'**
+  String get emailReports;
+
+  /// No description provided for @emailReportsOn.
+  ///
+  /// In zh, this message translates to:
+  /// **'每次 AI 测算完成，报告都会发到 {email}'**
+  String emailReportsOn(String email);
+
+  /// No description provided for @emailReportsOff.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后，每次 AI 测算完成都会把报告发到 {email}'**
+  String emailReportsOff(String email);
+
+  /// No description provided for @emailReportsNeedsEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'先在上面验证邮箱，才能开启'**
+  String get emailReportsNeedsEmail;
+
+  /// No description provided for @mailOutboxNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试环境：还没有接入邮件服务，邮件写在服务器的 .outbox 文件夹里，不会真的发出。'**
+  String get mailOutboxNotice;
+
+  /// No description provided for @mailOffNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务器还没有接入邮件服务，暂时不会发出。'**
+  String get mailOffNotice;
+
+  /// No description provided for @archiveEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'发到邮箱'**
+  String get archiveEmail;
+
+  /// No description provided for @archiveEmailShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'发邮箱'**
+  String get archiveEmailShort;
+
+  /// No description provided for @emailFirst.
+  ///
+  /// In zh, this message translates to:
+  /// **'先在“设置”里验证邮箱，才能发到邮箱'**
+  String get emailFirst;
+
+  /// No description provided for @emailedTo.
+  ///
+  /// In zh, this message translates to:
+  /// **'已发到 {to}'**
+  String emailedTo(String to);
+
+  /// No description provided for @emailedOutbox.
+  ///
+  /// In zh, this message translates to:
+  /// **'已发到 {to}（测试环境：写在服务器的 .outbox 文件夹里）'**
+  String emailedOutbox(String to);
+
+  /// No description provided for @emailFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'没能发出，请稍后再试'**
+  String get emailFailed;
+
+  /// No description provided for @emailTooMany.
+  ///
+  /// In zh, this message translates to:
+  /// **'今天发得太多了，明天再试'**
+  String get emailTooMany;
+
+  /// No description provided for @reportMailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'这份报告已发到你的邮箱'**
+  String get reportMailed;
+
+  /// No description provided for @reportMailFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'这份报告没能发到邮箱，可以在“以往记录”里再发一次'**
+  String get reportMailFailed;
 }
 
 class _AppLocalizationsDelegate
