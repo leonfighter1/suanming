@@ -31,9 +31,12 @@ export function narrativeSchema(topics: readonly Topic[]) {
               items: {
                 type: "object",
                 additionalProperties: false,
+                // term and example (v6.2.0) are asked for in the prompts but optional, as summary is.
                 required: ["text", "source_level", "fact_refs"],
                 properties: {
+                  term: str,
                   text: str,
+                  example: str,
                   source_level: { type: "string", enum: [...SOURCE_LEVELS] },
                   fact_refs: { type: "array", items: str },
                 },

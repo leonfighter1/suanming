@@ -16,6 +16,7 @@ CCPA, UK GDPR, EU GDPR).
 | 起名 names (surname, length, elements, the 八字 chart's digest, candidates; v4.5.0)               | yes                                                                                                              | the surname, as typed; no birth data: only the elements the names serve and the 八字 chart's digest | 24 months                                                                                                                            |
 | 算卦 cast (mode, the cast time and zone, coins and lines, hexagrams; layout and draw id; v5.3.0)  | yes                                                                                                              | no PII: the time is of the toss, not a birth; the question goes with the report, as for tarot       | 24 months                                                                                                                            |
 | The app language picked (v5.1.0)                                                                  | on the device only, in secure storage                                                                            | no PII: one of zh-Hans, zh-Hant, en; never sent to the server as a setting                          | until the app (or the browser's site data) is removed                                                                                |
+| Whose birth chart it is: the person's name and birthplace label (v6.2.0)                          | yes, with the chart record (owner, 2026-10-28)                                                                   | sealed with the chart under the user DEK; never in ChartFact; never sent to the AI provider         | until account deletion (in memory without the database store)                                                                        |
 | Life context (name if allowed, residence, marital status, children, occupation, family, question) | on the device with the profile; on the server with the report it was sent for (for that report's 破除運勢 plans) | sent to the AI provider inside the prompt, marked as user information; never written into ChartFact | until account deletion (server copy: with the report, sealed under the user DEK in the database store, v4.1.0; in memory without it) |
 | Email                                                                                             | yes                                                                                                              | encrypted, plus an HMAC lookup column                                                               | until account deletion                                                                                                               |
 | Logs                                                                                              | yes                                                                                                              | no PII by rule (security-baseline.md)                                                               | 30 days hot, 1 year cold                                                                                                             |
@@ -27,6 +28,20 @@ Names and saved birth details ("profiles") live **only on the device**, encrypte
 (Keychain/Keystore via flutter_secure_storage), keyed by account and deleted with
 the account. The server receives birth fields only inside a single chart request
 and never receives names. History labels (chart → person name) are device-only too.
+
+**Changed 2026-10-28 (owner, v6.2.0).** The owner reported as a bug that stored readings showed no name or
+birthplace when signed in elsewhere. Browser storage belongs to one origin, and `npm run public` gives the app a new
+one on every run. So a chart now carries its person, the name and the birthplace label the app shows, as
+`person` in `POST /v1/charts`.
+
+- The server keeps it on the chart record. In the database store it is sealed with the chart under the user DEK
+  (`test/pg-store.test.ts` checks that neither appears in the clear).
+- It is never written into ChartFact and never sent to the AI provider. Only a reading's own life context (name if
+  allowed) reaches the model, as before.
+- It is returned only to the owner: with the chart, in history and with 一生运势报告.
+- It is deleted with the account.
+- Saved profiles (the birth details kept for re-use) stay on the device, as before.
+- Charts made before v6.2.0 keep their names only on the device that labelled them.
 
 ## Product consequence
 

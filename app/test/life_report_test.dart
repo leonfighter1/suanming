@@ -93,4 +93,46 @@ void main() {
     }
     expect(find.byKey(const Key('life-ai-label')), findsOneWidget);
   });
+
+  // The owner's bug report (2026-10-28): signed in on another device, or after `npm run public` gave the app a new
+  // address, history and the reports had no name and no birthplace: both lived only in the browser that made the
+  // chart. Since v6.2.0 the server keeps them with the chart.
+  testWidgets('a device that never labelled the chart names the person and birthplace the server keeps', (tester) async {
+    tester.view.physicalSize = const Size(1000, 2600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final api = FakeApi(pendingPolls: 0)..person = {'name': '吴勇', 'birthplace': '中国 · 江苏 · 靖江市'};
+    await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('open-history')));
+    await settle(tester);
+    expect(find.text('吴勇 一生运势报告'), findsOneWidget);
+    expect(find.text('吴勇 的命盘'), findsOneWidget);
+
+    await tester.tap(find.text('吴勇 一生运势报告'));
+    await settle(tester);
+    await settle(tester);
+    expect(find.text('吴勇 一生运势报告'), findsWidgets); // the title and the cover
+    expect(find.text('中国 · 江苏 · 靖江市'), findsOneWidget);
+
+    Navigator.of(tester.element(find.text('中国 · 江苏 · 靖江市'))).pop();
+    await settle(tester);
+    await tester.tap(find.text('吴勇 的命盘'));
+    await settle(tester);
+    expect(find.text('吴勇 的命盘'), findsOneWidget);
+    expect(find.text('出生地：中国 · 江苏 · 靖江市'), findsOneWidget); // first in the facts card
+  });
+
+  testWidgets('a chart made before v6.2.0, never labelled here, keeps the plain titles', (tester) async {
+    tester.view.physicalSize = const Size(1000, 2600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0), profiles: InMemoryProfileStore(), locale: zhHans));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('open-history')));
+    await settle(tester);
+    expect(find.text('一生运势报告'), findsOneWidget);
+    expect(find.text('八字排盘'), findsWidgets);
+    expect(find.textContaining('的命盘'), findsNothing);
+  });
 }

@@ -26,7 +26,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：佈局",
             "text": "（示範）這個房間的佈局可以從主要家具的位置看起，先讓坐臥的地方背後有靠。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "simplified_rule",
             "fact_refs": [
               "/principles/0"
@@ -39,7 +41,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：光線與動線",
             "text": "（示範）讓光線與空氣進得來、走道不被擋住，房間會更舒適。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "simplified_rule",
             "fact_refs": [
               "/principles/1"
@@ -52,7 +56,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：建議",
             "text": "（示範）可以先從最容易的一步做起，例如整理門口或調整燈光。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "simplified_rule",
             "fact_refs": [
               "/principles/2"
@@ -77,7 +83,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_fengshui@1,action_fengshui@1,guard@2",
+    "prompt_version": "narrative_fengshui@2,action_fengshui@1,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

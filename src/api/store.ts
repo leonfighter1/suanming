@@ -7,6 +7,9 @@ import type { LifeReport, Remedy, Report, UserContext } from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
 import type { AgentName, Topic } from "../ai/types.js";
+import type { ChartPerson } from "../service/charts.js";
+
+export type { ChartPerson };
 
 export interface ChartRecord {
   id: string;
@@ -15,6 +18,12 @@ export interface ChartRecord {
   created_at: string;
   /** 每日一牌: the date it is the card of (YYYY-MM-DD). Not listed among the charts. */
   daily?: string;
+  /**
+   * Whose birth chart it is (v6.2.0, the owner's bug report 2026-10-28): the name and the birthplace as the app
+   * labels them, so history and reports show them on every device and sign-in. Not part of ChartFact and never
+   * sent to a model; sealed with the chart in the database store, and deleted with the account.
+   */
+  person?: ChartPerson;
 }
 
 export type ReportRecordStatus = "pending" | "passed" | "blocked" | "manual_review" | "failed";

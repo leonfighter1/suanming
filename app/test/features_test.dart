@@ -43,7 +43,11 @@ void main() {
     await settle(tester);
     final body = jsonDecode(api.requests.lastWhere((r) => r.url.path == '/v1/charts').body) as Map;
     expect(body['local'], '1990-03-15T14:30');
-    expect(body.containsKey('name'), isFalse, reason: 'names never leave the device');
+    // Since v6.2.0 (the owner's bug report) whose chart it is goes with it, as `person`, beside the birth fields
+    // and never among them. The sample profile's place is the legacy city 'hk': no country or region names, so its
+    // label is the city alone.
+    expect(body['person'], {'name': '测试用户', 'birthplace': '香港'});
+    expect(body.containsKey('name'), isFalse);
 
     expect(find.text('测试用户 的命盤'), findsWidgets);
     await scrollTo(tester, const Key('lunar-card'));
@@ -209,5 +213,19 @@ void main() {
     for (final s in r.layers!.interpretation) {
       expect(md, contains(s.paragraphs.first.text));
     }
+  });
+
+  test('export keeps each paragraph as on screen: the term, the commentary, then the example (v6.2.0)', () {
+    final r = ReportView.fromJson(fixture('report_passed'));
+    final p = r.layers!.interpretation.first.paragraphs.first;
+    final md = exportReportMarkdown(
+      report: r,
+      title: 'AI 解讀',
+      subtitle: '',
+      topicLabel: (t) => t,
+      horizonLabel: (h) => h,
+      headings: {'facts': '事實', 'interpretation': '解讀', 'actions': '行動建議'},
+    );
+    expect(md, contains('**${p.term}**\n\n${p.text}\n\n> ${p.example}\n'));
   });
 }

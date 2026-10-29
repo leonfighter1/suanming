@@ -67,6 +67,40 @@ export function num(v: unknown, name: string, min: number, max: number): number 
 
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Whose birth chart it is: the name and the birthplace label the app shows (v6.2.0). */
+export interface ChartPerson {
+  name?: string;
+  birthplace?: string;
+}
+
+/** The birth charts a person label belongs to; any other chart refuses one. */
+export const PERSON_SYSTEMS: readonly string[] = ["bazi", "astrology"];
+
+/**
+ * A chart request's optional `person` (v6.2.0): trimmed, cut to 40 and 120 characters, and left out when empty.
+ * Kept with the chart record, never in its ChartFact.
+ */
+export function parsePerson(raw: unknown, system: unknown): ChartPerson | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw !== "object" || Array.isArray(raw))
+    throw new InputError("person must be an object");
+  if (!PERSON_SYSTEMS.includes(String(system))) {
+    throw new InputError(`person is for birth charts: ${PERSON_SYSTEMS.join(", ")}`);
+  }
+  const p = raw as Record<string, unknown>;
+  const field = (key: "name" | "birthplace", max: number) => {
+    const v = p[key];
+    if (v === undefined || v === null) return undefined;
+    if (typeof v !== "string") throw new InputError(`person.${key} must be a string`);
+    return [...v.trim()].slice(0, max).join("") || undefined;
+  };
+  const name = field("name", 40);
+  const birthplace = field("birthplace", 120);
+  return name || birthplace
+    ? { ...(name && { name }), ...(birthplace && { birthplace }) }
+    : undefined;
+}
+
 /** Engine errors caused by user input (bad format, DST gap, unknown zone) become InputError. */
 function asInputError<T>(fn: () => T): T {
   try {

@@ -53,8 +53,29 @@
 49. Before laying out by a Material widget's size (a chip, a button), measure it in a test at the sizes that matter: its outline, density and focus side can add to label plus padding. Then pin the layout in a test at those sizes, focused too.
 50. A CustomPainter that draws text takes its font from the page: pass DefaultTextStyle.of(context).style (or the theme text style) into the painter and use its fontFamily and fallback. Look at a render with the real font loaded, not only the test font, whose boxes hide this.
 51. A test opens a method from the home page through openEntry (scroll, then tap), never a bare tap on entry-*, so a change in the home order or grouping cannot leave an entry off the first screen. Run every test that taps a moved entry before calling a home change done.
+52. Anything a stored record must show on every device or after a restart (a name, a label, a choice) is kept with the record on the server, sealed like it. Browser storage is per origin, and npm run public changes the origin every run: keep only per-device conveniences there.
+53. Give every child an AnimatedSwitcher can show its own key, whenever two of them can follow each other: two unkeyed children at once are duplicate keys. Test a page along every way users reach it (from history as well as right after making it).
+54. Run npx prettier --check . as the very last step before the harness, after the final edit to any Markdown, YAML or TypeScript file; a check made before a later edit proves nothing about it.
 
 ## Log
+
+### 2026-10-28: A doc edited after the format check
+- **Symptom:** The v6.2.0 harness failed at lint: docs/web-test.md was not Prettier-clean.
+- **Root cause:** I ran prettier --check on the changed files, then added a section to docs/web-test.md and started the harness without checking again.
+- **Fix:** prettier --write docs/web-test.md (it only added a blank line in a list), then the harness again.
+- **Rule:** Run npx prettier --check . as the very last step before the harness, after the final edit to any Markdown, YAML or TypeScript file; a check made before a later edit proves nothing about it. (Rule 54)
+
+### 2026-10-28: Unkeyed states in an AnimatedSwitcher
+- **Symptom:** Opening a 一生运势 report from history threw Duplicate keys found in the page's AnimatedSwitcher (debug), found by the first test that took that path (v6.2.0).
+- **Root cause:** From history the page goes waiting, then loading the chart, then the report; the waiting and loading states had no key, so the switcher held two unkeyed children at once. The tests only opened a report right after making it, with the chart in hand.
+- **Fix:** Every state the switcher can show has its own ValueKey (waiting, loading, failed, held, error).
+- **Rule:** Give every child an AnimatedSwitcher can show its own key, whenever two of them can follow each other: two unkeyed children at once are duplicate keys. Test a page along every way users reach it (from history as well as right after making it). (Rule 53)
+
+### 2026-10-28: Names and birthplaces lived only in the browser
+- **Symptom:** Signed in elsewhere, or after npm run public gave the app a new address, history and the 一生运势 report showed no name or birthplace for readings the database still kept (owner bug report, v6.2.0).
+- **Root cause:** The person label was saved only in the device's profile book. Browser storage belongs to one origin, and a quick tunnel's origin changes on every run, so each run started with an empty book.
+- **Fix:** The app sends the person (name, birthplace label) with the chart; the server keeps it on the chart record, sealed in the database store, out of ChartFact and away from the model, and returns it with charts, history and life reports; the app falls back to it.
+- **Rule:** Anything a stored record must show on every device or after a restart (a name, a label, a choice) is kept with the record on the server, sealed like it. Browser storage is per origin, and npm run public changes the origin every run: keep only per-device conveniences there. (Rule 52)
 
 ### 2026-10-28: Grouping the home page broke the tests that tapped 塔羅 unscrolled
 - **Symptom:** After 塔羅 moved into the 西方 group below 東方, five app tests failed: taps and finds on entry-tarot at phone sizes found nothing (the entry was past the list cache).

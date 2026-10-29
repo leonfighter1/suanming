@@ -202,7 +202,7 @@ describe("a 起名 reading and the API", () => {
     );
     expect(report.status).toBe("passed");
     expect(report.topics).toEqual(["naming_candidates", "naming_advice"]);
-    expect(report.ai_disclosure.prompt_version).toBe("narrative_naming@1,action_naming@1,guard@2");
+    expect(report.ai_disclosure.prompt_version).toBe("narrative_naming@2,action_naming@1,guard@2");
     const first = (naming.facts as { candidates: Candidate[] }).candidates[0]!;
     expect(mock.calls.find((c) => c.agent === "narrative")!.user).toContain(
       `張${first.given["zh-Hant"]}`,

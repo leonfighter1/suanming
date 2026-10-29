@@ -12,6 +12,59 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v6.2.0 (2026-10-28): readings in three parts (术语 → 评论 → 例子), names kept with the chart, three accounts
+
+The first part of stage S13 of the [tech plan](docs/tech-plan.md), plus your bug report and your three new
+accounts. A medium update, pushed as you said I could. 追问 comes next, in v7.0.0.
+
+- **Every AI reading now comes in three parts** (you: 术语在前，评论在后，评论要尽量详细，举个例子).
+  - **The term first, in bold:** the facts the paragraph rests on, said the tradition's way. Examples:
+    「日主甲木，生于寅月（得令）」, 「第 3 张·根基：宝剑七（正位）」, a quoted 爻辞, 「床头靠墙」.
+  - **Then the commentary:** what it means for you, in plain words and in detail. The conclusion comes first, then
+    why.
+  - **Then an example, in a tinted box:** one everyday scene. For a kind nature: 「比如同事临时找你帮忙改方案，你嘴
+    上说“没事”，其实已经开始帮他想办法了」.
+  - It covers every method: 八字, 塔罗, 求签, 算卦, 风水 and 起名 (still off). In the 一生运势报告, each text opens
+    with its basis, then the commentary and a 比如 example.
+  - Copy and download keep the three parts. Readings made before show as they were.
+  - Each method got its own new prompt (narrative_bazi@7 … narrative_liuyao@2, life_methods@3, life_topics@3).
+  - **To see real readings in the new form, switch the real model on** in `.env` (`IS_AI_MOCK=FALSE`,
+    `IS_AI_MODEL=TRUE`). While the mock answers, the three parts are its （示范） text. Only real readings show how
+    well the model follows the new instructions, so please read a few.
+- **Fixed: names and birthplaces missing from stored readings** (your bug report).
+  - **Cause:** the name and the birthplace were kept only in the browser that made the chart. A browser keeps such
+    data per web address, and `npm run public` gives the app a new address on every run. Another device or browser
+    starts empty too. So the database kept the readings, but not whose they were.
+  - **Now:** the app sends them with the chart, and the server keeps them on the chart record.
+    - With `MINGLI_STORE` on, they are sealed with the chart in the database.
+    - They are never in the chart's facts and never sent to the AI.
+  - History (「xxx 的命盘」, 「xxx 一生运势报告」), the reading's 出生地 line and the 一生运势报告 header now show them
+    on any device, after any restart.
+  - **Readings made before this update:** the server never had their names, so only the browser that made them can
+    still show them. Readings from now on keep them everywhere.
+  - This changes the 2026-10-26 rule that names never reach the server. docs/data-retention.md says what is kept
+    now. Saved profiles (birth details for re-use) still stay on the device.
+  - **Also fixed:** a 一生运势报告 opened from history could hit a "duplicate keys" error while its chart was
+    loading.
+- **Three more accounts:** `qianli` / `qianli`, `wuyong` / `wuyong` and `leonfighter` / `leonfighter`.
+  - Each password is its login, as with admin and xumei. I read 「密码都用一样的」 that way; say if you meant one
+    shared password.
+  - They are created at the next API start (`npm run api` or `npm run public`), in region HK. With `MINGLI_STORE`
+    on, they are kept.
+  - They exist in public mode too: anyone who guesses one can use it, within the daily AI caps.
+- Verified:
+  - 8 new server tests:
+    - the three parts are kept, normalised, scanned and checked;
+    - the person is kept with the chart and returned with history and the 一生运势报告;
+    - the person is never sent to the model and never stored in the clear;
+    - the three accounts sign in.
+  - New app tests:
+    - the three parts on screen, in order, and in the export;
+    - an older paragraph shown as before;
+    - the 八字 form sends the person;
+    - a device with no labels shows the name and birthplace in history and the 一生运势报告.
+  - All 495 server tests and 156 app tests (151 → 156) pass; harness PASS.
+
 ### v6.1.0 (2026-10-28): your three updates: coins that turn over, tarot spreads three to a row, 东方 and 西方
 
 Stage S12 of the [tech plan](docs/tech-plan.md), the three things you asked for after v6.0.0. A medium update,

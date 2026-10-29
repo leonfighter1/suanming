@@ -22,21 +22,27 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：逐張解讀",
             "text": "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/cards/0"
             ]
           },
           {
+            "term": "（示範）本段依據：逐張解讀",
             "text": "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/cards/1"
             ]
           },
           {
+            "term": "（示範）本段依據：逐張解讀",
             "text": "（示範）這張牌在這個位置上，傳統上被看作與問題相關的一個面向，可作為自我觀察的參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/cards/2"
@@ -49,7 +55,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：綜合解讀",
             "text": "（示範）把幾張牌連起來看，傳統上可以讀成一段變化的過程，供你參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/cards/0"
@@ -62,7 +70,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：建議",
             "text": "（示範）牌面傳統上提示可以先放慢腳步，整理想法後再做決定。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/cards/0"
@@ -87,7 +97,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_tarot@3,action_tarot@2,guard@2",
+    "prompt_version": "narrative_tarot@4,action_tarot@2,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

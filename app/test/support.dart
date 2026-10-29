@@ -100,6 +100,10 @@ class FakeApi {
 
   /// 破除運勢 plans bought so far.
   final remedies = <Map<String, dynamic>>[];
+
+  /// Whose chart the history's 八字 reading and 一生运势报告 are of, as the server keeps it (v6.2.0); null = none
+  /// (a chart made before v6.2.0).
+  Map<String, dynamic>? person;
   int _tokenSerial = 0;
   String access = 'access-0';
 
@@ -199,6 +203,7 @@ class FakeApi {
             'locale': 'zh-Hant',
             'topics': ['wuxing'],
             'chart': {'system': 'bazi', 'four_pillars': '庚午 己卯 己卯 辛未', 'civil_local': '1990-03-15T14:30:00'},
+            'person': ?person,
           },
         ],
       }, 200);
@@ -268,9 +273,11 @@ class FakeApi {
       return _json({...fixture('life_passed'), 'status': 'pending', 'facts': null, 'layers': null}, 202);
     }
     if (req.method == 'GET' && path == '/v1/life-reports') {
-      return _json({'items': [{...fixture('life_passed'), 'facts': null, 'layers': null}]}, 200);
+      return _json({'items': [{...fixture('life_passed'), 'facts': null, 'layers': null, 'person': ?person}]}, 200);
     }
-    if (req.method == 'GET' && path.startsWith('/v1/life-reports/')) return _json(fixture('life_passed'), 200);
+    if (req.method == 'GET' && path.startsWith('/v1/life-reports/')) {
+      return _json({...fixture('life_passed'), 'person': ?person}, 200);
+    }
     if (req.method == 'GET' && path == '/v1/charts/66666666-6666-4666-8666-666666666666') {
       return _json(fixture('chart_life'), 200);
     }

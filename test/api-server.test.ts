@@ -84,7 +84,7 @@ describe("v1 API", () => {
       "wuxing",
       "health",
     ]);
-    expect(view.ai_disclosure.prompt_version).toBe("narrative_bazi@6,action_bazi@4,guard@2");
+    expect(view.ai_disclosure.prompt_version).toBe("narrative_bazi@7,action_bazi@4,guard@2");
     // internal details never reach the client
     for (const k of ["draft", "agents", "compliance"]) expect(view).not.toHaveProperty(k);
   });
@@ -214,6 +214,54 @@ describe("history and live progress", () => {
     expect(again.chart_fact.system).toBe("bazi");
     expect((await get(`/v1/charts/${c1.chart_id}`, H("HK", "someone-else"))).status).toBe(404);
     expect((await (await get("/v1/reports", H("HK", "someone-else"))).json()).items).toEqual([]);
+  });
+
+  it("keeps whose chart it is, for history and reports on every device (v6.2.0)", async () => {
+    // The owner's bug report (2026-10-28): signed in elsewhere, 「xxx 的命盘」 and 「xxx 一生运势报告」 had no name
+    // and no birthplace, because both stayed in the browser that made the chart.
+    const h = H("HK", "person-owner");
+    const person = { name: "徐梅", birthplace: "中国 · 上海市 · 上海" };
+    const made = await post("/v1/charts", { ...bazi, person }, h);
+    expect(made.status).toBe(201);
+    const { chart_id, chart_fact, person: echoed } = await made.json();
+    expect(echoed).toEqual(person);
+    expect(JSON.stringify(chart_fact)).not.toContain("徐梅"); // never in ChartFact
+
+    expect((await (await get(`/v1/charts/${chart_id}`, h)).json()).person).toEqual(person);
+    expect((await (await get("/v1/charts", h)).json()).items[0].person).toEqual(person);
+
+    const calls = mock.calls.length;
+    await post("/v1/reports", { chart_id, locale: "zh-Hans" }, h);
+    const life = await (await post("/v1/life-reports", { chart_id, locale: "zh-Hans" }, h)).json();
+    await api.drain();
+    expect((await (await get("/v1/reports", h)).json()).items[0].person).toEqual(person);
+    expect((await (await get("/v1/life-reports", h)).json()).items[0].person).toEqual(person);
+    const opened = await (await get(`/v1/life-reports/${life.life_report_id}`, h)).json();
+    expect(opened).toMatchObject({ status: "passed", person });
+    // The model never gets it: the name and birthplace are the app's labels, not chart facts.
+    const sent = mock.calls.slice(calls).map((c) => c.user);
+    expect(sent.length).toBeGreaterThan(0);
+    expect(sent.filter((u) => u.includes("徐梅") || u.includes("上海市"))).toEqual([]);
+    expect((await get(`/v1/charts/${chart_id}`, H("HK", "someone-else"))).status).toBe(404);
+  });
+
+  it("checks a chart's person: text only, cut to length, birth charts only", async () => {
+    const h = H("HK", "person-checks");
+    const long = await (
+      await post("/v1/charts", { ...bazi, person: { name: "名".repeat(50), birthplace: " " } }, h)
+    ).json();
+    // 40 characters kept of the 50; an empty birthplace is left out.
+    expect(long.person).toEqual({ name: "名".repeat(40) });
+    const none = await (await post("/v1/charts", { ...bazi, person: { name: "  " } }, h)).json();
+    expect(none).not.toHaveProperty("person");
+    expect((await post("/v1/charts", { ...bazi, person: { name: 7 } }, h)).status).toBe(400);
+    expect((await post("/v1/charts", { ...bazi, person: "徐梅" }, h)).status).toBe(400);
+    const tarot = await post(
+      "/v1/charts",
+      { system: "tarot", spread: "single", person: { name: "徐梅" } },
+      h,
+    );
+    expect(tarot.status).toBe(400);
   });
 
   it("a pending report exposes the stage the pipeline is in", async () => {

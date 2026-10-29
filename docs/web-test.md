@@ -28,7 +28,8 @@ npm run api        # allows http://localhost and https://leonfighter1.github.io
 ```
 
 Then open the Pages URL and sign in with a dev account (`admin`/`admin`,
-`xumei`/`xumei`, `test@mingli.local`/`Test-12345678`). The API also answers Chrome's
+`xumei`/`xumei`, `qianli`/`qianli`, `wuyong`/`wuyong`, `leonfighter`/`leonfighter`,
+`test@mingli.local`/`Test-12345678`). The API also answers Chrome's
 Private Network Access preflight, so the https page may call the local http API.
 Safari blocks this mixed content; for phones see below.
 To allow other origins: `MINGLI_CORS_ORIGINS=https://a.example,https://b.example npm run api`.
@@ -67,8 +68,10 @@ Public mode protections:
   This bounds DeepSeek spend;
 - data is in memory: a restart clears accounts that testers registered, and their readings.
 
-The dev accounts (`admin`/`admin`, `xumei`/`xumei`) exist in public mode too. Anyone who
-knows them can use them, within the AI caps.
+The dev accounts (`admin`/`admin`, `xumei`/`xumei`, and since v6.2.0 `qianli`/`qianli`, `wuyong`/`wuyong`
+and `leonfighter`/`leonfighter`) exist in public mode too: each password is its login. Anyone who knows or
+guesses them can use them, within the AI caps. They are created at every API start; with `MINGLI_STORE` on, they
+are kept, with their readings.
 
 ## Phone on the same Wi-Fi (no hosting needed)
 
@@ -213,6 +216,22 @@ line in every model call, and the `id` rule group records any hit.
 - 算卦 is offered everywhere, after 求籤 in the home order. History names a reading by its hexagram (「算卦 · 天雷無妄」).
 - Since v6.1.0 the home page has two groups: 東方 (八字, 求籤, 算卦, 風水, in the region's order) and 西方 (塔羅).
   On a phone, 塔羅's spread choices sit three to a row.
+
+## Readings in three parts, and whose chart it is (v6.2.0)
+
+- Every AI paragraph shows, in order:
+  - the term in bold (the facts it rests on, said the tradition's way);
+  - the commentary in plain words;
+  - an everyday example in a tinted box.
+
+  With `IS_AI_MOCK=TRUE` all three are the mock's （示範） text. Switch the real model on to read real ones.
+
+- A 八字 chart now carries its person's name and birthplace label to the server. History (「xxx 的命盘」,
+  「xxx 一生运势报告」), the reading's 出生地 line and the 一生运势报告 header show them on any device, also after
+  `npm run public` starts with a new address.
+  - Charts made before v6.2.0 keep their names only in the browser that made them.
+- To check: sign in, make a 八字 reading, then open the page in a private window (or from another device) and sign
+  in again. History still names the person.
 
 ## Cache
 

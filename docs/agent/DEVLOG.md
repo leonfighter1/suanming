@@ -2,6 +2,37 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (aj): S13 begun (WP13.1, 术语 → 评论 → 例子), the owner's bug report, three accounts; release v6.2.0
+
+- **Owner request:** 追问 on every method, grounded in the reading and what the 卦象 say (「不能胡编乱造」), placed
+  where it can't be missed; and readings less 笼统, with fewer terms: 「术语在前，评论在后，评论要尽量详细……举个例子」.
+  - Rule 34: no earlier owner decision on either. Planned as S13 in the tech plan: WP13.1 here (v6.2.0), and 追问 as
+    WP13.2–13.3 (v7.0.0).
+- WP13.1:
+  - reading paragraphs gain `term` and `example` (additive; optional in the schema as `summary` is, so a missing one
+    costs no regeneration);
+  - each method has a new reading prompt with its own term and example (`explained()` in prompts.ts, rule 8):
+    narrative_bazi@7, narrative_tarot@4, narrative_astrology@2, narrative_qiuqian@2, narrative_fengshui@2,
+    narrative_naming@2, narrative_liuyao@2; life_methods@3 and life_topics@3 put the basis first inside each text;
+  - both fields are normalised and scanned (`paragraphTexts`), and the faithfulness checks read them;
+  - the mock writes all three. The app's `ReadingParagraph` shows term → text → example; export keeps them.
+  - The prompts are untried on the real model: `IS_AI_MOCK` is the owner's switch.
+- **Owner bug report:** signed in elsewhere, 「xxx 一生运势报告」 and 「xxx 的命盘」 had no name and no birthplace, and
+  neither did the reports.
+  - Cause: both lived only in the device's profile book. Browser storage is per origin, and `npm run public` changes
+    the origin every run, so every run started empty while the database kept the readings (rule 52).
+  - Fix: `person {name, birthplace}` goes with `POST /v1/charts` and is kept on the chart record. It is sealed in the
+    database store, never in ChartFact, never sent to a model, and returned with charts, history and life reports.
+    The app falls back to it.
+  - This reverses the 2026-10-26 "names never reach the server" rule at the owner's request: docs/data-retention.md
+    is updated. Old charts keep their names only on the device that labelled them.
+  - Found on the way: a 一生运势报告 opened from history threw "Duplicate keys" (two unkeyed states in its
+    AnimatedSwitcher). Every state now has its own key (rule 53).
+- **Owner request:** three more accounts, qianli, wuyong and leonfighter, each with its login as its password (as
+  admin and xumei; 「密码都用一样的」 read that way). Seeded at every API start, region HK.
+- Tests: server 487 → 495; app: the three parts on screen and in the export, an old paragraph, and the person in
+  history and the 一生运势报告 from a device with no labels.
+
 ## 2026-10-28 (ai): S12, the owner's three UI requests; release v6.1.0
 
 - **Owner requests**, three in a row after v6.0.0:

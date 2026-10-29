@@ -349,8 +349,25 @@ class TarotChart {
   final String drawId;
 }
 
+/// Whose birth chart it is (v6.2.0): the name and the birthplace label, kept with the chart on the server, so
+/// history and reports show them on every device and sign-in, not only in the browser that made the chart.
+class ChartPerson {
+  const ChartPerson({this.name, this.birthplace});
+
+  /// Null when the server has none: charts made before v6.2.0, and every chart that isn't a birth chart.
+  static ChartPerson? fromJson(Object? j) {
+    if (j is! Json) return null;
+    final name = j['name'] as String?;
+    final birthplace = j['birthplace'] as String?;
+    return name == null && birthplace == null ? null : ChartPerson(name: name, birthplace: birthplace);
+  }
+
+  final String? name;
+  final String? birthplace;
+}
+
 class ChartResult {
-  const ChartResult({required this.chartId, required this.system, required this.facts});
+  const ChartResult({required this.chartId, required this.system, required this.facts, this.person});
 
   factory ChartResult.fromJson(Json j) {
     final fact = j['chart_fact'] as Json;
@@ -358,12 +375,16 @@ class ChartResult {
       chartId: j['chart_id'] as String,
       system: fact['system'] as String,
       facts: fact['facts'] as Json,
+      person: ChartPerson.fromJson(j['person']),
     );
   }
 
   final String chartId;
   final String system;
   final Json facts;
+
+  /// Whose chart it is, as the server keeps it (v6.2.0).
+  final ChartPerson? person;
 
   BaziChart get bazi => BaziChart.fromFacts(facts);
   TarotChart get tarot => TarotChart.fromFacts(facts);
@@ -374,8 +395,16 @@ class ChartResult {
 }
 
 class Paragraph {
-  const Paragraph(this.text, this.sourceLevel, this.factRefs);
+  const Paragraph(this.text, this.sourceLevel, this.factRefs, {this.term, this.example});
+
+  /// 术语 (v6.2.0): the facts the paragraph rests on, said the tradition's way, shown first. Null on older readings.
+  final String? term;
+
+  /// 评论: what it means for the reader, in plain words.
   final String text;
+
+  /// 举例 (v6.2.0): one everyday scene that shows the point. Null on older readings.
+  final String? example;
   final String sourceLevel;
   final List<String> factRefs;
 }
@@ -482,6 +511,8 @@ class ReportLayers {
               p['text'] as String,
               p['source_level'] as String,
               (p['fact_refs'] as List).cast<String>(),
+              term: p['term'] as String?,
+              example: p['example'] as String?,
             ),
           ),
           s['summary'] as String?,
@@ -707,11 +738,13 @@ class HistoryItem {
     this.facing,
     this.surnames = const {},
     this.hexagrams = const {},
+    this.person,
   });
 
   factory HistoryItem.fromJson(Json j) {
     final chart = (j['chart'] as Json?) ?? const {};
     return HistoryItem(
+      person: ChartPerson.fromJson(j['person']),
       reportId: j['report_id'] as String,
       chartId: j['chart_id'] as String,
       status: j['status'] as String,
@@ -755,4 +788,7 @@ class HistoryItem {
   /// 算卦 (v6.0.0): the cast's 本卦 by its full name in both scripts; [hexagram] picks the reader's.
   final Map<String, String> hexagrams;
   String? hexagram(String apiLocale) => hexagrams[apiLocale == 'zh-Hans' ? 'zh-Hans' : 'zh-Hant'];
+
+  /// Whose chart the reading is of (v6.2.0), as the server keeps it.
+  final ChartPerson? person;
 }

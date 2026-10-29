@@ -39,7 +39,19 @@ class LifeReportPage extends ConsumerWidget {
     final names = ref.watch(profilesProvider).value?.chartLabels ?? const {};
     final places = ref.watch(profilesProvider).value?.chartPlaces ?? const {};
     final ready = view != null && view.status == 'passed' && view.layers != null && chart != null;
-    final header = ready ? _header(l10n, view, chart, names[view.chartId], places[view.chartId], hant, locale) : null;
+    // Whose report: labelled on this device, else kept with its chart on the server (v6.2.0), so another device or
+    // sign-in names the person and the birthplace too.
+    final header = ready
+        ? _header(
+            l10n,
+            view,
+            chart,
+            names[view.chartId] ?? view.person?.name ?? chart.person?.name,
+            places[view.chartId] ?? view.person?.birthplace ?? chart.person?.birthplace,
+            hant,
+            locale,
+          )
+        : null;
 
     Future<(String, String)> build() async {
       final lunar = chart!.bazi.lunar;
@@ -64,7 +76,7 @@ class LifeReportPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(header == null ? l10n.lifeEntry : l10n.lifeReportOf(header.name)),
+        title: Text(header == null || header.name.isEmpty ? l10n.lifeEntry : l10n.lifeReportOf(header.name)),
         actions: [
           if (ready) ...[
             IconButton(
@@ -114,10 +126,12 @@ class LifeReportPage extends ConsumerWidget {
       ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
+        // Every state has its own key: opened from history, waiting is followed by loading the chart, and two
+        // unkeyed children in the switcher at once are duplicate keys.
         child: switch (view) {
-          null when async.hasError => _Message(text: '${l10n.errorTitle}\n${async.error}'),
-          null => const _Pending(stage: null),
-          LifeReportView(status: 'pending') => _Pending(stage: view.progressStage),
+          null when async.hasError => _Message(key: const ValueKey('life-error'), text: '${l10n.errorTitle}\n${async.error}'),
+          null => const _Pending(key: ValueKey('life-waiting'), stage: null),
+          LifeReportView(status: 'pending') => _Pending(key: const ValueKey('life-waiting'), stage: view.progressStage),
           LifeReportView(status: 'passed') when ready => _Body(
             key: const ValueKey('life-body'),
             view: view,
@@ -125,9 +139,9 @@ class LifeReportPage extends ConsumerWidget {
             chart: chart,
             hant: hant,
           ),
-          LifeReportView(status: 'passed') => const Center(child: CircularProgressIndicator()),
-          LifeReportView(status: 'failed') => _Message(text: l10n.statusFailed),
-          _ => _Message(text: l10n.statusReview),
+          LifeReportView(status: 'passed') => const Center(key: ValueKey('life-loading'), child: CircularProgressIndicator()),
+          LifeReportView(status: 'failed') => _Message(key: const ValueKey('life-failed'), text: l10n.statusFailed),
+          _ => _Message(key: const ValueKey('life-held'), text: l10n.statusReview),
         },
       ),
     );
@@ -170,7 +184,7 @@ class LifeReportPage extends ConsumerWidget {
 }
 
 class _Pending extends StatefulWidget {
-  const _Pending({required this.stage});
+  const _Pending({super.key, required this.stage});
   final String? stage;
   @override
   State<_Pending> createState() => _PendingState();
@@ -232,7 +246,7 @@ class _PendingState extends State<_Pending> {
 }
 
 class _Message extends StatelessWidget {
-  const _Message({required this.text});
+  const _Message({super.key, required this.text});
   final String text;
   @override
   Widget build(BuildContext context) => Center(

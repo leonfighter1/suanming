@@ -282,7 +282,7 @@ paths:
           }
       responses:
         "200":
-          description: chart_id, created_at and a chart summary per item
+          description: chart_id, created_at, a chart summary and (since v6.2.0) the person per item
           content:
             application/json:
               schema:
@@ -297,7 +297,8 @@ paths:
       summary: Run a deterministic engine and return a ChartFact
       description: |
         Raw birth data is used for computation and not persisted (see docs/data-retention.md).
-        Only the ChartFact (encrypted) and its keyed `input_digest` are stored.
+        Only the ChartFact (encrypted) and its keyed `input_digest` are stored, and since v6.2.0 a birth
+        chart's `person` (sealed with it).
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -316,6 +317,7 @@ paths:
                 properties:
                   chart_id: { type: string, format: uuid }
                   chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
+                  person: { $ref: "#/components/schemas/ChartPerson" }
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "422":
@@ -338,7 +340,7 @@ paths:
           }
       responses:
         "200":
-          description: Report views without layers, plus chart_id and a chart summary
+          description: Report views without layers, plus chart_id, a chart summary and (since v6.2.0) the chart's person
           content:
             application/json:
               schema:
@@ -739,6 +741,7 @@ paths:
                 properties:
                   chart_id: { type: string, format: uuid }
                   chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
+                  person: { $ref: "#/components/schemas/ChartPerson" }
         "404": { $ref: "#/components/responses/Problem" }
 
   /v1/tarot/daily:
@@ -1069,6 +1072,19 @@ components:
                     date: { type: string, enum: [gregorian, lunar] }
                     time: { type: string, enum: [exact, shichen] }
                     shichen: { type: string, description: "地支 of the chosen 時辰" }
+            person: { $ref: "#/components/schemas/ChartPerson" }
+
+    ChartPerson:
+      description: |
+        Whose birth chart it is (since v6.2.0, the owner's bug report): the name and the birthplace as the app
+        labels them. Kept with the chart record, sealed with it in the database store, and returned with the chart,
+        in history and with 一生运势报告, so they show on every device. Never part of the ChartFact and never sent to
+        a model. Birth charts only (bazi, astrology): any other chart with a person is a 400. Each field is trimmed
+        and cut to 40 / 120 characters; an empty one is left out.
+      type: object
+      properties:
+        name: { type: string, maxLength: 40 }
+        birthplace: { type: string, maxLength: 120 }
 
     TarotChartRequest:
       type: object
@@ -1104,6 +1120,7 @@ components:
             system: { const: astrology }
             latitude: { type: number, minimum: -90, maximum: 90 }
             longitude: { type: number, minimum: -180, maximum: 180 }
+            person: { $ref: "#/components/schemas/ChartPerson" }
 
     NamingChartRequest:
       description: |
@@ -1257,7 +1274,17 @@ components:
                       type: object
                       required: [text, source_level, fact_refs]
                       properties:
-                        text: { type: string }
+                        term:
+                          type: string
+                          description: |
+                            术语 (since v6.2.0, the owner: 术语在前，评论在后): the facts the paragraph rests on, said
+                            the tradition's way, shown first. Absent from readings made before.
+                        text:
+                          type: string
+                          description: 评论, what it means for the reader in plain words.
+                        example:
+                          type: string
+                          description: 举例 (since v6.2.0), one everyday scene that shows the point.
                         source_level:
                           type: string
                           enum: [traditional_text, common_consensus, simplified_rule, derived]
@@ -1371,6 +1398,9 @@ components:
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
         message: { type: string }
+        person:
+          $ref: "#/components/schemas/ChartPerson"
+          description: Whose report it is, from its chart (since v6.2.0); absent when the chart has none.
         progress:
           type: object
           properties:

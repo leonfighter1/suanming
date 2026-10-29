@@ -61,6 +61,44 @@ void main() {
     expect(inDetail('健康 ${last.scores['health']}'), findsOneWidget);
   });
 
+  testWidgets('a paragraph shows its term first, then the commentary, then the example (v6.2.0)', (tester) async {
+    await openReport(tester);
+    final first = report.layers!.interpretation.first;
+    final p = first.paragraphs.first;
+    final term = find.byKey(ValueKey<String>('term-${first.topic}-0'));
+    final example = find.byKey(ValueKey<String>('example-${first.topic}-0'));
+    final text = find.text(p.text);
+    expect(tester.widget<Text>(term).data, p.term);
+    expect(find.descendant(of: example, matching: find.text(p.example!)), findsOneWidget);
+    expect(tester.getTopLeft(term).dy, lessThan(tester.getTopLeft(text).dy));
+    expect(tester.getTopLeft(text).dy, lessThan(tester.getTopLeft(example).dy));
+  });
+
+  testWidgets('a paragraph written before v6.2.0 shows its text alone', (tester) async {
+    tester.view.physicalSize = const Size(1000, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    // The same reading as an older one: no term or example in any paragraph.
+    final old = fixture('report_passed');
+    for (final s in (old['layers'] as Map)['interpretation'] as List) {
+      for (final p in (s as Map)['paragraphs'] as List) {
+        (p as Map)
+          ..remove('term')
+          ..remove('example');
+      }
+    }
+    await tester.pumpWidget(testApp(FakeApi(finalReport: old, pendingPolls: 0)));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('open-history')));
+    await settle(tester);
+    await tester.tap(find.text('八字排盤').last);
+    await settle(tester);
+    final first = report.layers!.interpretation.first;
+    expect(find.text(first.paragraphs.first.text), findsOneWidget);
+    expect(find.byKey(ValueKey<String>('term-${first.topic}-0')), findsNothing);
+    expect(find.byKey(ValueKey<String>('example-${first.topic}-0')), findsNothing);
+  });
+
   testWidgets('only the first topic starts open; expand all opens the rest', (tester) async {
     await openReport(tester);
     final secs = report.layers!.interpretation;

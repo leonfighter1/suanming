@@ -142,6 +142,18 @@ const TEXT: Record<Locale, Record<Topic, string>> = {
   },
 };
 
+/** 术语 and 举例 (v6.2.0): every demo paragraph has both, so the app shows the reading's three parts. */
+const TERM: Record<Locale, string> = {
+  "zh-Hant": "（示範）本段依據：{t}",
+  "zh-Hans": "（示范）本段依据：{t}",
+  en: "(Demo) Basis: {t}",
+};
+const EXAMPLE: Record<Locale, string> = {
+  "zh-Hant": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
+  "zh-Hans": "（示范）比如这周遇到一件小事时，你可以先停一下，再按自己的节奏处理。",
+  en: "(Demo) For example, when something small comes up this week, pause first, then handle it at your own pace.",
+};
+
 const ACTION: Record<Locale, string> = {
   "zh-Hant": "（示範）本週花十分鐘寫下與「{t}」相關的一個觀察。",
   "zh-Hans": "（示范）本周花十分钟写下与“{t}”相关的一个观察。",
@@ -240,7 +252,9 @@ export class MockProvider implements LLMProvider {
     if (req.agent === "narrative") {
       const p = req.payload as { topics: Topic[]; system: string; cards?: number };
       const paragraph = (topic: Topic, refs: string[]) => ({
+        term: TERM[locale].replace("{t}", TOPIC_LABELS[topic][locale]),
         text: TEXT[locale][topic],
+        example: EXAMPLE[locale],
         source_level: (topic === "wuxing" || topic === "health"
           ? "simplified_rule"
           : "traditional_text") as "simplified_rule" | "traditional_text",

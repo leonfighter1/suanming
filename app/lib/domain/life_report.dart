@@ -1,4 +1,4 @@
-import 'models.dart' show Json;
+import 'models.dart' show ChartPerson, Json;
 
 List<T> _list<T>(Object? v, T Function(Json) f) => ((v as List?) ?? const []).cast<Json>().map(f).toList();
 List<String> _strs(Object? v) => ((v as List?) ?? const []).cast<String>();
@@ -201,6 +201,7 @@ class LifeReportView {
     this.progressStage,
     this.createdAt,
     this.model,
+    this.person,
   });
 
   factory LifeReportView.fromJson(Json j) => LifeReportView(
@@ -212,10 +213,14 @@ class LifeReportView {
     progressStage: (j['progress'] as Json?)?['stage'] as String?,
     createdAt: DateTime.tryParse(j['created_at'] as String? ?? ''),
     model: (j['ai_disclosure'] as Json?)?['model'] as String?,
+    person: ChartPerson.fromJson(j['person']),
   );
 
   final String id;
   final String chartId;
+
+  /// Whose report it is (v6.2.0), from its chart on the server.
+  final ChartPerson? person;
 
   /// pending | passed | blocked | manual_review | failed
   final String status;

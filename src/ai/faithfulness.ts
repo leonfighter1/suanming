@@ -16,7 +16,7 @@ import { DECK, NAME_ALIASES } from "../engines/tarot/deck.js";
 import { yearGanZhi } from "../engines/bazi/index.js";
 import { hexOf } from "../engines/liuyao/index.js";
 import { zhouyiText } from "../engines/yijing/index.js";
-import type { Report } from "./pipeline.js";
+import { paragraphTexts, type Report } from "./pipeline.js";
 import { lotBrief } from "./qiuqian.js";
 import { loadTerms, type Locale } from "./terms.js";
 
@@ -93,7 +93,8 @@ function reportTexts(r: Report): string[] {
   const l = r.layers;
   if (!l) return [];
   return [
-    ...l.interpretation.flatMap((s) => s.paragraphs.map((p) => p.text)),
+    // Each paragraph's term and example too (v6.2.0): a term names cards, lines and 干支 most of all.
+    ...l.interpretation.flatMap((s) => s.paragraphs.flatMap(paragraphTexts)),
     ...l.actions.map((a) => a.text),
   ];
 }

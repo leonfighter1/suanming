@@ -55,7 +55,11 @@ class HistoryPage extends ConsumerWidget {
                           child: ListTile(
                             contentPadding: EdgeInsets.zero,
                             leading: const Icon(Icons.auto_stories),
-                            title: Text(labels[r.chartId] == null ? l10n.lifeEntry : l10n.lifeReportOf(labels[r.chartId]!)),
+                            // Whose report: labelled on this device, else kept with its chart on the server (v6.2.0).
+                            title: Text(switch (labels[r.chartId] ?? r.person?.name) {
+                              final String name when name.isNotEmpty => l10n.lifeReportOf(name),
+                              _ => l10n.lifeEntry,
+                            }),
                             subtitle: Text(r.createdAt == null ? '' : DateFormat('yyyy-MM-dd HH:mm').format(r.createdAt!.toLocal())),
                             trailing: const Icon(Icons.chevron_right),
                           ),
@@ -114,7 +118,10 @@ class HistoryTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(settingsProvider).apiLocaleCode;
     final terms = ref.watch(termsProvider).value;
-    final label = ref.watch(profilesProvider).value?.chartLabels[item.chartId];
+    // Whose chart: labelled on this device, else kept with the chart on the server (v6.2.0).
+    final book = ref.watch(profilesProvider).value;
+    final label = book?.chartLabels[item.chartId] ?? item.person?.name;
+    final place = book?.chartPlaces[item.chartId] ?? item.person?.birthplace;
     final scheme = Theme.of(context).colorScheme;
     final (statusText, statusColor) = switch (item.status) {
       'passed' => (l10n.aiReport, scheme.primary),
@@ -126,7 +133,7 @@ class HistoryTile extends ConsumerWidget {
     final surname = item.surname(locale);
     final hexagram = item.hexagram(locale);
     final title = switch (item.system) {
-      'bazi' => label == null ? l10n.homeBazi : l10n.chartOf(label),
+      'bazi' => label == null || label.isEmpty ? l10n.homeBazi : l10n.chartOf(label),
       'qiuqian' => l10n.homeQiuqian,
       'fengshui' => room == null ? l10n.homeFengshui : '${l10n.homeFengshui} · $room',
       'naming' => surname == null ? l10n.homeNaming : '${l10n.homeNaming} · $surname',
@@ -141,7 +148,7 @@ class HistoryTile extends ConsumerWidget {
           builder: (_) => ReportPage(
             reportId: item.reportId,
             title: title,
-            place: ref.read(profilesProvider).value?.chartPlaces[item.chartId],
+            place: place,
           ),
         ),
       ),

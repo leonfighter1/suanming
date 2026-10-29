@@ -21,7 +21,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：卦象",
             "text": "（示範）這一卦的重點在主要的那句卦爻辭：先看清它說的處境，再看動爻往哪裡變。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/focus/texts/0",
@@ -35,7 +37,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：所問之事",
             "text": "（示範）就你所問的事，這一卦傾向先穩住、把眼前的事做好，時機成熟再往前。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/focus/texts/0"
@@ -48,7 +52,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：建議",
             "text": "（示範）把要做的事拆成一小步，這週先做第一步，做完再看下一步。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/focus/texts/0"
@@ -73,7 +79,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_liuyao@1,action_liuyao@1,guard@2",
+    "prompt_version": "narrative_liuyao@2,action_liuyao@1,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

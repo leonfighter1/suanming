@@ -93,7 +93,15 @@ export const TOPIC_LABELS: Record<Topic, Record<Locale, string>> = {
 };
 
 export interface Paragraph {
+  /**
+   * 术语 (v6.2.0, S13): the facts the paragraph rests on, said the tradition's way, shown first. Absent from
+   * readings made before.
+   */
+  term?: string;
+  /** 评论: what it means for the reader, in plain words and in detail. */
   text: string;
+  /** 举例 (v6.2.0): one everyday scene that shows the point. Absent from readings made before. */
+  example?: string;
   source_level: SourceLevel;
   /** JSON Pointers into ChartFact.facts that this paragraph rests on */
   fact_refs: string[];

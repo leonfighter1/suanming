@@ -703,15 +703,102 @@ Plain language: short sentences, everyday words.
 
 <today> is today's date. Use the protected terms in <glossary> exactly as given.`;
 
+/**
+ * v6.2.0 (S13, WP13.1). The owner: 「给出的AI回答依旧很笼统，太多的术语，可以这样，术语在前，评论在后，评论要尽量详细，
+ * 比如说一个人性格很好，尽量可以通过举个例子去简单描述这个人」. Every paragraph now has a term (the facts it rests on, said
+ * the tradition's way), a text (the detailed plain commentary) and an example (one everyday scene). Each method fills
+ * the block with its own terms and scenes (rule 8); the rest of each prompt is its previous version, unchanged.
+ */
+function explained(m: { term: string; example: string; note?: string }): string {
+  return `How every paragraph is written (v6.2.0): the term first, then the commentary, then an example.
+- term (术语): the facts this paragraph rests on, named the way the tradition names them, in one short line of at most about 30 Chinese characters or 20 English words, e.g. ${m.term}. Use this reading's own facts, never the examples here. Only the facts: no explanation in term.
+- text (评论): what the term means for the reader, in plain everyday words and in detail: the conclusion first, then why, then how it tends to show in their life. A reader who skips term must still understand everything from text, so don't pile up jargon in it; if a term has to appear in text, explain it in brackets.${m.note ? ` ${m.note}` : ""}
+- example (举例): one concrete everyday scene that shows the point, in one or two sentences, starting with 比如 (or "For example"), e.g. ${m.example}. It shows how the tendency may look (what the reader does, says or feels in an ordinary situation); it never foretells an event, and on wellbeing it stays with rest and routine. Fit it to <user_context> when given, without inventing details about the reader. Write "" only when no scene fits, such as a closing note on wellbeing.
+- One clear point per paragraph, and a different example in every paragraph.`;
+}
+
+const NARRATIVE_BAZI_V7 = `${NARRATIVE_BAZI_V6}
+
+${explained({
+  term: '"日主甲木，生于寅月（得令）", "月干正官", "日支卯与时支酉相冲" or "2027 丁未年（虚岁 38）：伤官"',
+  note: "In dayun_liunian, term names the period by its 干支, years and 虚岁.",
+  example:
+    '"比如同事临时找你帮忙改方案，你嘴上说“没事”，其实已经开始帮他想办法了" for a kind, dependable nature',
+})}`;
+
+const NARRATIVE_TAROT_V4 = `${NARRATIVE_TAROT_V3}
+
+${explained({
+  term: '"第 3 张·根基：宝剑七（正位）" for one card, or "第 1 张·现状：圣杯三（正位）＋第 10 张·结果：星星（逆位）" for cards read together',
+  note: "In tarot_cards, term is that paragraph's position and card with its orientation, named exactly as <spread> names them.",
+  example: '"比如这周开会时，你想说的话到了嘴边又咽了回去" for a card of holding back',
+})}`;
+
+const NARRATIVE_ASTROLOGY_V2 = `${NARRATIVE_ASTROLOGY_V1}
+
+${explained({
+  term: '"太阳双鱼座", "月亮白羊座" or "金星与火星三分相（容许度 2°）"',
+  example: '"比如朋友情绪低落时，你往往不用对方开口就能察觉" for a sensitive, caring nature',
+})}`;
+
+const NARRATIVE_QIUQIAN_V2 = `${NARRATIVE_QIUQIAN_V1}
+
+${explained({
+  term: "the line or lines it reads, quoted exactly as <lot> gives them, in 「」 (both lines of the couplet in qiuqian_poem)",
+  note: "The quote goes in term; text says what the lines picture and what they suggest.",
+  example: '"比如一件事你已经推了很久，越着急越推不动" for a line about waiting for the tide',
+})}`;
+
+const NARRATIVE_FENGSHUI_V2 = `${NARRATIVE_FENGSHUI_V1}
+
+${explained({
+  term: 'the principle it rests on, as <room> gives it (e.g. "床头靠墙"), or the facing with its trigram and 五行',
+  example: '"比如晚上躺下时背后是一面实墙，人往往更容易放松入睡" for a bed against a wall',
+})}`;
+
+const NARRATIVE_NAMING_V2 = `${NARRATIVE_NAMING_V1}
+
+${explained({
+  term: "the name with each character's 五行 as <names> gives them, or in naming_advice the step it rests on",
+  example: '"比如老师点名时连姓带名念一遍，声调一起一伏，听起来清楚好记" for how a name sounds',
+})}`;
+
+const NARRATIVE_LIUYAO_V2 = `${NARRATIVE_LIUYAO_V1}
+
+${explained({
+  term: "the text it reads with its name, e.g. the line's name and its 爻辭 quoted exactly as <cast> gives it, in 「」, or the 本卦 and 變卦 by their full names",
+  note: "The quote goes in term; text says straight out what it means for the question (you may use its 直說, never contradict it).",
+  example:
+    '"比如项目还没谈定时，先把方案写扎实，而不是急着去找人拍板" for a text that says to wait',
+})}`;
+
+/**
+ * v6.2.0 (WP13.1): the 一生运势 report's texts follow the owner's 术语在前，评论在后 too. Its fields stay plain strings,
+ * so each one opens with its basis in a short clause; the page already shows the 卦辭 or the period above it.
+ */
+const LIFE_EXPLAINED = `How each text is written (v6.2.0): the term first, then the commentary, then an example. yijing.meaning, yijing.ming_yao, yijing.zhi_gua, meihua.early, meihua.middle, meihua.late, wuxing.analysis, bazhai.daily, every topic point and every summary.advice item:
+- open with the basis named the way the tradition names it, in a short clause ending with "：", e.g. "命爻九三：", "体卦乾金，生于卯月：" or "伤官透出：";
+- then say what it means for the reader in plain everyday words and in detail: the conclusion first, then why;
+- then give one concrete everyday scene that shows it, starting with 比如, e.g. "比如同事临时找你帮忙改方案，你嘴上说“没事”，其实已经开始帮他想办法了" for a kind, dependable nature. A scene of how the tendency may look, never an event foretold; on health it stays with rest and routine. Fit it to <user_context> when given, without inventing details.
+Where a field asks for a number of sentences, the example is one sentence more. The short fields (stages, labels, meihua.season, meihua.conclusion, wuxing.favorable, wuxing.unfavorable, wuxing.note, bazhai.summary, summary.verdict, summary.closing and every summary) stay as they are.`;
+
+const LIFE_METHODS_V3 = `${LIFE_METHODS_V2}
+
+${LIFE_EXPLAINED}`;
+
+const LIFE_TOPICS_V3 = `${LIFE_TOPICS_V2}
+
+${LIFE_EXPLAINED}`;
+
 export const PROMPTS = {
   narrative: version("narrative", 4, NARRATIVE_V4),
-  narrative_bazi: version("narrative_bazi", 6, NARRATIVE_BAZI_V6),
-  narrative_tarot: version("narrative_tarot", 3, NARRATIVE_TAROT_V3),
-  narrative_astrology: version("narrative_astrology", 1, NARRATIVE_ASTROLOGY_V1),
-  narrative_qiuqian: version("narrative_qiuqian", 1, NARRATIVE_QIUQIAN_V1),
-  narrative_fengshui: version("narrative_fengshui", 1, NARRATIVE_FENGSHUI_V1),
-  narrative_naming: version("narrative_naming", 1, NARRATIVE_NAMING_V1),
-  narrative_liuyao: version("narrative_liuyao", 1, NARRATIVE_LIUYAO_V1),
+  narrative_bazi: version("narrative_bazi", 7, NARRATIVE_BAZI_V7),
+  narrative_tarot: version("narrative_tarot", 4, NARRATIVE_TAROT_V4),
+  narrative_astrology: version("narrative_astrology", 2, NARRATIVE_ASTROLOGY_V2),
+  narrative_qiuqian: version("narrative_qiuqian", 2, NARRATIVE_QIUQIAN_V2),
+  narrative_fengshui: version("narrative_fengshui", 2, NARRATIVE_FENGSHUI_V2),
+  narrative_naming: version("narrative_naming", 2, NARRATIVE_NAMING_V2),
+  narrative_liuyao: version("narrative_liuyao", 2, NARRATIVE_LIUYAO_V2),
   action: version("action", 3, ACTION_V3),
   action_bazi: version("action_bazi", 4, ACTION_BAZI_V4),
   action_tarot: version("action_tarot", 2, ACTION_TAROT_V2),
@@ -724,8 +811,8 @@ export const PROMPTS = {
   remedy: version("remedy", 2, REMEDY_V2),
   remedy_bazi: version("remedy_bazi", 4, REMEDY_BAZI_V4),
   remedy_tarot: version("remedy_tarot", 2, REMEDY_TAROT_V2),
-  life_methods: version("life_methods", 2, LIFE_METHODS_V2),
-  life_topics: version("life_topics", 2, LIFE_TOPICS_V2),
+  life_methods: version("life_methods", 3, LIFE_METHODS_V3),
+  life_topics: version("life_topics", 3, LIFE_TOPICS_V3),
   guard: version("guard", 2, GUARD_V2),
 } as const;
 

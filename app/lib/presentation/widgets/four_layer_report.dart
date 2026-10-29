@@ -6,6 +6,7 @@ import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../labels.dart';
+import 'reading_paragraph.dart';
 import 'remedy.dart';
 import 'trend_chart.dart';
 
@@ -197,17 +198,11 @@ class _FourLayerReportState extends State<FourLayerReport> {
                                 ),
                               ),
                         children: [
-                          for (final p in s.paragraphs)
+                          // 术语 → 评论 → 例子 (v6.2.0).
+                          for (final (j, p) in s.paragraphs.indexed)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: Space.m),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(p.text, textAlign: TextAlign.start, style: body),
-                                  const SizedBox(height: Space.s),
-                                  Pill(l10n.sourceLevel(p.sourceLevel), icon: Icons.menu_book_outlined),
-                                ],
-                              ),
+                              padding: const EdgeInsets.only(bottom: Space.l),
+                              child: ReadingParagraph(paragraph: p, id: '${s.topic}-$j'),
                             ),
                           // 逐张解读 and 综合解读 have no plan; a tarot plan is on 建议 (contract noPlanTopics).
                           if (widget.reportId != null && !noPlanTopics.contains(s.topic))

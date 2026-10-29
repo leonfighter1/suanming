@@ -286,4 +286,16 @@ describe("dev accounts", () => {
     // Normal registration rules still apply to everyone else.
     expect((await register("admin2", "admin")).status).toBe(400);
   });
+
+  it("the owner's three added accounts sign in with their login as the password (2026-10-28)", async () => {
+    const { seedDevAccounts } = await import("../src/service/runtime.js");
+    await seedDevAccounts(auth, true);
+    for (const login of ["qianli", "wuyong", "leonfighter"]) {
+      const res = await post("/v1/auth/login", { email: login, password: login });
+      expect(res.status, login).toBe(200);
+      const me = await (await authed((await res.json()).access_token, "/v1/me")).json();
+      expect(me).toMatchObject({ email: login, country: "HK" });
+      expect((await post("/v1/auth/login", { email: login, password: "admin" })).status).toBe(401);
+    }
+  });
 });

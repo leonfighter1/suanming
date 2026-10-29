@@ -24,7 +24,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：籤詩",
             "text": "（示範）這兩句籤詩描繪的景象，傳統上被讀作一段心境的變化，可作為自我觀察的參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/lot/poem/0",
@@ -32,7 +34,9 @@
             ]
           },
           {
+            "term": "（示範）本段依據：籤詩",
             "text": "（示範）這兩句籤詩描繪的景象，傳統上被讀作一段心境的變化，可作為自我觀察的參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/lot/poem/2",
@@ -46,7 +50,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：所問之事",
             "text": "（示範）就你所問的事，這支籤傳統上提示先看清情勢，再一步步來。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/lot/poem/0"
@@ -59,7 +65,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：建議",
             "text": "（示範）籤詩傳統上提示可以放慢腳步，先做眼前做得到的事。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/lot/poem/3"
@@ -84,7 +92,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_qiuqian@1,action_qiuqian@1,guard@2",
+    "prompt_version": "narrative_qiuqian@2,action_qiuqian@1,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

@@ -31,7 +31,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：五行",
             "text": "（示範）依命盤的日主、月令與加權五行分數，傳統上會從五行的偏旺與偏弱來看整體平衡。此分數為簡化計分。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "simplified_rule",
             "fact_refs": [
               "/day_master",
@@ -46,7 +48,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：性格",
             "text": "（示範）傳統上認為日主的五行屬性會反映處事風格，可作為自我觀察的參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/day_master",
@@ -60,7 +64,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：事業財運",
             "text": "（示範）月柱的十神常被用來談工作方式與合作傾向，僅供規劃時參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/pillars/month"
@@ -73,7 +79,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：婚姻感情",
             "text": "（示範）日支在傳統上與親密關係的相處模式有關，可多留意溝通節奏。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/pillars/day"
@@ -86,7 +94,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：大運流年",
             "text": "（示範）目前大運與今年流年的十神組合，可視為這段時間值得關注的主題。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/dayun",
@@ -100,7 +110,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：健康",
             "text": "（示範）傳統五行說法會把作息與情緒平衡連結起來。以上不構成醫療建議，如有不適請就醫。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "simplified_rule",
             "fact_refs": [
               "/wuxing_weighted"
@@ -452,7 +464,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_bazi@6,action_bazi@4,guard@2",
+    "prompt_version": "narrative_bazi@7,action_bazi@4,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

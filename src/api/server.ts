@@ -46,6 +46,7 @@ import {
   computeChart,
   computeNamingChart,
   InputError,
+  parsePerson,
   UUID_RE,
   type EngineSecrets,
 } from "../service/charts.js";
@@ -1057,15 +1058,19 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (path === "/v1/life-reports" && req.method === "GET") {
       const rows = await store.listLifeReports(c.user, 50);
       return send(res, 200, {
-        items: rows.map((r) => {
-          const {
-            facts: _f,
-            layers: _l,
-            ai_disclosure: _a,
-            ...view
-          } = publicLifeReport(r) as Record<string, unknown>;
-          return view;
-        }),
+        items: await Promise.all(
+          rows.map(async (r) => {
+            const {
+              facts: _f,
+              layers: _l,
+              ai_disclosure: _a,
+              ...view
+            } = publicLifeReport(r) as Record<string, unknown>;
+            // Whose report it is (v6.2.0), from its chart: 「xxx 的一生运势报告」 on every device.
+            const person = (await store.getChart(r.chart_id))?.person;
+            return { ...view, ...(person && { person }) };
+          }),
+        ),
       });
     }
     const lm = /^\/v1\/life-reports\/([^/]+)$/.exec(path);
@@ -1073,10 +1078,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       const r = UUID_RE.test(lm[1]!) ? await store.getLifeReport(lm[1]!) : undefined;
       if (!r || r.owner !== c.user) throw new HttpError(404, "life report not found");
       const view = publicLifeReport(r);
+      const person = (await store.getChart(r.chart_id))?.person;
       return send(
         res,
         200,
-        view,
+        { ...view, ...(person && { person }) },
         aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
       );
     }
@@ -1181,7 +1187,12 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
               ai_disclosure: _a,
               ...view
             } = publicReport(r) as Record<string, unknown>;
-            return { ...view, chart_id: r.chart_id, chart: chart && chartSummary(chart.fact) };
+            return {
+              ...view,
+              chart_id: r.chart_id,
+              chart: chart && chartSummary(chart.fact),
+              ...(chart?.person && { person: chart.person }),
+            };
           }),
         );
         return send(res, 200, { items });
@@ -1193,6 +1204,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
             chart_id: r.id,
             created_at: r.created_at,
             chart: chartSummary(r.fact),
+            ...(r.person && { person: r.person }),
           })),
         });
       }
@@ -1200,7 +1212,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       if (cm) {
         const ch = UUID_RE.test(cm[1]!) ? await store.getChart(cm[1]!) : undefined;
         if (!ch || ch.owner !== c.user) throw new HttpError(404, "chart not found");
-        return send(res, 200, { chart_id: ch.id, chart_fact: ch.fact });
+        return send(res, 200, {
+          chart_id: ch.id,
+          chart_fact: ch.fact,
+          ...(ch.person && { person: ch.person }),
+        });
       }
     }
 
@@ -1213,17 +1229,25 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
       let out: { status: number; body: unknown; headers: Record<string, string> };
       if (path === "/v1/charts") {
-        const body = (await readJson(req)) as { system?: string };
+        const body = (await readJson(req)) as { system?: string; person?: unknown };
         assertServed(c.country, body.system);
+        // Whose chart it is (v6.2.0): kept on the record for history on any device, never in the facts.
+        const person = parsePerson(body.person, body.system);
         const fact =
           body.system === "naming"
             ? await namingChart(body as Record<string, unknown>, c)
             : computeChart(body, opts.secrets, now);
         const id = randomUUID();
-        await store.putChart({ id, owner: c.user, fact, created_at: now().toISOString() });
+        await store.putChart({
+          id,
+          owner: c.user,
+          fact,
+          created_at: now().toISOString(),
+          ...(person && { person }),
+        });
         out = {
           status: 201,
-          body: { chart_id: id, chart_fact: fact },
+          body: { chart_id: id, chart_fact: fact, ...(person && { person }) },
           headers: { location: `/v1/charts/${id}` },
         };
       } else {

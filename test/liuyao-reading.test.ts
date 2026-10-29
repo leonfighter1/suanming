@@ -51,7 +51,7 @@ describe("a 算卦 reading", () => {
     const report = await read(mock);
     expect(report.status).toBe("passed");
     expect(report.topics).toEqual(["liuyao_hexagram", "liuyao_answer", "liuyao_advice"]);
-    expect(report.ai_disclosure.prompt_version).toBe("narrative_liuyao@1,action_liuyao@1,guard@2");
+    expect(report.ai_disclosure.prompt_version).toBe("narrative_liuyao@2,action_liuyao@1,guard@2");
     const narrative = mock.calls.find((c) => c.agent === "narrative")!;
     expect(narrative.user).toContain(liuer["zh-Hant"]);
     expect(narrative.user).toContain(plainOf("100111", 2)["zh-Hant"]);

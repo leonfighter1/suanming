@@ -50,10 +50,21 @@ String exportReportMarkdown({
         ..writeln('**${s.summary}**')
         ..writeln();
     }
+    // 术语 → 评论 → 例子 (v6.2.0), as on screen; an older paragraph is its text alone.
     for (final p in s.paragraphs) {
+      if (p.term != null) {
+        b
+          ..writeln('**${p.term}**')
+          ..writeln();
+      }
       b
         ..writeln(p.text)
         ..writeln();
+      if (p.example != null) {
+        b
+          ..writeln('> ${p.example}')
+          ..writeln();
+      }
     }
   }
   b

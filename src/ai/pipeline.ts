@@ -57,6 +57,7 @@ import {
   type GuardOutput,
   type LLMProvider,
   type NarrativeOutput,
+  type Paragraph,
   type TarotFocus,
   type Topic,
   type Usage,
@@ -293,6 +294,11 @@ export async function runAgent<T>(args: {
   };
 }
 
+/** A paragraph's model-written texts, its term and example included (v6.2.0): what the checks read. */
+export function paragraphTexts(p: Pick<Paragraph, "term" | "text" | "example">): string[] {
+  return [...(p.term ? [p.term] : []), p.text, ...(p.example ? [p.example] : [])];
+}
+
 export function scanTexts(texts: string[], rules: CompiledRule[]) {
   const hits = texts.flatMap((t) => scan(t, rules));
   return {
@@ -478,13 +484,16 @@ export async function generateReport(
     check: (data) => {
       const feedback: string[] = [];
       let ungrounded = 0;
+      const norm = (t: string) => {
+        const { text, fixes } = normalizeTerms(t, opts.locale);
+        termFixes.push(...fixes);
+        return text;
+      };
       const sections = data.sections.map((s) => ({
         topic: s.topic,
         ...(s.summary && { summary: normalizeTerms(s.summary, opts.locale).text }),
         // 逐张解读 has one paragraph per card (ten for a Celtic Cross); other sections up to four.
         paragraphs: s.paragraphs.slice(0, maxParagraphs(s.topic)).flatMap((p) => {
-          const { text, fixes } = normalizeTerms(p.text, opts.locale);
-          termFixes.push(...fixes);
           const refs = p.fact_refs.filter((r) => resolvePointer(facts, r));
           if (refs.length === 0) {
             ungrounded++;
@@ -492,7 +501,16 @@ export async function generateReport(
           }
           // 风水 rests on simplified rules only (the owner's spec): no paragraph claims more.
           const source_level = room ? "simplified_rule" : p.source_level;
-          return [{ ...p, text, fact_refs: refs, source_level }];
+          // 术语 → 评论 → 例子 (v6.2.0): an empty term or example is left out, as an older reading has none.
+          return [
+            {
+              ...(p.term?.trim() && { term: norm(p.term.trim()) }),
+              text: norm(p.text),
+              ...(p.example?.trim() && { example: norm(p.example.trim()) }),
+              source_level,
+              fact_refs: refs,
+            },
+          ];
         }),
       }));
       if (ungrounded) {
@@ -528,7 +546,7 @@ export async function generateReport(
         ...scanTexts(
           value.sections.flatMap((s) => [
             ...(s.summary ? [s.summary] : []),
-            ...s.paragraphs.map((p) => p.text),
+            ...s.paragraphs.flatMap(paragraphTexts),
           ]),
           rules,
         ),

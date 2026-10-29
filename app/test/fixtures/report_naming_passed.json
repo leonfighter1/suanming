@@ -31,7 +31,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：候選名字",
             "text": "（示範）這個名字的字義與聲調相配，五行也合所需，可作為參考。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/candidates/0"
@@ -44,7 +46,9 @@
         "summary": "（示範）這一項的重點：照自己的節奏慢慢來。",
         "paragraphs": [
           {
+            "term": "（示範）本段依據：建議",
             "text": "（示範）把名字連同姓氏念出聲、寫下來，再聽聽家人的意見。",
+            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/candidates/0"
@@ -69,7 +73,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/deepseek-v4-pro",
-    "prompt_version": "narrative_naming@1,action_naming@1,guard@2",
+    "prompt_version": "narrative_naming@2,action_naming@1,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

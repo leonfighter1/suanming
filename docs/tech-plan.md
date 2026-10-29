@@ -39,6 +39,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | done        |
 | S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | done        |
 | S12 Owner updates          | tarot spreads 3 a row, 东方 / 西方 home, coins that turn    | medium | v6.1.0            | done        |
+| S13 AI 追问 + 通俗解读     | 术语 → 评论 → 例子 in every reading; 追问 on every reading  | big    | v7.0.0 + summary  | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1175,6 +1176,121 @@ As built (v6.1.0):
   - Two-digit pick numbers scale down rather than wrap.
   - Looked at rendered with Noto Sans SC: the toss rows, the covered grid, and the grid mid-turn and turned.
 
+## S13 AI 追问 + 通俗解读 (big → v7.0.0)
+
+**Owner request (2026-10-28):**
+
+> 添加新功能，给每种算命添加AI追问功能，可以在其回答的基础上继续追问其他问题。不能胡编乱造，一定要基于之前的回答和各个
+> 卦象所表达的东西持续给出后续问题。继续追问必须放在显眼的位置。另外给出的AI回答依旧很笼统，太多的术语，可以这样，术语在
+> 前，评论在后，评论要尽量详细，比如说一个人性格很好，尽量可以通过举个例子去简单描述这个人。
+
+Two parts. Every reading is written term first, then a detailed plain commentary, then an example (WP13.1). Every
+reading can then be asked about further, from what it rests on and what it already said (追问, WP13.2–13.3). No
+earlier owner decision touches either (rule 34: DEVLOG, README and git log searched).
+
+### WP13.1 术语在前，评论在后 (medium → v6.2.0)
+
+- **Every reading paragraph gets two fields**, additive: readings made before keep showing as they were.
+  - `term` (术语): the facts the paragraph rests on, said the tradition's way, in one short line. Examples:
+    「日主甲木，生于寅月（得令）」, 「第 3 张·根基：宝剑七（正位）」, a quoted 爻辭, 「床头靠实墙（背后有靠）」.
+  - `text` (评论): what it means for the reader, in plain words and in detail. The conclusion comes first, then why.
+  - `example` (举例): one everyday scene that shows it. For a kind nature: 「比如同事临时找你帮忙，你嘴上说“没事”，其实
+    已经开始帮他想办法了」.
+- **Prompts.** Each method gets a new reading prompt version with term examples of its own (rule 8):
+  - narrative_bazi@7, narrative_tarot@4, narrative_astrology@2, narrative_qiuqian@2, narrative_fengshui@2,
+    narrative_naming@2 and narrative_liuyao@2;
+  - the 一生运势 report's two agents, life_methods@3 and life_topics@3. Each of their texts names its basis first,
+    then gives the commentary and an example. Their fields stay as they are: the page already shows the 卦辭 or
+    the period first.
+- **Checks.**
+  - As with `summary`, both fields are asked for but optional in the schema: a missing one never costs a
+    regeneration.
+  - Both are normalised for terms, scanned by the rule layer and read by the faithfulness checks.
+- **The app.** The term comes first (bold, accent colour), then the commentary, then the example in a tinted box.
+  Copy and download include them.
+- **The mock** writes all three, so the layout shows with `IS_AI_MOCK=TRUE`.
+- **Not provable here:** how well the real model follows the new prompts. `IS_AI_MOCK` is the owner's switch, so the
+  first real readings are the owner's check (`npm run eval:ai -- --live` once the switch allows it).
+- Lessons: rules 28, 29, 31, 32 and 42; G5.
+
+As built (v6.2.0):
+
+- `explained()` in prompts.ts writes each method's block from its own term and example; each new version is its
+  previous one plus that block, so the old text stays pinned through the new hash.
+- `paragraphTexts` (pipeline.ts) is what the rule layer and the faithfulness checks read. The app's
+  `ReadingParagraph` shows a paragraph, and 追问 answers will reuse it.
+- **Two more owner requests went out in v6.2.0:**
+  - **The bug report** (「当我login不同账户时……运势报告人的姓名和出生地没有在表的record上体现出来」): the person's
+    name and birthplace label now go with the chart as `person`. The server keeps them on the chart record, sealed
+    in the database store, out of ChartFact and away from the model, and history and the reports show them on every
+    device. This reverses the 2026-10-26 device-only rule (docs/data-retention.md). Rules 52 and 53.
+  - **Three dev accounts:** qianli, wuyong and leonfighter, each with its login as its password.
+
+### WP13.2 追问, the server (with WP13.3 → v7.0.0)
+
+- **What can be asked about:** a passed reading of any method, or a 一生运势报告, by its owner.
+  - One question at a time, 1–200 characters, and up to 20 per reading.
+  - Each one takes one from the daily AI caps.
+- **Its own pipeline, `generateFollowUp` (src/ai/followup.ts)**, as hard rule 2 asks:
+  - Geo-Rule first: the reading's method must be offered in the account's region;
+  - then the follow-up agent;
+  - then the rule layer (the region's groups and the method's own);
+  - then the guard, while review is on.
+- **What the model reads:**
+  - the same facts and brief the reading read: the spread, lot, cast, room or names, and for 八字 the focused view
+    with any year the question names;
+  - the reading itself: summaries, paragraphs and actions;
+  - the earlier 追问 and their answers (the last six);
+  - the original question, the context and the new question.
+- **Not making things up** (the owner: 不能胡编乱造):
+  - Every answer paragraph cites the facts it rests on (`fact_refs`, JSON pointers that must exist). One that cites
+    none is dropped, and the answer is sent back.
+  - The deterministic faithfulness checks run on every answer: 干支, cards and orientations, the lot's lines and
+    number, the cast's hexagrams and texts, and script. An issue sends the answer back once, and a paragraph that
+    still fails is dropped.
+  - A question the reading can't answer gets `in_scope: false` and a plain reply saying what the reading does and
+    doesn't speak to, with no claims. Such questions include another matter than the lot or the cast was for (一事
+    一占), someone else's chart, exact dates, amounts, diagnoses and verdicts.
+- **Each answer:**
+  - 1–3 paragraphs in the WP13.1 form;
+  - 2–3 suggested next questions that the reading can answer, shown as chips (the owner: 持续给出后续问题).
+- **Prompts:** each method has its own, and each is pinned in method-prompts.test.ts:
+  - followup_bazi@1, followup_tarot@1, followup_astrology@1, followup_qiuqian@1;
+  - followup_fengshui@1, followup_naming@1, followup_liuyao@1;
+  - followup_life@1.
+- **API:**
+  - `GET` and `POST /v1/reports/{id}/followups` (`{question}` → 202), and `GET /v1/followups/{id}`;
+  - the same under `/v1/life-reports/{id}/followups`;
+  - 409 while one is being answered or at the limit, and 400 for an empty or overlong question;
+  - held answers appear in the review console (kind `followup`);
+  - deleting the account removes them;
+  - the database store has a table `followups` (migration 007), sealed under the owner's key;
+  - the reading's own question is kept with it (sealed), so a 追问 knows what was asked.
+- **Mock:** a grounded （示范） answer with suggestions.
+- Lessons: rules 1, 16, 17, 32, 35, 37 and 44.
+
+### WP13.3 追问, the app (→ v7.0.0)
+
+- **Where it goes** (the owner: 显眼的位置): on every reading page and on the 一生运势 page.
+  - A 「继续追问」 button floats at the bottom right from the moment the reading is ready. It brings the 追问 card
+    into view and puts the cursor in its field.
+  - On a reading page the card comes right after the reading, before 行动建议, in the accent colour. The jump
+    list starts with 「追问」.
+- **The card** holds, in order:
+  - one line on what it does: the answer rests only on this reading;
+  - the thread: each question, then its answer in the WP13.1 form;
+  - the suggested questions (the method's starters before the first question);
+  - the field with 发送.
+  - While an answer is being written it shows the progress. At the limit, the field says so.
+- **Keyboard access:** the button, the chips and the field can be reached with Tab, and Enter sends.
+- **Tests:**
+  - the card and the button on each method's reading and on the 一生运势 report;
+  - asking, waiting and the answer;
+  - a suggestion asks its question;
+  - the limit, and the 409 and 429 messages;
+  - the keyboard.
+- Lessons: rules 7, 12, 17, 19, 25, 27, 33, 43 and 46; the keyboard-access skill.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
@@ -1555,3 +1671,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP12.1    | done                         | v6.1.0  |
 | WP12.2    | done                         | v6.1.0  |
 | WP12.3    | done                         | v6.1.0  |
+| WP13.1    | done                         | v6.2.0  |
+| WP13.2    | planned                      | v7.0.0  |
+| WP13.3    | planned                      | v7.0.0  |

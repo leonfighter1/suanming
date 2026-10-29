@@ -20,35 +20,36 @@ import { DRAW_KEY, FIXED_NOW, PEPPER, withNamingOn } from "./helpers.js";
 // The versions older than v2.1.0 were hashed from the committed prompts.ts before WP2.1 touched
 // it; later ones are pinned as released. Changing a prompt's text needs a new version. A version
 // replaced in the registry stays in the file as the base of its successor's text (narrative_bazi@5
-// of @6, remedy_bazi@3 of @4, each tarot @1 of its @2, narrative_tarot@2 of @3), so its text stays
-// pinned through the successor's hash: an edit changes that hash, or makes swap() throw.
+// of @6, remedy_bazi@3 of @4, each tarot @1 of its @2, narrative_tarot@2 of @3; since v6.2.0 every
+// method's previous reading prompt of its 术语 → 评论 → 例子 version, and life_*@2 of @3), so its text
+// stays pinned through the successor's hash: an edit changes that hash, or makes swap() throw.
 const HASHES: Record<string, string> = {
   "narrative@4": "49007c9a8aba351e",
-  "narrative_bazi@6": "d7c2c79e4aed5cc0",
-  "narrative_tarot@3": "afa57d4daa579c11",
+  "narrative_bazi@7": "5b0438907f183cd3",
+  "narrative_tarot@4": "6bbf24df455a522a",
   "action@3": "87f6e73c8dd8d3de",
   "trend@2": "80a95937498e19fc",
   "remedy@2": "8a54bed1ea13dffa",
-  "life_methods@2": "b2b508fa866af9fc",
-  "life_topics@2": "6aee44c00e02b6a5",
+  "life_methods@3": "13e0ffa66978ef9a",
+  "life_topics@3": "6063894dbf8135d2",
   "guard@2": "49e59c41bbcd38bb",
-  "narrative_astrology@1": "65a19de24e0f0c90",
+  "narrative_astrology@2": "6103a67a383504f2",
   "action_bazi@4": "effdf6065ae231c6",
   "action_tarot@2": "33ab0ed8c7aa7a27",
   "action_astrology@1": "3da662668915d1f0",
   "remedy_bazi@4": "1953c4f923cf05ab",
   "remedy_tarot@2": "5ea0b8e2f95f8ce9",
   // v4.3.0 (WP6.1)
-  "narrative_qiuqian@1": "0c3e3d0e3fb24f68",
+  "narrative_qiuqian@2": "50793c67dabf468d",
   "action_qiuqian@1": "4d491e5caa9e0306",
   // v4.4.0 (WP6.3)
-  "narrative_fengshui@1": "6bc0422cc8d0cead",
+  "narrative_fengshui@2": "5d880d4dbbfbfa33",
   "action_fengshui@1": "146ae68566106766",
   // v4.5.0 (WP6.4)
-  "narrative_naming@1": "80799b1d7b8fc49f",
+  "narrative_naming@2": "65d36ae6e56a3b4f",
   "action_naming@1": "34493bd83790f328",
   // v5.3.0 (S10)
-  "narrative_liuyao@1": "e4ef0c466ca1c970",
+  "narrative_liuyao@2": "193c6eda8248674b",
   "action_liuyao@1": "82a59b90dfa30a15",
 };
 

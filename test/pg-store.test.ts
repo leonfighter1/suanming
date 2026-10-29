@@ -65,7 +65,14 @@ const user = (id: string, email: string): UserRecord => ({
 
 /** One owner's records: a chart, a 每日一牌, a held report with a life context, a plan, a life report. */
 function records(owner: string) {
-  const chart: ChartRecord = { id: randomUUID(), owner, fact: bazi, created_at: at(1) };
+  // Whose chart it is (v6.2.0): kept with the chart, sealed like it.
+  const chart: ChartRecord = {
+    id: randomUUID(),
+    owner,
+    fact: bazi,
+    created_at: at(1),
+    person: { name: "陳大文", birthplace: "台灣 · 高雄市" },
+  };
   const daily: ChartRecord = {
     id: randomUUID(),
     owner,
@@ -298,7 +305,7 @@ describe("the database store", () => {
   );
 
   it(
-    "stores no birth date, reading, life context or email in the clear",
+    "stores no birth date, name, reading, life context or email in the clear",
     async () => {
       const pg = await PgStore.open({ kek: KEK, pepper: PEPPER });
       const owner = randomUUID();
@@ -318,6 +325,8 @@ describe("the database store", () => {
         "換工作",
         "secret.person@example.com",
         "google-subject-42",
+        "陳大文",
+        "高雄市",
       ];
       const tables = ["users", "chart_facts", "reports", "remedies", "life_reports"] as const;
       const stored: Buffer[] = [];

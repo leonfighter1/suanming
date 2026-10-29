@@ -243,6 +243,10 @@ export async function openStore(
 export const DEV_ACCOUNTS = [
   { login: "admin", password: "admin", country: "HK", locale: "zh-Hans" as const },
   { login: "xumei", password: "xumei", country: "HK", locale: "zh-Hans" as const },
+  // Owner request (2026-10-28): three more, each with its login as its password, as admin and xumei have.
+  { login: "qianli", password: "qianli", country: "HK", locale: "zh-Hans" as const },
+  { login: "wuyong", password: "wuyong", country: "HK", locale: "zh-Hans" as const },
+  { login: "leonfighter", password: "leonfighter", country: "HK", locale: "zh-Hans" as const },
   {
     login: "test@mingli.local",
     password: "Test-12345678",

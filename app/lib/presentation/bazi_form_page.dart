@@ -61,6 +61,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
     final navigator = Navigator.of(context);
     try {
       final place = p.birthPlace;
+      final locale = ref.read(settingsProvider).apiLocaleCode;
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'bazi',
         'local': DateFormat("yyyy-MM-dd'T'HH:mm").format(p.birthLocal),
@@ -68,9 +69,11 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
         'longitude': place.longitude,
         'gender': p.gender,
         'options': {'trueSolarTime': p.trueSolarTime, 'ziHourSect': p.ziNextDay ? 1 : 2, 'inputBasis': p.inputBasis},
+        // Whose chart it is (v6.2.0, the owner's bug report): kept with the chart on the server, so history and
+        // reports name the person and the birthplace on any device or sign-in. Never part of the chart's facts.
+        'person': {'name': p.name.trim(), 'birthplace': place.label(locale)},
       });
-      // Name and birthplace stay on the device: label the chart locally for history.
-      final locale = ref.read(settingsProvider).apiLocaleCode;
+      // Also labelled on this device, as before: charts made before v6.2.0 have their names only here.
       await ref.read(profilesProvider.notifier).labelChart(chart.chartId, p.name, place: place.label(locale));
       // Left the page meanwhile (after confirming): don't open the result on top of 首页.
       if (!mounted) return;

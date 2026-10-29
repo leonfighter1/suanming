@@ -22,7 +22,7 @@ describe("generateLifeReport", () => {
     const r = await generateLifeReport(chart, opts, deps(mock));
     expect(r.status).toBe("passed");
     expect(mock.calls.map((c) => c.agent).sort()).toEqual(["guard", "life_methods", "life_topics"]);
-    expect(r.ai_disclosure.prompt_version).toBe("life_methods@2,life_topics@2,guard@2");
+    expect(r.ai_disclosure.prompt_version).toBe("life_methods@3,life_topics@3,guard@2");
     // Deterministic facts, shown as computed.
     expect(r.facts.benming.hexagram.full_name).toBe("天雷无妄");
     expect(r.facts.benming.changed.full_name).toBe("天泽履");
