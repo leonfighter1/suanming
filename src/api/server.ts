@@ -36,7 +36,10 @@ import {
 } from "../ai/index.js";
 import { SCHEMA_VERSION, type ChartFact, type ChartSystem } from "../chart-fact/index.js";
 import { loadGeoMatrix, loadRuleSet, methodsFor, resolveRegion } from "../compliance/index.js";
+import { AccountError, AccountService } from "../auth/account.js";
 import { AuthError, AuthService, publicUser } from "../auth/service.js";
+import { VerifyError, type ContactKind } from "../auth/verify.js";
+import { NoMail, NoSms, type MailTransport, type SmsTransport } from "../notify/index.js";
 import {
   CalendarInputError,
   lunarDate,
@@ -126,8 +129,14 @@ export interface ApiOptions {
    * scanned and hits recorded, but nothing is held and the console is closed.
    */
   review?: boolean;
-  /** Reviewers (内容审核): account logins / emails allowed to read and decide held content. */
+  /** Reviewers (内容审核): account usernames / emails allowed to read and decide held content. */
   admins?: string[];
+  /**
+   * How mail and text messages leave (v8.2.0, tech plan S15): verification codes, and reports their owner asked
+   * for. Default off; the API server uses the development outbox (src/notify) until the owner picks providers.
+   */
+  mail?: MailTransport;
+  sms?: SmsTransport;
   /** Daily caps on AI jobs (reports + 破除運勢 plans), to bound provider spend. */
   aiQuota?: { perUserPerDay: number; totalPerDay: number };
   /**
@@ -380,11 +389,14 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   }
 
   const admins = new Set((opts.admins ?? []).map((a) => a.trim().toLowerCase()).filter(Boolean));
-  /** The reviewer's login when the caller is a reviewer, else undefined. */
+  /** The reviewer's login (its username or its email, v8.2.0) when the caller is a reviewer, else undefined. */
   async function reviewer(c: Caller): Promise<string | undefined> {
-    const login = auth ? (await auth.users.get(c.user))?.email : undefined;
-    const name = (login ?? c.user).toLowerCase();
-    return admins.has(name) ? name : undefined;
+    const u = auth ? await auth.users.get(c.user) : undefined;
+    const names = u ? [u.username, u.email] : [c.user];
+    return names
+      .filter((n): n is string => n !== undefined)
+      .map((n) => n.toLowerCase())
+      .find((n) => admins.has(n));
   }
 
   function clientIp(req: IncomingMessage): string {
@@ -432,6 +444,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   const auth = opts.auth;
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
+  const mail = opts.mail ?? new NoMail();
+  const sms = opts.sms ?? new NoSms();
+  /** The account's own logins and settings (v8.2.0). */
+  const account = auth && new AccountService({ auth, mail, sms, now });
+  const delivery = () => ({ mail: mail.name, sms: sms.name });
 
   async function caller(req: IncomingMessage): Promise<Caller> {
     if (req.headers.authorization || !opts.devMode || opts.devHeaders === false) {
@@ -1237,17 +1254,55 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
 
     // ---- account ----
+    /** The caller's account as /v1/me shows it. */
+    const me = async () => ({
+      ...publicUser((await auth!.users.get(c.user))!),
+      role: opts.review !== false && (await reviewer(c)) ? "admin" : "user",
+    });
     if (path === "/v1/me" && req.method === "GET") {
       if (!auth) throw new HttpError(404, "auth not configured");
-      return send(res, 200, {
-        ...publicUser((await auth.users.get(c.user))!),
-        role: opts.review !== false && (await reviewer(c)) ? "admin" : "user",
-      });
+      return send(res, 200, await me());
+    }
+    // The logins and settings (v8.2.0, tech plan WP15.3–15.4): a username; an email or a phone, each proved by a
+    // code (POST sends it, POST …/verify brings it back, DELETE removes it); 测算完成后发到邮箱.
+    if (path.startsWith("/v1/account/")) {
+      if (!auth || !account) throw new HttpError(404, "auth not configured");
+      if (path === "/v1/account/username" && req.method === "PUT") {
+        const body = (await readJson(req)) as Record<string, unknown>;
+        await account.setUsername(c.user, body.username);
+        return send(res, 200, await me());
+      }
+      const contact = /^\/v1\/account\/(email|phone)(\/verify)?$/.exec(path);
+      if (contact) {
+        const kind = contact[1] as ContactKind;
+        if (req.method === "POST" && !contact[2]) {
+          const body = (await readJson(req)) as Record<string, unknown>;
+          return send(res, 202, await account.startContact(c.user, kind, body[kind]));
+        }
+        if (req.method === "POST") {
+          const body = (await readJson(req)) as Record<string, unknown>;
+          await account.confirmContact(c.user, kind, body[kind], body.code);
+          return send(res, 200, await me());
+        }
+        if (req.method === "DELETE" && !contact[2]) {
+          await account.removeContact(c.user, kind);
+          return send(res, 200, await me());
+        }
+      }
+      if (path === "/v1/account/settings" && req.method === "GET") {
+        return send(res, 200, { settings: await account.settings(c.user), delivery: delivery() });
+      }
+      if (path === "/v1/account/settings" && req.method === "PATCH") {
+        const settings = await account.updateSettings(c.user, await readJson(req));
+        return send(res, 200, { settings, delivery: delivery() });
+      }
+      throw new HttpError(404, "not found");
     }
     if (path === "/v1/account" && req.method === "DELETE") {
       if (!auth) throw new HttpError(404, "auth not configured");
       // PIPEDA / Québec Law 25: delete the account and everything it owns, now.
       const deleted = await store.deleteOwnerData(c.user);
+      account?.forget(c.user);
       await auth.deleteAccount(c.user);
       for (const k of idempotency.keys()) if (k.startsWith(`${c.user}:`)) idempotency.delete(k);
       return send(res, 200, {
@@ -1592,7 +1647,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         "access-control-allow-headers",
         "authorization, content-type, idempotency-key, x-dev-user, x-dev-country",
       );
-      res.setHeader("access-control-allow-methods", "GET, POST, DELETE, OPTIONS");
+      res.setHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
       res.setHeader(
         "access-control-expose-headers",
         "location, retry-after, x-ai-generated, x-ai-model",
@@ -1615,6 +1670,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       if (e instanceof AuthError) {
         const title = e.status === 451 ? "Unavailable for legal reasons" : "Authentication failed";
         return problem(res, e.status, title, e.message, e.code ? { code: e.code } : {});
+      }
+      if (e instanceof AccountError || e instanceof VerifyError) {
+        return problem(res, e.status, e.message, undefined, { code: e.code });
       }
       if (e instanceof GeoRefusedError)
         return problem(res, 451, "Unavailable for legal reasons", e.message);

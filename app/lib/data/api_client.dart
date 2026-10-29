@@ -37,22 +37,58 @@ class ApiException implements Exception {
 }
 
 class AppUser {
-  const AppUser({required this.id, this.email, required this.country, required this.signInMethods, this.role = 'user'});
+  const AppUser({
+    required this.id,
+    this.username,
+    this.email,
+    this.emailVerified = false,
+    this.phone,
+    required this.country,
+    required this.signInMethods,
+    this.role = 'user',
+    this.emailReports = false,
+  });
   factory AppUser.fromJson(Json j) => AppUser(
         id: j['id'] as String,
+        username: j['username'] as String?,
         email: j['email'] as String?,
+        emailVerified: j['email_verified'] as bool? ?? false,
+        phone: j['phone'] as String?,
         country: j['country'] as String,
         signInMethods: (j['sign_in_methods'] as List).cast<String>(),
         role: j['role'] as String? ?? 'user',
+        emailReports: (j['settings'] as Map?)?['email_reports'] as bool? ?? false,
       );
   final String id;
+
+  /// The three logins (v8.2.0): a username, an email (proved by a code once [emailVerified]), a phone (only once
+  /// bound, in E.164).
+  final String? username;
   final String? email;
+  final bool emailVerified;
+  final String? phone;
   final String country;
   final List<String> signInMethods;
 
   /// 'admin' for 内容审核 reviewers.
   final String role;
   bool get isReviewer => role == 'admin';
+
+  /// 测算完成后发到邮箱 (v8.2.0, WP15.4): 否 by default.
+  final bool emailReports;
+
+  /// Who is signed in, as the menu header shows it: the username, else the email, else the phone.
+  String get login => username ?? email ?? phone ?? '—';
+}
+
+/// Where a code went (POST /v1/account/{email|phone}, v8.2.0), masked, and what delivered it: "outbox" while the
+/// server has no provider, so nothing really left it.
+class CodeSent {
+  const CodeSent({required this.sentTo, required this.delivery});
+  factory CodeSent.fromJson(Json j) => CodeSent(sentTo: j['sent_to'] as String, delivery: j['delivery'] as String);
+  final String sentTo;
+  final String delivery;
+  bool get outbox => delivery == 'outbox';
 }
 
 /// v1 API client (api/openapi.yaml). Authenticated calls send the access token;
@@ -70,24 +106,28 @@ class ApiClient {
 
   // ---- auth ----
 
+  /// A new account (v8.2.0): a username, an email, or both.
   Future<void> register({
-    required String email,
+    String? username,
+    String? email,
     required String password,
     required String country,
     required String locale,
     required bool ageConfirmed,
   }) =>
       _storeTokens(_send('POST', '/v1/auth/register', {
-        'email': email,
+        'username': ?username,
+        'email': ?email,
         'password': password,
         'country': country,
         'locale': locale,
         'age_confirmed': ageConfirmed,
       }));
 
-  Future<void> login(String email, String password, {String? captchaToken}) =>
+  /// [login] is a username, an email or a bound phone (v8.2.0); the server tells them apart.
+  Future<void> login(String login, String password, {String? captchaToken}) =>
       _storeTokens(_send('POST', '/v1/auth/login', {
-        'email': email,
+        'login': login,
         'password': password,
         'captcha_token': ?captchaToken,
       }));
@@ -105,6 +145,21 @@ class ApiClient {
   }
 
   Future<AppUser> me() async => AppUser.fromJson(await _authed('GET', '/v1/me'));
+
+  // ---- the account's logins (v8.2.0, tech plan WP15.3) ----
+
+  Future<AppUser> setUsername(String username) async =>
+      AppUser.fromJson(await _authed('PUT', '/v1/account/username', {'username': username}));
+
+  /// Sends a code to an email or a phone ([kind]: 'email' or 'phone'); it counts once [confirmContact] brings it back.
+  Future<CodeSent> startContact(String kind, String value) async =>
+      CodeSent.fromJson(await _authed('POST', '/v1/account/$kind', {kind: value}));
+
+  Future<AppUser> confirmContact(String kind, String value, String code) async =>
+      AppUser.fromJson(await _authed('POST', '/v1/account/$kind/verify', {kind: value, 'code': code}));
+
+  /// Removes the email or unbinds the phone.
+  Future<AppUser> removeContact(String kind) async => AppUser.fromJson(await _authed('DELETE', '/v1/account/$kind'));
 
   /// Deletes the account and all its data on the server, then forgets the tokens.
   Future<Json> deleteAccount() async {
@@ -348,6 +403,8 @@ class ApiClient {
       res = switch (method) {
         'GET' => await _http.get(uri, headers: headers),
         'DELETE' => await _http.delete(uri, headers: headers),
+        'PUT' => await _http.put(uri, headers: headers, body: jsonEncode(body)),
+        'PATCH' => await _http.patch(uri, headers: headers, body: jsonEncode(body)),
         _ => await _http.post(uri, headers: headers, body: jsonEncode(body)),
       };
     } on http.ClientException catch (e) {

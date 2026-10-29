@@ -153,7 +153,8 @@ describe("login protection", () => {
       password: "whatever pw",
     });
     expect(res.status).toBe(401);
-    expect((await res.json()).detail).toBe("email or password is incorrect");
+    // One answer for an email, a username or a phone since v8.2.0 (the owner: 用户名、邮箱或手机号登录).
+    expect((await res.json()).detail).toBe("the login or password is incorrect");
   });
 });
 
@@ -283,7 +284,9 @@ describe("dev accounts", () => {
     const res = await post("/v1/auth/login", { email: "admin", password: "admin" });
     expect(res.status).toBe(200);
     const me = await (await authed((await res.json()).access_token, "/v1/me")).json();
-    expect(me).toMatchObject({ email: "admin", country: "HK" });
+    // Since v8.2.0 a login without an @ is the account's username, and the account has no email until one is added.
+    expect(me).toMatchObject({ username: "admin", country: "HK" });
+    expect(me.email).toBeUndefined();
     // Normal registration rules still apply to everyone else.
     expect((await register("admin2", "admin")).status).toBe(400);
   });
@@ -295,7 +298,7 @@ describe("dev accounts", () => {
       const res = await post("/v1/auth/login", { email: login, password: login });
       expect(res.status, login).toBe(200);
       const me = await (await authed((await res.json()).access_token, "/v1/me")).json();
-      expect(me).toMatchObject({ email: login, country: "HK" });
+      expect(me).toMatchObject({ username: login, country: "HK" });
       expect((await post("/v1/auth/login", { email: login, password: "admin" })).status).toBe(401);
     }
   });

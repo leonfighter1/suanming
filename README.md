@@ -12,6 +12,57 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v8.2.0 (2026-10-29): sign in with a username, an email or a phone; codes that bind a phone to its owner
+
+The third part of stage S15 (your request: 用户名、邮箱或手机号登录，手机号需要绑定用户本人). A medium update, kept
+locally until v9.0.0. As you asked, this is the framework. No mail or SMS service is connected yet: that is the next
+step, your choice.
+
+- **Signing in:** one field, 用户名 / 邮箱 / 手机号, and the password.
+  - The app tells them apart: with an @ it's an email; digits (or a leading +) a phone; anything else a username.
+  - A phone counts only once bound. Written without its country code it is read in each region where it fits, and
+    signs in when exactly one of those is bound.
+  - A wrong login says 账号或密码不正确, the same for all three, in Chinese. It used to show the server's English.
+- **Signing up:** a 用户名 and a password. The email is optional.
+  - A username is 2–24 letters, digits, Chinese characters, `_ . -`, starting with a letter or a Chinese character.
+    It is unique: Admin, admin and full-width ａｄｍｉｎ are the same name.
+  - A taken name or email says so in Chinese.
+- **设置 → 账号与登录:**
+  - **用户名:** set or change it in a dialog.
+  - **邮箱:** shown with 已验证 or 未验证. A tap verifies it, or changes it, by a 6-digit code sent there. A new email
+    replaces the old one for signing in.
+  - **手机号:** 绑定 sends a 6-digit code to the number, and only the code coming back binds it: that is what proves
+    the number is the user's own. Type a local number for the account's region (9123 4567 in 香港), or any number with
+    its country code (+65 9123 4567). 解绑 asks first.
+  - A number bound to one account can't be bound to another. An account always keeps one way to sign in.
+- **Codes:**
+  - valid 10 minutes, 5 tries;
+  - one a minute at most, five an hour to one number or address, ten a day per account;
+  - kept only in memory, as hashes.
+- **For now, nothing is really sent.** The server writes every code and mail to the `.outbox/` folder instead:
+  - The console prints each text message: `sms (dev outbox): …: 【命理大师】你的验证码是 123456…`.
+  - Mail goes to `.outbox/mail/` as .eml files (they open in Outlook or Thunderbird), each with a .txt beside it.
+  - The app's dialog says so under the code.
+  - Plugging in a provider later changes only the delivery code (`src/notify`).
+- **The dev accounts** are usernames now: admin / admin, xumei / xumei, qianli / qianli, wuyong / wuyong, leonfighter
+  / leonfighter. Readings kept in the database stay with them.
+- Kept private: the username and the phone are encrypted with the account's key, and found for login by a keyed
+  hash, as the email has been.
+- Verified:
+  - 22 new server tests:
+    - telling a login apart, usernames, phone numbers for HK, TW and MY, local numbers at login, masks;
+    - codes (once only, expiry, 5 tries, every limit);
+    - sign-up by username, binding and unbinding a phone, signing in with it written four ways, a number bound
+      elsewhere;
+    - verifying and changing an email, the setting needing a verified email, renaming, no provider (503), moving an
+      old dev seed, a reviewer by username;
+    - the database across a restart, with the plaintext check.
+  - 9 new app tests: sign-in sends the login, sign-up with and without an email and with a taken name, renaming,
+    binding a phone (a wrong code, then the right one), a number bound elsewhere, verifying the email, the keyboard
+    (Enter sends, Enter binds), no 测试环境 notice when a provider delivers, unbinding.
+  - Looked at rendered with the real font: the sign-in and sign-up pages, 设置, and the binding dialog.
+  - 556 server tests and 188 app tests pass; harness PASS.
+
 ### v8.1.0 (2026-10-29): the ☰ menu, and an app icon
 
 The first two parts of stage S15 (your request: settings in one menu, an icon for the app). A medium update, kept

@@ -1493,6 +1493,43 @@ As built (v8.1.0):
   - pending codes are kept in memory only, as hashes, and expire.
 - Data retention and OpenAPI are updated.
 
+As built (v8.2.0):
+
+- **Logins** (`src/auth/identifiers.ts`):
+  - A phone number is kept in E.164. Plans give the national number's length for HK, TW, SG, MY, MO, CN, US, CA, GB
+    and AU; any other calling code is taken as written.
+  - A trunk 0 is dropped first: Malaysia's 012-345 6789 has 10 digits and fits its plan as written. This came to
+    light while working the test's expectation out by hand.
+  - A local number at login is read in every region whose length fits (8 digits: HK, SG, MO). It names an account
+    only when exactly one of them is bound.
+  - Every failed login gets one answer, whatever its kind.
+- **Codes** (`src/auth/verify.ts`):
+  - They are kept in memory, hashed with a per-process key.
+  - A request is counted before the server looks for another holder, so a refused one counts too. That slows anyone
+    probing which numbers have accounts.
+- **The account** (`src/auth/account.ts`, routes `/v1/account/username | email | phone | settings`):
+  - Problems carry codes: `username_taken`, `phone_taken`, `wrong_code`, `wait`, `last_login`, `email_unverified`,
+    `delivery_unavailable` and more.
+  - Sign-up's 400s carry them too (`username_invalid`, `email_invalid`, `password_weak`), so the app shows Chinese
+    instead of the server's English.
+- **The store:**
+  - Migration 008 adds `username_lookup` and `phone_lookup`, unique as the email's lookup is.
+  - The sealed column gains the username, the phone, when each was proved, and the settings.
+  - A contract test covers a restart; the plaintext test now looks for a username and a phone too.
+- **The dev accounts:** a login without an @ seeds a username. An account seeded before is moved over: the same id
+  and records, the email removed. Reviewers match the username or the email.
+- **The outbox:**
+  - `OutboxMail` writes an .eml file, with a .txt beside it.
+  - `OutboxSms` writes a .txt, and its console line shows the message (the code, never the number).
+  - Without a provider, mail and SMS are off outside dev mode, and asking for a code answers 503.
+- **The app:**
+  - `AppUser` gains `username`, `emailVerified`, `phone`, `emailReports` and `login`.
+  - The sign-in page has one `login` field; sign-up asks for a 用户名, with 邮箱 optional.
+  - 设置 rows open `showContactDialog` and `showUsernameDialog`; `accountProblem` maps the codes to the reader's
+    language.
+- **Tests changed on purpose:** `auth.test.ts` (the 401's wording; the dev accounts are usernames) and the app's
+  sign-in tests (the `login` field, the Chinese 401 message).
+
 ### WP15.4 报告发到邮箱 (→ v9.0.0)
 
 - **The setting 测算完成后发到邮箱** is 否 by default, and can be turned on only with a verified email. When on:
@@ -1942,5 +1979,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP14.3    | done                         | v8.0.0  |
 | WP15.1    | done                         | v8.1.0  |
 | WP15.2    | done                         | v8.1.0  |
-| WP15.3    | in progress                  | —       |
-| WP15.4    | planned                      | —       |
+| WP15.3    | done                         | v8.2.0  |
+| WP15.4    | in progress                  | —       |

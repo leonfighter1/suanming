@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
+import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'sign_in_page.dart';
+import 'widgets/contact_dialog.dart';
+import 'widgets/remedy.dart' show compactButtons;
 
 /// A group's heading in 设置 (账号与登录, 报告), read out as a heading.
 class SettingsGroup extends StatelessWidget {
@@ -28,6 +31,56 @@ class SettingsGroup extends StatelessWidget {
 /// 个人资料, 语言, 内容审核 and 键盘快捷键 are in the menu itself.
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  static String _methodLabel(AppLocalizations l10n, String method) => switch (method) {
+        'password' => l10n.password,
+        'apple' => l10n.appleSignIn,
+        'google' => l10n.googleSignIn,
+        _ => method,
+      };
+
+  /// After a dialog that changed the account: keep the new account, and say what changed.
+  static Future<void> _changed(BuildContext context, WidgetRef ref, Future<AppUser?> dialog, String done) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final auth = ref.read(authProvider.notifier);
+    final user = await dialog;
+    if (user == null) return;
+    auth.changed(user);
+    messenger.showSnackBar(SnackBar(content: Text(done)));
+  }
+
+  /// 删除邮箱 or 解绑 the phone, after asking.
+  static Future<void> _remove(BuildContext context, WidgetRef ref, String kind, String action, String done) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('$action？'),
+        actions: [
+          compactButtons(
+            ctx,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+                const SizedBox(width: Space.s),
+                FilledButton(key: const Key('confirm-remove'), onPressed: () => Navigator.pop(ctx, true), child: Text(action)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final auth = ref.read(authProvider.notifier);
+    try {
+      auth.changed(await ref.read(apiClientProvider).removeContact(kind));
+      messenger.showSnackBar(SnackBar(content: Text(done)));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(accountProblem(l10n, e))));
+    }
+  }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
@@ -71,12 +124,61 @@ class SettingsPage extends ConsumerWidget {
       body: ListView(
         children: [
           SettingsGroup(l10n.settingsAccountGroup, key: const Key('settings-account')),
-          ListTile(title: Text(l10n.email), subtitle: Text(user.email ?? '—')),
+          // The three logins (v8.2.0, WP15.3): each changed in its own dialog; an email or a phone counts once a code
+          // sent to it comes back.
+          ListTile(
+            key: const Key('settings-username'),
+            title: Text(l10n.username),
+            subtitle: Text(user.username ?? l10n.notSet),
+            trailing: const Icon(Icons.edit_outlined),
+            onTap: () => _changed(context, ref, showUsernameDialog(context, current: user.username), l10n.usernameSaved),
+          ),
+          ListTile(
+            key: const Key('settings-email'),
+            title: Text(l10n.email),
+            subtitle: Text(
+              user.email == null
+                  ? l10n.notSet
+                  : '${user.email} · ${user.emailVerified ? l10n.emailVerifiedLabel : l10n.emailUnverifiedLabel}',
+            ),
+            trailing: user.email == null
+                ? const Icon(Icons.add)
+                : IconButton(
+                    key: const Key('remove-email'),
+                    tooltip: l10n.removeEmail,
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _remove(context, ref, 'email', l10n.removeEmail, l10n.emailRemovedDone),
+                  ),
+            onTap: () => _changed(
+              context,
+              ref,
+              showContactDialog(context, kind: 'email', current: user.email),
+              l10n.emailVerifiedDone,
+            ),
+          ),
+          ListTile(
+            key: const Key('settings-phone'),
+            title: Text(l10n.phone),
+            subtitle: Text(user.phone ?? l10n.phoneUnbound),
+            trailing: user.phone == null
+                ? const Icon(Icons.chevron_right)
+                : IconButton(
+                    key: const Key('unbind-phone'),
+                    tooltip: l10n.unbindPhone,
+                    icon: const Icon(Icons.link_off),
+                    onPressed: () => _remove(context, ref, 'phone', l10n.unbindPhone, l10n.phoneUnboundDone),
+                  ),
+            onTap: () => _changed(context, ref, showContactDialog(context, kind: 'phone'), l10n.phoneBoundDone),
+          ),
           ListTile(
             title: Text(l10n.regionAccount),
             subtitle: Text(signupRegions[user.country]?[locale] ?? user.country),
           ),
-          ListTile(title: Text(l10n.signInMethods), subtitle: Text(user.signInMethods.join(', '))),
+          ListTile(
+            title: Text(l10n.signInMethods),
+            subtitle: Text('${user.signInMethods.map((m) => _methodLabel(l10n, m)).join('、')}\n${l10n.loginsNote}'),
+            isThreeLine: true,
+          ),
           const Divider(),
           ListTile(
             key: const Key('sign-out'),

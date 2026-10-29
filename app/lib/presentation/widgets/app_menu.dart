@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
-import '../../data/api_client.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../history_page.dart';
@@ -36,7 +35,7 @@ class AppMenu extends ConsumerWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          _Header(account: user == null ? null : accountLabel(user)),
+          _Header(account: user?.login),
           ListTile(
             key: const Key('menu-history'),
             leading: const Icon(Icons.history),
@@ -98,9 +97,6 @@ class AppMenu extends ConsumerWidget {
     );
   }
 }
-
-/// Who is signed in, as the menu header and 设置 show it.
-String accountLabel(AppUser user) => user.email ?? '—';
 
 /// 语言 from the menu: 简体中文 or 繁體中文, the current one ticked and focused.
 Future<void> pickLanguage(BuildContext context, WidgetRef ref) async {

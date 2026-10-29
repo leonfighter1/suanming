@@ -9,3 +9,5 @@ report.json
 .cache/
 # The database store's default folder (MINGLI_STORE=pglite): encrypted, but personal data all the same.
 .data/
+# The development outbox (S15): mail and text messages written instead of sent; they hold addresses and codes.
+.outbox/

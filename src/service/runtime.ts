@@ -239,7 +239,10 @@ export async function openStore(
   return { store: pg, users: pg, dataDir, close: () => pg.close() };
 }
 
-/** Test accounts seeded on every dev-mode start (the store is in-memory). */
+/**
+ * Test accounts seeded on every dev-mode start (the store is in-memory). A login without an @ is the account's
+ * username since v8.2.0; one with an @ its email.
+ */
 export const DEV_ACCOUNTS = [
   { login: "admin", password: "admin", country: "HK", locale: "zh-Hans" as const },
   { login: "xumei", password: "xumei", country: "HK", locale: "zh-Hans" as const },

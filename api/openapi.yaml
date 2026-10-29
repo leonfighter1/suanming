@@ -69,7 +69,11 @@ paths:
     post:
       tags: [auth]
       operationId: register
-      summary: Email + password sign-up (Geo-Rule and age gate checked first)
+      summary: Username and/or email + password sign-up (Geo-Rule and age gate checked first)
+      description: |
+        At least one of `username` and `email` (v8.2.0; the app asks for a username, the email optional). The email
+        stays unverified until a code proves it (`POST /v1/account/email`). A taken username or email is a 409 with
+        `code: username_taken` or `email_taken`.
       security: []
       requestBody:
         required: true
@@ -79,8 +83,13 @@ paths:
               allOf:
                 - $ref: "#/components/schemas/SignupProfile"
                 - type: object
-                  required: [email, password]
+                  required: [password]
                   properties:
+                    username:
+                      type: string
+                      description: >-
+                        2–24 letters, digits, Han characters, _ . -, starting with a letter or a Han
+                        character; unique, case and width folded.
                     email: { type: string, format: email }
                     password: { type: string, minLength: 10, maxLength: 256 }
       responses:
@@ -93,9 +102,13 @@ paths:
     post:
       tags: [auth]
       operationId: login
-      summary: Email + password sign-in
+      summary: Sign in with a username, an email or a bound phone, and the password
       description: |
-        After 3 failures in 15 minutes (per email and per IP) a captcha token is
+        `login` (v8.2.0) is told apart by its form: with an @ an email; digits (spaces, dashes, brackets, a leading +)
+        a phone; anything else a username. A phone counts only once bound; written without its country code it is
+        read in each region whose numbers fit, and names an account only when exactly one of them is bound. `email`
+        is the same field from before v8.2.0. Every failure has the one answer, whether or not the login exists.
+        After 3 failures in 15 minutes (per login and per IP) a captcha token is
         required (problem `code: captcha_required`). After 10, the key is locked (429).
       security: []
       requestBody:
@@ -104,9 +117,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required: [password]
               properties:
-                email: { type: string }
+                login: { type: string }
+                email: { type: string, deprecated: true }
                 password: { type: string }
                 captcha_token: { type: string }
       responses:
@@ -248,6 +262,154 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
         "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/account/username:
+    put:
+      tags: [account]
+      operationId: setUsername
+      summary: Set or change the username (v8.2.0)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username: { type: string }
+      responses:
+        "200":
+          description: The account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+
+  /v1/account/{kind}:
+    parameters:
+      - name: kind
+        in: path
+        required: true
+        schema: { type: string, enum: [email, phone] }
+    post:
+      tags: [account]
+      operationId: startContact
+      summary: Send a code to an email or a phone, to verify or bind it (v8.2.0)
+      description: |
+        Six digits, valid 10 minutes, 5 tries. A local phone number reads in the account's region. Limits: one code
+        a minute per kind, five an hour to one destination, ten a day per account; every request counts (429 with
+        `code: wait` or `too_many`). Refused with 409 when another account holds it (`email_taken`, `phone_taken`)
+        or it is already this account's (`already_bound`), and 503 `delivery_unavailable` when the server has no
+        way to deliver.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                phone: { type: string }
+      responses:
+        "202":
+          description: The code is on its way
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeSent" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [account]
+      operationId: removeContact
+      summary: Remove the email or unbind the phone (v8.2.0)
+      description: >-
+        A password account keeps one way to sign in at least (409 `last_login`). Removing the email
+        turns 测算完成后发到邮箱 off.
+      responses:
+        "200":
+          description: The account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "409": { $ref: "#/components/responses/Problem" }
+
+  /v1/account/{kind}/verify:
+    parameters:
+      - name: kind
+        in: path
+        required: true
+        schema: { type: string, enum: [email, phone] }
+    post:
+      tags: [account]
+      operationId: confirmContact
+      summary: Bring the code back; the email becomes the account's, verified, or the phone is bound (v8.2.0)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                email: { type: string }
+                phone: { type: string }
+                code: { type: string, pattern: "^[0-9]{6}$" }
+      responses:
+        "200":
+          description: The account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400":
+          description: >-
+            Wrong (`wrong_code`), expired (`expired`), or no code for it (`no_code`, also after 5 wrong tries)
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+
+  /v1/account/settings:
+    get:
+      tags: [account]
+      operationId: getSettings
+      summary: The account's settings, and what delivers mail and text messages here (v8.2.0)
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [settings, delivery]
+                properties:
+                  settings: { $ref: "#/components/schemas/AccountSettings" }
+                  delivery: { $ref: "#/components/schemas/Delivery" }
+        "401": { $ref: "#/components/responses/Problem" }
+    patch:
+      tags: [account]
+      operationId: updateSettings
+      summary: Change settings; email_reports true needs a verified email (409 `email_unverified`)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountSettings" }
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [settings, delivery]
+                properties:
+                  settings: { $ref: "#/components/schemas/AccountSettings" }
+                  delivery: { $ref: "#/components/schemas/Delivery" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
 
   /v1/account:
     delete:
@@ -1252,10 +1414,18 @@ components:
           description: User confirms the region's minimum age (geo_rule_matrix age_gate)
     User:
       type: object
-      required: [id, country, locale, sign_in_methods, created_at]
+      required: [id, country, locale, sign_in_methods, settings, created_at]
       properties:
         id: { type: string, format: uuid }
+        username: { type: string, description: "v8.2.0: as chosen; signs in in any case" }
         email: { type: string }
+        email_verified:
+          type: boolean
+          description: v8.2.0. A code proved the email the user's own; reports are mailed only then.
+        phone:
+          type: string
+          description: v8.2.0. E.164, present only once bound (a code sent to it came back).
+        settings: { $ref: "#/components/schemas/AccountSettings" }
         country: { type: string }
         locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
         sign_in_methods:
@@ -1266,6 +1436,31 @@ components:
           type: string
           enum: [user, admin]
           description: admin = 内容审核 reviewer (MINGLI_ADMINS); returned by /v1/me
+    AccountSettings:
+      type: object
+      required: [email_reports]
+      properties:
+        email_reports:
+          type: boolean
+          description: >-
+            测算完成后发到邮箱 (v8.2.0): mail every passed reading and 一生运势报告 to the verified email.
+            false by default; true needs a verified email.
+    Delivery:
+      type: object
+      description: >-
+        What delivers mail and text messages on this server: "outbox" (development: written to a folder,
+        nothing sent), "off", or a provider's name.
+      required: [mail, sms]
+      properties:
+        mail: { type: string }
+        sms: { type: string }
+    CodeSent:
+      type: object
+      required: [sent_to, expires_at, delivery]
+      properties:
+        sent_to: { type: string, description: "Masked: s***@example.com, +852 ****4567" }
+        expires_at: { type: string, format: date-time }
+        delivery: { type: string }
     Problem:
       type: object
       required: [type, title, status]

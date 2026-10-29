@@ -29,6 +29,10 @@ class SignInPage extends ConsumerStatefulWidget {
 }
 
 class _SignInPageState extends ConsumerState<SignInPage> {
+  // Signing in: one field for a username, an email or a bound phone (v8.2.0). Signing up: a username, the email
+  // optional.
+  final _login = TextEditingController();
+  final _username = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _register = false;
@@ -39,10 +43,25 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   @override
   void dispose() {
+    _login.dispose();
+    _username.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
+
+  /// What went wrong, in the reader's language where the server names it.
+  String _message(AppLocalizations l10n, ApiException e) => switch (e.code) {
+        'captcha_required' || 'locked' => l10n.captchaRequired,
+        'username_invalid' => l10n.usernameHint,
+        'username_taken' => l10n.usernameTaken,
+        'email_invalid' => l10n.emailInvalid,
+        'email_taken' => l10n.emailTaken,
+        'password_weak' => l10n.passwordWeak,
+        _ when e.status == 429 => l10n.captchaRequired,
+        _ when e.status == 401 && !_register => l10n.loginFailed,
+        _ => e.toString(),
+      };
 
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
@@ -53,17 +72,19 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final auth = ref.read(authProvider.notifier);
     try {
       if (_register) {
+        final email = _email.text.trim();
         await auth.register(
-          email: _email.text.trim(),
+          username: _username.text.trim(),
+          email: email.isEmpty ? null : email,
           password: _password.text,
           country: _country,
           ageConfirmed: _ageConfirmed,
         );
       } else {
-        await auth.login(_email.text.trim(), _password.text);
+        await auth.login(_login.text.trim(), _password.text);
       }
     } on ApiException catch (e) {
-      setState(() => _error = e.code == 'captcha_required' || e.status == 429 ? l10n.captchaRequired : e.toString());
+      setState(() => _error = _message(l10n, e));
     } on ApiUnreachable catch (e) {
       setState(() => _error = l10n.serverUnreachable(e.baseUrl));
     } catch (e) {
@@ -77,8 +98,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(settingsProvider).apiLocaleCode;
-    final canSubmit = !_busy && (!_register || _ageConfirmed);
-    // Enter in 邮箱 moves on, Enter in 密码 submits; Ctrl+Enter submits from anywhere.
+    final canSubmit = !_busy && (!_register || (_ageConfirmed && _username.text.trim().isNotEmpty));
+    // Enter in a field moves on, Enter in 密码 submits; Ctrl+Enter submits from anywhere.
     return SubmitShortcut(
       onSubmit: canSubmit ? _submit : null,
       child: Scaffold(
@@ -92,14 +113,42 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               subtitle: l10n.disclaimerShort,
               icon: Icons.auto_awesome,
             ),
-            TextField(
-              key: const Key('email'),
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
-              decoration: InputDecoration(labelText: l10n.email, prefixIcon: const Icon(Icons.mail_outline)),
-            ),
+            if (_register) ...[
+              TextField(
+                key: const Key('username'),
+                controller: _username,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.newUsername],
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.username,
+                  prefixIcon: const Icon(Icons.person_outline),
+                  helperText: l10n.usernameHint,
+                  helperMaxLines: 2,
+                ),
+              ),
+              const SizedBox(height: Space.m),
+              TextField(
+                key: const Key('email'),
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.email],
+                decoration: InputDecoration(labelText: l10n.emailOptional, prefixIcon: const Icon(Icons.mail_outline)),
+              ),
+            ] else
+              TextField(
+                key: const Key('login'),
+                controller: _login,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.username, AutofillHints.email, AutofillHints.telephoneNumber],
+                decoration: InputDecoration(
+                  labelText: l10n.loginField,
+                  prefixIcon: const Icon(Icons.person_outline),
+                  helperText: l10n.loginFieldHint,
+                ),
+              ),
             const SizedBox(height: Space.m),
             TextField(
               key: const Key('password'),

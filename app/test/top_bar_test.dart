@@ -66,7 +66,7 @@ void main() {
     await settle(tester);
     expect(find.widgetWithText(AppBar, '设置'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('settings-account')), matching: find.text('账号与登录')), findsOneWidget);
-    expect(find.text('test@mingli.local'), findsOneWidget);
+    expect(find.text('test@mingli.local · 未验证，点此验证'), findsOneWidget);
     expect(find.byKey(const Key('sign-out')), findsOneWidget);
     expect(find.byKey(const Key('delete-account')), findsOneWidget);
   });

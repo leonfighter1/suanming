@@ -73,7 +73,25 @@ class FakeApi {
     this.email = 'me@example.com',
     this.pendingStage,
     this.history,
-  }) : finalReport = finalReport ?? fixture('report_passed');
+    this.username,
+    this.emailVerified = false,
+  })  : finalReport = finalReport ?? fixture('report_passed'),
+        accountEmail = email;
+
+  /// The account's logins as the server keeps them (v8.2.0): what /v1/me shows, changed by the account routes. A
+  /// code sent by POST /v1/account/{email|phone} is always [code].
+  String? username;
+  String? accountEmail;
+  bool emailVerified;
+  String? phone;
+  static const code = '123456';
+  final _codeFor = <String, String>{};
+
+  /// What delivers codes and mail here: "outbox" while the server has no provider.
+  String delivery = 'outbox';
+
+  /// 测算完成后发到邮箱 (v8.2.0, WP15.4).
+  bool emailReports = false;
 
   /// GET /v1/reports items, when a test needs other readings than the one 八字 report.
   final List<Map<String, dynamic>>? history;
@@ -180,6 +198,12 @@ class FakeApi {
     }
     switch ((req.method, path)) {
       case ('POST', '/v1/auth/register'):
+        if ((jsonDecode(req.body) as Map)['username'] == 'taken') {
+          return _json(
+            {'title': 'Authentication failed', 'detail': 'this username is taken', 'status': 409, 'code': 'username_taken'},
+            409,
+          );
+        }
         return _json(_tokens(), 201);
       case ('POST', '/v1/auth/login'):
         final b = jsonDecode(req.body) as Map;
@@ -196,16 +220,58 @@ class FakeApi {
       expireAccessOnce = false;
       return _json({'title': 'Authentication failed', 'status': 401}, 401);
     }
-    if (req.method == 'GET' && path == '/v1/me') {
+    if (req.method == 'GET' && path == '/v1/me') return _json(_me, 200);
+    // The account's logins and settings (v8.2.0).
+    if (path == '/v1/account/username' && req.method == 'PUT') {
+      final name = (jsonDecode(req.body) as Map)['username'] as String;
+      if (name.toLowerCase() == 'taken') return _problem(409, 'this username is taken', 'username_taken');
+      username = name;
+      return _json(_me, 200);
+    }
+    final contact = RegExp(r'^/v1/account/(email|phone)(/verify)?$').firstMatch(path);
+    if (contact != null) {
+      final kind = contact[1]!;
+      if (req.method == 'DELETE') {
+        if (kind == 'email') {
+          accountEmail = null;
+          emailVerified = false;
+          emailReports = false;
+        } else {
+          phone = null;
+        }
+        return _json(_me, 200);
+      }
+      final body = jsonDecode(req.body) as Map;
+      // As the server reads a local number: in the account's region (HK).
+      final raw = (body[kind] as String).trim();
+      final digits = raw.replaceAll(RegExp(r'\D'), '');
+      final value = kind == 'email' ? raw : (raw.startsWith('+') ? '+$digits' : '+852$digits');
+      if (contact[2] == null) {
+        if (value == '+85200000000') return _problem(409, 'this number is bound to another account', 'phone_taken');
+        _codeFor[kind] = value;
+        final masked = kind == 'phone' ? '+852 ****${value.substring(value.length - 4)}' : '${value[0]}***@${value.split('@').last}';
+        return _json({'sent_to': masked, 'expires_at': '2026-10-29T01:10:00Z', 'delivery': delivery}, 202);
+      }
+      if (_codeFor[kind] != value) return _problem(400, 'no code was sent for this; ask for one first', 'no_code');
+      if (body['code'] != code) return _problem(400, 'the code is not right', 'wrong_code');
+      _codeFor.remove(kind);
+      if (kind == 'phone') {
+        phone = value;
+      } else {
+        accountEmail = value;
+        emailVerified = true;
+      }
+      return _json(_me, 200);
+    }
+    if (path == '/v1/account/settings') {
+      if (req.method == 'PATCH') {
+        final on = (jsonDecode(req.body) as Map)['email_reports'] as bool;
+        if (on && !emailVerified) return _problem(409, 'verify an email first', 'email_unverified');
+        emailReports = on;
+      }
       return _json({
-        'id': 'u1',
-        'email': email,
-        'country': 'HK',
-        'locale': 'zh-Hant',
-        'sign_in_methods': ['password'],
-        'created_at': '2026-10-26T00:00:00Z',
-        // The dev reviewer (MINGLI_ADMINS default).
-        'role': email == 'admin' ? 'admin' : 'user',
+        'settings': {'email_reports': emailReports},
+        'delivery': {'mail': delivery, 'sms': delivery},
       }, 200);
     }
     // 内容审核: one held report (review_report.json, generated from the server).
@@ -429,6 +495,26 @@ class FakeApi {
         status,
         headers: {'content-type': 'application/json; charset=utf-8'},
       );
+
+  /// A problem as the server's account routes write it: the message as the title, and its code.
+  static http.Response _problem(int status, String title, String code) =>
+      _json({'title': title, 'status': status, 'code': code}, status);
+
+  /// GET /v1/me, from the account as it stands.
+  Map<String, Object?> get _me => {
+        'id': 'u1',
+        'username': ?username,
+        'email': accountEmail,
+        'email_verified': emailVerified,
+        'phone': ?phone,
+        'country': 'HK',
+        'locale': 'zh-Hant',
+        'sign_in_methods': ['password'],
+        'settings': {'email_reports': emailReports},
+        'created_at': '2026-10-26T00:00:00Z',
+        // The dev reviewer (MINGLI_ADMINS default).
+        'role': email == 'admin' || username == 'admin' ? 'admin' : 'user',
+      };
 }
 
 /// [pollInterval] must be non-zero when a report never leaves pending, or the

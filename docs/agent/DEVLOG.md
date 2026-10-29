@@ -2,6 +2,28 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (b): S15 WP15.3 — username, email or phone login; codes; release v8.2.0
+
+- Server:
+  - `src/auth/identifiers.ts`: login kinds, usernames (NFKC, case-folded lookup), phones in E.164 with plans for ten
+    regions, candidates for a local number at login, masks.
+  - `src/auth/verify.ts`: codes in memory with sending limits.
+  - `src/auth/account.ts`: username, email and phone binding, settings.
+  - `src/notify`: transports, the MIME builder, the dev outbox.
+  - Migration 008 (username_lookup, phone_lookup). Routes `/v1/account/*`; CORS allows PUT and PATCH.
+- Dev seeds: a login without an @ is a username. Seeds from before (the login stored as the email) are moved over,
+  keeping their ids and records. Reviewers match the username or the email.
+- App:
+  - the sign-in page has a `login` field; sign-up has username + optional email;
+  - 设置 rows for the three logins, with the binding dialog (`ContactDialog`) and the username dialog;
+  - server codes become Chinese messages.
+- Caught while working a test's expectation out by hand (G7): Malaysia's `012-345 6789` fit its 9–10 digit plan with
+  the trunk 0 still on (+600…). The 0 is now dropped first.
+- App tests: two taps missed after an error line pushed 注册 below the test screen. They now scroll first (rule 27, as
+  written).
+- Tests: server 534 → 556; app 179 → 188. Changed on purpose: auth.test.ts (the 401's wording; the dev accounts are
+  usernames) and the sign-in tests.
+
 ## 2026-10-29 (a): S15 begun — the ☰ menu and the app icon; release v8.1.0
 
 - **Owner request (2026-10-28):**

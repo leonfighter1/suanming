@@ -3510,6 +3510,264 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'账号与登录'**
   String get settingsAccountGroup;
+
+  /// No description provided for @loginField.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名 / 邮箱 / 手机号'**
+  String get loginField;
+
+  /// No description provided for @loginFieldHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'手机号要先在“设置”里绑定'**
+  String get loginFieldHint;
+
+  /// No description provided for @username.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名'**
+  String get username;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'2–24 个字：字母、数字、汉字或 _ . -，以字母或汉字开头'**
+  String get usernameHint;
+
+  /// No description provided for @emailOptional.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱（选填）'**
+  String get emailOptional;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号或密码不正确'**
+  String get loginFailed;
+
+  /// No description provided for @usernameTaken.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个用户名已被使用'**
+  String get usernameTaken;
+
+  /// No description provided for @emailTaken.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个邮箱已注册，请直接登录'**
+  String get emailTaken;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱格式不正确'**
+  String get emailInvalid;
+
+  /// No description provided for @passwordWeak.
+  ///
+  /// In zh, this message translates to:
+  /// **'密码至少要 10 个字符'**
+  String get passwordWeak;
+
+  /// No description provided for @phone.
+  ///
+  /// In zh, this message translates to:
+  /// **'手机号'**
+  String get phone;
+
+  /// No description provided for @notSet.
+  ///
+  /// In zh, this message translates to:
+  /// **'未设置'**
+  String get notSet;
+
+  /// No description provided for @emailVerifiedLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'已验证'**
+  String get emailVerifiedLabel;
+
+  /// No description provided for @emailUnverifiedLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'未验证，点此验证'**
+  String get emailUnverifiedLabel;
+
+  /// No description provided for @phoneUnbound.
+  ///
+  /// In zh, this message translates to:
+  /// **'未绑定，点此绑定'**
+  String get phoneUnbound;
+
+  /// No description provided for @loginsNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名、邮箱和已绑定的手机号都能用来登录，密码相同'**
+  String get loginsNote;
+
+  /// No description provided for @usernameTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名'**
+  String get usernameTitle;
+
+  /// No description provided for @usernameSaved.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名已保存'**
+  String get usernameSaved;
+
+  /// No description provided for @bindPhoneTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'绑定手机号'**
+  String get bindPhoneTitle;
+
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证邮箱'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地号码直接填写；其他地区的号码请加区号，如 +65 9123 4567'**
+  String get phoneHint;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'发送验证码'**
+  String get sendCode;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新发送'**
+  String get resendCode;
+
+  /// No description provided for @codeField.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码'**
+  String get codeField;
+
+  /// No description provided for @codeSentTo.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码已发送到 {to}，10 分钟内有效'**
+  String codeSentTo(String to);
+
+  /// No description provided for @outboxNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试环境：还没有接入短信和邮件服务，验证码不会真的发出，而是写在服务器的 .outbox 文件夹里。'**
+  String get outboxNotice;
+
+  /// No description provided for @confirmBind.
+  ///
+  /// In zh, this message translates to:
+  /// **'绑定'**
+  String get confirmBind;
+
+  /// No description provided for @confirmVerify.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证'**
+  String get confirmVerify;
+
+  /// No description provided for @unbindPhone.
+  ///
+  /// In zh, this message translates to:
+  /// **'解绑'**
+  String get unbindPhone;
+
+  /// No description provided for @removeEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除邮箱'**
+  String get removeEmail;
+
+  /// No description provided for @phoneBoundDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'手机号已绑定'**
+  String get phoneBoundDone;
+
+  /// No description provided for @phoneUnboundDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'手机号已解绑'**
+  String get phoneUnboundDone;
+
+  /// No description provided for @emailVerifiedDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱已验证'**
+  String get emailVerifiedDone;
+
+  /// No description provided for @emailRemovedDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱已删除'**
+  String get emailRemovedDone;
+
+  /// No description provided for @codeWrong.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码不对，请再看一下'**
+  String get codeWrong;
+
+  /// No description provided for @codeExpired.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码已过期，请重新发送'**
+  String get codeExpired;
+
+  /// No description provided for @codeVoid.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证码已失效，请重新发送'**
+  String get codeVoid;
+
+  /// No description provided for @codeWait.
+  ///
+  /// In zh, this message translates to:
+  /// **'发送太频繁，请稍后再试'**
+  String get codeWait;
+
+  /// No description provided for @phoneTaken.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个手机号已绑定其他账号'**
+  String get phoneTaken;
+
+  /// No description provided for @phoneInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'手机号格式不正确'**
+  String get phoneInvalid;
+
+  /// No description provided for @alreadyBound.
+  ///
+  /// In zh, this message translates to:
+  /// **'已经绑定好了'**
+  String get alreadyBound;
+
+  /// No description provided for @lastLogin.
+  ///
+  /// In zh, this message translates to:
+  /// **'至少要保留一种登录方式：用户名、邮箱或手机号'**
+  String get lastLogin;
+
+  /// No description provided for @deliveryOff.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务器还没有接入短信或邮件服务'**
+  String get deliveryOff;
 }
 
 class _AppLocalizationsDelegate

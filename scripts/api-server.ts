@@ -8,6 +8,7 @@ import { existsSync, watchFile } from "node:fs";
 import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createApiServer } from "../src/api/server.js";
+import { notifyFromEnv } from "../src/notify/index.js";
 import {
   buildAuth,
   buildProviders,
@@ -61,6 +62,8 @@ const aiQuota = {
 const persistence = await openStore(secrets);
 const auth = buildAuth(secrets, true, persistence.users);
 await seedDevAccounts(auth, true);
+// Mail and text messages (S15): the development outbox until the owner picks providers (MINGLI_MAIL / MINGLI_SMS).
+const notify = notifyFromEnv(true);
 // The GitHub Pages web test (docs/web-test.md) calls this API from its https origin.
 const corsOrigins = (process.env.MINGLI_CORS_ORIGINS ?? "https://leonfighter1.github.io")
   .split(",")
@@ -81,6 +84,8 @@ const server = createApiServer({
   review: process.env.MINGLI_REVIEW === "on",
   // 内容审核 reviewers: logins allowed to read and decide held content.
   admins: (process.env.MINGLI_ADMINS ?? "admin").split(","),
+  mail: notify.mail,
+  sms: notify.sms,
   aiServing: providers.serving,
   ...(pub && { trustProxy: true, staticDir, aiQuota }),
 });
@@ -115,6 +120,12 @@ server.listen(port, host, () => {
     `CORS origins: localhost${loopbackOnly ? "" : ", private-network http"}, ${corsOrigins.join(", ")}`,
   );
   console.log(`dev accounts: ${DEV_ACCOUNTS.map((a) => `${a.login} / ${a.password}`).join(", ")}`);
+  console.log(
+    `mail: ${notify.mail.name}, sms: ${notify.sms.name}` +
+      (notify.outbox
+        ? ` (nothing is sent: codes and reports are written to ${notify.outbox}/, no provider yet)`
+        : ""),
+  );
   console.log(
     persistence.dataDir
       ? `data: kept in ${persistence.dataDir}, encrypted (MINGLI_STORE=pglite); the X-Dev-User shortcut is off`

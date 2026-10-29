@@ -263,6 +263,28 @@ line in every model call, and the `id` rule group records any hit.
   Linux). Word needs none: Word uses its own font (Microsoft YaHei).
 - Only finished records can be downloaded or sent.
 
+## The ☰ menu, and signing in with a username, an email or a phone (v8.1.0–v8.2.0)
+
+- 首页's bar holds ☰, the title and 历史记录. ☰ opens the menu: 历史记录, 个人资料, 语言, 设置, 内容审核 (reviewers),
+  键盘快捷键, 退出登录.
+- **Signing in:** the one field takes a 用户名, an 邮箱 or a bound 手机号, with the same password. The dev accounts are
+  usernames now: admin / admin, xumei / xumei, qianli / qianli, wuyong / wuyong, leonfighter / leonfighter;
+  test@mingli.local stays an email. Accounts the database kept from before keep their records.
+- **Signing up:** a 用户名 (2–24 letters, digits, Chinese characters, `_ . -`, starting with a letter or a Chinese
+  character) and a password; the email is optional.
+- **设置 → 账号与登录:** change the 用户名; verify or change the 邮箱; bind or unbind the 手机号. A local number is read
+  in the account's region (`9123 4567` in 香港); any other needs its country code (`+65 9123 4567`).
+- **No mail or SMS provider yet** (the owner's next step). The server writes every code and mail to `.outbox/`
+  (git-ignored) instead of sending it, and the dialog says so:
+  - text messages: the console prints `sms (dev outbox): …: 【命理大师】你的验证码是 123456…`, and
+    `.outbox/sms/*.txt` keeps each one;
+  - mail: `.outbox/mail/*.eml` opens in any mail program (Outlook, Thunderbird, Windows Mail), and the `.txt` beside
+    it holds the address, the subject (with the code) and the text.
+  - `MINGLI_MAIL=off` / `MINGLI_SMS=off` turn them off (the default outside dev mode); `MINGLI_OUTBOX_DIR` moves the
+    folder; `MINGLI_MAIL_FROM` sets the sender.
+- A code is valid 10 minutes, 5 tries. A new code at most once a minute; five an hour to one number or address; ten
+  a day per account. Codes live in memory only: after a restart, ask for a new one.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

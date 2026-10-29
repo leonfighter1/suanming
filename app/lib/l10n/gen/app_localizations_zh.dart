@@ -1817,6 +1817,138 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAccountGroup => '账号与登录';
+
+  @override
+  String get loginField => '用户名 / 邮箱 / 手机号';
+
+  @override
+  String get loginFieldHint => '手机号要先在“设置”里绑定';
+
+  @override
+  String get username => '用户名';
+
+  @override
+  String get usernameHint => '2–24 个字：字母、数字、汉字或 _ . -，以字母或汉字开头';
+
+  @override
+  String get emailOptional => '邮箱（选填）';
+
+  @override
+  String get loginFailed => '账号或密码不正确';
+
+  @override
+  String get usernameTaken => '这个用户名已被使用';
+
+  @override
+  String get emailTaken => '这个邮箱已注册，请直接登录';
+
+  @override
+  String get emailInvalid => '邮箱格式不正确';
+
+  @override
+  String get passwordWeak => '密码至少要 10 个字符';
+
+  @override
+  String get phone => '手机号';
+
+  @override
+  String get notSet => '未设置';
+
+  @override
+  String get emailVerifiedLabel => '已验证';
+
+  @override
+  String get emailUnverifiedLabel => '未验证，点此验证';
+
+  @override
+  String get phoneUnbound => '未绑定，点此绑定';
+
+  @override
+  String get loginsNote => '用户名、邮箱和已绑定的手机号都能用来登录，密码相同';
+
+  @override
+  String get usernameTitle => '用户名';
+
+  @override
+  String get usernameSaved => '用户名已保存';
+
+  @override
+  String get bindPhoneTitle => '绑定手机号';
+
+  @override
+  String get verifyEmailTitle => '验证邮箱';
+
+  @override
+  String get phoneHint => '本地号码直接填写；其他地区的号码请加区号，如 +65 9123 4567';
+
+  @override
+  String get sendCode => '发送验证码';
+
+  @override
+  String get resendCode => '重新发送';
+
+  @override
+  String get codeField => '验证码';
+
+  @override
+  String codeSentTo(String to) {
+    return '验证码已发送到 $to，10 分钟内有效';
+  }
+
+  @override
+  String get outboxNotice =>
+      '测试环境：还没有接入短信和邮件服务，验证码不会真的发出，而是写在服务器的 .outbox 文件夹里。';
+
+  @override
+  String get confirmBind => '绑定';
+
+  @override
+  String get confirmVerify => '验证';
+
+  @override
+  String get unbindPhone => '解绑';
+
+  @override
+  String get removeEmail => '删除邮箱';
+
+  @override
+  String get phoneBoundDone => '手机号已绑定';
+
+  @override
+  String get phoneUnboundDone => '手机号已解绑';
+
+  @override
+  String get emailVerifiedDone => '邮箱已验证';
+
+  @override
+  String get emailRemovedDone => '邮箱已删除';
+
+  @override
+  String get codeWrong => '验证码不对，请再看一下';
+
+  @override
+  String get codeExpired => '验证码已过期，请重新发送';
+
+  @override
+  String get codeVoid => '验证码已失效，请重新发送';
+
+  @override
+  String get codeWait => '发送太频繁，请稍后再试';
+
+  @override
+  String get phoneTaken => '这个手机号已绑定其他账号';
+
+  @override
+  String get phoneInvalid => '手机号格式不正确';
+
+  @override
+  String get alreadyBound => '已经绑定好了';
+
+  @override
+  String get lastLogin => '至少要保留一种登录方式：用户名、邮箱或手机号';
+
+  @override
+  String get deliveryOff => '服务器还没有接入短信或邮件服务';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3631,4 +3763,136 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get settingsAccountGroup => '帳戶與登入';
+
+  @override
+  String get loginField => '用戶名稱 / 電子郵件 / 手機號碼';
+
+  @override
+  String get loginFieldHint => '手機號碼要先在「設定」裡綁定';
+
+  @override
+  String get username => '用戶名稱';
+
+  @override
+  String get usernameHint => '2–24 個字：字母、數字、漢字或 _ . -，以字母或漢字開頭';
+
+  @override
+  String get emailOptional => '電子郵件（選填）';
+
+  @override
+  String get loginFailed => '帳戶或密碼不正確';
+
+  @override
+  String get usernameTaken => '這個用戶名稱已被使用';
+
+  @override
+  String get emailTaken => '這個電子郵件已註冊，請直接登入';
+
+  @override
+  String get emailInvalid => '電子郵件格式不正確';
+
+  @override
+  String get passwordWeak => '密碼至少要 10 個字元';
+
+  @override
+  String get phone => '手機號碼';
+
+  @override
+  String get notSet => '未設定';
+
+  @override
+  String get emailVerifiedLabel => '已驗證';
+
+  @override
+  String get emailUnverifiedLabel => '未驗證，點此驗證';
+
+  @override
+  String get phoneUnbound => '未綁定，點此綁定';
+
+  @override
+  String get loginsNote => '用戶名稱、電子郵件和已綁定的手機號碼都能用來登入，密碼相同';
+
+  @override
+  String get usernameTitle => '用戶名稱';
+
+  @override
+  String get usernameSaved => '用戶名稱已儲存';
+
+  @override
+  String get bindPhoneTitle => '綁定手機號碼';
+
+  @override
+  String get verifyEmailTitle => '驗證電子郵件';
+
+  @override
+  String get phoneHint => '本地號碼直接填寫；其他地區的號碼請加區號，如 +65 9123 4567';
+
+  @override
+  String get sendCode => '傳送驗證碼';
+
+  @override
+  String get resendCode => '重新傳送';
+
+  @override
+  String get codeField => '驗證碼';
+
+  @override
+  String codeSentTo(String to) {
+    return '驗證碼已傳送到 $to，10 分鐘內有效';
+  }
+
+  @override
+  String get outboxNotice =>
+      '測試環境：尚未接入短訊和郵件服務，驗證碼不會真的發出，而是寫在伺服器的 .outbox 資料夾裡。';
+
+  @override
+  String get confirmBind => '綁定';
+
+  @override
+  String get confirmVerify => '驗證';
+
+  @override
+  String get unbindPhone => '解除綁定';
+
+  @override
+  String get removeEmail => '刪除電子郵件';
+
+  @override
+  String get phoneBoundDone => '手機號碼已綁定';
+
+  @override
+  String get phoneUnboundDone => '手機號碼已解除綁定';
+
+  @override
+  String get emailVerifiedDone => '電子郵件已驗證';
+
+  @override
+  String get emailRemovedDone => '電子郵件已刪除';
+
+  @override
+  String get codeWrong => '驗證碼不正確，請再看一下';
+
+  @override
+  String get codeExpired => '驗證碼已過期，請重新傳送';
+
+  @override
+  String get codeVoid => '驗證碼已失效，請重新傳送';
+
+  @override
+  String get codeWait => '傳送太頻繁，請稍後再試';
+
+  @override
+  String get phoneTaken => '這個手機號碼已綁定其他帳戶';
+
+  @override
+  String get phoneInvalid => '手機號碼格式不正確';
+
+  @override
+  String get alreadyBound => '已經綁定好了';
+
+  @override
+  String get lastLogin => '至少要保留一種登入方式：用戶名稱、電子郵件或手機號碼';
+
+  @override
+  String get deliveryOff => '伺服器尚未接入短訊或郵件服務';
 }

@@ -328,6 +328,44 @@ describe("the database store", () => {
   );
 
   it(
+    "keeps a username, a bound phone and the settings across a restart, each found by its lookup (v8.2.0)",
+    async () => {
+      const dataDir = folder();
+      const owner = randomUUID();
+      const account: UserRecord = {
+        ...user(owner, "logins@example.com"),
+        email_verified_at: at(1),
+        username: "Restart_User",
+        username_lookup: randomBytes(32).toString("hex"),
+        phone: "+85291234567",
+        phone_lookup: randomBytes(32).toString("hex"),
+        phone_bound_at: at(2),
+        settings: { email_reports: true },
+      };
+      const first = await PgStore.open({ dataDir, kek: KEK, pepper: PEPPER });
+      await first.put(account);
+      await first.close();
+      const again = await PgStore.open({ dataDir, kek: KEK, pepper: PEPPER });
+      expect(await again.get(owner)).toEqual(account);
+      expect(await again.byUsernameLookup(account.username_lookup!)).toEqual(account);
+      expect(await again.byPhoneLookup(account.phone_lookup!)).toEqual(account);
+      // Unbinding writes the lookup away: the number finds nobody.
+      const { phone: _p, phone_lookup: _l, phone_bound_at: _b, ...unbound } = account;
+      await again.put(unbound);
+      expect(await again.byPhoneLookup(account.phone_lookup!)).toBeUndefined();
+      expect(await again.get(owner)).toEqual(unbound);
+      // Two accounts can't hold one username: the column is unique, like the email's.
+      const twin = {
+        ...user(randomUUID(), "twin@example.com"),
+        username_lookup: account.username_lookup,
+      };
+      await expect(again.put(twin)).rejects.toThrow();
+      await again.close();
+    },
+    PG,
+  );
+
+  it(
     "keeps a 求籤 chart (migration 003 adds the method to chart_system)",
     async () => {
       const pg = await PgStore.open({ kek: KEK, pepper: PEPPER });
@@ -355,13 +393,18 @@ describe("the database store", () => {
   );
 
   it(
-    "stores no birth date, name, reading, life context or email in the clear",
+    "stores no birth date, name, reading, life context, email, username or phone in the clear",
     async () => {
       const pg = await PgStore.open({ kek: KEK, pepper: PEPPER });
       const owner = randomUUID();
       await pg.put({
         ...user(owner, "secret.person@example.com"),
         social: { google: "google-subject-42" },
+        // v8.2.0: a username and a bound phone are sealed with the email.
+        username: "secret_username_7",
+        username_lookup: randomBytes(32).toString("hex"),
+        phone: "+85298765432",
+        phone_lookup: randomBytes(32).toString("hex"),
       });
       const r = records(owner);
       await fill(pg, r);
@@ -375,6 +418,8 @@ describe("the database store", () => {
         "換工作",
         "secret.person@example.com",
         "google-subject-42",
+        "secret_username_7",
+        "85298765432",
         "陳大文",
         "高雄市",
         "我和同事的相处会好转吗",

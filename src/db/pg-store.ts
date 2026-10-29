@@ -34,6 +34,7 @@ const MIGRATIONS = [
   "005_naming",
   "006_liuyao",
   "007_followups",
+  "008_logins",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -55,6 +56,20 @@ export interface PgStoreOptions {
 type Db = PGlite | Transaction;
 type Row = Record<string, unknown>;
 const iso = (v: unknown) => (v as Date).toISOString();
+
+/**
+ * What an account's sealed column (email_ciphertext) holds: the email and the social subjects since S5, and since
+ * v8.2.0 the username, the bound phone, when each was proved, and the settings. Rows sealed before lack the new keys.
+ */
+interface SealedIds {
+  email?: string;
+  social: UserRecord["social"];
+  username?: string;
+  phone?: string;
+  email_verified_at?: string;
+  phone_bound_at?: string;
+  settings?: UserRecord["settings"];
+}
 
 export class PgStore implements Store, UserStore {
   /** Unwrapped data keys, in memory only. */
@@ -127,19 +142,29 @@ export class PgStore implements Store, UserStore {
   private async user(row: Row | undefined): Promise<UserRecord | undefined> {
     if (!row) return undefined;
     const dek = await this.dek(row.id as string);
-    const ids = row.email_ciphertext
-      ? openJson<{ email?: string; social: UserRecord["social"] }>(
+    const ids: SealedIds = row.email_ciphertext
+      ? openJson<SealedIds>(
           dek,
           Buffer.from(row.email_ciphertext as Uint8Array),
           `users:${row.id as string}`,
         )
       : { social: {} };
+    const hex = (column: string) =>
+      row[column] != null && Buffer.from(row[column] as Uint8Array).toString("hex");
+    const emailLookup = hex("email_lookup");
+    const usernameLookup = hex("username_lookup");
+    const phoneLookup = hex("phone_lookup");
     return {
       id: row.id as string,
       ...(ids.email !== undefined && { email: ids.email }),
-      ...(row.email_lookup != null && {
-        email_lookup: Buffer.from(row.email_lookup as Uint8Array).toString("hex"),
-      }),
+      ...(emailLookup && { email_lookup: emailLookup }),
+      ...(ids.email_verified_at !== undefined && { email_verified_at: ids.email_verified_at }),
+      ...(ids.username !== undefined && { username: ids.username }),
+      ...(usernameLookup && { username_lookup: usernameLookup }),
+      ...(ids.phone !== undefined && { phone: ids.phone }),
+      ...(phoneLookup && { phone_lookup: phoneLookup }),
+      ...(ids.phone_bound_at !== undefined && { phone_bound_at: ids.phone_bound_at }),
+      ...(ids.settings !== undefined && { settings: ids.settings }),
       ...(row.password_hash != null && { password_hash: row.password_hash as string }),
       social: ids.social,
       country: row.country as string,
@@ -155,6 +180,20 @@ export class PgStore implements Store, UserStore {
 
   async byEmailLookup(lookup: string) {
     const rows = await this.db.query<Row>("SELECT * FROM users WHERE email_lookup = $1", [
+      Buffer.from(lookup, "hex"),
+    ]);
+    return this.user(rows.rows[0]);
+  }
+
+  async byUsernameLookup(lookup: string) {
+    const rows = await this.db.query<Row>("SELECT * FROM users WHERE username_lookup = $1", [
+      Buffer.from(lookup, "hex"),
+    ]);
+    return this.user(rows.rows[0]);
+  }
+
+  async byPhoneLookup(lookup: string) {
+    const rows = await this.db.query<Row>("SELECT * FROM users WHERE phone_lookup = $1", [
       Buffer.from(lookup, "hex"),
     ]);
     return this.user(rows.rows[0]);
@@ -178,29 +217,42 @@ export class PgStore implements Store, UserStore {
     // A new account gets its data key here; it is cached only once the row is in.
     const fresh = known ? undefined : newDataKey(this.o.kek, u.id);
     const dek = fresh?.dek ?? (await this.dek(u.id));
-    const ids = sealJson(dek, { email: u.email, social: u.social }, `users:${u.id}`);
+    const sealed: SealedIds = {
+      email: u.email,
+      social: u.social,
+      username: u.username,
+      phone: u.phone,
+      email_verified_at: u.email_verified_at,
+      phone_bound_at: u.phone_bound_at,
+      settings: u.settings,
+    };
+    const ids = sealJson(dek, sealed, `users:${u.id}`);
+    const bytes = (lookup: string | undefined) => (lookup ? Buffer.from(lookup, "hex") : null);
     const values = [
       u.id,
       ids,
-      u.email_lookup ? Buffer.from(u.email_lookup, "hex") : null,
+      bytes(u.email_lookup),
       u.password_hash ?? null,
       u.country,
       u.locale,
       u.age_confirmed_at,
       u.created_at,
       social,
+      bytes(u.username_lookup),
+      bytes(u.phone_lookup),
     ];
     if (fresh) {
       await this.db.query(
-        `INSERT INTO users (id, email_ciphertext, email_lookup, password_hash, country, locale, age_confirmed_at, created_at, social_lookup, data_key_wrapped)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        `INSERT INTO users (id, email_ciphertext, email_lookup, password_hash, country, locale, age_confirmed_at, created_at, social_lookup, username_lookup, phone_lookup, data_key_wrapped)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [...values, fresh.wrapped],
       );
       this.keys.set(u.id, fresh.dek);
     } else {
       await this.db.query(
         `UPDATE users SET email_ciphertext = $2, email_lookup = $3, password_hash = $4, country = $5, locale = $6,
-           age_confirmed_at = $7, created_at = $8, social_lookup = $9 WHERE id = $1`,
+           age_confirmed_at = $7, created_at = $8, social_lookup = $9, username_lookup = $10, phone_lookup = $11
+         WHERE id = $1`,
         values,
       );
     }

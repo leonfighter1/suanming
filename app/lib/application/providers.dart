@@ -96,18 +96,24 @@ class AuthNotifier extends AsyncNotifier<AppUser?> {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    await _api.login(email, password);
+  /// [login]: a username, an email or a bound phone (v8.2.0).
+  Future<void> login(String login, String password) async {
+    await _api.login(login, password);
     state = AsyncData(await _api.me());
   }
 
+  /// The account as an account call returned it (a new username, a bound phone, a verified email).
+  void changed(AppUser user) => state = AsyncData(user);
+
   Future<void> register({
-    required String email,
+    String? username,
+    String? email,
     required String password,
     required String country,
     required bool ageConfirmed,
   }) async {
     await _api.register(
+      username: username,
       email: email,
       password: password,
       country: country,
