@@ -155,6 +155,23 @@ describe("the models to choose from (S17, v9.2.0)", () => {
     for (const m of MODELS) expect(checkRouting(withModel(loadRouting(), m))).toEqual([]);
   });
 
+  it("choosing the table's own model keeps each step's settings; another model brings its own effort", () => {
+    // The owner's .env names claude-opus-5-5, the model every shipped route already has: the table stands as it is,
+    // the 深度分析's questions at effort low among them (v10.0.0).
+    const table = loadRouting();
+    const same = withModel(table, modelInfo("claude-opus-5-5")!);
+    expect(same.routes).toEqual(table.routes);
+    expect(same.routes.inquiry.default.effort).toBe("low");
+    // Another model answers every step at its own effort, the 深度分析 too.
+    const sonnet = withModel(table, modelInfo("claude-sonnet-5-5")!);
+    expect(sonnet.routes.inquiry.default).toEqual({
+      provider: "anthropic",
+      model: "claude-sonnet-5-5",
+      effort: "medium",
+      max_tokens: 8_000,
+    });
+  });
+
   it("costUsd prices a usage at list price, and nothing for a model without one", () => {
     const usage = {
       input_tokens: 2000,

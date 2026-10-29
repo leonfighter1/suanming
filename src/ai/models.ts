@@ -119,14 +119,21 @@ export function checkRouting(table: RoutingTable): string[] {
   return problems;
 }
 
-/** The table with every route answered by one model, at its effort, each max_tokens kept within its limit. */
+/**
+ * The table with every route answered by one model, at its effort, each max_tokens kept within its limit. A route the
+ * table already gives that model keeps its own settings (v10.0.0): choosing the table's own model changes nothing, so
+ * the 深度分析's questions stay at their low effort.
+ */
 export function withModel(table: RoutingTable, model: ModelInfo): RoutingTable {
-  const answer = (r: Route): Route => ({
-    provider: model.provider,
-    model: model.id,
-    effort: model.effort,
-    max_tokens: Math.min(r.max_tokens, model.maxOutput),
-  });
+  const answer = (r: Route): Route =>
+    r.provider === model.provider && r.model === model.id
+      ? r
+      : {
+          provider: model.provider,
+          model: model.id,
+          effort: model.effort,
+          max_tokens: Math.min(r.max_tokens, model.maxOutput),
+        };
   const routes = Object.fromEntries(
     Object.entries(table.routes).map(([agent, byLocale]) => [
       agent,

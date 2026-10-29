@@ -67,8 +67,15 @@
 63. A test that scripts or breaks a provider puts it under every provider key (or passes its own routing), never only the key the shipped routes use. Check that a failure test fails for its own reason (the logged error), not only that something failed.
 64. On a page that builds cards past the screen, a finder for one below the fold needs skipOffstage: false, whether it checks that the card exists, measures its position or asserts findsNothing (rule 43). Scroll to it first only when the test is about what the user sees.
 65. In a list whose parts replace each other (a field, then a card), give each BringIntoView its own key: an unkeyed one at the same place takes over the old state and never brings its part into view. Prove it on a 360 x 740 phone with content past the fold, and check the test fails with the keys removed.
+66. A new or changed route's settings reach the model only through the server's routing: test it through withModel with the owner's ACTIVE_AI_MODEL (read its name from .env, never a key) as well as the bare table, before saying how it behaves.
 
 ## Log
+
+### 2026-10-29: A new route's effort never reached the model through ACTIVE_AI_MODEL
+- **Symptom:** The 深度分析 route was set to effort low and documented so, but the owner's .env names ACTIVE_AI_MODEL=claude-opus-5-5, and withModel put every route, this one too, at the model's catalog effort (medium).
+- **Root cause:** The route was tested against the bare routing table only, never through the routing the running server uses with the owner's model choice (rule 44's lesson, met again).
+- **Fix:** withModel leaves a route alone when the chosen model is the one it already has; a test runs the shipped table through withModel with claude-opus-5-5 and with another model, and fails on the old code.
+- **Rule:** A new or changed route's settings reach the model only through the server's routing: test it through withModel with the owner's ACTIVE_AI_MODEL (read its name from .env, never a key) as well as the bare table, before saying how it behaves. (Rule 66)
 
 ### 2026-10-29: A new BringIntoView took over the one it replaced and never scrolled
 - **Symptom:** On a 360 x 740 phone the 深度分析 start button stayed below the screen after the last answer; every earlier question came into view.

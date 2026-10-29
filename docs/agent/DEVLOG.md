@@ -33,7 +33,12 @@ Newest first. One entry per working session, key points only.
   - twice a script through the shell lost a `$` (rule G16): fixed with the editor;
   - a `..` path from the project root pointed at `C:\` and the guard stopped the removal: scripts go to the
     scratchpad.
-- 612 server tests, 225 app tests; harness PASS. Not tried: a real conversation (the owner's switch says mock).
+- The owner asked for one more run before the push (「再算一次 确保没有问题后再push吧」): the harness passed on the commit
+  again. Checking the owner's `.env` by name (no keys read) found `IS_AI_MOCK=FALSE` (the owner turned the real model on)
+  and `ACTIVE_AI_MODEL=claude-opus-5-5`, through which `withModel` put the questions at medium, not low: a route already
+  on the chosen model now keeps its settings (rule 66); the new test fails on the old code. Nothing was run against
+  the live server (it would spend money).
+- 613 server tests, 225 app tests; harness PASS three times. Not tried: a real conversation.
 
 ## 2026-10-29 (f): S18, the owner's request — 八字's AI reading is the AI's own, with a 总结; release v9.3.0
 

@@ -1853,7 +1853,8 @@ As built (v10.0.0):
   - The pipeline drops `fact_refs` that don't exist, sends back a turn naming a card, a line or a 干支 the result
     doesn't have, a repeated question and a first turn without a question; `planned` is clamped to 1–6, and after
     the sixth answer the master only closes. The `inquiry` route is Claude Opus 5.5 at effort low (the user waits for
-    each question), max_tokens 8,000.
+    each question), max_tokens 8,000. `withModel` now leaves a route alone when `ACTIVE_AI_MODEL` names the model it
+    already has: the owner's `.env` names claude-opus-5-5, which had put every step, these questions too, at medium.
   - The readings: `narrative_bazi@9`, `narrative_tarot@5`, `narrative_qiuqian@3`, `narrative_liuyao@3`,
     `narrative_fengshui@3` = the released texts plus `inquiryRules`; the five released versions moved to
     `RETIRED_PROMPTS`, still hashing to their pins.
@@ -1912,12 +1913,14 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 1. **Delivered (v10.0.0):** WP19.1 the 深度分析 pipeline, its five prompts, the API and the readings that read it;
    WP19.2 its page, the goal reminder and the conversation on the reading; WP19.3 the mic on the web; WP19.4 同名重算
    before every method's new 测算.
-2. **Numbers:** 18 new server tests (test/inquiry.test.ts), 612 in all; 12 new app tests (app/test/inquiry_test.dart),
-   225 in all. Ten new prompt pins and five retired ones; migration 009.
+2. **Numbers:** 19 new server tests (18 in test/inquiry.test.ts, one for the model choice), 613 in all; 12 new app
+   tests (app/test/inquiry_test.dart), 225 in all. Ten new prompt pins and five retired ones; migration 009. The
+   harness passed three times, the last on the final tree.
 3. **Against the plan:** the owner moved 积分 to later mid-stage (「收费系统可以留到以后做」), and with it the
    深度分析's flat fee; S20 keeps what was measured. The owner's affair example became a question about what the user
    knows, not a hint. 同名重算 matches a 卦 only on the same question, since a new question is a new 卦.
-4. **Mistakes:** rule 65 (a BringIntoView that takes another's place in a list needs its own key).
+4. **Mistakes:** rule 65 (a BringIntoView that takes another's place in a list needs its own key); rule 66 (a route's
+   settings reach the model only through the server's routing: test it with the owner's ACTIVE_AI_MODEL too).
 5. **Next:** the owner tries a real 深度分析 with the real model. Open: 追问 and the exports with the conversation;
    S20 积分 when the owner wants it; still waiting for the owner: the mail and SMS providers, the Phase 3 gate,
    WP7.2, WP7.3, WP1.8.

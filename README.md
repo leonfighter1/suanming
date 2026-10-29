@@ -43,9 +43,13 @@ Your requests of today, as stage S19 of the [tech plan](docs/tech-plan.md). A bi
 - **How to try it:** restart `npm run public`. While `IS_AI_MOCK=TRUE` the master is a demo (two （示范） questions);
   with the real model it judges the chart and plans its own questions. The questions use Claude Opus 5.5 at effort
   low, so each comes quickly; the readings stay at medium.
-- **Verified:** 18 new server tests (the pipeline, each method's own prompt, the reading reading the conversation, the
-  API), 612 in all; 12 new app tests (the page, the goal reminder, the mic, 同名重算, keyboard, a 360 × 740 phone),
-  225 in all; harness PASS. Not tried: a real conversation, which waits for your switch.
+- **Fixed on the way:** `ACTIVE_AI_MODEL=claude-opus-5-5`, the model every step already uses, put every step at the
+  model's default effort, so the questions would have run at medium. Naming the table's own model now keeps each
+  step's settings; another model still answers every step at its own effort.
+- **Verified:** 19 new server tests (the pipeline, each method's own prompt, the reading reading the conversation, the
+  API, the model choice keeping each step's settings), 613 in all; 12 new app tests (the page, the goal reminder, the
+  mic, 同名重算, keyboard, a 360 × 740 phone), 225 in all; harness PASS, run again before the push as you asked. Not
+  tried: a real conversation with the real model.
 
 ### v9.3.0 (2026-10-29): 八字's AI reading is the AI's own, with a 总结; no 行动建议 or 比如 examples
 

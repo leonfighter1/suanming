@@ -147,6 +147,8 @@ Every AI step answers with Claude Opus 5.5 (`config/model_routing.json`, the own
 
 - `npm run ai:models` prints this list, which model answers now, and whether each provider's key
   is in `.env` (never the key itself).
+- Another model answers every step at its own effort. Naming the model the table already uses
+  (`claude-opus-5-5`) keeps each step's own settings (v10.0.0): the 深度分析's questions stay at effort low.
 - Like `IS_AI_MOCK`, the running API follows a change from the next reading, with no restart, and
   the console prints `AI switched: …`.
 - An id not in the list is ignored, and the console says so; the table's model answers.
