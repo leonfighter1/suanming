@@ -1,69 +1,69 @@
 {
-  "_readme": "Model routing v1 (Phase 1 §2.2). Per agent: a default route plus optional per-locale overrides. effort is mapped per provider (DeepSeek: low|high|max). Phase 1 moves this into the model_routes table for hot updates; the shape stays the same.",
-  "version": "5",
+  "_readme": "Model routing v6 (S17, owner 2026-10-29: Claude Opus 5.5 for every agent). Per agent: a default route plus optional per-locale overrides. Models come from src/ai/models.ts (npm run ai:models lists them; test/ai-models.test.ts checks this table against it). effort is mapped per provider (DeepSeek: low|high|max); Claude Opus 5.5 starts at medium, its own default. max_tokens leaves room for Claude's thinking, which counts toward it. ACTIVE_AI_MODEL=<id> in .env puts every route on one model, each max_tokens kept within its limit.",
+  "version": "6",
   "routes": {
     "narrative": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 32000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 64000
       }
     },
     "action": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 16000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 32000
       }
     },
     "trend": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 16000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 32000
       }
     },
     "remedy": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 16000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 32000
       }
     },
     "life_methods": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 32000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 64000
       }
     },
     "life_topics": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 32000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 64000
       }
     },
     "followup": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 16000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 32000
       }
     },
     "guard": {
       "default": {
-        "provider": "deepseek",
-        "model": "deepseek-v4-pro",
-        "effort": "high",
-        "max_tokens": 16000
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "max_tokens": 32000
       }
     }
   }

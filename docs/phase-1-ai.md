@@ -1,5 +1,8 @@
 # Phase 1 · AI 解讀管線（第一段）
 
+Since v9.2.0 (2026-10-29, the owner's choice) every agent routes to **Claude Opus 5.5** (`claude-opus-5-5`);
+DeepSeek stays selectable with `ACTIVE_AI_MODEL` (docs/web-test.md). The notes below are from the DeepSeek runs.
+
 Status 2026-10-26: **running live on DeepSeek `deepseek-v4-pro`** (all three agents).
 First live report (八字, zh-Hant, HK, six topics): `passed` on the first attempt
 for every agent, no rule hits, every chart claim checked by hand against
@@ -49,7 +52,8 @@ through `DeepSeekProvider` (OpenAI-compatible Chat Completions, JSON mode,
 syntax only, so the schema goes at the end of the user message and the pipeline
 validates and retries. The key lives in the git-ignored `.env` as `DEEPSEEK_API_KEY`.
 `AnthropicProvider` (Claude, structured outputs, server-side refusal fallback)
-is kept and can be selected per agent in the routing file.
+is kept and can be selected per agent in the routing file. Since v9.2.0 it serves every
+agent, streamed, with the usable models listed in `src/ai/models.ts`.
 
 ## Data sent to the model
 

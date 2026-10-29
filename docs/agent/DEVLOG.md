@@ -2,6 +2,31 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (e): S17, the owner's request — Claude as the AI service, Claude Opus 5.5, the usable models; release v9.2.0
+
+- Owner request: 「添加除了添加deepseek ai之外也添加cluade ai api call service. 并且再添加可以用的modal。现在希望用claude
+  opus 5.5作为api service」. It replaces the owner's model choice of 2026-10-26 (`deepseek-v4-pro` for every agent).
+  Mid-work the owner said 「我已经再env里放置了密钥了」: they had added `CLAUDE_API_KEY` and `ACTIVE_AI_MODEL=claude-v1`.
+- `AnthropicProvider` (kept since Phase 1, never routed) now streams; fallback only for models that have one; usage
+  keeps cache writes. `src/ai/models.ts` lists the usable models (Claude Opus 5.5 / Fable 5.1 / Sonnet 5.5 / Haiku 5.5,
+  DeepSeek V4 Pro) with limits and list prices, and checks the routing table. Every route is on `claude-opus-5-5`,
+  effort medium, max_tokens 64,000 / 32,000.
+- The owner's names: `ACTIVE_AI_MODEL` picks the model for every step, read live with the AI switch (`watchAi` replaces
+  `watchAiMode`); `CLAUDE_API_KEY` is the Claude key, before the SDK's own variables. `claude-v1` (Claude 1, retired)
+  became `claude-opus-5-5` in the owner's `.env`; `IS_AI_MOCK=TRUE` untouched. `npm run ai:models`; `eval:ai --model`;
+  `/v1/health` `ai_model`.
+- The owner's key checked once against the Models API (free): accepted; all four Claude models open to the account;
+  `claude-opus-5-5` reports 1M context, 128K output, structured outputs, adaptive thinking, medium effort.
+- Mistakes:
+  - the Claude provider called `create`, and the SDK refuses an unstreamed request above 21,333 max_tokens: routed to
+    Claude, every reading (32,000) would have failed before sending. Its tests faked the client, so the SDK's checks
+    never ran. Now streamed, and tested through the real SDK over a fake fetch (rule 62);
+  - five tests had put a scripted or failing provider under `deepseek` only; with the routes on Claude they failed, or
+    (the provider-down test) passed for the wrong reason (rule 63).
+- Started the API once with the owner's `.env` on a spare port: the console line, `/v1/health`, one mock reading; then
+  stopped it (its node child by PID, after checking the command line).
+- 585 server tests (14 new), 208 app tests; harness PASS. Not tried: a real Claude reading (the owner's switch).
+
 ## 2026-10-29 (d): S16, the owner's UI requests — home bar, new parts into view, the 求签 altar; release v9.1.0
 
 - Owner requests (five messages): 历史记录 into the ☰ menu, ☰ framed and on the right, a decor before 命理大师; 塔罗

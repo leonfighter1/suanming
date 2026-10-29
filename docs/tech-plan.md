@@ -43,6 +43,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S14 以往记录               | by month and person; Word / PDF; send; file; delete         | big    | v8.0.0 + summary  | done        |
 | S15 菜单、图标、登录、邮件 | the menu, app icon, sign-in three ways, reports by email    | big    | v9.0.0 + summary  | done        |
 | S16 Owner updates          | home bar, new parts come into view, the 求签 altar          | medium | v9.1.0            | done        |
+| S17 Claude 与模型选择      | Claude as the AI service; the models to choose from         | medium | v9.2.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -872,7 +873,8 @@ Lessons: G5, rules 8, 34 and 42; P23 for the app.
   - WhatsApp Business needs a Meta account and approved templates;
   - the free 生肖运势 PDF needs content from the real model (the owner's AI switch).
 - §2.5:
-  - an English model route (the owner chose `deepseek-v4-pro` for every agent);
+  - an English model route (the owner chose one model for every agent: `deepseek-v4-pro`, and since v9.2.0
+    `claude-opus-5-5`);
   - the App Store English listing (WP7.3).
 - §2.6:
   - the RAG knowledge base needs a vector store and an embeddings provider, with their cost;
@@ -1640,9 +1642,81 @@ As built (v9.1.0):
 - **Looked at rendered** with the real font: the bar in light and dark, the menu, eight frames of the shake and five of
   the throw, the stage in dark, and the tarot ritual and 风水 principles after the tap on a 360 × 740 phone.
 
+## S17 Claude 与模型选择 (medium → v9.2.0)
+
+**Owner request (2026-10-29), after v9.1.0:**
+
+> 添加除了添加deepseek ai之外也添加cluade ai api call service. 并且再添加可以用的modal。现在希望用claude opus 5.5作为api service
+
+Read as: keep DeepSeek, add Claude as a second AI service, list the models that can be used ("modal" read as model),
+and answer with Claude Opus 5.5 from now on. This replaces the owner's choice of 2026-10-26 (`deepseek-v4-pro` for
+every agent). The owner's switch stays as it is: `IS_AI_MOCK=TRUE` keeps every step on the mock until the owner flips
+it, and Claude needs a key in `.env`, which only the owner can add (the owner added `CLAUDE_API_KEY` and
+`ACTIVE_AI_MODEL` during the work).
+
+- **WP17.1 Claude ready to serve.** `AnthropicProvider` has been kept since Phase 1 but never routed. It streams every
+  request (the SDK refuses an unstreamed one above about 21,000 max_tokens, and the narrative route asks for 32,000),
+  sends only what each model accepts, counts cache writes, and is tested through the real SDK over a fake network as
+  well as with a fake client.
+- **WP17.2 The models to choose from.** One list of the usable models (`src/ai/models.ts`): provider, limits, list
+  prices, what each is for. The routing table is checked against it. `ACTIVE_AI_MODEL=<id>` in `.env` picks one model
+  for every AI step, followed without a restart like the AI switch; `npm run ai:models` lists them; `eval:ai --model`.
+- **WP17.3 Claude Opus 5.5 by default.** Every route goes to `claude-opus-5-5`, with an effort and max_tokens sized for
+  its thinking; the console line, `/v1/health` and the docs name the model.
+
+Lessons: rules 12, 26, 42, 44, 54; G7.
+
+As built (v9.2.0):
+
+- **WP17.1:**
+  - `AnthropicProvider` streams (`beta.messages.stream(...).finalMessage()`). A probe confirmed the SDK's guard: an
+    unstreamed request reaches the network up to 21,333 max_tokens and is refused from 21,334 (rule 62).
+  - Structured outputs, the cached system prompt and the route's effort, as before; no thinking parameter (adaptive is
+    the only mode on Claude Opus 5.5). The refusal fallback (`fallbacks: "default"`) goes only to models that have one
+    (`MODELS[].fallback`: not Claude Haiku 5.5, nor a model outside the list). The answer is read by block type, after
+    any thinking block. Usage keeps cache writes (`cache_creation_input_tokens`, additive; other traces keep their
+    shape).
+  - The key: `CLAUDE_API_KEY` (the owner's name) before the SDK's own `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN`. A
+    test checks it is the key sent while other Anthropic variables are set too.
+  - Checked once with the owner's key against Anthropic's Models API (free, no tokens): accepted from this computer;
+    `claude-opus-5-5` reports a 1M context, 128,000 output tokens, structured outputs, adaptive thinking and medium
+    effort; all four Claude models in the list are open to the account.
+- **WP17.2:**
+  - `src/ai/models.ts`: Claude Opus 5.5, Fable 5.1, Sonnet 5.5 and Haiku 5.5 from Anthropic's catalog (2026-10-29), and
+    DeepSeek V4 Pro, without a price (not checked). `checkRouting`, `withModel`, `costUsd`.
+  - `ACTIVE_AI_MODEL` (the owner's name; first written as `MINGLI_AI_MODEL`) is read with the AI switch by `watchAi`,
+    which replaces `watchAiMode`: one notice per saved change; an id outside the list is said and ignored. The API takes
+    its routing per job (`ApiOptions.routing` is a getter now), and so do the demo and the eval.
+  - The owner's `.env` said `ACTIVE_AI_MODEL=claude-v1`, Claude 1's name, long retired. It now says `claude-opus-5-5`,
+    as the owner asked. The switch (`IS_AI_MOCK=TRUE`) is untouched.
+  - `npm run ai:models`; `eval:ai --model <id>`, which records each case's model and its cost at list price.
+- **WP17.3:**
+  - `config/model_routing.json` v6: every agent on `claude-opus-5-5` at effort medium, Opus 5.5's own default
+    (Anthropic's notes put it above Opus 5 at high). max_tokens is 64,000 for the reading and the 一生运势 steps and
+    32,000 for the rest, since thinking counts toward it.
+  - The console line names the model and what is still missing (a key, the switch). `/v1/health` adds `ai_model` while
+    a real model answers (OpenAPI updated).
+  - Tests no longer pin the shipped model, except one that records the owner's choice. Five tests that had scripted a
+    provider under `deepseek` alone now set it under both keys (rule 63).
+- **Not done:** a real Claude reading. It waits for the owner's switch.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S17 Claude 与模型选择 (done 2026-10-29: v9.2.0)
+
+1. **Delivered (v9.2.0):** WP17.1 Claude streamed, tested through the real SDK, on the owner's key; WP17.2 the usable
+   models, `ACTIVE_AI_MODEL`, `npm run ai:models` and `eval:ai --model`; WP17.3 every route on Claude Opus 5.5.
+2. **Numbers:** 14 new server tests (585 in all); 208 app tests, unchanged (their fixtures name the new model). The SDK
+   refuses an unstreamed request from 21,334 max_tokens; the reading asked for 32,000.
+3. **Against the plan:** the owner added `CLAUDE_API_KEY` and `ACTIVE_AI_MODEL` during the work. The code took their
+   names, and their `claude-v1` became `claude-opus-5-5`.
+4. **Mistakes:** rules 62 (test a provider through its real SDK client; stream Claude) and 63 (a scripted provider goes
+   under every key; a failure test checks its own reason).
+5. **Next:** the owner flips `IS_AI_MOCK=FALSE` and tries `npm run eval:ai -- --live`; effort can go up per route if
+   the eval shows a gain. Still waiting for the owner: the mail and SMS providers, the Phase 3 gate, WP7.2, WP7.3 and
+   WP1.8.
 
 ### S16 Owner updates (done 2026-10-29: v9.1.0)
 
@@ -2133,3 +2207,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP16.2    | done                         | v9.1.0  |
 | WP16.3    | done                         | v9.1.0  |
 | WP16.4    | done                         | v9.1.0  |
+| WP17.1    | done                         | v9.2.0  |
+| WP17.2    | done                         | v9.2.0  |
+| WP17.3    | done                         | v9.2.0  |

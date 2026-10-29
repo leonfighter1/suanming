@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
@@ -28,6 +28,7 @@
     "verify:qiuqian": "tsx scripts/verify-qiuqian.ts",
     "verify:liuyao": "tsx scripts/verify-liuyao.ts",
     "eval:ai": "tsx scripts/eval-ai.ts",
+    "ai:models": "tsx scripts/ai-models.ts",
     "build:places": "tsx scripts/build-places.ts",
     "api:lan": "tsx scripts/api-server.ts --lan",
     "api:public": "tsx scripts/api-server.ts --public",

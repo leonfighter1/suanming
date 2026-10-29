@@ -3,17 +3,22 @@
  * each automatically (status, attempts, latency, tokens, rule hits, faithfulness).
  *
  *   npm run eval:ai             # mock provider (free, checks the harness itself)
- *   npm run eval:ai -- --live   # real provider from .env (DeepSeek); costs money
- * Writes docs/verification/ai-eval-results.json.
+ *   npm run eval:ai -- --live   # the real model from .env (Claude Opus 5.5 by default); costs money
+ *   npm run eval:ai -- --live --model claude-sonnet-5-5   # the same cases on another usable model
+ * Writes docs/verification/ai-eval-results.json, with each case's cost at list price (src/ai/models.ts).
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import {
   checkFaithfulness,
+  costUsd,
   generateFollowUp,
   generateReport,
   MockProvider,
+  modelInfo,
+  MODELS,
   type Locale,
   type Topic,
+  type Usage,
 } from "../src/ai/index.js";
 import type { ChartFact } from "../src/chart-fact/index.js";
 import { computeChart } from "../src/service/charts.js";
@@ -27,9 +32,20 @@ try {
 
 const live = process.argv.includes("--live");
 if (!live) process.env.MINGLI_AI_PROVIDER = "mock";
+// --model <id>: every AI step on that model for this run, as ACTIVE_AI_MODEL does for the API.
+const model = process.argv[process.argv.indexOf("--model") + 1];
+if (process.argv.includes("--model")) {
+  if (!model || !modelInfo(model)) {
+    console.error(`--model must be one of: ${MODELS.map((m) => m.id).join(", ")}`);
+    process.exit(2);
+  }
+  process.env.ACTIVE_AI_MODEL = model;
+}
 const providers = buildProviders();
 if (live && providers.live.length === 0) {
-  console.error("--live needs DEEPSEEK_API_KEY (or another provider key) in .env");
+  console.error(
+    "--live needs a key in .env: CLAUDE_API_KEY for Claude, DEEPSEEK_API_KEY for DeepSeek",
+  );
   process.exit(2);
 }
 // The owner's switch to save tokens holds here too.
@@ -129,6 +145,17 @@ const FOLLOW_UP: Record<Locale, string> = {
   en: "What does this mean for my work in the coming months?",
 };
 
+/** What a reading's AI calls cost at list price, in US dollars; null when a model has no price (the mock). */
+function cost(agents: { model: string; usage: Usage }[]): number | null {
+  let sum = 0;
+  for (const a of agents) {
+    const c = costUsd(a.model, a.usage);
+    if (c === undefined) return null;
+    sum += c;
+  }
+  return Math.round(sum * 10_000) / 10_000;
+}
+
 /** For 時辰 input, the text must tell the reader the hour is a two-hour window. */
 const SHICHEN_MENTION = /時辰|时辰|兩小時|两小时|two-hour|2-hour|時柱只|时柱只/;
 
@@ -140,10 +167,11 @@ const results = await Promise.all(
       const map = live
         ? providers.map
         : { deepseek: new MockProvider(), anthropic: new MockProvider() };
+      const routing = providers.routing();
       const report = await generateReport(
         chart,
         { locale: c.locale, country: c.country, topics: c.topics },
-        { providers: map },
+        { providers: map, routing },
       );
       // 追问 (v7.0.0): one follow-up on the passed reading, answered from it alone and checked the same way.
       const followup =
@@ -154,7 +182,7 @@ const results = await Promise.all(
               FOLLOW_UP[c.locale],
               [],
               { country: c.country },
-              { providers: map },
+              { providers: map, routing },
             )
           : undefined;
       const issues = report.status === "passed" ? checkFaithfulness(chart, report) : [];
@@ -177,6 +205,8 @@ const results = await Promise.all(
         seconds: Math.round((Date.now() - t0) / 1000),
         attempts: Object.fromEntries(report.agents.map((a) => [a.agent, a.attempts])),
         tokens: report.agents.reduce((s, a) => s + a.usage.input_tokens + a.usage.output_tokens, 0),
+        model: report.ai_disclosure.model,
+        cost_usd: cost([...report.agents, ...(followup?.agents ?? [])]),
         rule_hits: report.compliance.rule_violations.map((v) => v.rule_id),
         review_pass: report.compliance.review?.pass ?? null,
         term_fixes: report.compliance.term_fixes,
@@ -216,6 +246,12 @@ const summary = {
   ).length,
   max_seconds: Math.max(...results.map((r) => r.seconds)),
   total_tokens: results.reduce((s, r) => s + ("tokens" in r ? (r.tokens as number) : 0), 0),
+  model: live ? providers.models() : "mock",
+  total_cost_usd: live
+    ? Math.round(
+        results.reduce((s, r) => s + ("cost_usd" in r && r.cost_usd ? r.cost_usd : 0), 0) * 10_000,
+      ) / 10_000
+    : null,
 };
 mkdirSync(new URL("../docs/verification/", import.meta.url), { recursive: true });
 writeFileSync(

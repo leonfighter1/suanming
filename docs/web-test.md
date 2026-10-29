@@ -14,7 +14,7 @@ hand from the Actions tab (**pages → Run workflow**).
 
 ## Which API the page calls
 
-The page is static. It calls the v1 API; it never holds the DeepSeek key.
+The page is static. It calls the v1 API; it never holds an AI key.
 
 | `API_BASE_URL` variable                   | Who can test                                                                    |
 | ----------------------------------------- | ------------------------------------------------------------------------------- |
@@ -65,7 +65,7 @@ Public mode protections:
 - login limits use the visitor's IP (`CF-Connecting-IP`), not the tunnel's 127.0.0.1;
 - AI jobs (reports + 破除運勢) are capped per account and in total per day:
   `MINGLI_AI_DAILY_PER_USER` (default 10), `MINGLI_AI_DAILY_TOTAL` (default 100).
-  This bounds DeepSeek spend;
+  This bounds AI spend;
 - data is in memory: a restart clears accounts that testers registered, and their readings.
 
 The dev accounts (`admin`/`admin`, `xumei`/`xumei`, and since v6.2.0 `qianli`/`qianli`, `wuyong`/`wuyong`
@@ -95,15 +95,20 @@ Add `?api=<API base URL>` to the page URL, e.g.
 An https page can only call an https API (browsers block http from https), so for
 phones expose the local API through an https tunnel, or host it.
 
-## The DeepSeek key
+## The AI keys
 
-The key never goes into GitHub for this. The Pages build is public static files, so a
-key in it would be readable by anyone. GitHub Actions doesn't need it either: CI runs
-the mock provider. The key belongs only to whatever runs the API:
+The keys never go into GitHub for this. The Pages build is public static files, so a
+key in it would be readable by anyone. GitHub Actions doesn't need them either: CI runs
+the mock provider. The keys belong only to whatever runs the API:
 
-- local / LAN testing: `DEEPSEEK_API_KEY` in `.env` (git-ignored), already in place;
+- local / LAN testing: in `.env` (git-ignored), both in place: `CLAUDE_API_KEY` for Claude
+  (since v9.2.0; `ANTHROPIC_API_KEY`, the SDK's own name, works too) and `DEEPSEEK_API_KEY`
+  for DeepSeek;
 - a hosted API later (Render, Fly.io, Cloud Run, …): the host's secret / environment
   variable settings, then that API's https URL goes into `API_BASE_URL`.
+
+A key is read when the API starts: after adding or changing one, start the API again
+(`npm run api`, or `npm run public`). The switch and the model below need no restart.
 
 ## Mock or real AI: `IS_AI_MOCK`
 
@@ -111,20 +116,44 @@ To save tokens, the API can answer every AI step with the built-in mock: reading
 trend scores, 破除运势 plans and the 一生运势报告 come back at once, each line marked
 （示范）. The switch is in `.env`:
 
-| `.env`                                    | AI answers with               |
-| ----------------------------------------- | ----------------------------- |
-| `IS_AI_MOCK=TRUE`                         | the mock, no tokens spent     |
-| `IS_AI_MOCK=FALSE` and `IS_AI_MODEL=TRUE` | the real model (DeepSeek key) |
-| `IS_AI_MODEL=FALSE`                       | the mock as well              |
+| `.env`                                    | AI answers with            |
+| ----------------------------------------- | -------------------------- |
+| `IS_AI_MOCK=TRUE`                         | the mock, no tokens spent  |
+| `IS_AI_MOCK=FALSE` and `IS_AI_MODEL=TRUE` | the real model (see below) |
+| `IS_AI_MODEL=FALSE`                       | the mock as well           |
 
 - The running API re-reads `.env` when it changes: the next reading follows, with no
   restart, so the public URL stays the same. The API console prints `AI switched: …`,
-  and `/v1/health` shows `"ai": "mock"` or `"ai": "deepseek"`.
+  and `/v1/health` shows `"ai": "mock"`, or the provider (`"ai": "anthropic"`) with
+  `"ai_model"`.
 - Readings made while the mock was on keep their （示范） text, preloaded 破除运势
   plans included; make a new reading after switching.
 - While the mock answers, the daily AI caps of public mode don't count.
 - A variable set in the shell itself wins over `.env`. `npm run eval:ai -- --live`
   refuses to run while the switch says mock.
+
+## Which model answers: `ACTIVE_AI_MODEL` (v9.2.0)
+
+Every AI step answers with Claude Opus 5.5 (`config/model_routing.json`, the owner's choice of
+2026-10-29). `ACTIVE_AI_MODEL=<id>` in `.env` puts every step on another usable model:
+
+| `ACTIVE_AI_MODEL=`  | Model                                   | $ per million tokens, in / out |
+| ------------------- | --------------------------------------- | ------------------------------ |
+| `claude-opus-5-5`   | Claude Opus 5.5, the default            | 4 / 20                         |
+| `claude-fable-5-1`  | Claude Fable 5.1, the most capable      | 10 / 50                        |
+| `claude-sonnet-5-5` | Claude Sonnet 5.5, balanced             | 2 / 10                         |
+| `claude-haiku-5-5`  | Claude Haiku 5.5, fastest and cheapest  | 0.10 / 0.50                    |
+| `deepseek-v4-pro`   | DeepSeek V4 Pro, the model until v9.2.0 | DeepSeek's own price list      |
+
+- `npm run ai:models` prints this list, which model answers now, and whether each provider's key
+  is in `.env` (never the key itself).
+- Like `IS_AI_MOCK`, the running API follows a change from the next reading, with no restart, and
+  the console prints `AI switched: …`.
+- An id not in the list is ignored, and the console says so; the table's model answers.
+- `IS_AI_MOCK=TRUE` still wins: the mock answers whichever model is chosen.
+- Claude Fable 5.1: Anthropic keeps its requests for 30 days.
+- To compare models on the evaluation cases: `npm run eval:ai -- --live --model claude-sonnet-5-5`.
+  It costs money; each case's cost at list price goes into docs/verification/ai-eval-results.json.
 
 ## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
 

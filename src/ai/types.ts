@@ -143,6 +143,8 @@ export interface Usage {
   input_tokens: number;
   output_tokens: number;
   cache_read_input_tokens?: number;
+  /** Claude's prompt-cache writes (v9.2.0), billed apart from input_tokens. */
+  cache_creation_input_tokens?: number;
 }
 
 export interface LLMJsonRequest {

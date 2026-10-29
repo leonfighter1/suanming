@@ -138,7 +138,7 @@ describe("tarot reading, the classic way", () => {
     await generateReport(
       three,
       { locale: "zh-Hans", country: "HK" },
-      { providers: { deepseek: mock }, now: FIXED_NOW },
+      { providers: { deepseek: mock, anthropic: mock }, now: FIXED_NOW },
     );
     const asks = mock.calls.filter((c) => c.agent === "narrative");
     expect(asks).toHaveLength(2);
@@ -149,7 +149,7 @@ describe("tarot reading, the classic way", () => {
 
   it("focus is a tarot option, and only the four areas", async () => {
     const mock = new MockProvider();
-    const deps = { providers: { deepseek: mock }, now: FIXED_NOW };
+    const deps = { providers: { deepseek: mock, anthropic: mock }, now: FIXED_NOW };
     const bazi = computeBazi(
       { local: "1990-03-15T14:30", timezone: "Asia/Hong_Kong", longitude: 114.17, gender: "male" },
       { digestPepper: PEPPER, now: FIXED_NOW },

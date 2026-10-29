@@ -24,7 +24,7 @@ chart 201, report 202 → poll → passed with `x-ai-generated`, CN → 451.
 ## How to run
 
 ```
-npm run api                     # v1 API on :8787 (reads .env; DeepSeek if DEEPSEEK_API_KEY is set)
+npm run api                     # v1 API on :8787 (reads .env; Claude Opus 5.5 with CLAUDE_API_KEY, since v9.2.0)
 cd app && flutter run -d chrome # or -d windows / an Android emulator (uses 10.0.2.2:8787)
 npm run sync:app                # after changing terms, deck, topics or the report shape
 ```

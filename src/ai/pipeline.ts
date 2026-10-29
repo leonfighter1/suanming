@@ -177,11 +177,16 @@ export function resolvePointer(obj: unknown, ptr: string): boolean {
   return true;
 }
 
-const addUsage = (a: Usage, b: Usage): Usage => ({
-  input_tokens: a.input_tokens + b.input_tokens,
-  output_tokens: a.output_tokens + b.output_tokens,
-  cache_read_input_tokens: (a.cache_read_input_tokens ?? 0) + (b.cache_read_input_tokens ?? 0),
-});
+const addUsage = (a: Usage, b: Usage): Usage => {
+  const writes = (a.cache_creation_input_tokens ?? 0) + (b.cache_creation_input_tokens ?? 0);
+  return {
+    input_tokens: a.input_tokens + b.input_tokens,
+    output_tokens: a.output_tokens + b.output_tokens,
+    cache_read_input_tokens: (a.cache_read_input_tokens ?? 0) + (b.cache_read_input_tokens ?? 0),
+    // Only Claude reports cache writes; other traces keep their shape.
+    ...(writes > 0 && { cache_creation_input_tokens: writes }),
+  };
+};
 
 export interface CheckResult<T> {
   value: T;

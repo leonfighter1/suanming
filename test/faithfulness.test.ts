@@ -46,11 +46,13 @@ async function reportWith(chart: typeof bazi, texts: string[]) {
     ],
   };
   // Run the real pipeline (mock model); stay clear of the rule layer by using neutral text.
+  const scripted = new MockProvider({ narrative: [{ kind: "ok", data: narrative }] });
   return generateReport(
     chart,
     { locale: "zh-Hant", country: "HK", topics: [topic] },
     {
-      providers: { deepseek: new MockProvider({ narrative: [{ kind: "ok", data: narrative }] }) },
+      // Under both keys: whichever provider the routes name answers with this narrative.
+      providers: { deepseek: scripted, anthropic: scripted },
       now: FIXED_NOW,
     },
   );

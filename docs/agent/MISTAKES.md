@@ -63,8 +63,22 @@
 59. Whatever a tap makes below its button (a result, a step, a card) goes inside BringIntoView, outside its FadeSlideIn, with a trigger when it grows a row per tap. Test it on a 360 x 740 phone with a test that fails when the scroll is off (owner, 2026-10-29: 新生成的component 要避免用户下滑后再点击).
 60. Never move the page with animateTo or ensureVisible while the user may tap (a button that has just come up): use bringIntoView, whose scroll lets taps through. When one tap starts two automatic scrolls, decide which part wins (the newest) and test where the page ends.
 61. In a widget test, pump at least 700 ms (BringIntoView.settle and its 400 ms scroll) after a tap that adds content before tapping or measuring that content; compare a rect measured through a transform with closeTo, never exactly.
+62. Test a provider through its real SDK client with a fake fetch (an SSE body for streams), at the largest max_tokens a route uses, not only with a fake client object. Call Claude through messages.stream(...).finalMessage(): the SDK refuses unstreamed requests over about 21,000 max_tokens, and thinking counts toward max_tokens.
+63. A test that scripts or breaks a provider puts it under every provider key (or passes its own routing), never only the key the shipped routes use. Check that a failure test fails for its own reason (the logged error), not only that something failed.
 
 ## Log
+
+### 2026-10-29: Scripted providers under one key (v9.2.0)
+- **Symptom:** When every route moved from deepseek to anthropic, five tests that passed a scripted or failing provider only as deepseek either failed with provider anthropic not configured or kept passing for the wrong reason: the provider-down test still saw a failed report, caused by the missing provider instead of its error.
+- **Root cause:** The tests named the provider the shipped routes happened to use, so their provider was chosen by config/model_routing.json, not by the test.
+- **Fix:** The same provider under both keys (deepseek and anthropic) in those tests; the provider-down test also checks that the logged error is the provider's own.
+- **Rule:** A test that scripts or breaks a provider puts it under every provider key (or passes its own routing), never only the key the shipped routes use. Check that a failure test fails for its own reason (the logged error), not only that something failed. (Rule 63)
+
+### 2026-10-29: Claude provider never sent a long reading (v9.2.0)
+- **Symptom:** AnthropicProvider used beta.messages.create. Routed to Claude, the narrative and life routes (max_tokens 32,000) would have failed before any request: the SDK refuses an unstreamed request above 21,333 max_tokens (Streaming is required for operations that may take longer than 10 minutes). Its tests used a fake client with create(), which never applies that guard.
+- **Root cause:** The provider was kept since Phase 1 but never routed, and was only tested against a hand-made fake of the SDK client, so the SDK request checks never ran.
+- **Fix:** Stream every request (beta.messages.stream(...).finalMessage()); a test drives the real SDK client over a fake fetch at 64,000 max_tokens and checks the request on the wire.
+- **Rule:** Test a provider through its real SDK client with a fake fetch (an SSE body for streams), at the largest max_tokens a route uses, not only with a fake client object. Call Claude through messages.stream(...).finalMessage(): the SDK refuses unstreamed requests over about 21,000 max_tokens, and thinking counts toward max_tokens. (Rule 62)
 
 ### 2026-10-29: Tests tapped what a growing card still clipped
 - **Symptom:** A tap on a button just added to an AppCard missed (no hit), and a turned tarot card measured 103.00000000000006 once the page scrolled by itself.

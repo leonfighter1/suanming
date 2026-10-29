@@ -61,15 +61,14 @@ describe("the five regions of Phase 3 §2.4", () => {
       })),
     };
     const hits = async (cc: string) => {
+      const scripted = new MockProvider({ narrative: [{ kind: "ok", data: narrative }] });
       // Review paused, as the dev server runs: every hit is recorded and nothing is held.
       const report = await generateReport(
         tarot,
         { locale: "en", country: cc },
         {
-          providers: {
-            deepseek: new MockProvider({ narrative: [{ kind: "ok", data: narrative }] }),
-            anthropic: new MockProvider(),
-          },
+          // Under both keys: whichever provider the routes name answers with this narrative.
+          providers: { deepseek: scripted, anthropic: scripted },
           now: FIXED_NOW,
           review: false,
         },

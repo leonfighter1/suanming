@@ -6,7 +6,6 @@
 import {
   generateReport,
   GeoRefusedError,
-  loadRouting,
   ReportInputError,
   TOPICS_BY_SYSTEM,
   type Locale,
@@ -106,7 +105,7 @@ export function listRegions() {
 // ---------- AI report (Phase 1) ----------
 
 export function aiStatus() {
-  const routing = loadRouting();
+  const routing = aiProviders().routing();
   return {
     provider: aiProviders().serving(),
     routes: Object.fromEntries(
@@ -148,7 +147,7 @@ export async function runReport(req: ReportRequest) {
         question: typeof req.question === "string" ? req.question.slice(0, 300) : undefined,
         includeDraft: true, // demo is an internal tool
       },
-      { providers: aiProviders().map },
+      { providers: aiProviders().map, routing: aiProviders().routing() },
     );
     return { report, chart, provider: aiProviders().serving() };
   } catch (e) {

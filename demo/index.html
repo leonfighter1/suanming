@@ -1288,7 +1288,7 @@
       };
       const providerNote = () =>
         AI.provider === "mock"
-          ? `<span class="badge muted">Mock provider</span> 未設定 ANTHROPIC_API_KEY，輸出為固定示範文字`
+          ? `<span class="badge muted">Mock provider</span> 未設定 CLAUDE_API_KEY 或 IS_AI_MOCK=TRUE，輸出為固定示範文字`
           : `<span class="badge ok">Claude</span> ${esc(AI.routes.narrative ?? "")}`;
 
       function aiPanel(system) {

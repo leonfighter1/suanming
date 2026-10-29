@@ -1,6 +1,10 @@
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { loadRouting } from "../src/ai/index.js";
 import { createDemoServer } from "../src/demo/server.js";
+
+/** The routed model; which one ships is pinned in ai-models.test.ts. */
+const narrativeModel = loadRouting().routes.narrative.default.model;
 
 const server = createDemoServer();
 let base = "";
@@ -81,7 +85,7 @@ describe("demo server", () => {
   it("ai-status reports the mock provider in tests", async () => {
     const s = await (await fetch(base + "/api/ai-status")).json();
     expect(s.provider).toBe("mock");
-    expect(s.routes.narrative).toContain("deepseek-v4-pro");
+    expect(s.routes.narrative).toContain(narrativeModel);
   });
 
   it("report: passed bazi report with AI disclosure headers", async () => {
@@ -99,7 +103,7 @@ describe("demo server", () => {
     });
     expect(res.status).toBe(200);
     expect(res.headers.get("x-ai-generated")).toBe("true");
-    expect(res.headers.get("x-ai-model")).toMatch(/deepseek-v4-pro;prompt=narrative_bazi@7/);
+    expect(res.headers.get("x-ai-model")).toContain(`${narrativeModel};prompt=narrative_bazi@7`);
     const data = await res.json();
     expect(data.report.status).toBe("passed");
     expect(data.report.layers.interpretation.map((s: { topic: string }) => s.topic)).toEqual([

@@ -12,6 +12,52 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v9.2.0 (2026-10-29): Claude as the AI service, Claude Opus 5.5 by default, and the models to choose from
+
+Your request of today (a Claude AI service besides DeepSeek, 可以用的 models, Claude Opus 5.5 from now on), as stage
+S17 of the [tech plan](docs/tech-plan.md). A medium update: kept locally until the next big one.
+
+- **Claude Opus 5.5 answers every AI step:** readings, their advice, 破除运势 plans, the 一生运势报告, 追问, and the
+  content review when it is on. DeepSeek stays, one setting away. A reading names the model that wrote it
+  (`claude-opus-5-5`), as before in its Word / PDF export.
+- **Your keys:** `CLAUDE_API_KEY` in `.env` (your name for it; `ANTHROPIC_API_KEY`, the SDK's own, works too), and
+  `DEEPSEEK_API_KEY` as before. Your Claude key was checked once against Anthropic's model list (free, no tokens): it is
+  accepted from this computer, and all four Claude models below are open to your account.
+- **The models to choose from:** `ACTIVE_AI_MODEL=<id>` in `.env` (your name for it) puts every step on one model:
+  - `claude-opus-5-5`: Claude Opus 5.5, the default ($4 / $20 per million tokens, in / out);
+  - `claude-fable-5-1`: Claude Fable 5.1, the most capable ($10 / $50; Anthropic keeps its requests for 30 days);
+  - `claude-sonnet-5-5`: Claude Sonnet 5.5, balanced ($2 / $10);
+  - `claude-haiku-5-5`: Claude Haiku 5.5, the fastest and cheapest ($0.10 / $0.50);
+  - `deepseek-v4-pro`: DeepSeek V4 Pro, the model until now.
+  - Your `.env` said `ACTIVE_AI_MODEL=claude-v1`, the name of Claude 1, which the API no longer serves; it now says
+    `claude-opus-5-5`. An id that isn't in the list is ignored, and the console says so and lists the usable ones.
+- **How to use it:**
+  - `npm run ai:models` lists the models, which one answers now, and whether each provider's key is in `.env` (never
+    the key itself).
+  - The running API follows a change to `ACTIVE_AI_MODEL` from the next reading, with no restart, as it does for
+    `IS_AI_MOCK`. A new key needs a restart.
+  - The AI switch is unchanged: `IS_AI_MOCK=TRUE` (as now) keeps the mock; `IS_AI_MOCK=FALSE` brings Claude Opus 5.5.
+    The console line says which model would answer and what is still missing, and `/v1/health` adds `ai_model` while a
+    real model answers.
+  - `npm run eval:ai -- --live --model claude-sonnet-5-5` runs the evaluation cases on any model in the list and records
+    each case's cost at list price.
+- **Fixed on the way:**
+  - The Claude provider, kept since Phase 1 but never used, could not have sent a reading: the SDK refuses a request
+    that isn't streamed above about 21,000 tokens, and a reading asks for 32,000. Every request is now streamed.
+  - Claude Opus 5.5 thinks before it answers, and its thinking counts toward the limit, so a reading may now use up to
+    64,000 tokens (the other steps 32,000), at Opus 5.5's own default effort, medium. Claude Haiku 5.5 is sent without
+    the refusal fallback it doesn't have.
+  - Five tests that had put their scripted provider under DeepSeek's name now cover whichever provider answers.
+- Verified:
+  - 14 new server tests: the provider through the real SDK over a stubbed network (a 64,000-token request goes out as
+    a stream; the answer is read after a thinking block), your key being the one sent, the model list and its prices,
+    the routing check, a reading on a chosen model, and a running API following `ACTIVE_AI_MODEL` from the next
+    reading.
+  - The API started once with your `.env`: its console line, `/v1/health`, and one (mock) reading.
+  - 585 server tests and 208 app tests pass (the app's fixtures now name `mock/claude-opus-5-5`); harness PASS.
+  - Not tried: a real Claude reading. Your switch says mock; once you flip it, `npm run eval:ai -- --live` tries the
+    cases, and costs money.
+
 ### v9.1.0 (2026-10-29): a cleaner home bar; what a tap brings up comes into view; the 求签 altar
 
 Your four requests of today, as stage S16 of the [tech plan](docs/tech-plan.md). A medium update: kept locally until
@@ -1508,7 +1554,7 @@ src/engines/bazi/    BaziEngine (lunar-javascript + tz/DST + true solar time)
 src/engines/tarot/   78-card RWS deck, spreads, HMAC-DRBG, audit replay
 src/engines/astrology/  POC adapter on astronomy-engine
 src/compliance/      rule-layer scanner + Geo-Rule resolver
-src/ai/              AI Interp pipeline, providers (DeepSeek, Claude, mock), prompts, terms
+src/ai/              AI Interp pipeline, providers (Claude, DeepSeek, mock), usable models, prompts, terms
 src/api/             v1 API server (auth, account, charts, async reports)
 src/auth/            passwords, tokens, Apple/Google ID tokens, login limits
 src/service/         chart validation + runtime wiring shared by API and demo

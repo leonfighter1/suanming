@@ -148,18 +148,19 @@ describe("v1 API", () => {
   });
 
   it("marks a report failed (not manual_review) when the provider is down", async () => {
+    const broken = {
+      name: "down",
+      generateJson: async (): Promise<never> => {
+        throw new Error("boom");
+      },
+    };
+    const logged: unknown[] = [];
     const down = createApiServer({
       secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-      providers: {
-        deepseek: {
-          name: "down",
-          generateJson: async () => {
-            throw new Error("boom");
-          },
-        },
-      },
+      // Under both keys, so the failure is the provider's whichever one the routes name.
+      providers: { deepseek: broken, anthropic: broken },
       devMode: true,
-      log: () => {},
+      log: (_msg, err) => logged.push(err),
     });
     await new Promise<void>((r) => down.listen(0, "127.0.0.1", r));
     const url = `http://127.0.0.1:${(down.address() as AddressInfo).port}`;
@@ -170,6 +171,7 @@ describe("v1 API", () => {
     await down.drain();
     const view = await (await fetch(`${url}/v1/reports/${report_id}`, { headers: H() })).json();
     expect(view.status).toBe("failed");
+    expect(logged.map((e) => (e as Error | undefined)?.message)).toContain("boom");
     await new Promise<void>((r) => down.close(() => r()));
   });
 });

@@ -11,10 +11,15 @@ import {
   DeepSeekProvider,
   loadRouting,
   MockProvider,
+  modelInfo,
+  MODELS,
   ProviderHttpError,
+  withModel,
   type LLMJsonRequest,
   type LLMJsonResult,
   type LLMProvider,
+  type ModelInfo,
+  type RoutingTable,
 } from "../ai/index.js";
 import type { Store } from "../api/store.js";
 import { noCaptcha, TurnstileVerifier } from "../auth/limits.js";
@@ -75,27 +80,60 @@ export function aiMode(env: Record<string, string | undefined>): AiMode {
   return { mock: false };
 }
 
+export interface ModelChoice {
+  /** The model ACTIVE_AI_MODEL picks for every AI step; absent: config/model_routing.json as it is. */
+  model?: ModelInfo;
+  /** ACTIVE_AI_MODEL names no usable model: the table answers, and the console says why. */
+  error?: string;
+}
+
 /**
- * aiMode() kept current with an .env file, re-read whenever the file changes: flip
- * IS_AI_MOCK and the next AI call follows, with no restart (so a tunnel's URL
- * survives). `shell` is the environment from before .env was loaded; like
- * process.loadEnvFile, it wins over the file. onChange hears every flip.
+ * The owner's model choice (S17): ACTIVE_AI_MODEL=<id> in .env (the owner's name for it), one of MODELS
+ * (npm run ai:models lists them).
  */
-export function watchAiMode(
+export function modelChoice(env: Record<string, string | undefined>): ModelChoice {
+  const id = env.ACTIVE_AI_MODEL?.trim();
+  if (!id) return {};
+  const model = modelInfo(id);
+  if (model) return { model };
+  const usable = MODELS.map((m) => m.id).join(", ");
+  return {
+    error: `ACTIVE_AI_MODEL=${id} is not a usable model, so config/model_routing.json answers (usable: ${usable})`,
+  };
+}
+
+interface AiSettings {
+  mode: AiMode;
+  choice: ModelChoice;
+}
+
+const sameSettings = (a: AiSettings, b: AiSettings) =>
+  a.mode.mock === b.mode.mock &&
+  a.mode.reason === b.mode.reason &&
+  a.choice.model?.id === b.choice.model?.id &&
+  a.choice.error === b.choice.error;
+
+/**
+ * The AI settings in an .env file, kept current: the switch (aiMode) and the model choice (modelChoice), re-read
+ * whenever the file changes. Flip IS_AI_MOCK or change ACTIVE_AI_MODEL and the next AI call follows, with no restart
+ * (so a tunnel's URL survives). `shell` is the environment from before .env was loaded; like process.loadEnvFile, it
+ * wins over the file. onChange hears every change, once per change of the file.
+ */
+export function watchAi(
   file: string,
   shell: Record<string, string | undefined>,
-  onChange?: (mode: AiMode) => void,
-): () => AiMode {
+  onChange?: () => void,
+): { mode: () => AiMode; choice: () => ModelChoice } {
   let stamp: number | undefined;
-  let mode: AiMode | undefined;
-  return () => {
+  let now: AiSettings | undefined;
+  const current = (): AiSettings => {
     let mtime = -1;
     try {
       mtime = statSync(file).mtimeMs;
     } catch {
       // no .env: the shell alone
     }
-    if (mtime !== stamp || !mode) {
+    if (mtime !== stamp || !now) {
       stamp = mtime;
       let fromFile: Record<string, string | undefined> = {};
       try {
@@ -103,13 +141,15 @@ export function watchAiMode(
       } catch {
         // missing or unreadable: the shell alone
       }
-      const prev = mode;
-      mode = aiMode({ ...fromFile, ...shell });
-      // After storing it: a listener that reads the switch sees the new mode.
-      if (prev && (mode.mock !== prev.mock || mode.reason !== prev.reason)) onChange?.(mode);
+      const env = { ...fromFile, ...shell };
+      const prev = now;
+      now = { mode: aiMode(env), choice: modelChoice(env) };
+      // After storing them: a listener that reads the settings back sees the new ones.
+      if (prev && !sameSettings(prev, now)) onChange?.();
     }
-    return mode;
+    return now;
   };
+  return { mode: () => current().mode, choice: () => current().choice };
 }
 
 /** A real provider that hands each call to the mock while the AI switch says so. */
@@ -129,22 +169,34 @@ export class SwitchedProvider implements LLMProvider {
   }
 }
 
+const defaultRoutes = (routing: RoutingTable) =>
+  Object.values(routing.routes).map((r) => r.default);
+
 export interface Providers {
   /** Providers with credentials (the ones the switch can turn on). */
   live: string[];
   map: Record<string, LLMProvider>;
   mode: () => AiMode;
+  choice: () => ModelChoice;
+  /** The routing for the next AI job: config/model_routing.json, every route on the chosen model if there is one. */
+  routing: () => RoutingTable;
   /** What answers AI calls right now: the routed provider name(s), or "mock". */
   serving: () => string;
+  /** The model(s) the routes name: they answer once serving() is not "mock". */
+  models: () => string;
 }
 
 /**
  * Providers keyed by the names config/model_routing.json uses. Each is real when
  * its credentials are present and the AI switch (`mode`, default: aiMode of the
  * environment) allows it, and the mock otherwise. Under MINGLI_AI_PROVIDER=mock
- * (the test suite) no real provider is even built.
+ * (the test suite) no real provider is even built. `choice` (default: modelChoice
+ * of the environment) puts every route on one model.
  */
-export function buildProviders(mode: () => AiMode = () => aiMode(process.env)): Providers {
+export function buildProviders(
+  mode: () => AiMode = () => aiMode(process.env),
+  choice: () => ModelChoice = () => modelChoice(process.env),
+): Providers {
   const testing = process.env.MINGLI_AI_PROVIDER === "mock";
   const mock = new MockProvider();
   const live: string[] = [];
@@ -154,11 +206,29 @@ export function buildProviders(mode: () => AiMode = () => aiMode(process.env)): 
     map.deepseek = new SwitchedProvider(new DeepSeekProvider(), mock, useMock);
     live.push("deepseek");
   }
-  if (!testing && (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
-    map.anthropic = new SwitchedProvider(new AnthropicProvider(), mock, useMock);
+  // CLAUDE_API_KEY is the owner's name for the key (2026-10-29), used before the SDK's own variables.
+  const claudeKey = process.env.CLAUDE_API_KEY?.trim();
+  if (
+    !testing &&
+    (claudeKey || process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)
+  ) {
+    const client = claudeKey ? new Anthropic({ apiKey: claudeKey, authToken: null }) : undefined;
+    map.anthropic = new SwitchedProvider(new AnthropicProvider(client), mock, useMock);
     live.push("anthropic");
   }
-  return { live, map, mode, serving: () => (useMock() ? "mock" : servingProvider(live)) };
+  const routing = () => {
+    const { model } = choice();
+    return model ? withModel(loadRouting(), model) : loadRouting();
+  };
+  return {
+    live,
+    map,
+    mode,
+    choice,
+    routing,
+    serving: () => (useMock() ? "mock" : servingProvider(live, routing())),
+    models: () => [...new Set(defaultRoutes(routing()).map((r) => r.model))].join(","),
+  };
 }
 
 /** The .env change that turns the real model back on, per reason for the mock. */
@@ -167,15 +237,34 @@ const UNMOCK: Record<string, string> = {
   "IS_AI_MODEL=FALSE": "IS_AI_MODEL=TRUE",
 };
 
+/** The .env key each provider needs (Claude's also answers to ANTHROPIC_API_KEY). */
+const KEYS: Record<string, string> = {
+  anthropic: "CLAUDE_API_KEY",
+  deepseek: "DEEPSEEK_API_KEY",
+};
+
 /** One console line: what answers AI calls now, and how to flip it. */
 export function describeAi(p: Providers): string {
   const serving = p.serving();
+  const models = p.models();
+  const wrong = p.choice().error;
+  const choice = wrong ? `; ${wrong}` : "";
   if (serving !== "mock")
-    return `${serving} (real model; IS_AI_MOCK=TRUE in .env switches to the mock)`;
+    return `${serving} ${models} (real model; IS_AI_MOCK=TRUE in .env switches to the mock)${choice}`;
+  // The keys the routed providers still lack: without them the mock answers whatever the switch says.
+  const missing = [...new Set(defaultRoutes(p.routing()).map((r) => r.provider))]
+    .filter((name) => !p.live.includes(name))
+    .map((name) => KEYS[name] ?? `a ${name} key`)
+    .join(" or ");
   const { reason } = p.mode();
-  if (!reason) return "mock (no API key in .env)";
-  const flip = UNMOCK[reason] ? `; ${UNMOCK[reason]} in .env for the real model` : "";
-  return `mock (${reason}): demo answers marked （示范）, no tokens spent${flip}`;
+  if (!reason) return `mock (no ${missing || "API key"} in .env for ${models})${choice}`;
+  const unmock = UNMOCK[reason];
+  const flip = !unmock
+    ? ""
+    : missing
+      ? `; for the real model (${models}): ${unmock} and ${missing} in .env`
+      : `; ${unmock} in .env for the real model (${models})`;
+  return `mock (${reason}): demo answers marked （示范）, no tokens spent${flip}${choice}`;
 }
 
 /**
@@ -270,8 +359,8 @@ export function upstreamMessage(e: unknown): string | undefined {
   return undefined;
 }
 
-/** Which provider actually serves the configured routes: its name(s), or "mock". */
-export function servingProvider(live: string[]): string {
-  const used = new Set(Object.values(loadRouting().routes).map((r) => r.default.provider));
+/** Which provider actually serves the routes: its name(s), or "mock" while one of them has no key. */
+export function servingProvider(live: string[], routing: RoutingTable = loadRouting()): string {
+  const used = new Set(defaultRoutes(routing).map((r) => r.provider));
   return [...used].every((p) => live.includes(p)) ? [...used].join(",") : "mock";
 }

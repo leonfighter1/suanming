@@ -63,6 +63,11 @@ paths:
                     description: >-
                       What answers AI calls right now: a provider name, or "mock" (the
                       （示范）demo answers; IS_AI_MOCK=TRUE in the server's .env).
+                  ai_model:
+                    type: string
+                    description: >-
+                      The model answering AI calls (v9.2.0), e.g. claude-opus-5-5; absent while
+                      "ai" is "mock". ACTIVE_AI_MODEL in the server's .env picks it.
         "429": { $ref: "#/components/responses/Problem" }
 
   /v1/auth/register:

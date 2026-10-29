@@ -1,6 +1,7 @@
 export * from "./types.js";
 export * from "./terms.js";
 export * from "./routing.js";
+export * from "./models.js";
 export * from "./prompts.js";
 export * from "./layers.js";
 export * from "./pipeline.js";

@@ -112,7 +112,11 @@ export interface ApiOptions {
   store?: Store;
   /** Required outside devMode. */
   auth?: AuthService;
-  routing?: RoutingTable;
+  /**
+   * The routing for each AI job, read as the job starts (v9.2.0: ACTIVE_AI_MODEL can change between jobs). Default:
+   * config/model_routing.json, which the pipelines read per job.
+   */
+  routing?: () => RoutingTable;
   devMode?: boolean;
   /**
    * Extra browser origins allowed to call the API, e.g. the GitHub Pages web test
@@ -159,6 +163,8 @@ export interface ApiOptions {
    * spent, so aiQuota is not counted.
    */
   aiServing?: () => string;
+  /** The model(s) behind aiServing (v9.2.0), shown on /v1/health while a real model answers. */
+  aiModel?: () => string;
   /**
    * Generate every topic's 破除運勢 plan (locked) right after a report passes, so a
    * purchase opens instantly. Default true. Counts against aiQuota.totalPerDay.
@@ -604,7 +610,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         },
         {
           providers: opts.providers,
-          routing: opts.routing,
+          routing: opts.routing?.(),
           review: opts.review !== false,
           now,
           // Live stage for clients polling the pending report.
@@ -686,7 +692,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         { country: c.country, context },
         {
           providers: opts.providers,
-          routing: opts.routing,
+          routing: opts.routing?.(),
           review: opts.review !== false,
           now,
           onProgress: async ({ stage, attempt }) => {
@@ -854,7 +860,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         { country: c.country },
         {
           providers: opts.providers,
-          routing: opts.routing,
+          routing: opts.routing?.(),
           review: opts.review !== false,
           now,
           onProgress: async ({ stage, attempt }) => {
@@ -961,7 +967,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         { locale: record.locale, country: c.country, context },
         {
           providers: opts.providers,
-          routing: opts.routing,
+          routing: opts.routing?.(),
           review: opts.review !== false,
           now,
           onProgress: async ({ stage, attempt }) => {
@@ -1257,6 +1263,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         content_review: opts.review === false ? "paused" : "on",
         // ...or the mock's demo answers for the real model.
         ...(opts.aiServing && { ai: opts.aiServing() }),
+        ...(opts.aiModel && opts.aiServing?.() !== "mock" && { ai_model: opts.aiModel() }),
       });
     }
 

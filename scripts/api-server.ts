@@ -7,6 +7,7 @@
 import { existsSync, watchFile } from "node:fs";
 import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
+import { checkRouting, loadRouting } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
 import { notifyFromEnv } from "../src/notify/index.js";
 import {
@@ -17,7 +18,7 @@ import {
   loadSecrets,
   openStore,
   seedDevAccounts,
-  watchAiMode,
+  watchAi,
 } from "../src/service/runtime.js";
 
 // The shell's own variables, from before .env: they win over the file.
@@ -37,13 +38,12 @@ const lan = process.argv.includes("--lan");
 const pub = process.argv.includes("--public");
 const secrets = loadSecrets();
 /**
- * The AI switch: IS_AI_MOCK / IS_AI_MODEL in .env, re-read when the file changes.
- * A flip applies from the next AI call, with no restart (the public URL stays).
+ * The AI switch (IS_AI_MOCK / IS_AI_MODEL) and the model choice (ACTIVE_AI_MODEL) in .env, re-read when the file
+ * changes. A change applies from the next AI call, with no restart (the public URL stays).
  */
-const providers = buildProviders(
-  watchAiMode(".env", shellEnv, () => console.log(`AI switched: ${describeAi(providers)}`)),
-);
-// Notice a saved .env within a second, so the console confirms the flip.
+const ai = watchAi(".env", shellEnv, () => console.log(`AI switched: ${describeAi(providers)}`));
+const providers = buildProviders(ai.mode, ai.choice);
+// Notice a saved .env within a second, so the console confirms the change.
 watchFile(".env", { persistent: false, interval: 1000 }, () => providers.mode());
 const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? (lan ? "0.0.0.0" : "127.0.0.1");
@@ -87,6 +87,8 @@ const server = createApiServer({
   mail: notify.mail,
   sms: notify.sms,
   aiServing: providers.serving,
+  aiModel: providers.models,
+  routing: providers.routing,
   ...(pub && { trustProxy: true, staticDir, aiQuota }),
 });
 
@@ -111,6 +113,8 @@ server.listen(port, host, () => {
     console.log("  X-Dev-User shortcut is off (reachable from other machines); sign in instead.");
   }
   console.log(`AI: ${describeAi(providers)}`);
+  // Anything in config/model_routing.json that src/ai/models.ts doesn't allow, said before a reading fails on it.
+  for (const problem of checkRouting(loadRouting())) console.log(`  routing: ${problem}`);
   console.log(
     process.env.MINGLI_REVIEW === "on"
       ? "content review: ON (holds, guard, 内容审核)"

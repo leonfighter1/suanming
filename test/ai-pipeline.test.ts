@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import Anthropic from "@anthropic-ai/sdk";
 import {
   AnthropicProvider,
   GeoRefusedError,
   generateReport,
+  loadRouting,
   MockProvider,
   ReportInputError,
   type AnthropicLike,
@@ -56,7 +58,8 @@ describe("generateReport — happy path", () => {
     expect(r.layers!.actions.length).toBeGreaterThan(0);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
     expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@7,action_bazi@4,guard@2");
-    expect(r.ai_disclosure.model).toContain("deepseek-v4-pro");
+    // The routed model, as the mock reports it (mock/<model>); which model ships is pinned in ai-models.test.ts.
+    expect(r.ai_disclosure.model).toContain(loadRouting().routes.narrative.default.model);
     // No trend agent: the engine scores the trend chart (v2.0.0).
     expect(mock.calls.map((c) => c.agent).sort()).toEqual(["action", "guard", "narrative"]);
     const trend = r.layers!.trend!;
@@ -230,26 +233,36 @@ describe("generateReport — input and Geo-Rule", () => {
 });
 
 describe("AnthropicProvider", () => {
+  /** A client that answers stream() with `response` and records what it was sent. It has no create(). */
   function fakeClient(response: unknown) {
     const seen: unknown[] = [];
     const client = {
-      beta: { messages: { create: async (params: unknown) => (seen.push(params), response) } },
+      beta: {
+        messages: {
+          stream: (params: unknown) => (seen.push(params), { finalMessage: async () => response }),
+        },
+      },
     } as unknown as AnthropicLike;
     return { client, seen };
   }
   const req = {
     agent: "narrative" as const,
     model: "claude-opus-5-5",
-    effort: "high" as const,
-    maxTokens: 16000,
+    effort: "medium" as const,
+    maxTokens: 64000,
     system: "SYS",
     user: "USER",
     schema: { type: "object" },
     payload: {},
   };
-  const usage = { input_tokens: 10, output_tokens: 5, cache_read_input_tokens: 0 };
+  const usage = {
+    input_tokens: 10,
+    output_tokens: 5,
+    cache_read_input_tokens: 0,
+    cache_creation_input_tokens: 0,
+  };
 
-  it("sends structured-output, fallback and caching params; no prefill or sampling params", async () => {
+  it("streams structured-output, fallback and caching params; no prefill, sampling or thinking params", async () => {
     const { client, seen } = fakeClient({
       model: "claude-opus-5-5",
       stop_reason: "end_turn",
@@ -261,17 +274,164 @@ describe("AnthropicProvider", () => {
     const p = seen[0] as Record<string, unknown>;
     expect(p).toMatchObject({
       model: "claude-opus-5-5",
-      max_tokens: 16000,
+      max_tokens: 64000,
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       output_config: {
-        effort: "high",
+        effort: "medium",
         format: { type: "json_schema", schema: { type: "object" } },
       },
       system: [{ type: "text", text: "SYS", cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content: "USER" }],
     });
+    // Thinking is the model's own: adaptive, and Claude Opus 5.5 can't turn it off.
     for (const k of ["temperature", "top_p", "top_k", "thinking"]) expect(p).not.toHaveProperty(k);
+  });
+
+  it("leaves the fallback out for Claude Haiku 5.5, which has none, and for a model not in the list", async () => {
+    for (const model of ["claude-haiku-5-5", "claude-opus-4-8"]) {
+      const { client, seen } = fakeClient({
+        model,
+        stop_reason: "end_turn",
+        content: [{ type: "text", text: "{}" }],
+        usage,
+      });
+      expect(await new AnthropicProvider(client).generateJson({ ...req, model })).toMatchObject({
+        kind: "ok",
+        model,
+      });
+      expect(seen[0]).toMatchObject({ model, output_config: { effort: "medium" } });
+      expect(seen[0]).not.toHaveProperty("fallbacks");
+      expect(seen[0]).not.toHaveProperty("betas");
+    }
+  });
+
+  it("reads the answer by block type, after a thinking block, and keeps cache reads and writes", async () => {
+    const counted = {
+      input_tokens: 40,
+      output_tokens: 900,
+      cache_read_input_tokens: 3000,
+      cache_creation_input_tokens: 1200,
+    };
+    const { client } = fakeClient({
+      model: "claude-opus-5-5",
+      stop_reason: "end_turn",
+      content: [
+        { type: "thinking", thinking: "", signature: "sig" },
+        { type: "text", text: '{"a":' },
+        { type: "text", text: "1}" },
+      ],
+      usage: counted,
+    });
+    expect(await new AnthropicProvider(client).generateJson(req)).toEqual({
+      kind: "ok",
+      data: { a: 1 },
+      model: "claude-opus-5-5",
+      usage: counted,
+    });
+  });
+
+  it("goes through the real SDK as a stream, so a 64,000-token route is sent at all", async () => {
+    // What a streamed answer arrives as: a thinking block first (empty, as Claude Opus 5.5 returns it), then the JSON.
+    const events: [string, unknown][] = [
+      [
+        "message_start",
+        {
+          type: "message_start",
+          message: {
+            id: "msg_1",
+            type: "message",
+            role: "assistant",
+            model: "claude-opus-5-5",
+            content: [],
+            stop_reason: null,
+            stop_sequence: null,
+            usage: {
+              input_tokens: 120,
+              output_tokens: 1,
+              cache_read_input_tokens: 2500,
+              cache_creation_input_tokens: 0,
+            },
+          },
+        },
+      ],
+      [
+        "content_block_start",
+        {
+          type: "content_block_start",
+          index: 0,
+          content_block: { type: "thinking", thinking: "", signature: "" },
+        },
+      ],
+      [
+        "content_block_delta",
+        {
+          type: "content_block_delta",
+          index: 0,
+          delta: { type: "signature_delta", signature: "sig" },
+        },
+      ],
+      ["content_block_stop", { type: "content_block_stop", index: 0 }],
+      [
+        "content_block_start",
+        { type: "content_block_start", index: 1, content_block: { type: "text", text: "" } },
+      ],
+      [
+        "content_block_delta",
+        { type: "content_block_delta", index: 1, delta: { type: "text_delta", text: '{"ok":' } },
+      ],
+      [
+        "content_block_delta",
+        { type: "content_block_delta", index: 1, delta: { type: "text_delta", text: "true}" } },
+      ],
+      ["content_block_stop", { type: "content_block_stop", index: 1 }],
+      [
+        "message_delta",
+        {
+          type: "message_delta",
+          delta: { stop_reason: "end_turn", stop_sequence: null },
+          usage: { output_tokens: 640 },
+        },
+      ],
+      ["message_stop", { type: "message_stop" }],
+    ];
+    const sse = events
+      .map(([event, data]) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+      .join("");
+    const sent: { url: string; headers: Headers; body: Record<string, unknown> }[] = [];
+    const fetch = async (url: string | URL | Request, init?: RequestInit) => {
+      sent.push({
+        url: String(url),
+        headers: new Headers(init?.headers),
+        body: JSON.parse(String(init?.body)) as Record<string, unknown>,
+      });
+      return new Response(sse, { status: 200, headers: { "content-type": "text/event-stream" } });
+    };
+    const client = new Anthropic({ apiKey: "sk-ant-test", fetch, maxRetries: 0 });
+
+    expect(await new AnthropicProvider(client).generateJson(req)).toEqual({
+      kind: "ok",
+      data: { ok: true },
+      model: "claude-opus-5-5",
+      // output_tokens from message_delta (640), the rest from message_start.
+      usage: {
+        input_tokens: 120,
+        output_tokens: 640,
+        cache_read_input_tokens: 2500,
+        cache_creation_input_tokens: 0,
+      },
+    });
+    expect(sent).toHaveLength(1);
+    expect(sent[0]!.url).toMatch(/\/v1\/messages\?beta=true$/);
+    expect(sent[0]!.headers.get("anthropic-beta")).toBe("server-side-fallback-2026-07-01");
+    expect(sent[0]!.body).toMatchObject({
+      stream: true,
+      model: "claude-opus-5-5",
+      max_tokens: 64000,
+      fallbacks: "default",
+      output_config: { effort: "medium", format: { type: "json_schema" } },
+    });
+    expect(sent[0]!.body).not.toHaveProperty("betas"); // a header, not a body field
   });
 
   it("maps refusal and truncation", async () => {
@@ -353,7 +513,7 @@ it("facts layer and narrative prompt carry the 農曆 / 時辰 input basis to th
   await gen(
     shichenChart,
     { locale: "zh-Hant", country: "HK", topics: ["personality"] },
-    { providers: { deepseek: mock }, now: FIXED_NOW },
+    { providers: { deepseek: mock, anthropic: mock }, now: FIXED_NOW },
   );
   const narrative = mock.calls.find((c) => c.agent === "narrative")!;
   expect(narrative.system).toContain("input_basis");

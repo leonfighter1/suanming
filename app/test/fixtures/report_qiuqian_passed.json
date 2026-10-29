@@ -91,7 +91,7 @@
   },
   "ai_disclosure": {
     "generated": true,
-    "model": "mock/deepseek-v4-pro",
+    "model": "mock/claude-opus-5-5",
     "prompt_version": "narrative_qiuqian@2,action_qiuqian@1,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
