@@ -41,6 +41,8 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S12 Owner updates          | tarot spreads 3 a row, 东方 / 西方 home, coins that turn    | medium | v6.1.0            | done        |
 | S13 AI 追问 + 通俗解读     | 术语 → 评论 → 例子 in every reading; 追问 on every reading  | big    | v7.0.0 + summary  | done        |
 | S14 以往记录               | by month and person; Word / PDF; send; file; delete         | big    | v8.0.0 + summary  | done        |
+| S15 菜单、图标、登录、邮件 | the menu, app icon, sign-in three ways, reports by email    | big    | v9.0.0 + summary  | done        |
+| S16 Owner updates          | home bar, new parts come into view, the 求签 altar          | medium | v9.1.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1576,9 +1578,86 @@ As built (v9.0.0):
 - **Looked at:** a real reading's mail in headless Chrome at 480 px wide; the select bar and 设置 → 报告 with Noto
   Sans SC.
 
+## S16 Owner updates (medium → v9.1.0)
+
+**Owner requests (2026-10-29), after v9.0.0, five in a row:**
+
+> UI 的小改动，首先关于主页的历史记录，可以添加到breadcrumb里去。breadcrumb需要添加外框，更加明显。然后将其移动到右侧。
+> 命理大师的text可以添加一些效果，比如前置一个svg的decor。
+>
+> 塔罗牌测试时，当选好牌阵 点击抽牌后，要navigate 到洗牌切牌和选牌的区域，否则用户不知道板块刷新了
+>
+> 最后求签要添加新的动画效果。目前太单调了。比如有个甩签的画面。
+>
+> 还有风水也是，点击看布局要 navigate 到新的生成的区域。
+>
+> 所以这类新生成的component 要避免用户下滑后再点击。最好点击的时候自动集中到当前的UI component
+
+- **WP16.1 首页's bar.** 历史记录 off the bar and first in the ☰ menu (it was in both). ☰ framed and on the right, the
+  menu sliding in from there. A mark before 命理大师, the name given an effect.
+- **WP16.2 What a tap brings up comes into view.** One building block, used wherever a tap makes something below its
+  button: 塔罗 (the ritual, its pick step, the spread, the reading request), 风水 (the principles), 求签 (the altar, the
+  lot), 算卦 (the tosses, the coins laid out, the hexagram), 起名 (the names).
+- **WP16.3 求签's animation.** The 签筒 shaken until a stick falls (甩签), and the 筊杯 thrown, in place of a text line
+  that appeared at once.
+- **WP16.4 The rule kept.** A MISTAKES rule and a test per page on a phone, so a new page keeps to it.
+
+Lessons: rules 3, 22, 27, 43, 49, 50, 53, 55, 58; the keyboard-access skill.
+
+As built (v9.1.0):
+
+- **WP16.1:**
+  - "breadcrumb" read as the ☰ menu, as in S15.
+  - The mark is `BaguaMark` (widgets/app_title.dart): the icon's 太极 and 先天八卦, in the icon's order, drawn with a
+    CustomPainter. Flutter shows no SVG without a package; a painter adds none and takes the theme's colours, light
+    and dark. Its trigram lines are thicker than the icon's, for 34 px.
+  - The name is bold, spaced 3 px, shading from the theme's 赭红 to gold (a ShaderMask).
+  - ☰ is `MenuButton` (widgets/app_menu.dart): a 1.5 px 赭红 frame on a light tint. While it has the keyboard focus
+    the theme's focus outline takes the frame's place.
+  - The menu is the page's end drawer. Tab still reaches ☰ first; Esc and Tab inside the menu work as before.
+- **WP16.2:** `BringIntoView` (design.dart).
+  - When the part first shows, and again whenever its trigger changes, the page scrolls as little as it takes: the
+    part ends 16 px inside the bottom, with what was tapped still above it. One taller than the view comes to the top.
+  - A trigger waits 300 ms first: AppCard animates its size, and the part is measured once it has grown.
+  - It scrolls with its own scroll activity, which lets taps through. Flutter ignores taps on a list during an animated
+    scroll, and the test lost the tap on 擲筊 as it came up (rule 60).
+  - When several parts ask at once, the last to ask wins. The throw that brought the lot also grew the rounds card,
+    whose reveal came later and scrolled the lot away (rule 60).
+  - With the system's reduce-motion on, it jumps.
+  - The tarot ritual and the spread now line up at the top while one gives way to the other, so the one coming is
+    measured where it stays.
+- **WP16.3:** `QiuqianStage` (widgets/qiuqian_stage.dart).
+  - The shake (1.8 s): the 签筒 rests, leans 35°, takes five thrusts along its length while its sticks rattle and one
+    works its way out, then rights itself as the stick drops, bounces once and glows. The rounds card says 摇签中…….
+  - The throw (1.1 s): the blocks leave a moment apart, tumble through six half-turns and land on their faces,
+    painted by the rows' own `JiaobeiPainter`.
+  - The rows and the button wait for each step: the round's row once its stick lies still, the throw's meaning once
+    the blocks land, the next button after that.
+  - 直接看结果 and reduce-motion show each step's end at once. The label on the cylinder is 签 or 籤, in the page's
+    font (rule 50).
+- **Fixed on the way:** VS Code's CMake extension made `.vscode/` and `build/` at the top of the project. Prettier
+  reads them, so the lint gate would have failed. Both are now git-ignored (Prettier 3 reads .gitignore).
+- **Looked at rendered** with the real font: the bar in light and dark, the menu, eight frames of the shake and five of
+  the throw, the stage in dark, and the tarot ritual and 风水 principles after the tap on a 360 × 740 phone.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S16 Owner updates (done 2026-10-29: v9.1.0)
+
+1. **Delivered (v9.1.0):** WP16.1 the home bar (历史记录 in the menu, a framed ☰ on the right, the mark and the
+   shaded name); WP16.2 `BringIntoView` on every page where a tap makes something below its button; WP16.3 the 求签
+   altar (甩签 and 掷筊); WP16.4 the rule and the phone tests.
+2. **Numbers:** 12 new app tests (208 in all); 571 server tests, unchanged. The phone tests fail with the scroll off.
+   Before the fix, the tarot ritual started 3 px above the screen's bottom edge.
+3. **Against the plan:** the owner named 塔罗 and 风水; the same fix went to every page where a tap adds a part below
+   its button, as the owner's last message asked. The SVG became a painter (no new package), drawn from the icon.
+4. **Mistakes:** rules 59 (the owner's rule: what a tap makes comes into view, tested on a phone), 60 (an animated
+   scroll swallows taps; two reveals from one tap must not fight) and 61 (tests wait for a growing card; transformed
+   rects use closeTo).
+5. **Next:** nothing in progress. Waiting for the owner: the mail and SMS providers (S15), the Phase 3 gate, WP7.2,
+   WP7.3 and WP1.8.
 
 ### S15 菜单、图标、多种登录、报告发到邮箱 (done 2026-10-29: v8.1.0–v9.0.0)
 
@@ -2050,3 +2129,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP15.2    | done                         | v8.1.0  |
 | WP15.3    | done                         | v8.2.0  |
 | WP15.4    | done                         | v9.0.0  |
+| WP16.1    | done                         | v9.1.0  |
+| WP16.2    | done                         | v9.1.0  |
+| WP16.3    | done                         | v9.1.0  |
+| WP16.4    | done                         | v9.1.0  |

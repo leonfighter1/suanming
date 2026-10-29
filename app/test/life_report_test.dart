@@ -104,7 +104,7 @@ void main() {
     final api = FakeApi(pendingPolls: 0)..person = {'name': '吴勇', 'birthplace': '中国 · 江苏 · 靖江市'};
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await settle(tester);
     expect(find.text('吴勇 一生运势报告'), findsOneWidget);
     expect(find.text('吴勇 的命盘'), findsOneWidget);
@@ -129,7 +129,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0), profiles: InMemoryProfileStore(), locale: zhHans));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await settle(tester);
     expect(find.text('一生运势报告'), findsOneWidget);
     expect(find.text('八字排盘'), findsWidgets);

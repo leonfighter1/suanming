@@ -12,6 +12,54 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v9.1.0 (2026-10-29): a cleaner home bar; what a tap brings up comes into view; the 求签 altar
+
+Your four requests of today, as stage S16 of the [tech plan](docs/tech-plan.md). A medium update: kept locally until
+the next big one.
+
+- **首页's bar:**
+  - 历史记录 moved into the ☰ menu, first in it. The bar now holds only the app's mark and name on the left and ☰ on
+    the right.
+  - ☰ is framed (a 赭红 outline on a light tint), and the menu now slides in from the right, where ☰ is.
+  - Before 命理大师: the app's mark, the 太极 in the 先天八卦 as on the icon. It is drawn in code, so it stays sharp at
+    any size and takes the theme's colours, light and dark. The name is bold and spaced, shading from 赭红 to gold.
+- **What a tap brings up comes into view by itself** (your rule: 这类新生成的component 要避免用户下滑后再点击):
+  - 塔罗: 抽牌 brings up 洗牌 · 切牌 · 选牌, also when it is open already. After 切牌, the 78 cards come up from their
+    top. Then the drawn spread, and, once the last card has turned, 生成解读.
+  - 风水: 看布局 brings up the room's principles.
+  - 求签: the altar as the lot is drawn. It stays in view as each step adds a row, and the lot comes up once the 圣筊
+    lands.
+  - 算卦: the tosses (each 擲下一爻 keeps the card and its button in view), the coins laid out for 自己挑币, and the
+    hexagram once the coins that make it have landed or turned.
+  - 起名 (still off): the names.
+  - The page scrolls only as far as it must: a new part ends just inside the bottom of the screen, with what you
+    tapped still above it. One taller than the screen comes to the top. Nothing moves when it is in view already. With
+    the system's reduce-motion setting on, it jumps instead of gliding.
+  - Taps work while the page moves. Flutter normally ignores them during a scroll animation, which would have lost
+    the tap on a button that had just come up.
+- **求签's new animation (甩签):**
+  - A 签筒 full of sticks tilts forward and is shaken. One stick works its way out, drops to the floor in front and
+    glows; then 摇出第…签.
+  - 掷筊: the two 筊杯 are thrown, tumble in the air and land on their faces beside the stick; then what they mean.
+  - 放回再摇 puts the stick back and shakes again. 直接看结果 still shows everything at once, and with reduce-motion on
+    each step ends at once.
+  - While it moves, the card says 摇签中…… or 掷筊中……; the next step's button comes when it is done.
+- **Fixed on the way:** the `.vscode/` and `build/` folders that VS Code's CMake extension made at the top of the
+  project are now git-ignored. Prettier read them, and the lint gate would have failed.
+- Verified:
+  - 12 new app tests:
+    - the scroll on its own: a part below the fold, one taller than the screen, one in view already, one that grows,
+      and reduce-motion;
+    - each page on a 360 × 740 phone (塔罗 through to 生成解读, 风水, 求签 through to the lot, 算卦 through to the
+      hexagram). These fail with the scroll turned off: before, the tarot ritual started 3 px above the screen's
+      bottom edge;
+    - the 求签 stage: when it says the stick lies still and the blocks have landed, 直接看结果 halfway, reduce-motion.
+  - The home bar's tests now check the mark, the name, the framed ☰ at the right end, the menu from the right and
+    历史记录 in it.
+  - Looked at rendered with the real font: the bar in light and dark, the menu, the shake and the throw frame by
+    frame, and the tarot ritual and 风水 principles after the tap.
+  - 571 server tests and 208 app tests pass; harness PASS.
+
 ### v9.0.0 (2026-10-29): reports by email; stage S15 complete (menu, icon, logins, email)
 
 Stage S15 of the [tech plan](docs/tech-plan.md) is complete, and its summary is there. It covers your whole request:

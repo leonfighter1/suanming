@@ -13,6 +13,7 @@ import 'profiles_page.dart';
 import 'qiuqian_page.dart';
 import 'tarot_page.dart';
 import 'widgets/app_menu.dart';
+import 'widgets/app_title.dart';
 
 void push(BuildContext context, Widget page) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
@@ -41,27 +42,15 @@ class HomePage extends ConsumerWidget {
         ],
     ];
     return Scaffold(
-      // A clean bar (owner, v8.1.0): ☰ opens the menu with 个人资料, 语言, 设置 and the rest; 历史记录 stays one tap away.
-      // This replaces the 2026-10-27 bar, which had every one of them as its own button.
-      drawer: const AppMenu(),
+      // A clean bar (owner, v8.1.0; v9.1.0): the mark and the name, then a framed ☰ on the right. ☰ opens the menu
+      // from that side, with 历史记录, 个人资料, 语言, 设置 and the rest. This replaces the 2026-10-27 bar, which had
+      // each of them as its own button, and the v8.1.0 one, with ☰ on the left and 历史记录 beside the title.
+      endDrawer: const AppMenu(),
       appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            key: const Key('open-menu'),
-            tooltip: l10n.menu,
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
-        title: Text(l10n.appTitle),
+        title: const AppTitle(),
         actions: [
-          IconButton(
-            key: const Key('open-history'),
-            tooltip: l10n.history,
-            icon: const Icon(Icons.history),
-            onPressed: () => push(context, const HistoryPage()),
-          ),
-          const SizedBox(width: Space.xs),
+          Builder(builder: (context) => MenuButton(onPressed: () => Scaffold.of(context).openEndDrawer())),
+          const SizedBox(width: Space.m),
         ],
       ),
       body: ListView(

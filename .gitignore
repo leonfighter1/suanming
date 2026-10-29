@@ -11,3 +11,6 @@ report.json
 .data/
 # The development outbox (S15): mail and text messages written instead of sent; they hold addresses and codes.
 .outbox/
+# Made by the IDE (VS Code's CMake extension configuring app/windows): not part of the project.
+/.vscode/
+/build/

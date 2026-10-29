@@ -311,7 +311,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
     await tester.pumpWidget(testApp(api));
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await frames(tester, 10);
     expect(find.text('算卦 · 天火同人'), findsOneWidget);
     await tester.tap(find.byType(HistoryTile).first);

@@ -162,11 +162,15 @@ class _FengshuiPageState extends ConsumerState<FengshuiPage> {
               ),
             ),
             if (chart != null) ...[
-              FadeSlideIn(
-                child: PrinciplesCard(
-                  key: const Key('principles-card'),
-                  room: chart.fengshui.room,
-                  facing: chart.fengshui.facing,
+              // 看佈局 brings the room's principles into view (owner, v9.1.0).
+              BringIntoView(
+                key: ValueKey<String>('principles-${chart.chartId}'),
+                child: FadeSlideIn(
+                  child: PrinciplesCard(
+                    key: const Key('principles-card'),
+                    room: chart.fengshui.room,
+                    facing: chart.fengshui.facing,
+                  ),
                 ),
               ),
               FadeSlideIn(

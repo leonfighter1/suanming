@@ -32,7 +32,7 @@ Future<FakeApi> openReport(WidgetTester tester, {bool preload = false}) async {
   final api = FakeApi(pendingPolls: 0)..preloadRemedies = preload;
   await tester.pumpWidget(testApp(api));
   await settle(tester);
-  await tester.tap(find.byKey(const Key('open-history')));
+  await openFromMenu(tester, 'menu-history');
   await settle(tester);
   await tester.tap(find.text('八字排盤').last);
   await settle(tester);

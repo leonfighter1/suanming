@@ -8,10 +8,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart' show shareProvider;
 import 'package:mingli_app/presentation/history_page.dart' show HistoryTile;
+import 'package:mingli_app/presentation/widgets/qiuqian_stage.dart' show QiuqianStage;
 import 'package:share_plus/share_plus.dart' show ShareParams;
 
 import 'keys.dart';
 import 'support.dart';
+
+/// The stage at work (v9.1.0): until the stick lies on the floor, or the blocks have landed.
+Future<void> _shaken(WidgetTester tester) => frames(tester, QiuqianStage.shake.inMilliseconds ~/ 100 + 2);
+Future<void> _landed(WidgetTester tester) => frames(tester, QiuqianStage.toss.inMilliseconds ~/ 100 + 2);
 
 final _facts = fixture('chart_qiuqian')['chart_fact']['facts'] as Map<String, dynamic>;
 final _rounds = (_facts['rounds'] as List).cast<Map<String, dynamic>>();
@@ -63,17 +68,28 @@ void main() {
     await tester.enterText(find.byKey(const Key('qiuqian-question')), '今年適合換工作嗎？');
     await tester.pump();
     await tester.tap(find.byKey(const Key('draw-lot')));
-    await frames(tester);
+    await frames(tester, 3);
     expect(jsonDecode(api.requests.last.body), {'system': 'qiuqian'});
 
     for (final (i, r) in _rounds.indexed) {
       final stick = testTerms.lots!.lot(r['lot'] as int)!.title('zh-Hant');
+      // The cylinder is shaken first (v9.1.0): the stick and the button wait until it lies on the floor.
+      expect(find.text('搖籤中……'), findsOneWidget);
+      expect(find.byKey(const Key('skip-rounds')), findsOneWidget);
+      expect(find.text('搖出$stick'), findsNothing);
+      expect(find.byKey(const Key('throw-blocks')), findsNothing);
+      await _shaken(tester);
       expect(find.text('搖出$stick'), findsWidgets);
       // The blocks aren't thrown yet, and the lot isn't shown.
       expect(find.byKey(ValueKey<String>('throw-$i')), findsNothing);
       expect(find.byKey(const Key('lot-card')), findsNothing);
       await tester.tap(find.byKey(const Key('throw-blocks')));
       await frames(tester, 3);
+      // In the air: how they landed waits until they have.
+      expect(find.text('擲筊中……'), findsOneWidget);
+      expect(find.byKey(ValueKey<String>('throw-$i')), findsNothing);
+      await _landed(tester);
+      expect(find.text('擲筊中……'), findsNothing);
       expect(tester.widget<Text>(find.byKey(ValueKey<String>('throw-$i'))).data, _meaning(r['result'] as String));
       if (i < _rounds.length - 1) {
         await tester.tap(find.byKey(const Key('shake-again')));
@@ -103,17 +119,78 @@ void main() {
   testWidgets('直接看結果 shows every round and the lot at once; Enter throws from the keyboard', (tester) async {
     await _openQiuqian(tester, FakeApi());
     await tester.tap(find.byKey(const Key('draw-lot')));
-    await frames(tester);
+    await _shaken(tester);
     // The fixture's draw: a 陰筊 on the first stick, the 聖筊 on the second.
     expect(_rounds.map((r) => r['result']), ['yin', 'sheng']);
-    // The throw button has the focus as soon as the stick falls: Enter throws.
+    // The throw button has the focus as soon as the stick lies on the floor: Enter throws.
     await press(tester, LogicalKeyboardKey.enter);
+    await _landed(tester);
     expect(tester.widget<Text>(find.byKey(const ValueKey<String>('throw-0'))).data, _meaning('yin'));
     await tester.tap(find.byKey(const Key('skip-rounds')));
     await frames(tester, 3);
     expect(tester.widget<Text>(find.byKey(const ValueKey<String>('throw-1'))).data, _meaning('sheng'));
     await scrollTo(tester, const Key('lot-card'));
     expect(find.text('${_lot.title('zh-Hant')} · ${_lot.ganzhi}'), findsOneWidget);
+  });
+
+  group('the altar (v9.1.0)', () {
+    late List<int> shaken, thrown;
+    setUp(() {
+      shaken = [];
+      thrown = [];
+    });
+    Widget stage(int round, List<String>? blocks, {bool settled = false, bool still = false}) => MaterialApp(
+          builder: (context, child) =>
+              MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: still), child: child!),
+          home: Scaffold(
+            body: QiuqianStage(
+              round: round,
+              blocks: blocks,
+              label: '籤',
+              settled: settled,
+              onShaken: shaken.add,
+              onThrown: thrown.add,
+            ),
+          ),
+        );
+    const tick = Duration(milliseconds: 100);
+
+    testWidgets('the stick lies still at the end of the shake, the blocks at the end of the throw', (tester) async {
+      await tester.pumpWidget(stage(0, null));
+      expect(find.text('籤'), findsOneWidget); // on the cylinder's label
+      await tester.pump(QiuqianStage.shake - tick);
+      expect(shaken, isEmpty);
+      await tester.pump(tick * 2);
+      expect(shaken, [0]);
+      await tester.pumpWidget(stage(0, const ['flat', 'round']));
+      await tester.pump(QiuqianStage.toss - tick);
+      expect(thrown, isEmpty);
+      await tester.pump(tick * 2);
+      expect(thrown, [0]);
+      // A new round puts the stick back and shakes again.
+      await tester.pumpWidget(stage(1, null));
+      await tester.pump(QiuqianStage.shake + tick);
+      expect(shaken, [0, 1]);
+      expect(thrown, [0]);
+    });
+
+    testWidgets('直接看結果 in the middle of a shake shows the end at once, and the page hears nothing more', (tester) async {
+      await tester.pumpWidget(stage(0, null));
+      await tester.pump(QiuqianStage.shake ~/ 3);
+      await tester.pumpWidget(stage(1, const ['flat', 'round'], settled: true));
+      await tester.pump(QiuqianStage.shake + QiuqianStage.toss);
+      expect(shaken, isEmpty);
+      expect(thrown, isEmpty);
+    });
+
+    testWidgets('with the system animations off each step ends at once', (tester) async {
+      await tester.pumpWidget(stage(0, null, still: true));
+      await tester.pump();
+      expect(shaken, [0]);
+      await tester.pumpWidget(stage(0, const ['round', 'round'], still: true));
+      await tester.pump();
+      expect(thrown, [0]);
+    });
   });
 
   testWidgets('a 求籤 reading opens with its lot, lists it in history and offers 分享圖片', (tester) async {
@@ -140,7 +217,7 @@ void main() {
     );
     await tester.pumpWidget(testApp(api, overrides: [shareProvider.overrideWithValue((p) async => shared.add(p))]));
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await frames(tester, 10);
     expect(
       tester.widget<Text>(find.byKey(const Key('history-lot'))).data,

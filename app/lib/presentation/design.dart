@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 
 /// Spacing scale. Use these instead of ad-hoc numbers so screens line up.
 abstract final class Space {
@@ -210,6 +211,129 @@ class _FadeSlideInState extends State<FadeSlideIn> with SingleTickerProviderStat
           child: widget.child,
         ),
       );
+}
+
+/// What a tap brings up comes into view by itself (owner, v9.1.0: 「新生成的component 要避免用户下滑后再点击」): the
+/// tarot ritual after 抽牌, a room's principles after 看布局, a lot, a hexagram. Wrap the new part in this. When it
+/// first shows (after [delay]), and again whenever [trigger] changes (a card that grows a row per tap), the page
+/// scrolls as little as it takes to show all of it; one taller than the screen comes to the top. Wrap it outside
+/// [FadeSlideIn], whose slide would otherwise be measured too.
+class BringIntoView extends StatefulWidget {
+  const BringIntoView({super.key, required this.child, this.trigger, this.delay = Duration.zero});
+  final Widget child;
+
+  /// A new value brings the part into view again, once the card round it has grown ([AppCard] animates its size).
+  final Object? trigger;
+
+  /// How long to wait at first, e.g. while the coins that lead to it turn over.
+  final Duration delay;
+
+  /// [AppCard]'s change of size, and a frame.
+  static const settle = Duration(milliseconds: 300);
+
+  @override
+  State<BringIntoView> createState() => _BringIntoViewState();
+}
+
+class _BringIntoViewState extends State<BringIntoView> {
+  Timer? _wait;
+
+  /// When parts ask at once, the last to ask (the newest, lowest on the page) is the one shown: the lot after the
+  /// throw that brought it, not the rounds card the throw grew.
+  static var _latest = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _schedule(widget.delay);
+  }
+
+  @override
+  void didUpdateWidget(BringIntoView old) {
+    super.didUpdateWidget(old);
+    if (old.trigger != widget.trigger) _schedule(BringIntoView.settle);
+  }
+
+  @override
+  void dispose() {
+    _wait?.cancel();
+    super.dispose();
+  }
+
+  void _schedule(Duration wait) {
+    _wait?.cancel();
+    final ask = ++_latest;
+    void show() {
+      if (mounted && ask == _latest) bringIntoView(context);
+    }
+
+    if (wait == Duration.zero) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => show());
+    } else {
+      _wait = Timer(wait, show);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Scrolls the list round [context] as little as it takes to show its box whole, [margin] clear of the edges; a box
+/// taller than the list's view comes to its top. Does nothing when the box is in view already. See [BringIntoView].
+Future<void> bringIntoView(BuildContext context, {double margin = Space.l}) async {
+  final box = context.findRenderObject();
+  final position = Scrollable.maybeOf(context)?.position;
+  if (box is! RenderBox || !box.attached || !box.hasSize || position == null) return;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return;
+  // The scroll offsets that put the box's top at the view's top, and its bottom at the view's bottom.
+  final top = viewport.getOffsetToReveal(box, 0).offset - margin;
+  final bottom = viewport.getOffsetToReveal(box, 1).offset + margin;
+  final now = position.pixels;
+  final double to;
+  if (bottom > top || now > top) {
+    to = top; // taller than the view, or its top is above it
+  } else if (now < bottom) {
+    to = bottom; // below the fold: just far enough for its bottom
+  } else {
+    return;
+  }
+  final target = to.clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+  if ((target - now).abs() < 1) return;
+  const duration = Duration(milliseconds: 400);
+  if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+    position.jumpTo(target);
+  } else if (position is ScrollActivityDelegate) {
+    final scroll = _RevealScroll(
+      position as ScrollActivityDelegate,
+      from: now,
+      to: target,
+      duration: duration,
+      curve: Curves.easeOutCubic,
+      vsync: position.context.vsync,
+    );
+    position.beginActivity(scroll);
+    await scroll.done;
+  } else {
+    await position.animateTo(target, duration: duration, curve: Curves.easeOutCubic);
+  }
+}
+
+/// [bringIntoView]'s scroll: animateTo's, except that taps reach the page while it moves. Flutter ignores them during
+/// an animated scroll, so a button that has just come up (擲筊 as the stick lands) lost the tap that pressed it at
+/// once. A touch on the list still stops the scroll, as it stops any.
+class _RevealScroll extends DrivenScrollActivity {
+  _RevealScroll(
+    super.delegate, {
+    required super.from,
+    required super.to,
+    required super.duration,
+    required super.curve,
+    required super.vsync,
+  });
+
+  @override
+  bool get shouldIgnorePointer => false;
 }
 
 /// Large gradient header used at the top of the main screens.

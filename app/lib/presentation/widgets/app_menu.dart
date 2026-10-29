@@ -11,8 +11,9 @@ import '../review_page.dart';
 import '../settings_page.dart';
 import 'language_menu.dart';
 
-/// The ☰ menu (owner, v8.1.0, tech plan WP15.1): the pages and settings that sat on the home bar, in one side menu,
-/// so the bar keeps ☰, the title and 历史记录. The menu is the page's drawer: Esc closes it, as the drawer is a local
+/// The ☰ menu (owner, v8.1.0, tech plan WP15.1): the pages and settings that sat on the home bar, in one side menu.
+/// Since v9.1.0 (owner) 历史记录 lives here too, and the bar keeps only the title and a framed ☰ on its right
+/// ([MenuButton]), from where the menu slides in: it is the page's end drawer. Esc closes it, as the drawer is a local
 /// history entry of the page, and Tab stays inside it while it is open.
 class AppMenu extends ConsumerWidget {
   const AppMenu({super.key});
@@ -93,6 +94,35 @@ class AppMenu extends ConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// ☰ on the right of the home bar (owner, v9.1.0: 「需要添加外框，更加明显」): framed in 赭红 on a light tint, so it
+/// reads as the way into the menu. While it has the keyboard focus the theme's focus outline takes the frame's place.
+class MenuButton extends StatelessWidget {
+  const MenuButton({super.key, required this.onPressed});
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final frame = BorderSide(color: scheme.primary, width: 1.5);
+    return IconButton(
+      key: const Key('open-menu'),
+      tooltip: l10n.menu,
+      icon: const Icon(Icons.menu),
+      onPressed: onPressed,
+      style: IconButton.styleFrom(
+        foregroundColor: scheme.primary,
+        backgroundColor: scheme.primaryContainer.withValues(alpha: 0.35),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.chip)),
+      ).copyWith(
+        side: WidgetStateBorderSide.resolveWith(
+          (states) => states.contains(WidgetState.focused) ? focusOutline(scheme) : frame,
+        ),
       ),
     );
   }

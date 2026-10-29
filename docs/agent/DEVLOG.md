@@ -2,6 +2,32 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (d): S16, the owner's UI requests — home bar, new parts into view, the 求签 altar; release v9.1.0
+
+- Owner requests (five messages): 历史记录 into the ☰ menu, ☰ framed and on the right, a decor before 命理大师; 塔罗
+  抽牌 and 风水 看布局 must bring their new area into view; a 甩签 animation for 求签; and the rule behind them all:
+  「这类新生成的component 要避免用户下滑后再点击」.
+- Home: `AppTitle` + `BaguaMark` (widgets/app_title.dart, the icon's 太极 and 先天八卦 drawn with a painter: Flutter
+  needs a package for SVG); `MenuButton` (framed, the focus outline in its place when focused); the menu is the end
+  drawer. 15 test sites that pressed the bar's 历史记录 now open it from the menu.
+- `BringIntoView` (design.dart) on every page where a tap adds a part below its button: 塔罗 (ritual, pick step,
+  spread, request), 风水, 求签, 算卦 (tosses, coins laid out, hexagram), 起名. Scrolls as little as it takes.
+- `QiuqianStage` (widgets/qiuqian_stage.dart): the 签筒 shaken until a stick falls, the 筊杯 thrown; the rows and
+  buttons wait for each step. `_BlockPainter` became `JiaobeiPainter` for it.
+- Mistakes:
+  - the page tests on a phone lost taps: Flutter ignores taps during an animated scroll, so a button that came up
+    while the page moved could not be pressed. The scroll now lets taps through (rule 60);
+  - the lot card came into view and was scrolled away by the rounds card's later reveal; the last part to ask now wins
+    (rule 60);
+  - a tap on a button just added to an AppCard missed while the card grew, and a turned tarot card measured
+    103.00000000000006 once the page scrolled by itself (rule 61);
+  - on a 360-wide phone the tarot test must turn cards in their dialog (tap a face-down card, then the large one);
+  - VS Code's CMake extension made `.vscode/` and `build/` at the top; Prettier would have failed the lint gate on
+    them. Git-ignored.
+- Checked the page tests fail with the scroll off (the ritual started at 737 of 740 px). Looked at the bar (light,
+  dark), the menu, the shake and throw frame by frame, the tarot ritual and 风水 with the real font.
+- Tests: app 196 → 208; server 571.
+
 ## 2026-10-29 (c): S15 WP15.4 — reports by email; stage S15 complete; release v9.0.0
 
 - Server:

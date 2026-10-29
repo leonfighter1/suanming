@@ -48,6 +48,9 @@ class _TarotPageState extends ConsumerState<TarotPage> {
   final Set<int> _revealed = {};
   bool _busy = false;
 
+  /// 抽牌 so far: each one brings the ritual into view, even when it is open already (owner, v9.1.0).
+  int _draws = 0;
+
   @override
   void dispose() {
     _question.dispose();
@@ -59,6 +62,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
         _chart = null;
         _revealed.clear();
         _inRitual = true;
+        _draws++;
       });
 
   /// The draw: with the user's cut and picks from the ritual, or the engine's own pick.
@@ -270,35 +274,51 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                   ),
                 ),
               ),
+              // The ritual, then the spread, each brought into view as it comes (owner, v9.1.0: on a phone 抽牌
+              // opened the ritual below the fold). Both line up at the top while one gives way to the other, so
+              // the one coming is measured where it stays.
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.topCenter,
+                  children: [...previous, ?current],
+                ),
                 child: chart == null
                     ? (_inRitual
-                        ? TarotRitualSteps(
+                        ? BringIntoView(
                             key: ValueKey('ritual-$_spread'),
-                            count: terms?.spreadPositions(_spread).length ?? 1,
-                            onDone: (cut, picks) => _draw(ritual: {'cut': cut, 'picks': picks}),
-                            onSkip: _busy ? () {} : _draw,
+                            trigger: _draws,
+                            child: TarotRitualSteps(
+                              count: terms?.spreadPositions(_spread).length ?? 1,
+                              onDone: (cut, picks) => _draw(ritual: {'cut': cut, 'picks': picks}),
+                              onSkip: _busy ? () {} : _draw,
+                            ),
                           )
                         : const SizedBox.shrink())
-                    : AppCard(
+                    : BringIntoView(
                         key: ValueKey(chart.chartId),
-                        child: TarotSpread(
-                          chart: chart.tarot,
-                          revealed: _revealed,
-                          question: _asked,
-                          onReveal: (position) => setState(() => _revealed.add(position)),
+                        child: AppCard(
+                          child: TarotSpread(
+                            chart: chart.tarot,
+                            revealed: _revealed,
+                            question: _asked,
+                            onReveal: (position) => setState(() => _revealed.add(position)),
+                          ),
                         ),
                       ),
               ),
               if (chart != null && _revealed.length == chart.tarot.cards.length)
-                FadeSlideIn(
-                  child: ReportRequest(
-                    chartId: chart.chartId,
-                    system: 'tarot',
-                    title: l10n.homeTarot,
-                    question: _asked,
-                    focus: _askedFocus,
+                // Once the last card has turned (half a second).
+                BringIntoView(
+                  delay: const Duration(milliseconds: 600),
+                  child: FadeSlideIn(
+                    child: ReportRequest(
+                      chartId: chart.chartId,
+                      system: 'tarot',
+                      title: l10n.homeTarot,
+                      question: _asked,
+                      focus: _askedFocus,
+                    ),
                   ),
                 ),
             ],

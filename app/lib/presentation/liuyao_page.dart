@@ -238,19 +238,31 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
                 ),
               ),
               if (cast != null && _mode == 'auto')
-                FadeSlideIn(
-                  child: AppCard(
-                    key: ValueKey<String>('tosses-${chart!.chartId}'),
-                    child: _Tosses(
-                      chart: cast,
-                      shown: _shown,
-                      onNext: () => setState(() => _shown++),
-                      onSkip: () => setState(() => _shown = 6),
+                // Each toss adds a row and moves 擲下一爻 down: the card stays in view (owner, v9.1.0).
+                BringIntoView(
+                  trigger: _shown,
+                  child: FadeSlideIn(
+                    child: AppCard(
+                      key: ValueKey<String>('tosses-${chart!.chartId}'),
+                      child: _Tosses(
+                        chart: cast,
+                        shown: _shown,
+                        onNext: () => setState(() => _shown++),
+                        onSkip: () => setState(() => _shown = 6),
+                      ),
                     ),
                   ),
                 ),
               if (done) ...[
-                FadeSlideIn(child: HexagramCard(key: const Key('hexagram-card'), chart: cast)),
+                // The hexagram comes into view once the coins that make it have landed or turned.
+                BringIntoView(
+                  delay: switch (_mode) {
+                    'auto' => _tossStagger * 2 + CopperCoin.spin,
+                    'pick' => _revealStagger * 17 + CopperCoin.turn,
+                    _ => Duration.zero,
+                  },
+                  child: FadeSlideIn(child: HexagramCard(key: const Key('hexagram-card'), chart: cast)),
+                ),
                 FadeSlideIn(
                   child: ReportRequest(
                     chartId: chart!.chartId,
@@ -277,29 +289,37 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
             icon: const Icon(Icons.grid_view),
             label: Text(l10n.liuyaoPickStart),
           )
-        else ...[
-          _CoinGrid(
-            picks: _picks,
-            cast: cast,
-            onPick: cast != null || _picks.length >= 18 ? null : (i) => setState(() => _picks.add(i)),
+        else
+          // The coins laid out come into view, 揭示 below them (owner, v9.1.0), once the card has grown round them.
+          BringIntoView(
+            delay: BringIntoView.settle,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _CoinGrid(
+                  picks: _picks,
+                  cast: cast,
+                  onPick: cast != null || _picks.length >= 18 ? null : (i) => setState(() => _picks.add(i)),
+                ),
+                const SizedBox(height: Space.s),
+                Text(l10n.liuyaoPicked(_picks.length), key: const Key('liuyao-picked')),
+                if (cast == null) ...[
+                  const SizedBox(height: Space.m),
+                  FilledButton.icon(
+                    key: const Key('liuyao-reveal'),
+                    onPressed: reveal,
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: Text(l10n.liuyaoReveal),
+                  ),
+                  TextButton(
+                    key: const Key('liuyao-pick-again'),
+                    onPressed: _picks.isEmpty ? null : () => setState(_picks.clear),
+                    child: Text(l10n.liuyaoPickAgain),
+                  ),
+                ],
+              ],
+            ),
           ),
-          const SizedBox(height: Space.s),
-          Text(l10n.liuyaoPicked(_picks.length), key: const Key('liuyao-picked')),
-          if (cast == null) ...[
-            const SizedBox(height: Space.m),
-            FilledButton.icon(
-              key: const Key('liuyao-reveal'),
-              onPressed: reveal,
-              icon: const Icon(Icons.visibility_outlined),
-              label: Text(l10n.liuyaoReveal),
-            ),
-            TextButton(
-              key: const Key('liuyao-pick-again'),
-              onPressed: _picks.isEmpty ? null : () => setState(_picks.clear),
-              child: Text(l10n.liuyaoPickAgain),
-            ),
-          ],
-        ],
       ];
 
   List<Widget> _manualPanel(AppLocalizations l10n, ThemeData theme, bool cast, VoidCallback? submit) {

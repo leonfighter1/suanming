@@ -107,7 +107,11 @@ class _NamingPageState extends ConsumerState<NamingPage> {
               ),
             ),
             if (chart != null) ...[
-              FadeSlideIn(child: NamesCard(key: const Key('names-card'), chart: chart.naming)),
+              // The names come into view as they come (owner, v9.1.0).
+              BringIntoView(
+                key: ValueKey<String>('names-${chart.chartId}'),
+                child: FadeSlideIn(child: NamesCard(key: const Key('names-card'), chart: chart.naming)),
+              ),
               FadeSlideIn(
                 child: ReportRequest(
                   key: ValueKey<String>('naming-request-${chart.chartId}'),

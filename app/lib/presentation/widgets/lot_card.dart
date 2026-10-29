@@ -88,7 +88,7 @@ class JiaobeiBlocks extends StatelessWidget {
           children: [
             for (final (i, b) in blocks.indexed) ...[
               if (i > 0) const SizedBox(width: Space.s),
-              CustomPaint(size: Size(size, size / 2), painter: _BlockPainter(flat: b == 'flat', dark: dark)),
+              CustomPaint(size: Size(size, size / 2), painter: JiaobeiPainter(flat: b == 'flat', dark: dark)),
             ],
           ],
         ),
@@ -97,8 +97,10 @@ class JiaobeiBlocks extends StatelessWidget {
   }
 }
 
-class _BlockPainter extends CustomPainter {
-  const _BlockPainter({required this.flat, required this.dark});
+/// One moon block in a box twice as wide as it is high: [flat] face up, or its round back. The 求籤 stage
+/// (qiuqian_stage.dart) paints the thrown blocks with it too.
+class JiaobeiPainter extends CustomPainter {
+  const JiaobeiPainter({required this.flat, required this.dark});
   final bool flat;
   final bool dark;
 
@@ -135,5 +137,5 @@ class _BlockPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BlockPainter old) => old.flat != flat || old.dark != dark;
+  bool shouldRepaint(JiaobeiPainter old) => old.flat != flat || old.dark != dark;
 }

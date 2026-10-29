@@ -98,7 +98,7 @@ void main() {
   testWidgets('history lists earlier readings and opens them', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0)));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await settle(tester);
     expect(find.text('歷史紀錄'), findsOneWidget);
     expect(find.text('八字排盤'), findsWidgets);

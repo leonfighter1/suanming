@@ -648,6 +648,12 @@
   "qiuqianThrow": "掷筊",
   "qiuqianAgain": "放回再摇",
   "qiuqianSkip": "直接看结果",
+  "qiuqianCylinder": "签",
+  "@qiuqianCylinder": {
+    "description": "The character on the label of the 签筒 drawn in the 求签 animation (v9.1.0)."
+  },
+  "qiuqianShaking": "摇签中……",
+  "qiuqianTossing": "掷筊中……",
   "qiuqianStickFell": "摇出{title}",
   "@qiuqianStickFell": {
     "placeholders": {

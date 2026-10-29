@@ -60,8 +60,29 @@
 56. The Write/Edit tools turn a \uXXXX in new_string or content into the character itself. For a literal \u escape, use numeric code units instead, or build it in a script with String.fromCharCode(92), and check the bytes afterwards (od -c, or a test). (G16 recurred 2026-10-29: a `node -e` edit turned `/\s+/g` into `/s+/g` in server.ts; caught by grepping the line after the edit. A regex goes in with the Edit tool, never through a shell string.)
 57. When an action shows a 'working' SnackBar and then its result, hide the current SnackBar before showing the result: SnackBars queue, and the result would wait out the first one's duration.
 58. After adding anything to a page, run every test that opens it (grep for its open key) before the harness, not only the new ones. A test that finds a row below the new content must scroll to it: lazily built lists drop what lies past the fold.
+59. Whatever a tap makes below its button (a result, a step, a card) goes inside BringIntoView, outside its FadeSlideIn, with a trigger when it grows a row per tap. Test it on a 360 x 740 phone with a test that fails when the scroll is off (owner, 2026-10-29: 新生成的component 要避免用户下滑后再点击).
+60. Never move the page with animateTo or ensureVisible while the user may tap (a button that has just come up): use bringIntoView, whose scroll lets taps through. When one tap starts two automatic scrolls, decide which part wins (the newest) and test where the page ends.
+61. In a widget test, pump at least 700 ms (BringIntoView.settle and its 400 ms scroll) after a tap that adds content before tapping or measuring that content; compare a rect measured through a transform with closeTo, never exactly.
 
 ## Log
+
+### 2026-10-29: Tests tapped what a growing card still clipped
+- **Symptom:** A tap on a button just added to an AppCard missed (no hit), and a turned tarot card measured 103.00000000000006 once the page scrolled by itself.
+- **Root cause:** AppCard's AnimatedSize clips its content and its hit test to the animating size for 250 ms; a rect measured through a rotation picks up floating error at a fractional scroll offset.
+- **Fix:** Tests pump past BringIntoView.settle and the 400 ms scroll before tapping what was just added; the turned card is compared with closeTo.
+- **Rule:** In a widget test, pump at least 700 ms (BringIntoView.settle and its 400 ms scroll) after a tap that adds content before tapping or measuring that content; compare a rect measured through a transform with closeTo, never exactly. (Rule 61)
+
+### 2026-10-29: The automatic scroll swallowed taps, and two reveals fought
+- **Symptom:** On a phone, a tap on 擲筊 or 擲下一爻 right after it came up did nothing; and the lot card, once brought into view, was scrolled away again.
+- **Root cause:** Flutter ignores taps on a list during an animated scroll (DrivenScrollActivity.shouldIgnorePointer); and the rounds card, grown by the same throw, asked for its reveal 300 ms later than the lot card.
+- **Fix:** bringIntoView scrolls with its own activity that lets taps through; when several parts ask at once, the last to ask wins.
+- **Rule:** Never move the page with animateTo or ensureVisible while the user may tap (a button that has just come up): use bringIntoView, whose scroll lets taps through. When one tap starts two automatic scrolls, decide which part wins (the newest) and test where the page ends. (Rule 60)
+
+### 2026-10-29: New parts opened below the fold (tarot ritual, 风水 principles)
+- **Symptom:** The owner had to scroll to find what 抽牌, 看布局 and 求签 had made: on a phone the new card opened below the fold, and nothing showed that the page had changed.
+- **Root cause:** Pages added a result under the button without moving the view, and no test looked at a phone-sized screen after the tap.
+- **Fix:** BringIntoView (design.dart) wraps every part a tap makes; bring_into_view_test.dart checks each page on a 360 x 740 phone and fails with the scroll turned off.
+- **Rule:** Whatever a tap makes below its button (a result, a step, a card) goes inside BringIntoView, outside its FadeSlideIn, with a trigger when it grows a row per tap. Test it on a 360 x 740 phone with a test that fails when the scroll is off (owner, 2026-10-29: 新生成的component 要避免用户下滑后再点击). (Rule 59)
 
 ### 2026-10-29: New rows in 设置 pushed tested rows out of the built list
 - **Symptom:** The v9.0.0 harness failed in auth_test and top_bar_test: sign-out and delete-account were not found after 设置 gained its 报告 group.

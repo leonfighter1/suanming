@@ -70,7 +70,7 @@ void main() {
       testApp(api, overrides: [shareProvider.overrideWithValue((p) async => shared.add(p))]),
     );
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await frames(tester, 10);
     await tester.tap(find.byType(HistoryTile).first);
     await frames(tester, 20);

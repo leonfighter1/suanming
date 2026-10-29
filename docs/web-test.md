@@ -265,8 +265,9 @@ line in every model call, and the `id` rule group records any hit.
 
 ## The ☰ menu, and signing in with a username, an email or a phone (v8.1.0–v8.2.0)
 
-- 首页's bar holds ☰, the title and 历史记录. ☰ opens the menu: 历史记录, 个人资料, 语言, 设置, 内容审核 (reviewers),
-  键盘快捷键, 退出登录.
+- 首页's bar holds the mark and the title, and ☰ on the right (v9.1.0; before, ☰ was on the left with 历史记录 beside
+  the title). ☰ opens the menu from the right: 历史记录, 个人资料, 语言, 设置, 内容审核 (reviewers), 键盘快捷键,
+  退出登录.
 - **Signing in:** the one field takes a 用户名, an 邮箱 or a bound 手机号, with the same password. The dev accounts are
   usernames now: admin / admin, xumei / xumei, qianli / qianli, wuyong / wuyong, leonfighter / leonfighter;
   test@mingli.local stays an email. Accounts the database kept from before keep their records.
@@ -301,6 +302,19 @@ line in every model call, and the `id` rule group records any hit.
      the reader would, PDF attached.
 - PDF attachments need the Chinese font on the server, as downloads do. Without it the report still goes, in the
   message alone.
+
+## New parts come into view; the 求签 altar (v9.1.0)
+
+Best tried on a phone, or a narrow browser window:
+
+- **塔罗:** choose a spread, scroll to 抽牌 and press it. 洗牌 · 切牌 · 选牌 comes up under the button. After 切牌 the 78
+  cards come up from their top; after the draw, the spread; after the last card turns, 生成解读.
+- **风水:** 看布局 brings up the room's principles. **算卦:** each 擲下一爻 keeps its card in view, and the hexagram
+  comes up once the last coins land. 自己挑币's coins come up as they are laid out.
+- **求签:** 求签 brings up the altar. The 签筒 leans and is shaken, a stick drops out and glows, then 摇出第…签 and 掷筊.
+  掷筊 throws the two blocks, which land on their faces; then what they mean. 直接看结果 skips it all.
+- With the system's reduce-motion setting on (Windows: 设置 → 辅助功能 → 视觉效果 → 动画效果), the page jumps
+  instead of gliding, and each 求签 step ends at once.
 
 ## Cache
 

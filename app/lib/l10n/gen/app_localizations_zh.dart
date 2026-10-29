@@ -1276,6 +1276,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qiuqianSkip => '直接看结果';
 
   @override
+  String get qiuqianCylinder => '签';
+
+  @override
+  String get qiuqianShaking => '摇签中……';
+
+  @override
+  String get qiuqianTossing => '掷筊中……';
+
+  @override
   String qiuqianStickFell(String title) {
     return '摇出$title';
   }
@@ -3276,6 +3285,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get qiuqianSkip => '直接看結果';
+
+  @override
+  String get qiuqianCylinder => '籤';
+
+  @override
+  String get qiuqianShaking => '搖籤中……';
+
+  @override
+  String get qiuqianTossing => '擲筊中……';
 
   @override
   String qiuqianStickFell(String title) {

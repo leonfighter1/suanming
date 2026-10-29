@@ -145,20 +145,24 @@ class _TarotRitualStepsState extends State<TarotRitualSteps> {
           ],
         ),
     };
-    return AppCard(
-      key: const Key('tarot-ritual'),
-      title: l10n.ritualTitle,
-      icon: Icons.back_hand_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AnimatedSwitcher(duration: const Duration(milliseconds: 250), child: KeyedSubtree(key: ValueKey(_step), child: step)),
-          const SizedBox(height: Space.s),
-          Center(
-            child: TextButton(key: const Key('ritual-skip'), onPressed: widget.onSkip, child: Text(l10n.ritualSkip)),
-          ),
-          Text(l10n.ritualNote, textAlign: TextAlign.center, style: text.bodySmall),
-        ],
+    // Each step stays in view as it changes: the 78 cards to pick from, after the cut, from the top (owner, v9.1.0).
+    return BringIntoView(
+      trigger: _step,
+      child: AppCard(
+        key: const Key('tarot-ritual'),
+        title: l10n.ritualTitle,
+        icon: Icons.back_hand_outlined,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AnimatedSwitcher(duration: const Duration(milliseconds: 250), child: KeyedSubtree(key: ValueKey(_step), child: step)),
+            const SizedBox(height: Space.s),
+            Center(
+              child: TextButton(key: const Key('ritual-skip'), onPressed: widget.onSkip, child: Text(l10n.ritualSkip)),
+            ),
+            Text(l10n.ritualNote, textAlign: TextAlign.center, style: text.bodySmall),
+          ],
+        ),
       ),
     );
   }

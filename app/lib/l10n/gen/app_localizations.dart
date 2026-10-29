@@ -2503,6 +2503,24 @@ abstract class AppLocalizations {
   /// **'直接看结果'**
   String get qiuqianSkip;
 
+  /// The character on the label of the 签筒 drawn in the 求签 animation (v9.1.0).
+  ///
+  /// In zh, this message translates to:
+  /// **'签'**
+  String get qiuqianCylinder;
+
+  /// No description provided for @qiuqianShaking.
+  ///
+  /// In zh, this message translates to:
+  /// **'摇签中……'**
+  String get qiuqianShaking;
+
+  /// No description provided for @qiuqianTossing.
+  ///
+  /// In zh, this message translates to:
+  /// **'掷筊中……'**
+  String get qiuqianTossing;
+
   /// No description provided for @qiuqianStickFell.
   ///
   /// In zh, this message translates to:

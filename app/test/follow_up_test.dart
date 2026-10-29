@@ -24,7 +24,7 @@ Future<FakeApi> openReading(WidgetTester tester, {FakeApi? api}) async {
   final fake = api ?? FakeApi(pendingPolls: 0);
   await tester.pumpWidget(testApp(fake, locale: zhHans));
   await settle(tester);
-  await tester.tap(find.byKey(const Key('open-history')));
+  await openFromMenu(tester, 'menu-history');
   await settle(tester);
   await tester.tap(find.text('八字排盘').last);
   await settle(tester);
@@ -180,7 +180,7 @@ void main() {
     final api = FakeApi(pendingPolls: 0);
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await settle(tester);
     await tester.tap(find.text('一生运势报告'));
     await settle(tester);

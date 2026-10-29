@@ -169,7 +169,7 @@ void main() {
     );
     await tester.pumpWidget(testApp(api));
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await frames(tester, 10);
     expect(find.text('起名 · 陳'), findsOneWidget);
     await tester.tap(find.byType(HistoryTile).first);

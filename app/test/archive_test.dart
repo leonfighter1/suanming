@@ -68,7 +68,7 @@ Future<(FakeApi, List<ShareParams>)> openArchive(
     testApp(api, locale: zhHans, overrides: [shareProvider.overrideWithValue((p) async => shared.add(p))]),
   );
   await settle(tester);
-  await tester.tap(find.byKey(const Key('open-history')));
+  await openFromMenu(tester, 'menu-history');
   await settle(tester);
   return (api, shared);
 }

@@ -8,6 +8,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'widgets/lot_card.dart';
+import 'widgets/qiuqian_stage.dart';
 import 'widgets/report_request.dart';
 
 /// 求籤 (v4.3.0, tech plan WP6.1) as temples do it: keep the question in mind, shake the cylinder until
@@ -33,6 +34,13 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
   bool _thrown = false;
   bool _busy = false;
 
+  /// The stage at work (v9.1.0): the round's stick still falling, or its blocks in the air.
+  bool _shaking = false;
+  bool _tossing = false;
+
+  /// 直接看结果: every step's end at once.
+  bool _skipped = false;
+
   @override
   void dispose() {
     _question.dispose();
@@ -54,6 +62,9 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
         _asked = _question.text.trim();
         _round = 0;
         _thrown = false;
+        _shaking = true;
+        _tossing = false;
+        _skipped = false;
       });
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
@@ -136,27 +147,71 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
                 ),
               ),
               if (lot != null)
-                FadeSlideIn(
-                  child: AppCard(
-                    key: ValueKey<String>('rounds-${chart!.chartId}'),
-                    child: _Rounds(
-                      chart: lot,
-                      round: _round,
-                      thrown: _thrown,
-                      onThrow: () => setState(() => _thrown = true),
-                      onAgain: () => setState(() {
-                        _round++;
-                        _thrown = false;
-                      }),
-                      onSkip: () => setState(() {
-                        _round = lot.rounds.length - 1;
-                        _thrown = true;
-                      }),
+                // The altar comes into view as the lot is drawn, and stays in view as each step adds a row
+                // (owner, v9.1.0).
+                BringIntoView(
+                  trigger: (_round, _shaking, _thrown),
+                  child: FadeSlideIn(
+                    child: AppCard(
+                      key: ValueKey<String>('rounds-${chart!.chartId}'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          QiuqianStage(
+                            key: const Key('qiuqian-stage'),
+                            round: _round,
+                            blocks: _tossing || _thrown ? lot.rounds[_round].blocks : null,
+                            label: l10n.qiuqianCylinder,
+                            settled: _skipped,
+                            onShaken: (round) {
+                              if (round == _round) setState(() => _shaking = false);
+                            },
+                            onThrown: (round) {
+                              if (round == _round) {
+                                setState(() {
+                                  _tossing = false;
+                                  _thrown = true;
+                                });
+                              }
+                            },
+                          ),
+                          if (_shaking || _tossing)
+                            Semantics(
+                              liveRegion: true,
+                              child: Text(
+                                _shaking ? l10n.qiuqianShaking : l10n.qiuqianTossing,
+                                key: const Key('qiuqian-busy'),
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          _Rounds(
+                            chart: lot,
+                            round: _round,
+                            thrown: _thrown,
+                            shaking: _shaking,
+                            tossing: _tossing,
+                            onThrow: () => setState(() => _tossing = true),
+                            onAgain: () => setState(() {
+                              _round++;
+                              _thrown = false;
+                              _shaking = true;
+                            }),
+                            onSkip: () => setState(() {
+                              _round = lot.rounds.length - 1;
+                              _thrown = true;
+                              _shaking = false;
+                              _tossing = false;
+                              _skipped = true;
+                            }),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               if (done) ...[
-                FadeSlideIn(child: LotCard(key: const Key('lot-card'), lotNumber: lot.lotNumber)),
+                BringIntoView(child: FadeSlideIn(child: LotCard(key: const Key('lot-card'), lotNumber: lot.lotNumber))),
                 FadeSlideIn(
                   child: ReportRequest(chartId: chart!.chartId, system: 'qiuqian', title: l10n.homeQiuqian, question: _asked),
                 ),
@@ -171,11 +226,15 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
 
 /// The rounds so far: each stick that fell and, once thrown, how the blocks landed. The one button
 /// takes the next step (throw, or put the stick back and shake again); 直接看结果 shows the rest.
+/// While the stage is at work the next step waits for it: the round's row until its stick is [shaking] out, the
+/// button while it is, and while the blocks are [tossing].
 class _Rounds extends ConsumerWidget {
   const _Rounds({
     required this.chart,
     required this.round,
     required this.thrown,
+    required this.shaking,
+    required this.tossing,
     required this.onThrow,
     required this.onAgain,
     required this.onSkip,
@@ -183,6 +242,8 @@ class _Rounds extends ConsumerWidget {
   final QiuqianChart chart;
   final int round;
   final bool thrown;
+  final bool shaking;
+  final bool tossing;
   final VoidCallback onThrow;
   final VoidCallback onAgain;
   final VoidCallback onSkip;
@@ -195,6 +256,8 @@ class _Rounds extends ConsumerWidget {
     final theme = Theme.of(context);
     final current = chart.rounds[round];
     final finished = thrown && current.confirmed;
+    // The round's row once its stick lies on the floor (its throw once the blocks have landed).
+    final rows = shaking ? round : round + 1;
     String title(int n) => lots?.lot(n)?.title(locale) ?? '$n';
     String meaning(String result) => switch (result) {
           'sheng' => l10n.qiuqianSheng,
@@ -204,7 +267,7 @@ class _Rounds extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i <= round; i++)
+        for (var i = 0; i < rows; i++)
           Padding(
             key: ValueKey<String>('round-$i'),
             padding: const EdgeInsets.symmetric(vertical: Space.s),
@@ -244,13 +307,14 @@ class _Rounds extends ConsumerWidget {
           ),
         if (!finished) ...[
           const SizedBox(height: Space.m),
-          FilledButton.icon(
-            key: Key(thrown ? 'shake-again' : 'throw-blocks'),
-            autofocus: true,
-            onPressed: thrown ? onAgain : onThrow,
-            icon: Icon(thrown ? Icons.replay : Icons.back_hand_outlined),
-            label: Text(thrown ? l10n.qiuqianAgain : l10n.qiuqianThrow),
-          ),
+          if (!shaking && !tossing)
+            FilledButton.icon(
+              key: Key(thrown ? 'shake-again' : 'throw-blocks'),
+              autofocus: true,
+              onPressed: thrown ? onAgain : onThrow,
+              icon: Icon(thrown ? Icons.replay : Icons.back_hand_outlined),
+              label: Text(thrown ? l10n.qiuqianAgain : l10n.qiuqianThrow),
+            ),
           TextButton(key: const Key('skip-rounds'), onPressed: onSkip, child: Text(l10n.qiuqianSkip)),
         ],
       ],

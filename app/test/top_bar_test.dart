@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
+import 'package:mingli_app/presentation/design.dart' show Space, focusOutline;
 
 import 'keys.dart';
 import 'support.dart';
@@ -18,30 +19,47 @@ String current(WidgetTester tester) => tester.widget<Text>(find.byKey(const Key(
 final menu = find.byKey(const Key('app-menu'));
 
 void main() {
-  // The owner, v8.1.0: the settings go into the ☰ menu and the bar stays clean. This replaces the 2026-10-27 bar,
-  // where 个人资料, 语言 and 设置 each had a button.
-  testWidgets('the home bar holds ☰ and 历史记录 only', (tester) async {
+  // The owner, v8.1.0: the settings go into the ☰ menu and the bar stays clean; v9.1.0: 历史记录 goes in too, and ☰
+  // moves to the right, framed, with a mark before the name. This replaces the 2026-10-27 bar, where 个人资料, 语言
+  // and 设置 each had a button.
+  testWidgets('the home bar: the mark and the name, then a framed ☰ at the right end, nothing else', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
     await settle(tester);
     final bar = find.byType(AppBar);
-    for (final tip in ['菜单', '历史记录']) {
-      expect(find.descendant(of: bar, matching: find.byTooltip(tip)), findsOneWidget, reason: tip);
-    }
-    for (final tip in ['个人资料', '语言', '设置']) {
+    expect(find.descendant(of: bar, matching: find.byTooltip('菜单')), findsOneWidget);
+    for (final tip in ['历史记录', '个人资料', '语言', '设置']) {
       expect(find.descendant(of: bar, matching: find.byTooltip(tip)), findsNothing, reason: tip);
     }
-    expect(find.descendant(of: bar, matching: find.byIcon(Icons.settings_outlined)), findsNothing);
-    expect(find.descendant(of: bar, matching: find.byIcon(Icons.more_vert)), findsNothing);
-    expect(find.descendant(of: bar, matching: find.byType(IconButton)), findsNWidgets(2));
+    expect(find.descendant(of: bar, matching: find.byIcon(Icons.history)), findsNothing);
+    expect(find.descendant(of: bar, matching: find.byType(IconButton)), findsOneWidget);
+
+    final mark = tester.getRect(find.descendant(of: bar, matching: find.byKey(const Key('title-mark'))));
+    final name = tester.getRect(find.descendant(of: bar, matching: find.text('命理大师')));
+    final button = tester.getRect(find.byKey(const Key('open-menu')));
+    expect(mark.right, lessThanOrEqualTo(name.left));
+    expect(name.right, lessThan(button.left));
+    expect(tester.getRect(bar).right - button.right, lessThanOrEqualTo(Space.m + 4), reason: 'at the right end: $button');
+
+    // Framed in the theme's 赭红, 1.5 px; the focus outline takes its place while it has the keyboard focus.
+    final style = tester.widget<IconButton>(find.byKey(const Key('open-menu'))).style!;
+    final scheme = Theme.of(tester.element(bar)).colorScheme;
+    final frame = style.side!.resolve(const <WidgetState>{})!;
+    expect((frame.width, frame.color), (1.5, scheme.primary));
+    expect(style.side!.resolve(const {WidgetState.focused}), focusOutline(scheme));
   });
 
-  testWidgets('☰ opens the menu: the icon, the account, then every page and setting in order', (tester) async {
+  testWidgets('☰ opens the menu from the right: the icon, the account, then every page and setting in order', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
     await settle(tester);
     expect(menu, findsNothing);
     await tester.tap(find.byKey(const Key('open-menu')));
     await settle(tester);
     expect(menu, findsOneWidget);
+    // An end drawer, flush with the screen's right edge, where ☰ is.
+    final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+    final drawer = tester.getRect(menu);
+    expect(drawer.right, screen.width);
+    expect(drawer.left, greaterThan(screen.width / 3));
     expect(find.descendant(of: menu, matching: find.byKey(const Key('menu-icon'))), findsOneWidget);
     expect(tester.widget<Text>(find.byKey(const Key('menu-account'))).data, 'test@mingli.local');
     final order = ['menu-history', 'open-profiles', 'language-menu', 'open-settings', 'open-shortcuts', 'menu-sign-out'];
@@ -56,6 +74,15 @@ void main() {
     expect(find.widgetWithText(AppBar, '个人资料'), findsOneWidget);
     await systemBack(tester);
     await settle(tester);
+    expect(menu, findsNothing);
+
+    // 历史记录 too (v9.1.0: off the bar, first in the menu).
+    await openFromMenu(tester, 'menu-history');
+    await settle(tester);
+    expect(find.widgetWithText(AppBar, '历史记录'), findsOneWidget);
+    await systemBack(tester);
+    await settle(tester);
+    expect(find.byKey(const Key('entry-bazi')), findsOneWidget); // back on 首页
     expect(menu, findsNothing);
   });
 
@@ -160,7 +187,7 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: locale));
       await settle(tester);
-      for (final key in ['open-menu', 'open-history']) {
+      for (final key in ['title-mark', 'open-menu']) {
         final r = tester.getRect(find.byKey(Key(key)));
         expect(r.left >= 0 && r.right <= 360, isTrue, reason: '$key at $r');
       }
@@ -172,6 +199,7 @@ void main() {
       await tester.tap(find.byKey(const Key('open-menu')));
       await settle(tester);
       expect(tester.takeException(), isNull);
+      expect(tester.getRect(menu).right, 360, reason: 'from the right, where ☰ is');
       final last = tester.getRect(find.byKey(const Key('menu-sign-out')));
       expect(last.bottom, lessThanOrEqualTo(740), reason: 'the whole menu on one phone screen');
     });

@@ -219,7 +219,8 @@ void main() {
     expect(r[2]!.center.dx, closeTo(r[1]!.center.dx, 0.01));
     expect(r[2]!.center.dy, closeTo(r[1]!.center.dy, 0.01));
     expect(r[2]!.width, closeTo(103 * 12 / 7, 0.01));
-    expect(r[2]!.height, 103);
+    // Measured through the turn: since v9.1.0 the drawn spread comes into view, and the page stops between pixels.
+    expect(r[2]!.height, closeTo(103, 0.01));
     // 3 below, 5 above (the crown), 4 behind (left), 6 ahead (right), clear of card 2.
     expect(r[3]!.left, r[1]!.left);
     expect(r[3]!.top, greaterThan(r[1]!.bottom));
@@ -388,7 +389,7 @@ void main() {
     );
     await tester.pumpWidget(testApp(api));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-history')));
+    await openFromMenu(tester, 'menu-history');
     await settle(tester);
     final art = find.byKey(const Key('history-art'));
     expect(art, findsOneWidget);
