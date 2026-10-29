@@ -1,4 +1,88 @@
+import 'document.dart';
 import 'models.dart';
+
+/// A paragraph's three parts as blocks (v6.2.0): the term, the commentary, the example.
+List<DocBlock> paragraphBlocks(Paragraph p) => [
+      if (p.term != null) DocBlock('term', p.term),
+      DocBlock('p', p.text),
+      if (p.example != null) DocBlock('example', p.example),
+    ];
+
+/// A record's 追问 (v7.0.0): each question as asked, then its answer. Questions not answered (yet) are left out.
+List<DocBlock> followUpBlocks(
+  List<FollowUpView> followUps, {
+  required String heading,
+  required String asked,
+  required String outOfScope,
+}) {
+  final answered = followUps.where((f) => f.status == 'passed').toList();
+  if (answered.isEmpty) return const [];
+  return [
+    DocBlock('h2', heading),
+    for (final f in answered) ...[
+      DocBlock('question', '$asked${f.question}'),
+      if (!f.inScope) DocBlock('note', outOfScope),
+      for (final p in f.paragraphs) ...paragraphBlocks(p),
+    ],
+  ];
+}
+
+/// A passed reading as a document (v8.0.0), for Word and PDF: what its page shows, its 追问, and the AI label and the
+/// disclaimer, which every export carries (compliance/ai_disclosure_spec.md §4). [details] are its label–value rows
+/// (whose it is, where they were born); [headings] name facts, interpretation, actions, trend, total, followups,
+/// asked and outOfScope.
+Doc reportDocument({
+  required ReportView report,
+  required String title,
+  required String subtitle,
+  required List<(String, String)> details,
+  required String Function(String topic) topicLabel,
+  required String Function(String horizon) horizonLabel,
+  required Map<String, String> headings,
+  List<FollowUpView> followUps = const [],
+}) {
+  final l = report.layers!;
+  final blocks = <DocBlock>[
+    if (details.isNotEmpty) DocBlock.kv(details),
+    DocBlock('h2', headings['facts']),
+    for (final f in l.facts) DocBlock('bullet', f),
+  ];
+  final t = l.trend;
+  if (t != null) {
+    blocks.add(DocBlock('h2', '${headings['trend']}（${headings['total']} ${t.total}/100）'));
+    for (final p in [...t.dayun, ...t.liunian]) {
+      blocks.add(DocBlock('bullet', '${p.label} ${p.ganzhi}：${p.overall} · ${p.note}'));
+    }
+    blocks.add(DocBlock('note', t.methodNote));
+  }
+  blocks.add(DocBlock('h2', headings['interpretation']));
+  for (final s in l.interpretation) {
+    blocks.add(DocBlock('h3', topicLabel(s.topic)));
+    if (s.summary != null) blocks.add(DocBlock('summary', s.summary));
+    for (final p in s.paragraphs) {
+      blocks.addAll(paragraphBlocks(p));
+    }
+  }
+  if (l.actions.isNotEmpty) {
+    blocks.add(DocBlock('h2', headings['actions']));
+    for (final a in l.actions) {
+      blocks.add(DocBlock('bullet', '${topicLabel(a.topic)} · ${horizonLabel(a.horizon)}：${a.text}'));
+    }
+  }
+  blocks.addAll(
+    followUpBlocks(
+      followUps,
+      heading: headings['followups']!,
+      asked: headings['asked']!,
+      outOfScope: headings['outOfScope']!,
+    ),
+  );
+  blocks
+    ..add(const DocBlock.divider())
+    ..add(DocBlock('note', l.expectation.text))
+    ..add(DocBlock('note', '${l.expectation.aiLabel}${report.model == null ? '' : '（${report.model}）'}'));
+  return Doc(title: title, subtitle: subtitle, blocks: blocks);
+}
 
 /// Plain-text (Markdown) export of a passed report. The AI label and the
 /// expectation copy are always included: an exported file must disclose the AI

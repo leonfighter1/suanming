@@ -7,11 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../application/providers.dart';
+import '../domain/document.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/printer.dart';
+import 'archive_actions.dart' show lifeDocumentOf, shareDocuments;
 import 'design.dart';
 import 'labels.dart';
 import 'life_export.dart';
@@ -42,15 +44,15 @@ class LifeReportPage extends ConsumerWidget {
     final names = ref.watch(profilesProvider).value?.chartLabels ?? const {};
     final places = ref.watch(profilesProvider).value?.chartPlaces ?? const {};
     final ready = view != null && view.status == 'passed' && view.layers != null && chart != null;
-    // Whose report: labelled on this device, else kept with its chart on the server (v6.2.0), so another device or
-    // sign-in names the person and the birthplace too.
+    // Whose report: kept with its chart on the server (v6.2.0; 归类到… changes it, v8.0.0), else this device's label,
+    // so another device or sign-in names the person and the birthplace too.
     final header = ready
         ? _header(
             l10n,
             view,
             chart,
-            names[view.chartId] ?? view.person?.name ?? chart.person?.name,
-            places[view.chartId] ?? view.person?.birthplace ?? chart.person?.birthplace,
+            view.person?.name ?? chart.person?.name ?? names[view.chartId],
+            view.person?.birthplace ?? chart.person?.birthplace ?? places[view.chartId],
             hant,
             locale,
           )
@@ -82,27 +84,54 @@ class LifeReportPage extends ConsumerWidget {
         title: Text(header == null || header.name.isEmpty ? l10n.lifeEntry : l10n.lifeReportOf(header.name)),
         actions: [
           if (ready) ...[
-            IconButton(
+            // 下载 (v8.0.0): PDF or Word, rendered by the server with the report's 追问; or the HTML and Markdown ZIP.
+            PopupMenuButton<String>(
               key: const Key('life-download'),
               tooltip: l10n.lifeDownload,
               icon: const Icon(Icons.download_outlined),
-              onPressed: () async {
-                final (html, md) = await build();
-                final name = '${header!.name.isEmpty ? 'mingli' : header.name}-${l10n.lifeEntry}.zip';
-                await SharePlus.instance.share(
-                  ShareParams(
-                    files: [
-                      XFile.fromData(
-                        lifeReportZip(html: html, markdown: md),
-                        mimeType: 'application/zip',
-                        name: name,
-                      ),
-                    ],
-                    fileNameOverrides: [name],
-                    subject: l10n.lifeReportOf(header.name),
-                  ),
-                );
+              onSelected: (v) async {
+                final messenger = ScaffoldMessenger.of(context);
+                if (v == 'zip') {
+                  final (html, md) = await build();
+                  final name = '${header!.name.isEmpty ? 'mingli' : header.name}-${l10n.lifeEntry}.zip';
+                  await SharePlus.instance.share(
+                    ShareParams(
+                      files: [
+                        XFile.fromData(
+                          lifeReportZip(html: html, markdown: md),
+                          mimeType: 'application/zip',
+                          name: name,
+                        ),
+                      ],
+                      fileNameOverrides: [name],
+                      subject: l10n.lifeReportOf(header.name),
+                    ),
+                  );
+                  return;
+                }
+                try {
+                  final doc = await lifeDocumentOf(
+                    ref,
+                    l10n,
+                    lifeReportId: reportId,
+                    person: header!.name.isEmpty ? null : header.name,
+                    birthplace: header.place == '—' ? null : header.place,
+                  );
+                  await shareDocuments(
+                    ref,
+                    [(doc, docFileName(doc.title, view.createdAt?.toLocal()))],
+                    v == 'pdf' ? DocFormat.pdf : DocFormat.docx,
+                    subject: doc.title,
+                  );
+                } catch (_) {
+                  messenger.showSnackBar(SnackBar(content: Text(l10n.archiveDocFailed)));
+                }
               },
+              itemBuilder: (_) => [
+                PopupMenuItem(key: const Key('life-download-pdf'), value: 'pdf', child: Text(l10n.archiveDownloadPdf)),
+                PopupMenuItem(key: const Key('life-download-docx'), value: 'docx', child: Text(l10n.archiveDownloadWord)),
+                PopupMenuItem(key: const Key('life-download-zip'), value: 'zip', child: Text(l10n.lifeDownload)),
+              ],
             ),
             IconButton(
               key: const Key('life-print'),
@@ -150,40 +179,58 @@ class LifeReportPage extends ConsumerWidget {
     );
   }
 
-  LifeHeader _header(AppLocalizations l10n, LifeReportView v, ChartResult chart, String? label, String? place, bool hant, String locale) {
-    final b = chart.bazi;
-    final f = v.facts!;
-    final hour = b.pillars['hour']!.zhi;
-    final shi = hant ? '時' : '时';
-    final civil = DateTime.parse(b.civilLocal);
-    final clock = f.pillarClock.substring(11, 16);
-    final range = _shichenRange(hour);
-    final gender = (chart.facts['dayun'] as Json)['gender'] == 'male' ? l10n.male : l10n.female;
-    String two(int n) => n.toString().padLeft(2, '0');
-    return LifeHeader(
-      name: profile?.name ?? label ?? '',
-      gender: gender,
-      lunar:
-          '${b.lunar.year} 年 ${b.lunar.yearGanzhi}年 ${b.lunar.isLeapMonth ? (hant ? '閏' : '闰') : ''}${b.lunar.monthName}${b.lunar.dayName} $hour$shi（${hant ? '約' : '约'} ${two(civil.hour)}:${two(civil.minute)}）',
-      solar: '${civil.year} 年 ${civil.month} 月 ${civil.day} 日',
-      place: profile?.birthPlace.label(locale) ?? place ?? '—',
-      trueSolar: f.trueSolar ? '${hant ? '約' : '约'} $clock，${hant ? '屬' : '属'}$hour$shi（$range）' : '—',
-      ganzhi: [
-        '${b.pillars['year']!.ganzhi}年',
-        '${b.pillars['month']!.ganzhi}月',
-        '${b.pillars['day']!.ganzhi}日',
-        '${b.pillars['hour']!.ganzhi}$shi',
-      ].join('　'),
-    );
-  }
+  LifeHeader _header(AppLocalizations l10n, LifeReportView v, ChartResult chart, String? label, String? place, bool hant, String locale) =>
+      lifeHeaderOf(
+        l10n: l10n,
+        view: v,
+        chart: chart,
+        name: profile?.name ?? label,
+        place: profile?.birthPlace.label(locale) ?? place,
+        hant: hant,
+      );
+}
 
-  static String _shichenRange(String zhi) {
-    const order = '子丑寅卯辰巳午未申酉戌亥';
-    final i = order.indexOf(zhi);
-    final start = (i * 2 + 23) % 24;
-    String h(int x) => '${x % 24}:00';
-    return '${h(start)}–${h(start + 2)}';
-  }
+/// The 项目 / 内容 rows of a 一生运势报告 for [name] born in [place]: the page's cover, and its documents (v8.0.0).
+LifeHeader lifeHeaderOf({
+  required AppLocalizations l10n,
+  required LifeReportView view,
+  required ChartResult chart,
+  String? name,
+  String? place,
+  required bool hant,
+}) {
+  final b = chart.bazi;
+  final f = view.facts!;
+  final hour = b.pillars['hour']!.zhi;
+  final shi = hant ? '時' : '时';
+  final civil = DateTime.parse(b.civilLocal);
+  final clock = f.pillarClock.substring(11, 16);
+  final range = _shichenRange(hour);
+  final gender = (chart.facts['dayun'] as Json)['gender'] == 'male' ? l10n.male : l10n.female;
+  String two(int n) => n.toString().padLeft(2, '0');
+  return LifeHeader(
+    name: name ?? '',
+    gender: gender,
+    lunar:
+        '${b.lunar.year} 年 ${b.lunar.yearGanzhi}年 ${b.lunar.isLeapMonth ? (hant ? '閏' : '闰') : ''}${b.lunar.monthName}${b.lunar.dayName} $hour$shi（${hant ? '約' : '约'} ${two(civil.hour)}:${two(civil.minute)}）',
+    solar: '${civil.year} 年 ${civil.month} 月 ${civil.day} 日',
+    place: place ?? '—',
+    trueSolar: f.trueSolar ? '${hant ? '約' : '约'} $clock，${hant ? '屬' : '属'}$hour$shi（$range）' : '—',
+    ganzhi: [
+      '${b.pillars['year']!.ganzhi}年',
+      '${b.pillars['month']!.ganzhi}月',
+      '${b.pillars['day']!.ganzhi}日',
+      '${b.pillars['hour']!.ganzhi}$shi',
+    ].join('　'),
+  );
+}
+
+String _shichenRange(String zhi) {
+  const order = '子丑寅卯辰巳午未申酉戌亥';
+  final i = order.indexOf(zhi);
+  final start = (i * 2 + 23) % 24;
+  String h(int x) => '${x % 24}:00';
+  return '${h(start)}–${h(start + 2)}';
 }
 
 class _Pending extends StatefulWidget {

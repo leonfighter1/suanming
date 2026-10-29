@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../domain/document.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/places.dart';
@@ -190,6 +191,29 @@ class ApiClient {
     return (j['regions'] as List).cast<Json>().map(PlaceRegion.fromJson).toList();
   }
 
+  // ---- 以往记录 (v8.0.0) ----
+
+  /// A record's document as Word or PDF, rendered by the server from [doc] (POST /v1/documents).
+  Future<Uint8List> document(Doc doc, DocFormat format, {required String fileName, required String locale}) =>
+      _withAccess(
+        (access) => _postBytes('/v1/documents', {
+          'format': format.ext,
+          'filename': fileName,
+          'locale': locale,
+          'document': doc.toJson(),
+        }, access),
+      );
+
+  /// Deletes one reading with its plans and 追问 (and its chart when nothing else reads it).
+  Future<Json> deleteReport(String id) => _authed('DELETE', '/v1/reports/$id');
+
+  /// Deletes one 一生运势报告 with its 追问.
+  Future<Json> deleteLifeReport(String id) => _authed('DELETE', '/v1/life-reports/$id');
+
+  /// 归类到…: files a chart's records under [name]; an empty name clears it. A birth chart keeps its birthplace.
+  Future<ChartPerson?> setChartPerson(String chartId, String name) async =>
+      ChartPerson.fromJson((await _authed('POST', '/v1/charts/$chartId/person', {'name': name}))['person']);
+
   // ---- 追问 (v7.0.0) ----
 
   /// A reading's 追问, oldest first: [parent] is `reports/<id>` or `life-reports/<id>`.
@@ -269,6 +293,22 @@ class ApiClient {
     final http.Response res;
     try {
       res = await _http.get(Uri.parse('$baseUrl$path'), headers: {'authorization': 'Bearer $access'});
+    } on http.ClientException catch (e) {
+      throw ApiUnreachable(baseUrl, e.message);
+    }
+    if (res.statusCode >= 400) throw _problem(res);
+    return res.bodyBytes;
+  }
+
+  /// A file the server makes from a request body (a document): its bytes, or the server's problem.
+  Future<Uint8List> _postBytes(String path, Object body, String access) async {
+    final http.Response res;
+    try {
+      res = await _http.post(
+        Uri.parse('$baseUrl$path'),
+        headers: {'content-type': 'application/json', 'authorization': 'Bearer $access'},
+        body: jsonEncode(body),
+      );
     } on http.ClientException catch (e) {
       throw ApiUnreachable(baseUrl, e.message);
     }

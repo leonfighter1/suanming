@@ -78,15 +78,13 @@ export const PERSON_SYSTEMS: readonly string[] = ["bazi", "astrology"];
 
 /**
  * A chart request's optional `person` (v6.2.0): trimmed, cut to 40 and 120 characters, and left out when empty.
- * Kept with the chart record, never in its ChartFact.
+ * Kept with the chart record, never in its ChartFact. Any chart may name its person (v8.0.0: 塔罗, 求签, 算卦 and 风水
+ * too, so history can group by person); a birthplace belongs to a birth chart only.
  */
 export function parsePerson(raw: unknown, system: unknown): ChartPerson | undefined {
   if (raw === undefined || raw === null) return undefined;
   if (typeof raw !== "object" || Array.isArray(raw))
     throw new InputError("person must be an object");
-  if (!PERSON_SYSTEMS.includes(String(system))) {
-    throw new InputError(`person is for birth charts: ${PERSON_SYSTEMS.join(", ")}`);
-  }
   const p = raw as Record<string, unknown>;
   const field = (key: "name" | "birthplace", max: number) => {
     const v = p[key];
@@ -96,9 +94,34 @@ export function parsePerson(raw: unknown, system: unknown): ChartPerson | undefi
   };
   const name = field("name", 40);
   const birthplace = field("birthplace", 120);
+  if (birthplace && !PERSON_SYSTEMS.includes(String(system))) {
+    throw new InputError(`person.birthplace is for birth charts: ${PERSON_SYSTEMS.join(", ")}`);
+  }
   return name || birthplace
     ? { ...(name && { name }), ...(birthplace && { birthplace }) }
     : undefined;
+}
+
+/**
+ * 归类到… (v8.0.0): a chart's person after a change. A field the change names is set (empty or null clears it); a
+ * field it leaves out stays as it was.
+ */
+export function changePerson(
+  current: ChartPerson | undefined,
+  raw: unknown,
+  system: string,
+): ChartPerson | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new InputError("the body must be an object with name and/or birthplace");
+  }
+  const p = raw as Record<string, unknown>;
+  return parsePerson(
+    {
+      name: "name" in p ? p.name : current?.name,
+      birthplace: "birthplace" in p ? p.birthplace : current?.birthplace,
+    },
+    system,
+  );
 }
 
 /** Engine errors caused by user input (bad format, DST gap, unknown zone) become InputError. */

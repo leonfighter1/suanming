@@ -40,6 +40,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | done        |
 | S12 Owner updates          | tarot spreads 3 a row, 东方 / 西方 home, coins that turn    | medium | v6.1.0            | done        |
 | S13 AI 追问 + 通俗解读     | 术语 → 评论 → 例子 in every reading; 追问 on every reading  | big    | v7.0.0 + summary  | done        |
+| S14 以往记录               | by month and person; Word / PDF; send; file; delete         | big    | v8.0.0 + summary  | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1311,9 +1312,114 @@ As built (v7.0.0):
   - The 一生运势 page builds all its cards (the cache extent, as the reading page does), so the button can bring up
     the last one.
 
+## S14 以往记录：整理、下载、发送、删除 (big → v8.0.0)
+
+**Owner request (2026-10-28):**
+
+> 对于以往记录可以进行整理，也可以进行下载，发送和删除，下载后可以生成Word文档和PDF。点击发送也可以发送选择的文档。另外所有
+> 归档文件可以按年和月排，日期由近及远。 如果给多人算过不同的类型，那么可以按人名字去归类。
+
+No earlier owner decision touches it (rule 34). Since v6.2.0 a 八字 chart keeps its person on the server, which is what
+grouping by person needs. Deleting a single record is new: until now only deleting the whole account removed anything.
+
+### WP14.1 Word and PDF documents
+
+- **Who builds what:**
+  - The app builds a record's document: the reading or 一生运势报告, its chart summary, the 追问 thread, and the AI
+    label with the disclaimer, which every export must carry (compliance/ai_disclosure_spec.md §4). It already
+    builds the same content for copy and Markdown, and it has the labels, names and local dates.
+  - The server renders it. `POST /v1/documents {format: pdf | docx, filename, document}` takes a neutral document:
+    a title, then blocks (h2, h3, meta, p, summary, term, example, quote, bullet, kv rows, note, question,
+    divider). It is checked (types, counts, lengths), needs a signed-in caller, and calls no model.
+- **Word:** `docx` 9.8.1, a month-old release; 9.15.0 was a day old. The text is in an East Asian font
+  (Microsoft YaHei), with the zh-CN or zh-TW language.
+- **PDF:** PDFKit 0.19.1, with the server's Chinese font (`shareFont`, as share images use) embedded as a subset.
+  - Measured first (G4): pdf-lib 1.17.1 + @pdf-lib/fontkit kept the text layer but drew no Chinese glyphs with the
+    OTF and only some with the variable TTF, and failed on the TTC.
+  - PDFKit drew every glyph with all three, at 24–64 KB, and wraps Chinese lines itself.
+  - A TTC needs its face (msyh.ttc: MicrosoftYaHei).
+  - No font on the server: 503, as for share images.
+- Both file types carry the record's title as the file name: 命理大师-八字排盘-徐梅-2026-10-28.pdf.
+
+### WP14.2 整理: by year and month, by person, filed under a person, deleted
+
+- **The history page:**
+  - **按时间:** year, then month, newest first. 一生运势报告 sit among the readings by date, no longer on top.
+  - **按人:** one group per person, the group with the latest record first, each group newest first; records with
+    no person under 未归类, last.
+  - Up to 100 readings load (the API's most).
+- **Whose record it is:**
+  - The person kept with the chart (v6.2.0); then this device's label, for charts made before v6.2.0.
+  - 起名 takes its 八字 chart's person.
+  - New 塔罗, 求签, 算卦 and 风水 charts carry the reader's default profile name.
+  - **归类到…** files any record under a person: a profile's name, a name typed in, or none. It goes through
+    `POST /v1/charts/{id}/person`, which sets or clears the name and keeps a birth chart's birthplace.
+- **Deleting**, after a confirmation that it can't be undone:
+  - `DELETE /v1/reports/{id}` removes the reading, its 破除運勢 plans and its 追问;
+  - `DELETE /v1/life-reports/{id}` removes the report and its 追问;
+  - the chart goes too when no other record reads it (never a 每日一牌's).
+  - A job still running for a deleted record never writes it back.
+
+### WP14.3 Download and send, one or several
+
+- **Each record's ⋮ menu:** 下载 PDF, 下载 Word, 发送, 归类到…, 删除.
+- **Select (the toolbar button, or a long press):** tick several, then 下载, 发送 or 删除 for all. Download and
+  send first ask PDF or Word.
+- **发送** opens the system's share sheet with the documents. On the web that is the browser's share where it can
+  share files (phones), and a download elsewhere.
+- **The reading page and the 一生运势 page** offer 下载 PDF and 下载 Word in their own menus too.
+- **Keyboard:** the view switch, the menus, the checkboxes and the action bar can all be reached with Tab.
+- Lessons: rules 4, 6, 7, 12, 17, 25, 27, 33, 36, 43, 46, 52 and 53; G4 and G6.
+
+As built (v8.0.0):
+
+- **Libraries:**
+  - `docx` 9.8.1 was a month old; 9.15.0 was a day old, and a release that fresh is a supply-chain risk.
+  - PDFKit 0.19.1 (fontkit 2 inside), plus `@types/pdfkit` as a dev dependency.
+  - pdf-lib and its fontkit were measured, then removed.
+  - `npm audit`: 0 vulnerabilities after each step.
+- **The PDF layout:**
+  - A4 with 56 pt margins.
+  - Bold is drawn as a fill with a thin stroke of the same colour, since one face is embedded.
+  - The example sits in a tinted panel with an accent bar, a quote has a grey bar, and a question a grey panel.
+  - Page numbers go in the bottom margin.
+  - Looked at rendered: two pages, every block, page break included.
+- **The font for a TTC:** `ShareFont.face` is the face's PostScript name: MicrosoftYaHei, NotoSansCJKsc/tc-Regular
+  (CI's `fonts-noto-cjk`), PingFangSC/TC-Regular, or `MINGLI_SHARE_FONT_FACE`.
+- **Deleting:**
+  - the store gains `deleteReport`, `deleteLifeReport` and `deleteChartIfUnused`, a contract test on both stores;
+  - the chart's rows go only when no reading or life report reads it.
+- **Whose record:**
+  - the server's person comes first now, so 归类到… shows at once; the device label is the fallback;
+  - `relabelChart` keeps the device label in step, and clears it on 不归类;
+  - `parsePerson` takes a name for any chart and a birthplace for birth charts only. The v6.2.0 test changed with
+    the owner's request.
+- **The app:**
+  - the history page builds every record (up to 100 readings);
+  - selecting is a mode, entered by the toolbar button or a long press;
+  - a record's menu is a PopupMenuButton, its checkbox a Checkbox, so Tab reaches both.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S14 以往记录：整理、下载、发送、删除 (done 2026-10-28: v8.0.0)
+
+1. **Delivered** in v8.0.0, the owner's request:
+   - WP14.1: Word and PDF for every reading and 一生运势报告, with its 追问 and the AI label;
+   - WP14.2: history by year and month or by person, records filed under a person (归类到…), and deleting one record
+     with what hangs off it;
+   - WP14.3: download and send, one record or several selected, also from the reading page and the 一生运势 page.
+2. **Numbers:**
+   - server tests 515 → 528;
+   - app tests 165 → 175;
+   - a PDF of a reading is about 85 KB (two pages, subset font).
+3. **Changed against the plan:** nothing in scope.
+   - The 一生运势 page's 下载 became a menu (PDF, Word, and the old ZIP).
+   - The reading page's menu gained PDF and Word beside its Markdown download.
+4. **Mistakes recorded:** none new. Rule 4 (G4, measure first) paid off: pdf-lib would have shipped PDFs with blank
+   Chinese.
+5. **Next:** what the owner picks; the open items stand as at S13's end.
 
 ### S13 AI 追问 + 通俗解读 (done 2026-10-28: v6.2.0–v7.0.0)
 
@@ -1723,3 +1829,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP13.1    | done                         | v6.2.0  |
 | WP13.2    | done                         | v7.0.0  |
 | WP13.3    | done                         | v7.0.0  |
+| WP14.1    | done                         | v8.0.0  |
+| WP14.2    | done                         | v8.0.0  |
+| WP14.3    | done                         | v8.0.0  |

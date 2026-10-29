@@ -7,9 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../application/providers.dart';
+import '../domain/document.dart';
 import '../domain/export.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'archive_actions.dart';
 import 'design.dart';
 import 'labels.dart';
 import 'theme.dart' show GanZhiText;
@@ -72,6 +74,32 @@ class ReportPage extends ConsumerWidget {
                 final text = _export(l10n, r);
                 final messenger = ScaffoldMessenger.of(context);
                 final share = ref.read(shareProvider);
+                if (v == 'pdf' || v == 'docx') {
+                  // Word or PDF (v8.0.0): the reading with its 追问, rendered by the server.
+                  final chart = chartId == null ? null : ref.read(chartProvider(chartId)).value;
+                  final person = chart?.person?.name ?? ref.read(profilesProvider).value?.chartLabels[chartId];
+                  final heading = title ?? l10n.aiReport;
+                  try {
+                    final doc = await readingDocumentOf(
+                      ref,
+                      l10n,
+                      report: r,
+                      title: heading,
+                      method: l10n.methodLabel(system ?? ''),
+                      person: person,
+                      birthplace: chart?.person?.birthplace ?? place,
+                    );
+                    await shareDocuments(
+                      ref,
+                      [(doc, docFileName(heading, r.createdAt?.toLocal()))],
+                      v == 'pdf' ? DocFormat.pdf : DocFormat.docx,
+                      subject: heading,
+                    );
+                  } catch (_) {
+                    messenger.showSnackBar(SnackBar(content: Text(l10n.archiveDocFailed)));
+                  }
+                  return;
+                }
                 if (v == 'copy') {
                   await Clipboard.setData(ClipboardData(text: text));
                   messenger.showSnackBar(SnackBar(content: Text(l10n.copied)));
@@ -110,6 +138,16 @@ class ReportPage extends ConsumerWidget {
                     value: 'image',
                     child: Row(children: [const Icon(Icons.image_outlined), const SizedBox(width: Space.m), Text(l10n.shareImage)]),
                   ),
+                PopupMenuItem(
+                  key: const Key('download-pdf'),
+                  value: 'pdf',
+                  child: Row(children: [const Icon(Icons.picture_as_pdf_outlined), const SizedBox(width: Space.m), Text(l10n.archiveDownloadPdf)]),
+                ),
+                PopupMenuItem(
+                  key: const Key('download-docx'),
+                  value: 'docx',
+                  child: Row(children: [const Icon(Icons.description_outlined), const SizedBox(width: Space.m), Text(l10n.archiveDownloadWord)]),
+                ),
                 PopupMenuItem(
                   key: const Key('download-report'),
                   value: 'download',

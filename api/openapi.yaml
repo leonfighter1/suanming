@@ -27,6 +27,8 @@ tags:
     description: Paid per-topic 破除運勢 plans (payment is a Phase 4 TODO)
   - name: followups
     description: 追问, follow-up questions on a passed reading or 一生运势报告 (v7.0.0)
+  - name: archive
+    description: 以往记录 — documents (Word / PDF), deleting a record, filing it under a person (v8.0.0)
   - name: ops
     description: Operational endpoints
 
@@ -655,6 +657,16 @@ paths:
               schema: { $ref: "#/components/schemas/LifeReport" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [archive]
+      operationId: deleteLifeReport
+      summary: Delete one 一生运势报告 with its 追问 (since v8.0.0); its chart too when nothing else reads it
+      parameters:
+        - { name: life_report_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200": { $ref: "#/components/responses/Deleted" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
 
   /v1/places:
     get:
@@ -746,6 +758,108 @@ paths:
                   person: { $ref: "#/components/schemas/ChartPerson" }
         "404": { $ref: "#/components/responses/Problem" }
 
+  /v1/charts/{chart_id}/person:
+    post:
+      tags: [archive]
+      operationId: fileChart
+      summary: 归类到… — file a chart's records under a person (since v8.0.0)
+      description: |
+        A field the body names is set (empty or null clears it); a field it leaves out stays. Any chart may name its
+        person; a birthplace belongs to a birth chart only (400 otherwise).
+      parameters:
+        - { name: chart_id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: [string, "null"], maxLength: 40 }
+                birthplace: { type: [string, "null"], maxLength: 120 }
+      responses:
+        "200":
+          description: The chart's person now; absent when it has none
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chart_id]
+                properties:
+                  chart_id: { type: string, format: uuid }
+                  person: { $ref: "#/components/schemas/ChartPerson" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/documents:
+    post:
+      tags: [archive]
+      operationId: renderDocument
+      summary: A record as Word or PDF, rendered from the document the app builds (since v8.0.0)
+      description: |
+        The app builds the document from what it shows (the reading or 一生运势报告, its 追问, and the AI label with the
+        disclaimer every export carries); the server renders it, with no model call. PDF embeds the server's Chinese
+        font as a subset (503 without one, as for share images); Word names an East Asian font.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format, document]
+              properties:
+                format: { type: string, enum: [pdf, docx] }
+                filename: { type: string, maxLength: 120, description: Without the extension }
+                locale: { type: string, enum: [zh-Hant, zh-Hans, en] }
+                document:
+                  type: object
+                  required: [title, blocks]
+                  properties:
+                    title: { type: string, maxLength: 200 }
+                    subtitle: { type: string, maxLength: 200 }
+                    blocks:
+                      type: array
+                      maxItems: 3000
+                      items:
+                        type: object
+                        required: [type]
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              [
+                                h2,
+                                h3,
+                                meta,
+                                p,
+                                summary,
+                                term,
+                                example,
+                                quote,
+                                bullet,
+                                kv,
+                                note,
+                                question,
+                                divider,
+                              ]
+                          text: { type: string, maxLength: 6000 }
+                          rows:
+                            type: array
+                            maxItems: 80
+                            items:
+                              { type: array, minItems: 2, maxItems: 2, items: { type: string } }
+      responses:
+        "200":
+          description: The file, with Content-Disposition naming it
+          content:
+            application/pdf: { schema: { type: string, format: binary } }
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema: { type: string, format: binary }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+
   /v1/tarot/daily:
     get:
       tags: [charts]
@@ -799,6 +913,19 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Report" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [archive]
+      operationId: deleteReport
+      summary: Delete one reading, with its 破除運勢 plans and its 追问 (since v8.0.0)
+      description: |
+        Its chart goes too when no other reading or 一生运势报告 reads it (never a 每日一牌's). It can't be undone.
+        A job still running for the reading never writes it back.
+      parameters:
+        - { name: report_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200": { $ref: "#/components/responses/Deleted" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
 
@@ -1053,6 +1180,19 @@ components:
       schema: { type: string }
 
   responses:
+    Deleted:
+      description: What went, counted
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [deleted, completed_at]
+            properties:
+              deleted:
+                type: object
+                additionalProperties: { type: integer }
+                description: reports or life_reports, remedies, followups, charts
+              completed_at: { type: string, format: date-time }
     FollowUpList:
       description: Oldest first, with the most a reading may have
       content:

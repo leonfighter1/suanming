@@ -3,7 +3,10 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 
+import '../domain/document.dart';
+import '../domain/export.dart' show followUpBlocks;
 import '../domain/life_report.dart';
+import '../domain/models.dart' show FollowUpView;
 import '../l10n/gen/app_localizations.dart';
 
 /// The 项目 / 内容 rows at the top of the report.
@@ -362,6 +365,82 @@ String lifeReportMarkdown({
     ..writeln()
     ..writeln(l.aiLabel);
   return b.toString();
+}
+
+/// The 一生运势报告 as a document (v8.0.0), for Word and PDF: the same sections as [lifeReportMarkdown], then its 追问,
+/// the disclaimer and the AI label.
+Doc lifeReportDocument({
+  required AppLocalizations l10n,
+  required LifeHeader header,
+  required LifeReportView report,
+  required bool hant,
+  required String lunarMonth,
+  required String lunarDay,
+  List<FollowUpView> followUps = const [],
+}) {
+  final f = report.facts!;
+  final l = report.layers!;
+  final blocks = <DocBlock>[
+    DocBlock.kv(header.rows(l10n)),
+    DocBlock('note', l10n.lifeNote),
+    // 一、易经本命卦
+    DocBlock('h2', l10n.lifeSec1),
+    DocBlock('h3', l10n.lifeQigua),
+    for (final s in qiguaSteps(f, hant: hant, lunarMonth: lunarMonth, lunarDay: lunarDay)) DocBlock('bullet', s),
+    DocBlock('h3', l10n.lifeGuaYi),
+    DocBlock('quote', f.hexagram.guaCi),
+    DocBlock('p', l.yijingText('meaning')),
+    DocBlock('h3', l10n.lifeMingYao),
+    DocBlock('quote', f.lines[f.movingLine - 1].text),
+    DocBlock('p', l.yijingText('ming_yao')),
+    DocBlock('h3', l10n.lifeZhiGua),
+    DocBlock('quote', f.changed.guaCi),
+    DocBlock('p', l.yijingText('zhi_gua')),
+    DocBlock('h3', l10n.lifeSixLines),
+    for (final x in f.lines)
+      DocBlock('bullet', '${x.position}${x.moving ? '★' : ''} · ${x.ages}：${x.text} —— ${l.stageReading(x.line)}'),
+    // 二、梅花易数
+    DocBlock('h2', l10n.lifeSec2),
+    DocBlock('bullet', '${l10n.lifeSeason}：${l.meihua['season']}'),
+    DocBlock('bullet', '${l10n.lifeEarly}（${relationLabel(l10n, f.yong.relation)}）：${l.meihua['early']}'),
+    DocBlock('bullet', '${l10n.lifeMiddle}：${l.meihua['middle']}'),
+    DocBlock('bullet', '${l10n.lifeLate}（${relationLabel(l10n, f.bian.relation)}）：${l.meihua['late']}'),
+    DocBlock('summary', '${l10n.lifeMhConclusion}：${l.meihua['conclusion']}'),
+    // 三、五行与八宅
+    DocBlock('h2', l10n.lifeSec3),
+    DocBlock('p', l.wuxing['analysis']),
+    DocBlock('p', '${l10n.lifeFavorable}：${l.favorable().join('、')}；${l10n.lifeUnfavorable}：${l.unfavorable().join('、')}'),
+    DocBlock('h3', l10n.lifeBazhai),
+    DocBlock('p', l10n.lifeKua('${f.kua}', f.trigram(f.kuaTrigram).name, hantTerm(f.kuaGroup, hant), f.kuaWuxing)),
+    for (final d in f.directions) DocBlock('bullet', '${d.direction}：${hantTerm(d.star, hant)}（${d.luck}）'),
+    DocBlock('p', '${l10n.lifeDaily}：${l.bazhai['daily']}'),
+    // 四、六个方面
+    DocBlock('h2', l10n.lifeSec4),
+    for (final topic in l.topics) ...[
+      DocBlock('h3', topicLabel(l10n, topic.key)),
+      DocBlock('summary', topic.summary),
+      for (final (period, text) in topic.points) DocBlock('bullet', '${period.isEmpty ? '' : '$period：'}$text'),
+    ],
+    // 五、人生阶段总览
+    DocBlock('h2', l10n.lifeSec5),
+    for (final s in l.stages)
+      DocBlock('bullet', '${s.ages} · ${s.years}（${s.ganzhi}） · ${s.label}（${s.score}）：${s.focus}'),
+    // 六、总评与建议
+    DocBlock('h2', l10n.lifeSec6),
+    DocBlock('p', l.verdict),
+    for (final (area, text) in l.advice) DocBlock('bullet', '$area：$text'),
+    DocBlock('summary', l.closing),
+    ...followUpBlocks(
+      followUps,
+      heading: l10n.followUpTitle,
+      asked: l10n.followUpAsked,
+      outOfScope: l10n.followUpOutOfScope,
+    ),
+    const DocBlock.divider(),
+    DocBlock('note', l.disclaimer),
+    DocBlock('note', l.aiLabel),
+  ];
+  return Doc(title: l10n.lifeReportOf(header.name), subtitle: l10n.lifeSubtitle, blocks: blocks);
 }
 
 /// The download package: the styled HTML (opens anywhere, prints to PDF) and a Markdown copy.

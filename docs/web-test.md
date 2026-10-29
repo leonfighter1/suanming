@@ -247,6 +247,22 @@ line in every model call, and the `id` rule group records any hit.
 - `npm run eval:ai -- --live` also asks one 追问 per case and records whether its answer stayed with the reading
   (`followup.unfaithful` in docs/verification/ai-eval-results.json).
 
+## 以往记录 (v8.0.0)
+
+- 首页 → 历史记录 (or 最近记录 → 查看全部):
+  - **按时间**: years, then months, newest first. 一生运势报告 sit among the readings by date.
+  - **按人**: one group per person, the person with the latest record first; records filed under nobody under 未归类,
+    last. A 八字 or 一生运势 record is filed under its chart's person; a 塔罗, 求签, 算卦 or 风水 reading under the
+    default profile at the time it was made; 起名 under its 八字 chart's person.
+- Each record's ⋮: 下载 PDF, 下载 Word, 发送 (asks PDF or Word), 归类到… (a profile's name, a name typed in, or 不归类),
+  删除 (asks first; it can't be undone).
+- 选择 (top right, or a long press): tick several, then 下载 / 发送 / 删除 at the bottom.
+- 发送 opens the share sheet. On a computer's browser that can't share files, it downloads them.
+- The reading page's ⋮ and the 一生运势 page's 下载 offer PDF and Word too.
+- PDF needs a Chinese font on the server, as share images do (Noto Sans SC or 微软雅黑 on Windows; `fonts-noto-cjk` on
+  Linux). Word needs none: Word uses its own font (Microsoft YaHei).
+- Only finished records can be downloaded or sent.
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

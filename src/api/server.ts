@@ -49,6 +49,7 @@ import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
 import {
+  changePerson,
   computeChart,
   computeNamingChart,
   InputError,
@@ -56,6 +57,15 @@ import {
   UUID_RE,
   type EngineSecrets,
 } from "../service/charts.js";
+import {
+  contentDisposition,
+  documentName,
+  DocumentInputError,
+  parseDocument,
+  type Doc,
+} from "../export/document.js";
+import { renderDocx } from "../export/render-docx.js";
+import { renderPdf } from "../export/render-pdf.js";
 import { dailyDate, dailyIds, drawDaily } from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
 import { shareFont } from "../share/font.js";
@@ -435,7 +445,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     return { user: String(req.headers["x-dev-user"] ?? "dev-user"), country };
   }
 
-  /** 起名 (v4.5.0): reads the caller's own 八字 chart; anyone else's is as if it weren't there. */
+  /**
+   * 起名 (v4.5.0): reads the caller's own 八字 chart; anyone else's is as if it weren't there. The names are for that
+   * chart's person (v8.0.0), so the 起名 record is filed under them too.
+   */
   async function namingChart(body: Record<string, unknown>, c: Caller) {
     const id = body.bazi_chart_id;
     if (typeof id !== "string" || !UUID_RE.test(id)) {
@@ -443,7 +456,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
     const bazi = await store.getChart(id);
     if (!bazi || bazi.owner !== c.user) throw new HttpError(404, "chart not found");
-    return computeNamingChart(body, bazi.fact, opts.secrets, now);
+    return {
+      fact: computeNamingChart(body, bazi.fact, opts.secrets, now),
+      ...(bazi.person?.name && { person: { name: bazi.person.name } }),
+    };
   }
 
   /** Geo-Rule: refuse before computing anything for unserved regions. */
@@ -1285,6 +1301,71 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       );
     }
 
+    // ---- 以往记录 (v8.0.0, S14): delete one record; file a chart under a person; a record as Word or PDF ----
+    const dr = /^\/v1\/(reports|life-reports)\/([^/]+)$/.exec(path);
+    if (dr && req.method === "DELETE") {
+      const id = dr[2]!;
+      const reading = dr[1] === "reports";
+      const r = !UUID_RE.test(id)
+        ? undefined
+        : reading
+          ? await store.getReport(id)
+          : await store.getLifeReport(id);
+      if (!r || r.owner !== c.user) throw new HttpError(404, "record not found");
+      // The record with what hangs off it; its chart too when nothing else reads it. A job still running for it
+      // finds the record gone and writes nothing back.
+      const removed = reading ? await store.deleteReport(id) : await store.deleteLifeReport(id);
+      const charts = (await store.deleteChartIfUnused(r.chart_id)) ? 1 : 0;
+      return send(res, 200, { deleted: { ...removed, charts }, completed_at: now().toISOString() });
+    }
+    const pm2 = /^\/v1\/charts\/([^/]+)\/person$/.exec(path);
+    if (pm2 && req.method === "POST") {
+      const ch = UUID_RE.test(pm2[1]!) ? await store.getChart(pm2[1]!) : undefined;
+      if (!ch || ch.owner !== c.user) throw new HttpError(404, "chart not found");
+      const person = changePerson(ch.person, await readJson(req), ch.fact.system);
+      const { person: _old, ...rest } = ch;
+      await store.putChart(person ? { ...rest, person } : rest);
+      return send(res, 200, { chart_id: ch.id, ...(person && { person }) });
+    }
+    if (path === "/v1/documents" && req.method === "POST") {
+      // A long 一生运势报告 with its 追问 runs to tens of kilobytes of text.
+      const body = (await readJson(req, 1024 * 1024)) as Record<string, unknown>;
+      const format = body.format === "pdf" || body.format === "docx" ? body.format : undefined;
+      if (!format) throw new InputError("format must be pdf or docx");
+      let doc: Doc;
+      try {
+        doc = parseDocument(body.document);
+      } catch (e) {
+        if (e instanceof DocumentInputError) throw new InputError(e.message);
+        throw e;
+      }
+      const locale = LOCALES.includes(body.locale as Locale) ? (body.locale as Locale) : "zh-Hans";
+      let bytes: Buffer;
+      if (format === "pdf") {
+        const font = shareFont(locale);
+        if (!font) {
+          throw new HttpError(
+            503,
+            "PDF documents need a CJK font on the server: install fonts-noto-cjk or set MINGLI_SHARE_FONT",
+          );
+        }
+        bytes = await renderPdf(doc, font);
+      } else {
+        bytes = await renderDocx(doc, locale);
+      }
+      res.writeHead(200, {
+        "content-type":
+          format === "pdf"
+            ? "application/pdf"
+            : "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "content-length": String(bytes.length),
+        "content-disposition": contentDisposition(documentName(body.filename, format)),
+        "cache-control": "no-store",
+      });
+      res.end(bytes);
+      return;
+    }
+
     // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 ----
     const fq = /^\/v1\/(reports|life-reports)\/([^/]+)\/followups$/.exec(path);
     if (fq && req.method === "POST") {
@@ -1460,12 +1541,15 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       if (path === "/v1/charts") {
         const body = (await readJson(req)) as { system?: string; person?: unknown };
         assertServed(c.country, body.system);
-        // Whose chart it is (v6.2.0): kept on the record for history on any device, never in the facts.
-        const person = parsePerson(body.person, body.system);
-        const fact =
+        // Whose chart it is (v6.2.0): kept on the record for history on any device, never in the facts. A 起名
+        // chart takes its 八字 chart's person unless the request names one (v8.0.0).
+        const asked = parsePerson(body.person, body.system);
+        const made =
           body.system === "naming"
             ? await namingChart(body as Record<string, unknown>, c)
-            : computeChart(body, opts.secrets, now);
+            : { fact: computeChart(body, opts.secrets, now) };
+        const fact = made.fact;
+        const person = asked ?? ("person" in made ? made.person : undefined);
         const id = randomUUID();
         await store.putChart({
           id,

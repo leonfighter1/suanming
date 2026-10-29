@@ -70,6 +70,8 @@ class _TarotPageState extends ConsumerState<TarotPage> {
         'system': 'tarot',
         'spread': _spread,
         'ritual': ?ritual,
+        // Whose reading it is, for 以往记录 (v8.0.0).
+        ...readerPerson(ref.read(profilesProvider).value),
       });
       if (!mounted) return; // left the page meanwhile
       setState(() {

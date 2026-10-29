@@ -9,19 +9,31 @@ import type { Locale } from "../ai/terms.js";
 export interface ShareFont {
   file: string;
   family: string;
+  /** In a font collection (.ttc), the face's PostScript name: PDF documents (v8.0.0) embed that face. */
+  face?: string;
 }
 
-const KNOWN: { file: string; family: (locale: Locale) => string }[] = [
+const KNOWN: {
+  file: string;
+  family: (locale: Locale) => string;
+  face?: (locale: Locale) => string;
+}[] = [
   {
     file: "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
     family: (l) => (l === "zh-Hant" ? "Noto Sans CJK TC" : "Noto Sans CJK SC"),
+    face: (l) => (l === "zh-Hant" ? "NotoSansCJKtc-Regular" : "NotoSansCJKsc-Regular"),
   },
   { file: "C:/Windows/Fonts/Noto Sans SC (TrueType).otf", family: () => "Noto Sans SC" },
   { file: "C:/Windows/Fonts/NotoSansSC-VF.ttf", family: () => "Noto Sans SC" },
-  { file: "C:/Windows/Fonts/msyh.ttc", family: () => "Microsoft YaHei" },
+  {
+    file: "C:/Windows/Fonts/msyh.ttc",
+    family: () => "Microsoft YaHei",
+    face: () => "MicrosoftYaHei",
+  },
   {
     file: "/System/Library/Fonts/PingFang.ttc",
     family: (l) => (l === "zh-Hant" ? "PingFang TC" : "PingFang SC"),
+    face: (l) => (l === "zh-Hant" ? "PingFangTC-Regular" : "PingFangSC-Regular"),
   },
 ];
 
@@ -33,8 +45,15 @@ export function shareFont(
   const file = env.MINGLI_SHARE_FONT?.trim();
   if (file) {
     if (!existsSync(file)) return undefined;
-    return { file, family: env.MINGLI_SHARE_FONT_FAMILY?.trim() || "sans" };
+    const face = env.MINGLI_SHARE_FONT_FACE?.trim();
+    return { file, family: env.MINGLI_SHARE_FONT_FAMILY?.trim() || "sans", ...(face && { face }) };
   }
   const known = KNOWN.find((k) => existsSync(k.file));
-  return known && { file: known.file, family: known.family(locale) };
+  return (
+    known && {
+      file: known.file,
+      family: known.family(locale),
+      ...(known.face && { face: known.face(locale) }),
+    }
+  );
 }

@@ -3,27 +3,281 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
+import '../domain/archive.dart';
+import '../domain/document.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
+import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'archive_actions.dart';
 import 'design.dart';
+import 'keyboard.dart' show SegmentKeys;
 import 'life_report_page.dart';
 import 'report_page.dart';
 import 'theme.dart';
+import 'widgets/remedy.dart' show compactButtons;
 import 'widgets/tarot_spread.dart';
 
-/// All earlier readings, newest first. Pull down to refresh.
-class HistoryPage extends ConsumerWidget {
+/// 以往记录 (v8.0.0, the owner): every reading and 一生运势报告, by year and month (newest first) or by person. Each can be
+/// downloaded as PDF or Word, sent, filed under a person or deleted; 选择 does the same for several at once. Pull down
+/// to refresh.
+class HistoryPage extends ConsumerStatefulWidget {
   const HistoryPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryPage> createState() => _HistoryPageState();
+}
+
+enum _Act { pdf, docx, send, file, delete }
+
+class _HistoryPageState extends ConsumerState<HistoryPage> {
+  bool _byPerson = false;
+  bool _selecting = false;
+  final _selected = <String>{};
+  bool _busy = false;
+
+  List<ArchiveRecord> _records() => [
+        for (final it in ref.watch(historyProvider).value ?? const <HistoryItem>[]) ArchiveRecord.reading(it),
+        for (final r in ref.watch(lifeReportsProvider).value ?? const <LifeReportView>[]) ArchiveRecord.life(r),
+      ];
+
+  void _refresh() {
+    ref.invalidate(historyProvider);
+    ref.invalidate(lifeReportsProvider);
+  }
+
+  void _toggle(ArchiveRecord r) => setState(() {
+        if (!_selected.remove(r.key)) _selected.add(r.key);
+      });
+
+  void _stopSelecting() => setState(() {
+        _selecting = false;
+        _selected.clear();
+      });
+
+  /// Runs [work] with the page busy, and says what went wrong if it fails.
+  Future<void> _busyWith(Future<void> Function() work) async {
+    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    try {
+      await work();
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.archiveDocFailed)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// 下载 and 发送: the records' documents in [format] (asked for when null), shared.
+  Future<void> _share(List<ArchiveRecord> records, {DocFormat? format}) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ready = records.where((r) => r.passed).toList();
+    if (ready.isEmpty) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.archiveNotReady)));
+      return;
+    }
+    final as = format ?? await chooseFormat(context);
+    if (as == null || !mounted) return;
+    messenger.showSnackBar(SnackBar(content: Text(l10n.archiveWorking), duration: const Duration(seconds: 2)));
+    await _busyWith(() async {
+      final docs = [for (final r in ready) await recordDocument(ref, l10n, r)];
+      await shareDocuments(ref, docs, as, subject: l10n.history);
+    });
+  }
+
+  Future<void> _delete(List<ArchiveRecord> records) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    if (records.isEmpty || !await confirmDelete(context, records.length) || !mounted) return;
+    await _busyWith(() async {
+      final api = ref.read(apiClientProvider);
+      for (final r in records) {
+        r.isLife ? await api.deleteLifeReport(r.id) : await api.deleteReport(r.id);
+      }
+      messenger.showSnackBar(SnackBar(content: Text(l10n.archiveDeleted(records.length))));
+    });
+    if (!mounted) return;
+    _stopSelecting();
+    _refresh();
+  }
+
+  /// 归类到…: files the record's chart under a person, on the server and on this device.
+  Future<void> _file(ArchiveRecord r) async {
+    final book = ref.read(profilesProvider).value;
+    final current = personName(r, book?.chartLabels ?? const {});
+    final names = <String>{
+      for (final p in book?.profiles ?? const <BirthProfile>[])
+        if (p.name.trim().isNotEmpty) p.name.trim(),
+    }.toList();
+    final name = await chooseFiling(context, names: names, current: current);
+    if (name == null || !mounted) return;
+    await _busyWith(() async {
+      await ref.read(apiClientProvider).setChartPerson(r.chartId, name);
+      await ref.read(profilesProvider.notifier).relabelChart(r.chartId, name);
+    });
+    if (mounted) _refresh();
+  }
+
+  void _act(_Act a, ArchiveRecord r) => switch (a) {
+        _Act.pdf => _share([r], format: DocFormat.pdf),
+        _Act.docx => _share([r], format: DocFormat.docx),
+        _Act.send => _share([r]),
+        _Act.file => _file(r),
+        _Act.delete => _delete([r]),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final history = ref.watch(historyProvider);
-    final lives = ref.watch(lifeReportsProvider).value ?? const <LifeReportView>[];
-    final labels = ref.watch(profilesProvider).value?.chartLabels ?? const {};
+    final records = _records();
+    final labels = ref.watch(profilesProvider).value?.chartLabels ?? const <String, String>{};
+    final chosen = records.where((r) => _selected.contains(r.key)).toList();
+
+    Widget tile(ArchiveRecord r) {
+      final picked = _selected.contains(r.key);
+      final trailing = _selecting
+          ? Checkbox(key: ValueKey<String>('pick-${r.key}'), value: picked, onChanged: (_) => _toggle(r))
+          : PopupMenuButton<_Act>(
+              key: ValueKey<String>('record-menu-${r.key}'),
+              tooltip: l10n.more,
+              enabled: !_busy,
+              onSelected: (a) => _act(a, r),
+              itemBuilder: (_) => [
+                PopupMenuItem(value: _Act.pdf, child: Text(l10n.archiveDownloadPdf)),
+                PopupMenuItem(value: _Act.docx, child: Text(l10n.archiveDownloadWord)),
+                PopupMenuItem(value: _Act.send, child: Text(l10n.archiveSend)),
+                PopupMenuItem(value: _Act.file, child: Text(l10n.archiveFile)),
+                PopupMenuItem(value: _Act.delete, child: Text(l10n.archiveDelete, style: TextStyle(color: scheme.error))),
+              ],
+            );
+      final onTap = _selecting ? () => _toggle(r) : null;
+      void onLongPress() => setState(() {
+            _selecting = true;
+            _selected.add(r.key);
+          });
+      return r.isLife
+          ? _LifeTile(record: r, trailing: trailing, onTap: onTap, onLongPress: onLongPress)
+          : HistoryTile(item: r.reading!, trailing: trailing, onTap: onTap, onLongPress: onLongPress);
+    }
+
+    Widget header(String text, {required Key key, int? count, bool big = false}) => Padding(
+          key: key,
+          padding: EdgeInsets.fromLTRB(Space.xs, big ? Space.l : Space.s, Space.xs, Space.s),
+          child: Row(
+            children: [
+              Text(
+                text,
+                style: (big ? theme.textTheme.titleLarge : theme.textTheme.titleSmall)?.copyWith(
+                  color: big ? scheme.primary : scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (count != null) ...[
+                const SizedBox(width: Space.s),
+                Text(l10n.archiveCount(count), style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              ],
+            ],
+          ),
+        );
+
+    final children = <Widget>[];
+    if (_byPerson) {
+      for (final g in byPerson(records, (r) => personName(r, labels))) {
+        children.add(
+          header(
+            g.name ?? l10n.archiveUnfiled,
+            key: ValueKey<String>('archive-person-${g.name ?? '-'}'),
+            count: g.records.length,
+            big: true,
+          ),
+        );
+        children.addAll(g.records.map(tile));
+      }
+    } else {
+      int? year;
+      for (final m in byMonth(records)) {
+        if (m.year != year) {
+          year = m.year;
+          children.add(header(l10n.archiveYear(m.year), key: ValueKey<String>('archive-year-${m.year}'), big: true));
+        }
+        children.add(
+          header(
+            l10n.archiveMonth(m.month),
+            key: ValueKey<String>('archive-month-${m.year}-${m.month}'),
+            count: m.records.length,
+          ),
+        );
+        children.addAll(m.records.map(tile));
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.history)),
+      appBar: AppBar(
+        leading: _selecting
+            ? IconButton(key: const Key('archive-select-done'), tooltip: l10n.close, icon: const Icon(Icons.close), onPressed: _stopSelecting)
+            : null,
+        title: Text(_selecting ? l10n.archiveSelected(chosen.length) : l10n.history),
+        actions: [
+          if (_selecting)
+            TextButton(
+              key: const Key('archive-select-all'),
+              onPressed: () => setState(() => _selected
+                ..clear()
+                ..addAll(records.map((r) => r.key))),
+              child: Text(l10n.archiveSelectAll),
+            )
+          else if (records.isNotEmpty)
+            IconButton(
+              key: const Key('archive-select'),
+              tooltip: l10n.archiveSelect,
+              icon: const Icon(Icons.checklist_rtl),
+              onPressed: () => setState(() => _selecting = true),
+            ),
+        ],
+      ),
+      bottomNavigationBar: _selecting
+          ? Material(
+              elevation: 8,
+              color: scheme.surfaceContainer,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.s),
+                  child: compactButtons(
+                    context,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton.icon(
+                          key: const Key('archive-download'),
+                          onPressed: chosen.isEmpty || _busy ? null : () => _share(chosen),
+                          icon: const Icon(Icons.download_outlined),
+                          label: Text(l10n.download),
+                        ),
+                        TextButton.icon(
+                          key: const Key('archive-send'),
+                          onPressed: chosen.isEmpty || _busy ? null : () => _share(chosen),
+                          icon: const Icon(Icons.send_outlined),
+                          label: Text(l10n.archiveSend),
+                        ),
+                        TextButton.icon(
+                          key: const Key('archive-delete'),
+                          onPressed: chosen.isEmpty || _busy ? null : () => _delete(chosen),
+                          icon: Icon(Icons.delete_outline, color: chosen.isEmpty ? null : scheme.error),
+                          label: Text(l10n.archiveDelete, style: TextStyle(color: chosen.isEmpty ? null : scheme.error)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: RefreshIndicator(
         onRefresh: () {
           ref.invalidate(lifeReportsProvider);
@@ -32,12 +286,12 @@ class HistoryPage extends ConsumerWidget {
         child: history.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => ListView(padding: Space.page, children: [Text('$e')]),
-          data: (items) => items.isEmpty && lives.isEmpty
+          data: (_) => records.isEmpty
               ? ListView(
                   padding: Space.page,
                   children: [
                     const SizedBox(height: 120),
-                    Icon(Icons.history_toggle_off, size: 56, color: Theme.of(context).colorScheme.outline),
+                    Icon(Icons.history_toggle_off, size: 56, color: scheme.outline),
                     const SizedBox(height: Space.l),
                     Text(l10n.historyEmpty, textAlign: TextAlign.center),
                   ],
@@ -45,30 +299,52 @@ class HistoryPage extends ConsumerWidget {
               : ListView(
                   padding: Space.page,
                   children: [
-                    // 一生运势报告 first: they are the long, kept documents.
-                    for (final (i, r) in lives.indexed)
-                      FadeSlideIn(
-                        index: i,
-                        child: AppCard(
-                          key: Key('history-life-${r.id}'),
-                          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => LifeReportPage(reportId: r.id))),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.auto_stories),
-                            // Whose report: labelled on this device, else kept with its chart on the server (v6.2.0).
-                            title: Text(switch (labels[r.chartId] ?? r.person?.name) {
-                              final String name when name.isNotEmpty => l10n.lifeReportOf(name),
-                              _ => l10n.lifeEntry,
-                            }),
-                            subtitle: Text(r.createdAt == null ? '' : DateFormat('yyyy-MM-dd HH:mm').format(r.createdAt!.toLocal())),
-                            trailing: const Icon(Icons.chevron_right),
-                          ),
-                        ),
+                    SegmentKeys(
+                      child: SegmentedButton<bool>(
+                        key: const Key('archive-view'),
+                        segments: [
+                          ButtonSegment(value: false, icon: const Icon(Icons.calendar_month_outlined), label: Text(l10n.archiveByTime)),
+                          ButtonSegment(value: true, icon: const Icon(Icons.people_outline), label: Text(l10n.archiveByPerson)),
+                        ],
+                        selected: {_byPerson},
+                        onSelectionChanged: (s) => setState(() => _byPerson = s.first),
                       ),
-                    for (final (i, it) in items.indexed) FadeSlideIn(index: lives.length + i, child: HistoryTile(item: it)),
+                    ),
+                    if (_busy) const Padding(padding: EdgeInsets.only(top: Space.s), child: LinearProgressIndicator()),
+                    ...children,
                   ],
                 ),
         ),
+      ),
+    );
+  }
+}
+
+/// A 一生运势报告 in the archive.
+class _LifeTile extends ConsumerWidget {
+  const _LifeTile({required this.record, required this.trailing, this.onTap, this.onLongPress});
+  final ArchiveRecord record;
+  final Widget trailing;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final labels = ref.watch(profilesProvider).value?.chartLabels ?? const <String, String>{};
+    final name = personName(record, labels);
+    return AppCard(
+      key: Key('history-life-${record.id}'),
+      padding: const EdgeInsets.fromLTRB(Space.l, Space.s, Space.xs, Space.s),
+      onTap: onTap ??
+          () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => LifeReportPage(reportId: record.id))),
+      onLongPress: onLongPress,
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.auto_stories),
+        title: Text(name == null ? l10n.lifeEntry : l10n.lifeReportOf(name)),
+        subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(record.createdAt)),
+        trailing: trailing,
       ),
     );
   }
@@ -110,18 +386,26 @@ class RecentHistory extends ConsumerWidget {
 }
 
 class HistoryTile extends ConsumerWidget {
-  const HistoryTile({super.key, required this.item});
+  const HistoryTile({super.key, required this.item, this.trailing, this.onTap, this.onLongPress});
   final HistoryItem item;
+
+  /// After the status (v8.0.0): the record's menu, or its checkbox while selecting.
+  final Widget? trailing;
+
+  /// In place of opening the reading (v8.0.0: selecting).
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(settingsProvider).apiLocaleCode;
     final terms = ref.watch(termsProvider).value;
-    // Whose chart: labelled on this device, else kept with the chart on the server (v6.2.0).
+    final record = ArchiveRecord.reading(item);
+    // Whose chart: kept with the chart on the server (v6.2.0; 归类到… changes it, v8.0.0), else this device's label.
     final book = ref.watch(profilesProvider).value;
-    final label = book?.chartLabels[item.chartId] ?? item.person?.name;
-    final place = book?.chartPlaces[item.chartId] ?? item.person?.birthplace;
+    final label = personName(record, book?.chartLabels ?? const {});
+    final place = item.person?.birthplace ?? book?.chartPlaces[item.chartId];
     final scheme = Theme.of(context).colorScheme;
     final (statusText, statusColor) = switch (item.status) {
       'passed' => (l10n.aiReport, scheme.primary),
@@ -129,29 +413,15 @@ class HistoryTile extends ConsumerWidget {
       'failed' => (l10n.statusFailed, scheme.error),
       _ => (l10n.statusReview, scheme.outline),
     };
-    final room = item.room == null ? null : terms?.fengshui?.roomName(item.room!, locale);
-    final surname = item.surname(locale);
-    final hexagram = item.hexagram(locale);
-    final title = switch (item.system) {
-      'bazi' => label == null || label.isEmpty ? l10n.homeBazi : l10n.chartOf(label),
-      'qiuqian' => l10n.homeQiuqian,
-      'fengshui' => room == null ? l10n.homeFengshui : '${l10n.homeFengshui} · $room',
-      'naming' => surname == null ? l10n.homeNaming : '${l10n.homeNaming} · $surname',
-      'liuyao' => hexagram == null ? l10n.homeLiuyao : '${l10n.homeLiuyao} · $hexagram',
-      _ => l10n.homeTarot,
-    };
+    final title = recordTitle(l10n, record, person: label, terms: terms, locale: locale);
     final lot = item.lotNumber == null ? null : terms?.lots?.lot(item.lotNumber!);
     return AppCard(
-      padding: const EdgeInsets.all(Space.l),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => ReportPage(
-            reportId: item.reportId,
-            title: title,
-            place: place,
-          ),
-        ),
-      ),
+      padding: EdgeInsets.fromLTRB(Space.l, Space.l, trailing == null ? Space.l : Space.xs, Space.l),
+      onTap: onTap ??
+          () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => ReportPage(reportId: item.reportId, title: title, place: place)),
+              ),
+      onLongPress: onLongPress,
       child: Row(
         children: [
           Icon(
@@ -224,6 +494,7 @@ class HistoryTile extends ConsumerWidget {
             ),
           ),
           Pill(statusText, color: statusColor),
+          ?trailing,
         ],
       ),
     );

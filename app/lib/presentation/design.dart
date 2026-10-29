@@ -92,6 +92,7 @@ class AppCard extends StatefulWidget {
     this.color,
     this.padding = const EdgeInsets.all(Space.l + 4),
     this.onTap,
+    this.onLongPress,
   });
 
   final Widget child;
@@ -101,6 +102,9 @@ class AppCard extends StatefulWidget {
   final Color? color;
   final EdgeInsets padding;
   final VoidCallback? onTap;
+
+  /// A long press (v8.0.0: starts selecting in 以往记录).
+  final VoidCallback? onLongPress;
 
   @override
   State<AppCard> createState() => _AppCardState();
@@ -125,6 +129,7 @@ class _AppCardState extends State<AppCard> {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: widget.onTap,
+            onLongPress: widget.onLongPress,
             onFocusChange: (f) => setState(() => _focused = f),
             child: Container(
               decoration: BoxDecoration(

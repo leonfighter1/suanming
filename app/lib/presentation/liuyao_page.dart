@@ -78,6 +78,8 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         'system': 'liuyao',
         'timezone': deviceTimeZone(),
         ...request,
+        // Whose reading it is, for 以往记录 (v8.0.0).
+        ...readerPerson(ref.read(profilesProvider).value),
       });
       if (!mounted) return; // left the page meanwhile
       setState(() {

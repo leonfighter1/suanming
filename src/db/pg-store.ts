@@ -426,6 +426,41 @@ export class PgStore implements Store, UserStore {
     return Promise.all(rows.rows.map((r) => this.open<FollowUpRecord>("followups", r)));
   }
 
+  async deleteReport(id: string) {
+    return this.db.transaction(async (tx) => {
+      const n = async (sql: string) => (await tx.query(sql, [id])).affectedRows ?? 0;
+      const followups = await n("DELETE FROM followups WHERE parent_id = $1");
+      const remedies = await n("DELETE FROM remedies WHERE report_id = $1");
+      const reports = await n("DELETE FROM reports WHERE id = $1");
+      return { reports, remedies, followups };
+    });
+  }
+
+  async deleteLifeReport(id: string) {
+    return this.db.transaction(async (tx) => {
+      const n = async (sql: string) => (await tx.query(sql, [id])).affectedRows ?? 0;
+      const followups = await n("DELETE FROM followups WHERE parent_id = $1");
+      const life_reports = await n("DELETE FROM life_reports WHERE id = $1");
+      return { life_reports, followups };
+    });
+  }
+
+  async deleteChartIfUnused(id: string) {
+    return this.db.transaction(async (tx) => {
+      const row = (await tx.query<Row>("SELECT daily FROM chart_facts WHERE id = $1", [id]))
+        .rows[0];
+      if (!row || row.daily != null) return false;
+      const read = await tx.query(
+        "SELECT 1 FROM reports WHERE chart_fact_id = $1 UNION ALL SELECT 1 FROM life_reports WHERE chart_fact_id = $1 LIMIT 1",
+        [id],
+      );
+      if (read.rows.length) return false;
+      return (
+        ((await tx.query("DELETE FROM chart_facts WHERE id = $1", [id])).affectedRows ?? 0) > 0
+      );
+    });
+  }
+
   async listHeld() {
     const held = async <T>(table: string) => {
       // The statuses inline: PGlite sends a JS array for an enum array as "a,b", which PostgreSQL refuses.

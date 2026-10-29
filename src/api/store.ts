@@ -143,6 +143,12 @@ export interface Store {
   getFollowUp(id: string): Promise<FollowUpRecord | undefined>;
   /** A reading's 追问, oldest first. */
   listFollowUps(parentId: string): Promise<FollowUpRecord[]>;
+  /** 删除 (v8.0.0): one reading with its 破除運勢 plans and its 追问. Counts for the receipt. */
+  deleteReport(id: string): Promise<{ reports: number; remedies: number; followups: number }>;
+  /** 删除 (v8.0.0): one 一生运势报告 with its 追问. */
+  deleteLifeReport(id: string): Promise<{ life_reports: number; followups: number }>;
+  /** A chart, unless a reading or a 一生运势报告 still reads it, or it is a 每日一牌's; true when it went. */
+  deleteChartIfUnused(id: string): Promise<boolean>;
   /** Account deletion: remove everything the user owns. Returns counts for the receipt. */
   deleteOwnerData(owner: string): Promise<{
     charts: number;
@@ -192,6 +198,31 @@ export class InMemoryStore implements Store {
       [...this.followUps.values()].filter((f) => f.parent.id === parentId),
       100,
     ).reverse();
+  }
+  private dropFollowUps(parentId: string) {
+    let n = 0;
+    for (const [id, f] of this.followUps)
+      if (f.parent.id === parentId && this.followUps.delete(id)) n++;
+    return n;
+  }
+  async deleteReport(id: string) {
+    let remedies = 0;
+    for (const [k, r] of this.remedies)
+      if (r.report_id === id && this.remedies.delete(k)) remedies++;
+    const followups = this.dropFollowUps(id);
+    return { reports: this.reports.delete(id) ? 1 : 0, remedies, followups };
+  }
+  async deleteLifeReport(id: string) {
+    const followups = this.dropFollowUps(id);
+    return { life_reports: this.lifeReports.delete(id) ? 1 : 0, followups };
+  }
+  async deleteChartIfUnused(id: string) {
+    const chart = this.charts.get(id);
+    if (!chart || chart.daily) return false;
+    const read =
+      [...this.reports.values()].some((r) => r.chart_id === id) ||
+      [...this.lifeReports.values()].some((r) => r.chart_id === id);
+    return !read && this.charts.delete(id);
   }
   async putLifeReport(r: LifeReportRecord) {
     this.lifeReports.set(r.id, structuredClone(r));

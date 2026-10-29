@@ -55,6 +55,8 @@ class _FengshuiPageState extends ConsumerState<FengshuiPage> {
         'system': 'fengshui',
         'room': _room,
         'facing': ?_facing,
+        // Whose reading it is, for 以往记录 (v8.0.0).
+        ...readerPerson(ref.read(profilesProvider).value),
       });
       if (!mounted) return;
       setState(() {

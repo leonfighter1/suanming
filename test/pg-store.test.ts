@@ -170,6 +170,41 @@ const kinds: [
 
 describe.each(kinds)("the store contract, %s", (_name, make) => {
   it(
+    "deletes one record with what hangs off it, and a chart only once nothing reads it (v8.0.0)",
+    async () => {
+      const { store, users, close } = await make();
+      const owner = randomUUID();
+      await users.put(user(owner, "del@example.com"));
+      const r = records(owner);
+      await fill(store, r);
+      // The chart is read by the reading and the 一生运势报告: it stays until both are gone.
+      expect(await store.deleteReport(r.reading.id)).toEqual({
+        reports: 1,
+        remedies: 1,
+        followups: 1,
+      });
+      expect(await store.getReport(r.reading.id)).toBeUndefined();
+      expect(await store.getRemedy(r.plan.id)).toBeUndefined();
+      expect(await store.getFollowUp(r.ask.id)).toBeUndefined();
+      expect(await store.deleteChartIfUnused(r.chart.id)).toBe(false);
+      expect(await store.deleteLifeReport(r.life.id)).toEqual({ life_reports: 1, followups: 0 });
+      expect(await store.deleteChartIfUnused(r.chart.id)).toBe(true);
+      expect(await store.getChart(r.chart.id)).toBeUndefined();
+      // A 每日一牌 is never removed this way; nor is a chart that isn't there.
+      expect(await store.deleteChartIfUnused(r.daily.id)).toBe(false);
+      expect(await store.getChart(r.daily.id)).toEqual(r.daily);
+      expect(await store.deleteChartIfUnused(randomUUID())).toBe(false);
+      expect(await store.deleteReport(randomUUID())).toEqual({
+        reports: 0,
+        remedies: 0,
+        followups: 0,
+      });
+      await close();
+    },
+    PG,
+  );
+
+  it(
     "keeps every record as it was put, and replaces it when put again",
     async () => {
       const { store, users, close } = await make();

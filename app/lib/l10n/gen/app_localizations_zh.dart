@@ -1715,6 +1715,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get followUpStartLife2 => '命爻对我的工作意味着什么？';
+
+  @override
+  String get followUpAsked => '问：';
+
+  @override
+  String get archiveByTime => '按时间';
+
+  @override
+  String get archiveByPerson => '按人';
+
+  @override
+  String archiveYear(int year) {
+    return '$year 年';
+  }
+
+  @override
+  String archiveMonth(int month) {
+    return '$month 月';
+  }
+
+  @override
+  String get archiveUnfiled => '未归类';
+
+  @override
+  String archiveCount(int n) {
+    return '$n 条';
+  }
+
+  @override
+  String get archiveSelect => '选择';
+
+  @override
+  String archiveSelected(int n) {
+    return '已选 $n 项';
+  }
+
+  @override
+  String get archiveSelectAll => '全选';
+
+  @override
+  String get archiveSend => '发送';
+
+  @override
+  String get archiveDelete => '删除';
+
+  @override
+  String get archiveDownloadPdf => '下载 PDF';
+
+  @override
+  String get archiveDownloadWord => '下载 Word';
+
+  @override
+  String get archiveFile => '归类到…';
+
+  @override
+  String get archiveFormatTitle => '选择文档格式';
+
+  @override
+  String get archiveFormatPdf => 'PDF';
+
+  @override
+  String get archiveFormatWord => 'Word 文档';
+
+  @override
+  String get archiveDeleteTitle => '删除这些记录？';
+
+  @override
+  String archiveDeleteBody(int n) {
+    return '将删除 $n 条记录，连同它们的追问和破除运势方案。删除后无法恢复。';
+  }
+
+  @override
+  String archiveDeleted(int n) {
+    return '已删除 $n 条记录';
+  }
+
+  @override
+  String get archiveFileHint => '其他名字';
+
+  @override
+  String get archiveFileNone => '不归类';
+
+  @override
+  String get archiveWorking => '正在生成文档…';
+
+  @override
+  String get archiveNotReady => '只有已完成的记录能下载或发送';
+
+  @override
+  String get archiveDocFailed => '文档没能生成，请稍后再试';
+
+  @override
+  String get archiveMethod => '类型';
+
+  @override
+  String get archiveTime => '时间';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3427,4 +3523,100 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get followUpStartLife2 => '命爻對我的工作意味著什麼？';
+
+  @override
+  String get followUpAsked => '問：';
+
+  @override
+  String get archiveByTime => '按時間';
+
+  @override
+  String get archiveByPerson => '按人';
+
+  @override
+  String archiveYear(int year) {
+    return '$year 年';
+  }
+
+  @override
+  String archiveMonth(int month) {
+    return '$month 月';
+  }
+
+  @override
+  String get archiveUnfiled => '未歸類';
+
+  @override
+  String archiveCount(int n) {
+    return '$n 條';
+  }
+
+  @override
+  String get archiveSelect => '選擇';
+
+  @override
+  String archiveSelected(int n) {
+    return '已選 $n 項';
+  }
+
+  @override
+  String get archiveSelectAll => '全選';
+
+  @override
+  String get archiveSend => '發送';
+
+  @override
+  String get archiveDelete => '刪除';
+
+  @override
+  String get archiveDownloadPdf => '下載 PDF';
+
+  @override
+  String get archiveDownloadWord => '下載 Word';
+
+  @override
+  String get archiveFile => '歸類到…';
+
+  @override
+  String get archiveFormatTitle => '選擇文件格式';
+
+  @override
+  String get archiveFormatPdf => 'PDF';
+
+  @override
+  String get archiveFormatWord => 'Word 文件';
+
+  @override
+  String get archiveDeleteTitle => '刪除這些記錄？';
+
+  @override
+  String archiveDeleteBody(int n) {
+    return '將刪除 $n 條記錄，連同它們的追問和破除運勢方案。刪除後無法恢復。';
+  }
+
+  @override
+  String archiveDeleted(int n) {
+    return '已刪除 $n 條記錄';
+  }
+
+  @override
+  String get archiveFileHint => '其他名字';
+
+  @override
+  String get archiveFileNone => '不歸類';
+
+  @override
+  String get archiveWorking => '正在生成文件…';
+
+  @override
+  String get archiveNotReady => '只有已完成的記錄能下載或發送';
+
+  @override
+  String get archiveDocFailed => '文件沒能生成，請稍後再試';
+
+  @override
+  String get archiveMethod => '類型';
+
+  @override
+  String get archiveTime => '時間';
 }

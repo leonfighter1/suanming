@@ -43,7 +43,11 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final chart = await ref.read(apiClientProvider).createChart({'system': 'qiuqian'});
+      final chart = await ref.read(apiClientProvider).createChart({
+        'system': 'qiuqian',
+        // Whose reading it is, for 以往记录 (v8.0.0).
+        ...readerPerson(ref.read(profilesProvider).value),
+      });
       if (!mounted) return; // left the page meanwhile
       setState(() {
         _chart = chart;

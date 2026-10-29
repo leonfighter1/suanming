@@ -12,6 +12,58 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v8.0.0 (2026-10-28): 以往记录 — by month and by person; Word and PDF; send; file under a person; delete
+
+Stage S14 of the [tech plan](docs/tech-plan.md) is complete (its summary is there): your request for organising,
+downloading, sending and deleting past records. A big update: pushed.
+
+- **History (历史记录) is now an archive of every reading and 一生运势报告.**
+  - **按时间:** years, then months, newest first. 一生运势报告 now sit among the readings by date, not above them.
+  - **按人:** one group per person, with the person whose latest record is newest first. Records filed under
+    nobody come last, under 未归类.
+  - Up to 100 readings are listed.
+- **Whose record it is:**
+  - a 八字 or 一生运势 record: its chart's person;
+  - a new 塔罗, 求签, 算卦 or 风水 reading: your default profile at the time;
+  - 起名: its 八字 chart's person.
+  - **归类到…** in a record's menu files it under one of your profiles, a name you type, or nobody. This also gives
+    older records back a name.
+- **Each record's ⋮ menu:**
+  - **下载 PDF** and **下载 Word**: the whole record as a document, the same as on screen. Its chart summary, the
+    reading in three parts (term, commentary, example), the actions and the 追问 are all there. The AI label and the
+    disclaimer come at the end, as on every export.
+  - **发送**: asks PDF or Word, then opens the share sheet. On a phone you can send to WeChat, mail and so on. A
+    computer's browser that can't share files downloads them instead.
+  - **删除**: asks first, because it can't be undone. The reading goes with its 破除运势 plans and its 追问, and its
+    chart too once nothing else reads it.
+- **选择** (top right, or a long press on a record): tick several, then 下载, 发送 or 删除 all of them from the bar at
+  the bottom.
+- **Also:** the reading page's ⋮ and the 一生运势 page's 下载 offer PDF and Word too.
+- **How the files are made:**
+  - The server renders them from what the app shows. Nothing is kept on the server.
+  - The PDF carries the server's Chinese font, so it reads the same anywhere; about 85 KB for a reading.
+  - The Word file uses Word's own font (Microsoft YaHei).
+  - PDF needs a Chinese font on the server, as share images do: on this computer it finds Noto Sans SC.
+  - I tested three PDF libraries' handling of Chinese before choosing. One would have produced PDFs with blank
+    Chinese text.
+- Verified:
+  - 13 new server tests:
+    - documents: their checks, Word and PDF, a font collection's face;
+    - deleting: a reading with its plans and 追问, a 一生运势报告, a chart kept while another record reads it, and a
+      reading deleted mid-generation, in both stores;
+    - filing and clearing a person, and 起名 taking its 八字 chart's person.
+  - 10 new app tests:
+    - the two views and their order;
+    - one download as PDF;
+    - several sent as Word;
+    - deleting (cancelled, then confirmed);
+    - filing under a typed name;
+    - a record not finished;
+    - the reading and 一生运势 menus;
+    - the keyboard.
+  - I looked at a PDF rendered with every kind of block, over two pages.
+  - All 528 server tests and 175 app tests pass; harness PASS.
+
 ### v7.0.0 (2026-10-28): 追问, follow-up questions on every reading, answered from that reading alone
 
 Stage S13 of the [tech plan](docs/tech-plan.md) is complete (its summary is there): your request for 追问 on every

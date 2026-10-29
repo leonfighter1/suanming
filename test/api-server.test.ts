@@ -245,7 +245,7 @@ describe("history and live progress", () => {
     expect((await get(`/v1/charts/${chart_id}`, H("HK", "someone-else"))).status).toBe(404);
   });
 
-  it("checks a chart's person: text only, cut to length, birth charts only", async () => {
+  it("checks a chart's person: text only, cut to length, a birthplace for birth charts only", async () => {
     const h = H("HK", "person-checks");
     const long = await (
       await post("/v1/charts", { ...bazi, person: { name: "名".repeat(50), birthplace: " " } }, h)
@@ -256,12 +256,20 @@ describe("history and live progress", () => {
     expect(none).not.toHaveProperty("person");
     expect((await post("/v1/charts", { ...bazi, person: { name: 7 } }, h)).status).toBe(400);
     expect((await post("/v1/charts", { ...bazi, person: "徐梅" }, h)).status).toBe(400);
+    // Since v8.0.0 (以往记录 by person) any chart may name its person; only a birth chart has a birthplace.
     const tarot = await post(
       "/v1/charts",
       { system: "tarot", spread: "single", person: { name: "徐梅" } },
       h,
     );
-    expect(tarot.status).toBe(400);
+    expect(tarot.status).toBe(201);
+    expect((await tarot.json()).person).toEqual({ name: "徐梅" });
+    const placed = await post(
+      "/v1/charts",
+      { system: "tarot", spread: "single", person: { name: "徐梅", birthplace: "上海" } },
+      h,
+    );
+    expect(placed.status).toBe(400);
   });
 
   it("a pending report exposes the stage the pipeline is in", async () => {

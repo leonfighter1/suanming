@@ -51,6 +51,18 @@ extension ApiLabels on AppLocalizations {
         _ => h,
       };
 
+  /// A method's name, as the home page names it; `life` is the 一生运势报告 (v8.0.0).
+  String methodLabel(String system) => switch (system) {
+        'bazi' => homeBazi,
+        'tarot' => homeTarot,
+        'qiuqian' => homeQiuqian,
+        'liuyao' => homeLiuyao,
+        'fengshui' => homeFengshui,
+        'naming' => homeNaming,
+        'life' => kindLife,
+        _ => system,
+      };
+
   /// 追问's first questions per method (v7.0.0), offered before anything is asked; `life` is the 一生运势报告.
   List<String> followUpStarters(String? system) => switch (system) {
         'bazi' => [followUpStartBazi1, followUpStartBazi2],

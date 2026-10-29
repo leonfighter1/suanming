@@ -119,6 +119,11 @@ class FakeApi {
 
   /// Asking answers with this problem instead, e.g. {'status': 409, 'code': 'followup_pending'}.
   Map<String, dynamic>? followUpError;
+
+  /// 以往记录 (v8.0.0): the documents asked for, the records deleted and the charts filed under a person.
+  final documents = <Map<String, dynamic>>[];
+  final deleted = <String>[];
+  final filed = <String, String>{};
   int _tokenSerial = 0;
   String access = 'access-0';
 
@@ -205,7 +210,9 @@ class FakeApi {
       }
       return _json(fixture('review_report'), 200);
     }
-    if (req.method == 'GET' && path == '/v1/reports' && history != null) return _json({'items': history}, 200);
+    if (req.method == 'GET' && path == '/v1/reports' && history != null) {
+      return _json({'items': [for (final h in history!) if (!deleted.contains(h['report_id'])) _filedTo(h)]}, 200);
+    }
     if (req.method == 'GET' && path == '/v1/reports') {
       return _json({
         'items': [
@@ -283,6 +290,23 @@ class FakeApi {
       return _json(fixture('chart_fengshui'), 200);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
+    // 以往记录 (v8.0.0): a document's bytes (a PDF's or a zip's first bytes are enough); deleting; filing.
+    if (req.method == 'POST' && path == '/v1/documents') {
+      documents.add(jsonDecode(req.body) as Map<String, dynamic>);
+      final pdf = documents.last['format'] == 'pdf';
+      return http.Response.bytes(pdf ? utf8.encode('%PDF-1.7') : [0x50, 0x4b, 0x03, 0x04], 200);
+    }
+    final gone = RegExp(r'^/v1/(?:life-)?reports/([^/]+)$').firstMatch(path);
+    if (req.method == 'DELETE' && gone != null) {
+      deleted.add(gone.group(1)!);
+      return _json({'deleted': {'reports': 1, 'remedies': 0, 'followups': 0, 'charts': 1}}, 200);
+    }
+    final filing = RegExp(r'^/v1/charts/([^/]+)/person$').firstMatch(path);
+    if (req.method == 'POST' && filing != null) {
+      final name = (jsonDecode(req.body) as Map)['name'] as String;
+      filed[filing.group(1)!] = name;
+      return _json({'chart_id': filing.group(1), if (name.isNotEmpty) 'person': {'name': name}}, 200);
+    }
     // 追问 (v7.0.0): the list answers a pending one once its polls run out; asking adds a pending one.
     final asked = RegExp(r'^/v1/((?:life-)?reports/[^/]+)/followups$').firstMatch(path);
     if (asked != null && req.method == 'GET') {
@@ -322,7 +346,8 @@ class FakeApi {
       return _json({...fixture('life_passed'), 'status': 'pending', 'facts': null, 'layers': null}, 202);
     }
     if (req.method == 'GET' && path == '/v1/life-reports') {
-      return _json({'items': [{...fixture('life_passed'), 'facts': null, 'layers': null, 'person': ?person}]}, 200);
+      final life = {...fixture('life_passed'), 'facts': null, 'layers': null, 'person': ?person};
+      return _json({'items': [if (!deleted.contains(life['life_report_id'])) _filedTo(life)]}, 200);
     }
     if (req.method == 'GET' && path.startsWith('/v1/life-reports/')) {
       return _json({...fixture('life_passed'), 'person': ?person}, 200);
@@ -380,6 +405,13 @@ class FakeApi {
     }
     return _json({'title': 'not found', 'status': 404}, 404);
   });
+
+  /// A listed record with the person its chart was filed under since (归类到…, v8.0.0).
+  Map<String, dynamic> _filedTo(Map<String, dynamic> item) {
+    final name = filed[item['chart_id']];
+    if (name == null) return item;
+    return {...item}..['person'] = name.isEmpty ? null : {'name': name};
+  }
 
   static http.Response _json(Object body, int status) => http.Response.bytes(
         utf8.encode(jsonEncode(body)),

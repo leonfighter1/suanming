@@ -261,6 +261,17 @@ class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
 
   Future<void> setDefault(String id) => _save(_book.copyWith(defaultId: id));
 
+  /// 归类到… (v8.0.0): the chart's label on this device follows its person on the server; an empty name drops it.
+  Future<void> relabelChart(String chartId, String name) => _save(
+        _book.copyWith(
+          chartLabels: {
+            for (final e in _book.chartLabels.entries)
+              if (e.key != chartId) e.key: e.value,
+            if (name.isNotEmpty) chartId: name,
+          },
+        ),
+      );
+
   /// Remembers whose chart it is and where they were born (device only).
   Future<void> labelChart(String chartId, String name, {String? place}) => _save(_book.copyWith(
         chartLabels: {..._book.chartLabels, if (name.isNotEmpty) chartId: name},
@@ -270,10 +281,22 @@ class ProfilesNotifier extends AsyncNotifier<ProfileBook> {
 
 final profilesProvider = AsyncNotifierProvider<ProfilesNotifier, ProfileBook>(ProfilesNotifier.new);
 
+/// Whose reading a 塔罗, 求签, 算卦 or 风水 chart is (v8.0.0): the reader's default profile, so 以往记录 can file it by
+/// person. 归类到… in history moves it to someone else. Nothing when there is no profile yet.
+Map<String, Object?> readerPerson(ProfileBook? book) {
+  final name = book?.defaultProfile?.name.trim() ?? '';
+  return name.isEmpty
+      ? const {}
+      : {
+          'person': {'name': name},
+        };
+}
+
 // ---- history & calendar ----
 
+/// The readings of 以往记录: as many as the API lists (100, v8.0.0), for its months and people.
 final historyProvider = FutureProvider.autoDispose<List<HistoryItem>>(
-  (ref) => ref.watch(apiClientProvider).listReports(),
+  (ref) => ref.watch(apiClientProvider).listReports(limit: 100),
 );
 
 /// 農曆 equivalent and 時辰 list of a date (y-m-d only), for the pickers.

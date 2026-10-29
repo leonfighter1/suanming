@@ -3330,6 +3330,174 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'命爻对我的工作意味着什么？'**
   String get followUpStartLife2;
+
+  /// No description provided for @followUpAsked.
+  ///
+  /// In zh, this message translates to:
+  /// **'问：'**
+  String get followUpAsked;
+
+  /// No description provided for @archiveByTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'按时间'**
+  String get archiveByTime;
+
+  /// No description provided for @archiveByPerson.
+  ///
+  /// In zh, this message translates to:
+  /// **'按人'**
+  String get archiveByPerson;
+
+  /// No description provided for @archiveYear.
+  ///
+  /// In zh, this message translates to:
+  /// **'{year} 年'**
+  String archiveYear(int year);
+
+  /// No description provided for @archiveMonth.
+  ///
+  /// In zh, this message translates to:
+  /// **'{month} 月'**
+  String archiveMonth(int month);
+
+  /// No description provided for @archiveUnfiled.
+  ///
+  /// In zh, this message translates to:
+  /// **'未归类'**
+  String get archiveUnfiled;
+
+  /// No description provided for @archiveCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{n} 条'**
+  String archiveCount(int n);
+
+  /// No description provided for @archiveSelect.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择'**
+  String get archiveSelect;
+
+  /// No description provided for @archiveSelected.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选 {n} 项'**
+  String archiveSelected(int n);
+
+  /// No description provided for @archiveSelectAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'全选'**
+  String get archiveSelectAll;
+
+  /// No description provided for @archiveSend.
+  ///
+  /// In zh, this message translates to:
+  /// **'发送'**
+  String get archiveSend;
+
+  /// No description provided for @archiveDelete.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除'**
+  String get archiveDelete;
+
+  /// No description provided for @archiveDownloadPdf.
+  ///
+  /// In zh, this message translates to:
+  /// **'下载 PDF'**
+  String get archiveDownloadPdf;
+
+  /// No description provided for @archiveDownloadWord.
+  ///
+  /// In zh, this message translates to:
+  /// **'下载 Word'**
+  String get archiveDownloadWord;
+
+  /// No description provided for @archiveFile.
+  ///
+  /// In zh, this message translates to:
+  /// **'归类到…'**
+  String get archiveFile;
+
+  /// No description provided for @archiveFormatTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择文档格式'**
+  String get archiveFormatTitle;
+
+  /// No description provided for @archiveFormatPdf.
+  ///
+  /// In zh, this message translates to:
+  /// **'PDF'**
+  String get archiveFormatPdf;
+
+  /// No description provided for @archiveFormatWord.
+  ///
+  /// In zh, this message translates to:
+  /// **'Word 文档'**
+  String get archiveFormatWord;
+
+  /// No description provided for @archiveDeleteTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除这些记录？'**
+  String get archiveDeleteTitle;
+
+  /// No description provided for @archiveDeleteBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'将删除 {n} 条记录，连同它们的追问和破除运势方案。删除后无法恢复。'**
+  String archiveDeleteBody(int n);
+
+  /// No description provided for @archiveDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已删除 {n} 条记录'**
+  String archiveDeleted(int n);
+
+  /// No description provided for @archiveFileHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'其他名字'**
+  String get archiveFileHint;
+
+  /// No description provided for @archiveFileNone.
+  ///
+  /// In zh, this message translates to:
+  /// **'不归类'**
+  String get archiveFileNone;
+
+  /// No description provided for @archiveWorking.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在生成文档…'**
+  String get archiveWorking;
+
+  /// No description provided for @archiveNotReady.
+  ///
+  /// In zh, this message translates to:
+  /// **'只有已完成的记录能下载或发送'**
+  String get archiveNotReady;
+
+  /// No description provided for @archiveDocFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'文档没能生成，请稍后再试'**
+  String get archiveDocFailed;
+
+  /// No description provided for @archiveMethod.
+  ///
+  /// In zh, this message translates to:
+  /// **'类型'**
+  String get archiveMethod;
+
+  /// No description provided for @archiveTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间'**
+  String get archiveTime;
 }
 
 class _AppLocalizationsDelegate

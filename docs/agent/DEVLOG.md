@@ -2,6 +2,32 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (al): S14 以往记录 — by month and person, Word / PDF, send, file, delete; release v8.0.0
+
+- **Owner request:** 以往记录 can be organised, downloaded, sent and deleted; downloads make Word and PDF; 发送 sends the
+  selected; everything by year and month, newest first; and by person when readings were done for several people.
+  - Rule 34: no earlier owner decision. Planned as S14 (WP14.1–14.3), one release.
+- WP14.1:
+  - the app builds a neutral document (it already builds the copy and Markdown of a reading and a 一生运势报告);
+  - `POST /v1/documents` renders it: Word with `docx` 9.8.1, PDF with PDFKit 0.19.1 and the server's Chinese font as
+    a subset;
+  - measured first (G4): pdf-lib + fontkit drew no Chinese glyphs from the OTF, some from the VF and failed on the
+    TTC; PDFKit drew all three, 24–64 KB. pdf-lib was removed;
+  - `docx` 9.15.0 was a day old, so 9.8.1 is pinned. `npm audit` was clean after each step;
+  - looked at the PDF rendered (every block, two pages).
+- WP14.2:
+  - `DELETE /v1/reports/{id}` and `DELETE /v1/life-reports/{id}`, with their plans and 追问, and the chart once nothing
+    reads it (never a 每日一牌's). This is a store contract on both stores;
+  - `POST /v1/charts/{id}/person` (归类到…) sets or clears a name and keeps a birthplace;
+  - any chart may now name its person; 塔罗, 求签, 算卦 and 风水 charts carry the default profile name (`readerPerson`),
+    and 起名 its 八字 chart's person;
+  - the server's person now comes before the device label.
+- WP14.3: the history page rewritten (`domain/archive.dart`, `presentation/archive_actions.dart`):
+  - 按时间 / 按人, a ⋮ menu per record, 选择 with a bottom bar;
+  - PDF / Word on the reading page and the 一生运势 page.
+- Tests: server 515 → 528 (documents, delete, filing, 起名, the store contract); app 165 → 175 (views and order,
+  download, multi-send, delete, filing, not ready, the reading and 一生运势 menus, keyboard).
+
 ## 2026-10-28 (ak): S13 complete, 追问 on every reading (WP13.2–13.3); release v7.0.0
 
 - WP13.2, the server:
