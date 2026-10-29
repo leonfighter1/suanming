@@ -565,5 +565,7 @@
   "archiveNotReady": "只有已完成的記錄能下載或發送",
   "archiveDocFailed": "文件沒能生成，請稍後再試",
   "archiveMethod": "類型",
-  "archiveTime": "時間"
+  "archiveTime": "時間",
+  "menu": "選單",
+  "settingsAccountGroup": "帳戶與登入"
 }

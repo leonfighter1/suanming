@@ -52,6 +52,17 @@ Future<void> openEntry(WidgetTester tester, String system) async {
   await tester.tap(find.byKey(Key('entry-$system')));
 }
 
+/// On the home page, open the ☰ menu (v8.1.0) and tap [key] in it: 个人资料, 语言, 设置, 内容审核 and the rest
+/// live there. The caller pumps for whatever the tap opens.
+Future<void> openFromMenu(WidgetTester tester, String key) async {
+  await tester.tap(find.byKey(const Key('open-menu')));
+  // The drawer slides in (about 250 ms).
+  for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  await tester.tap(find.byKey(Key(key)));
+}
+
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
 /// fixtures; reports go pending → [finalReport].
 class FakeApi {

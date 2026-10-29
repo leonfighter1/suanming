@@ -30,7 +30,7 @@ void main() {
     expect(find.text('你好，测试用户'), findsOneWidget);
     expect(supportedAppLocales.first, zhHans);
 
-    await tester.tap(find.byKey(const Key('language-menu')));
+    await openFromMenu(tester, 'language-menu');
     await settle(tester);
     final labels = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data).whereType<String>().toList();
     expect(labels.indexOf('简体中文'), lessThan(labels.indexOf('繁體中文')));
@@ -67,7 +67,7 @@ void main() {
     await tester.pumpWidget(testApp(api, locale: null, settings: store));
     await settle(tester);
     expect(find.text('八字排盘'), findsWidgets);
-    await tester.tap(find.byKey(const Key('language-menu')));
+    await openFromMenu(tester, 'language-menu');
     await settle(tester);
     await tester.tap(find.byKey(const Key('language-zh-Hant')));
     await settle(tester);
@@ -79,7 +79,10 @@ void main() {
     await settle(tester);
     expect(find.text('八字排盤'), findsWidgets);
     expect(find.text('八字排盘'), findsNothing);
-    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁');
+    // The ☰ menu (v8.1.0) shows the language it started in.
+    await tester.tap(find.byKey(const Key('open-menu')));
+    await settle(tester);
+    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁體中文');
   });
 
   testWidgets('without a saved language, or without storage, the app starts in 简体中文', (tester) async {
@@ -91,10 +94,10 @@ void main() {
     // Picking a language where it can't be saved still switches it.
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null, settings: _BrokenStore()));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('language-menu')));
+    await openFromMenu(tester, 'language-menu');
     await settle(tester);
     await tester.tap(find.byKey(const Key('language-zh-Hant')));
     await settle(tester);
-    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁');
+    expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁體中文');
   });
 }

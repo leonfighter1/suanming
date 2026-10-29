@@ -1811,6 +1811,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get archiveTime => '时间';
+
+  @override
+  String get menu => '菜单';
+
+  @override
+  String get settingsAccountGroup => '账号与登录';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3619,4 +3625,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get archiveTime => '時間';
+
+  @override
+  String get menu => '選單';
+
+  @override
+  String get settingsAccountGroup => '帳戶與登入';
 }

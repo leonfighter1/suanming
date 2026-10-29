@@ -25,9 +25,10 @@ void main() {
   testWidgets('only reviewers see 内容审核', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
     await settle(tester);
-    await tester.tap(find.byKey(const Key('open-settings')));
+    // 内容审核 sits in the ☰ menu (v8.1.0), beside 设置: a positive anchor, then its absence (rule 43).
+    await tester.tap(find.byKey(const Key('open-menu')));
     await settle(tester);
-    expect(find.text('邮箱'), findsOneWidget);
+    expect(find.byKey(const Key('open-settings')), findsOneWidget);
     expect(find.byKey(const Key('open-review')), findsNothing);
   });
 
@@ -39,9 +40,7 @@ void main() {
     await tester.pumpWidget(testApp(api, locale: zhHans));
     await settle(tester);
 
-    await tester.tap(find.byKey(const Key('open-settings')));
-    await settle(tester);
-    await tester.tap(find.byKey(const Key('open-review')));
+    await openFromMenu(tester, 'open-review');
     await settle(tester);
     expect(find.text('内容审核'), findsOneWidget);
 

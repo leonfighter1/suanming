@@ -53,15 +53,14 @@ void main() {
     testWidgets('home: Tab goes along the bar, then the entries; the focused card shows the ring', (tester) async {
       await start(tester);
       final stops = <String?>[];
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 8; i++) {
         await press(tester, LogicalKeyboardKey.tab);
         stops.add(focusedKey());
       }
       expect(stops, [
+        // The bar (v8.1.0): ☰, then 历史记录; the rest is in the menu.
+        'open-menu',
         'open-history',
-        'open-profiles',
-        'language-menu',
-        'open-settings',
         // 東方 (owner, v6.1.0), in the region's order: the default here.
         'entry-bazi',
         'entry-qiuqian', // 求籤 (v4.3.0)
@@ -291,6 +290,7 @@ void main() {
 
     testWidgets('profile editor: untouched Esc goes back; after an edit it asks; Ctrl+Enter saves', (tester) async {
       await start(tester);
+      await tapAndWait(tester, find.byKey(const Key('open-menu')));
       await tapAndWait(tester, find.byKey(const Key('open-profiles')));
       final person = find.byType(CircleAvatar).first;
       await tapAndWait(tester, person);
@@ -307,14 +307,17 @@ void main() {
       expect(find.text('新名字'), findsOneWidget);
     });
 
-    testWidgets('设置 lists the keyboard shortcuts too', (tester) async {
+    testWidgets('the ☰ menu lists the keyboard shortcuts too', (tester) async {
       await start(tester);
-      await tapAndWait(tester, find.byKey(const Key('open-settings')));
+      await tapAndWait(tester, find.byKey(const Key('open-menu')));
       await tapAndWait(tester, find.byKey(const Key('open-shortcuts')));
       expect(find.byKey(const Key('shortcut-list')), findsOneWidget);
       expect(find.text('键盘快捷键'), findsWidgets);
+      // The menu closed before the list opened: Esc closes the list and leaves 首页 as it was.
+      expect(find.byKey(const Key('app-menu')), findsNothing);
       await press(tester, LogicalKeyboardKey.escape);
       expect(find.byKey(const Key('shortcut-list')), findsNothing);
+      expect(home, findsOneWidget);
       await press(tester, LogicalKeyboardKey.escape);
       expect(home, findsOneWidget);
     });

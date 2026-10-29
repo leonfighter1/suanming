@@ -29,7 +29,7 @@ Where things are:
 | Esc                                               | back one level: an open dropdown or menu, then a dialog, then the page. A `LeaveGuard` asks first. Nothing on 首页. |
 | ← / →                                             | option rows (`SegmentKeys`), chart periods, the 大运 / 流年 strips; Home / End jump to the ends                     |
 | Ctrl+Enter (⌘+Enter)                              | the page's main button (`SubmitShortcut`): 登录, 排盘, 保存                                                         |
-| Ctrl+/ (⌘/), or ? outside a text field            | the 键盘快捷键 list (also 设置 → 键盘快捷键)                                                                        |
+| Ctrl+/ (⌘/), or ? outside a text field            | the 键盘快捷键 list (also ☰ → 键盘快捷键)                                                                          |
 | Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W/T/L, F5, Alt+←/→ | the browser's own. Never bind them: Chrome doesn't pass Ctrl+Tab to a page at all.                                  |
 
 ## Building blocks: reuse, don't re-implement

@@ -1,11 +1,11 @@
 {
-  "name": "mingli_app",
-  "short_name": "mingli_app",
+  "name": "命理大师",
+  "short_name": "命理大师",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0175C2",
-  "theme_color": "#0175C2",
-  "description": "命理大師 App",
+  "background_color": "#8A3B2E",
+  "theme_color": "#8A3B2E",
+  "description": "命理大师",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [

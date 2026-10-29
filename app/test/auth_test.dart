@@ -90,8 +90,8 @@ void main() {
     final tokens = InMemoryTokenStore(Tokens(api.access, 'refresh-0'));
     await tester.pumpWidget(testApp(api, tokens: tokens));
     await settle(tester);
-    // The gear opens 設定 directly, with the account in it.
-    await tester.tap(find.byKey(const Key('open-settings')));
+    // 設定 is in the ☰ menu (v8.1.0), with the account in it.
+    await openFromMenu(tester, 'open-settings');
     await settle(tester);
     expect(find.widgetWithText(AppBar, '設定'), findsOneWidget);
     expect(find.text('me@example.com'), findsOneWidget);

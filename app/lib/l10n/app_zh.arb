@@ -861,5 +861,7 @@
   "archiveNotReady": "只有已完成的记录能下载或发送",
   "archiveDocFailed": "文档没能生成，请稍后再试",
   "archiveMethod": "类型",
-  "archiveTime": "时间"
+  "archiveTime": "时间",
+  "menu": "菜单",
+  "settingsAccountGroup": "账号与登录"
 }

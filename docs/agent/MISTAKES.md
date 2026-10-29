@@ -57,8 +57,15 @@
 53. Give every child an AnimatedSwitcher can show its own key, whenever two of them can follow each other: two unkeyed children at once are duplicate keys. Test a page along every way users reach it (from history as well as right after making it).
 54. Run npx prettier --check . as the very last step before the harness, after the final edit to any Markdown, YAML or TypeScript file; a check made before a later edit proves nothing about it.
 55. A floating control must never cover what it leads to: hide it (out of the hit test and the Tab order too) while its target is on screen, and test the target with hitTestable after opening it at a phone size. When code both scrolls to a field and focuses it, await the scroll first.
+56. The Write/Edit tools turn a \uXXXX in new_string or content into the character itself. For a literal \u escape, use numeric code units instead, or build it in a script with String.fromCharCode(92), and check the bytes afterwards (od -c, or a test).
 
 ## Log
+
+### 2026-10-28: Edit tool decoded \u escapes (meant for the global list: access denied)
+- **Symptom:** A C++ title written as L\u547D\u7406\u5927\u5E08 through the Edit tool landed in main.cpp as the raw UTF-8 characters.
+- **Root cause:** The Write/Edit tools decode a \uXXXX sequence in the text they are given; a double backslash survives.
+- **Fix:** Wrote the title as UTF-16 code units, {0x547D, 0x7406, 0x5927, 0x5E08, 0}, so the file stays ASCII; test/app-icons.test.ts checks it.
+- **Rule:** The Write/Edit tools turn a \uXXXX in new_string or content into the character itself. For a literal \u escape, use numeric code units instead, or build it in a script with String.fromCharCode(92), and check the bytes afterwards (od -c, or a test). (Rule 56)
 
 ### 2026-10-28: A floating button over the controls it leads to
 - **Symptom:** On a 412x900 phone the floating 继续追问 sat on top of the 发送 button it had just scrolled into view, so a tap went to the floating button (v7.0.0, found by a hitTestable check).

@@ -27,7 +27,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"mingli_app", origin, size)) {
+  // The app's name (U+547D U+7406 U+5927 U+5E08) as UTF-16 code units: this file stays ASCII, since
+  // the compiler reads it in the system code page and the build treats its warnings as errors.
+  const wchar_t kTitle[] = {0x547D, 0x7406, 0x5927, 0x5E08, 0};
+  if (!window.Create(kTitle, origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

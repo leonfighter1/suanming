@@ -4,12 +4,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
-import 'keyboard.dart';
-import 'review_page.dart';
 import 'sign_in_page.dart';
 
-/// 设置, behind the gear on the home bar: the account, 内容审核 for reviewers,
-/// sign-out and deletion. 个人资料 and 语言 sit on the bar itself.
+/// A group's heading in 设置 (账号与登录, 报告), read out as a heading.
+class SettingsGroup extends StatelessWidget {
+  const SettingsGroup(this.title, {super.key});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.xs),
+      child: Semantics(
+        header: true,
+        child: Text(title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
+      ),
+    );
+  }
+}
+
+/// 设置, in the ☰ menu (v8.1.0): the account and how it signs in, then sign-out and deletion, in groups.
+/// 个人资料, 语言, 内容审核 and 键盘快捷键 are in the menu itself.
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
@@ -54,37 +70,13 @@ class SettingsPage extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.xs),
-            child: Text(l10n.account, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
-          ),
+          SettingsGroup(l10n.settingsAccountGroup, key: const Key('settings-account')),
           ListTile(title: Text(l10n.email), subtitle: Text(user.email ?? '—')),
           ListTile(
             title: Text(l10n.regionAccount),
             subtitle: Text(signupRegions[user.country]?[locale] ?? user.country),
           ),
           ListTile(title: Text(l10n.signInMethods), subtitle: Text(user.signInMethods.join(', '))),
-          // 内容审核: reviewers only (the server decides who is one).
-          if (user.isReviewer) ...[
-            const Divider(),
-            ListTile(
-              key: const Key('open-review'),
-              leading: const Icon(Icons.fact_check_outlined),
-              title: Text(l10n.reviewTitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ReviewPage())),
-            ),
-          ],
-          const Divider(),
-          // The keyboard list is also behind Ctrl+/ (or ?) on every page.
-          ListTile(
-            key: const Key('open-shortcuts'),
-            leading: const Icon(Icons.keyboard_outlined),
-            title: Text(l10n.keysTitle),
-            subtitle: const Text('Ctrl + /'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showShortcutList(context),
-          ),
           const Divider(),
           ListTile(
             key: const Key('sign-out'),

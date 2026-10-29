@@ -12,6 +12,41 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v8.1.0 (2026-10-29): the ☰ menu, and an app icon
+
+The first two parts of stage S15 (your request: settings in one menu, an icon for the app). A medium update, kept
+locally until the stage's v9.0.0.
+
+- **The home bar is clean:** ☰ on the left, the title, and 历史记录 on the right.
+- **☰ opens the menu**, which holds everything that sat on the bar:
+  - at the top: the app icon, 命理大师 and the account you're signed in with;
+  - then 历史记录, 个人资料, 语言, 设置, 内容审核 (reviewers only), 键盘快捷键 and 退出登录.
+  - **语言** shows the current language, and a tap opens 简体中文 / 繁體中文 with the current one ticked.
+  - Each item closes the menu and opens its page.
+  - Keyboard: Tab reaches ☰ and Enter opens it. Tab then stays inside the menu, and Esc closes it.
+- **设置** now holds only settings, under 账号与登录: the account, its region and how it signs in, then 退出登录 and
+  注销账号. 内容审核 and 键盘快捷键 moved to the menu.
+- **The sign-in page keeps 语言 on its bar**, since there is no menu before you sign in.
+- **The app icon:** a 太极 inside the eight trigrams (先天八卦: 乾 at the top, 坤 at the bottom), gold on the app's
+  赭红.
+  - It is used everywhere: Android (with an adaptive icon for current phones), iOS, the web (the browser tab, the
+    installed app and the iPhone home screen) and Windows.
+  - At 32 px and below it shows the 太极 alone, so it stays clear on a browser tab.
+  - Under the icon the app is now called 命理大师 everywhere. It was "mingli_app", or "Mingli App" on iOS.
+  - One script draws every size: `npm run build:icons`. To change the icon, change the drawing in
+    `scripts/app-icons.ts` and run it.
+- **This reverses an earlier decision:** on 2026-10-27 you asked for 个人资料, 语言 and 设置 each to have its own button
+  on the bar.
+- Verified:
+  - 6 new server tests: every icon file at its size, opaque where iOS needs it, the Windows .ico, the trigram order
+    and the names.
+  - The app tests rewritten for the menu: the bar's two buttons, the menu's order, each item, 语言, 退出登录, the
+    keyboard (Tab stays inside, Esc closes), and both languages on a 360-wide phone. The tests that reached 设置,
+    个人资料, 内容审核 or 语言 now go through the menu.
+  - Looked at rendered with the real font: the bar, the menu and the 语言 dialog on a phone, and the icon at
+    16–1024 px.
+  - 534 server tests and 179 app tests pass; harness PASS.
+
 ### v8.0.0 (2026-10-28): 以往记录 — by month and by person; Word and PDF; send; file under a person; delete
 
 Stage S14 of the [tech plan](docs/tech-plan.md) is complete (its summary is there): your request for organising,

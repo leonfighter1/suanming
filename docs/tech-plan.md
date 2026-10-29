@@ -1399,6 +1399,114 @@ As built (v8.0.0):
   - selecting is a mode, entered by the toolbar button or a long press;
   - a record's menu is a PopupMenuButton, its checkbox a Checkbox, so Tab reaches both.
 
+## S15 菜单、图标、多种登录、报告发到邮箱 (big → v9.0.0)
+
+**Owner request (2026-10-28):**
+
+> 将各种设置放到breadcrum 菜单内，保证navigation干净。 同时给整个app一个合理的ICON。 同时还得做以下步骤，用户可以用用户名
+> 或者邮箱登录或者手机号登录，手机号需要绑定用户本人。另外每当一个算法AI 算完成后，可以选择给邮箱发送报告结果（当然也可以不
+> 用，这个可以再设置中默认， 默认为否，改为是后自动发送）。目前可以先把框架搭好，后面的设置可以慢慢来，包括手机号也是。至于需
+> 要用什么技术和工具做这些，我们留到下一步再做。 做完了 你可以push。
+
+Earlier decisions it touches (rule 34):
+
+- **2026-10-27 (b), owner:** 个人资料, 语言 and 设置 went straight onto the home bar, "instead of ⋮". This request
+  reverses that: the settings go into one menu.
+- **"breadcrum 菜单"** is read as the ☰ menu (often called a hamburger menu): one button that opens the list of pages
+  and settings. A breadcrumb trail holds no settings.
+- **Phase 3 gate, item 3:** the email list waits for consent wording and a mail provider. Report emails are not that
+  list. They go only to the account's own verified address, and only when its user turns them on.
+- **Which provider sends mail and SMS** waits for the owner (留到下一步). This stage builds the framework: the
+  interfaces, the flows and the settings, with a development outbox in place of a provider.
+
+### WP15.1 ☰ 菜单 (medium → v8.1.0)
+
+- **The home bar:** ☰, the title and 历史记录. The other buttons move into the menu.
+- **☰ opens a side menu** (a Drawer):
+  - a header with the app icon, the name and the signed-in account;
+  - 历史记录, 个人资料, 语言 (the current one shown; 简体中文 / 繁體中文), 设置, 内容审核 (reviewers only),
+    键盘快捷键 and 退出登录.
+- **设置 in groups:** 账号与登录, 报告, 其他, then 退出登录 and 注销账号.
+- **The sign-in page keeps 语言 on its bar:** there is no menu before signing in.
+- **Keyboard:** ☰ is a Tab stop and Enter opens it. Focus moves into the menu, Tab stays inside it, and Esc closes it.
+- **Tests:** the bar holds ☰ and 历史记录 only; each item opens its page; 语言 switches; Esc closes the menu; everything
+  fits a 360-wide phone.
+
+### WP15.2 App 图标 (with WP15.1 → v8.1.0)
+
+- **One source:** the drawing in `scripts/app-icons.ts`, a 太极 inside the eight trigrams, gold on the app's 赭红
+  accent. It is also written out as `app/assets/icon/icon.svg`.
+- **`npm run build:icons`** (scripts/build-icons.ts, with sharp) renders every size from it:
+  - Android's mipmaps;
+  - iOS's AppIcon set, opaque as Apple requires;
+  - the web favicon and the PWA icons, the maskable ones with their safe zone;
+  - Windows's app_icon.ico.
+- **Names:** under the icon the app is 命理大师, on Android, iOS, Windows and in the web manifest (it was mingli_app),
+  with the accent as the theme colour.
+- **The menu header** shows the same icon.
+- **Tests:** every output exists at its size, the ICO holds its sizes, and the names are set.
+
+As built (v8.1.0):
+
+- **The menu** is the home page's Drawer.
+  - Opening it adds a local history entry to the page, so the keyboard layer's Esc closes it with no new code, and
+    Flutter moves the focus into it.
+  - An item closes the menu first, then opens its page. 键盘快捷键 opens its list from the navigator.
+  - 语言 opens a small dialog with the current language ticked and focused.
+  - 内容审核 and 键盘快捷键 left 设置 for the menu. 退出登录 is in both: it ends 设置, as before.
+- **The icon:**
+  - 40 files from one drawing. iOS's set has 19 entries over 15 files, and each file is drawn once.
+  - Up to 32 px the drawing is the 太极 alone, which stays legible on a browser tab.
+  - Android gets an adaptive icon (a gradient background layer and a foreground in the safe zone) besides the legacy
+    one.
+  - The Windows title is written as UTF-16 code units, so main.cpp stays ASCII: the Edit tool turns a `\u` escape
+    into the character itself (rule 56).
+- **Looked at rendered**, with Noto Sans SC loaded: the bar, the menu (as a reviewer) and the 语言 dialog at 412×900,
+  and the icon at 16–1024 px.
+
+### WP15.3 用户名、邮箱或手机号登录 (medium → v8.2.0)
+
+- **Every account can have three identifiers.** Each is unique and works with the same password:
+  - a 用户名: 2–24 letters, digits, Han characters, `_ . -`, starting with a letter or a Han character;
+  - an email;
+  - a 手机号, which counts only once bound.
+- **Login** takes one field, 用户名 / 邮箱 / 手机号, and tells the three apart:
+  - with an @, it's an email;
+  - digits, or a leading +, make it a phone;
+  - anything else is a username.
+- **Binding proves the number is the user's own:**
+  - a 6-digit code goes to it, valid 10 minutes, 5 tries;
+  - sending is limited per account and per number;
+  - a number bound to another account is refused.
+  - An email is verified the same way; reports go only to a verified email.
+- **Delivery is a framework:** `MailTransport` and `SmsTransport`, with a development outbox for now.
+  - Every message is written to `.outbox/` (git-ignored): .eml files for mail, which open in any mail program.
+  - The console line names neither the address nor the content (security-baseline.md).
+  - The provider comes next step, from the owner's choice. Until then, the app says that codes and mail stay on
+    the server.
+- **Sign-up:** 用户名 and 密码, the email optional. A phone is bound later, in 设置.
+- **The dev accounts become usernames:** admin, xumei, qianli, wuyong and leonfighter. test@mingli.local stays an
+  email. An account seeded before keeps its records: its seed is moved over.
+- **Storage:**
+  - the username and the phone are sealed with the email under the account's key;
+  - HMAC lookups find them for login (migration 008);
+  - pending codes are kept in memory only, as hashes, and expire.
+- Data retention and OpenAPI are updated.
+
+### WP15.4 报告发到邮箱 (→ v9.0.0)
+
+- **The setting 测算完成后发到邮箱** is 否 by default, and can be turned on only with a verified email. When on:
+  - every reading, of any method, and every 一生运势报告 that passes is mailed to that address;
+  - the reading is in the message and attached as a PDF.
+  - Held, blocked and failed reports are never mailed.
+- **The server builds the automatic email's document** from the stored report's own layers. It renders the
+  document as the message (HTML and text) and as the PDF.
+- **Sending by hand:** 发到邮箱 in a record's menu and in the select bar sends the same PDF or Word file as 下载,
+  built by the app as for 下载 (`POST /v1/documents/email`).
+- **Each record notes its last mailing** (sent or failed, and when), and the reading page shows it. A failure is
+  logged and never retried on its own.
+- Lessons: rules 16, 17, 32, 36, 37, 42, 44, 52 and 54; G6.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
@@ -1832,3 +1940,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP14.1    | done                         | v8.0.0  |
 | WP14.2    | done                         | v8.0.0  |
 | WP14.3    | done                         | v8.0.0  |
+| WP15.1    | done                         | v8.1.0  |
+| WP15.2    | done                         | v8.1.0  |
+| WP15.3    | in progress                  | —       |
+| WP15.4    | planned                      | —       |

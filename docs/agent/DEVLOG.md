@@ -2,6 +2,34 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (a): S15 begun — the ☰ menu and the app icon; release v8.1.0
+
+- **Owner request (2026-10-28):**
+  - the settings go into a "breadcrum 菜单" so the navigation stays clean, and the app gets a reasonable icon;
+  - log in with a username, an email or a phone number, the phone bound to its owner;
+  - after every AI reading, the report can go to the user's email: a setting, 否 by default, sent automatically once
+    on;
+  - for now the framework; the technology and tools (mail and SMS providers) come next; push when done.
+  - Rule 34: it reverses the owner's 2026-10-27 (b) bar, where 个人资料, 语言 and 设置 each had a button.
+  - The Phase 3 gate's email list (consent, a provider) is a different thing: report mail goes only to the user's own
+    verified address, by their choice.
+  - "breadcrum 菜单" is read as the ☰ (hamburger) menu.
+  - Planned as S15 (WP15.1–15.4), ending in v9.0.0.
+- WP15.1 (v8.1.0): `AppMenu`, the home page's drawer.
+  - The bar now holds ☰, the title and 历史记录. The menu has the header (icon, name, account), then 历史记录, 个人资料,
+    语言 (a dialog), 设置, 内容审核, 键盘快捷键 and 退出登录.
+  - 设置 is grouped (`SettingsGroup`).
+  - Esc closes the drawer through the existing keyboard layer, since the drawer is a local history entry of the page.
+- WP15.2 (v8.1.0): `scripts/app-icons.ts` draws the icon (太极 in the 先天八卦, gold on #8A3B2E). `npm run build:icons`
+  writes 40 files: web, Android legacy plus adaptive, iOS (opaque), Windows .ico, and the menu's asset. The names
+  under the icon are now 命理大师.
+- Looked at rendered: the icon at 16–1024 px, and the bar, the menu and the 语言 dialog with Noto Sans SC loaded.
+- Mistake: the Edit tool turned `命…` into the characters themselves in main.cpp. The title is now written as
+  UTF-16 code units, and the file stays ASCII (rule 56, meant for the global list, which was read-only to this
+  session again).
+- Tests: server 528 → 534 (app-icons); app 175 → 179 (the top bar and menu tests rewritten; the tests that reached
+  设置, 个人资料, 内容审核 or 语言 go through `openFromMenu`).
+
 ## 2026-10-28 (al): S14 以往记录 — by month and person, Word / PDF, send, file, delete; release v8.0.0
 
 - **Owner request:** 以往记录 can be organised, downloaded, sent and deleted; downloads make Word and PDF; 发送 sends the

@@ -3498,6 +3498,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'时间'**
   String get archiveTime;
+
+  /// No description provided for @menu.
+  ///
+  /// In zh, this message translates to:
+  /// **'菜单'**
+  String get menu;
+
+  /// No description provided for @settingsAccountGroup.
+  ///
+  /// In zh, this message translates to:
+  /// **'账号与登录'**
+  String get settingsAccountGroup;
 }
 
 class _AppLocalizationsDelegate
