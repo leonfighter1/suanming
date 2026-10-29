@@ -3,10 +3,10 @@
  * (db/schema_v0.sql + migrations, encrypted facts/report bodies) implements the
  * same interface later.
  */
-import type { LifeReport, Remedy, Report, UserContext } from "../ai/index.js";
+import type { FollowUp, LifeReport, Remedy, Report, UserContext } from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
-import type { AgentName, Topic } from "../ai/types.js";
+import type { AgentName, TarotFocus, Topic } from "../ai/types.js";
 import type { ChartPerson } from "../service/charts.js";
 
 export type { ChartPerson };
@@ -52,6 +52,12 @@ export interface ReportRecord {
   review?: ReviewDecision;
   /** What the user told us (kept for this report's 破除運勢 plans; deleted with the account). */
   context?: UserContext;
+  /**
+   * What the reading was asked for (v7.0.0), kept for its 追问: a tarot, 求籤 or 算卦 question, 风水's room
+   * description, and a tarot reading's focus. Sealed with the report; deleted with the account.
+   */
+  question?: string;
+  focus?: TarotFocus;
 }
 
 /** A paid 破除運勢 plan for one topic of a report (payment: Phase 4 TODO). */
@@ -89,6 +95,24 @@ export interface LifeReportRecord {
   review?: ReviewDecision;
   error?: string;
   progress?: { stage: AgentName; attempt: number; updated_at: string };
+  /** What the user told us (v7.0.0), kept for the report's 追问; deleted with the account. */
+  context?: UserContext;
+}
+
+/** A 追问 on a passed reading or 一生运势报告 (v7.0.0, S13 WP13.2): the question, then its answer. */
+export interface FollowUpRecord {
+  id: string;
+  owner: string;
+  /** What it asks about. */
+  parent: { kind: "report" | "life_report"; id: string };
+  question: string;
+  status: ReportRecordStatus;
+  created_at: string;
+  updated_at: string;
+  followup?: FollowUp;
+  review?: ReviewDecision;
+  error?: string;
+  progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
 
 export interface Store {
@@ -109,15 +133,24 @@ export interface Store {
     reports: ReportRecord[];
     remedies: RemedyRecord[];
     life: LifeReportRecord[];
+    followups: FollowUpRecord[];
   }>;
   putLifeReport(r: LifeReportRecord): Promise<void>;
   getLifeReport(id: string): Promise<LifeReportRecord | undefined>;
   /** Newest first. */
   listLifeReports(owner: string, limit: number): Promise<LifeReportRecord[]>;
+  putFollowUp(f: FollowUpRecord): Promise<void>;
+  getFollowUp(id: string): Promise<FollowUpRecord | undefined>;
+  /** A reading's 追问, oldest first. */
+  listFollowUps(parentId: string): Promise<FollowUpRecord[]>;
   /** Account deletion: remove everything the user owns. Returns counts for the receipt. */
-  deleteOwnerData(
-    owner: string,
-  ): Promise<{ charts: number; reports: number; remedies: number; life_reports: number }>;
+  deleteOwnerData(owner: string): Promise<{
+    charts: number;
+    reports: number;
+    remedies: number;
+    life_reports: number;
+    followups: number;
+  }>;
 }
 
 export class InMemoryStore implements Store {
@@ -125,6 +158,7 @@ export class InMemoryStore implements Store {
   private reports = new Map<string, ReportRecord>();
   private remedies = new Map<string, RemedyRecord>();
   private lifeReports = new Map<string, LifeReportRecord>();
+  private followUps = new Map<string, FollowUpRecord>();
   async listHeld() {
     const held = (s: ReportRecordStatus) => s === "manual_review" || s === "blocked";
     return {
@@ -140,7 +174,24 @@ export class InMemoryStore implements Store {
         [...this.lifeReports.values()].filter((r) => held(r.status)),
         500,
       ),
+      followups: newest(
+        [...this.followUps.values()].filter((f) => held(f.status)),
+        500,
+      ),
     };
+  }
+  async putFollowUp(f: FollowUpRecord) {
+    this.followUps.set(f.id, structuredClone(f));
+  }
+  async getFollowUp(id: string) {
+    const f = this.followUps.get(id);
+    return f && structuredClone(f);
+  }
+  async listFollowUps(parentId: string) {
+    return newest(
+      [...this.followUps.values()].filter((f) => f.parent.id === parentId),
+      100,
+    ).reverse();
   }
   async putLifeReport(r: LifeReportRecord) {
     this.lifeReports.set(r.id, structuredClone(r));
@@ -206,7 +257,10 @@ export class InMemoryStore implements Store {
     let life_reports = 0;
     for (const [id, r] of this.lifeReports)
       if (r.owner === owner && this.lifeReports.delete(id)) life_reports++;
-    return { charts, reports, remedies, life_reports };
+    let followups = 0;
+    for (const [id, f] of this.followUps)
+      if (f.owner === owner && this.followUps.delete(id)) followups++;
+    return { charts, reports, remedies, life_reports, followups };
   }
 }
 

@@ -156,4 +156,33 @@ describe("内容审核 (review console)", () => {
     expect((await rej.json()).decision.decision).toBe("reject");
     expect((await (await call("user1", `/v1/reports/${id}`)).json()).layers).toBeUndefined();
   });
+
+  it("a held 追问: the user sees the hold message; the reviewer reads it and releases it (v7.0.0)", async () => {
+    const id = await tarotReport("user1"); // the guard queue is empty: the reading passes
+    expect((await (await call("user1", `/v1/reports/${id}`)).json()).status).toBe("passed");
+    (mock as unknown as { script: Record<string, unknown[]> }).script.guard = [held];
+    const asked = await (
+      await call("user1", `/v1/reports/${id}/followups`, {
+        question: "这组牌对我的工作意味着什么？",
+      })
+    ).json();
+    await api.drain();
+    const mine = await (await call("user1", `/v1/followups/${asked.followup_id}`)).json();
+    expect(mine.status).toBe("manual_review");
+    expect(mine).not.toHaveProperty("answer");
+
+    const list = await (await call("boss", "/v1/admin/reviews")).json();
+    expect(list.items.find((x: { id: string }) => x.id === asked.followup_id)).toMatchObject({
+      kind: "followup",
+      status: "manual_review",
+      parent: { kind: "report", id },
+    });
+    const path = `/v1/admin/reviews/followup/${asked.followup_id}`;
+    const detail = await (await call("boss", path)).json();
+    expect(detail.content.paragraphs.length).toBeGreaterThan(0);
+    expect((await call("boss", path, { decision: "approve" })).status).toBe(200);
+    const now = await (await call("user1", `/v1/followups/${asked.followup_id}`)).json();
+    expect(now.status).toBe("passed");
+    expect(now.answer.paragraphs).toEqual(detail.content.paragraphs);
+  });
 });

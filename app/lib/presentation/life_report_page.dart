@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -12,7 +13,9 @@ import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/printer.dart';
 import 'design.dart';
+import 'labels.dart';
 import 'life_export.dart';
+import 'widgets/follow_up.dart';
 import 'widgets/life_blocks.dart';
 import 'widgets/life_figures.dart';
 import 'widgets/life_stages.dart';
@@ -259,7 +262,7 @@ class _Message extends StatelessWidget {
 
 // ---------- the report ----------
 
-class _Body extends StatelessWidget {
+class _Body extends StatefulWidget {
   const _Body({super.key, required this.view, required this.header, required this.chart, required this.hant});
   final LifeReportView view;
   final LifeHeader header;
@@ -267,19 +270,38 @@ class _Body extends StatelessWidget {
   final bool hant;
 
   @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  /// 追问 (v7.0.0): the card after the summary, and the floating button that brings it up.
+  final _followUp = FollowUpTarget();
+
+  @override
+  void dispose() {
+    _followUp.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final view = widget.view;
+    final header = widget.header;
+    final hant = widget.hant;
     final f = view.facts!;
     final l = view.layers!;
     final body = theme.textTheme.bodyLarge?.copyWith(height: 1.8);
-    final lunar = chart.bazi.lunar;
+    final lunar = widget.chart.bazi.lunar;
     var i = 0;
     Widget fade(Widget w) => FadeSlideIn(index: i++, child: w);
 
-    return ListView(
-      padding: Space.page,
+    final list = ListView(
+      // Room at the bottom for the floating 继续追问; every card built, so the button can bring up the last one.
+      padding: Space.page.copyWith(bottom: Space.xxl + 72),
+      scrollCacheExtent: const ScrollCacheExtent.pixels(100000),
       children: [
         fade(LifeHero(title: l10n.lifeReportOf(header.name), subtitle: l10n.lifeSubtitle)),
         fade(AppCard(child: LifeKeyValues(rows: header.rows(l10n)))),
@@ -341,7 +363,7 @@ class _Body extends StatelessWidget {
             title: l10n.lifeSec3,
             children: [
               LifeSub(l10n.lifeWuxingDist),
-              LifeWuxingBars(scores: chart.bazi.wuxingWeighted),
+              LifeWuxingBars(scores: widget.chart.bazi.wuxingWeighted),
               const SizedBox(height: Space.m),
               Text(l.wuxing['analysis'] as String, style: body),
               const SizedBox(height: Space.s),
@@ -404,10 +426,19 @@ class _Body extends StatelessWidget {
             ],
           ),
         ),
+        // 追问 (v7.0.0): right after the summary, the report's last section.
+        fade(FollowUpCard(parent: 'life-reports/${view.id}', target: _followUp, starters: l10n.followUpStarters('life'))),
         const SizedBox(height: Space.l),
         Text(l.disclaimer, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
         const SizedBox(height: Space.xs),
         Text(l.aiLabel, key: const Key('life-ai-label'), style: theme.textTheme.labelMedium),
+      ],
+    );
+    // 「继续追问」 floats at the bottom right, over the report (the owner: 显眼的位置).
+    return Stack(
+      children: [
+        Positioned.fill(child: FollowUpScope(target: _followUp, child: list)),
+        Positioned(right: Space.l, bottom: Space.l, child: FollowUpButton(target: _followUp)),
       ],
     );
   }

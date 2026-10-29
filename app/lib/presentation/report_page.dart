@@ -144,6 +144,7 @@ class ReportPage extends ConsumerWidget {
                 reportId: r.id,
                 birthplace: place,
                 header: r.chartId == null ? null : ReadingChart(chartId: r.chartId!),
+                system: system,
               ),
             'blocked' => _Message(key: const ValueKey('blocked'), icon: Icons.block, text: l10n.statusBlocked),
             'manual_review' => _Message(key: const ValueKey('review'), icon: Icons.hourglass_top, text: l10n.statusReview),

@@ -1622,6 +1622,99 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get leaveLiuyaoBody => '这次起的卦不会保留，下次要重新起卦。已生成的解读会保存在历史记录里。';
+
+  @override
+  String get followUpTitle => '继续追问';
+
+  @override
+  String get followUpIntro =>
+      '就这次的结果接着问。回答只依据这次的命盘、牌面、签诗或卦象和上面的解读，不会凭空编造；问题超出它能回答的范围时，会直接告诉你。';
+
+  @override
+  String get followUpHint => '比如：这对我的工作意味着什么？';
+
+  @override
+  String get followUpSend => '发送';
+
+  @override
+  String followUpLeft(int n) {
+    return '还可追问 $n 次';
+  }
+
+  @override
+  String get followUpLimit => '这次结果的追问次数已用完';
+
+  @override
+  String get followUpBusy => '上一个追问还在回答，请稍候';
+
+  @override
+  String get followUpQuota => '今天的 AI 次数已用完，请明天再来';
+
+  @override
+  String get followUpAnswering => 'AI 正在依据这次的结果作答…';
+
+  @override
+  String get followUpFailed => '这次没能答上，请再问一次';
+
+  @override
+  String get followUpHeld => '这条回答需要复核，暂时不能显示';
+
+  @override
+  String get followUpOutOfScope => '超出这次结果能回答的范围';
+
+  @override
+  String get followUpStart => '可以这样问';
+
+  @override
+  String get followUpNext => '你还可以问';
+
+  @override
+  String get jumpFollowUp => '追问';
+
+  @override
+  String get kindFollowUp => '追问';
+
+  @override
+  String get followUpStartBazi1 => '我适合什么样的工作？';
+
+  @override
+  String get followUpStartBazi2 => '今年我最该注意什么？';
+
+  @override
+  String get followUpStartTarot1 => '这组牌最想提醒我什么？';
+
+  @override
+  String get followUpStartTarot2 => '我现在最该做的一步是什么？';
+
+  @override
+  String get followUpStartQiuqian1 => '签诗里哪一句最要紧？';
+
+  @override
+  String get followUpStartQiuqian2 => '这件事我该先做什么？';
+
+  @override
+  String get followUpStartLiuyao1 => '动爻在提醒我什么？';
+
+  @override
+  String get followUpStartLiuyao2 => '这件事我该等还是该动？';
+
+  @override
+  String get followUpStartFengshui1 => '我先改哪一处最容易？';
+
+  @override
+  String get followUpStartFengshui2 => '书桌放在哪里比较好？';
+
+  @override
+  String get followUpStartNaming1 => '这几个名字怎么选？';
+
+  @override
+  String get followUpStartNaming2 => '第一个名字的字义是什么？';
+
+  @override
+  String get followUpStartLife1 => '我哪个阶段最需要用心？';
+
+  @override
+  String get followUpStartLife2 => '命爻对我的工作意味着什么？';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -3241,4 +3334,97 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get leaveLiuyaoBody => '這次起的卦不會保留，下次要重新起卦。已生成的解讀會保存在歷史紀錄裡。';
+
+  @override
+  String get followUpTitle => '繼續追問';
+
+  @override
+  String get followUpIntro =>
+      '就這次的結果接著問。回答只依據這次的命盤、牌面、籤詩或卦象和上面的解讀，不會憑空編造；問題超出它能回答的範圍時，會直接告訴你。';
+
+  @override
+  String get followUpHint => '比如：這對我的工作意味著什麼？';
+
+  @override
+  String get followUpSend => '發送';
+
+  @override
+  String followUpLeft(int n) {
+    return '還可追問 $n 次';
+  }
+
+  @override
+  String get followUpLimit => '這次結果的追問次數已用完';
+
+  @override
+  String get followUpBusy => '上一個追問還在回答，請稍候';
+
+  @override
+  String get followUpQuota => '今天的 AI 次數已用完，請明天再來';
+
+  @override
+  String get followUpAnswering => 'AI 正在依據這次的結果作答…';
+
+  @override
+  String get followUpFailed => '這次沒能答上，請再問一次';
+
+  @override
+  String get followUpHeld => '這條回答需要覆核，暫時不能顯示';
+
+  @override
+  String get followUpOutOfScope => '超出這次結果能回答的範圍';
+
+  @override
+  String get followUpStart => '可以這樣問';
+
+  @override
+  String get followUpNext => '你還可以問';
+
+  @override
+  String get jumpFollowUp => '追問';
+
+  @override
+  String get kindFollowUp => '追問';
+
+  @override
+  String get followUpStartBazi1 => '我適合什麼樣的工作？';
+
+  @override
+  String get followUpStartBazi2 => '今年我最該注意什麼？';
+
+  @override
+  String get followUpStartTarot1 => '這組牌最想提醒我什麼？';
+
+  @override
+  String get followUpStartTarot2 => '我現在最該做的一步是什麼？';
+
+  @override
+  String get followUpStartQiuqian1 => '籤詩裡哪一句最要緊？';
+
+  @override
+  String get followUpStartQiuqian2 => '這件事我該先做什麼？';
+
+  @override
+  String get followUpStartLiuyao1 => '動爻在提醒我什麼？';
+
+  @override
+  String get followUpStartLiuyao2 => '這件事我該等還是該動？';
+
+  @override
+  String get followUpStartFengshui1 => '我先改哪一處最容易？';
+
+  @override
+  String get followUpStartFengshui2 => '書桌放在哪裡比較好？';
+
+  @override
+  String get followUpStartNaming1 => '這幾個名字怎麼選？';
+
+  @override
+  String get followUpStartNaming2 => '第一個名字的字義是什麼？';
+
+  @override
+  String get followUpStartLife1 => '我哪個階段最需要用心？';
+
+  @override
+  String get followUpStartLife2 => '命爻對我的工作意味著什麼？';
 }

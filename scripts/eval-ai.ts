@@ -9,6 +9,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import {
   checkFaithfulness,
+  generateFollowUp,
   generateReport,
   MockProvider,
   type Locale,
@@ -121,6 +122,13 @@ const only = process.argv[process.argv.indexOf("--only") + 1];
 const selected =
   process.argv.includes("--only") && only ? CASES.filter((c) => c.name.includes(only)) : CASES;
 
+/** 追问 (v7.0.0): one follow-up per passed reading, in its language. */
+const FOLLOW_UP: Record<Locale, string> = {
+  "zh-Hant": "這對我接下來的工作意味著什麼？",
+  "zh-Hans": "这对我接下来的工作意味着什么？",
+  en: "What does this mean for my work in the coming months?",
+};
+
 /** For 時辰 input, the text must tell the reader the hour is a two-hour window. */
 const SHICHEN_MENTION = /時辰|时辰|兩小時|两小时|two-hour|2-hour|時柱只|时柱只/;
 
@@ -129,15 +137,26 @@ const results = await Promise.all(
     const t0 = Date.now();
     const chart: ChartFact = computeChart(c.chart, secrets);
     try {
+      const map = live
+        ? providers.map
+        : { deepseek: new MockProvider(), anthropic: new MockProvider() };
       const report = await generateReport(
         chart,
         { locale: c.locale, country: c.country, topics: c.topics },
-        {
-          providers: live
-            ? providers.map
-            : { deepseek: new MockProvider(), anthropic: new MockProvider() },
-        },
+        { providers: map },
       );
+      // 追问 (v7.0.0): one follow-up on the passed reading, answered from it alone and checked the same way.
+      const followup =
+        report.status === "passed"
+          ? await generateFollowUp(
+              chart,
+              { kind: "report", report },
+              FOLLOW_UP[c.locale],
+              [],
+              { country: c.country },
+              { providers: map },
+            )
+          : undefined;
       const issues = report.status === "passed" ? checkFaithfulness(chart, report) : [];
       const shichenInput =
         (chart.facts as { input_basis?: { time?: string } }).input_basis?.time === "shichen";
@@ -168,6 +187,14 @@ const results = await Promise.all(
         facts_layer: report.layers?.facts,
         interpretation: report.layers?.interpretation,
         actions: report.layers?.actions,
+        followup: followup && {
+          question: followup.question,
+          status: followup.status,
+          attempts: followup.agents[0]?.attempts,
+          dropped_ungrounded: followup.compliance.dropped_ungrounded,
+          unfaithful: followup.compliance.unfaithful,
+          answer: followup.answer,
+        },
       };
     } catch (e) {
       return {

@@ -31,7 +31,11 @@ class ReadingParagraph extends StatelessWidget {
             p.term!,
             key: id == null ? null : ValueKey<String>('term-$id'),
             textAlign: TextAlign.start,
-            style: theme.textTheme.titleSmall?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700, height: 1.5),
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.w700,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: Space.xs),
         ],
@@ -55,7 +59,11 @@ class ReadingParagraph extends StatelessWidget {
                 ),
                 const SizedBox(width: Space.s),
                 Expanded(
-                  child: Text(p.example!, textAlign: TextAlign.start, style: theme.textTheme.bodyMedium?.copyWith(height: 1.65)),
+                  child: Text(
+                    p.example!,
+                    textAlign: TextAlign.start,
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.65),
+                  ),
                 ),
               ],
             ),

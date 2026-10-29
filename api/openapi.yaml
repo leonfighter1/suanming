@@ -25,6 +25,8 @@ tags:
     description: Four-layer AI interpretation behind Compliance Guard
   - name: remedies
     description: Paid per-topic 破除運勢 plans (payment is a Phase 4 TODO)
+  - name: followups
+    description: 追问, follow-up questions on a passed reading or 一生运势报告 (v7.0.0)
   - name: ops
     description: Operational endpoints
 
@@ -911,6 +913,104 @@ paths:
               schema: { $ref: "#/components/schemas/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
+  /v1/reports/{report_id}/followups:
+    parameters:
+      - { name: report_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [followups]
+      operationId: listFollowUps
+      summary: A reading's 追问, oldest first, and how many it may have
+      responses:
+        "200": { $ref: "#/components/responses/FollowUpList" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [followups]
+      operationId: askFollowUp
+      summary: Ask about a passed reading (async)
+      description: |
+        Since v7.0.0. The answer rests only on this reading: the facts it read (for 八字 with any year the
+        question names), what it said, and the earlier 追问 on it (the last six). Every answer paragraph cites the
+        facts it rests on and passes the deterministic faithfulness checks, or it is dropped and the answer
+        regenerated. A question the reading can't answer gets `in_scope: false` and a reply that makes no claim.
+        Each method answers with its own prompt (`followup_<method>@N`). Geo-Rule first; each 追问 takes one from
+        the daily AI caps. One at a time (409 `followup_pending`), up to `limit` per reading (409
+        `followup_limit`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        "202": { $ref: "#/components/responses/FollowUpAccepted" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: The reading has not passed, a 追问 is still being answered, or the limit is reached
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/life-reports/{life_report_id}/followups:
+    parameters:
+      - { name: life_report_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [followups]
+      operationId: listLifeFollowUps
+      summary: A 一生运势报告's 追问, oldest first
+      responses:
+        "200": { $ref: "#/components/responses/FollowUpList" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [followups]
+      operationId: askLifeFollowUp
+      summary: Ask about a passed 一生运势报告 (async), as for a reading (`followup_life@N`)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string, minLength: 1, maxLength: 200 }
+      responses:
+        "202": { $ref: "#/components/responses/FollowUpAccepted" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409":
+          description: The report has not passed, a 追问 is still being answered, or the limit is reached
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/followups/{followup_id}:
+    get:
+      tags: [followups]
+      operationId: getFollowUp
+      summary: Poll a 追问
+      parameters:
+        - { name: followup_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Current state; `answer` only when status = passed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowUp" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
   /v1/remedies/{remedy_id}:
     get:
       tags: [remedies]
@@ -953,6 +1053,26 @@ components:
       schema: { type: string }
 
   responses:
+    FollowUpList:
+      description: Oldest first, with the most a reading may have
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [limit, items]
+            properties:
+              limit: { type: integer, description: "20" }
+              items:
+                type: array
+                items: { $ref: "#/components/schemas/FollowUp" }
+    FollowUpAccepted:
+      description: Accepted, pending; poll Location
+      headers:
+        Location: { schema: { type: string } }
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/FollowUp" }
     Tokens:
       description: Access + refresh token pair
       content:
@@ -1353,7 +1473,7 @@ components:
       type: object
       required: [kind, id, status, created_at, updated_at, owner, reasons, rule_hits, guard]
       properties:
-        kind: { type: string, enum: [report, remedy, life_report] }
+        kind: { type: string, enum: [report, remedy, life_report, followup] }
         id: { type: string, format: uuid }
         status: { type: string, enum: [manual_review, blocked, passed] }
         created_at: { type: string, format: date-time }
@@ -1441,6 +1561,57 @@ components:
           additionalProperties: { type: integer, minimum: 0, maximum: 100 }
         overall: { type: integer, minimum: 0, maximum: 100 }
         note: { type: string }
+
+    FollowUp:
+      description: A 追问 on a reading or a 一生运势报告 (since v7.0.0)
+      type: object
+      required: [followup_id, parent, question, status, created_at, updated_at]
+      properties:
+        followup_id: { type: string, format: uuid }
+        parent:
+          type: object
+          required: [kind, id]
+          properties:
+            kind: { type: string, enum: [report, life_report] }
+            id: { type: string, format: uuid }
+        question: { type: string }
+        status: { type: string, enum: [pending, passed, blocked, manual_review, failed] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        message: { type: string }
+        progress:
+          type: object
+          properties:
+            stage: { type: string, enum: [followup, guard] }
+            attempt: { type: integer, minimum: 1 }
+            updated_at: { type: string, format: date-time }
+        answer:
+          description: Present only when status = passed
+          type: object
+          required: [in_scope, paragraphs, suggestions]
+          properties:
+            in_scope:
+              type: boolean
+              description: false when the reading can't answer the question; the one paragraph says so
+            paragraphs:
+              description: 1–3, as a reading's (term, text, example); each cites the facts it rests on
+              type: array
+              items:
+                type: object
+                required: [text, source_level, fact_refs]
+                properties:
+                  term: { type: string }
+                  text: { type: string }
+                  example: { type: string }
+                  source_level:
+                    type: string
+                    enum: [traditional_text, common_consensus, simplified_rule, derived]
+                  fact_refs: { type: array, items: { type: string } }
+            suggestions:
+              description: Up to three next questions this reading can answer
+              type: array
+              items: { type: string }
+        ai_disclosure: { $ref: "#/components/schemas/AiDisclosure" }
 
     Price:
       type: object

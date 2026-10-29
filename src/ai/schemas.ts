@@ -72,6 +72,35 @@ export function actionSchema(topics: readonly Topic[]) {
   };
 }
 
+/**
+ * 追问 (v7.0.0, S13 WP13.2): whether the reading can answer it, 1–3 paragraphs in the reading's three parts, and
+ * the next questions. Counts and grounding are checked in followup.ts.
+ */
+export const followUpSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["in_scope", "paragraphs", "suggestions"],
+  properties: {
+    in_scope: { type: "boolean" },
+    paragraphs: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["term", "text", "source_level", "fact_refs"],
+        properties: {
+          term: str,
+          text: str,
+          example: str,
+          source_level: { type: "string", enum: [...SOURCE_LEVELS] },
+          fact_refs: { type: "array", items: str },
+        },
+      },
+    },
+    suggestions: { type: "array", items: str },
+  },
+};
+
 export const guardSchema = {
   type: "object",
   additionalProperties: false,

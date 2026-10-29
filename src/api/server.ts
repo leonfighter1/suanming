@@ -9,6 +9,10 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import {
+  FOLLOWUP_LIMIT,
+  FOLLOWUP_QUESTION_MAX,
+  followUpAvailable,
+  generateFollowUp,
   generateLifeReport,
   generateRemedy,
   generateReport,
@@ -21,6 +25,8 @@ import {
   TAROT_FOCUS,
   TOPICS,
   TOPICS_BY_SYSTEM,
+  type FollowUpParent,
+  type FollowUpTurn,
   type LLMProvider,
   type Locale,
   type Report,
@@ -63,6 +69,7 @@ const SHARE_RENDERERS: Partial<Record<ChartSystem, typeof renderTarotShare>> = {
 };
 import {
   InMemoryStore,
+  type FollowUpRecord,
   type ReviewDecision,
   type LifeReportRecord,
   type RemedyRecord,
@@ -257,6 +264,24 @@ export function publicLifeReport(r: LifeReportRecord) {
   };
 }
 
+/** What the user may see of a 追问 (v7.0.0): the question, where it stands, and the answer once it has passed. */
+export function publicFollowUp(r: FollowUpRecord) {
+  const base = {
+    followup_id: r.id,
+    parent: r.parent,
+    question: r.question,
+    status: r.status,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+  };
+  if (r.status === "pending") return r.progress ? { ...base, progress: r.progress } : base;
+  if (r.status === "failed") return { ...base, message: "generation failed; please ask again" };
+  if (r.status !== "passed" || !r.followup?.answer) {
+    return { ...base, message: "this answer is held for review and is not available yet" };
+  }
+  return { ...base, answer: r.followup.answer, ai_disclosure: r.followup.ai_disclosure };
+}
+
 /**
  * Why a report or plan was held, for the server log: status reasons, rule ids and
  * guard categories only. Never quotes (they can contain the user's own words).
@@ -279,7 +304,7 @@ export function heldWhy(r: {
     .join(" | ");
 }
 
-export type HeldKind = "report" | "remedy" | "life_report";
+export type HeldKind = "report" | "remedy" | "life_report" | "followup";
 
 /** What a reviewer sees in the list: why it was held, never the user's identity. */
 export function reviewSummary(
@@ -651,6 +676,150 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
+  /** The caller's passed 一生运势报告 and its chart, or 404 / 409. */
+  async function ownedPassedLifeReport(id: string, c: Caller) {
+    const r = UUID_RE.test(id) ? await store.getLifeReport(id) : undefined;
+    if (!r || r.owner !== c.user) throw new HttpError(404, "life report not found");
+    if (r.status !== "passed" || !r.life) throw new HttpError(409, "the report is not ready");
+    const chart = await store.getChart(r.chart_id);
+    if (!chart) throw new HttpError(404, "chart not found");
+    return { record: r, life: r.life, fact: chart.fact };
+  }
+
+  /** What a 追问 asks about: the caller's passed reading with what it was asked for and told, or 404 / 409. */
+  async function followUpParent(
+    kind: FollowUpRecord["parent"]["kind"],
+    id: string,
+    c: Caller,
+  ): Promise<{ parent: FollowUpParent; fact: ChartFact }> {
+    if (kind === "life_report") {
+      const { record, life, fact } = await ownedPassedLifeReport(id, c);
+      return { parent: { kind, life, ...(record.context && { context: record.context }) }, fact };
+    }
+    const { record, report, fact } = await ownedPassedReport(id, c);
+    return {
+      parent: {
+        kind,
+        report,
+        ...(record.question && { question: record.question }),
+        ...(record.focus && { focus: record.focus }),
+        ...(record.context && { context: record.context }),
+      },
+      fact,
+    };
+  }
+
+  async function runFollowUpJob(
+    record: FollowUpRecord,
+    parent: FollowUpParent,
+    fact: ChartFact,
+    thread: FollowUpTurn[],
+    c: Caller,
+  ) {
+    let next: FollowUpRecord;
+    try {
+      const followup = await generateFollowUp(
+        fact,
+        parent,
+        record.question,
+        thread,
+        { country: c.country },
+        {
+          providers: opts.providers,
+          routing: opts.routing,
+          review: opts.review !== false,
+          now,
+          onProgress: async ({ stage, attempt }) => {
+            const current = await store.getFollowUp(record.id);
+            if (current?.status !== "pending") return;
+            await store.putFollowUp({
+              ...current,
+              progress: { stage, attempt, updated_at: now().toISOString() },
+            });
+          },
+        },
+      );
+      next = { ...record, status: followup.status, followup, updated_at: now().toISOString() };
+      if (followup.status !== "passed") log(`follow-up ${record.id} held: ${heldWhy(followup)}`);
+    } catch (e) {
+      const upstream = upstreamMessage(e);
+      log(
+        `follow-up ${record.id} failed: ${upstream ?? (e as Error).message}`,
+        upstream ? undefined : e,
+      );
+      next = {
+        ...record,
+        status: "failed",
+        error: upstream ?? "internal error",
+        updated_at: now().toISOString(),
+      };
+    }
+    // The account may have been deleted while this ran; never resurrect its data.
+    if (!(await store.getFollowUp(record.id))) return;
+    await store.putFollowUp(next);
+  }
+
+  /**
+   * 追问 (v7.0.0, S13): one question on a passed reading or 一生运势报告, answered in the background from that reading
+   * alone. One at a time, up to FOLLOWUP_LIMIT per reading; each takes one from the daily AI caps.
+   */
+  async function createFollowUp(
+    req: IncomingMessage,
+    kind: FollowUpRecord["parent"]["kind"],
+    id: string,
+    c: Caller,
+  ) {
+    const body = (await readJson(req)) as Record<string, unknown>;
+    const question = typeof body.question === "string" ? body.question.trim() : "";
+    if (!question) throw new InputError("question is required");
+    if ([...question].length > FOLLOWUP_QUESTION_MAX) {
+      throw new InputError(`question must be at most ${FOLLOWUP_QUESTION_MAX} characters`);
+    }
+    const { parent, fact } = await followUpParent(kind, id, c);
+    if (!followUpAvailable(kind, fact)) {
+      throw new InputError(`follow-up questions are not offered for ${fact.system} readings`);
+    }
+    assertServed(c.country, fact.system);
+    const earlier = await store.listFollowUps(id);
+    if (earlier.some((f) => f.status === "pending")) {
+      throw new HttpError(
+        409,
+        "the previous follow-up is still being answered",
+        "followup_pending",
+      );
+    }
+    if (earlier.filter((f) => f.status !== "failed").length >= FOLLOWUP_LIMIT) {
+      throw new HttpError(
+        409,
+        `this reading has had its ${FOLLOWUP_LIMIT} follow-up questions`,
+        "followup_limit",
+      );
+    }
+    takeAiQuota(c.user);
+    const ts = now().toISOString();
+    const record: FollowUpRecord = {
+      id: randomUUID(),
+      owner: c.user,
+      parent: { kind, id },
+      question,
+      status: "pending",
+      created_at: ts,
+      updated_at: ts,
+    };
+    await store.putFollowUp(record);
+    const thread = earlier.flatMap((f) =>
+      f.status === "passed" && f.followup?.answer
+        ? [{ question: f.question, answer: f.followup.answer }]
+        : [],
+    );
+    track(`follow-up ${record.id}`, runFollowUpJob(record, parent, fact, thread, c));
+    return {
+      status: 202,
+      body: publicFollowUp(record),
+      headers: { location: `/v1/followups/${record.id}`, "retry-after": "5" },
+    };
+  }
+
   async function runLifeJob(
     record: LifeReportRecord,
     fact: ChartFact,
@@ -719,6 +888,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       locale,
       created_at: ts,
       updated_at: ts,
+      // Kept for the report's 追问 (v7.0.0), sealed with it.
+      ...(context && { context }),
     };
     await store.putLifeReport(record);
     track(`life report ${record.id}`, runLifeJob(record, chart.fact, c, context));
@@ -753,6 +924,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         }
       );
     }
+    if (kind === "followup") {
+      const r = await store.getFollowUp(id);
+      return (
+        r && {
+          kind: "followup" as const,
+          r,
+          summary: reviewSummary("followup", r, r.followup, { parent: r.parent }),
+          content: r.followup?.held_answer,
+        }
+      );
+    }
     if (kind === "life_report") {
       const r = await store.getLifeReport(id);
       return (
@@ -784,10 +966,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           reviewSummary("remedy", r, r.remedy, { topic: r.topic, locked: !r.unlocked }),
         ),
         ...h.life.map((r) => reviewSummary("life_report", r, r.life, { locale: r.locale })),
+        ...h.followups.map((r) => reviewSummary("followup", r, r.followup, { parent: r.parent })),
       ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
       return send(res, 200, { items });
     }
-    const m = /^\/v1\/admin\/reviews\/(report|remedy|life_report)\/([^/]+)$/.exec(path);
+    const m = /^\/v1\/admin\/reviews\/(report|remedy|life_report|followup)\/([^/]+)$/.exec(path);
     const item = m ? await heldItem(m[1]!, m[2]!) : undefined;
     if (!item || !["manual_review", "blocked"].includes(item.r.status)) {
       throw new HttpError(404, "no held item with that id");
@@ -840,6 +1023,18 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           status === "passed"
             ? { ...rem, status, content: rem.held_content, held_content: undefined }
             : rem,
+      });
+    } else if (item.kind === "followup") {
+      const fu = item.r.followup!;
+      await store.putFollowUp({
+        ...item.r,
+        status,
+        review,
+        updated_at: ts,
+        followup:
+          status === "passed"
+            ? { ...fu, status, answer: fu.held_answer, held_answer: undefined }
+            : fu,
       });
     } else {
       const life = item.r.life!;
@@ -895,6 +1090,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       created_at: ts,
       updated_at: ts,
       ...(context && { context }),
+      // What the reading was asked for, kept for its 追问 (v7.0.0), sealed with it.
+      ...(question && { question }),
+      ...(focus && { focus }),
     };
     await store.putReport(record);
     track(`report ${record.id}`, runJob(record, chart.fact, c, question, focus));
@@ -1083,6 +1281,37 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         res,
         200,
         { ...view, ...(person && { person }) },
+        aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
+      );
+    }
+
+    // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 ----
+    const fq = /^\/v1\/(reports|life-reports)\/([^/]+)\/followups$/.exec(path);
+    if (fq && req.method === "POST") {
+      const kind = fq[1] === "reports" ? "report" : "life_report";
+      const out = await createFollowUp(req, kind, fq[2]!, c);
+      return send(res, out.status, out.body, out.headers);
+    }
+    if (fq && req.method === "GET") {
+      const id = fq[2]!;
+      const parent = !UUID_RE.test(id)
+        ? undefined
+        : fq[1] === "reports"
+          ? await store.getReport(id)
+          : await store.getLifeReport(id);
+      if (!parent || parent.owner !== c.user) throw new HttpError(404, "reading not found");
+      const items = (await store.listFollowUps(parent.id)).map(publicFollowUp);
+      return send(res, 200, { limit: FOLLOWUP_LIMIT, items });
+    }
+    const fo = /^\/v1\/followups\/([^/]+)$/.exec(path);
+    if (fo && req.method === "GET") {
+      const r = UUID_RE.test(fo[1]!) ? await store.getFollowUp(fo[1]!) : undefined;
+      if (!r || r.owner !== c.user) throw new HttpError(404, "follow-up not found");
+      const view = publicFollowUp(r);
+      return send(
+        res,
+        200,
+        view,
         aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
       );
     }
@@ -1296,7 +1525,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     try {
       await handle(req, res);
     } catch (e) {
-      if (e instanceof HttpError) return problem(res, e.status, e.message);
+      if (e instanceof HttpError) {
+        return problem(res, e.status, e.message, undefined, e.code ? { code: e.code } : {});
+      }
       if (e instanceof AuthError) {
         const title = e.status === 451 ? "Unavailable for legal reasons" : "Authentication failed";
         return problem(res, e.status, title, e.message, e.code ? { code: e.code } : {});

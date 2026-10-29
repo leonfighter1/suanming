@@ -211,7 +211,9 @@ export async function runAgent<T>(args: {
   /** false: rule hits are recorded but cause no rewrite or hold (review paused). */
   enforce?: boolean;
 }): Promise<AgentOutcome<T>> {
-  const prompt = args.prompt ?? PROMPTS[args.agent];
+  // 追问 has no shared prompt: each method passes its own (rule 8).
+  const prompt = args.prompt ?? (PROMPTS as Partial<Record<AgentName, PromptVersion>>)[args.agent];
+  if (!prompt) throw new Error(`no prompt given for agent ${args.agent}`);
   const trace: AgentTrace = {
     agent: args.agent,
     prompt_version: prompt.id,
@@ -343,6 +345,56 @@ export function servedRegion(country: string, system: string) {
   return { matrix, region };
 }
 
+/**
+ * What a method's reading agent reads, and since v7.0.0 its 追问 too: the facts, the method's brief, and the
+ * glossary. A 八字 reading reads its focused view (WP2.3), with any 流年 year [question] names; a 求籤 reading the lot
+ * without the rounds that confirmed it; a 算卦 reading the cast without its coins. The other methods' facts are
+ * small already.
+ */
+export function readingInputs(chart: ChartFact, locale: Locale, now: Date, question?: string) {
+  const facts =
+    chart.system === "bazi"
+      ? baziView(modelFacts(chart), readingFocus(chart.facts, now.getUTCFullYear(), question), {
+          trend: true,
+        })
+      : chart.system === "qiuqian"
+        ? qiuqianView(modelFacts(chart))
+        : chart.system === "liuyao"
+          ? liuyaoView(modelFacts(chart))
+          : modelFacts(chart);
+  const lot = chart.system === "qiuqian" ? lotBrief(chart, locale) : undefined;
+  const room = chart.system === "fengshui" ? fengshuiBrief(chart, locale) : undefined;
+  const names = chart.system === "naming" ? namingBrief(chart, locale) : undefined;
+  const cast = chart.system === "liuyao" ? liuyaoBrief(chart, locale) : undefined;
+  const spread = chart.system === "tarot" ? spreadBrief(chart, locale) : undefined;
+  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體, a room's
+  // principles are ids, names are names and a cast's texts are 繁體, so 求籤, 风水, 起名 and 算卦 name
+  // their own.
+  const ownTerms = lot
+    ? QIUQIAN_TERMS
+    : room
+      ? FENGSHUI_TERMS
+      : names
+        ? NAMING_TERMS
+        : cast
+          ? LIUYAO_TERMS
+          : undefined;
+  const glossary = glossaryFor(ownTerms ? ownTerms.join(" ") : JSON.stringify(facts), locale);
+  // The brief as the reading's user message names it: a 追问 passes it on under the same tag.
+  const brief = spread
+    ? { tag: "spread", value: spread }
+    : lot
+      ? { tag: "lot", value: lot }
+      : room
+        ? { tag: "room", value: room }
+        : names
+          ? { tag: "names", value: names }
+          : cast
+            ? { tag: "cast", value: cast }
+            : undefined;
+  return { facts, lot, room, names, cast, spread, glossary, brief };
+}
+
 // ---------- pipeline ----------
 
 export async function generateReport(
@@ -380,37 +432,12 @@ export async function generateReport(
   ]);
   // A region's content blocks (Indonesia, v5.1.0) reach the model in every call; empty elsewhere.
   const regionLine = contentBlockLine(region);
-  // A 八字 reading reads its focused view (WP2.3), a 求籤 reading the lot without the rounds that
-  // confirmed it, a 算卦 reading the cast without its coins; the other methods' facts are small already.
-  const facts =
-    chart.system === "bazi"
-      ? baziView(
-          modelFacts(chart),
-          readingFocus(chart.facts, now.getUTCFullYear(), opts.question),
-          { trend: true },
-        )
-      : chart.system === "qiuqian"
-        ? qiuqianView(modelFacts(chart))
-        : chart.system === "liuyao"
-          ? liuyaoView(modelFacts(chart))
-          : modelFacts(chart);
-  const lot = chart.system === "qiuqian" ? lotBrief(chart, opts.locale) : undefined;
-  const room = chart.system === "fengshui" ? fengshuiBrief(chart, opts.locale) : undefined;
-  const names = chart.system === "naming" ? namingBrief(chart, opts.locale) : undefined;
-  const cast = chart.system === "liuyao" ? liuyaoBrief(chart, opts.locale) : undefined;
-  // Glossary keys are the canonical 简体 forms the engines emit; a lot's poem is 繁體, a room's
-  // principles are ids, names are names and a cast's texts are 繁體, so 求籤, 风水, 起名 and 算卦 name
-  // their own.
-  const ownTerms = lot
-    ? QIUQIAN_TERMS
-    : room
-      ? FENGSHUI_TERMS
-      : names
-        ? NAMING_TERMS
-        : cast
-          ? LIUYAO_TERMS
-          : undefined;
-  const glossary = glossaryFor(ownTerms ? ownTerms.join(" ") : JSON.stringify(facts), opts.locale);
+  const { facts, lot, room, names, cast, spread, glossary } = readingInputs(
+    chart,
+    opts.locale,
+    now,
+    opts.question,
+  );
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
   const providerFor = (agent: AgentName) => {
     const route = routeFor(routing, agent, opts.locale);
@@ -432,8 +459,6 @@ export async function generateReport(
 
   // Each method reads and writes its actions with its own prompts (rule 8, METHOD_PROMPTS).
   const prompts = METHOD_PROMPTS[chart.system];
-  const tarot = chart.system === "tarot";
-  const spread = tarot ? spreadBrief(chart, opts.locale) : undefined;
   // 逐张解读: one paragraph per card; 起名: one per candidate read (up to six); other sections up to four.
   const maxParagraphs = (t: Topic) =>
     t === "tarot_cards" && spread ? spread.cards.length : t === "naming_candidates" ? 6 : 4;

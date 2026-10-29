@@ -2,6 +2,29 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-28 (ak): S13 complete, 追问 on every reading (WP13.2–13.3); release v7.0.0
+
+- WP13.2, the server:
+  - `generateFollowUp` (src/ai/followup.ts), the fourth pipeline (CLAUDE.md rule 2 updated). It runs Geo-Rule →
+    `followup_<method>@1` / `followup_life@1` → rule layer + `checkTexts` → guard;
+  - routes `GET`/`POST /v1/{reports|life-reports}/{id}/followups` and `GET /v1/followups/{id}`, with 409
+    `followup_pending` / `followup_limit`, the daily caps and the review console (kind followup);
+  - migration 007 for the sealed table; the deletion receipt counts follow-ups;
+  - `readingInputs` is shared with `generateReport` (behaviour kept: 74 reading tests unchanged);
+  - the report keeps its question and focus, and the life report its context;
+  - `eval:ai` asks one 追问 per passed case.
+- WP13.3, the app:
+  - `FollowUpCard` after the reading (before 行动建议) and at the end of the 一生运势报告;
+  - the floating 「继续追问」 and the 追问 jump chip;
+  - per-method starters, the thread with each answer in three parts, suggestions as chips, and the left / limit /
+    busy / quota messages.
+- Found by tests:
+  - the mock answers at once, so the busy check needed a gated provider (rule 37 recurred);
+  - at 412 × 900 the floating button covered 发送. It now steps aside while the field is on screen, and the scroll
+    is awaited before the focus (rule 55);
+  - a field of several lines took Enter as a new line, so it is one line now.
+- Tests: server 495 → 515; app 156 → 165.
+
 ## 2026-10-28 (aj): S13 begun (WP13.1, 术语 → 评论 → 例子), the owner's bug report, three accounts; release v6.2.0
 
 - **Owner request:** 追问 on every method, grounded in the reading and what the 卦象 say (「不能胡编乱造」), placed

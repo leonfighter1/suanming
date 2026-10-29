@@ -3150,6 +3150,186 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'这次起的卦不会保留，下次要重新起卦。已生成的解读会保存在历史记录里。'**
   String get leaveLiuyaoBody;
+
+  /// No description provided for @followUpTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'继续追问'**
+  String get followUpTitle;
+
+  /// No description provided for @followUpIntro.
+  ///
+  /// In zh, this message translates to:
+  /// **'就这次的结果接着问。回答只依据这次的命盘、牌面、签诗或卦象和上面的解读，不会凭空编造；问题超出它能回答的范围时，会直接告诉你。'**
+  String get followUpIntro;
+
+  /// No description provided for @followUpHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'比如：这对我的工作意味着什么？'**
+  String get followUpHint;
+
+  /// No description provided for @followUpSend.
+  ///
+  /// In zh, this message translates to:
+  /// **'发送'**
+  String get followUpSend;
+
+  /// No description provided for @followUpLeft.
+  ///
+  /// In zh, this message translates to:
+  /// **'还可追问 {n} 次'**
+  String followUpLeft(int n);
+
+  /// No description provided for @followUpLimit.
+  ///
+  /// In zh, this message translates to:
+  /// **'这次结果的追问次数已用完'**
+  String get followUpLimit;
+
+  /// No description provided for @followUpBusy.
+  ///
+  /// In zh, this message translates to:
+  /// **'上一个追问还在回答，请稍候'**
+  String get followUpBusy;
+
+  /// No description provided for @followUpQuota.
+  ///
+  /// In zh, this message translates to:
+  /// **'今天的 AI 次数已用完，请明天再来'**
+  String get followUpQuota;
+
+  /// No description provided for @followUpAnswering.
+  ///
+  /// In zh, this message translates to:
+  /// **'AI 正在依据这次的结果作答…'**
+  String get followUpAnswering;
+
+  /// No description provided for @followUpFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'这次没能答上，请再问一次'**
+  String get followUpFailed;
+
+  /// No description provided for @followUpHeld.
+  ///
+  /// In zh, this message translates to:
+  /// **'这条回答需要复核，暂时不能显示'**
+  String get followUpHeld;
+
+  /// No description provided for @followUpOutOfScope.
+  ///
+  /// In zh, this message translates to:
+  /// **'超出这次结果能回答的范围'**
+  String get followUpOutOfScope;
+
+  /// No description provided for @followUpStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'可以这样问'**
+  String get followUpStart;
+
+  /// No description provided for @followUpNext.
+  ///
+  /// In zh, this message translates to:
+  /// **'你还可以问'**
+  String get followUpNext;
+
+  /// No description provided for @jumpFollowUp.
+  ///
+  /// In zh, this message translates to:
+  /// **'追问'**
+  String get jumpFollowUp;
+
+  /// No description provided for @kindFollowUp.
+  ///
+  /// In zh, this message translates to:
+  /// **'追问'**
+  String get kindFollowUp;
+
+  /// No description provided for @followUpStartBazi1.
+  ///
+  /// In zh, this message translates to:
+  /// **'我适合什么样的工作？'**
+  String get followUpStartBazi1;
+
+  /// No description provided for @followUpStartBazi2.
+  ///
+  /// In zh, this message translates to:
+  /// **'今年我最该注意什么？'**
+  String get followUpStartBazi2;
+
+  /// No description provided for @followUpStartTarot1.
+  ///
+  /// In zh, this message translates to:
+  /// **'这组牌最想提醒我什么？'**
+  String get followUpStartTarot1;
+
+  /// No description provided for @followUpStartTarot2.
+  ///
+  /// In zh, this message translates to:
+  /// **'我现在最该做的一步是什么？'**
+  String get followUpStartTarot2;
+
+  /// No description provided for @followUpStartQiuqian1.
+  ///
+  /// In zh, this message translates to:
+  /// **'签诗里哪一句最要紧？'**
+  String get followUpStartQiuqian1;
+
+  /// No description provided for @followUpStartQiuqian2.
+  ///
+  /// In zh, this message translates to:
+  /// **'这件事我该先做什么？'**
+  String get followUpStartQiuqian2;
+
+  /// No description provided for @followUpStartLiuyao1.
+  ///
+  /// In zh, this message translates to:
+  /// **'动爻在提醒我什么？'**
+  String get followUpStartLiuyao1;
+
+  /// No description provided for @followUpStartLiuyao2.
+  ///
+  /// In zh, this message translates to:
+  /// **'这件事我该等还是该动？'**
+  String get followUpStartLiuyao2;
+
+  /// No description provided for @followUpStartFengshui1.
+  ///
+  /// In zh, this message translates to:
+  /// **'我先改哪一处最容易？'**
+  String get followUpStartFengshui1;
+
+  /// No description provided for @followUpStartFengshui2.
+  ///
+  /// In zh, this message translates to:
+  /// **'书桌放在哪里比较好？'**
+  String get followUpStartFengshui2;
+
+  /// No description provided for @followUpStartNaming1.
+  ///
+  /// In zh, this message translates to:
+  /// **'这几个名字怎么选？'**
+  String get followUpStartNaming1;
+
+  /// No description provided for @followUpStartNaming2.
+  ///
+  /// In zh, this message translates to:
+  /// **'第一个名字的字义是什么？'**
+  String get followUpStartNaming2;
+
+  /// No description provided for @followUpStartLife1.
+  ///
+  /// In zh, this message translates to:
+  /// **'我哪个阶段最需要用心？'**
+  String get followUpStartLife1;
+
+  /// No description provided for @followUpStartLife2.
+  ///
+  /// In zh, this message translates to:
+  /// **'命爻对我的工作意味着什么？'**
+  String get followUpStartLife2;
 }
 
 class _AppLocalizationsDelegate

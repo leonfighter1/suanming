@@ -39,7 +39,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S10 算卦                   | 六爻 by coins: auto, pick and manual casts; 直說; AI        | big    | v6.0.0 + summary  | done        |
 | S11 Owner updates          | tarot spread icons, English removed, the admin in Beijing   | medium | v5.4.0            | done        |
 | S12 Owner updates          | tarot spreads 3 a row, 东方 / 西方 home, coins that turn    | medium | v6.1.0            | done        |
-| S13 AI 追问 + 通俗解读     | 术语 → 评论 → 例子 in every reading; 追问 on every reading  | big    | v7.0.0 + summary  | in progress |
+| S13 AI 追问 + 通俗解读     | 术语 → 评论 → 例子 in every reading; 追问 on every reading  | big    | v7.0.0 + summary  | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1291,9 +1291,58 @@ As built (v6.2.0):
   - the keyboard.
 - Lessons: rules 7, 12, 17, 19, 25, 27, 33, 43 and 46; the keyboard-access skill.
 
+As built (v7.0.0):
+
+- **WP13.2, the server.**
+  - `generateFollowUp` reads what the reading read: `readingInputs`, now shared with `generateReport`. For a
+    一生运势报告 it reads `lifeModelInput`, the report's facts without the birth clock.
+  - The answer is checked twice:
+    - fact_refs must resolve;
+    - `checkTexts` (faithfulness on any text) checks the paragraphs and the suggestions.
+      A failing paragraph is dropped and the answer sent back once, with what was wrong.
+  - Suggestions already asked, over 40 characters, or naming what the reading lacks are dropped.
+  - A report now keeps its own question and focus, and a life report its context: the 追问 needs them for 一事一占.
+  - `HttpError` carries a `code`: `followup_pending` and `followup_limit`.
+  - `npm run eval:ai` asks one 追问 per passed case.
+- **WP13.3, the app.**
+  - The floating 「继续追问」 steps aside while the field and 发送 are on screen (`FollowUpScope` measures on every
+    scroll). It is then out of the Tab order too. Found by a hitTestable check: at 412 × 900 it covered 发送 (rule 55).
+  - The field is one line, so Enter sends. A field of several lines takes Enter as a new line.
+  - The 一生运势 page builds all its cards (the cache extent, as the reading page does), so the button can bring up
+    the last one.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S13 AI 追问 + 通俗解读 (done 2026-10-28: v6.2.0–v7.0.0)
+
+1. **Delivered**, the owner's request:
+   - **v6.2.0, WP13.1:** every reading in three parts, term → commentary → example. Each method has a new reading
+     prompt with its own terms and scenes, and the 一生运势 report puts the basis first in each text.
+   - **v6.2.0, also:** the owner's bug report (a chart's person kept with it on the server) and three dev accounts.
+   - **v7.0.0, WP13.2–13.3:** 追问 on every reading and 一生运势报告.
+     - Its own pipeline and a prompt per method.
+     - Grounded by cited facts and the faithfulness checks; questions out of scope are said to be so.
+     - Suggested next questions.
+     - The card after the reading, the floating button and the jump chip.
+2. **Numbers:** server tests 487 → 495 → 515; app tests 151 → 156 → 165. Eight 追问 prompts and seven reading prompts
+   (plus two life prompts) pinned. Migration 007.
+3. **Changed against the plan:**
+   - the floating button steps aside over its own target;
+   - the field is one line, so Enter sends;
+   - the reading's question and the life report's context are now stored for 追问;
+   - `npm run eval:ai` asks a 追问 too.
+4. **Mistakes recorded:**
+   - rule 52: labels kept in browser storage vanish with the origin;
+   - rule 53: unkeyed AnimatedSwitcher states;
+   - rule 54: check formatting after the last edit;
+   - rule 55: a floating control covering its target;
+   - rule 37 recurred, for a job other than a report.
+5. **Next:**
+   - The owner reads real readings and 追问 with the model switched on. The new prompts are untried live:
+     `npm run eval:ai -- --live`.
+   - Otherwise the open items stand as at S10's end.
 
 ### S12 Owner updates (done 2026-10-28: v6.1.0, medium)
 
@@ -1672,5 +1721,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP12.2    | done                         | v6.1.0  |
 | WP12.3    | done                         | v6.1.0  |
 | WP13.1    | done                         | v6.2.0  |
-| WP13.2    | planned                      | v7.0.0  |
-| WP13.3    | planned                      | v7.0.0  |
+| WP13.2    | done                         | v7.0.0  |
+| WP13.3    | done                         | v7.0.0  |

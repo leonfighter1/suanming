@@ -16,6 +16,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  generateFollowUp,
   generateLifeReport,
   generateRemedy,
   generateReport,
@@ -29,6 +30,7 @@ import { lotTitle } from "../src/ai/qiuqian.js";
 import { termTips } from "../src/ai/term-tips.js";
 import { LOCALES } from "../src/ai/terms.js";
 import {
+  publicFollowUp,
   publicLifeReport,
   publicRemedy,
   publicReport,
@@ -284,6 +286,26 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     remedy,
   });
 
+  // 追问 (v7.0.0): one question on the 八字 reading, answered by the mock from the reading's own facts.
+  const followup = await generateFollowUp(
+    bazi,
+    { kind: "report", report },
+    "明年我的事业怎么样？",
+    [],
+    { country: "HK" },
+    { providers: { deepseek: mock, anthropic: mock }, now },
+  );
+  const followupView = publicFollowUp({
+    id: "45454545-4545-4545-8545-454545454545",
+    owner: "fixture",
+    parent: { kind: "report", id: report.report_id },
+    question: followup.question,
+    status: followup.status,
+    created_at: ts,
+    updated_at: ts,
+    followup,
+  });
+
   // The owner's sample (吴勇, 1987-11-23 03:30, 靖江) as a 一生运势报告.
   const lifeChart = computeBazi(
     { local: "1987-11-23T03:30", timezone: "Asia/Shanghai", longitude: 120.2625, gender: "male" },
@@ -439,6 +461,7 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
     "app/test/fixtures/report_tarot_passed.json": tarotView,
     "app/test/fixtures/report_qiuqian_passed.json": qiuqianView,
     "app/test/fixtures/remedy_passed.json": remedyView,
+    "app/test/fixtures/followup_passed.json": followupView,
     "app/test/fixtures/life_passed.json": lifeView,
     "app/test/fixtures/review_report.json": reviewView,
     "app/test/fixtures/chart_life.json": {

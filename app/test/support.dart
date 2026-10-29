@@ -104,6 +104,21 @@ class FakeApi {
   /// Whose chart the history's 八字 reading and 一生运势报告 are of, as the server keeps it (v6.2.0); null = none
   /// (a chart made before v6.2.0).
   Map<String, dynamic>? person;
+
+  /// 追问 asked so far (v7.0.0), per reading path (`reports/<id>` or `life-reports/<id>`), oldest first. Each is
+  /// answered with followup_passed after [followUpPolls] polls of the list.
+  final followUps = <String, List<Map<String, dynamic>>>{};
+  int followUpPolls = 1;
+  final _pollsLeft = <String, int>{};
+
+  /// The most 追问 a reading may have (the server's FOLLOWUP_LIMIT is 20).
+  int followUpLimit = 20;
+
+  /// false: every answer says the reading can't answer its question.
+  bool followUpInScope = true;
+
+  /// Asking answers with this problem instead, e.g. {'status': 409, 'code': 'followup_pending'}.
+  Map<String, dynamic>? followUpError;
   int _tokenSerial = 0;
   String access = 'access-0';
 
@@ -268,6 +283,40 @@ class FakeApi {
       return _json(fixture('chart_fengshui'), 200);
     }
     if (req.method == 'POST' && path == '/v1/reports') return _json(_pending, 202);
+    // 追问 (v7.0.0): the list answers a pending one once its polls run out; asking adds a pending one.
+    final asked = RegExp(r'^/v1/((?:life-)?reports/[^/]+)/followups$').firstMatch(path);
+    if (asked != null && req.method == 'GET') {
+      final items = followUps[asked.group(1)!] ?? [];
+      for (final f in items.where((f) => f['status'] == 'pending')) {
+        final id = f['followup_id'] as String;
+        final left = _pollsLeft[id] ?? 0;
+        if (left > 0) {
+          _pollsLeft[id] = left - 1;
+          continue;
+        }
+        final done = fixture('followup_passed');
+        f
+          ..['status'] = 'passed'
+          ..['answer'] = {...(done['answer'] as Map<String, dynamic>), 'in_scope': followUpInScope}
+          ..['ai_disclosure'] = done['ai_disclosure'];
+      }
+      return _json({'limit': followUpLimit, 'items': items}, 200);
+    }
+    if (asked != null && req.method == 'POST') {
+      if (followUpError != null) return _json(followUpError!, followUpError!['status'] as int);
+      final list = followUps.putIfAbsent(asked.group(1)!, () => []);
+      final id = '45454545-0000-4000-8000-${list.length.toString().padLeft(12, '0')}';
+      final item = <String, dynamic>{
+        'followup_id': id,
+        'question': (jsonDecode(req.body) as Map)['question'],
+        'status': 'pending',
+        'created_at': '2026-10-28T00:00:00.000Z',
+        'updated_at': '2026-10-28T00:00:00.000Z',
+      };
+      list.add(item);
+      _pollsLeft[id] = followUpPolls;
+      return _json(item, 202);
+    }
     // 一生运势报告: real engine facts for the owner's sample (life_passed.json).
     if (req.method == 'POST' && path == '/v1/life-reports') {
       return _json({...fixture('life_passed'), 'status': 'pending', 'facts': null, 'layers': null}, 202);

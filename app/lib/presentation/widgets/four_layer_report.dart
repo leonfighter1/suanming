@@ -6,6 +6,7 @@ import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../labels.dart';
+import 'follow_up.dart';
 import 'reading_paragraph.dart';
 import 'remedy.dart';
 import 'trend_chart.dart';
@@ -14,8 +15,11 @@ import 'trend_chart.dart';
 /// 破除運勢 module below. Layer ④ (expectation + AI label) is the fixed footer
 /// [ExpectationFooter], so it stays visible however far the user scrolls.
 class FourLayerReport extends StatefulWidget {
-  const FourLayerReport({super.key, required this.layers, this.reportId, this.birthplace, this.header});
+  const FourLayerReport({super.key, required this.layers, this.reportId, this.birthplace, this.header, this.system});
   final ReportLayers layers;
+
+  /// The reading's method, for 追问's first questions (v7.0.0); null until its chart has loaded.
+  final String? system;
 
   /// Shown above the layers: the reading's chart, a tarot spread (v2.4.0) or the four pillars
   /// (v3.4.0).
@@ -51,11 +55,15 @@ class _FourLayerReportState extends State<FourLayerReport> {
   /// Focus for a target once jumped to, so Tab goes on from there; Tab itself passes them by.
   late final _targetFocus = [for (final _ in _targets) FocusNode(skipTraversal: true)];
 
+  /// 追问 (v7.0.0): the card after the reading, and the floating button that brings it up.
+  final _followUp = FollowUpTarget();
+
   @override
   void dispose() {
     for (final f in _targetFocus) {
       f.dispose();
     }
+    _followUp.dispose();
     super.dispose();
   }
 
@@ -87,13 +95,16 @@ class _FourLayerReportState extends State<FourLayerReport> {
     Widget target(int n, Widget child) =>
         Focus(focusNode: _targetFocus[n], child: KeyedSubtree(key: _targets[n], child: child));
 
-    return ListView(
-      padding: Space.page,
+    // 追问 needs the report: a reading page has it, a preview doesn't.
+    final followUp = widget.reportId != null;
+    final list = ListView(
+      // Room at the bottom for the floating 继续追问, so the last card scrolls clear of it.
+      padding: followUp ? Space.page.copyWith(bottom: Space.xxl + 72) : Space.page,
       // Every card is built, so the jump list can reach the last one from the top.
       scrollCacheExtent: const ScrollCacheExtent.pixels(100000),
       children: [
         // The jump list (v3.4.0): a chip per section and 行动建议, in one row that scrolls sideways
-        // on a phone. Not a lazy list: Tab must reach every chip.
+        // on a phone. Not a lazy list: Tab must reach every chip. Since v7.0.0 it starts with 追问.
         if (layers.interpretation.length > 1)
           Padding(
             key: const Key('jump-list'),
@@ -103,6 +114,17 @@ class _FourLayerReportState extends State<FourLayerReport> {
               child: Row(
                 children: [
                   Text(l10n.jumpTo, style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
+                  if (followUp)
+                    Padding(
+                      padding: const EdgeInsets.only(left: Space.s),
+                      child: ActionChip(
+                        key: const Key('jump-followup'),
+                        avatar: Icon(Icons.forum_outlined, size: 16, color: scheme.primary),
+                        label: Text(l10n.jumpFollowUp),
+                        backgroundColor: scheme.primaryContainer.withValues(alpha: 0.6),
+                        onPressed: _followUp.open,
+                      ),
+                    ),
                   for (final (n, s) in layers.interpretation.indexed)
                     Padding(
                       padding: const EdgeInsets.only(left: Space.s),
@@ -218,6 +240,16 @@ class _FourLayerReportState extends State<FourLayerReport> {
             ),
           ),
         ),
+        // 追问 (v7.0.0): right after the reading, before 行动建议 (the owner: 显眼的位置).
+        if (followUp)
+          FadeSlideIn(
+            index: i++,
+            child: FollowUpCard(
+              parent: 'reports/${widget.reportId}',
+              target: _followUp,
+              starters: l10n.followUpStarters(widget.system),
+            ),
+          ),
         FadeSlideIn(
           index: i++,
           child: target(
@@ -270,6 +302,14 @@ class _FourLayerReportState extends State<FourLayerReport> {
               ],
             ),
           ),
+      ],
+    );
+    if (!followUp) return list;
+    // 「继续追问」 floats at the bottom right, over the reading, from the moment it is ready.
+    return Stack(
+      children: [
+        Positioned.fill(child: FollowUpScope(target: _followUp, child: list)),
+        Positioned(right: Space.l, bottom: Space.l, child: FollowUpButton(target: _followUp)),
       ],
     );
   }

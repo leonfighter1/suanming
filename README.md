@@ -12,6 +12,68 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v7.0.0 (2026-10-28): 追问, follow-up questions on every reading, answered from that reading alone
+
+Stage S13 of the [tech plan](docs/tech-plan.md) is complete (its summary is there): your request for 追问 on every
+method, after the three-part readings of v6.2.0. A big update: pushed.
+
+- **Every finished reading can be asked about further:** 八字, 塔罗, 求签, 算卦, 风水, 起名 (still off) and the 一生运势报告.
+  - **Easy to find** (you: 显眼的位置): a 「继续追问」 button floats at the bottom right as soon as the reading is ready.
+    It brings up the 追问 card, with the cursor in its field.
+    - On a reading page the card comes right after the reading, before 行动建议, in the accent colour.
+    - The jump list at the top starts with 「追问」.
+    - While the field is on screen, the floating button steps aside, so it never covers 发送.
+  - **Asking:** type a question and press Enter (or 发送), or tap one of the suggested questions. Before the first
+    question each method offers two of its own (八字: 「我适合什么样的工作？」; 算卦: 「动爻在提醒我什么？」…).
+  - **The answer** comes in the same three parts as the reading: the term, the commentary, an everyday example.
+    Under it come two or three next questions to tap (you: 持续给出后续问题).
+  - Each question stays on the card with its answer, so you can read the whole thread.
+- **No making things up** (you: 不能胡编乱造).
+  - The answer reads only this reading: the same chart, cards, lot, hexagram or room, what the reading said, and the
+    earlier 追问 on it.
+  - Every paragraph must cite the facts it rests on. One that cites nothing is thrown out, and the answer is
+    written again.
+  - The answer is checked automatically against the reading's own facts:
+    - no card that wasn't drawn, and no orientation it didn't have;
+    - no lot line it doesn't have, and no hexagram or text from another cast;
+    - no 干支 the chart doesn't have.
+      A paragraph that fails is thrown out too, and the answer written again.
+  - **A question the reading can't answer is said to be so,** with what it can answer instead. Examples: another
+    matter than the one a lot or a cast was for (一事一占); someone else's chart; an exact date or amount; a
+    diagnosis.
+  - The same safety rules as the readings: tendency language, no fear, no medical, legal or money advice, and the
+    rule layer on every answer.
+- **Limits:**
+  - one question at a time, and up to 20 per reading;
+  - each 追问 counts against the daily AI caps of `npm run public`, like a reading;
+  - with `IS_AI_MOCK=TRUE` the answers and suggestions are the mock's （示范） text: switch the real model on to see
+    real ones.
+- **For you to try with the real model:** `npm run eval:ai -- --live` now also asks one 追问 per case and records
+  whether the answer stayed with the reading (docs/verification/ai-eval-results.json, `followup`). It costs tokens,
+  as before.
+- **Kept on the server:** each question and its answer, sealed under your account's key in the database (migration
+  007), deleted with the account. The reading's own question is kept with it now, so a 追问 knows what was asked.
+- Verified:
+  - 20 new server tests:
+    - the answer rests on the reading's own facts, in three parts;
+    - a paragraph citing nothing, or naming a card never drawn, is sent back;
+    - an out-of-scope reply makes no claim;
+    - the last six 追问 are read, and a 八字 追问 that names a year reads that year in full;
+    - suggestions are checked;
+    - Geo-Rule comes first, and the rule layer scans the answer;
+    - the API: one at a time, the limit, the daily caps, the 一生运势报告, the review console and the database
+      store.
+  - 9 new app tests:
+    - the floating button brings the field into view and steps aside;
+    - the card sits after the reading;
+    - asking with Enter, the three-part answer, and a suggestion asking the next;
+    - the out-of-scope reply;
+    - the busy, limit and daily-cap messages;
+    - the limit;
+    - Tab;
+    - every method's reading, and the 一生运势报告.
+  - All 515 server tests and 165 app tests pass; harness PASS.
+
 ### v6.2.0 (2026-10-28): readings in three parts (术语 → 评论 → 例子), names kept with the chart, three accounts
 
 The first part of stage S13 of the [tech plan](docs/tech-plan.md), plus your bug report and your three new

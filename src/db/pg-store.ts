@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import { PGlite, type Transaction } from "@electric-sql/pglite";
 import type {
   ChartRecord,
+  FollowUpRecord,
   LifeReportRecord,
   RemedyRecord,
   ReportRecord,
@@ -32,6 +33,7 @@ const MIGRATIONS = [
   "004_fengshui",
   "005_naming",
   "006_liuyao",
+  "007_followups",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -395,6 +397,35 @@ export class PgStore implements Store, UserStore {
     return Promise.all(rows.rows.map((r) => this.open<LifeReportRecord>("life_reports", r)));
   }
 
+  async putFollowUp(f: FollowUpRecord) {
+    const body = sealJson(await this.dek(f.owner), f, `followups:${f.id}`);
+    await this.db.query(
+      `INSERT INTO followups (id, user_id, parent_kind, parent_id, status, body_ciphertext, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, body_ciphertext = EXCLUDED.body_ciphertext,
+         updated_at = EXCLUDED.updated_at`,
+      [f.id, f.owner, f.parent.kind, f.parent.id, f.status, body, f.created_at, f.updated_at],
+    );
+  }
+
+  async getFollowUp(id: string) {
+    const row = (
+      await this.db.query<Row>("SELECT id, user_id, body_ciphertext FROM followups WHERE id = $1", [
+        id,
+      ])
+    ).rows[0];
+    return row && this.open<FollowUpRecord>("followups", row);
+  }
+
+  async listFollowUps(parentId: string) {
+    // Oldest first, as the in-memory store gives them.
+    const rows = await this.db.query<Row>(
+      "SELECT id, user_id, body_ciphertext FROM followups WHERE parent_id = $1 ORDER BY created_at ASC, seq DESC LIMIT 100",
+      [parentId],
+    );
+    return Promise.all(rows.rows.map((r) => this.open<FollowUpRecord>("followups", r)));
+  }
+
   async listHeld() {
     const held = async <T>(table: string) => {
       // The statuses inline: PGlite sends a JS array for an enum array as "a,b", which PostgreSQL refuses.
@@ -407,6 +438,7 @@ export class PgStore implements Store, UserStore {
       reports: await held<ReportRecord>("reports"),
       remedies: await held<RemedyRecord>("remedies"),
       life: await held<LifeReportRecord>("life_reports"),
+      followups: await held<FollowUpRecord>("followups"),
     };
   }
 
@@ -419,11 +451,12 @@ export class PgStore implements Store, UserStore {
       // Children first, so each count is the table's own and not a cascade's.
       const purge = async (table: string) =>
         (await tx.query(`DELETE FROM ${table} WHERE user_id = $1`, [owner])).affectedRows ?? 0;
+      const followups = await purge("followups");
       const remedies = await purge("remedies");
       const life_reports = await purge("life_reports");
       const reports = await purge("reports");
       const charts = await purge("chart_facts");
-      const counts = { charts, reports, remedies, life_reports };
+      const counts = { charts, reports, remedies, life_reports, followups };
       await tx.query(
         "INSERT INTO deletion_requests (subject_hash, channel, status, evidence) VALUES ($1, 'app', 'in_progress', $2)",
         [this.hmac(`subject:${owner}`), counts],
@@ -445,5 +478,6 @@ const TABLES = [
   "reports",
   "remedies",
   "life_reports",
+  "followups",
   "deletion_requests",
 ] as const;

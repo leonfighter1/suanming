@@ -51,6 +51,18 @@ extension ApiLabels on AppLocalizations {
         _ => h,
       };
 
+  /// 追问's first questions per method (v7.0.0), offered before anything is asked; `life` is the 一生运势报告.
+  List<String> followUpStarters(String? system) => switch (system) {
+        'bazi' => [followUpStartBazi1, followUpStartBazi2],
+        'tarot' => [followUpStartTarot1, followUpStartTarot2],
+        'qiuqian' => [followUpStartQiuqian1, followUpStartQiuqian2],
+        'liuyao' => [followUpStartLiuyao1, followUpStartLiuyao2],
+        'fengshui' => [followUpStartFengshui1, followUpStartFengshui2],
+        'naming' => [followUpStartNaming1, followUpStartNaming2],
+        'life' => [followUpStartLife1, followUpStartLife2],
+        _ => const [],
+      };
+
   String pillar(String p) => switch (p) {
         'year' => pillarYear,
         'month' => pillarMonth,

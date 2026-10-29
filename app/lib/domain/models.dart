@@ -397,6 +397,15 @@ class ChartResult {
 class Paragraph {
   const Paragraph(this.text, this.sourceLevel, this.factRefs, {this.term, this.example});
 
+  /// A reading's paragraph, or since v7.0.0 a 追问 answer's.
+  factory Paragraph.fromJson(Json p) => Paragraph(
+        p['text'] as String,
+        p['source_level'] as String,
+        (p['fact_refs'] as List).cast<String>(),
+        term: p['term'] as String?,
+        example: p['example'] as String?,
+      );
+
   /// 术语 (v6.2.0): the facts the paragraph rests on, said the tradition's way, shown first. Null on older readings.
   final String? term;
 
@@ -505,16 +514,7 @@ class ReportLayers {
         j['interpretation'],
         (s) => Section(
           s['topic'] as String,
-          _list(
-            s['paragraphs'],
-            (p) => Paragraph(
-              p['text'] as String,
-              p['source_level'] as String,
-              (p['fact_refs'] as List).cast<String>(),
-              term: p['term'] as String?,
-              example: p['example'] as String?,
-            ),
-          ),
+          _list(s['paragraphs'], Paragraph.fromJson),
           s['summary'] as String?,
         ),
       ),
@@ -619,6 +619,64 @@ class RemedyList {
   final List<RemedyView> items;
 
   String get priceLabel => '$currency ${amount.toStringAsFixed(amount == amount.roundToDouble() ? 0 : 2)}';
+}
+
+/// One 追问 and its answer (v7.0.0): `GET /v1/{reports|life-reports}/{id}/followups`, `GET /v1/followups/{id}`.
+class FollowUpView {
+  const FollowUpView({
+    required this.id,
+    required this.question,
+    required this.status,
+    this.inScope = true,
+    this.paragraphs = const [],
+    this.suggestions = const [],
+    this.message,
+  });
+
+  factory FollowUpView.fromJson(Json j) {
+    final a = j['answer'] as Json?;
+    return FollowUpView(
+      id: j['followup_id'] as String,
+      question: j['question'] as String,
+      status: j['status'] as String,
+      inScope: a?['in_scope'] as bool? ?? true,
+      paragraphs: _list(a?['paragraphs'], Paragraph.fromJson),
+      suggestions: ((a?['suggestions'] as List?) ?? const []).cast<String>(),
+      message: j['message'] as String?,
+    );
+  }
+
+  final String id;
+  final String question;
+
+  /// pending | passed | blocked | manual_review | failed
+  final String status;
+
+  /// false: the reading can't answer this, and the one paragraph says so.
+  final bool inScope;
+
+  /// The answer, as a reading's paragraphs: term, commentary, example. Empty until it has passed.
+  final List<Paragraph> paragraphs;
+
+  /// What the answer suggests asking next.
+  final List<String> suggestions;
+  final String? message;
+}
+
+/// A reading's 追问, oldest first, and how many it may have.
+class FollowUpList {
+  const FollowUpList(this.limit, this.items);
+
+  factory FollowUpList.fromJson(Json j) =>
+      FollowUpList((j['limit'] as num).toInt(), _list(j['items'], FollowUpView.fromJson));
+
+  final int limit;
+  final List<FollowUpView> items;
+
+  bool get answering => items.any((f) => f.status == 'pending');
+
+  /// What is left to ask: failed ones don't count.
+  int get left => limit - items.where((f) => f.status != 'failed').length;
 }
 
 class ReportView {

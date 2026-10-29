@@ -51,6 +51,15 @@ const HASHES: Record<string, string> = {
   // v5.3.0 (S10)
   "narrative_liuyao@2": "193c6eda8248674b",
   "action_liuyao@1": "82a59b90dfa30a15",
+  // v7.0.0 (S13 WP13.2): 追问, one prompt per method and one for the 一生运势报告
+  "followup_bazi@1": "4e43565d20de349b",
+  "followup_tarot@1": "883078143895e07c",
+  "followup_astrology@1": "7a678494b699e4a6",
+  "followup_qiuqian@1": "38d46ff61f3de0ff",
+  "followup_fengshui@1": "ef6fcd79586c05d8",
+  "followup_naming@1": "bf56ee25c0f11bb0",
+  "followup_liuyao@1": "3f21effd4153d3e1",
+  "followup_life@1": "874e9b6dbae185b6",
 };
 
 const charts = {
@@ -102,8 +111,8 @@ describe("each method's own prompts (rule 8)", () => {
     expect(now).toEqual(HASHES);
   });
 
-  it("no two methods share a reading, action or plan prompt", () => {
-    for (const agent of ["narrative", "action", "remedy"] as const) {
+  it("no two methods share a reading, action, plan or 追问 prompt", () => {
+    for (const agent of ["narrative", "action", "remedy", "followup"] as const) {
       const ids = Object.entries(METHOD_PROMPTS).flatMap(([system, own]) =>
         own[agent] ? [[system, own[agent]!.id] as const] : [],
       );
@@ -156,6 +165,13 @@ describe("each method's own prompts (rule 8)", () => {
       PROMPTS.action_naming,
       PROMPTS.narrative_liuyao,
       PROMPTS.action_liuyao,
+      // 追问 (v7.0.0): each method answers in its own terms.
+      PROMPTS.followup_tarot,
+      PROMPTS.followup_astrology,
+      PROMPTS.followup_qiuqian,
+      PROMPTS.followup_fengshui,
+      PROMPTS.followup_naming,
+      PROMPTS.followup_liuyao,
     ];
     for (const p of others) {
       for (const bazi of [

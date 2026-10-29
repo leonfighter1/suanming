@@ -1,0 +1,36 @@
+{
+  "followup_id": "45454545-4545-4545-8545-454545454545",
+  "parent": {
+    "kind": "report",
+    "id": "11111111-1111-4111-8111-111111111111"
+  },
+  "question": "明年我的事业怎么样？",
+  "status": "passed",
+  "created_at": "2026-10-25T00:00:00.000Z",
+  "updated_at": "2026-10-25T00:00:00.000Z",
+  "answer": {
+    "in_scope": true,
+    "paragraphs": [
+      {
+        "term": "（示範）本次解讀的依據",
+        "text": "（示範）就你追問的這一點，傳統上仍要回到這次的結果本身來看：照解讀裡說的節奏，一步一步來。",
+        "example": "（示範）比如這週先把最在意的一件事寫下來，再對照解讀想想下一步。",
+        "source_level": "derived",
+        "fact_refs": [
+          "/day_master"
+        ]
+      }
+    ],
+    "suggestions": [
+      "（示範）這對我的工作意味著什麼？",
+      "（示範）接下來一個月要留意什麼？"
+    ]
+  },
+  "ai_disclosure": {
+    "generated": true,
+    "model": "mock/deepseek-v4-pro",
+    "prompt_version": "followup_bazi@1,guard@2",
+    "label_required": false,
+    "generated_at": "2026-10-25T00:00:00.000Z"
+  }
+}

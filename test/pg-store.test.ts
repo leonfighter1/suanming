@@ -12,6 +12,7 @@ import { createApiServer } from "../src/api/server.js";
 import {
   InMemoryStore,
   type ChartRecord,
+  type FollowUpRecord,
   type LifeReportRecord,
   type RemedyRecord,
   type ReportRecord,
@@ -112,7 +113,17 @@ function records(owner: string) {
     updated_at: at(5),
     error: "provider down",
   };
-  return { chart, daily, reading, plan, life };
+  // 追问 (v7.0.0): the question is the user's own words, sealed like a reading.
+  const ask: FollowUpRecord = {
+    id: randomUUID(),
+    owner,
+    parent: { kind: "report", id: reading.id },
+    question: "我和同事的相处会好转吗",
+    status: "pending",
+    created_at: at(6),
+    updated_at: at(6),
+  };
+  return { chart, daily, reading, plan, life, ask };
 }
 
 async function fill(store: Store, r: ReturnType<typeof records>) {
@@ -121,6 +132,7 @@ async function fill(store: Store, r: ReturnType<typeof records>) {
   await store.putReport(r.reading);
   await store.putRemedy(r.plan);
   await store.putLifeReport(r.life);
+  await store.putFollowUp(r.ask);
 }
 
 const dirs: string[] = [];
@@ -237,10 +249,13 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
         reports: 1,
         remedies: 1,
         life_reports: 1,
+        followups: 1,
       });
       await users.delete(a);
       expect(await store.getChart(ra.chart.id)).toBeUndefined();
       expect(await store.getReport(ra.reading.id)).toBeUndefined();
+      expect(await store.getFollowUp(ra.ask.id)).toBeUndefined();
+      expect(await store.listFollowUps(rb.reading.id)).toEqual([rb.ask]);
       expect(await users.get(a)).toBeUndefined();
       expect(await store.getReport(rb.reading.id)).toEqual(rb.reading);
       expect(await users.get(b)).toEqual(other);
@@ -327,8 +342,16 @@ describe("the database store", () => {
         "google-subject-42",
         "陳大文",
         "高雄市",
+        "我和同事的相处会好转吗",
       ];
-      const tables = ["users", "chart_facts", "reports", "remedies", "life_reports"] as const;
+      const tables = [
+        "users",
+        "chart_facts",
+        "reports",
+        "remedies",
+        "life_reports",
+        "followups",
+      ] as const;
       const stored: Buffer[] = [];
       for (const t of tables) {
         for (const row of await pg.rawRows(t)) {
@@ -361,7 +384,14 @@ describe("the database store", () => {
       await fill(pg, records(owner));
       await pg.deleteOwnerData(owner);
       await pg.delete(owner);
-      for (const t of ["users", "chart_facts", "reports", "remedies", "life_reports"] as const) {
+      for (const t of [
+        "users",
+        "chart_facts",
+        "reports",
+        "remedies",
+        "life_reports",
+        "followups",
+      ] as const) {
         expect(await pg.rawRows(t), t).toEqual([]);
       }
       const [request, ...more] = await pg.rawRows("deletion_requests");
@@ -461,6 +491,7 @@ describe("the API on the database store", () => {
         reports: 1,
         remedies: 1,
         life_reports: 0,
+        followups: 0,
       });
       expect(await pg.rawRows("reports")).toEqual([]);
 

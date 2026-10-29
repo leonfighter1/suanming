@@ -118,9 +118,20 @@ function knownGanzhi(chart: ChartFact): Set<string> {
 }
 
 export function checkFaithfulness(chart: ChartFact, report: Report): FaithfulnessIssue[] {
+  return checkTexts(chart, reportTexts(report), report.locale, report.created_at);
+}
+
+/**
+ * The same checks on any model texts about [chart], written at [createdAt] (its year is 今年): a reading's, or
+ * since v7.0.0 a 追问 answer's, which the follow-up pipeline sends back when they find anything.
+ */
+export function checkTexts(
+  chart: ChartFact,
+  texts: string[],
+  locale: Locale,
+  createdAt: string,
+): FaithfulnessIssue[] {
   const issues: FaithfulnessIssue[] = [];
-  const texts = reportTexts(report);
-  const locale = report.locale as Locale;
 
   if (chart.system === "bazi") {
     const known = knownGanzhi(chart);
@@ -130,7 +141,7 @@ export function checkFaithfulness(chart: ChartFact, report: Report): Faithfulnes
         if (!known.has(m[0]))
           issues.push({ kind: "unknown_ganzhi", detail: `${m[0]} is not in the chart`, quote: t });
       }
-      const thisYear = Number(report.created_at.slice(0, 4));
+      const thisYear = Number(createdAt.slice(0, 4));
       for (const m of t.matchAll(RELATIVE_GZ)) {
         const year = thisYear + RELATIVE_OFFSET[m[1]!.toLowerCase()]!;
         const real = yearGanZhi(year);
@@ -225,7 +236,7 @@ export function checkFaithfulness(chart: ChartFact, report: Report): Faithfulnes
     const mine = all.filter((h) => own.has(h.id)).flatMap((h) => h.texts[locale]);
     const others = all.filter((h) => !own.has(h.id));
     // The only 干支 a reading may name: the cast time's four (rule 29), and last, this and next year's.
-    const year = Number(report.created_at.slice(0, 4));
+    const year = Number(createdAt.slice(0, 4));
     const ganzhi = new Set([
       ...Object.values(f.cast.ganzhi),
       yearGanZhi(year - 1),

@@ -190,6 +190,16 @@ class ApiClient {
     return (j['regions'] as List).cast<Json>().map(PlaceRegion.fromJson).toList();
   }
 
+  // ---- 追问 (v7.0.0) ----
+
+  /// A reading's 追问, oldest first: [parent] is `reports/<id>` or `life-reports/<id>`.
+  Future<FollowUpList> listFollowUps(String parent) async =>
+      FollowUpList.fromJson(await _authed('GET', '/v1/$parent/followups'));
+
+  /// Asks one more: answered in the background (202), so poll [listFollowUps].
+  Future<FollowUpView> askFollowUp(String parent, String question) async =>
+      FollowUpView.fromJson(await _authed('POST', '/v1/$parent/followups', {'question': question}));
+
   // ---- 破除運勢 plans (paid per topic) ----
 
   Future<RemedyList> listRemedies(String reportId) async =>

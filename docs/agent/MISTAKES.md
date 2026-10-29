@@ -38,7 +38,7 @@
 34. Before building a plan item, search the DEVLOG, the README and git log for an owner decision on the same thing (owner, Owner request); a plan item never overrides one. Label owner requests as such in the DEVLOG.
 35. With PGlite, pass a JS array only for a column of a known array type such as text[]; for an enum array, write constant values into the SQL or pass text[] and cast it there. Probe a new parameter type in a scratch script before relying on it.
 36. Code that only scripts need (sync, review, build) is imported from its own module, never re-exported from an index the server imports; runtime-deps.test.ts holds the server to its dependencies.
-37. Against the mock provider, never assert that a report is still pending: drain the jobs and assert the end state, or give the test a provider that waits until released.
+37. Against the mock provider, never assert that a report is still pending: drain the jobs and assert the end state, or give the test a provider that waits until released. This covers any job, not only reports (recurred v7.0.0: a 追问's 409 "still being answered" check needed a gated provider).
 38. Copy the project path from the environment or an earlier tool call; never retype a path with CJK characters. The folder is `C:\命理大师` (简体 师); `C:\命理大師` is a stray folder the guard won't let go of (v4.3.0).
 39. To verify a traditional text, read the primary source for every item; agreement between modern copies can hide a shared error. v4.3.0: both modern 籤詩 copies had 寅午戍 (no such branch), 敵圖, 咨嘆 and 步多; the Qing print had 戌, 敵國, 咨嗟 and 步步.
 40. Never put the owner email or any personal data in a request to an outside service, not even in a User-Agent; use a generic agent string.
@@ -56,8 +56,15 @@
 52. Anything a stored record must show on every device or after a restart (a name, a label, a choice) is kept with the record on the server, sealed like it. Browser storage is per origin, and npm run public changes the origin every run: keep only per-device conveniences there.
 53. Give every child an AnimatedSwitcher can show its own key, whenever two of them can follow each other: two unkeyed children at once are duplicate keys. Test a page along every way users reach it (from history as well as right after making it).
 54. Run npx prettier --check . as the very last step before the harness, after the final edit to any Markdown, YAML or TypeScript file; a check made before a later edit proves nothing about it.
+55. A floating control must never cover what it leads to: hide it (out of the hit test and the Tab order too) while its target is on screen, and test the target with hitTestable after opening it at a phone size. When code both scrolls to a field and focuses it, await the scroll first.
 
 ## Log
+
+### 2026-10-28: A floating button over the controls it leads to
+- **Symptom:** On a 412x900 phone the floating 继续追问 sat on top of the 发送 button it had just scrolled into view, so a tap went to the floating button (v7.0.0, found by a hitTestable check).
+- **Root cause:** A Positioned button over a scroll view covers whatever scrolls under its corner, its own target included; and focusing the field scrolled it into view at once, racing the animated scroll to the field and button together.
+- **Fix:** The button steps aside (scale 0, IgnorePointer, ExcludeFocus) while the field and 发送 are on screen, measured on every scroll and size change (FollowUpScope); open() awaits the scroll, then focuses.
+- **Rule:** A floating control must never cover what it leads to: hide it (out of the hit test and the Tab order too) while its target is on screen, and test the target with hitTestable after opening it at a phone size. When code both scrolls to a field and focuses it, await the scroll first. (Rule 55)
 
 ### 2026-10-28: A doc edited after the format check
 - **Symptom:** The v6.2.0 harness failed at lint: docs/web-test.md was not Prettier-clean.

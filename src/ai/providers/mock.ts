@@ -154,6 +154,35 @@ const EXAMPLE: Record<Locale, string> = {
   en: "(Demo) For example, when something small comes up this week, pause first, then handle it at your own pace.",
 };
 
+/** 追问 (v7.0.0): one grounded paragraph in three parts, and two next questions. */
+const FOLLOWUP: Record<
+  Locale,
+  { term: string; text: string; example: string; suggestions: string[] }
+> = {
+  "zh-Hant": {
+    term: "（示範）本次解讀的依據",
+    text: "（示範）就你追問的這一點，傳統上仍要回到這次的結果本身來看：照解讀裡說的節奏，一步一步來。",
+    example: "（示範）比如這週先把最在意的一件事寫下來，再對照解讀想想下一步。",
+    suggestions: ["（示範）這對我的工作意味著什麼？", "（示範）接下來一個月要留意什麼？"],
+  },
+  "zh-Hans": {
+    term: "（示范）本次解读的依据",
+    text: "（示范）就你追问的这一点，传统上仍要回到这次的结果本身来看：照解读里说的节奏，一步一步来。",
+    example: "（示范）比如这周先把最在意的一件事写下来，再对照解读想想下一步。",
+    suggestions: ["（示范）这对我的工作意味着什么？", "（示范）接下来一个月要留意什么？"],
+  },
+  en: {
+    term: "(Demo) What this reading rests on",
+    text: "(Demo) For what you asked, tradition goes back to this reading itself: take it step by step, at the pace the reading describes.",
+    example:
+      "(Demo) For example, write down the one thing you care about most this week, then reread the reading for the next step.",
+    suggestions: [
+      "(Demo) What does this mean for my work?",
+      "(Demo) What should I watch for next month?",
+    ],
+  },
+};
+
 const ACTION: Record<Locale, string> = {
   "zh-Hant": "（示範）本週花十分鐘寫下與「{t}」相關的一個觀察。",
   "zh-Hans": "（示范）本周花十分钟写下与“{t}”相关的一个观察。",
@@ -333,6 +362,25 @@ export class MockProvider implements LLMProvider {
         })),
         basis: r.basis,
         fact_refs: p.system === "bazi" ? ["/day_master", "/wuxing_weighted"] : ["/cards/0"],
+      };
+      return { kind: "ok", data, model, usage: USAGE };
+    }
+    if (req.agent === "followup") {
+      // The pipeline passes a path the reading itself cited, so the demo answer is grounded too.
+      const p = req.payload as { refs: string[] };
+      const f = FOLLOWUP[locale];
+      const data = {
+        in_scope: true,
+        paragraphs: [
+          {
+            term: f.term,
+            text: f.text,
+            example: f.example,
+            source_level: "derived",
+            fact_refs: p.refs,
+          },
+        ],
+        suggestions: f.suggestions,
       };
       return { kind: "ok", data, model, usage: USAGE };
     }

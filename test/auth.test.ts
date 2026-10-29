@@ -250,6 +250,7 @@ describe("DELETE /v1/account", () => {
       reports: 1,
       remedies: 1, // the tarot reading's one plan (on its 建议) was preloaded
       life_reports: 0,
+      followups: 0,
     });
     expect((await authed(t.access_token, "/v1/me")).status).toBe(401);
     expect((await post("/v1/auth/refresh", { refresh_token: t.refresh_token })).status).toBe(401);

@@ -361,6 +361,18 @@ final remedyProvider = StreamProvider.autoDispose.family<RemedyView, String>((re
   }
 });
 
+/// A reading's 追问 (v7.0.0), polled while one is being answered. [parent] is `reports/<id>` or `life-reports/<id>`.
+final followUpsProvider = StreamProvider.autoDispose.family<FollowUpList, String>((ref, parent) async* {
+  final api = ref.watch(apiClientProvider);
+  final interval = ref.watch(pollIntervalProvider);
+  while (true) {
+    final list = await api.listFollowUps(parent);
+    yield list;
+    if (!list.answering) return;
+    await Future<void>.delayed(interval);
+  }
+});
+
 /// Polls a report until it leaves `pending`.
 final reportProvider = StreamProvider.autoDispose.family<ReportView, String>((ref, id) async* {
   final api = ref.watch(apiClientProvider);

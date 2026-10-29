@@ -14,6 +14,7 @@ final reviewsProvider = FutureProvider.autoDispose<List<Json>>((ref) => ref.watc
 String kindLabel(AppLocalizations l10n, String kind) => switch (kind) {
   'remedy' => l10n.kindRemedy,
   'life_report' => l10n.kindLife,
+  'followup' => l10n.kindFollowUp,
   _ => l10n.kindReport,
 };
 

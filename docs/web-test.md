@@ -233,6 +233,20 @@ line in every model call, and the `id` rule group records any hit.
 - To check: sign in, make a 八字 reading, then open the page in a private window (or from another device) and sign
   in again. History still names the person.
 
+## 追问 (v7.0.0)
+
+- Open any finished reading (八字, 塔罗, 求签, 算卦, 风水) or a 一生运势报告. 「继续追问」 floats at the bottom right; it
+  brings up the 追问 card and puts the cursor in its field. On a reading page the card sits right after the reading,
+  and the jump list starts with 追问.
+- Type a question and press Enter (or 发送), or tap a suggested question. The answer comes in the reading's three
+  parts (term, commentary, example), with next questions under it.
+- The answer rests only on this reading. A question it can't answer (another matter for a lot or a cast, someone
+  else's chart, a date or an amount) is answered with 「超出这次结果能回答的范围」 and what can be asked instead.
+- One at a time, up to 20 per reading. Each 追问 counts against the daily AI caps of public mode, like a reading.
+- With `IS_AI_MOCK=TRUE` the answers and suggestions are the mock's （示范） text.
+- `npm run eval:ai -- --live` also asks one 追问 per case and records whether its answer stayed with the reading
+  (`followup.unfaithful` in docs/verification/ai-eval-results.json).
+
 ## Cache
 
 Every page open loads the current build, in debug as well:

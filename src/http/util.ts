@@ -5,6 +5,8 @@ export class HttpError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** A machine-readable reason in the problem body (`code`), e.g. followup_pending (v7.0.0). */
+    readonly code?: string,
   ) {
     super(message);
   }

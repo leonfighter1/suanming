@@ -24,3 +24,15 @@ export {
   type LifeReport,
   type LifeTopic,
 } from "./life.js";
+export {
+  FOLLOWUP_LIMIT,
+  FOLLOWUP_QUESTION_MAX,
+  FOLLOWUP_THREAD,
+  followUpAvailable,
+  FollowUpInputError,
+  generateFollowUp,
+  type FollowUp,
+  type FollowUpAnswer,
+  type FollowUpParent,
+  type FollowUpTurn,
+} from "./followup.js";

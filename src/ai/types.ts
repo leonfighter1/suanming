@@ -2,7 +2,15 @@ import type { ChartSystem, SourceLevel } from "../chart-fact/index.js";
 import type { Locale } from "./terms.js";
 
 export type AgentName =
-  "narrative" | "action" | "trend" | "remedy" | "life_methods" | "life_topics" | "guard";
+  | "narrative"
+  | "action"
+  | "trend"
+  | "remedy"
+  | "life_methods"
+  | "life_topics"
+  // 追问 (v7.0.0, S13): a follow-up question on a passed reading or 一生运势报告.
+  | "followup"
+  | "guard";
 
 /**
  * The sections a report can have: the six analysis areas (`wuxing` and `dayun_liunian` only for
