@@ -44,6 +44,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S15 菜单、图标、登录、邮件 | the menu, app icon, sign-in three ways, reports by email    | big    | v9.0.0 + summary  | done        |
 | S16 Owner updates          | home bar, new parts come into view, the 求签 altar          | medium | v9.1.0            | done        |
 | S17 Claude 与模型选择      | Claude as the AI service; the models to choose from         | medium | v9.2.0            | done        |
+| S18 八字 AI 解读           | the AI's own reading, a 总结, no 行动建议, the skill        | medium | v9.3.0            | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1700,9 +1701,85 @@ As built (v9.2.0):
     provider under `deepseek` alone now set it under both keys (rule 63).
 - **Not done:** a real Claude reading. It waits for the owner's switch.
 
+## S18 八字 AI 解读 (medium → v9.3.0)
+
+**Owner requests (2026-10-29), after v9.2.0, two messages:**
+
+> 八字排盘AI算法需要更新，当给AI去运算时，只需要给出当前人的资料和具体背景和问题，让AI给一个详细且具体并且符合UI 的角度过程。
+> 行动建议可以不用做了。还有运势要尽量详实具体，且不绕弯子直接说就行了。另外·比如XXX` 这样的例子可以不用做了，可以移除。一定要给出
+> 总结，比如XXX 你是一个XXX样的人，过去怎么样，现在怎么样，可能会有什么问题，会有什么得势或者得失，未来的运势怎么怎么样，从什么时候开始
+> 要注意，从什么时候开始要发力，当你遇到问题时该怎么办等等等等，越详尽越好。
+>
+> 一个是引擎解读，一个是ai解读，可以把button label改成 ~用AI做更精确解读~，ai解读时尽量不采用引擎数据，但是ai prompt要做好规范，且
+> 回馈数据要完整符合用户需求。这些要求可以写到skill去
+
+Read as: for 八字 only (rule 8), the AI reading becomes the AI's own analysis beside the engine's. The engine's reading
+stays where it is (the 命盘事实 card, the trend chart, the 破除运势 plans). "尽量不采用引擎数据" is read as: the AI gets
+the person (the 排盘, their background from the profile, their question) and none of the engine's judgements. The
+排盘 itself stays the engine's (pillars, 大运, 流年 years and 干支): a model left to reckon 干支 gets years wrong (the
+DeepSeek runs once called 2027 丙午), and every reading must match the chart on its page (CLAUDE.md rule 1).
+
+- **WP18.1 What the AI reads.** The 八字 reading's view leaves out the engine's judgements: `strength` (its 扶抑
+  count, 得令, 喜用 and 忌), `wuxing_weighted` (its weighted score) and `trend` (its period scores). It keeps the
+  排盘: pillars with 藏干, 十神, 十二长生 and 纳音, 日主, 月令, the five-element count, 合冲刑害破, 神煞, 空亡, 胎元,
+  every 大运 and 流年. 追问 reads the same view.
+- **WP18.2 What the AI writes (narrative_bazi@8).** A new, self-contained prompt: the AI judges 旺衰, 格局, 调候, 喜用
+  and each period itself and says how. Every UI section (五行, 性格, 事业财运, 婚姻感情, 大运流年, 健康) in detail, 术语 then
+  评论, no 比如 example; 大运流年 the most detailed, by years; said straight (不绕弯子), with the safety basics kept. A
+  required 总结 in nine parts: who they are, the past, now, what may go wrong, 得势与得失, the years ahead, from when to
+  take care, from when to push, what to do when trouble comes. No 行动建议: 八字 has no action step any more.
+- **WP18.3 The app.** The 八字 button says 用AI做更精确解读. The reading opens with the 总结 card (a jump chip too); the
+  行动建议 card shows only when a reading has actions (older 八字 readings, other methods). Exports, report emails and
+  追问 carry the 总结.
+- **WP18.4 The rules kept.** A project skill, `ai-reading`, with the owner's requirements for AI readings and how they
+  are checked; CLAUDE.md names it. Tests pin the new prompt, the view, the 总结 and the pages.
+
+Lessons: rules 12, 26, 28, 29, 32, 42, 53, 54, 58, 59; the keyboard-access skill.
+
+As built (v9.3.0):
+
+- **WP18.1:** `baziView(…, { trend: false, judgements: false })` in `readingInputs`, so the reading and its 追问 read
+  the 排盘 alone. A 破除运势 plan's view is byte for byte as before: it keeps the engine's 喜用. A probe that sent the
+  judgements again failed both view tests.
+- **WP18.2:**
+  - narrative_bazi@8 is self-contained: the analysis (旺衰, 格局, 调候, 喜用 and how each period meets the chart)
+    is the model's, every section's content is spelled out, 大运流年 gets one paragraph per period in focus, and the
+    text says it straight with the safety basics kept.
+  - narrative_bazi@7 and action_bazi@4 moved to `RETIRED_PROMPTS`, still pinned at their released hashes.
+  - `baziNarrativeSchema` has no `example` and requires `conclusion`, whose nine parts are all required. Each part is
+    grounded as a paragraph is: one that cites nothing is sent back, then left out and counted.
+  - 大运流年 keeps up to six paragraphs.
+  - The rule layer and `checkFaithfulness` read the 总结.
+  - `METHOD_PROMPTS.bazi` has no action prompt; the pipeline skips the step and the review sees the 总结.
+  - The mock writes a （示范） 总结, and gives an old scripted 八字 narrative one, so tests keep reading their own
+    sections.
+- **WP18.3:**
+  - The 八字 ReportRequest says 用AI做更精确解读; every other method keeps 生成 AI 解读.
+  - The 总结 card opens the AI part, after the engine's facts, with a 总结 chip in the jump list.
+  - The 行动建议 card and its chip show only when a reading has actions.
+  - Word / PDF, Markdown, the report email and 追问 carry the 总结. The parts' list reaches the app through
+    sync:app (`conclusionParts`), with their labels in the ARB files.
+- **WP18.4:** `.claude/skills/ai-reading` holds the owner's requirements and how each is checked; CLAUDE.md lists it
+  and notes the reading under hard rule 1. Every test that used the 八字 fixture for 举例 or 行动建议 now uses the
+  tarot one.
+- **Not done:** a real reading, which waits for the owner's switch. `npm run eval:ai` now records each 八字 case's
+  总结 and how many of its parts came back.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S18 八字 AI 解读 (done 2026-10-29: v9.3.0)
+
+1. **Delivered (v9.3.0):** WP18.1 the 排盘 alone for the AI; WP18.2 narrative_bazi@8 with its required 总结, no 举例
+   and no 行动建议; WP18.3 the button, the 总结 card and every place a reading goes; WP18.4 the ai-reading skill.
+2. **Numbers:** 9 new server tests (7 in test/bazi-ai-reading.test.ts), and 15 changed where 八字 no longer has
+   actions or examples (594 in all). 5 new app tests and 8 changed (213 in all).
+3. **Against the plan:** "尽量不采用引擎数据" is read as no engine judgements, while the 排盘 stays the engine's; this
+   is said to the owner. The 总结 opens the AI reading instead of closing it, so it is read first.
+4. **Mistakes:** rule 64 (a card below the screen is offstage to find()).
+5. **Next:** the owner tries a real reading. Still waiting for the owner: the mail and SMS providers, the Phase 3 gate,
+   WP7.2, WP7.3 and WP1.8.
 
 ### S17 Claude 与模型选择 (done 2026-10-29: v9.2.0)
 
@@ -2210,3 +2287,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP17.1    | done                         | v9.2.0  |
 | WP17.2    | done                         | v9.2.0  |
 | WP17.3    | done                         | v9.2.0  |
+| WP18.1    | done                         | v9.3.0  |
+| WP18.2    | done                         | v9.3.0  |
+| WP18.3    | done                         | v9.3.0  |
+| WP18.4    | done                         | v9.3.0  |

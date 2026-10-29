@@ -24,6 +24,7 @@ import 'widgets/remedy.dart' show compactButtons;
 /// The headings a reading's document is written under.
 Map<String, String> readingHeadings(AppLocalizations l10n) => {
       'facts': l10n.layerFacts,
+      'conclusion': l10n.layerConclusion,
       'interpretation': l10n.layerInterpretation,
       'actions': l10n.layerActions,
       'trend': l10n.trendTitle,
@@ -76,6 +77,7 @@ Future<Doc> readingDocumentOf(
     ],
     topicLabel: l10n.topic,
     horizonLabel: l10n.horizon,
+    conclusionLabel: l10n.conclusionPart,
     headings: readingHeadings(l10n),
     followUps: followUps,
   );

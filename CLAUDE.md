@@ -16,6 +16,7 @@ scripts and don't copy them.
 | Flutter app work                   | **appdev** (`~/.claude/skills/appdev`): its check is what harness-check runs for `app/`    | through harness-check                                                                                                                                            |
 | Any app screen, dialog or widget   | **keyboard-access** (`.claude/skills/keyboard-access`): keyboard rules and building blocks | read its checklist; reuse `app/lib/presentation/keyboard.dart`                                                                                                   |
 | Planning, continuing, finishing    | **dev-workflow** (`.claude/skills/dev-workflow`): tech plan, stages, versions, push rule   | work through [docs/tech-plan.md](docs/tech-plan.md); finish with harness PASS → README 更新记录 → version → records → commit; push big updates only              |
+| Any AI prompt, reading or its page | **ai-reading** (`.claude/skills/ai-reading`): the owner's requirements for AI readings     | read it before changing a prompt, what a reading sends the model or writes, or its page, export or email                                                         |
 
 Records:
 
@@ -27,7 +28,9 @@ Records:
 ## Hard rules for this codebase
 
 1. **ChartFact is additive-only.** Never change the meaning of a field. Engines
-   compute facts; the AI only interprets them.
+   compute facts; the AI only interprets them. 八字's AI reading (owner, 2026-10-29) reads the
+   排盘 alone, without the engine's judgements (strength, 喜用, weighted 五行, trend), and judges
+   the chart itself: see the ai-reading skill.
 2. **Every output goes through a pipeline.** Anything model-generated goes through
    `generateReport`, `generateRemedy`, `generateLifeReport` or, for 追问 (v7.0.0),
    `generateFollowUp` (`src/ai/`). Nothing calls a model directly. **Content review (rule-layer holds, the guard, 内容审核)

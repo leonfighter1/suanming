@@ -125,6 +125,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generate => '生成 AI 解读';
 
   @override
+  String get generateBazi => '用AI做更精确解读';
+
+  @override
   String get generating => '正在生成解读…';
 
   @override
@@ -147,6 +150,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get layerActions => '行动建议 · AI 生成';
+
+  @override
+  String get layerConclusion => '总结 · AI 生成';
+
+  @override
+  String get conclusionPortrait => '你是怎样的人';
+
+  @override
+  String get conclusionPast => '过去';
+
+  @override
+  String get conclusionPresent => '现在';
+
+  @override
+  String get conclusionChallenges => '可能遇到的问题';
+
+  @override
+  String get conclusionGains => '得势与得失';
+
+  @override
+  String get conclusionFuture => '未来运势';
+
+  @override
+  String get conclusionCaution => '何时开始要注意';
+
+  @override
+  String get conclusionMomentum => '何时开始要发力';
+
+  @override
+  String get conclusionCoping => '遇到问题时怎么办';
 
   @override
   String get aiBadge => 'AI';
@@ -1234,6 +1267,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get jumpActions => '行动建议';
 
   @override
+  String get jumpConclusion => '总结';
+
+  @override
   String get shareImage => '分享图片';
 
   @override
@@ -2136,6 +2172,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get generate => '生成 AI 解讀';
 
   @override
+  String get generateBazi => '用AI做更精確解讀';
+
+  @override
   String get generating => '正在生成解讀…';
 
   @override
@@ -2158,6 +2197,36 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get layerActions => '行動建議 · AI 生成';
+
+  @override
+  String get layerConclusion => '總結 · AI 生成';
+
+  @override
+  String get conclusionPortrait => '你是怎樣的人';
+
+  @override
+  String get conclusionPast => '過去';
+
+  @override
+  String get conclusionPresent => '現在';
+
+  @override
+  String get conclusionChallenges => '可能遇到的問題';
+
+  @override
+  String get conclusionGains => '得勢與得失';
+
+  @override
+  String get conclusionFuture => '未來運勢';
+
+  @override
+  String get conclusionCaution => '何時開始要注意';
+
+  @override
+  String get conclusionMomentum => '何時開始要發力';
+
+  @override
+  String get conclusionCoping => '遇到問題時怎麼辦';
 
   @override
   String get aiBadge => 'AI';
@@ -3243,6 +3312,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get jumpActions => '行動建議';
+
+  @override
+  String get jumpConclusion => '總結';
 
   @override
   String get shareImage => '分享圖片';

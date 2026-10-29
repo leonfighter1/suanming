@@ -33,12 +33,11 @@
           {
             "term": "（示範）本段依據：五行",
             "text": "（示範）依命盤的日主、月令與加權五行分數，傳統上會從五行的偏旺與偏弱來看整體平衡。此分數為簡化計分。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
-            "source_level": "simplified_rule",
+            "source_level": "derived",
             "fact_refs": [
               "/day_master",
               "/month_command",
-              "/wuxing_weighted"
+              "/wuxing_count"
             ]
           }
         ]
@@ -50,7 +49,6 @@
           {
             "term": "（示範）本段依據：性格",
             "text": "（示範）傳統上認為日主的五行屬性會反映處事風格，可作為自我觀察的參考。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/day_master",
@@ -66,7 +64,6 @@
           {
             "term": "（示範）本段依據：事業財運",
             "text": "（示範）月柱的十神常被用來談工作方式與合作傾向，僅供規劃時參考。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/pillars/month"
@@ -81,7 +78,6 @@
           {
             "term": "（示範）本段依據：婚姻感情",
             "text": "（示範）日支在傳統上與親密關係的相處模式有關，可多留意溝通節奏。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/pillars/day"
@@ -96,7 +92,6 @@
           {
             "term": "（示範）本段依據：大運流年",
             "text": "（示範）目前大運與今年流年的十神組合，可視為這段時間值得關注的主題。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/dayun",
@@ -112,47 +107,72 @@
           {
             "term": "（示範）本段依據：健康",
             "text": "（示範）傳統五行說法會把作息與情緒平衡連結起來。以上不構成醫療建議，如有不適請就醫。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
-            "source_level": "simplified_rule",
+            "source_level": "derived",
             "fact_refs": [
-              "/wuxing_weighted"
+              "/wuxing_count"
             ]
           }
         ]
       }
     ],
-    "actions": [
-      {
-        "topic": "wuxing",
-        "text": "（示範）本週花十分鐘寫下與「五行」相關的一個觀察。",
-        "horizon": "this_week"
+    "conclusion": {
+      "portrait": {
+        "text": "（示範）你是怎樣的人：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/day_master",
+          "/month_command"
+        ]
       },
-      {
-        "topic": "personality",
-        "text": "（示範）本週花十分鐘寫下與「性格」相關的一個觀察。",
-        "horizon": "this_week"
+      "past": {
+        "text": "（示範）過去：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/dayun/cycles/0"
+        ]
       },
-      {
-        "topic": "career_wealth",
-        "text": "（示範）本週花十分鐘寫下與「事業財運」相關的一個觀察。",
-        "horizon": "this_week"
+      "present": {
+        "text": "（示範）現在：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/dayun/cycles/1"
+        ]
       },
-      {
-        "topic": "relationships",
-        "text": "（示範）本週花十分鐘寫下與「婚姻感情」相關的一個觀察。",
-        "horizon": "this_week"
+      "challenges": {
+        "text": "（示範）可能遇到的問題：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/relations"
+        ]
       },
-      {
-        "topic": "dayun_liunian",
-        "text": "（示範）本週花十分鐘寫下與「大運流年」相關的一個觀察。",
-        "horizon": "this_week"
+      "gains": {
+        "text": "（示範）得勢與得失：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/pillars/month"
+        ]
       },
-      {
-        "topic": "health",
-        "text": "（示範）本週花十分鐘寫下與「健康」相關的一個觀察。",
-        "horizon": "this_week"
+      "future": {
+        "text": "（示範）未來運勢：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/dayun/cycles/2"
+        ]
+      },
+      "caution": {
+        "text": "（示範）何時開始要注意：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/liunian/1"
+        ]
+      },
+      "momentum": {
+        "text": "（示範）何時開始要發力：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/liunian/2"
+        ]
+      },
+      "coping": {
+        "text": "（示範）遇到問題時怎麼辦：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/day_master"
+        ]
       }
-    ],
+    },
+    "actions": [],
     "expectation": {
       "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
       "ai_label": "本解讀由 AI 依據命盤資料生成，僅供娛樂和玄學學習使用。",
@@ -464,7 +484,7 @@
   "ai_disclosure": {
     "generated": true,
     "model": "mock/claude-opus-5-5",
-    "prompt_version": "narrative_bazi@7,action_bazi@4,guard@2",
+    "prompt_version": "narrative_bazi@8,guard@2",
     "label_required": false,
     "generated_at": "2026-10-25T00:00:00.000Z"
   }

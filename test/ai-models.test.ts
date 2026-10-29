@@ -215,7 +215,7 @@ describe("the models to choose from (S17, v9.2.0)", () => {
     );
     expect(r.status).toBe("passed");
     expect(claude.calls).toEqual([]);
-    expect(deepseek.calls.map((c) => c.agent).sort()).toEqual(["action", "guard", "narrative"]);
+    expect(deepseek.calls.map((c) => c.agent).sort()).toEqual(["guard", "narrative"]);
     for (const c of deepseek.calls)
       expect([c.model, c.effort]).toEqual(["deepseek-v4-pro", "high"]);
     expect(r.ai_disclosure.model).toBe("mock/deepseek-v4-pro");

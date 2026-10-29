@@ -51,6 +51,20 @@ extension ApiLabels on AppLocalizations {
         _ => h,
       };
 
+  /// A part of a 八字 reading's 总结 (v9.3.0; contract `conclusionParts`).
+  String conclusionPart(String p) => switch (p) {
+        'portrait' => conclusionPortrait,
+        'past' => conclusionPast,
+        'present' => conclusionPresent,
+        'challenges' => conclusionChallenges,
+        'gains' => conclusionGains,
+        'future' => conclusionFuture,
+        'caution' => conclusionCaution,
+        'momentum' => conclusionMomentum,
+        'coping' => conclusionCoping,
+        _ => p,
+      };
+
   /// A method's name, as the home page names it; `life` is the 一生运势报告 (v8.0.0).
   String methodLabel(String system) => switch (system) {
         'bazi' => homeBazi,

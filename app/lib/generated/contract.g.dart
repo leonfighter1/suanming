@@ -16,3 +16,6 @@ const noPlanTopics = <String>{'tarot_cards', 'tarot_synthesis', 'qiuqian_poem', 
 
 /// The areas of life a tarot reading may focus on (TAROT_FOCUS on the server).
 const tarotFocus = <String>['career_wealth', 'relationships', 'health', 'personality'];
+
+/// The parts of a 八字 reading's 总结, in order (CONCLUSION_PARTS on the server, v9.3.0).
+const conclusionParts = <String>['portrait', 'past', 'present', 'challenges', 'gains', 'future', 'caution', 'momentum', 'coping'];

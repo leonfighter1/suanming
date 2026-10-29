@@ -118,7 +118,8 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             icon: _busy
                 ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.auto_awesome),
-            label: Text(l10n.generate),
+            // 八字 (v9.3.0, the owner): the engine has read the chart already; this asks the AI for its own reading.
+            label: Text(widget.system == 'bazi' ? l10n.generateBazi : l10n.generate),
           ),
           const SizedBox(height: Space.s),
           Text(l10n.disclaimerShort, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),

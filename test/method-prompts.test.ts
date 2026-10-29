@@ -7,6 +7,7 @@ import {
   MockProvider,
   PROMPTS,
   promptHash,
+  RETIRED_PROMPTS,
 } from "../src/ai/index.js";
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
@@ -25,7 +26,8 @@ import { DRAW_KEY, FIXED_NOW, PEPPER, withNamingOn } from "./helpers.js";
 // stays pinned through the successor's hash: an edit changes that hash, or makes swap() throw.
 const HASHES: Record<string, string> = {
   "narrative@4": "49007c9a8aba351e",
-  "narrative_bazi@7": "5b0438907f183cd3",
+  // v9.3.0 (S18): 八字's own AI reading, self-contained.
+  "narrative_bazi@8": "d19232f14a20dbc2",
   "narrative_tarot@4": "6bbf24df455a522a",
   "action@3": "87f6e73c8dd8d3de",
   "trend@2": "80a95937498e19fc",
@@ -34,7 +36,6 @@ const HASHES: Record<string, string> = {
   "life_topics@3": "6063894dbf8135d2",
   "guard@2": "49e59c41bbcd38bb",
   "narrative_astrology@2": "6103a67a383504f2",
-  "action_bazi@4": "effdf6065ae231c6",
   "action_tarot@2": "33ab0ed8c7aa7a27",
   "action_astrology@1": "3da662668915d1f0",
   "remedy_bazi@4": "1953c4f923cf05ab",
@@ -60,6 +61,12 @@ const HASHES: Record<string, string> = {
   "followup_naming@1": "bf56ee25c0f11bb0",
   "followup_liuyao@1": "3f21effd4153d3e1",
   "followup_life@1": "874e9b6dbae185b6",
+};
+
+// Released prompts no new reading uses (v9.3.0): their pins as released, so their text never changes either.
+const RETIRED_HASHES: Record<string, string> = {
+  "narrative_bazi@7": "5b0438907f183cd3",
+  "action_bazi@4": "effdf6065ae231c6",
 };
 
 const charts = {
@@ -109,6 +116,10 @@ describe("each method's own prompts (rule 8)", () => {
   it("every released prompt version keeps its hash", () => {
     const now = Object.fromEntries(Object.values(PROMPTS).map((p) => [p.id, promptHash(p)]));
     expect(now).toEqual(HASHES);
+    const retired = Object.fromEntries(
+      Object.values(RETIRED_PROMPTS).map((p) => [p.id, promptHash(p)]),
+    );
+    expect(retired).toEqual(RETIRED_HASHES);
   });
 
   it("no two methods share a reading, action, plan or 追问 prompt", () => {
@@ -144,11 +155,19 @@ describe("each method's own prompts (rule 8)", () => {
       );
       const own = METHOD_PROMPTS[system as keyof typeof METHOD_PROMPTS];
       expect(report.ai_disclosure.prompt_version, system).toBe(
-        `${own.narrative.id},${own.action.id},guard@2`,
+        own.action ? `${own.narrative.id},${own.action.id},guard@2` : `${own.narrative.id},guard@2`,
       );
       expect(mock.calls.find((c) => c.agent === "narrative")!.system).toBe(own.narrative.system);
-      expect(mock.calls.find((c) => c.agent === "action")!.system).toBe(own.action.system);
+      const action = mock.calls.find((c) => c.agent === "action");
+      if (own.action) expect(action!.system).toBe(own.action.system);
+      else expect(action, system).toBeUndefined();
     }
+    // 八字 alone writes no 行动建议 since v9.3.0 (the owner: 「行动建议可以不用做了」).
+    expect(
+      Object.entries(METHOD_PROMPTS)
+        .filter(([, own]) => !own.action)
+        .map(([system]) => system),
+    ).toEqual(["bazi"]);
   });
 
   it("tarot, astrology, 求籤 and 风水 prompts carry no 八字 instructions; 八字 plans use the engine's 喜用", () => {
@@ -191,8 +210,45 @@ describe("each method's own prompts (rule 8)", () => {
     expect(plan).toContain("chart_facts.strength.favorable");
     expect(plan).toContain("虛歲 38–47");
     expect(plan).not.toContain("塔羅");
-    expect(PROMPTS.action_bazi.system).toContain(
+    expect(RETIRED_PROMPTS.action_bazi_4.system).toContain(
       "favourable elements (喜用) given in <chart_summary>",
     );
+  });
+
+  it("八字's AI reading (narrative_bazi@8) judges the chart itself, writes a 总结, and no 举例 or 行动建议", () => {
+    const p = PROMPTS.narrative_bazi.system;
+    // The owner (2026-10-29): 「ai解读时尽量不采用引擎数据」. The prompt names no engine judgement to lean on.
+    expect(p).toContain("chart_facts carries no verdicts and no scores");
+    for (const engine of [
+      "chart_facts.strength",
+      "wuxing_weighted",
+      "chart_facts.trend",
+      "simplified judgement",
+    ]) {
+      expect(p, engine).not.toContain(engine);
+    }
+    // 「一定要给出总结」: the nine parts, each named in the prompt as the schema names it.
+    for (const part of [
+      "portrait",
+      "past",
+      "present",
+      "challenges",
+      "gains",
+      "future",
+      "caution",
+      "momentum",
+      "coping",
+    ]) {
+      expect(p).toContain(`- ${part}: `);
+    }
+    // 「不绕弯子直接说」, with the safety basics kept.
+    expect(p).toContain("Say it straight (直说，不绕弯子)");
+    expect(p).toContain("Direct is not fatalistic");
+    expect(p).toContain("Never name a disease");
+    // 「比如XXX 这样的例子可以不用做了」 and 「行动建议可以不用做了」.
+    expect(p).toContain("No 比如 or 例如 example scenes");
+    expect(p).not.toContain("example (举例)");
+    // The older text is not underneath: v8 stands alone.
+    expect(p).not.toContain(RETIRED_PROMPTS.narrative_bazi_7.system.slice(0, 200));
   });
 });

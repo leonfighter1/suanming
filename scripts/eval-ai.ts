@@ -213,8 +213,13 @@ const results = await Promise.all(
         dropped_ungrounded: report.compliance.dropped_ungrounded,
         faithfulness_issues: issues,
         paragraphs: report.layers?.interpretation.reduce((s, x) => s + x.paragraphs.length, 0) ?? 0,
+        // 八字 (v9.3.0): how many of the 总结's nine parts came back (「回馈数据要完整」); null for other methods.
+        conclusion_parts: report.layers?.conclusion
+          ? Object.keys(report.layers.conclusion).length
+          : null,
         // Kept for the human review the Phase 1 gate requires.
         facts_layer: report.layers?.facts,
+        conclusion: report.layers?.conclusion,
         interpretation: report.layers?.interpretation,
         actions: report.layers?.actions,
         followup: followup && {

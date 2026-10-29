@@ -319,6 +319,12 @@ abstract class AppLocalizations {
   /// **'生成 AI 解读'**
   String get generate;
 
+  /// No description provided for @generateBazi.
+  ///
+  /// In zh, this message translates to:
+  /// **'用AI做更精确解读'**
+  String get generateBazi;
+
   /// No description provided for @generating.
   ///
   /// In zh, this message translates to:
@@ -366,6 +372,66 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'行动建议 · AI 生成'**
   String get layerActions;
+
+  /// No description provided for @layerConclusion.
+  ///
+  /// In zh, this message translates to:
+  /// **'总结 · AI 生成'**
+  String get layerConclusion;
+
+  /// No description provided for @conclusionPortrait.
+  ///
+  /// In zh, this message translates to:
+  /// **'你是怎样的人'**
+  String get conclusionPortrait;
+
+  /// No description provided for @conclusionPast.
+  ///
+  /// In zh, this message translates to:
+  /// **'过去'**
+  String get conclusionPast;
+
+  /// No description provided for @conclusionPresent.
+  ///
+  /// In zh, this message translates to:
+  /// **'现在'**
+  String get conclusionPresent;
+
+  /// No description provided for @conclusionChallenges.
+  ///
+  /// In zh, this message translates to:
+  /// **'可能遇到的问题'**
+  String get conclusionChallenges;
+
+  /// No description provided for @conclusionGains.
+  ///
+  /// In zh, this message translates to:
+  /// **'得势与得失'**
+  String get conclusionGains;
+
+  /// No description provided for @conclusionFuture.
+  ///
+  /// In zh, this message translates to:
+  /// **'未来运势'**
+  String get conclusionFuture;
+
+  /// No description provided for @conclusionCaution.
+  ///
+  /// In zh, this message translates to:
+  /// **'何时开始要注意'**
+  String get conclusionCaution;
+
+  /// No description provided for @conclusionMomentum.
+  ///
+  /// In zh, this message translates to:
+  /// **'何时开始要发力'**
+  String get conclusionMomentum;
+
+  /// No description provided for @conclusionCoping.
+  ///
+  /// In zh, this message translates to:
+  /// **'遇到问题时怎么办'**
+  String get conclusionCoping;
 
   /// No description provided for @aiBadge.
   ///
@@ -2418,6 +2484,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'行动建议'**
   String get jumpActions;
+
+  /// No description provided for @jumpConclusion.
+  ///
+  /// In zh, this message translates to:
+  /// **'总结'**
+  String get jumpConclusion;
 
   /// No description provided for @shareImage.
   ///

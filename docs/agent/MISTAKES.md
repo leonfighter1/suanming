@@ -65,8 +65,15 @@
 61. In a widget test, pump at least 700 ms (BringIntoView.settle and its 400 ms scroll) after a tap that adds content before tapping or measuring that content; compare a rect measured through a transform with closeTo, never exactly.
 62. Test a provider through its real SDK client with a fake fetch (an SSE body for streams), at the largest max_tokens a route uses, not only with a fake client object. Call Claude through messages.stream(...).finalMessage(): the SDK refuses unstreamed requests over about 21,000 max_tokens, and thinking counts toward max_tokens.
 63. A test that scripts or breaks a provider puts it under every provider key (or passes its own routing), never only the key the shipped routes use. Check that a failure test fails for its own reason (the logged error), not only that something failed.
+64. On a page that builds cards past the screen, a finder for one below the fold needs skipOffstage: false, whether it checks that the card exists, measures its position or asserts findsNothing (rule 43). Scroll to it first only when the test is about what the user sees.
 
 ## Log
+
+### 2026-10-29: A card below the screen is offstage to find() (v9.3.0)
+- **Symptom:** The new reading-page tests found no 总结 card (find.byKey(conclusion) found 0) and getRect threw, though the card was built: FourLayerReport builds every card (scrollCacheExtent 100000), and those below the screen are offstage to the default finder.
+- **Root cause:** find() skips offstage widgets by default, and a scrollable reports the children in its cache area as offstage.
+- **Fix:** skipOffstage: false on every finder that checks a below-the-fold card exists, measures where it sits, or asserts findsNothing there.
+- **Rule:** On a page that builds cards past the screen, a finder for one below the fold needs skipOffstage: false, whether it checks that the card exists, measures its position or asserts findsNothing (rule 43). Scroll to it first only when the test is about what the user sees. (Rule 64)
 
 ### 2026-10-29: Scripted providers under one key (v9.2.0)
 - **Symptom:** When every route moved from deepseek to anthropic, five tests that passed a scripted or failing provider only as deepseek either failed with provider anthropic not configured or kept passing for the wrong reason: the provider-down test still saw a failed report, caused by the missing provider instead of its error.

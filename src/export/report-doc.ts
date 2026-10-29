@@ -8,7 +8,7 @@
 import type { LifeReport } from "../ai/life.js";
 import type { Report } from "../ai/pipeline.js";
 import type { Locale } from "../ai/terms.js";
-import { TOPIC_LABELS, type Topic } from "../ai/types.js";
+import { CONCLUSION_LABELS, CONCLUSION_PARTS, TOPIC_LABELS, type Topic } from "../ai/types.js";
 import type { Doc, DocBlock } from "./document.js";
 
 type Script = "zh-Hans" | "zh-Hant";
@@ -37,6 +37,7 @@ const WORDS = {
     time: "时间",
     question: "所问",
     facts: "命盘事实 · 引擎计算，非 AI",
+    zongjie: "总结 · AI 生成",
     interpretation: "解读 · AI 生成",
     actions: "行动建议 · AI 生成",
     trend: "运势走势",
@@ -98,6 +99,7 @@ const WORDS = {
     time: "時間",
     question: "所問",
     facts: "命盤事實 · 引擎計算，非 AI",
+    zongjie: "總結 · AI 生成",
     interpretation: "解讀 · AI 生成",
     actions: "行動建議 · AI 生成",
     trend: "運勢走勢",
@@ -220,6 +222,15 @@ export function readingDocument(report: Report, c: ReadingContext): Doc {
       blocks.push({ type: "bullet", text: `${p.year} ${p.ganzhi}：${p.overall} · ${p.note}` });
     }
     blocks.push({ type: "note", text: l.trend.method_note });
+  }
+  // 八字's 总结 (v9.3.0) opens the AI reading, as on the page.
+  if (l.conclusion) {
+    blocks.push({ type: "h2", text: w.zongjie });
+    for (const part of CONCLUSION_PARTS) {
+      const c = l.conclusion[part];
+      if (c)
+        blocks.push({ type: "h3", text: CONCLUSION_LABELS[part][s] }, { type: "p", text: c.text });
+    }
   }
   blocks.push({ type: "h2", text: w.interpretation });
   for (const section of l.interpretation) {

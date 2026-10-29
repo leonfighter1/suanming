@@ -45,15 +45,23 @@ import { NAMING_TERMS, namingBrief } from "./naming.js";
 import { lotBrief, QIUQIAN_TERMS, qiuqianView } from "./qiuqian.js";
 import { spreadBrief } from "./tarot.js";
 import { loadRouting, routeFor, type RoutingTable } from "./routing.js";
-import { actionSchema, checkShape, guardSchema, narrativeSchema } from "./schemas.js";
+import {
+  actionSchema,
+  baziNarrativeSchema,
+  checkShape,
+  guardSchema,
+  narrativeSchema,
+} from "./schemas.js";
 import { glossaryFor, LOCALES, normalizeTerms, type Locale } from "./terms.js";
 import { trendLayer, type TrendLayer } from "./trend.js";
 import {
+  CONCLUSION_PARTS,
   TAROT_FOCUS,
   TOPICS,
   TOPICS_BY_SYSTEM,
   type ActionOutput,
   type AgentName,
+  type Conclusion,
   type GuardOutput,
   type LLMProvider,
   type NarrativeOutput,
@@ -129,12 +137,19 @@ export interface Report {
   layers?: {
     facts: string[];
     interpretation: NarrativeOutput["sections"];
+    /** 八字 only, since v9.3.0: the 总结, keyed by part in CONCLUSION_PARTS order. */
+    conclusion?: Conclusion;
+    /** Empty for a 八字 reading since v9.3.0: 八字 writes no 行动建议. */
     actions: ActionOutput["actions"];
     expectation: { text: string; ai_label: string; label_required: boolean };
     /** 八字 only; omitted when the trend agent fails (the rest of the report stands). */
     trend?: TrendLayer;
   };
-  draft?: { interpretation?: NarrativeOutput["sections"]; actions?: ActionOutput["actions"] };
+  draft?: {
+    interpretation?: NarrativeOutput["sections"];
+    conclusion?: Conclusion;
+    actions?: ActionOutput["actions"];
+  };
   /**
    * What the layers would have been, kept when the report is held (manual_review /
    * blocked) so a reviewer can read it and, for manual_review, release it. Never
@@ -357,10 +372,13 @@ export function servedRegion(country: string, system: string) {
  * small already.
  */
 export function readingInputs(chart: ChartFact, locale: Locale, now: Date, question?: string) {
+  // 八字 (v9.3.0): the 排盘 alone, without the engine's strength, weighted 五行 or trend scores. The AI reading
+  // makes its own judgements (the owner: 「ai解读时尽量不采用引擎数据」); 追问 reads the same.
   const facts =
     chart.system === "bazi"
       ? baziView(modelFacts(chart), readingFocus(chart.facts, now.getUTCFullYear(), question), {
-          trend: true,
+          trend: false,
+          judgements: false,
         })
       : chart.system === "qiuqian"
         ? qiuqianView(modelFacts(chart))
@@ -464,16 +482,23 @@ export async function generateReport(
 
   // Each method reads and writes its actions with its own prompts (rule 8, METHOD_PROMPTS).
   const prompts = METHOD_PROMPTS[chart.system];
-  // 逐张解读: one paragraph per card; 起名: one per candidate read (up to six); other sections up to four.
+  // 八字 (v9.3.0): sections without 举例, a 总结, a fuller 大运流年, and no 行动建议.
+  const bazi = chart.system === "bazi";
+  // 逐张解读: one paragraph per card; 起名: one per candidate read (up to six); 八字's 大运流年 up to six (one per
+  // period in focus); other sections up to four.
   const maxParagraphs = (t: Topic) =>
-    t === "tarot_cards" && spread ? spread.cards.length : t === "naming_candidates" ? 6 : 4;
+    t === "tarot_cards" && spread
+      ? spread.cards.length
+      : t === "naming_candidates" || (bazi && t === "dayun_liunian")
+        ? 6
+        : 4;
   const advice = ADVICE_TOPIC[chart.system];
   const actionTopics: Topic[] = advice && topics.includes(advice) ? [advice] : topics;
   const narrative = await runAgent<NarrativeOutput>({
     agent: "narrative",
     prompt: prompts.narrative,
     ...providerFor("narrative"),
-    schema: narrativeSchema(topics),
+    schema: bazi ? baziNarrativeSchema(topics) : narrativeSchema(topics),
     payload: {
       topics,
       system: chart.system,
@@ -568,16 +593,45 @@ export async function generateReport(
         if (unread.length)
           feedback.push(`qiuqian_poem must read all four lines; not cited: ${unread.join(", ")}`);
       }
-      dropped = ungrounded;
-      const value = { sections: sections.filter((s) => s.paragraphs.length) };
+      // 八字's 总结 (v9.3.0): every part, each grounded as a paragraph is; a part that cites nothing is left out.
+      const conclusion: Conclusion = {};
+      let ungroundedParts = 0;
+      if (bazi) {
+        const unwritten: string[] = [];
+        for (const part of CONCLUSION_PARTS) {
+          const c = data.conclusion?.[part];
+          const text = c?.text?.trim() ?? "";
+          const refs = (c?.fact_refs ?? []).filter((r) => resolvePointer(facts, r));
+          if (text && refs.length === 0) ungroundedParts++;
+          if (!text || refs.length === 0) {
+            unwritten.push(part);
+            continue;
+          }
+          conclusion[part] = { text: norm(text), fact_refs: refs };
+        }
+        if (unwritten.length) {
+          feedback.push(
+            `conclusion: write every part, each citing an existing chart_facts path in fact_refs; missing: ${unwritten.join(", ")}`,
+          );
+        }
+      }
+      dropped = ungrounded + ungroundedParts;
+      const written = Object.keys(conclusion).length > 0;
+      const value = {
+        sections: sections.filter((s) => s.paragraphs.length),
+        ...(written && { conclusion }),
+      };
       return {
         value,
         feedback,
         ...scanTexts(
-          value.sections.flatMap((s) => [
-            ...(s.summary ? [s.summary] : []),
-            ...s.paragraphs.flatMap(paragraphTexts),
-          ]),
+          [
+            ...value.sections.flatMap((s) => [
+              ...(s.summary ? [s.summary] : []),
+              ...s.paragraphs.flatMap(paragraphTexts),
+            ]),
+            ...Object.values(conclusion).map((c) => c.text),
+          ],
           rules,
         ),
       };
@@ -596,63 +650,67 @@ export async function generateReport(
   } else {
     ruleViolations.push(...narrative.review, ...narrative.block);
 
-    // 3. Action
-    const action = await runAgent<ActionOutput>({
-      agent: "action",
-      prompt: prompts.action,
-      ...providerFor("action"),
-      schema: actionSchema(actionTopics),
-      payload: { topics: actionTopics },
-      maxRetries,
-      enforce,
-      onProgress: deps.onProgress,
-      user: (feedback) =>
-        actionUser({
-          interpretation: narrative.value.sections,
-          chartSummary,
-          locale: opts.locale,
-          glossary,
-          context: opts.context,
-          today: todayLine(now),
-          feedback,
-          regionLine,
-        }),
-      check: (data) => {
-        const list = data.actions.map((a) => {
-          const { text, fixes } = normalizeTerms(a.text, opts.locale);
-          termFixes.push(...fixes);
-          return { ...a, text };
-        });
-        const value = {
-          actions: list
-            .filter((a) => actionTopics.includes(a.topic))
-            .slice(0, advice ? 5 : topics.length * 3),
-        };
-        return {
-          value,
-          feedback: [],
-          ...scanTexts(
-            value.actions.map((a) => a.text),
-            rules,
-          ),
-        };
-      },
-    });
-    traces.push(action.trace);
+    // 3. Action. 八字 has none since v9.3.0 (the owner: 「行动建议可以不用做了」; its 总结 says what to do).
+    const actionPrompt = prompts.action;
+    const action = actionPrompt
+      ? await runAgent<ActionOutput>({
+          agent: "action",
+          prompt: actionPrompt,
+          ...providerFor("action"),
+          schema: actionSchema(actionTopics),
+          payload: { topics: actionTopics },
+          maxRetries,
+          enforce,
+          onProgress: deps.onProgress,
+          user: (feedback) =>
+            actionUser({
+              interpretation: narrative.value.sections,
+              chartSummary,
+              locale: opts.locale,
+              glossary,
+              context: opts.context,
+              today: todayLine(now),
+              feedback,
+              regionLine,
+            }),
+          check: (data) => {
+            const list = data.actions.map((a) => {
+              const { text, fixes } = normalizeTerms(a.text, opts.locale);
+              termFixes.push(...fixes);
+              return { ...a, text };
+            });
+            const value = {
+              actions: list
+                .filter((a) => actionTopics.includes(a.topic))
+                .slice(0, advice ? 5 : topics.length * 3),
+            };
+            return {
+              value,
+              feedback: [],
+              ...scanTexts(
+                value.actions.map((a) => a.text),
+                rules,
+              ),
+            };
+          },
+        })
+      : undefined;
+    if (action) traces.push(action.trace);
 
-    if (!action.ok) {
+    if (action && !action.ok) {
       status = action.block.length ? "blocked" : "manual_review";
       reasons.push(action.reason);
       ruleViolations.push(...action.block);
     } else {
-      actions = action.value;
-      ruleViolations.push(...action.review, ...action.block);
+      actions = action ? action.value : { actions: [] };
+      if (action) ruleViolations.push(...action.review, ...action.block);
 
       // 4. Model review layer — only for drafts the rule layer already passed,
       //    and only while review is on.
       // The trend chart is the engine's (no model text), so it isn't part of the draft.
       const draft = {
         interpretation: narrative.value.sections,
+        ...(narrative.value.conclusion && { conclusion: narrative.value.conclusion }),
         actions: actions.actions,
       };
       const guard = !enforce
@@ -701,6 +759,7 @@ export async function generateReport(
 
   const labelRequired = region.ai_disclosure.visible_label === "required";
   const interpretation = narrative.ok ? narrative.value.sections : narrative.held?.sections;
+  const conclusion = narrative.ok ? narrative.value.conclusion : narrative.held?.conclusion;
   if (!(narrative.ok && narrative.value.sections.length)) actions = undefined;
   const report: Report = {
     report_id: deps.newId?.() ?? randomUUID(),
@@ -735,6 +794,7 @@ export async function generateReport(
   const candidate = interpretation && {
     facts: chartSummary,
     interpretation,
+    ...(conclusion && { conclusion }),
     actions: actions?.actions ?? [],
     expectation: expectationLayer(opts.locale, labelRequired, chart.system),
     ...(trend && { trend }),
@@ -743,7 +803,13 @@ export async function generateReport(
     report.layers = candidate;
   } else {
     if (candidate) report.held_layers = candidate;
-    if (opts.includeDraft) report.draft = { interpretation, actions: actions?.actions };
+    if (opts.includeDraft) {
+      report.draft = {
+        interpretation,
+        ...(conclusion && { conclusion }),
+        actions: actions?.actions,
+      };
+    }
   }
   return report;
 }

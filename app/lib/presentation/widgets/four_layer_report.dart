@@ -49,8 +49,11 @@ class _FourLayerReportState extends State<FourLayerReport> {
         _generation++;
       });
 
-  /// Where the jump list goes (v3.4.0): each topic section, then 行动建议 (the last one).
-  late final _targets = [for (var i = 0; i <= widget.layers.interpretation.length; i++) GlobalKey()];
+  /// Where the jump list goes (v3.4.0): each topic section, then 行动建议, then (v9.3.0) 八字's 总结.
+  late final _targets = [for (var i = 0; i <= widget.layers.interpretation.length + 1; i++) GlobalKey()];
+
+  /// The 总结's place in [_targets].
+  int get _conclusionTarget => widget.layers.interpretation.length + 1;
 
   /// Focus for a target once jumped to, so Tab goes on from there; Tab itself passes them by.
   late final _targetFocus = [for (final _ in _targets) FocusNode(skipTraversal: true)];
@@ -125,6 +128,15 @@ class _FourLayerReportState extends State<FourLayerReport> {
                         onPressed: _followUp.open,
                       ),
                     ),
+                  if (layers.conclusion.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: Space.s),
+                      child: ActionChip(
+                        key: const Key('jump-conclusion'),
+                        label: Text(l10n.jumpConclusion),
+                        onPressed: () => _jumpTo(_conclusionTarget),
+                      ),
+                    ),
                   for (final (n, s) in layers.interpretation.indexed)
                     Padding(
                       padding: const EdgeInsets.only(left: Space.s),
@@ -172,6 +184,41 @@ class _FourLayerReportState extends State<FourLayerReport> {
             ),
           ),
         ),
+        // 八字's 总结 (v9.3.0, the owner: 「一定要给出总结」): the AI reading opens with it, after the engine's facts.
+        if (layers.conclusion.isNotEmpty)
+          FadeSlideIn(
+            index: i++,
+            child: target(
+              _conclusionTarget,
+              AppCard(
+                key: const Key('conclusion'),
+                title: l10n.layerConclusion,
+                icon: Icons.summarize_outlined,
+                trailing: Badge(label: Text(l10n.aiBadge)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final (n, c) in layers.conclusion.indexed)
+                      Padding(
+                        padding: EdgeInsets.only(top: n == 0 ? 0 : Space.l),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.conclusionPart(c.part),
+                              key: Key('conclusion-label-${c.part}'),
+                              style: theme.textTheme.titleSmall?.copyWith(color: scheme.primary),
+                            ),
+                            const SizedBox(height: Space.xs),
+                            Text(c.text, key: Key('conclusion-${c.part}'), textAlign: TextAlign.start, style: body),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         FadeSlideIn(
           index: i++,
           child: AppCard(
@@ -250,47 +297,49 @@ class _FourLayerReportState extends State<FourLayerReport> {
               starters: l10n.followUpStarters(widget.system),
             ),
           ),
-        FadeSlideIn(
-          index: i++,
-          child: target(
-            layers.interpretation.length,
-            AppCard(
-              title: l10n.layerActions,
-              icon: Icons.checklist_rtl,
-              trailing: Badge(label: Text(l10n.aiBadge)),
-              color: scheme.primaryContainer.withValues(alpha: 0.5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final a in layers.actions)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: Space.s),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.check_circle_outline, color: scheme.primary),
-                          const SizedBox(width: Space.m),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(a.text, textAlign: TextAlign.start, style: body),
-                                const SizedBox(height: Space.xs),
-                                Text(
-                                  '${l10n.topic(a.topic)} · ${l10n.horizon(a.horizon)}',
-                                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-                                ),
-                              ],
+        // 八字 writes no 行动建议 since v9.3.0: the card shows only for readings that have some.
+        if (layers.actions.isNotEmpty)
+          FadeSlideIn(
+            index: i++,
+            child: target(
+              layers.interpretation.length,
+              AppCard(
+                title: l10n.layerActions,
+                icon: Icons.checklist_rtl,
+                trailing: Badge(label: Text(l10n.aiBadge)),
+                color: scheme.primaryContainer.withValues(alpha: 0.5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final a in layers.actions)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: Space.s),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.check_circle_outline, color: scheme.primary),
+                            const SizedBox(width: Space.m),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(a.text, textAlign: TextAlign.start, style: body),
+                                  const SizedBox(height: Space.xs),
+                                  Text(
+                                    '${l10n.topic(a.topic)} · ${l10n.horizon(a.horizon)}',
+                                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
         if (widget.reportId != null)
           FadeSlideIn(
             index: i++,

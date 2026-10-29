@@ -166,7 +166,9 @@ describe("an Indonesian reading", () => {
       await generateRemedy(bazi, report, "health", { country: "ID" }, deps(mock));
       await generateLifeReport(bazi, { locale: "en", country: "ID" }, deps(mock));
     });
-    for (const agent of ["narrative", "action", "remedy", "life_methods", "life_topics"]) {
+    // 八字 writes no 行动建议 since v9.3.0; the tarot reading above shows the action step gets the line too.
+    expect(mock.calls.some((c) => c.agent === "action")).toBe(false);
+    for (const agent of ["narrative", "remedy", "life_methods", "life_topics"]) {
       const calls = mock.calls.filter((c) => c.agent === agent);
       expect(calls.length, agent).toBeGreaterThan(0);
       for (const c of calls) expect(c.user, agent).toContain(LINE);

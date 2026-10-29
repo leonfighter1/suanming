@@ -6,6 +6,7 @@ import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/domain/export.dart';
 import 'package:mingli_app/domain/models.dart';
 import 'package:mingli_app/domain/profile.dart';
+import 'package:mingli_app/generated/contract.g.dart' show conclusionParts;
 
 import 'support.dart';
 
@@ -204,7 +205,8 @@ void main() {
       subtitle: '测试用户 的命盤',
       topicLabel: (t) => t,
       horizonLabel: (h) => h,
-      headings: {'facts': '命盤事實', 'interpretation': '解讀', 'actions': '行動建議'},
+      conclusionLabel: (p) => '[$p]',
+      headings: {'facts': '命盤事實', 'conclusion': '總結', 'interpretation': '解讀', 'actions': '行動建議'},
     );
     expect(md, startsWith('# 命理大師 AI 解讀'));
     expect(md, contains(r.layers!.expectation.aiLabel));
@@ -215,17 +217,65 @@ void main() {
     }
   });
 
-  test('export keeps each paragraph as on screen: the term, the commentary, then the example (v6.2.0)', () {
+  test('a 八字 export opens the AI reading with its 总结, in order, and has no 行动建议 (v9.3.0)', () {
     final r = ReportView.fromJson(fixture('report_passed'));
-    final p = r.layers!.interpretation.first.paragraphs.first;
     final md = exportReportMarkdown(
       report: r,
       title: 'AI 解讀',
       subtitle: '',
       topicLabel: (t) => t,
       horizonLabel: (h) => h,
+      conclusionLabel: (p) => '[$p]',
+      headings: {'facts': '事實', 'conclusion': '總結', 'interpretation': '解讀', 'actions': '行動建議'},
+    );
+    expect(r.layers!.conclusion.map((c) => c.part), conclusionParts);
+    final at = [for (final p in conclusionParts) md.indexOf('### [$p]')];
+    expect(at.every((i) => i > md.indexOf('## 總結')), isTrue);
+    for (var k = 1; k < at.length; k++) {
+      expect(at[k], greaterThan(at[k - 1]));
+    }
+    expect(md.indexOf('## 解讀'), greaterThan(at.last));
+    expect(md, contains(r.layers!.conclusion.first.text));
+    expect(md, isNot(contains('## 行動建議')));
+    final doc = reportDocument(
+      report: r,
+      title: 'AI 解讀',
+      subtitle: '',
+      details: const [],
+      topicLabel: (t) => t,
+      horizonLabel: (h) => h,
+      conclusionLabel: (p) => '[$p]',
+      headings: {
+        'facts': '事實',
+        'conclusion': '總結',
+        'interpretation': '解讀',
+        'actions': '行動建議',
+        'followups': '追問',
+        'asked': '問：',
+        'outOfScope': '',
+      },
+    );
+    final h2 = [for (final b in doc.blocks) if (b.type == 'h2') b.text];
+    expect(h2.indexOf('總結'), lessThan(h2.indexOf('解讀')));
+    expect(h2, isNot(contains('行動建議')));
+  });
+
+  test('export keeps each paragraph as on screen: the term, the commentary, then the example (v6.2.0)', () {
+    // 塔罗 still writes examples; 八字 has none since v9.3.0.
+    final r = ReportView.fromJson(fixture('report_tarot_passed'));
+    final p = r.layers!.interpretation.first.paragraphs.first;
+    expect(p.example, isNotNull);
+    final md = exportReportMarkdown(
+      report: r,
+      title: 'AI 解讀',
+      subtitle: '',
+      topicLabel: (t) => t,
+      horizonLabel: (h) => h,
+      conclusionLabel: (p) => p,
       headings: {'facts': '事實', 'interpretation': '解讀', 'actions': '行動建議'},
     );
     expect(md, contains('**${p.term}**\n\n${p.text}\n\n> ${p.example}\n'));
+    // 塔罗's actions keep their heading.
+    expect(md, contains('## 行動建議'));
   });
 }

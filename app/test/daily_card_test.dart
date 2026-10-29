@@ -39,6 +39,9 @@ void main() {
     expect(find.byKey(const Key('tarot-card-1')), findsOneWidget);
     await scrollTo(tester, const Key('generate-report'));
     expect(find.byKey(const Key('tarot-sections')), findsOneWidget); // a tarot reading of the one card
+    // Only 八字's button asks for 用AI做更精确解读 (v9.3.0); every other method keeps its label.
+    expect(find.descendant(of: find.byKey(const Key('generate-report')), matching: find.text('生成 AI 解讀')),
+        findsOneWidget);
   });
 
   testWidgets('keyboard: Tab reaches the card of the day, Enter opens it, Esc comes back', (tester) async {

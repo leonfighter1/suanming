@@ -6,9 +6,13 @@
  */
 import type { Locale } from "../terms.js";
 import {
+  CONCLUSION_LABELS,
+  CONCLUSION_PARTS,
   TOPIC_LABELS,
   type ActionOutput,
   type AgentName,
+  type Conclusion,
+  type ConclusionPart,
   type GuardOutput,
   type LLMJsonRequest,
   type LLMJsonResult,
@@ -19,15 +23,62 @@ import {
 
 export type Scripted = LLMJsonResult | { kind: "ok"; data: unknown };
 
+/** The chart paths each part of the demo 总结 cites (八字, v9.3.0). */
+const CONCLUSION_REFS: Record<ConclusionPart, string[]> = {
+  portrait: ["/day_master", "/month_command"],
+  past: ["/dayun/cycles/0"],
+  present: ["/dayun/cycles/1"],
+  challenges: ["/relations"],
+  gains: ["/pillars/month"],
+  future: ["/dayun/cycles/2"],
+  caution: ["/liunian/1"],
+  momentum: ["/liunian/2"],
+  coping: ["/day_master"],
+};
+
+const CONCLUSION: Record<Locale, string> = {
+  "zh-Hant": "（示範）{p}：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+  "zh-Hans": "（示范）{p}：这是总结的这一部分，真实解读会依你的命盘详细写出。",
+  en: "(Demo) {p}: this part of the summary. A real reading writes it out in detail from your chart.",
+};
+
+function demoConclusion(locale: Locale): Conclusion {
+  return Object.fromEntries(
+    CONCLUSION_PARTS.map((p) => [
+      p,
+      {
+        text: CONCLUSION[locale].replace("{p}", CONCLUSION_LABELS[p][locale]),
+        fact_refs: CONCLUSION_REFS[p],
+      },
+    ]),
+  );
+}
+
+/** Whether the request's schema asks for a 总结 (八字's narrative_bazi@8). */
+const asksConclusion = (req: LLMJsonRequest) =>
+  ((req.schema as { required?: string[] }).required ?? []).includes("conclusion");
+
+/**
+ * A scripted 八字 narrative written before v9.3.0 has no 总结. When the request asks for one, the mock adds its demo
+ * 总结, so the script's sections are still what the pipeline reads; a test that scripts `conclusion` gets its own.
+ */
+function withConclusion(req: LLMJsonRequest, s: Scripted): Scripted {
+  if (req.agent !== "narrative" || s.kind !== "ok" || !asksConclusion(req)) return s;
+  const data = s.data;
+  if (!data || typeof data !== "object" || "conclusion" in data) return s;
+  return { ...s, data: { ...data, conclusion: demoConclusion(localeOf(req)) } };
+}
+
 const USAGE = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0 };
 
 const REFS: Record<Topic, string[]> = {
-  wuxing: ["/day_master", "/month_command", "/wuxing_weighted"],
+  // The AI reading's view has no wuxing_weighted since v9.3.0: the plain count stands in.
+  wuxing: ["/day_master", "/month_command", "/wuxing_count"],
   personality: ["/day_master", "/pillars/day"],
   career_wealth: ["/pillars/month"],
   relationships: ["/pillars/day"],
   dayun_liunian: ["/dayun", "/liunian/0"],
-  health: ["/wuxing_weighted"],
+  health: ["/wuxing_count"],
   // Tarot's sections cite cards (tarot_cards: one paragraph per card, see generateJson).
   tarot_cards: ["/cards/0"],
   tarot_synthesis: ["/cards/0"],
@@ -274,19 +325,30 @@ export class MockProvider implements LLMProvider {
   async generateJson(req: LLMJsonRequest): Promise<LLMJsonResult> {
     this.calls.push(req);
     const next = this.script[req.agent]?.shift();
-    if (next) return { model: `mock/${req.model}`, usage: USAGE, ...next } as LLMJsonResult;
+    if (next) {
+      return {
+        model: `mock/${req.model}`,
+        usage: USAGE,
+        ...withConclusion(req, next),
+      } as LLMJsonResult;
+    }
     const locale = localeOf(req);
     const model = `mock/${req.model}`;
 
     if (req.agent === "narrative") {
       const p = req.payload as { topics: Topic[]; system: string; cards?: number };
+      // 八字 writes no 举例 and ends with a 总结 since narrative_bazi@8 (v9.3.0).
+      const conclusion = asksConclusion(req);
       const paragraph = (topic: Topic, refs: string[]) => ({
         term: TERM[locale].replace("{t}", TOPIC_LABELS[topic][locale]),
         text: TEXT[locale][topic],
-        example: EXAMPLE[locale],
+        ...(!conclusion && { example: EXAMPLE[locale] }),
+        // 八字's 五行 and 健康 are the AI's own judgement since v9.3.0, no longer the engine's simplified score.
         source_level: (topic === "wuxing" || topic === "health"
-          ? "simplified_rule"
-          : "traditional_text") as "simplified_rule" | "traditional_text",
+          ? conclusion
+            ? "derived"
+            : "simplified_rule"
+          : "traditional_text") as "simplified_rule" | "traditional_text" | "derived",
         fact_refs: refs,
       });
       const data: NarrativeOutput = {
@@ -318,6 +380,7 @@ export class MockProvider implements LLMProvider {
                     ),
                   ],
         })),
+        ...(conclusion && { conclusion: demoConclusion(locale) }),
       };
       return { kind: "ok", data, model, usage: USAGE };
     }

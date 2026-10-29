@@ -1,6 +1,7 @@
 // Client-side views of the v1 API contract (api/openapi.yaml, ChartFact v0.1).
 // Parsing is tolerant of extra fields: the contract is additive-only.
 
+import '../generated/contract.g.dart' show conclusionParts;
 import 'fengshui.dart';
 import 'liuyao.dart';
 import 'naming.dart';
@@ -503,11 +504,20 @@ class TrendLayer {
   final String methodNote;
 }
 
+/// One part of a 八字 reading's 总结 (v9.3.0): `part` is one of the contract's `conclusionParts`.
+class ConclusionItem {
+  const ConclusionItem(this.part, this.text);
+  final String part;
+  final String text;
+}
+
 class ReportLayers {
-  const ReportLayers(this.facts, this.interpretation, this.actions, this.expectation, [this.trend]);
+  const ReportLayers(this.facts, this.interpretation, this.actions, this.expectation,
+      [this.trend, this.conclusion = const []]);
 
   factory ReportLayers.fromJson(Json j) {
     final e = j['expectation'] as Json;
+    final c = j['conclusion'] as Json?;
     return ReportLayers(
       (j['facts'] as List).cast<String>(),
       _list(
@@ -524,16 +534,27 @@ class ReportLayers {
       ),
       Expectation(e['text'] as String, e['ai_label'] as String, e['label_required'] as bool),
       j['trend'] == null ? null : TrendLayer.fromJson(j['trend'] as Json),
+      // In the contract's order, whatever order the JSON keys come in.
+      [
+        if (c != null)
+          for (final p in conclusionParts)
+            if (c[p] case final Json part) ConclusionItem(p, part['text'] as String),
+      ],
     );
   }
 
   final List<String> facts;
   final List<Section> interpretation;
+
+  /// Empty for a 八字 reading made since v9.3.0 (八字 writes no 行动建议).
   final List<ActionItem> actions;
   final Expectation expectation;
 
   /// 八字 only; null when absent.
   final TrendLayer? trend;
+
+  /// 八字's 总结 (v9.3.0), in order; empty for other methods and older readings.
+  final List<ConclusionItem> conclusion;
 }
 
 class RemedyStep {

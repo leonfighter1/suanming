@@ -6,44 +6,74 @@
  */
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { SOURCE_LEVELS } from "../chart-fact/index.js";
-import { GUARD_CATEGORIES, HORIZONS, type Topic } from "./types.js";
+import { CONCLUSION_PARTS, GUARD_CATEGORIES, HORIZONS, type Topic } from "./types.js";
 
 const str = { type: "string" } as const;
+
+/** A reading's sections; `example: false` for a method that writes no 举例 (八字 since v9.3.0). */
+function sections(topics: readonly Topic[], example: boolean) {
+  return {
+    type: "array",
+    items: {
+      type: "object",
+      additionalProperties: false,
+      // summary is asked for in the prompt but optional: a missing one never costs a regeneration.
+      required: ["topic", "paragraphs"],
+      properties: {
+        topic: { type: "string", enum: [...topics] },
+        summary: str,
+        paragraphs: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            // term and example (v6.2.0) are asked for in the prompts but optional, as summary is.
+            required: ["text", "source_level", "fact_refs"],
+            properties: {
+              term: str,
+              text: str,
+              ...(example && { example: str }),
+              source_level: { type: "string", enum: [...SOURCE_LEVELS] },
+              fact_refs: { type: "array", items: str },
+            },
+          },
+        },
+      },
+    },
+  };
+}
 
 export function narrativeSchema(topics: readonly Topic[]) {
   return {
     type: "object",
     additionalProperties: false,
     required: ["sections"],
+    properties: { sections: sections(topics, true) },
+  };
+}
+
+/**
+ * 八字's reading (narrative_bazi@8, v9.3.0): its sections without 举例, and the 总结, whose nine parts are all
+ * required (the owner: 「一定要给出总结」).
+ */
+export function baziNarrativeSchema(topics: readonly Topic[]) {
+  const part = {
+    type: "object",
+    additionalProperties: false,
+    required: ["text", "fact_refs"],
+    properties: { text: str, fact_refs: { type: "array", items: str } },
+  };
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["sections", "conclusion"],
     properties: {
-      sections: {
-        type: "array",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          // summary is asked for in the prompt but optional: a missing one never costs a regeneration.
-          required: ["topic", "paragraphs"],
-          properties: {
-            topic: { type: "string", enum: [...topics] },
-            summary: str,
-            paragraphs: {
-              type: "array",
-              items: {
-                type: "object",
-                additionalProperties: false,
-                // term and example (v6.2.0) are asked for in the prompts but optional, as summary is.
-                required: ["text", "source_level", "fact_refs"],
-                properties: {
-                  term: str,
-                  text: str,
-                  example: str,
-                  source_level: { type: "string", enum: [...SOURCE_LEVELS] },
-                  fact_refs: { type: "array", items: str },
-                },
-              },
-            },
-          },
-        },
+      sections: sections(topics, false),
+      conclusion: {
+        type: "object",
+        additionalProperties: false,
+        required: [...CONCLUSION_PARTS],
+        properties: Object.fromEntries(CONCLUSION_PARTS.map((p) => [p, part])),
       },
     },
   };

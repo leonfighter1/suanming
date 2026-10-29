@@ -2,6 +2,36 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (f): S18, the owner's request — 八字's AI reading is the AI's own, with a 总结; release v9.3.0
+
+- Owner requests (two messages), quoted in the tech plan:
+  - the 八字 AI gets the person's data, background and question;
+  - every UI section in detail; 运势 detailed and said straight;
+  - no 行动建议 and no 比如 examples; always a detailed 总结 (owner's outline);
+  - "一个是引擎解读，一个是ai解读": the button reads 用AI做更精确解读, and the AI uses as little engine data as it can,
+    under a well-specified prompt with complete output;
+  - write the requirements into a skill.
+- Read as: the AI gets the 排盘 (the engine's calendar work) and the person, and none of the engine's judgements:
+  strength / 喜用, wuxing_weighted, trend. It judges the chart itself. The engine reading stays: the facts card, the
+  trend chart and the 破除运势 plans. Told the owner why the 排盘 stays the engine's.
+- Built:
+  - `baziView(… judgements: false)`;
+  - narrative_bazi@8 (self-contained); narrative_bazi@7 and action_bazi@4 moved to `RETIRED_PROMPTS`, still pinned;
+  - `baziNarrativeSchema` with a required nine-part `conclusion`;
+  - the pipeline: no action step for 八字, the 总结 grounded, scanned and faithfulness-checked, 大运流年 up to six
+    paragraphs;
+  - the mock's 总结;
+  - the app: the button label, the 总结 card first with a chip, 行动建议 only when present, exports, the email,
+    追问;
+  - `.claude/skills/ai-reading`; CLAUDE.md row and rule 1 note.
+- Mistakes:
+  - the new reading-page tests didn't find the 总结 card: it lay below the screen, and find() skips a list's cached
+    children (rule 64);
+  - the server and app tests that had used the 八字 fixture or scripts for 举例 and 行动建议 now use tarot where they
+    test those, and 八字 where they test the 总结.
+- Probe: sending the engine's judgements again failed both view tests.
+- 594 server tests, 213 app tests; harness PASS. Not tried: a real reading (the owner's switch says mock).
+
 ## 2026-10-29 (e): S17, the owner's request — Claude as the AI service, Claude Opus 5.5, the usable models; release v9.2.0
 
 - Owner request: 「添加除了添加deepseek ai之外也添加cluade ai api call service. 并且再添加可以用的modal。现在希望用claude

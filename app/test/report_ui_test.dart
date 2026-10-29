@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/domain/export.dart';
 import 'package:mingli_app/domain/models.dart';
 
+import 'reading_page_test.dart' show openTarotReading;
 import 'support.dart';
 
 Future<void> settle(WidgetTester tester) async {
@@ -62,16 +63,30 @@ void main() {
   });
 
   testWidgets('a paragraph shows its term first, then the commentary, then the example (v6.2.0)', (tester) async {
+    // 八字 writes no example since v9.3.0 (next test); a tarot reading still has them.
+    await openTarotReading(tester);
+    final tarot = ReportView.fromJson(fixture('report_tarot_passed'));
+    final first = tarot.layers!.interpretation.first;
+    final p = first.paragraphs.first;
+    // A phone-sized view: what lies below the screen is offstage to a finder (rule 64).
+    final term = find.byKey(ValueKey<String>('term-${first.topic}-0'), skipOffstage: false);
+    final example = find.byKey(ValueKey<String>('example-${first.topic}-0'), skipOffstage: false);
+    final text = find.text(p.text, skipOffstage: false).first;
+    expect(tester.widget<Text>(term).data, p.term);
+    expect(find.descendant(of: example, matching: find.text(p.example!, skipOffstage: false)), findsOneWidget);
+    expect(tester.getTopLeft(term).dy, lessThan(tester.getTopLeft(text).dy));
+    expect(tester.getTopLeft(text).dy, lessThan(tester.getTopLeft(example).dy));
+  });
+
+  testWidgets('a 八字 paragraph shows its term, then the commentary, and no example (v9.3.0)', (tester) async {
     await openReport(tester);
     final first = report.layers!.interpretation.first;
     final p = first.paragraphs.first;
+    expect(p.example, isNull);
     final term = find.byKey(ValueKey<String>('term-${first.topic}-0'));
-    final example = find.byKey(ValueKey<String>('example-${first.topic}-0'));
-    final text = find.text(p.text);
     expect(tester.widget<Text>(term).data, p.term);
-    expect(find.descendant(of: example, matching: find.text(p.example!)), findsOneWidget);
-    expect(tester.getTopLeft(term).dy, lessThan(tester.getTopLeft(text).dy));
-    expect(tester.getTopLeft(text).dy, lessThan(tester.getTopLeft(example).dy));
+    expect(tester.getTopLeft(term).dy, lessThan(tester.getTopLeft(find.text(p.text)).dy));
+    expect(find.byKey(ValueKey<String>('example-${first.topic}-0'), skipOffstage: false), findsNothing);
   });
 
   testWidgets('a paragraph written before v6.2.0 shows its text alone', (tester) async {

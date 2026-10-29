@@ -16,6 +16,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  CONCLUSION_PARTS,
   generateFollowUp,
   generateLifeReport,
   generateRemedy,
@@ -514,6 +515,9 @@ export async function buildAppAssets(): Promise<Record<string, unknown>> {
       "",
       "/// The areas of life a tarot reading may focus on (TAROT_FOCUS on the server).",
       `const tarotFocus = <String>[${TAROT_FOCUS.map((t) => `'${t}'`).join(", ")}];`,
+      "",
+      "/// The parts of a 八字 reading's 总结, in order (CONCLUSION_PARTS on the server, v9.3.0).",
+      `const conclusionParts = <String>[${CONCLUSION_PARTS.map((p) => `'${p}'`).join(", ")}];`,
       "",
     ].join("\n"),
   };

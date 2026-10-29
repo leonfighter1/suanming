@@ -27,10 +27,16 @@ List<DocBlock> followUpBlocks(
   ];
 }
 
+/// 八字's 总结 (v9.3.0) as blocks, before the sections as on the page; none for a reading without one.
+List<DocBlock> conclusionBlocks(ReportLayers l, String? heading, String Function(String part) partLabel) => [
+      if (l.conclusion.isNotEmpty) DocBlock('h2', heading),
+      for (final c in l.conclusion) ...[DocBlock('h3', partLabel(c.part)), DocBlock('p', c.text)],
+    ];
+
 /// A passed reading as a document (v8.0.0), for Word and PDF: what its page shows, its 追问, and the AI label and the
 /// disclaimer, which every export carries (compliance/ai_disclosure_spec.md §4). [details] are its label–value rows
-/// (whose it is, where they were born); [headings] name facts, interpretation, actions, trend, total, followups,
-/// asked and outOfScope.
+/// (whose it is, where they were born); [headings] name facts, conclusion, interpretation, actions, trend, total,
+/// followups, asked and outOfScope.
 Doc reportDocument({
   required ReportView report,
   required String title,
@@ -38,6 +44,7 @@ Doc reportDocument({
   required List<(String, String)> details,
   required String Function(String topic) topicLabel,
   required String Function(String horizon) horizonLabel,
+  required String Function(String part) conclusionLabel,
   required Map<String, String> headings,
   List<FollowUpView> followUps = const [],
 }) {
@@ -55,7 +62,9 @@ Doc reportDocument({
     }
     blocks.add(DocBlock('note', t.methodNote));
   }
-  blocks.add(DocBlock('h2', headings['interpretation']));
+  blocks
+    ..addAll(conclusionBlocks(l, headings['conclusion'], conclusionLabel))
+    ..add(DocBlock('h2', headings['interpretation']));
   for (final s in l.interpretation) {
     blocks.add(DocBlock('h3', topicLabel(s.topic)));
     if (s.summary != null) blocks.add(DocBlock('summary', s.summary));
@@ -93,6 +102,7 @@ String exportReportMarkdown({
   required String subtitle,
   required String Function(String topic) topicLabel,
   required String Function(String horizon) horizonLabel,
+  required String Function(String part) conclusionLabel,
   required Map<String, String> headings,
 }) {
   final l = report.layers!;
@@ -120,6 +130,19 @@ String exportReportMarkdown({
     b
       ..writeln()
       ..writeln(t.methodNote);
+  }
+  // 八字's 总结 (v9.3.0), before the sections as on the page.
+  if (l.conclusion.isNotEmpty) {
+    b
+      ..writeln()
+      ..writeln('## ${headings['conclusion']}');
+    for (final c in l.conclusion) {
+      b
+        ..writeln()
+        ..writeln('### ${conclusionLabel(c.part)}')
+        ..writeln()
+        ..writeln(c.text);
+    }
   }
   b
     ..writeln()
@@ -151,14 +174,17 @@ String exportReportMarkdown({
       }
     }
   }
-  b
-    ..writeln('## ${headings['actions']}')
-    ..writeln();
-  for (final a in l.actions) {
-    b.writeln('- **${topicLabel(a.topic)} · ${horizonLabel(a.horizon)}**：${a.text}');
+  // 八字 writes no 行动建议 since v9.3.0: the heading only when there are some.
+  if (l.actions.isNotEmpty) {
+    b
+      ..writeln('## ${headings['actions']}')
+      ..writeln();
+    for (final a in l.actions) {
+      b.writeln('- **${topicLabel(a.topic)} · ${horizonLabel(a.horizon)}**：${a.text}');
+    }
+    b.writeln();
   }
   b
-    ..writeln()
     ..writeln('---')
     ..writeln()
     ..writeln(l.expectation.text)

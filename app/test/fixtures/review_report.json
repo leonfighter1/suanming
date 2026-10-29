@@ -40,7 +40,6 @@
           {
             "term": "（示範）本段依據：事業財運",
             "text": "（示範）月柱的十神常被用來談工作方式與合作傾向，僅供規劃時參考。",
-            "example": "（示範）比如這週遇到一件小事時，你可以先停一下，再按自己的節奏處理。",
             "source_level": "traditional_text",
             "fact_refs": [
               "/pillars/month"
@@ -49,13 +48,64 @@
         ]
       }
     ],
-    "actions": [
-      {
-        "topic": "career_wealth",
-        "text": "（示範）本週花十分鐘寫下與「事業財運」相關的一個觀察。",
-        "horizon": "this_week"
+    "conclusion": {
+      "portrait": {
+        "text": "（示範）你是怎樣的人：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/day_master",
+          "/month_command"
+        ]
+      },
+      "past": {
+        "text": "（示範）過去：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/dayun/cycles/0"
+        ]
+      },
+      "present": {
+        "text": "（示範）現在：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/dayun/cycles/1"
+        ]
+      },
+      "challenges": {
+        "text": "（示範）可能遇到的問題：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/relations"
+        ]
+      },
+      "gains": {
+        "text": "（示範）得勢與得失：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/pillars/month"
+        ]
+      },
+      "future": {
+        "text": "（示範）未來運勢：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/dayun/cycles/2"
+        ]
+      },
+      "caution": {
+        "text": "（示範）何時開始要注意：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/liunian/1"
+        ]
+      },
+      "momentum": {
+        "text": "（示範）何時開始要發力：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/liunian/2"
+        ]
+      },
+      "coping": {
+        "text": "（示範）遇到問題時怎麼辦：這是總結的這一部分，真實解讀會依你的命盤詳細寫出。",
+        "fact_refs": [
+          "/day_master"
+        ]
       }
-    ],
+    },
+    "actions": [],
     "expectation": {
       "text": "命理內容僅供娛樂和玄學學習使用，不是對未來的預測，也不構成醫療、財務、法律或心理專業意見。重要決定請諮詢相關專業人士。",
       "ai_label": "本解讀由 AI 依據命盤資料生成，僅供娛樂和玄學學習使用。",

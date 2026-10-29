@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   AnthropicProvider,
+  CONCLUSION_PARTS,
   GeoRefusedError,
   generateReport,
   loadRouting,
@@ -55,13 +56,15 @@ describe("generateReport — happy path", () => {
     expect(r.layers!.facts[0]).toBe("四柱：庚午 己卯 己卯 辛未");
     expect(r.layers!.facts).toContain("流年 2026 丙午：正印 / 偏印；與時支六合");
     expect(r.layers!.interpretation.map((s) => s.topic)).toEqual(r.topics);
-    expect(r.layers!.actions.length).toBeGreaterThan(0);
+    // 八字 since v9.3.0: a 总结 in its nine parts, in order, and no 行动建议.
+    expect(Object.keys(r.layers!.conclusion!)).toEqual([...CONCLUSION_PARTS]);
+    expect(r.layers!.actions).toEqual([]);
     expect(r.layers!.expectation.label_required).toBe(false); // HK: recommended
-    expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@7,action_bazi@4,guard@2");
+    expect(r.ai_disclosure.prompt_version).toBe("narrative_bazi@8,guard@2");
     // The routed model, as the mock reports it (mock/<model>); which model ships is pinned in ai-models.test.ts.
     expect(r.ai_disclosure.model).toContain(loadRouting().routes.narrative.default.model);
-    // No trend agent: the engine scores the trend chart (v2.0.0).
-    expect(mock.calls.map((c) => c.agent).sort()).toEqual(["action", "guard", "narrative"]);
+    // No trend agent: the engine scores the trend chart (v2.0.0). No action agent for 八字 (v9.3.0).
+    expect(mock.calls.map((c) => c.agent).sort()).toEqual(["guard", "narrative"]);
     const trend = r.layers!.trend!;
     expect(trend.dayun.map((d) => d.index)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(trend.liunian).toHaveLength(10);
@@ -137,22 +140,52 @@ describe("generateReport — compliance outcomes", () => {
     ]); // no action/guard calls
   });
 
-  it("sends review-level patterns (investment advice) to manual review", async () => {
-    const mock = new MockProvider({
+  it("sends review-level patterns (investment advice) to manual review: in a 八字 总结, and in actions", async () => {
+    // 八字 writes no 行动建议 since v9.3.0: what it advises is in its 总结, scanned like every paragraph.
+    const bazi = new MockProvider({
+      narrative: [
+        {
+          kind: "ok",
+          data: {
+            ...narrativeWith("月柱為劫财，傳統上認為重視同伴。"),
+            conclusion: Object.fromEntries(
+              CONCLUSION_PARTS.map((p) => [
+                p,
+                {
+                  text: p === "coping" ? "建議下月買入科技股。" : "整體平穩，按自己的節奏來。",
+                  fact_refs: ["/day_master"],
+                },
+              ]),
+            ),
+          },
+        },
+      ],
+    });
+    const r = await generateReport(chart, { ...zhHantHK, topics: ["personality"] }, deps(bazi));
+    expect(r.status).toBe("manual_review");
+    expect(r.compliance.rule_violations.map((v) => v.rule_id)).toContain("G007");
+    expect(r.held_layers!.conclusion!.coping!.text).toBe("建議下月買入科技股。");
+
+    // A method with 行动建议 (塔罗): its actions are scanned too.
+    const tarot = computeTarot(
+      { spread: "three_card" },
+      { drawKey: DRAW_KEY, digestPepper: PEPPER },
+    );
+    const withActions = new MockProvider({
       action: [
         {
           kind: "ok",
           data: {
             actions: [
-              { topic: "career_wealth", text: "建議下月買入科技股。", horizon: "this_month" },
+              { topic: "tarot_advice", text: "建議下月買入科技股。", horizon: "this_month" },
             ],
           },
         },
       ],
     });
-    const r = await generateReport(chart, { ...zhHantHK, topics: ["career_wealth"] }, deps(mock));
-    expect(r.status).toBe("manual_review");
-    expect(r.compliance.rule_violations.map((v) => v.rule_id)).toContain("G007");
+    const t = await generateReport(tarot, zhHantHK, deps(withActions));
+    expect(t.status).toBe("manual_review");
+    expect(t.compliance.rule_violations.map((v) => v.rule_id)).toContain("G007");
   });
 
   it("sends a failed model review to manual review", async () => {

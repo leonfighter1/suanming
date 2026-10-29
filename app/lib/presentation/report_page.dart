@@ -40,8 +40,10 @@ class ReportPage extends ConsumerWidget {
             .join(' · '),
         topicLabel: l10n.topic,
         horizonLabel: l10n.horizon,
+        conclusionLabel: l10n.conclusionPart,
         headings: {
           'facts': l10n.layerFacts,
+          'conclusion': l10n.layerConclusion,
           'interpretation': l10n.layerInterpretation,
           'actions': l10n.layerActions,
           'trend': l10n.trendTitle,

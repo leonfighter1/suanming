@@ -12,6 +12,61 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v9.3.0 (2026-10-29): 八字's AI reading is the AI's own, with a 总结; no 行动建议 or 比如 examples
+
+Your two requests of today, as stage S18 of the [tech plan](docs/tech-plan.md). A medium update: kept locally until
+the next big one.
+
+- **Two readings, side by side:** the engine's reading stays as it was: the 命盘事实 card, the trend chart and the
+  破除运势 plans. The button for the AI's reading now says 用AI做更精确解读.
+- **What the AI reads (「尽量不采用引擎数据」):**
+  - the person's 排盘: pillars, 十神, 合冲刑害, 神煞, 大运 and 流年;
+  - what the profile says about them: name, residence, marriage, children, work, family, what they want to know;
+  - their question and today's date.
+
+  Not the engine's own judgements: its 身强 / 身弱 count, its 喜用 and 忌, its weighted 五行 or its trend scores. The
+  AI judges 旺衰, 格局, 调候, 喜用 and each 大运 and 流年 itself, and says how. The 排盘 itself is still the
+  engine's: models get 干支 and years wrong (one run called 2027 丙午; it is 丁未), and the reading must match the
+  chart on its page.
+
+- **What the AI writes:**
+  - It opens with a **总结** in nine parts, written to the person by name: 你是怎样的人, 过去, 现在, 可能遇到的问题,
+    得势与得失, 未来运势, 何时开始要注意, 何时开始要发力, 遇到问题时怎么办. Each is 150–400 characters, with
+    years and 虚岁 where they matter.
+  - Then the six sections, each in detail: 术语 first, then 评论 (the conclusion, why, how it shows, what to do).
+    大运流年 is the most detailed: a paragraph for the current 大运, the next one, and each year in focus.
+  - It says things straight, without piled-up hedges. A hard period is named as a warning with what to do about
+    it, never as fate.
+  - No 比如 examples and no 行动建议: the 总结 says what to do.
+- **On the page:** the 总结 card comes first in the AI part, after the engine's facts, and the jump list has a 总结
+  chip. The 行动建议 card shows only for readings that have actions (older 八字 readings, the other methods).
+- **Everywhere a reading goes:** Word / PDF and Markdown exports, the report email and 追问 carry the 总结.
+- **Other methods are unchanged:** 塔罗, 求签, 算卦, 风水 and 起名 keep their examples and 行动建议.
+- **The rules, kept:** a new project skill, [ai-reading](.claude/skills/ai-reading/SKILL.md), holds your
+  requirements for AI readings and how each is checked. CLAUDE.md points to it.
+- **How to try it:**
+  1. Restart with `npm run public`.
+  2. On 八字排盘, compute a chart and press 用AI做更精确解读.
+  3. While `IS_AI_MOCK=TRUE`, every part reads （示范）. With the real model, the 总结 is the AI's.
+
+  `npm run eval:ai -- --live` records each 八字 case's 总结 and how many of its nine parts came back.
+
+- Verified:
+  - 9 new server tests:
+    - what the AI reads: no engine judgements, while a plan still has the engine's 喜用;
+    - the 总结: all nine parts, in order; a part that cites nothing is sent back, then left out;
+    - 大运流年 keeps up to six paragraphs;
+    - the faithfulness check reads the 总结: a year with the wrong 干支 is caught;
+    - 追问 and the email carry the 总结;
+    - the new prompt's rules.
+
+    The view tests fail when the engine's judgements are sent again.
+
+  - 5 new app tests: the button label; the 总结 card first and in order; no 行动建议 on 八字 and still on 塔罗; a 八字
+    paragraph without an example; the export.
+  - 594 server tests and 213 app tests pass; harness PASS.
+  - Not tried: a real reading (your switch says mock).
+
 ### v9.2.0 (2026-10-29): Claude as the AI service, Claude Opus 5.5 by default, and the models to choose from
 
 Your request of today (a Claude AI service besides DeepSeek, 可以用的 models, Claude Opus 5.5 from now on), as stage

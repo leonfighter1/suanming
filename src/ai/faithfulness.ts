@@ -95,6 +95,8 @@ function reportTexts(r: Report): string[] {
   return [
     // Each paragraph's term and example too (v6.2.0): a term names cards, lines and 干支 most of all.
     ...l.interpretation.flatMap((s) => s.paragraphs.flatMap(paragraphTexts)),
+    // 八字's 总结 (v9.3.0) names the years to take care and to push: its 干支 are checked like the rest.
+    ...Object.values(l.conclusion ?? {}).map((c) => c.text),
     ...l.actions.map((a) => a.text),
   ];
 }

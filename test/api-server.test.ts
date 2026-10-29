@@ -84,7 +84,7 @@ describe("v1 API", () => {
       "wuxing",
       "health",
     ]);
-    expect(view.ai_disclosure.prompt_version).toBe("narrative_bazi@7,action_bazi@4,guard@2");
+    expect(view.ai_disclosure.prompt_version).toBe("narrative_bazi@8,guard@2");
     // internal details never reach the client
     for (const k of ["draft", "agents", "compliance"]) expect(view).not.toHaveProperty(k);
   });
@@ -279,8 +279,9 @@ describe("history and live progress", () => {
     const gate = new Promise<void>((r) => (release = r));
     const slow = {
       name: "slow",
+      // 八字 goes narrative → guard since v9.3.0 (no 行动建议): the reading waits at its review.
       generateJson: async (req: Parameters<MockProvider["generateJson"]>[0]) => {
-        if (req.agent === "action") await gate;
+        if (req.agent === "guard") await gate;
         return mock.generateJson(req);
       },
     };
@@ -297,11 +298,11 @@ describe("history and live progress", () => {
     const { chart_id } = await (await p("/v1/charts", bazi)).json();
     const { report_id } = await (await p("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
     let view: { status: string; progress?: { stage: string; attempt: number } } = { status: "" };
-    for (let i = 0; i < 50 && view.progress?.stage !== "action"; i++) {
+    for (let i = 0; i < 50 && view.progress?.stage !== "guard"; i++) {
       view = await (await fetch(`${url}/v1/reports/${report_id}`, { headers: H() })).json();
       await new Promise((r) => setTimeout(r, 10));
     }
-    expect(view).toMatchObject({ status: "pending", progress: { stage: "action", attempt: 1 } });
+    expect(view).toMatchObject({ status: "pending", progress: { stage: "guard", attempt: 1 } });
     release();
     await s.drain();
     const done = await (await fetch(`${url}/v1/reports/${report_id}`, { headers: H() })).json();

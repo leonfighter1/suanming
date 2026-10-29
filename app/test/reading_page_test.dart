@@ -1,10 +1,12 @@
 // S4 WP4.5 (v3.4.0): a reading opens with its chart (a 八字 reading's four pillars; a tarot
 // reading's spread is in tarot_spread_test) and a jump list to every section and to 行动建议.
-// report_passed has six sections, 五行 to 健康, and six actions; only 五行 starts open.
+// report_passed has six sections, 五行 to 健康, and since v9.3.0 (S18) a 总结 and no actions; only 五行
+// starts open. report_tarot_passed still has its actions.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart' show shareProvider;
+import 'package:mingli_app/generated/contract.g.dart' show conclusionParts;
 import 'package:mingli_app/presentation/history_page.dart' show HistoryTile;
 import 'package:mingli_app/presentation/theme.dart';
 import 'package:share_plus/share_plus.dart' show ShareParams;
@@ -29,6 +31,44 @@ Future<void> openReading(WidgetTester tester) async {
   await frames(tester, 20);
 }
 
+/// 历史记录 holding one three-card tarot reading (report_tarot_passed).
+List<Map<String, dynamic>> tarotHistory() {
+  final cards = fixture('chart_tarot')['chart_fact']['facts']['cards'] as List;
+  return [
+    {
+      'report_id': '55555555-5555-4555-8555-555555555555',
+      'chart_id': '33333333-3333-4333-8333-333333333333',
+      'status': 'passed',
+      'created_at': '2026-10-25T00:00:00.000Z',
+      'updated_at': '2026-10-25T00:00:00.000Z',
+      'locale': 'zh-Hant',
+      'topics': ['tarot_cards', 'tarot_synthesis', 'tarot_advice'],
+      'chart': {
+        'system': 'tarot',
+        'spread': 'three_card',
+        'cards': [for (final c in cards) {'card_id': c['card_id'], 'reversed': c['reversed']}],
+      },
+    },
+  ];
+}
+
+/// The tarot reading, opened from 历史记录 on the same phone-sized view.
+Future<void> openTarotReading(WidgetTester tester) async {
+  tester.view.physicalSize = const Size(400, 800);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(testApp(FakeApi(finalReport: fixture('report_tarot_passed'), pendingPolls: 0, history: tarotHistory())));
+  await frames(tester, 10);
+  await openFromMenu(tester, 'menu-history');
+  await frames(tester, 10);
+  await tester.tap(find.byType(HistoryTile).first);
+  await frames(tester, 20);
+}
+
+/// A part of the 总结, as the fixture has it.
+String conclusion(String part) =>
+    ((((fixture('report_passed')['layers'] as Map)['conclusion'] as Map)[part]) as Map)['text'] as String;
+
 /// The first paragraph of a section, as the fixture has it.
 String paragraph(int section) =>
     (((fixture('report_passed')['layers'] as Map)['interpretation'] as List)[section] as Map)['paragraphs'][0]['text'] as String;
@@ -45,27 +85,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final shared = <ShareParams>[];
-    final cards = fixture('chart_tarot')['chart_fact']['facts']['cards'] as List;
-    final api = FakeApi(
-      finalReport: fixture('report_tarot_passed'),
-      pendingPolls: 0,
-      history: [
-        {
-          'report_id': '55555555-5555-4555-8555-555555555555',
-          'chart_id': '33333333-3333-4333-8333-333333333333',
-          'status': 'passed',
-          'created_at': '2026-10-25T00:00:00.000Z',
-          'updated_at': '2026-10-25T00:00:00.000Z',
-          'locale': 'zh-Hant',
-          'topics': ['tarot_cards', 'tarot_synthesis', 'tarot_advice'],
-          'chart': {
-            'system': 'tarot',
-            'spread': 'three_card',
-            'cards': [for (final c in cards) {'card_id': c['card_id'], 'reversed': c['reversed']}],
-          },
-        },
-      ],
-    );
+    final api = FakeApi(finalReport: fixture('report_tarot_passed'), pendingPolls: 0, history: tarotHistory());
     await tester.pumpWidget(
       testApp(api, overrides: [shareProvider.overrideWithValue((p) async => shared.add(p))]),
     );
@@ -106,7 +126,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(const Key('jump-list'))).dy, lessThan(tester.getTopLeft(pillars).dy));
   });
 
-  testWidgets('a chip opens its section and brings it into view; 行动建议 too', (tester) async {
+  testWidgets('a chip opens its section and brings it into view; the 總結 too', (tester) async {
     await openReading(tester);
     // 健康, the sixth section: closed, so its text isn't there yet. Its chip is past the right
     // edge of the row: bring it into view first, as a swipe would (and pump, rule 27).
@@ -119,26 +139,75 @@ void main() {
     expect(onScreen(tester, find.text(paragraph(5))), isTrue);
     expect(find.text(paragraph(0)), findsOneWidget); // 五行 stays open
 
-    final firstAction = ((fixture('report_passed')['layers'] as Map)['actions'] as List).first['text'] as String;
+    // Back at the top, the 總結 starts below the fold; its chip brings it up (v9.3.0). The list builds
+    // every card, so the finder must look past the screen too.
     await scrollToFinder(tester, find.byKey(const Key('jump-list')), delta: -300);
     await frames(tester);
-    await tester.ensureVisible(find.byKey(const Key('jump-actions')));
+    final portrait = find.text(conclusion('portrait'), skipOffstage: false);
+    expect(onScreen(tester, portrait), isFalse);
+    await tester.ensureVisible(find.byKey(const Key('jump-conclusion')));
     await frames(tester);
-    await tester.tap(find.byKey(const Key('jump-actions')));
+    await tester.tap(find.byKey(const Key('jump-conclusion')));
     await frames(tester);
-    expect(onScreen(tester, find.text(firstAction)), isTrue);
+    expect(onScreen(tester, portrait), isTrue);
   });
 
-  testWidgets('on a phone the chips scroll sideways, and Tab still reaches the last, 行動建議', (tester) async {
+  testWidgets('on a phone the chips scroll sideways, and Tab still reaches the last, 健康', (tester) async {
     await openReading(tester);
-    final last = find.byKey(const Key('jump-actions'));
-    expect(find.descendant(of: last, matching: find.text('行動建議')), findsOneWidget);
+    final last = find.byKey(const Key('jump-health'));
+    expect(find.descendant(of: last, matching: find.text('健康')), findsOneWidget);
     expect(tester.getRect(last).right, greaterThan(400)); // past the edge of the 400 px view
-    await tabTo(tester, 'jump-actions');
+    await tabTo(tester, 'jump-health');
     expect(tester.getRect(last).right, lessThanOrEqualTo(400)); // scrolled into view
     await press(tester, LogicalKeyboardKey.enter);
-    final firstAction = ((fixture('report_passed')['layers'] as Map)['actions'] as List).first['text'] as String;
-    expect(onScreen(tester, find.text(firstAction)), isTrue);
+    expect(onScreen(tester, find.text(paragraph(5))), isTrue);
+  });
+
+  testWidgets('a 八字 reading opens the AI part with its 總結, in order, and has no 行動建議 (v9.3.0)', (tester) async {
+    await openReading(tester);
+    // The list builds every card, below the screen too (rule 43): look there as well.
+    Finder key(String k) => find.byKey(Key(k), skipOffstage: false);
+    Finder text(String t) => find.text(t, skipOffstage: false);
+    final card = key('conclusion');
+    expect(card, findsOneWidget);
+    expect(key('jump-conclusion'), findsOneWidget);
+    // After the engine's facts, before the AI's sections.
+    final top = tester.getTopLeft(card).dy;
+    expect(top, greaterThan(tester.getTopLeft(text('命盤事實 · 引擎計算，非 AI')).dy));
+    expect(top, lessThan(tester.getTopLeft(text('解讀 · AI 生成')).dy));
+    expect(find.descendant(of: card, matching: text('總結 · AI 生成')), findsOneWidget);
+    // The nine parts in order, each under its label.
+    final ys = [for (final p in conclusionParts) tester.getTopLeft(key('conclusion-label-$p')).dy];
+    for (var k = 1; k < ys.length; k++) {
+      expect(ys[k], greaterThan(ys[k - 1]));
+    }
+    expect(tester.widget<Text>(key('conclusion-label-portrait')).data, '你是怎樣的人');
+    expect(tester.widget<Text>(key('conclusion-label-momentum')).data, '何時開始要發力');
+    expect(tester.widget<Text>(key('conclusion-coping')).data, conclusion('coping'));
+    // No 行動建議: neither its card nor its chip (the tarot reading below has both).
+    expect(text('行動建議 · AI 生成'), findsNothing);
+    expect(key('jump-actions'), findsNothing);
+  });
+
+  testWidgets('a tarot reading keeps its 行動建議 and has no 總結', (tester) async {
+    await openTarotReading(tester);
+    expect(find.byKey(const Key('jump-actions'), skipOffstage: false), findsOneWidget);
+    expect(find.text('行動建議 · AI 生成', skipOffstage: false), findsOneWidget);
+    expect(find.byKey(const Key('conclusion'), skipOffstage: false), findsNothing);
+    expect(find.byKey(const Key('jump-conclusion'), skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('the 八字 page asks the AI for its own reading: 用AI做更精確解讀 (v9.3.0)', (tester) async {
+    await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0)));
+    await frames(tester, 10);
+    await tester.tap(find.byKey(const Key('entry-bazi')));
+    await frames(tester, 10);
+    await scrollTo(tester, const Key('compute-chart'));
+    await tester.tap(find.byKey(const Key('compute-chart')));
+    await frames(tester, 10);
+    await scrollTo(tester, const Key('generate-report'));
+    expect(find.descendant(of: find.byKey(const Key('generate-report')), matching: find.text('用AI做更精確解讀')),
+        findsOneWidget);
   });
 
   testWidgets('from the keyboard: Enter on a chip jumps, and Tab goes on inside that section', (tester) async {

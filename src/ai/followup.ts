@@ -39,6 +39,8 @@ import { loadRouting, routeFor } from "./routing.js";
 import { followUpSchema, guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
 import {
+  CONCLUSION_LABELS,
+  CONCLUSION_PARTS,
   TOPIC_LABELS,
   type AgentName,
   type GuardOutput,
@@ -180,6 +182,13 @@ export async function generateFollowUp(
           ...(s.summary && { summary: s.summary }),
           paragraphs: s.paragraphs.map(words),
         })),
+        // 八字's 总结 (v9.3.0), by its parts' labels, in order.
+        ...(parent.report.layers!.conclusion && {
+          conclusion: CONCLUSION_PARTS.flatMap((p) => {
+            const c = parent.report.layers!.conclusion![p];
+            return c ? [{ part: CONCLUSION_LABELS[p][locale], text: c.text }] : [];
+          }),
+        }),
         actions: parent.report.layers!.actions.map((a) => a.text),
       };
   const earlier = thread.slice(-FOLLOWUP_THREAD).map((t) => ({

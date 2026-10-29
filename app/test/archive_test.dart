@@ -162,8 +162,12 @@ void main() {
         ['时间', anything],
       ],
     });
-    // The reading in its three parts, and the AI label last.
-    expect(blocks.map((b) => b['type']), containsAll(['h2', 'h3', 'term', 'p', 'example', 'bullet', 'note']));
+    // A 八字 reading since v9.3.0: its 总结 first, then the sections as term and commentary (no example), and the AI
+    // label last.
+    expect(blocks.map((b) => b['type']), containsAll(['h2', 'h3', 'term', 'p', 'bullet', 'note']));
+    expect(blocks.map((b) => b['type']), isNot(contains('example')));
+    final h2 = [for (final b in blocks) if (b['type'] == 'h2') b['text']];
+    expect(h2.indexOf('总结 · AI 生成'), allOf(greaterThan(-1), lessThan(h2.indexOf('解读 · AI 生成'))));
     expect(blocks.last['type'], 'note');
     expect(shared.single.fileNameOverrides!.single, endsWith('.pdf'));
   });

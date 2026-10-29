@@ -114,9 +114,51 @@ export interface Paragraph {
   /** JSON Pointers into ChartFact.facts that this paragraph rests on */
   fact_refs: string[];
 }
+/**
+ * 八字's 总结 (v9.3.0, S18; the owner: 「一定要给出总结」): nine parts in this order, each written to the reader. No
+ * other method has one.
+ */
+export const CONCLUSION_PARTS = [
+  "portrait",
+  "past",
+  "present",
+  "challenges",
+  "gains",
+  "future",
+  "caution",
+  "momentum",
+  "coping",
+] as const;
+export type ConclusionPart = (typeof CONCLUSION_PARTS)[number];
+
+export const CONCLUSION_LABELS: Record<ConclusionPart, Record<Locale, string>> = {
+  portrait: { "zh-Hant": "你是怎樣的人", "zh-Hans": "你是怎样的人", en: "Who you are" },
+  past: { "zh-Hant": "過去", "zh-Hans": "过去", en: "The past" },
+  present: { "zh-Hant": "現在", "zh-Hans": "现在", en: "Now" },
+  challenges: { "zh-Hant": "可能遇到的問題", "zh-Hans": "可能遇到的问题", en: "What may go wrong" },
+  gains: { "zh-Hant": "得勢與得失", "zh-Hans": "得势与得失", en: "Gains and losses" },
+  future: { "zh-Hant": "未來運勢", "zh-Hans": "未来运势", en: "The years ahead" },
+  caution: { "zh-Hant": "何時開始要注意", "zh-Hans": "何时开始要注意", en: "When to take care" },
+  momentum: { "zh-Hant": "何時開始要發力", "zh-Hans": "何时开始要发力", en: "When to push" },
+  coping: {
+    "zh-Hant": "遇到問題時怎麼辦",
+    "zh-Hans": "遇到问题时怎么办",
+    en: "When trouble comes",
+  },
+};
+
+/** One part of the 总结 and the chart paths it rests on. */
+export interface ConclusionText {
+  text: string;
+  fact_refs: string[];
+}
+export type Conclusion = Partial<Record<ConclusionPart, ConclusionText>>;
+
 export interface NarrativeOutput {
   /** summary: the topic's main point in one plain sentence (narrative@4+) */
   sections: { topic: Topic; summary?: string; paragraphs: Paragraph[] }[];
+  /** 八字 only (narrative_bazi@8): the 总结, keyed by part in CONCLUSION_PARTS order. */
+  conclusion?: Conclusion;
 }
 
 export const HORIZONS = ["this_week", "this_month", "this_year", "ongoing"] as const;

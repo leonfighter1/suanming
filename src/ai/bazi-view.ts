@@ -29,18 +29,22 @@ const DETAIL = new Set(["relations", "shensha", "branch_relations"]);
 const without = <T extends Entry>(e: T, keys: Set<string>) =>
   Object.fromEntries(Object.entries(e).filter(([k]) => !keys.has(k))) as T;
 const BASIS = new Set(["basis"]);
+/** The engine's own judgements, which the AI reading leaves out (v9.3.0). */
+const JUDGEMENTS = new Set(["strength", "wuxing_weighted"]);
 
 const VIEW_NOTE =
   "Only the periods in focus carry relations, shensha and branch_relations (and a trend basis where trend is given). Every other 大运 and 流年 keeps only its 干支, years, ages and, for a 流年, its 十神: say nothing about its relations or 神煞.";
 
 /**
  * The facts a 八字 agent reads, from modelFacts(chart). `trend: false` leaves the scores out (a
- * plan gets its topic's scores in <trend> instead).
+ * plan gets its topic's scores in <trend> instead). `judgements: false` (the AI reading since v9.3.0,
+ * the owner: 「ai解读时尽量不采用引擎数据」) also leaves out the engine's own judgements, its strength
+ * (扶抑 count, 得令, 喜用 and 忌) and its weighted 五行 score, so only the 排盘 remains.
  */
 export function baziView(
   facts: Record<string, unknown>,
   focus: Focus,
-  opts: { trend: boolean },
+  opts: { trend: boolean; judgements?: boolean },
 ): Record<string, unknown> {
   const {
     liuyue: _months,
@@ -51,7 +55,7 @@ export function baziView(
     ...natal
   } = facts as Entry & Periods;
   return {
-    ...natal,
+    ...(opts.judgements === false ? without(natal, JUDGEMENTS) : natal),
     ...(dayun && {
       dayun: {
         ...dayun,

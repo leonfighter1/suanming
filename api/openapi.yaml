@@ -1806,7 +1806,9 @@ components:
                           description: 评论, what it means for the reader in plain words.
                         example:
                           type: string
-                          description: 举例 (since v6.2.0), one everyday scene that shows the point.
+                          description: |
+                            举例 (since v6.2.0), one everyday scene that shows the point. A 八字 reading has none since
+                            v9.3.0.
                         source_level:
                           type: string
                           enum: [traditional_text, common_consensus, simplified_rule, derived]
@@ -1814,7 +1816,24 @@ components:
                           description: JSON Pointers into ChartFact.facts
                           type: array
                           items: { type: string }
+            conclusion:
+              description: |
+                八字 only, since v9.3.0 (the owner: 一定要给出总结): the 总结, written to the reader, in this key
+                order. Each part cites the ChartFact paths it rests on.
+              type: object
+              additionalProperties: false
+              properties:
+                portrait: { $ref: "#/components/schemas/ConclusionText" }
+                past: { $ref: "#/components/schemas/ConclusionText" }
+                present: { $ref: "#/components/schemas/ConclusionText" }
+                challenges: { $ref: "#/components/schemas/ConclusionText" }
+                gains: { $ref: "#/components/schemas/ConclusionText" }
+                future: { $ref: "#/components/schemas/ConclusionText" }
+                caution: { $ref: "#/components/schemas/ConclusionText" }
+                momentum: { $ref: "#/components/schemas/ConclusionText" }
+                coping: { $ref: "#/components/schemas/ConclusionText" }
             actions:
+              description: 行动建议. Empty for a 八字 reading since v9.3.0.
               type: array
               items:
                 type: object
@@ -2088,6 +2107,17 @@ components:
             closing:
               type: string
               description: Fixed disclaimer copy (not model-generated)
+
+    ConclusionText:
+      description: One part of a 八字 reading's 总结 (v9.3.0).
+      type: object
+      required: [text, fact_refs]
+      properties:
+        text: { type: string }
+        fact_refs:
+          description: JSON Pointers into ChartFact.facts
+          type: array
+          items: { type: string }
 
     Topic:
       description: |

@@ -360,7 +360,9 @@ describe("remedy API", () => {
         202,
       );
       await api3.drain();
-      for (const agent of ["narrative", "action", "remedy"] as const) {
+      // 八字 writes no 行动建议 since v9.3.0.
+      expect(m.calls.some((c) => c.agent === "action")).toBe(false);
+      for (const agent of ["narrative", "remedy"] as const) {
         const call = m.calls.find((c) => c.agent === agent)!;
         expect(call.user).toContain("<user_context>");
         expect(call.user).toContain("明年適合轉工嗎？");

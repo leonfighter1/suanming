@@ -155,6 +155,19 @@ Every AI step answers with Claude Opus 5.5 (`config/model_routing.json`, the own
 - To compare models on the evaluation cases: `npm run eval:ai -- --live --model claude-sonnet-5-5`.
   It costs money; each case's cost at list price goes into docs/verification/ai-eval-results.json.
 
+## 八字's AI reading (v9.3.0)
+
+On 八字排盘 the button under the chart says 用AI做更精确解读. The engine's own reading stays as it was: the 命盘事实
+card and the trend chart. The AI's reading is its own:
+
+- It reads the 排盘 and what the profile says about the person, not the engine's 身强 / 身弱, 喜用 or scores, and
+  judges the chart itself. Fill in 为谁排盘's real situation (job, family, what you want to know) for a closer reading.
+- It opens with a 总结 in nine parts (你是怎样的人, 过去, 现在, 可能遇到的问题, 得势与得失, 未来运势, 何时开始要注意,
+  何时开始要发力, 遇到问题时怎么办), then the six sections, each as 术语 then 评论. There are no 比如 examples and no
+  行动建议.
+- While `IS_AI_MOCK=TRUE`, every part reads （示范）: switch to the real model for a real one.
+- Readings made before keep their 行动建议 and examples.
+
 ## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
 
 By default the API keeps everything in memory: a restart loses every account and reading. The

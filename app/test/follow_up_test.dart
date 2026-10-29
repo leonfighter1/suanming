@@ -8,6 +8,7 @@ import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/domain/models.dart';
 
 import 'keys.dart';
+import 'reading_page_test.dart' show openTarotReading;
 import 'support.dart';
 
 Future<void> settle(WidgetTester tester) async {
@@ -60,9 +61,10 @@ void main() {
   });
 
   testWidgets('the card comes right after the reading, before 行动建议', (tester) async {
-    await openReading(tester);
+    // 八字 writes no 行动建议 since v9.3.0; a tarot reading still has them.
+    await openTarotReading(tester);
     // Every card of a reading is built (the jump list needs them), so their places can be compared unscrolled.
-    final report = ReportView.fromJson(fixture('report_passed'));
+    final report = ReportView.fromJson(fixture('report_tarot_passed'));
     // Below the fold they count as offstage to a finder, so look past that.
     final reading = tester.getTopLeft(find.byKey(const Key('expand-all'), skipOffstage: false)).dy;
     final card = tester.getTopLeft(find.byKey(const Key('followup-card'), skipOffstage: false)).dy;
