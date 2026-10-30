@@ -6,7 +6,7 @@
 import type { IncomingMessage } from "node:http";
 import type { AccountService } from "../auth/account.js";
 import type { AccountPermissions, AuthService } from "../auth/service.js";
-import type { AgentTrace } from "../ai/index.js";
+import type { AgentTrace, RoutingTable } from "../ai/index.js";
 import type { Dispatcher, MailTransport } from "../notify/index.js";
 import type {
   ChargeKind,
@@ -55,6 +55,8 @@ export interface ApiContext {
   pointsConfig?: PointsConfig;
   /** 充值 adds a pack's 积分 without payment (development, until Phase 4). */
   simulatedTopUp: boolean;
+  /** The routing a job started now would get: prices follow the model it names (ACTIVE_AI_MODEL too). */
+  routingNow: () => RoutingTable;
   /** What an AI request costs now; undefined while 积分 are off. */
   priceOf: (kind: ChargeKind, about?: QuoteFor) => Quote | undefined;
   /** What an admin allows this account; 403 `ai_not_allowed` / `top_up_not_allowed` when not. */

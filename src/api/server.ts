@@ -13,13 +13,7 @@ import {
   FOLLOWUP_QUESTION_MAX,
   followUpAvailable,
   generateFollowUp,
-  generateInquiryTurn,
   generateReport,
-  INQUIRY_ANSWER_MAX,
-  INQUIRY_GOAL_MAX,
-  INQUIRY_GOAL_MIN,
-  inquiryAvailable,
-  inquiryGoal,
   loadRouting,
   parseUserContext,
   GeoRefusedError,
@@ -32,7 +26,6 @@ import {
   type FollowUpParent,
   type FollowUpTurn,
   type InquiryContext,
-  type InquiryStep,
   type LLMProvider,
   type Locale,
   type Report,
@@ -61,10 +54,7 @@ import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import {
   chargeFor,
-  inquiryFee,
   loadPointsConfig,
-  measuredCost,
-  pointsPerUsd,
   quote,
   quoteFor,
   type ChargeKind,
@@ -104,6 +94,7 @@ import { dailyRoute } from "./routes/daily.js";
 import { pointsRoute } from "./routes/points.js";
 import { ownedPassedReport, preloadRemedies, remediesRoute } from "./routes/remedies.js";
 import { lifeRoute, ownedPassedLifeReport } from "./routes/life.js";
+import { inquiryRoute, ownedInquiry } from "./routes/inquiry.js";
 import { publicRoute } from "./routes/public.js";
 import {
   InMemoryStore,
@@ -119,7 +110,6 @@ import {
   chartSummary,
   heldWhy,
   publicFollowUp,
-  publicInquiry,
   publicReport,
   questionRequired,
   reviewSummary,
@@ -396,19 +386,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         ? { points: hold.quote, basis: "flat" }
         : chargeFor(pointsConfig, hold, delivered);
     await store.settlePoints(hold, charge, now().toISOString());
-  }
-
-  /**
-   * The 深度分析's guard (the owner's 统一收费): its fee is paid once, so a turn that would take what its turns spent
-   * past what the fee allows at the margin is not asked for; the conversation closes and the reading goes on.
-   */
-  function inquiryOverBudget(record: InquiryRecord): boolean {
-    if (!pointsConfig || record.fee === undefined || record.turns.length === 0) return false;
-    const agents = record.agents ?? [];
-    const spent = measuredCost(pointsConfig, agents).usd;
-    const largest = Math.max(0, ...agents.map((a) => measuredCost(pointsConfig, [a]).usd));
-    const { turnUsd } = inquiryFee(pointsConfig, routingNow());
-    return spent + Math.max(turnUsd, largest) > record.fee / pointsPerUsd(pointsConfig);
   }
 
   const auth = opts.auth;
@@ -757,117 +734,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
-  /**
-   * 深度分析 (v10.0.0, S19): the master's next turn, in the background. A question goes on the record and waits for its
-   * answer (asking); when the master asks nothing more it is ready, with its last words. A turn that fails or is held
-   * ends the questions there (ready: the reading goes on with what was said), or, on the first turn, fails the 深度分析.
-   */
-  async function runInquiryTurn(
-    record: InquiryRecord,
-    fact: ChartFact,
-    c: Caller,
-    /** The first turn's: the 统一收费, charged once the master has asked. */
-    hold?: PointsHold,
-  ) {
-    let step: InquiryStep | undefined;
-    let error: string | undefined;
-    if (inquiryOverBudget(record)) {
-      error = "its fee covers no further turn";
-      log(`inquiry ${record.id}: closed, its fee covers no further turn`);
-    } else {
-      try {
-        step = await generateInquiryTurn(
-          fact,
-          {
-            goal: record.goal,
-            ...(record.question && { question: record.question }),
-            ...(record.focus && { focus: record.focus }),
-            ...(record.context && { context: record.context }),
-            turns: record.turns,
-            ...(record.planned !== undefined && { planned: record.planned }),
-          },
-          { locale: record.locale, country: c.country },
-          {
-            providers: opts.providers,
-            routing: opts.routing?.(),
-            review: opts.review !== false,
-            now,
-            onProgress: async ({ stage, attempt }) => {
-              const current = await store.getInquiry(record.id);
-              if (current?.status !== "thinking") return;
-              await store.putInquiry({
-                ...current,
-                progress: { stage, attempt, updated_at: now().toISOString() },
-              });
-            },
-          },
-        );
-        if (step.status !== "passed") {
-          error = step.reasons.join("; ");
-          log(`inquiry ${record.id} turn held: ${heldWhy(step)}`);
-        }
-      } catch (e) {
-        const upstream = upstreamMessage(e);
-        error = upstream ?? "internal error";
-        log(
-          `inquiry ${record.id} turn failed: ${upstream ?? (e as Error).message}`,
-          upstream ? undefined : e,
-        );
-      }
-    }
-    // The account or the reading may have gone, or the user moved on, meanwhile: never resurrect or overwrite.
-    const current = await store.getInquiry(record.id);
-    // Each turn's steps, under the conversation's id.
-    await recordJob(
-      { kind: "inquiry", id: record.id, owner: record.owner, system: fact.system },
-      step?.agents,
-      step?.status === "passed",
-    );
-    if (!current || current.status !== "thinking") return settleHold(hold, undefined);
-    const { progress: _p, error: _e, ...rest } = current;
-    const base: InquiryRecord = {
-      ...rest,
-      updated_at: now().toISOString(),
-      agents: [...(current.agents ?? []), ...(step?.agents ?? [])],
-      ...(step && { ai_disclosure: step.ai_disclosure }),
-    };
-    const turn = step?.status === "passed" ? step.turn : undefined;
-    let next: InquiryRecord;
-    if (step && turn && !step.done && turn.question) {
-      next = {
-        ...base,
-        status: "asking",
-        turns: [...current.turns, turn],
-        planned: step.planned,
-        ...(step.focus && { understanding: step.focus }),
-      };
-    } else if (step && turn) {
-      next = {
-        ...base,
-        status: "ready",
-        planned: step.planned,
-        ...(turn.say && { closing: turn.say }),
-        ...(step.focus && { understanding: step.focus }),
-      };
-    } else {
-      next = {
-        ...base,
-        status: current.turns.length === 0 ? "failed" : "ready",
-        ...(error && { error }),
-      };
-    }
-    await store.putInquiry(next);
-    // The fee is paid once the conversation has begun; a 深度分析 whose first question never came costs nothing.
-    await settleHold(hold, next.status === "failed" ? undefined : (step?.agents ?? []), true);
-  }
-
-  /** The caller's 深度分析, or 404. */
-  async function ownedInquiry(id: string, c: Caller) {
-    const r = UUID_RE.test(id) ? await store.getInquiry(id) : undefined;
-    if (!r || r.owner !== c.user) throw new HttpError(404, "inquiry not found");
-    return r;
-  }
-
   /** A request on one of the caller's charts: its body, and the chart its chart_id names (400 or 404 otherwise; S28). */
   async function chartRequest(req: IncomingMessage, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
@@ -877,107 +743,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     const chart = await store.getChart(chartId);
     if (!chart || chart.owner !== c.user) throw new HttpError(404, "chart not found");
     return { body, chart };
-  }
-
-  /**
-   * 深度分析 (v10.0.0): the master's questions on a chart before its reading. It needs a goal (the owner:
-   * 「使用这一功能一定要给出个明确的目标才行」): 400 goal_required without one. The first question comes in the background.
-   * One from the daily AI caps, as a reading takes.
-   */
-  async function createInquiry(req: IncomingMessage, c: Caller) {
-    const { body, chart } = await chartRequest(req, c);
-    if (!inquiryAvailable(chart.fact)) {
-      throw new InputError(`深度分析 is not offered for ${chart.fact.system} readings`);
-    }
-    const locale = body.locale as Locale;
-    if (!LOCALES.includes(locale))
-      throw new InputError(`locale must be one of ${LOCALES.join(", ")}`);
-    const goal = inquiryGoal(body.goal);
-    if (!goal) {
-      throw new HttpError(
-        400,
-        `a 深度分析 needs a clear goal: what you want to know, ${INQUIRY_GOAL_MIN}–${INQUIRY_GOAL_MAX} characters`,
-        "goal_required",
-      );
-    }
-    const focus = body.focus as TarotFocus | undefined;
-    if (focus !== undefined && (chart.fact.system !== "tarot" || !TAROT_FOCUS.includes(focus))) {
-      throw new InputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
-    }
-    assertServed(c.country, chart.fact.system);
-    const context = parseUserContext(body.context);
-    // The question the chart was drawn for (v11.1.0), which the reading after the conversation answers.
-    const asks = asksQuestion(chart.fact.system) && !chart.daily;
-    const question = (asks && chart.question) || parseQuestion(body.question);
-    if (asks && !question) throw questionRequired();
-    const inquiryId = randomUUID();
-    // The owner's 统一收费: one fee for the conversation however many questions it takes (1–6), held now.
-    const hold = await holdForJob(c, "inquiry", {
-      kind: "inquiry",
-      id: inquiryId,
-      system: chart.fact.system,
-    });
-    const ts = now().toISOString();
-    const record: InquiryRecord = {
-      id: inquiryId,
-      owner: c.user,
-      chart_id: chart.id,
-      locale,
-      status: "thinking",
-      goal,
-      ...(question && { question }),
-      ...(focus && { focus }),
-      ...(context && { context }),
-      turns: [],
-      ...(hold && { fee: hold.quote }),
-      created_at: ts,
-      updated_at: ts,
-    };
-    await store.putInquiry(record);
-    track(`inquiry ${record.id}`, runInquiryTurn(record, chart.fact, c, hold));
-    return {
-      status: 202,
-      body: publicInquiry(record),
-      headers: { location: `/v1/inquiries/${record.id}`, "retry-after": "3" },
-    };
-  }
-
-  /** The user's answer to the master's question; the master's next turn comes in the background. */
-  async function answerInquiry(req: IncomingMessage, id: string, c: Caller) {
-    const body = (await readJson(req)) as Record<string, unknown>;
-    const answer = typeof body.answer === "string" ? body.answer.trim() : "";
-    if (!answer) throw new InputError("answer is required");
-    if ([...answer].length > INQUIRY_ANSWER_MAX) {
-      throw new InputError(`answer must be at most ${INQUIRY_ANSWER_MAX} characters`);
-    }
-    const record = await ownedInquiry(id, c);
-    // Each answer asks the model for the next turn (v11.2.0).
-    await assertAllowed(c, "ai");
-    if (record.status === "thinking") {
-      throw new HttpError(409, "the master is still thinking", "inquiry_thinking");
-    }
-    if (record.status !== "asking") {
-      throw new HttpError(409, "the master has no question waiting", "inquiry_not_asking");
-    }
-    const chart = await store.getChart(record.chart_id);
-    if (!chart) throw new HttpError(404, "chart not found");
-    assertServed(c.country, chart.fact.system);
-    const turns = record.turns.map((t, i) =>
-      i === record.turns.length - 1 ? { ...t, answer } : t,
-    );
-    const next: InquiryRecord = {
-      ...record,
-      status: "thinking",
-      turns,
-      updated_at: now().toISOString(),
-    };
-    await store.putInquiry(next);
-    track(`inquiry ${record.id}`, runInquiryTurn(next, chart.fact, c));
-    return {
-      status: 202,
-      body: publicInquiry(next),
-      headers: { location: `/v1/inquiries/${record.id}`, "retry-after": "3" },
-    };
   }
 
   async function heldItem(kind: string, id: string) {
@@ -1157,7 +922,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       const id = body.inquiry_id;
       if (typeof id !== "string" || !UUID_RE.test(id))
         throw new InputError("inquiry_id must be a UUID");
-      inquiry = await ownedInquiry(id, c);
+      inquiry = await ownedInquiry(api, id, c);
       if (inquiry.chart_id !== chart.id) throw new InputError("the 深度分析 is for another chart");
       if (inquiry.status === "thinking") {
         throw new HttpError(409, "the master is still thinking", "inquiry_thinking");
@@ -1264,6 +1029,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     recordJob,
     chartRequest,
     mailWhenDone,
+    routingNow,
   };
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
@@ -1373,20 +1139,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // ---- 以往记录 (v8.0.0, S14) and the documents (routes/archive.ts) ----
     if (await archiveRoute(api, req, res, path, c)) return;
 
-    // ---- 深度分析 (v10.0.0, S19): the master's questions before a reading ----
-    if (path === "/v1/inquiries" && req.method === "POST") {
-      const out = await createInquiry(req, c);
-      return send(res, out.status, out.body, out.headers);
-    }
-    const iq = /^\/v1\/inquiries\/([^/]+)(\/answers)?$/.exec(path);
-    if (iq && !iq[2] && req.method === "GET") {
-      const r = await ownedInquiry(iq[1]!, c);
-      return send(res, 200, publicInquiry(r), aiHeaders(r.ai_disclosure));
-    }
-    if (iq && iq[2] && req.method === "POST") {
-      const out = await answerInquiry(req, iq[1]!, c);
-      return send(res, out.status, out.body, out.headers);
-    }
+    // ---- 深度分析 (v10.0.0, S19): the master's questions before a reading (routes/inquiry.ts) ----
+    if (await inquiryRoute(api, req, res, path, c)) return;
 
     // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 ----
     const fq = /^\/v1\/(reports|life-reports)\/([^/]+)\/followups$/.exec(path);
