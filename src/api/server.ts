@@ -183,6 +183,8 @@ export interface ApiOptions {
   trustProxy?: boolean;
   /** Serve this directory (the built web app) for non-/v1 GET requests. */
   staticDir?: string;
+  /** Serve this directory (the built 管理后台, admin/build/served) at /admin/ (S22, v12.0.0). */
+  adminDir?: string;
   /**
    * Content review (rule-layer holds, guard, 内容审核). Default true; false pauses it
    * (owner decision 2026-10-26, a later legal & obligations item): outputs are
@@ -1810,6 +1812,23 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
     const path = new URL(req.url ?? "/", "http://localhost").pathname;
+    // The 管理后台, once built: its page at /admin/, on the API's own origin, so it needs no
+    // settings. Before the public mode's app, which would take every path.
+    if (
+      opts.adminDir &&
+      req.method === "GET" &&
+      (path === "/admin" || path.startsWith("/admin/"))
+    ) {
+      if (path === "/admin") {
+        // The page's files are relative to /admin/.
+        res.writeHead(301, {
+          location: "/admin/" + new URL(req.url ?? "/", "http://localhost").search,
+        });
+        return res.end();
+      }
+      if (serveStatic(res, opts.adminDir, path.slice("/admin".length))) return;
+      throw new HttpError(404, "not found");
+    }
     // Public test mode: the built web app on the same origin as the API.
     if (opts.staticDir && req.method === "GET" && !path.startsWith("/v1/")) {
       if (serveStatic(res, opts.staticDir, path)) return;

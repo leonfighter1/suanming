@@ -4,6 +4,7 @@ Phase 0 (engines, ChartFact, compliance) and Phase 1 in progress (AI pipeline, v
 **Start here: [docs/SUMMARY.md](docs/SUMMARY.md)** (what each phase delivered).
 Details: [docs/phase-0-gate.md](docs/phase-0-gate.md) · [docs/phase-1-status.md](docs/phase-1-status.md) · [docs/phase-3-gate.md](docs/phase-3-gate.md) · agent instructions in [CLAUDE.md](CLAUDE.md).
 Web test: **https://leonfighter1.github.io/suanming/** ([docs/web-test.md](docs/web-test.md)).
+管理后台 (admins): `npm run admin:build`, then `npm run api` and **http://127.0.0.1:8787/admin/** ([admin/](admin/README.md)).
 
 ## 更新记录 (release notes)
 
@@ -11,6 +12,31 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tech-plan.md) and are the ones pushed;
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
+
+### v12.0.0 (2026-10-30): 管理后台 — the admin dashboard, served at /admin/
+
+Your request (「新建一个新的project folder- admin dashboard，这个专门用来管理app下的所有账户…」), stage S22 of the
+[tech plan](docs/tech-plan.md), complete. Pushed.
+
+- **Open it:** `npm run admin:build` (once, and again after a change to `admin/`; about a minute), then `npm run api`,
+  then **http://127.0.0.1:8787/admin/**, and sign in as `admin` / `admin`. The console says where it is
+  (`管理后台: http://127.0.0.1:8787/admin/`), or that it isn't built yet. Details: docs/web-test.md, 管理后台.
+- **What the stage brought:**
+  - **The server's part (v11.2.0):** every AI job's tokens and cost are recorded; accounts have a role, a status,
+    permissions and their last activity; suspension and permissions take effect at once; the admin API.
+  - **Demo data (v11.3.0):** 36 demo accounts with 90 days of history fill every page (filter them on 用户).
+  - **The dashboard (v11.4.0):** 概览 (revenue, AI cost, gross profit and margin, accounts, active users, tokens,
+    积分), 用户 and each account's page (停用账户, 管理员, AI and 充值 permissions, 增加积分 with a note, 在所有设备上退出, its
+    积分 ledger and AI jobs), 活跃, 收益 (the revenue curve each day or added up, PNG and CSV), 用量 (tokens by day,
+    by kind of job, by model), 导出 (the 经营报表 as PDF or Word, CSV).
+- **New in this release:** the API serves the dashboard itself on its own address, so the dashboard needs no
+  settings, and CanvasKit (Flutter's drawing engine) comes from the API too, not from Google's servers.
+  `MINGLI_ADMIN_DIR` serves another build, `off` none. The harness now checks the dashboard at every update: its
+  analysis, its 45 tests and a web build.
+- **Verified:** 5 new server tests (the page and each file by its type, `/admin` sent to `/admin/`, no file from
+  outside its folder, nothing served without a build, the public mode's app leaves `/admin/` alone), 675 in all; a
+  private API on a spare port served the built dashboard, the admin API answered the `admin` account, and headless
+  Chrome showed the dashboard's sign-in page; harness PASS with the dashboard's gate.
 
 ### v11.4.0 (2026-10-29): 管理后台 — the dashboard
 

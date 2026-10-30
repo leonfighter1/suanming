@@ -75,8 +75,15 @@
 71. When several requests can meet an expired token at once, share one refresh (an in-flight future) and retry without refreshing when the token already changed: the server rotates refresh tokens, so a second refresh with the same one fails.
 72. A focus check must name the focused control itself (its key, or a focused element inside the widget it belongs to), never just an ancestor of a label: before the first Tab the primary focus is a scope above everything.
 73. In Git Bash, an argument that starts with / (a base href, a URL path, a /flag) reaches the program as a Windows path: prefix the command with MSYS_NO_PATHCONV=1, or run it from PowerShell or a script. Through powershell -File, an argument with a double quote inside is split: keep double quotes out of such arguments.
+74. A Flutter build script clears .dart_tool/flutter_build first (real path), builds through a junction it removes afterwards, writes a build that is served to its own --output folder (the harness builds build/web), and checks the output has its files: rule 23's stale-path deletion hits web build output too, through any junction still there.
 
 ## Log
+
+### 2026-10-30: A web build through a new junction deleted its own files
+- **Symptom:** npm run admin:build produced admin/build/web without favicon.png and manifest.json
+- **Root cause:** Flutter records a build's files by the path it used (.dart_tool/flutter_build/*/outputs.json) and deletes them as stale from the next build through another path: the earlier manual junction still existed, so the deletes hit the same physical files. Also, the harness gate's plain flutter build web writes build/web with base href /, which would replace the build served at /admin/
+- **Fix:** admin-build.ts clears admin/.dart_tool/flutter_build on the real path, builds through a junction it removes afterwards into its own folder (--output admin/build/served), and checks the output has its files; check-admin.ps1 clears the record too
+- **Rule:** A Flutter build script clears .dart_tool/flutter_build first (real path), builds through a junction it removes afterwards, writes a build that is served to its own --output folder (the harness builds build/web), and checks the output has its files: rule 23's stale-path deletion hits web build output too, through any junction still there. (Rule 74)
 
 ### 2026-10-29: Git Bash rewrote --base-href /admin/ into a Windows path
 - **Symptom:** flutter build web --base-href /admin/ failed: it received the base href C:/Program Files/Git/admin/

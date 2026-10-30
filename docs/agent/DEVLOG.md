@@ -2,6 +2,21 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (a): S22 WP22.5 — the 管理后台 served at /admin/; S22 done, release v12.0.0
+
+- v11.4.0 pushed after its harness PASS (the owner: 「你测试完成了可以push。」).
+- Built: the API's `adminDir` (reusing `serveStatic`), scripts/api-server.ts serving `admin/build/served`,
+  `npm run admin:build`, the harness gate `scripts/check-admin.ps1` (a junction to the repository root), the
+  管理后台 section of docs/web-test.md, the S22 summary.
+- The first build lacked favicon.png and manifest.json: Flutter deleted them as stale through my earlier manual
+  junction, which still existed (rule 74). Also, the harness's plain web build would have replaced the served
+  build: the served one got its own `--output` folder. The script clears Flutter's record first and removes its
+  junction after; I removed the leftover `%TEMP%\mingli-admin` junction (the link only, checked first).
+- Checked the owner's way: a private API (port 8799, memory store) served /admin/ (types, the redirect, CanvasKit
+  locally), the `admin` account read the overview, and headless Chrome (a throwaway profile) rendered the sign-in
+  page; stopped by its port, the port checked free.
+- Found on the way: `AppCard` rings itself while a field inside has the focus: planned as S23 (WP23.1).
+
 ## 2026-10-29 (l): S22 WP22.4 — the 管理后台 dashboard (`admin/`); v11.4.0
 
 - Owner's word for this step: 「你测试完成了可以push。」 — pushed after the tests and the harness.

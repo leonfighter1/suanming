@@ -1,6 +1,6 @@
 {
   "name": "mingli-dashi",
-  "version": "11.4.0",
+  "version": "12.0.0",
   "private": true,
   "type": "module",
   "description": "命理大师 — Phase 0: engine POCs, ChartFact contract, compliance rule sets, API/DB skeleton",
@@ -22,6 +22,7 @@
     "demo:ui": "tsx scripts/demo-server.ts",
     "keygen": "tsx scripts/keygen.ts",
     "api": "tsx scripts/api-server.ts",
+    "admin:build": "tsx scripts/admin-build.ts",
     "sync:app": "tsx scripts/sync-app-assets.ts",
     "verify:bazi": "tsx scripts/verify-bazi.ts",
     "verify:tarot": "tsx scripts/verify-tarot.ts",

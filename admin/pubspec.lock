@@ -355,7 +355,7 @@ packages:
       path: "../app"
       relative: true
     source: path
-    version: "11.3.0+48"
+    version: "12.0.0+50"
   objective_c:
     dependency: transitive
     description:

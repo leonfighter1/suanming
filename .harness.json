@@ -13,6 +13,10 @@
     {
       "name": "app (pub get, analyze, test, build web)",
       "run": "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\AgentSkills\\harness-check\\scripts\\check.ps1 -Project app -Build web"
+    },
+    {
+      "name": "admin (pub get, analyze, test, build web)",
+      "run": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\check-admin.ps1 -Build web"
     }
   ]
 }

@@ -17,9 +17,14 @@ and Ctrl+/ work as in the app. The numbers come from the admin API (`/v1/admin/*
 
 ## Running it
 
-The API serves the built dashboard at `/admin/` (`npm run admin:build`, then `npm run dev:api`); docs/web-test.md has
-the steps and the demo accounts. Flutter on this machine needs an ASCII path, so run it through a junction to the repo
-root (CLAUDE.md rule 7). Which API it calls: `?api=<url>` on the page, else `--dart-define=API_BASE_URL=<url>`, else
-the page's own server when it is served under `/admin/`, else `http://127.0.0.1:8787`.
+From the repository root: `npm run admin:build` builds it into `admin/build/served`, and `npm run api` serves that at
+**http://127.0.0.1:8787/admin/** (sign in as `admin` / `admin`); docs/web-test.md has the details and the demo
+accounts. `admin/build/web` is the harness's own build, for "/": it isn't served.
 
-Tests: `flutter test` (a fake admin API, no server); the harness runs analyze, the tests and a web build.
+For development, `flutter run -d chrome` here, against `npm run api`. Flutter on this machine needs an ASCII path, so
+run it through a junction to the repository root (CLAUDE.md rule 7), and don't leave the junction behind (MISTAKES
+rule 74). Which API it calls: `?api=<url>` on the page, else `--dart-define=API_BASE_URL=<url>`, else the page's own
+server when it is served under `/admin/`, else `http://127.0.0.1:8787`.
+
+Tests: `flutter test` (a fake admin API, no server). The harness gate `scripts/check-admin.ps1` runs pub get,
+analyze, the tests and a web build.

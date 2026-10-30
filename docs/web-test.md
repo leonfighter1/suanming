@@ -208,6 +208,39 @@ card and the trend chart. The AI's reading is its own:
 - **The prices** are in `config/points.json` (packs, the margin, the CNY rate, each request's estimate); a change is
   read at the next start. `ACTIVE_AI_MODEL` moves every price with the model (Claude Sonnet 5.5 halves them).
 
+## 管理后台 (v12.0.0)
+
+The admin dashboard: every account, the tokens, the money, who is active, and exports. It is a web app of its own
+(`admin/`), served by the API beside the app's API.
+
+1. `npm run admin:build` (once, and after each change to `admin/`): builds it into `admin/build/served`, about a
+   minute. It needs Flutter, like the app; it runs through a junction itself, so the CJK path doesn't matter.
+2. `npm run api`. The console says `管理后台: http://127.0.0.1:8787/admin/ (admins: admin)`; before a build it says
+   `not built yet`.
+3. Open **http://127.0.0.1:8787/admin/** and sign in as **`admin` / `admin`**. Any other account is turned away
+   (这个账号不是管理员).
+
+- **Who is an admin:** the logins in `MINGLI_ADMINS` (default `admin`; comma-separated, read at the start) and any
+  account an admin makes one on its page. An admin named in `MINGLI_ADMINS` can't be demoted there, and nobody can
+  suspend or demote themselves, so there is always a way in.
+- **The demo accounts:** a new store gets 36 demo accounts with 90 days of history, so every page has numbers
+  (`管理后台: 36 demo accounts …` in the console). They have no password. `MINGLI_ADMIN_DEMO=off` leaves them out
+  of a new store; with `MINGLI_STORE=pglite` they are made once and kept. The 用户 page filters them (含演示 / 不含演示
+  / 只看演示).
+- **What changes take effect at once:** 停用账户 signs the account out everywhere and refuses its sign-in (the app
+  says 这个账号已被管理员停用); 可以用 AI off refuses its AI requests; 可以充值 off refuses 充值; 增加积分 shows in its 我的积分
+  as 管理员赠送 with the note.
+- **Exports:** 导出 makes the 经营报表 as PDF or Word and the revenue curve or the user list as CSV; 收益 also saves
+  the chart as a PNG. A PDF needs a Chinese font on the server, as share images do (below); without one, the page
+  says so and Word still works.
+- **Numbers:** days are Beijing time; 充值 is what was paid, its net after the payment fee (0.6%) and VAT (6%); AI cost
+  is each request's tokens at the model's list price, at the CNY rate in `config/points.json`.
+- **Another API or folder:** `MINGLI_ADMIN_DIR=<folder>` serves another build, `off` none. Run from `flutter run` in
+  `admin/` (through an ASCII junction), the dashboard calls `http://127.0.0.1:8787`; `?api=<url>` on its address
+  picks another API.
+- The session lives in the browser tab: closing it signs out. The dashboard is web only; on a phone it puts the pages
+  in a bar at the bottom.
+
 ## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
 
 By default the API keeps everything in memory: a restart loses every account and reading. The

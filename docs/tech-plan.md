@@ -48,7 +48,8 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S19 深度分析               | the master asks first; 麦克风; 同名重算                     | big    | v10.0.0 + summary | done        |
 | S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | v11.0.0 + summary | done        |
 | S21 有所求才能去求         | 塔罗, 求签 and 算卦 drawn only for a question               | medium | v11.1.0           | done        |
-| S22 管理后台               | admin dashboard: accounts, tokens, money, users, exports    | big    | v12.0.0 + summary | in progress |
+| S22 管理后台               | admin dashboard: accounts, tokens, money, users, exports    | big    | v12.0.0 + summary | done        |
+| S23 Found on the way       | a card's focus ring only for the card itself                | small  | v12.0.1           | next        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2095,8 +2096,50 @@ As built:
   (hover, tap, ←/→; round steps), `widgets/common.dart` (PageBody, PeriodPicker, AsyncView, DataGrid),
   `platform/download*.dart` (the browser's download). The active list opens each account's page, where it can be
   signed out or suspended. CORS exposes `content-disposition`. 45 dashboard tests against a fake API.
+- **v12.0.0 (WP22.5):** the API's `adminDir` (served by `serveStatic` at `/admin/`, `/admin` sent to `/admin/`, ahead
+  of the public mode's app); scripts/api-server.ts serves `admin/build/served` once built (`MINGLI_ADMIN_DIR` another,
+  `off` none) and says where. `npm run admin:build` (scripts/admin-build.ts) builds into that folder of its own: the
+  harness's check builds `admin/build/web` for "/", which would replace it. It clears Flutter's record of the last
+  build and removes its junction afterwards (rule 74), uses the build's own CanvasKit (`--no-web-resources-cdn`) and
+  checks the output. The harness gate `scripts/check-admin.ps1` junctions the repository root, since the dashboard
+  needs `../app`. Checked served: a private API on a spare port, `/admin/` in headless Chrome (the sign-in page).
+
+## S23 Found on the way (small → v12.0.1)
+
+### WP23.1 A card's focus ring only for the card itself
+
+- The app's `AppCard` shows its focus ring while anything inside it has the focus: its InkWell's `onFocusChange`
+  reports a descendant's focus too. Seen on the 管理后台's sign-in card, the field focused at the start (keyboard
+  highlight mode before any pointer input): a ring round the whole card besides the field's own.
+- Ring only when the card itself has the primary focus (a tappable card); a test in keyboard_shell_test or
+  keyboard_test with a field inside a card. The app and the dashboard both take the fix.
 
 ## 阶段总结 (stage summaries)
+
+### S22 管理后台 (done 2026-10-30: v12.0.0)
+
+1. **Delivered:** v11.2.0 (WP22.1–22.2) the server's part: every AI job's use recorded, the account's role, status,
+   permissions, last activity and demo mark (migration 011), suspension and permissions enforced, and the admin API
+   with its numbers from pure functions in `src/admin`; v11.3.0 (WP22.3) 36 demo accounts with 90 days of history
+   from a fixed seed; v11.4.0 (WP22.4) `admin/`, the Flutter web dashboard: 概览, 用户 and each account's page, 活跃,
+   收益, 用量, 导出; v12.0.0 (WP22.5) the API serves it at `/admin/`, `npm run admin:build`, its harness gate, the docs.
+2. **Numbers:** server tests 647 → 675; app tests 237 → 239; 45 dashboard tests (a fake admin API, the keyboard, a
+   phone and a wide screen); migration 011; the demo history: 36 accounts, about 570 AI jobs, 108 top-ups, ¥2,720 of
+   充值; the built dashboard 46 MB, nearly all CanvasKit (main.dart.js 3.2 MB).
+3. **Against the plan:** the pages 活跃 and 导出 (short rail labels) for 活跃用户 and 报表; the active list opens each
+   account's page for its actions instead of repeating them; exports download through the browser (package:web), as
+   share_plus opens Windows' share sheet in Chrome; the served build got its own folder (`admin/build/served`); CORS
+   exposes `content-disposition`, found while writing how to run the dashboard from Flutter.
+4. **Mistakes:** rule 69 (stop a background server by its port), 70 (Riverpod 3 retries a failed provider by
+   itself, behind a spinner), 71 (one shared token refresh: the server rotates refresh tokens), 72 (a focus check
+   that matched the scope above everything), 73 (Git Bash rewrote `/admin/` into a Windows path), 74 (a build
+   through a new junction deleted its own files). Together: a framework or tool can make a check pass, or a build
+   succeed, without the effect happening (a missed tap rescued by a retry, files deleted after a green build). Check
+   the effect itself (the request sent, the files built), and look at the result (screenshots with a real font, the
+   served page in a browser).
+5. **Next:** S23 (WP23.1, found on the way). The owner tries the dashboard: `npm run admin:build`, `npm run api`,
+   http://127.0.0.1:8787/admin/ as `admin`/`admin`. Waiting for the owner: Phase 4 payments, the mail and SMS
+   providers, the Phase 3 gate, WP7.2, WP7.3, WP1.8.
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
 
@@ -2683,4 +2726,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP22.2    | done                         | v11.2.0 |
 | WP22.3    | done                         | v11.3.0 |
 | WP22.4    | done                         | v11.4.0 |
-| WP22.5    | next                         | v12.0.0 |
+| WP22.5    | done                         | v12.0.0 |
+| WP23.1    | next                         | v12.0.1 |

@@ -3,9 +3,11 @@
  * npm run api:lan  → all interfaces, for phones on the same Wi-Fi (docs/web-test.md).
  *                    Sign-in only: the X-Dev-User shortcut is off, since other machines can reach it.
  * npm run public   → web app + API behind a public https tunnel (scripts/public.ts).
+ * The 管理后台, once built (npm run admin:build), at /admin/ on the same port.
  */
 import { existsSync, watchFile } from "node:fs";
 import { networkInterfaces } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkRouting, loadRouting } from "../src/ai/index.js";
 import { adminDemoOn, seedAdminDemo } from "../src/admin/demo.js";
@@ -54,6 +56,14 @@ const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? (lan ? "0.0.0.0" : "127.0.0.1");
 const loopbackOnly = !pub && (host === "127.0.0.1" || host === "localhost");
 const staticDir = fileURLToPath(new URL("../app/build/web/", import.meta.url));
+// The 管理后台 (S22), once built (npm run admin:build): served at /admin/. MINGLI_ADMIN_DIR names another build;
+// off serves none.
+const adminEnv = process.env.MINGLI_ADMIN_DIR;
+const adminDir =
+  adminEnv === "off"
+    ? undefined
+    : adminEnv || fileURLToPath(new URL("../admin/build/served/", import.meta.url));
+const adminBuilt = !!adminDir && existsSync(join(adminDir, "index.html"));
 if (pub && !existsSync(staticDir)) {
   console.error(`--public needs the built web app in ${staticDir} (npm run public builds it)`);
   process.exit(2);
@@ -103,6 +113,7 @@ const server = createApiServer({
   aiServing: providers.serving,
   aiModel: providers.models,
   routing: providers.routing,
+  ...(adminBuilt && { adminDir }),
   ...(pub && { trustProxy: true, staticDir, aiQuota }),
 });
 
@@ -151,6 +162,13 @@ server.listen(port, host, () => {
       : demo
         ? `管理后台: ${demo.accounts} demo accounts with 90 days of history (${demo.jobs} AI jobs); MINGLI_ADMIN_DEMO=off leaves them out`
         : "管理后台: the demo accounts are there from before; MINGLI_ADMIN_DEMO=off leaves new stores without them",
+  );
+  console.log(
+    adminBuilt
+      ? `管理后台: http://${host === "0.0.0.0" ? "127.0.0.1" : host}:${port}/admin/ (admins: ${(process.env.MINGLI_ADMINS ?? "admin").split(",").join(", ")})`
+      : adminDir
+        ? "管理后台: not built yet (npm run admin:build, then start the API again)"
+        : "管理后台: not served (MINGLI_ADMIN_DIR=off)",
   );
   console.log(
     `mail: ${notify.mail.name}, sms: ${notify.sms.name}` +
