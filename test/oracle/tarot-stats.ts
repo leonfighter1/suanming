@@ -5,12 +5,7 @@
  */
 import { DECK, SPREADS, type SpreadId } from "../../src/engines/tarot/deck.js";
 import { deriveSeed, drawWithRitual, drawWithSeed } from "../../src/engines/tarot/index.js";
-
-const Z_999 = 3.09;
-export const chi2Critical = (df: number, z = Z_999) => {
-  const a = 2 / (9 * df);
-  return df * (1 - a + z * Math.sqrt(a)) ** 3;
-};
+import { chi2, chi2Critical, drawId, independence, round, Z_999, type Check } from "./stats.js";
 
 const IDS = DECK.map((c) => c.id);
 const INDEX = new Map(IDS.map((id, i) => [id, i]));
@@ -20,35 +15,6 @@ const category = (id: string) =>
     ? 0
     : ["wands", "cups", "swords", "pentacles"].indexOf(id.split("_")[0]!) + 1;
 const CAT_P = [22 / 78, 14 / 78, 14 / 78, 14 / 78, 14 / 78];
-
-const drawId = (i: number) => `00000000-0000-4000-8000-${i.toString(16).padStart(12, "0")}`;
-
-export interface Check {
-  name: string;
-  statistic: number;
-  critical: number;
-  pass: boolean;
-  detail?: string;
-}
-
-function chi2(observed: number[], expected: number[]) {
-  return observed.reduce((s, o, i) => s + (o - expected[i]!) ** 2 / expected[i]!, 0);
-}
-
-/** Chi-square test of independence on a contingency table. */
-function independence(table: number[][]) {
-  const rows = table.map((r) => r.reduce((a, b) => a + b, 0));
-  const cols = table[0]!.map((_, j) => table.reduce((a, r) => a + r[j]!, 0));
-  const n = rows.reduce((a, b) => a + b, 0);
-  let s = 0;
-  table.forEach((r, i) =>
-    r.forEach((o, j) => {
-      const e = (rows[i]! * cols[j]!) / n;
-      if (e > 0) s += (o - e) ** 2 / e;
-    }),
-  );
-  return { s, df: (table.length - 1) * (table[0]!.length - 1) };
-}
 
 export type DrawFn = (drawId: string, spread: SpreadId) => ReturnType<typeof drawWithSeed>;
 
@@ -191,5 +157,3 @@ export function tarotBattery(
 
   return { draws_per_spread: n, checks, pass: checks.every((c) => c.pass) };
 }
-
-const round = (x: number) => Math.round(x * 100) / 100;

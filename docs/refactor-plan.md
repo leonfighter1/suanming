@@ -144,35 +144,39 @@ files show where structure is missing:
 
 ## Where things go
 
-| Home                                               | Takes                                                                                        |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `src/api/routes/<group>.ts`                        | each route group, as `<group>Route(ctx, req, res, path, caller): Promise<boolean>` (F1)      |
-| `ApiContext` (`src/api/context.ts`)                | what the groups share: store, options, now, log, quotas, holds, jobs, the Geo-Rule check     |
-| `src/ai/envelope.ts`                               | `providerFor`, the guard's verdict, the disclosure and compliance envelope (F2)              |
-| `test/api.ts`                                      | `startApi(options)`: the server, its base address, `get`, `post`, `close` (F9, F10)          |
-| `test/oracle/stats.ts`, `scripts/verify-common.ts` | the statistics and the scripts' shared parts (F11)                                           |
-| `app/test/support.dart`                            | `settle(tester, [frames])`, `scrollAndTap` (F17)                                             |
-| App widgets and helpers                            | a numbered step, the card of the day's tile, the date key, 有所求's listener (F12, F13, F15) |
+| Home                                               | Takes                                                                                                |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `src/api/routes/<group>.ts`                        | each route group, as `<group>Route(ctx, req, res, path, caller): Promise<boolean>` (F1)              |
+| `ApiContext` (`src/api/context.ts`)                | what the groups share: store, options, now, log, quotas, holds, jobs, the Geo-Rule check             |
+| `src/ai/envelope.ts`                               | `providerFor`, the guard's verdict, the disclosure and compliance envelope (F2)                      |
+| `test/api.ts`                                      | `testApi(options, onBase)`: the server for a file or a describe, its address, closed after (F9, F10) |
+| `test/oracle/stats.ts`, `scripts/verify-common.ts` | the statistics and the scripts' shared parts (F11)                                                   |
+| `app/test/support.dart`                            | `settle(tester, [frames])`, `scrollAndTap` (F17)                                                     |
+| App widgets and helpers                            | a numbered step, the card of the day's tile, the date key, 有所求's listener (F12, F13, F15)         |
 
 ## Phases and work packages
 
 The safest and most repeated go first. Each WP is one commit, or one per group for a long one. Each release runs the
 harness.
 
-### Phase A: test helpers (→ v16.1.0)
+### Phase A: test helpers (no version: tests and scripts only)
 
 No app or server code changes.
 
-- **WP28.1 `startApi` for the server tests (F9, F10).** The helper starts right before the tests that call it (rule
-  81). Move the thirty files over a few at a time, each file's assertions unchanged.
+- **WP28.1 `testApi` for the server tests (F9, F10).** The helper serves the file, or the describe it is called in.
+  A file whose slow steps come before its HTTP tests keeps its own late start (rule 81). Move the files over a few at
+  a time, each file's assertions unchanged; a server of another shape stays as it is.
   - Accept: the 696 server tests pass; the scan's server-test count falls from 167 to under 40.
-- **WP28.2 The app tests' `settle` and `scrollAndTap` (F17).** Both go to `support.dart`; each file passes its own
-  frame count, so no test's timing changes.
+  - Done: 20 files, 260 → 123 blocks in all, server tests 167 → 30.
+- **WP28.2 The app tests' `settle` and `scrollAndTap` (F17).** `settle` was a copy of `keys.dart`'s
+  `frames(tester, n)`, so each file now calls `frames` with its own count, and no test's timing changes.
+  `scrollAndTap` goes to `support.dart`, with `after` and `n` for the copies that differed.
   - Accept: the 265 app tests pass.
-- **WP28.3 The statistics' and verify scripts' shared helpers (F11).**
-  - Accept: the four verify gates pass with the same results; their JSON differs only in its time and seconds.
+- **WP28.3 The statistics' and verify scripts' shared helpers (F11):** `test/oracle/stats.ts` and
+  `scripts/verify-run.ts`.
+  - Accept: the verify gates pass with the same results; their JSON differs only in its time and seconds.
 
-### Phase B: small code homes (→ v16.2.0)
+### Phase B: small code homes (→ v16.1.0)
 
 - **WP28.4 App (F12, F13, F15, F16):**
   - the numbered step widget;
@@ -191,7 +195,7 @@ No app or server code changes.
   - Accept: the server tests pass. The share images' bytes are the same for the tests' readings, since sharp
     renders deterministically with the same font.
 
-### Phase C: the AI mechanics (→ v16.3.0)
+### Phase C: the AI mechanics (→ v16.2.0)
 
 - **WP28.6 `src/ai/envelope.ts` (F2).** Every entry point (`generateReport`, `generateRemedy`, `generateLifeReport`,
   `generateFollowUp`, `generateInquiryTurn`) keeps its name, prompts and steps (CLAUDE.md rule 2), and takes the

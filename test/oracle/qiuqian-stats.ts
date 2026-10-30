@@ -5,29 +5,9 @@
  * lands flat with p = ½, so a round is 聖筊 ½, 笑筊 ¼, 陰筊 ¼ and the rounds per draw are geometric (½).
  */
 import { deriveSeed, drawWithSeed, type Round } from "../../src/engines/qiuqian/index.js";
-import { chi2Critical, type Check } from "./tarot-stats.js";
+import { chi2, chi2Critical, drawId, independence, round, Z_999, type Check } from "./stats.js";
 
-const Z_999 = 3.09;
 const LOTS = 100;
-const drawId = (i: number) => `00000000-0000-4000-8000-${i.toString(16).padStart(12, "0")}`;
-
-function chi2(observed: number[], expected: number[]) {
-  return observed.reduce((s, o, i) => s + (o - expected[i]!) ** 2 / expected[i]!, 0);
-}
-
-function independence(table: number[][]) {
-  const rows = table.map((r) => r.reduce((a, b) => a + b, 0));
-  const cols = table[0]!.map((_, j) => table.reduce((a, r) => a + r[j]!, 0));
-  const n = rows.reduce((a, b) => a + b, 0);
-  let s = 0;
-  table.forEach((r, i) =>
-    r.forEach((o, j) => {
-      const e = (rows[i]! * cols[j]!) / n;
-      if (e > 0) s += (o - e) ** 2 / e;
-    }),
-  );
-  return { s, df: (table.length - 1) * (table[0]!.length - 1) };
-}
 
 export type QiuqianDrawFn = (drawId: string) => Round[];
 
@@ -119,5 +99,3 @@ export function qiuqianBattery(n: number, draw: QiuqianDrawFn = realQiuqianDraw(
 
   return { draws: n, checks, pass: checks.every((c) => c.pass) };
 }
-
-const round = (x: number) => Math.round(x * 100) / 100;

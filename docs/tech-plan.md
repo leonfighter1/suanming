@@ -2526,13 +2526,13 @@ The survey (260 repeated blocks; the largest files), the rules for every step, t
 
 | WP      | What                                                                                              | Release |
 | ------- | ------------------------------------------------------------------------------------------------- | ------- |
-| WP28.1  | `startApi` for the server tests (30 files start the API by hand)                                  | v16.1.0 |
-| WP28.2  | the app tests' `settle` and `scrollAndTap` in support.dart (27 and 4 copies)                      | v16.1.0 |
-| WP28.3  | the verification statistics' and verify scripts' shared helpers                                   | v16.1.0 |
-| WP28.4  | app: a numbered step, one tile for the cards of the day, the date key, 有所求's listener, repeats | v16.2.0 |
-| WP28.5  | server: `ownedChart`, one get-or-create for the cards of the day, the hold's arithmetic, sums     | v16.2.0 |
-| WP28.6  | the AI mechanics in `src/ai/envelope.ts` (model routing, the guard's verdict, the envelope)       | v16.3.0 |
-| WP28.7  | the user-message builders' closing lines, checked byte for byte                                   | v16.3.0 |
+| WP28.1  | `testApi` for the server tests (30 files start the API by hand)                                   | —       |
+| WP28.2  | the app tests' `settle` and `scrollAndTap` in support.dart (27 and 4 copies)                      | —       |
+| WP28.3  | the verification statistics' and verify scripts' shared helpers                                   | —       |
+| WP28.4  | app: a numbered step, one tile for the cards of the day, the date key, 有所求's listener, repeats | v16.1.0 |
+| WP28.5  | server: `ownedChart`, one get-or-create for the cards of the day, the hold's arithmetic, sums     | v16.1.0 |
+| WP28.6  | the AI mechanics in `src/ai/envelope.ts` (model routing, the guard's verdict, the envelope)       | v16.2.0 |
+| WP28.7  | the user-message builders' closing lines, checked byte for byte                                   | v16.2.0 |
 | WP28.8  | `ApiContext` and the first route module (calendar, places)                                        | v17.0.0 |
 | WP28.9  | the other route groups, one commit each; `server.ts` under 900 lines                              | v17.0.0 |
 | WP28.10 | the 管理后台's panel card built in one place, nothing visible changed                             | v17.0.0 |
@@ -3327,13 +3327,13 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP27.1    | done                         | —       |
 | WP27.2    | done                         | v15.1.0 |
 | WP27.3    | done                         | v16.0.0 |
-| WP28.1    | done                         | v16.1.0 |
-| WP28.2    | done                         | v16.1.0 |
-| WP28.3    | in progress                  | v16.1.0 |
-| WP28.4    | planned                      | v16.2.0 |
-| WP28.5    | planned                      | v16.2.0 |
-| WP28.6    | planned                      | v16.3.0 |
-| WP28.7    | planned                      | v16.3.0 |
+| WP28.1    | done                         | —       |
+| WP28.2    | done                         | —       |
+| WP28.3    | done                         | —       |
+| WP28.4    | in progress                  | v16.1.0 |
+| WP28.5    | planned                      | v16.1.0 |
+| WP28.6    | planned                      | v16.2.0 |
+| WP28.7    | planned                      | v16.2.0 |
 | WP28.8    | planned                      | v17.0.0 |
 | WP28.9    | planned                      | v17.0.0 |
 | WP28.10   | planned                      | v17.0.0 |
