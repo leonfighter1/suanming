@@ -6,8 +6,16 @@
 import type { IncomingMessage } from "node:http";
 import type { AccountService } from "../auth/account.js";
 import type { AccountPermissions, AuthService } from "../auth/service.js";
+import type { AgentTrace } from "../ai/index.js";
 import type { Dispatcher, MailTransport } from "../notify/index.js";
-import type { ChargeKind, PointsConfig, Quote, QuoteFor } from "../points/index.js";
+import type {
+  ChargeKind,
+  PointsConfig,
+  PointsFor,
+  PointsHold,
+  Quote,
+  QuoteFor,
+} from "../points/index.js";
 import type { ApiOptions } from "./server.js";
 import type { Store } from "./store.js";
 
@@ -53,4 +61,33 @@ export interface ApiContext {
   assertAllowed: (c: Caller, what: keyof AccountPermissions) => Promise<void>;
   /** Geo-Rule: refuses (451) before anything is computed for a region, or a method, not served. */
   assertServed: (country: string, system?: string) => void;
+  /** Runs a background job, kept for drain(); a failure is logged, never left unhandled. */
+  track: (what: string, work: Promise<void>) => void;
+  /** A background job (a preload) takes from the day's AI total alone; false: skip it. */
+  takeBackgroundQuota: () => boolean;
+  /** Holds a request's price; 402 `points_short` when what is available doesn't cover it. */
+  holdPoints: (
+    c: Caller,
+    price: Quote | undefined,
+    what: PointsFor,
+  ) => Promise<PointsHold | undefined>;
+  /** Before an AI job: AI allowed, its price held, the day's AI caps; a refusal takes nothing. */
+  holdForJob: (
+    c: Caller,
+    kind: ChargeKind,
+    what: PointsFor,
+    about?: QuoteFor,
+  ) => Promise<PointsHold | undefined>;
+  /** Ends a job's hold: what it delivered is charged (`flat`: its quote), nothing when it delivered nothing. */
+  settleHold: (
+    hold: PointsHold | undefined,
+    delivered: readonly AgentTrace[] | undefined,
+    flat?: boolean,
+  ) => Promise<void>;
+  /** 管理后台 (v11.2.0): an AI job's steps as it ends, delivered or not (their tokens were spent either way). */
+  recordJob: (
+    job: { kind: ChargeKind; id: string; owner: string; system?: string },
+    agents: readonly AgentTrace[] | undefined,
+    delivered: boolean,
+  ) => Promise<void>;
 }
