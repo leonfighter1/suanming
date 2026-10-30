@@ -47,7 +47,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('look-room')));
     await frames(tester);
-    expect(jsonDecode(api.requests.last.body), {'system': 'fengshui', 'room': 'kitchen', 'facing': 'west'});
+    expect(jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body), {'system': 'fengshui', 'room': 'kitchen', 'facing': 'west'});
 
     // The card shows the room the server answered with (the fixture: a bedroom facing east).
     await scrollTo(tester, const Key('principles-card'));

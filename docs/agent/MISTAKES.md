@@ -68,8 +68,22 @@
 64. On a page that builds cards past the screen, a finder for one below the fold needs skipOffstage: false, whether it checks that the card exists, measures its position or asserts findsNothing (rule 43). Scroll to it first only when the test is about what the user sees.
 65. In a list whose parts replace each other (a field, then a card), give each BringIntoView its own key: an unkeyed one at the same place takes over the old state and never brings its part into view. Prove it on a 360 x 740 phone with content past the fold, and check the test fails with the keys removed.
 66. A new or changed route's settings reach the model only through the server's routing: test it through withModel with the owner's ACTIVE_AI_MODEL (read its name from .env, never a key) as well as the bare table, before saying how it behaves.
+67. In api/openapi.yaml, quote every description inside a flow mapping { ... } that contains a comma, a colon or starts with true/false/null, and run npm run validate:openapi right after editing the spec.
+68. In app tests, find the request you check by its method and path (lastWhere / singleWhere), never api.requests.last: any page may add a background call (a balance, a price) after it.
 
 ## Log
+
+### 2026-10-29: A test read api.requests.last and met a new background request
+- **Symptom:** fengshui_test failed with FormatException: Unexpected end of input after 积分 came in; naming_test and qiuqian_test used the same pattern and passed only by timing.
+- **Root cause:** The test took the chart request to be the last one sent. The reading card shown after the chart now asks for the balance (GET /v1/points, empty body), so the last request was that GET.
+- **Fix:** The tests find the request by method and path: api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts'); the expected bodies are unchanged.
+- **Rule:** In app tests, find the request you check by its method and path (lastWhere / singleWhere), never api.requests.last: any page may add a background call (a balance, a price) after it. (Rule 68)
+
+### 2026-10-29: OpenAPI flow-mapping comma split a description (recurred from S19)
+- **Symptom:** npm run validate:openapi failed: Property 'in 积分' is not expected here, at PointsShort need.
+- **Root cause:** In a YAML flow mapping { type: integer, description: What the request costs, in 积分 } an unquoted comma ends the value, so the rest became a key. S19 hit the same thing and fixed it without a rule.
+- **Fix:** Quoted the description; also quoted one that began with the word false.
+- **Rule:** In api/openapi.yaml, quote every description inside a flow mapping { ... } that contains a comma, a colon or starts with true/false/null, and run npm run validate:openapi right after editing the spec. (Rule 67)
 
 ### 2026-10-29: A new route's effort never reached the model through ACTIVE_AI_MODEL
 - **Symptom:** The 深度分析 route was set to effort low and documented so, but the owner's .env names ACTIVE_AI_MODEL=claude-opus-5-5, and withModel put every route, this one too, at the model's catalog effort (medium).

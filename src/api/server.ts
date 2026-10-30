@@ -23,6 +23,7 @@ import {
   INQUIRY_MAX_QUESTIONS,
   inquiryAvailable,
   inquiryGoal,
+  loadRouting,
   remedyAvailable,
   parseUserContext,
   GeoRefusedError,
@@ -32,6 +33,7 @@ import {
   TAROT_FOCUS,
   TOPICS,
   TOPICS_BY_SYSTEM,
+  type AgentTrace,
   type FollowUpParent,
   type FollowUpTurn,
   type InquiryContext,
@@ -69,6 +71,23 @@ import { newLayout } from "../engines/liuyao/index.js";
 import { serveStatic } from "../http/static.js";
 import { aiHeaders, HttpError, problem, readJson, send } from "../http/util.js";
 import { placeCountry, placeIndex } from "../places/index.js";
+import {
+  chargeFor,
+  inquiryFee,
+  loadPointsConfig,
+  measuredCost,
+  pointsPerUsd,
+  quote,
+  quoteFor,
+  type ChargeKind,
+  type PointsCharge,
+  type PointsConfig,
+  type PointsEntry,
+  type PointsFor,
+  type PointsHold,
+  type Quote,
+  type QuoteFor,
+} from "../points/index.js";
 import {
   changePerson,
   computeChart,
@@ -177,9 +196,16 @@ export interface ApiOptions {
   aiModel?: () => string;
   /**
    * Generate every topic's 破除運勢 plan (locked) right after a report passes, so a
-   * purchase opens instantly. Default true. Counts against aiQuota.totalPerDay.
+   * purchase opens instantly. Default true. Counts against aiQuota.totalPerDay. Never with `points`: a preload
+   * spends tokens nobody pays for.
    */
   preloadRemedies?: boolean;
+  /**
+   * 积分 (v11.0.0, tech plan S20): every AI request is paid in points: its price is held while it runs (402
+   * points_short when the account can't cover it) and it is charged what it cost (src/points). Absent: everything
+   * is free, as before. `simulateTopUp`: 充值 adds a pack's 积分 without payment (development, until Phase 4).
+   */
+  points?: { config?: PointsConfig; simulateTopUp?: boolean };
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
@@ -326,6 +352,30 @@ export function publicRemedy(r: RemedyRecord) {
     return { ...base, message: "this plan is held for review and is not available yet" };
   }
   return r.unlocked ? { ...base, content: r.remedy.content } : base;
+}
+
+/**
+ * What the user sees of a 积分 change (v11.0.0): what it was and what it left. A charge's measured cost in dollars is
+ * shown while 充值 is simulated (development), for the owner's 「提交问题给花费了多少」; never once real money pays.
+ */
+export function publicPointsEntry(e: PointsEntry, showCost: boolean) {
+  return {
+    id: e.id,
+    kind: e.kind,
+    points: e.points,
+    balance: e.balance,
+    created_at: e.created_at,
+    ...(e.for && { for: e.for }),
+    ...(e.basis && { basis: e.basis }),
+    ...(showCost && e.usd !== undefined && { usd: e.usd }),
+    ...(e.pack && { pack: e.pack }),
+    ...(e.reason && { reason: e.reason }),
+  };
+}
+
+/** A 充值 pack as the app offers it: its bonus over 100 积分 a 元, in percent (20元 = 2200: 10). */
+export function publicPack(p: { yuan: number; points: number }) {
+  return { ...p, bonus_percent: Math.round((p.points / (p.yuan * 100) - 1) * 100) };
 }
 
 /** What the user may see of a 一生运势报告. */
@@ -526,6 +576,84 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     return true;
   }
 
+  // ---- 积分 (v11.0.0, tech plan S20): every AI request held, then charged what it cost ----
+
+  const pointsConfig = opts.points && (opts.points.config ?? loadPointsConfig());
+  const simulatedTopUp = !!opts.points?.simulateTopUp;
+  /** The routing a job started now would get: prices follow the model it names (ACTIVE_AI_MODEL too). */
+  const routingNow = () => opts.routing?.() ?? loadRouting();
+  /** What an AI request costs now; undefined while 积分 are off. */
+  const priceOf = (kind: ChargeKind, about?: QuoteFor): Quote | undefined =>
+    pointsConfig && quote(pointsConfig, routingNow(), kind, about);
+
+  /** Holds a request's price; 402 points_short, with what it needs and what is available, when that doesn't cover it. */
+  async function holdPoints(c: Caller, price: Quote | undefined, what: PointsFor) {
+    if (!price) return undefined;
+    const hold = await store.holdPoints(
+      c.user,
+      price.points,
+      price.hold,
+      what,
+      now().toISOString(),
+    );
+    if (hold) return hold;
+    const { balance, held } = await store.pointsOf(c.user);
+    const available = Math.max(0, balance - held);
+    throw new HttpError(
+      402,
+      `not enough 积分: this costs about ${price.points}, and ${available} are available`,
+      "points_short",
+      { need: price.points, available },
+    );
+  }
+
+  /**
+   * Before an AI job: its price held, then the daily AI caps, so a refusal of either takes nothing. Undefined while
+   * 积分 are off.
+   */
+  async function holdForJob(c: Caller, kind: ChargeKind, what: PointsFor, about?: QuoteFor) {
+    const hold = await holdPoints(c, priceOf(kind, about), what);
+    try {
+      takeAiQuota(c.user);
+    } catch (e) {
+      await settleHold(hold, undefined);
+      throw e;
+    }
+    return hold;
+  }
+
+  /**
+   * Ends a job's hold. What it delivered is charged: its measured cost (its quote when no tokens were reported: the
+   * mock), or with `flat` its quote, the 深度分析's 统一收费; never more than was held. A job that delivered nothing
+   * (failed, held for review, deleted meanwhile) is charged nothing.
+   */
+  async function settleHold(
+    hold: PointsHold | undefined,
+    delivered: readonly AgentTrace[] | undefined,
+    flat = false,
+  ) {
+    if (!hold || !pointsConfig) return;
+    const charge: PointsCharge | undefined = !delivered
+      ? undefined
+      : flat
+        ? { points: hold.quote, basis: "flat" }
+        : chargeFor(pointsConfig, hold, delivered);
+    await store.settlePoints(hold, charge, now().toISOString());
+  }
+
+  /**
+   * The 深度分析's guard (the owner's 统一收费): its fee is paid once, so a turn that would take what its turns spent
+   * past what the fee allows at the margin is not asked for; the conversation closes and the reading goes on.
+   */
+  function inquiryOverBudget(record: InquiryRecord): boolean {
+    if (!pointsConfig || record.fee === undefined || record.turns.length === 0) return false;
+    const agents = record.agents ?? [];
+    const spent = measuredCost(pointsConfig, agents).usd;
+    const largest = Math.max(0, ...agents.map((a) => measuredCost(pointsConfig, [a]).usd));
+    const { turnUsd } = inquiryFee(pointsConfig, routingNow());
+    return spent + Math.max(turnUsd, largest) > record.fee / pointsPerUsd(pointsConfig);
+  }
+
   const auth = opts.auth;
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
   const mail = opts.mail ?? new NoMail();
@@ -639,6 +767,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     question?: string,
     focus?: TarotFocus,
     inquiry?: InquiryContext,
+    hold?: PointsHold,
   ) {
     let next: ReportRecord;
     try {
@@ -685,10 +814,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     // The account may have been deleted while this ran; never resurrect its data.
-    if (!(await store.getReport(record.id))) return;
+    if (!(await store.getReport(record.id))) return settleHold(hold, undefined);
     await store.putReport(next);
+    await settleHold(hold, next.status === "passed" ? next.report?.agents : undefined);
     if (next.status === "passed") await mailWhenDone("report", record.id);
-    if (next.status === "passed" && next.report && opts.preloadRemedies !== false) {
+    // With 积分 a plan is made when bought: a preload spends tokens nobody pays for.
+    if (
+      next.status === "passed" &&
+      next.report &&
+      opts.preloadRemedies !== false &&
+      !pointsConfig
+    ) {
       await preloadRemedies(next, next.report, fact, c);
     }
   }
@@ -727,6 +863,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     fact: ChartFact,
     c: Caller,
     context?: ReportRecord["context"],
+    hold?: PointsHold,
   ) {
     let next: RemedyRecord;
     try {
@@ -766,9 +903,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     const current = await store.getRemedy(record.id);
-    if (!current) return;
+    if (!current) return settleHold(hold, undefined);
     // Bought while generating: keep the purchase.
     await store.putRemedy({ ...next, unlocked: current.unlocked, payment: current.payment });
+    await settleHold(hold, next.status === "passed" ? next.remedy?.agents : undefined);
   }
 
   /** The caller's passed report and its chart, or 404 / 409. */
@@ -817,37 +955,49 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
       existing = undefined;
     }
+    const plan = { kind: "remedy" as const, system: fact.system };
     if (existing) {
-      // Preloaded: buying only unlocks it. TODO(Phase 4 payments): verify the receipt.
+      // Preloaded: buying only unlocks it. TODO(Phase 4 payments): verify the receipt. With 积分 (a plan preloaded
+      // before they were on), buying it pays what it cost to make.
+      if (!existing.unlocked && pointsConfig) {
+        const hold = await holdPoints(c, priceOf("remedy", quoteFor(fact)), {
+          ...plan,
+          id: existing.id,
+        });
+        await settleHold(hold, existing.remedy?.agents ?? []);
+      }
       const bought = existing.unlocked
         ? existing
         : {
             ...existing,
             unlocked: true,
-            payment: { status: "placeholder" as const, ...REMEDY_PRICE },
+            payment: pointsConfig
+              ? { status: "points" as const }
+              : { status: "placeholder" as const, ...REMEDY_PRICE },
             updated_at: now().toISOString(),
           };
       if (!existing.unlocked) await store.putRemedy(bought);
       return { status: 200, body: publicRemedy(bought), headers: {} as Record<string, string> };
     }
-    takeAiQuota(c.user);
+    const id = randomUUID();
+    const hold = await holdForJob(c, "remedy", { ...plan, id }, quoteFor(fact));
 
     const ts = now().toISOString();
     const remedy: RemedyRecord = {
-      id: randomUUID(),
+      id,
       owner: c.user,
       report_id: record.id,
       topic,
       status: "pending",
       created_at: ts,
       updated_at: ts,
-      // TODO(Phase 4 payments): verify the store receipt here; until then every
-      // purchase is a placeholder that succeeds without charging.
+      // TODO(Phase 4 payments): verify the store receipt here; until then a purchase is
+      // paid in 积分 (v11.0.0) or, with them off, a placeholder that succeeds without charging.
       unlocked: true,
-      payment: { status: "placeholder", ...REMEDY_PRICE },
+      payment: pointsConfig ? { status: "points" } : { status: "placeholder", ...REMEDY_PRICE },
     };
     await store.putRemedy(remedy);
-    track(`plan ${remedy.id}`, runRemedyJob(remedy, report, fact, c, record.context));
+    track(`plan ${remedy.id}`, runRemedyJob(remedy, report, fact, c, record.context, hold));
     return {
       status: 202,
       body: publicRemedy(remedy),
@@ -894,6 +1044,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     fact: ChartFact,
     thread: FollowUpTurn[],
     c: Caller,
+    hold?: PointsHold,
   ) {
     let next: FollowUpRecord;
     try {
@@ -934,8 +1085,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     // The account may have been deleted while this ran; never resurrect its data.
-    if (!(await store.getFollowUp(record.id))) return;
+    if (!(await store.getFollowUp(record.id))) return settleHold(hold, undefined);
     await store.putFollowUp(next);
+    await settleHold(hold, next.status === "passed" ? next.followup?.agents : undefined);
   }
 
   /**
@@ -974,10 +1126,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         "followup_limit",
       );
     }
-    takeAiQuota(c.user);
+    const followUpId = randomUUID();
+    const hold = await holdForJob(
+      c,
+      "followup",
+      { kind: "followup", id: followUpId, system: fact.system },
+      { system: fact.system, parent: kind },
+    );
     const ts = now().toISOString();
     const record: FollowUpRecord = {
-      id: randomUUID(),
+      id: followUpId,
       owner: c.user,
       parent: { kind, id },
       question,
@@ -991,7 +1149,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         ? [{ question: f.question, answer: f.followup.answer }]
         : [],
     );
-    track(`follow-up ${record.id}`, runFollowUpJob(record, parent, fact, thread, c));
+    track(`follow-up ${record.id}`, runFollowUpJob(record, parent, fact, thread, c, hold));
     return {
       status: 202,
       body: publicFollowUp(record),
@@ -1004,51 +1162,62 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
    * answer (asking); when the master asks nothing more it is ready, with its last words. A turn that fails or is held
    * ends the questions there (ready: the reading goes on with what was said), or, on the first turn, fails the 深度分析.
    */
-  async function runInquiryTurn(record: InquiryRecord, fact: ChartFact, c: Caller) {
+  async function runInquiryTurn(
+    record: InquiryRecord,
+    fact: ChartFact,
+    c: Caller,
+    /** The first turn's: the 统一收费, charged once the master has asked. */
+    hold?: PointsHold,
+  ) {
     let step: InquiryStep | undefined;
     let error: string | undefined;
-    try {
-      step = await generateInquiryTurn(
-        fact,
-        {
-          goal: record.goal,
-          ...(record.question && { question: record.question }),
-          ...(record.focus && { focus: record.focus }),
-          ...(record.context && { context: record.context }),
-          turns: record.turns,
-          ...(record.planned !== undefined && { planned: record.planned }),
-        },
-        { locale: record.locale, country: c.country },
-        {
-          providers: opts.providers,
-          routing: opts.routing?.(),
-          review: opts.review !== false,
-          now,
-          onProgress: async ({ stage, attempt }) => {
-            const current = await store.getInquiry(record.id);
-            if (current?.status !== "thinking") return;
-            await store.putInquiry({
-              ...current,
-              progress: { stage, attempt, updated_at: now().toISOString() },
-            });
+    if (inquiryOverBudget(record)) {
+      error = "its fee covers no further turn";
+      log(`inquiry ${record.id}: closed, its fee covers no further turn`);
+    } else {
+      try {
+        step = await generateInquiryTurn(
+          fact,
+          {
+            goal: record.goal,
+            ...(record.question && { question: record.question }),
+            ...(record.focus && { focus: record.focus }),
+            ...(record.context && { context: record.context }),
+            turns: record.turns,
+            ...(record.planned !== undefined && { planned: record.planned }),
           },
-        },
-      );
-      if (step.status !== "passed") {
-        error = step.reasons.join("; ");
-        log(`inquiry ${record.id} turn held: ${heldWhy(step)}`);
+          { locale: record.locale, country: c.country },
+          {
+            providers: opts.providers,
+            routing: opts.routing?.(),
+            review: opts.review !== false,
+            now,
+            onProgress: async ({ stage, attempt }) => {
+              const current = await store.getInquiry(record.id);
+              if (current?.status !== "thinking") return;
+              await store.putInquiry({
+                ...current,
+                progress: { stage, attempt, updated_at: now().toISOString() },
+              });
+            },
+          },
+        );
+        if (step.status !== "passed") {
+          error = step.reasons.join("; ");
+          log(`inquiry ${record.id} turn held: ${heldWhy(step)}`);
+        }
+      } catch (e) {
+        const upstream = upstreamMessage(e);
+        error = upstream ?? "internal error";
+        log(
+          `inquiry ${record.id} turn failed: ${upstream ?? (e as Error).message}`,
+          upstream ? undefined : e,
+        );
       }
-    } catch (e) {
-      const upstream = upstreamMessage(e);
-      error = upstream ?? "internal error";
-      log(
-        `inquiry ${record.id} turn failed: ${upstream ?? (e as Error).message}`,
-        upstream ? undefined : e,
-      );
     }
     // The account or the reading may have gone, or the user moved on, meanwhile: never resurrect or overwrite.
     const current = await store.getInquiry(record.id);
-    if (!current || current.status !== "thinking") return;
+    if (!current || current.status !== "thinking") return settleHold(hold, undefined);
     const { progress: _p, error: _e, ...rest } = current;
     const base: InquiryRecord = {
       ...rest,
@@ -1082,6 +1251,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     await store.putInquiry(next);
+    // The fee is paid once the conversation has begun; a 深度分析 whose first question never came costs nothing.
+    await settleHold(hold, next.status === "failed" ? undefined : (step?.agents ?? []), true);
   }
 
   /** The caller's 深度分析, or 404. */
@@ -1127,10 +1298,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       typeof body.question === "string" && body.question.trim()
         ? body.question.trim().slice(0, 300)
         : undefined;
-    takeAiQuota(c.user);
+    const inquiryId = randomUUID();
+    // The owner's 统一收费: one fee for the conversation however many questions it takes (1–6), held now.
+    const hold = await holdForJob(c, "inquiry", {
+      kind: "inquiry",
+      id: inquiryId,
+      system: chart.fact.system,
+    });
     const ts = now().toISOString();
     const record: InquiryRecord = {
-      id: randomUUID(),
+      id: inquiryId,
       owner: c.user,
       chart_id: chart.id,
       locale,
@@ -1140,11 +1317,12 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       ...(focus && { focus }),
       ...(context && { context }),
       turns: [],
+      ...(hold && { fee: hold.quote }),
       created_at: ts,
       updated_at: ts,
     };
     await store.putInquiry(record);
-    track(`inquiry ${record.id}`, runInquiryTurn(record, chart.fact, c));
+    track(`inquiry ${record.id}`, runInquiryTurn(record, chart.fact, c, hold));
     return {
       status: 202,
       body: publicInquiry(record),
@@ -1193,6 +1371,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     fact: ChartFact,
     c: Caller,
     context?: ReportRecord["context"],
+    hold?: PointsHold,
   ) {
     let next: LifeReportRecord;
     try {
@@ -1229,8 +1408,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         updated_at: now().toISOString(),
       };
     }
-    if (!(await store.getLifeReport(record.id))) return;
+    if (!(await store.getLifeReport(record.id))) return settleHold(hold, undefined);
     await store.putLifeReport(next);
+    await settleHold(hold, next.status === "passed" ? next.life?.agents : undefined);
     if (next.status === "passed") await mailWhenDone("life_report", record.id);
   }
 
@@ -1247,10 +1427,15 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       throw new InputError(`locale must be one of ${LOCALES.join(", ")}`);
     assertServed(c.country, "bazi");
     const context = parseUserContext(body.context);
-    takeAiQuota(c.user);
+    const lifeId = randomUUID();
+    const hold = await holdForJob(c, "life_report", {
+      kind: "life_report",
+      id: lifeId,
+      system: "bazi",
+    });
     const ts = now().toISOString();
     const record: LifeReportRecord = {
-      id: randomUUID(),
+      id: lifeId,
       owner: c.user,
       chart_id: chart.id,
       status: "pending",
@@ -1261,7 +1446,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       ...(context && { context }),
     };
     await store.putLifeReport(record);
-    track(`life report ${record.id}`, runLifeJob(record, chart.fact, c, context));
+    track(`life report ${record.id}`, runLifeJob(record, chart.fact, c, context, hold));
     return {
       status: 202,
       body: publicLifeReport(record),
@@ -1463,7 +1648,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         throw new HttpError(409, "this 深度分析 failed: read without it", "inquiry_failed");
       }
     }
-    takeAiQuota(c.user);
+    // Every check before anything is held or counted (v11.0.0).
     const question =
       typeof body.question === "string" ? body.question.slice(0, 300) : inquiry?.question;
     const focus = (body.focus ?? inquiry?.focus) as TarotFocus | undefined;
@@ -1478,15 +1663,23 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       ),
       ...(inquiry.understanding && { understanding: inquiry.understanding }),
     };
+    const topics = TOPICS.filter((t) => requested.includes(t));
+    const reportId = randomUUID();
+    const hold = await holdForJob(
+      c,
+      "report",
+      { kind: "report", id: reportId, system: chart.fact.system },
+      quoteFor(chart.fact, topics.length),
+    );
 
     const ts = now().toISOString();
     const record: ReportRecord = {
-      id: randomUUID(),
+      id: reportId,
       owner: c.user,
       chart_id: chart.id,
       status: "pending",
       locale,
-      topics: TOPICS.filter((t) => requested.includes(t)),
+      topics,
       created_at: ts,
       updated_at: ts,
       ...(context && { context }),
@@ -1504,7 +1697,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         updated_at: ts,
       });
     }
-    track(`report ${record.id}`, runJob(record, chart.fact, c, question, focus, conversation));
+    track(
+      `report ${record.id}`,
+      runJob(record, chart.fact, c, question, focus, conversation, hold),
+    );
     return {
       status: 202,
       body: publicReport(record),
@@ -1531,6 +1727,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         },
         // Visible so nobody mistakes a paused review for a working one.
         content_review: opts.review === false ? "paused" : "on",
+        // 积分 (v11.0.0): whether AI requests are paid, and how 充值 works here.
+        points: !pointsConfig ? "off" : simulatedTopUp ? "simulated" : "on",
         // ...or the mock's demo answers for the real model.
         ...(opts.aiServing && { ai: opts.aiServing() }),
         ...(opts.aiModel && opts.aiServing?.() !== "mock" && { ai_model: opts.aiModel() }),
@@ -1685,6 +1883,75 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       return send(res, 200, {
         deleted: { account: true, ...deleted },
         completed_at: now().toISOString(),
+      });
+    }
+
+    // ---- 积分 (v11.0.0, tech plan S20): the balance, 充值, and what each AI request on a chart costs ----
+    if (path === "/v1/points" && req.method === "GET") {
+      if (!pointsConfig) return send(res, 200, { enabled: false });
+      const { balance, held } = await store.pointsOf(c.user);
+      const [entries, holds] = await Promise.all([
+        store.listPoints(c.user, 50),
+        store.listHolds(c.user),
+      ]);
+      return send(res, 200, {
+        enabled: true,
+        balance,
+        held,
+        available: Math.max(0, balance - held),
+        top_up: simulatedTopUp ? "simulated" : "unavailable",
+        packs: pointsConfig.packs.map(publicPack),
+        entries: entries.map((e) => publicPointsEntry(e, simulatedTopUp)),
+        holds: holds.map((h) => ({ points: h.points, for: h.for, created_at: h.created_at })),
+      });
+    }
+    if (path === "/v1/points/top-ups" && req.method === "POST") {
+      if (!pointsConfig) throw new HttpError(404, "积分 are off on this server", "points_off");
+      if (!simulatedTopUp) {
+        throw new HttpError(
+          501,
+          "充值 needs real payments, which come with Phase 4",
+          "payments_unavailable",
+        );
+      }
+      const body = (await readJson(req)) as Record<string, unknown>;
+      const pack = pointsConfig.packs.find((p) => p.yuan === body.yuan);
+      if (!pack) {
+        throw new InputError(
+          `yuan must be one of the packs: ${pointsConfig.packs.map((p) => p.yuan).join(", ")}`,
+        );
+      }
+      // Simulated (development): the pack's 积分 arrive without payment. TODO(Phase 4): a verified payment.
+      const entry = await store.creditPoints(
+        c.user,
+        pack.points,
+        { kind: "topup", pack },
+        now().toISOString(),
+      );
+      const { balance, held } = await store.pointsOf(c.user);
+      return send(res, 201, {
+        entry: publicPointsEntry(entry!, simulatedTopUp),
+        balance,
+        held,
+        available: Math.max(0, balance - held),
+      });
+    }
+    const qm = /^\/v1\/charts\/([^/]+)\/quote$/.exec(path);
+    if (qm && req.method === "GET") {
+      if (!pointsConfig) throw new HttpError(404, "积分 are off on this server", "points_off");
+      const ch = UUID_RE.test(qm[1]!) ? await store.getChart(qm[1]!) : undefined;
+      if (!ch || ch.owner !== c.user) throw new HttpError(404, "chart not found");
+      const allowed = TOPICS_BY_SYSTEM[ch.fact.system];
+      const asked = new URL(req.url ?? "/", "http://localhost").searchParams.get("topics");
+      const topics = asked
+        ? asked.split(",").filter((t) => allowed.includes(t as Topic)).length
+        : allowed.length;
+      return send(res, 200, {
+        report: priceOf("report", quoteFor(ch.fact, topics)),
+        ...(inquiryAvailable(ch.fact) && {
+          inquiry: { ...priceOf("inquiry"), max_questions: INQUIRY_MAX_QUESTIONS },
+        }),
+        ...(ch.fact.system === "bazi" && { life_report: priceOf("life_report") }),
       });
     }
 
@@ -1898,7 +2165,15 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           : await store.getLifeReport(id);
       if (!parent || parent.owner !== c.user) throw new HttpError(404, "reading not found");
       const items = (await store.listFollowUps(parent.id)).map(publicFollowUp);
-      return send(res, 200, { limit: FOLLOWUP_LIMIT, items });
+      // 积分 (v11.0.0): what one more costs.
+      const system = pointsConfig && (await store.getChart(parent.chart_id))?.fact.system;
+      const price =
+        system &&
+        priceOf("followup", {
+          system,
+          parent: fq[1] === "reports" ? "report" : "life_report",
+        });
+      return send(res, 200, { limit: FOLLOWUP_LIMIT, items, ...(price && { price }) });
     }
     const fo = /^\/v1\/followups\/([^/]+)$/.exec(path);
     if (fo && req.method === "GET") {
@@ -1919,7 +2194,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       const r = UUID_RE.test(rm[1]!) ? await store.getReport(rm[1]!) : undefined;
       if (!r || r.owner !== c.user) throw new HttpError(404, "report not found");
       const items = (await store.listRemedies(r.id)).map(publicRemedy);
-      return send(res, 200, { price: REMEDY_PRICE, items });
+      // 积分 (v11.0.0): what a plan costs, in 积分; `price` stays for a server without them.
+      const chart = pointsConfig && (await store.getChart(r.chart_id));
+      const points = chart && priceOf("remedy", quoteFor(chart.fact));
+      return send(res, 200, { price: REMEDY_PRICE, items, ...(points && { points }) });
     }
     if (rm && req.method === "POST") {
       const out = await createRemedy(req, rm[1]!, c);
@@ -2128,7 +2406,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       await handle(req, res);
     } catch (e) {
       if (e instanceof HttpError) {
-        return problem(res, e.status, e.message, undefined, e.code ? { code: e.code } : {});
+        return problem(res, e.status, e.message, undefined, {
+          ...(e.code && { code: e.code }),
+          ...e.extra,
+        });
       }
       if (e instanceof AuthError) {
         const title = e.status === 451 ? "Unavailable for legal reasons" : "Authentication failed";

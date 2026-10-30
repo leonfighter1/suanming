@@ -69,7 +69,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('draw-lot')));
     await frames(tester, 3);
-    expect(jsonDecode(api.requests.last.body), {'system': 'qiuqian'});
+    expect(jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body), {'system': 'qiuqian'});
 
     for (final (i, r) in _rounds.indexed) {
       final stick = testTerms.lots!.lot(r['lot'] as int)!.title('zh-Hant');

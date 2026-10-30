@@ -187,6 +187,27 @@ card and the trend chart. The AI's reading is its own:
   person, and the app asks 之前已经算过，是否还要重新再算一次？ with 查看之前的 and 重新再算. The person is 为谁排盘 for
   八字 and your default profile for the others.
 
+## 积分 (v11.0.0)
+
+- **On by default** in `npm run api`, `api:lan` and `public`; `MINGLI_POINTS=off` in `.env` (or the shell) makes every
+  AI request free again. The console says which: `积分: on; 充值 is simulated …`. `/v1/health` says `points`.
+- **The dev accounts** (admin, xumei, qianli, wuyong, leonfighter, test@mingli.local) start with **10,000 积分**,
+  given once: with `MINGLI_STORE=pglite` a restart doesn't give them again. Anyone else starts with none.
+- **我的积分** in ☰ shows what is available, what running requests hold, the packs (10元 = 1000, 20元 = 2200, 30元 =
+  3450, 40元 = 4800, 50元 = 6250) and every change. **充值 is simulated**: tap a pack and its 积分 arrive, nothing is
+  paid. Someone using the `X-Dev-User` shortcut tops up with the same header: `POST /v1/points/top-ups {"yuan": 50}`.
+- **What each request costs** is under its button (约 N 积分; the 深度分析 its 统一收费, 747 at Claude Opus 5.5). The
+  price is held while the request runs, and when it is done it is charged what it really cost: its tokens at the
+  model's list price, at 1,953.96 积分 a dollar (a 50% margin on the cheapest 积分). Never more than was held; a failed
+  or held request costs nothing; with too few available the app says 积分不足 and offers 去充值.
+- **With the mock** (`IS_AI_MOCK=TRUE`) no tokens are used, so each request is charged its estimate (演示模式，按预估
+  in 我的积分). **With the real model** each charge says 按实际用量 and its AI cost in dollars, which is how to see what
+  a question really cost.
+- **破除运势 plans** are made when bought (about a minute), no longer ahead of time: a plan made ahead costs tokens
+  nobody pays for. With `MINGLI_POINTS=off` they are made ahead again.
+- **The prices** are in `config/points.json` (packs, the margin, the CNY rate, each request's estimate); a change is
+  read at the next start. `ACTIVE_AI_MODEL` moves every price with the model (Claude Sonnet 5.5 halves them).
+
 ## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
 
 By default the API keeps everything in memory: a restart loses every account and reading. The

@@ -7,6 +7,7 @@ import '../../data/api_client.dart';
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
+import 'points.dart';
 import 'reading_paragraph.dart';
 import 'remedy.dart' show compactButtons;
 import 'voice_input.dart';
@@ -151,7 +152,13 @@ class _FollowUpCardState extends ConsumerState<FollowUpCard> {
       await ref.read(apiClientProvider).askFollowUp(widget.parent, q);
       _question.clear();
       ref.invalidate(followUpsProvider(widget.parent));
+      ref.invalidate(pointsProvider);
     } on ApiException catch (e) {
+      // 积分不足 (v11.0.0): the dialog says what it needs, with 去充值.
+      if (e.isPointsShort) {
+        if (mounted) await showPointsShort(context, e);
+        return;
+      }
       messenger.showSnackBar(
         SnackBar(
           content: Text(switch ((e.status, e.code)) {
@@ -229,7 +236,12 @@ class _FollowUpCardState extends ConsumerState<FollowUpCard> {
                   onSubmitted: (v) => canAsk ? _ask(v) : null,
                   decoration: InputDecoration(
                     hintText: left > 0 ? l10n.followUpHint : l10n.followUpLimit,
-                    helperText: list != null && left > 0 ? l10n.followUpLeft(left) : null,
+                    // With 积分 on (v11.0.0), what one more costs.
+                    helperText: list == null || left <= 0
+                        ? null
+                        : list.price == null
+                        ? l10n.followUpLeft(left)
+                        : l10n.pointsFollowUpLeft(left, list.price!.points),
                     // 麦克风 (v10.0.0): say the question instead of typing it, where the browser can listen.
                     suffixIcon: left > 0 ? VoiceInputButton.suffix(ref, controller: _question, id: 'followup', maxLength: 200) : null,
                   ),

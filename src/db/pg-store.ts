@@ -10,7 +10,7 @@
  * which makes anything left under it unreadable (crypto-shredding), and leaves a deletion record
  * without personal data (docs/data-retention.md).
  */
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { PGlite, type Transaction } from "@electric-sql/pglite";
 import type {
@@ -24,6 +24,16 @@ import type {
 } from "../api/store.js";
 import type { UserRecord, UserStore } from "../auth/service.js";
 import type { SocialProvider } from "../auth/social.js";
+import type {
+  ChargeKind,
+  PointsBasis,
+  PointsCharge,
+  PointsCredit,
+  PointsEntry,
+  PointsEntryKind,
+  PointsFor,
+  PointsHold,
+} from "../points/index.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
@@ -37,6 +47,7 @@ const MIGRATIONS = [
   "007_followups",
   "008_logins",
   "009_inquiries",
+  "010_points",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -58,6 +69,75 @@ export interface PgStoreOptions {
 type Db = PGlite | Transaction;
 type Row = Record<string, unknown>;
 const iso = (v: unknown) => (v as Date).toISOString();
+
+const ENTRY_COLUMNS =
+  "id, user_id, kind, points, balance, for_kind, for_id, system, basis, usd, pack_yuan, pack_points, reason, created_at";
+
+/** A 积分 change as its row holds it (v11.0.0). */
+function entryOf(r: Row): PointsEntry {
+  return {
+    id: r.id as string,
+    owner: r.user_id as string,
+    kind: r.kind as PointsEntryKind,
+    points: r.points as number,
+    balance: r.balance as number,
+    created_at: iso(r.created_at),
+    ...(r.for_kind != null && {
+      for: {
+        kind: r.for_kind as ChargeKind,
+        id: r.for_id as string,
+        ...(r.system != null && { system: r.system as string }),
+      },
+    }),
+    ...(r.basis != null && { basis: r.basis as PointsBasis }),
+    ...(r.usd != null && { usd: r.usd as number }),
+    ...(r.pack_yuan != null && {
+      pack: { yuan: r.pack_yuan as number, points: r.pack_points as number },
+    }),
+    ...(r.reason != null && { reason: r.reason as string }),
+  };
+}
+
+function insertEntry(db: Db, e: PointsEntry) {
+  return db.query(
+    `INSERT INTO points_entries (${ENTRY_COLUMNS}) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    [
+      e.id,
+      e.owner,
+      e.kind,
+      e.points,
+      e.balance,
+      e.for?.kind ?? null,
+      e.for?.id ?? null,
+      e.for?.system ?? null,
+      e.basis ?? null,
+      e.usd ?? null,
+      e.pack?.yuan ?? null,
+      e.pack?.points ?? null,
+      e.reason ?? null,
+      e.created_at,
+    ],
+  );
+}
+
+/** The balance, locked for the rest of the transaction (PostgreSQL; PGlite runs one transaction at a time anyway). */
+async function lockedBalance(tx: Db, owner: string): Promise<number> {
+  const row = (
+    await tx.query<{ balance: number }>(
+      "SELECT balance FROM points_balances WHERE user_id = $1 FOR UPDATE",
+      [owner],
+    )
+  ).rows[0];
+  return row?.balance ?? 0;
+}
+
+async function setBalance(tx: Db, owner: string, balance: number, at: string) {
+  await tx.query(
+    `INSERT INTO points_balances (user_id, balance, updated_at) VALUES ($1, $2, $3)
+     ON CONFLICT (user_id) DO UPDATE SET balance = EXCLUDED.balance, updated_at = EXCLUDED.updated_at`,
+    [owner, balance, at],
+  );
+}
 
 /**
  * What an account's sealed column (email_ciphertext) holds: the email and the social subjects since S5, and since
@@ -88,6 +168,8 @@ export class PgStore implements Store, UserStore {
     await db.waitReady;
     const store = new PgStore(db, o);
     await store.migrate();
+    // 积分 holds belong to running jobs, and no job survives a restart: whatever a last run left held is free again.
+    await db.exec("DELETE FROM points_holds");
     return store;
   }
 
@@ -500,6 +582,122 @@ export class PgStore implements Store, UserStore {
     return row && this.open<InquiryRecord>("inquiries", row);
   }
 
+  // ---- 积分 (v11.0.0, tech plan S20): plain columns, no text of a reading ----
+
+  async pointsOf(owner: string) {
+    const row = (
+      await this.db.query<{ balance: number; held: number }>(
+        `SELECT COALESCE((SELECT balance FROM points_balances WHERE user_id = $1), 0) AS balance,
+                COALESCE((SELECT sum(points) FROM points_holds WHERE user_id = $1), 0)::integer AS held`,
+        [owner],
+      )
+    ).rows[0]!;
+    return { balance: row.balance, held: row.held };
+  }
+
+  async holdPoints(owner: string, need: number, want: number, what: PointsFor, at: string) {
+    return this.db.transaction(async (tx) => {
+      const balance = await lockedBalance(tx, owner);
+      const held = (
+        await tx.query<{ held: number }>(
+          "SELECT COALESCE(sum(points), 0)::integer AS held FROM points_holds WHERE user_id = $1",
+          [owner],
+        )
+      ).rows[0]!.held;
+      const available = balance - held;
+      if (need < 1 || available < need) return undefined;
+      const hold: PointsHold = {
+        id: randomUUID(),
+        owner,
+        points: Math.min(Math.max(want, need), available),
+        quote: need,
+        for: { ...what },
+        created_at: at,
+      };
+      await tx.query(
+        `INSERT INTO points_holds (id, user_id, points, quote, for_kind, for_id, system, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [hold.id, owner, hold.points, hold.quote, what.kind, what.id, what.system ?? null, at],
+      );
+      return hold;
+    });
+  }
+
+  async settlePoints(hold: PointsHold, charge: PointsCharge | undefined, at: string) {
+    return this.db.transaction(async (tx) => {
+      const gone = await tx.query("DELETE FROM points_holds WHERE id = $1", [hold.id]);
+      if (!gone.affectedRows || !charge || charge.points < 1) return undefined;
+      const before = await lockedBalance(tx, hold.owner);
+      const taken = Math.min(charge.points, before);
+      await setBalance(tx, hold.owner, before - taken, at);
+      const entry: PointsEntry = {
+        id: randomUUID(),
+        owner: hold.owner,
+        kind: "charge",
+        points: -taken,
+        balance: before - taken,
+        created_at: at,
+        for: { ...hold.for },
+        basis: charge.basis,
+        ...(charge.usd !== undefined && { usd: charge.usd }),
+      };
+      await insertEntry(tx, entry);
+      return entry;
+    });
+  }
+
+  async creditPoints(owner: string, points: number, credit: PointsCredit, at: string) {
+    return this.db.transaction(async (tx) => {
+      if (credit.kind === "grant") {
+        const had = await tx.query(
+          "SELECT 1 FROM points_entries WHERE user_id = $1 AND kind = 'grant' AND reason = $2",
+          [owner, credit.reason],
+        );
+        if (had.rows.length) return undefined;
+      }
+      const balance = (await lockedBalance(tx, owner)) + points;
+      await setBalance(tx, owner, balance, at);
+      const entry: PointsEntry = {
+        id: randomUUID(),
+        owner,
+        kind: credit.kind,
+        points,
+        balance,
+        created_at: at,
+        ...(credit.kind === "topup" ? { pack: { ...credit.pack } } : { reason: credit.reason }),
+      };
+      await insertEntry(tx, entry);
+      return entry;
+    });
+  }
+
+  async listPoints(owner: string, limit: number) {
+    const rows = await this.db.query<Row>(
+      `SELECT ${ENTRY_COLUMNS} FROM points_entries WHERE user_id = $1 ORDER BY created_at DESC, seq DESC LIMIT $2`,
+      [owner, limit],
+    );
+    return rows.rows.map(entryOf);
+  }
+
+  async listHolds(owner: string) {
+    const rows = await this.db.query<Row>(
+      "SELECT id, user_id, points, quote, for_kind, for_id, system, created_at FROM points_holds WHERE user_id = $1 ORDER BY created_at, id",
+      [owner],
+    );
+    return rows.rows.map((r): PointsHold => ({
+      id: r.id as string,
+      owner: r.user_id as string,
+      points: r.points as number,
+      quote: r.quote as number,
+      for: {
+        kind: r.for_kind as ChargeKind,
+        id: r.for_id as string,
+        ...(r.system != null && { system: r.system as string }),
+      },
+      created_at: iso(r.created_at),
+    }));
+  }
+
   async deleteReport(id: string) {
     return this.db.transaction(async (tx) => {
       const n = async (sql: string) => (await tx.query(sql, [id])).affectedRows ?? 0;
@@ -567,7 +765,10 @@ export class PgStore implements Store, UserStore {
       const life_reports = await purge("life_reports");
       const reports = await purge("reports");
       const charts = await purge("chart_facts");
-      const counts = { charts, reports, remedies, life_reports, followups, inquiries };
+      const points = await purge("points_entries");
+      await purge("points_holds");
+      await purge("points_balances");
+      const counts = { charts, reports, remedies, life_reports, followups, inquiries, points };
       await tx.query(
         "INSERT INTO deletion_requests (subject_hash, channel, status, evidence) VALUES ($1, 'app', 'in_progress', $2)",
         [this.hmac(`subject:${owner}`), counts],
@@ -591,5 +792,8 @@ const TABLES = [
   "life_reports",
   "followups",
   "inquiries",
+  "points_balances",
+  "points_entries",
+  "points_holds",
   "deletion_requests",
 ] as const;

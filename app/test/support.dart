@@ -158,6 +158,18 @@ class FakeApi {
   int inquiryPlanned = 2;
   bool inquiryFails = false;
 
+  /// 积分 (v11.0.0): off (`enabled: false`) unless a test turns them on. On, each AI request costs its price here at
+  /// once (the server holds it, then charges what it cost); with less than that available it answers 402
+  /// points_short. 充值 is simulated unless [pointsTopUp] says otherwise.
+  bool pointsOn = false;
+  int pointsBalance = 0;
+  String pointsTopUp = 'simulated';
+  final pointsEntries = <Map<String, dynamic>>[];
+  final prices = <String, int>{'report': 688, 'inquiry': 747, 'life_report': 1208, 'followup': 270, 'remedy': 303};
+
+  /// GET /v1/charts/{id}/quote requests so far, with their topics.
+  final quoteTopics = <String?>[];
+
   /// 以往记录 (v8.0.0): the documents asked for, the records deleted and the charts filed under a person.
   final documents = <Map<String, dynamic>>[];
   final deleted = <String>[];
@@ -230,6 +242,50 @@ class FakeApi {
       return _json({'title': 'Authentication failed', 'status': 401}, 401);
     }
     if (req.method == 'GET' && path == '/v1/me') return _json(_me, 200);
+    // 积分 (v11.0.0): the balance and changes, 充值, a chart's prices.
+    if (req.method == 'GET' && path == '/v1/points') {
+      if (!pointsOn) return _json({'enabled': false}, 200);
+      return _json({
+        'enabled': true,
+        'balance': pointsBalance,
+        'held': 0,
+        'available': pointsBalance,
+        'top_up': pointsTopUp,
+        'packs': [
+          for (final (yuan, points, bonus) in const [(10, 1000, 0), (20, 2200, 10), (30, 3450, 15), (40, 4800, 20), (50, 6250, 25)])
+            {'yuan': yuan, 'points': points, 'bonus_percent': bonus},
+        ],
+        'entries': pointsEntries,
+        'holds': const [],
+      }, 200);
+    }
+    if (req.method == 'POST' && path == '/v1/points/top-ups') {
+      if (!pointsOn) return _problem(404, 'points are off', 'points_off');
+      final yuan = (jsonDecode(req.body) as Map)['yuan'] as int;
+      final points = const {10: 1000, 20: 2200, 30: 3450, 40: 4800, 50: 6250}[yuan]!;
+      pointsBalance += points;
+      final entry = <String, dynamic>{
+        'id': '7a7a7a7a-0000-4000-8000-${pointsEntries.length.toString().padLeft(12, '0')}',
+        'kind': 'topup',
+        'points': points,
+        'balance': pointsBalance,
+        'created_at': '2026-10-29T08:00:00.000Z',
+        'pack': {'yuan': yuan, 'points': points},
+      };
+      pointsEntries.insert(0, entry);
+      return _json({'entry': entry, 'balance': pointsBalance, 'held': 0, 'available': pointsBalance}, 201);
+    }
+    final quote = RegExp(r'^/v1/charts/([^/]+)/quote$').firstMatch(path);
+    if (req.method == 'GET' && quote != null) {
+      if (!pointsOn) return _problem(404, 'points are off', 'points_off');
+      quoteTopics.add(q['topics']);
+      Map<String, int> price(String kind) => {'points': prices[kind]!, 'hold': (prices[kind]! * 1.5).ceil()};
+      return _json({
+        'report': price('report'),
+        'inquiry': {...price('inquiry'), 'hold': prices['inquiry'], 'max_questions': 6},
+        'life_report': price('life_report'),
+      }, 200);
+    }
     // The account's logins and settings (v8.2.0).
     if (path == '/v1/account/username' && req.method == 'PUT') {
       final name = (jsonDecode(req.body) as Map)['username'] as String;
@@ -380,6 +436,8 @@ class FakeApi {
       final body = jsonDecode(req.body) as Map<String, dynamic>;
       final goal = (body['goal'] as String? ?? '').trim();
       if (goal.characters.length < 4) return _problem(400, 'a 深度分析 needs a clear goal', 'goal_required');
+      final paid = _pay('inquiry');
+      if (paid != null) return paid;
       final id = '99999999-9999-4999-8999-${(inquiries.length + 1).toString().padLeft(12, '0')}';
       inquiries[id] = {
         'inquiry_id': id,
@@ -423,6 +481,8 @@ class FakeApi {
       return _json(inquiry, 200);
     }
     if (req.method == 'POST' && path == '/v1/reports') {
+      final paid = _pay('report');
+      if (paid != null) return paid;
       final id = (jsonDecode(req.body) as Map)['inquiry_id'] as String?;
       if (id != null && inquiries[id] != null) {
         inquiries[id]!
@@ -473,10 +533,16 @@ class FakeApi {
           ..['answer'] = {...(done['answer'] as Map<String, dynamic>), 'in_scope': followUpInScope}
           ..['ai_disclosure'] = done['ai_disclosure'];
       }
-      return _json({'limit': followUpLimit, 'items': items}, 200);
+      return _json({
+        'limit': followUpLimit,
+        'items': items,
+        if (pointsOn) 'price': {'points': prices['followup'], 'hold': (prices['followup']! * 1.5).ceil()},
+      }, 200);
     }
     if (asked != null && req.method == 'POST') {
       if (followUpError != null) return _json(followUpError!, followUpError!['status'] as int);
+      final paid = _pay('followup');
+      if (paid != null) return paid;
       final list = followUps.putIfAbsent(asked.group(1)!, () => []);
       final id = '45454545-0000-4000-8000-${list.length.toString().padLeft(12, '0')}';
       final item = <String, dynamic>{
@@ -492,6 +558,8 @@ class FakeApi {
     }
     // 一生运势报告: real engine facts for the owner's sample (life_passed.json).
     if (req.method == 'POST' && path == '/v1/life-reports') {
+      final paid = _pay('life_report');
+      if (paid != null) return paid;
       return _json({...fixture('life_passed'), 'status': 'pending', 'facts': null, 'layers': null}, 202);
     }
     if (req.method == 'GET' && path == '/v1/life-reports') {
@@ -532,11 +600,22 @@ class FakeApi {
                   {...fixture('remedy_passed'), 'topic': t, 'locked': true, 'content': null, 'payment': null},
             ]
           : const [];
-      return _json({'price': {'amount': 18, 'currency': 'HKD'}, 'items': [...remedies, ...locked]}, 200);
+      return _json({
+        'price': {'amount': 18, 'currency': 'HKD'},
+        'items': [...remedies, ...locked],
+        if (pointsOn) 'points': {'points': prices['remedy'], 'hold': (prices['remedy']! * 1.5).ceil()},
+      }, 200);
     }
     if (req.method == 'POST' && remedyOf.hasMatch(path)) {
+      final paid = _pay('remedy');
+      if (paid != null) return paid;
       final topic = (jsonDecode(req.body) as Map)['topic'];
-      final plan = {...fixture('remedy_passed'), 'topic': topic};
+      final plan = {
+        ...fixture('remedy_passed'),
+        'topic': topic,
+        // Paid in 积分 (v11.0.0) when they are on.
+        if (pointsOn) 'payment': {'status': 'points'},
+      };
       remedies.add(plan);
       if (preloadRemedies) return _json(plan, 200);
       return _json({...plan, 'status': 'pending', 'content': null}, 202);
@@ -554,6 +633,33 @@ class FakeApi {
     }
     return _json({'title': 'not found', 'status': 404}, 404);
   });
+
+  /// 积分 (v11.0.0): what an AI request of [kind] costs, taken at once; a 402 points_short problem when short.
+  http.Response? _pay(String kind) {
+    if (!pointsOn) return null;
+    final price = prices[kind]!;
+    if (pointsBalance < price) {
+      return _json({
+        'title': 'not enough 积分',
+        'status': 402,
+        'code': 'points_short',
+        'need': price,
+        'available': pointsBalance,
+      }, 402);
+    }
+    pointsBalance -= price;
+    pointsEntries.insert(0, {
+      'id': '7b7b7b7b-0000-4000-8000-${pointsEntries.length.toString().padLeft(12, '0')}',
+      'kind': 'charge',
+      'points': -price,
+      'balance': pointsBalance,
+      'created_at': '2026-10-29T09:00:00.000Z',
+      'for': {'kind': kind, 'id': '00000000-0000-4000-8000-000000000000', 'system': 'bazi'},
+      'basis': 'measured',
+      'usd': price / 1953.96,
+    });
+    return null;
+  }
 
   /// A listed record with the person its chart was filed under since (归类到…, v8.0.0).
   Map<String, dynamic> _filedTo(Map<String, dynamic> item) {

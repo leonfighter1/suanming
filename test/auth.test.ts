@@ -253,6 +253,7 @@ describe("DELETE /v1/account", () => {
       life_reports: 0,
       followups: 0,
       inquiries: 0,
+      points: 0,
     });
     expect((await authed(t.access_token, "/v1/me")).status).toBe(401);
     expect((await post("/v1/auth/refresh", { refresh_token: t.refresh_token })).status).toBe(401);

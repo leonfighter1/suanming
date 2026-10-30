@@ -60,6 +60,12 @@ Records:
    never a shared one) and keep method-specific logic behind its own branch or
    module. `test/method-prompts.test.ts` pins every released prompt's hash and
    checks that no two methods share a prompt.
+9. **Every AI request is paid in 积分** (owner, 2026-10-29; v11.0.0, `src/points`). A new
+   kind of AI request holds its price before its job (`holdForJob` in `src/api/server.ts`,
+   402 `points_short` when short) and settles when the job ends (`settleHold`: its measured
+   cost, nothing for a failed or held job); its estimate goes in `config/points.json`. While
+   积分 are on, nothing makes AI output nobody pays for (no preloads). `MINGLI_POINTS=off`
+   is the switch; 充值 stays simulated until the owner's Phase 4 payments.
 
 ## Map
 

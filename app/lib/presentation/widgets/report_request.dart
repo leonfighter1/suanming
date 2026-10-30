@@ -10,6 +10,7 @@ import '../inquiry_page.dart';
 import '../labels.dart';
 import '../report_page.dart';
 import 'inquiry_goal_dialog.dart';
+import 'points.dart';
 
 /// Topic picker + "generate AI reading" button for a computed chart.
 class ReportRequest extends ConsumerStatefulWidget {
@@ -49,6 +50,9 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
   late final List<String> _available = topicsBySystem[widget.system] ?? const [];
   late final Set<String> _selected = {..._available};
   bool _busy = false;
+
+  /// 积分 (v11.0.0): the price follows the topics asked (八字 costs more for each).
+  String get _quoteKey => quoteKey(widget.chartId, _available.where(_selected.contains));
 
   /// 深度分析 (v10.0.0): the master asks first, then the reading reads the conversation. It needs a goal: what was asked
   /// before the draw, or for 八字 the profile's 想了解的事; without one, the reminder asks for it.
@@ -92,11 +96,18 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
         ),
       );
     } on ApiException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.code == 'goal_required' ? l10n.inquiryGoalShort : '$e')));
+      if (e.isPointsShort) {
+        if (mounted) await showPointsShort(context, e);
+      } else {
+        messenger.showSnackBar(SnackBar(content: Text(e.code == 'goal_required' ? l10n.inquiryGoalShort : '$e')));
+      }
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('$e')));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        ref.invalidate(pointsProvider);
+      }
     }
   }
 
@@ -119,9 +130,14 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
         MaterialPageRoute<void>(builder: (_) => ReportPage(reportId: report.id, title: widget.title, place: widget.place)),
       );
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      if (!mounted) return;
+      if (!await showPointsShort(context, e)) messenger.showSnackBar(SnackBar(content: Text('$e')));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+        // What is held or was charged meanwhile.
+        ref.invalidate(pointsProvider);
+      }
     }
   }
 
@@ -129,6 +145,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final quote = ref.watch(chartQuoteProvider(_quoteKey)).value;
     return AppCard(
       title: l10n.aiReport,
       icon: Icons.auto_awesome,
@@ -174,6 +191,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             // 八字 (v9.3.0, the owner): the engine has read the chart already; this asks the AI for its own reading.
             label: Text(widget.system == 'bazi' ? l10n.generateBazi : l10n.generate),
           ),
+          PriceLine(id: 'report', quote: quote?.report),
           // 深度分析 (v10.0.0): the master asks about the user's situation first, for the methods that have it.
           if (inquirySystems.contains(widget.system)) ...[
             const SizedBox(height: Space.s),
@@ -190,6 +208,8 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            // The owner's 统一收费: one fee however many questions the master asks.
+            PriceLine(id: 'inquiry', quote: quote?.inquiry, fee: true),
           ],
           const SizedBox(height: Space.s),
           Text(l10n.disclaimerShort, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),

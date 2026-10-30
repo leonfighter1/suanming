@@ -9,6 +9,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'report_page.dart';
+import 'widgets/points.dart';
 import 'widgets/remedy.dart' show compactButtons;
 import 'widgets/voice_input.dart';
 
@@ -99,15 +100,16 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
             inquiryId: widget.inquiryId,
           );
       ref.invalidate(historyProvider);
+      ref.invalidate(pointsProvider);
       if (!mounted) return;
       await navigator.pushReplacement(
         MaterialPageRoute<void>(builder: (_) => ReportPage(reportId: report.id, title: r.title, place: r.place)),
       );
     } catch (e) {
-      if (mounted) {
-        _show('$e');
-        setState(() => _starting = false);
-      }
+      if (!mounted) return;
+      setState(() => _starting = false);
+      // 积分不足 (v11.0.0): the reading after a 深度分析 is paid on its own; after 充值 the button works again.
+      if (!await showPointsShort(context, e) && mounted) _show('$e');
     }
   }
 
@@ -129,7 +131,7 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
         MaterialPageRoute<void>(builder: (_) => InquiryPage(inquiryId: next.id, reading: r)),
       );
     } catch (e) {
-      if (mounted) _show('$e');
+      if (mounted && !await showPointsShort(context, e) && mounted) _show('$e');
     }
   }
 

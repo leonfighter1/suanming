@@ -2,6 +2,34 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (h): S20, the owner's request — 积分; release v11.0.0
+
+- Owner request: 「GO AND BUILD THE POINTS SYSTEM NOW」, after asking 「积分系统有没有做好」 (it wasn't: planned only, as S20,
+  since the owner had deferred it). The terms are S19's (quoted in the tech plan): 10元=1000积分, 50元 +25%,
+  每多10块加5%, ≥ 50% margin at Opus 5.5's prices, each request's cost measured and fed back into points, simulated,
+  points for the dev accounts, the 深度分析's 统一收费.
+- Checked before building (rule 34): the plans' preload came from the owner's 「plans should open faster」
+  (2026-10-26). With 积分 it spends tokens nobody pays for, which the owner's margin can't carry: it is off while 积分
+  are on, said in the README and here; `MINGLI_POINTS=off` brings it back.
+- Measured, not reused: a scratch script over the mock read the prompts each pipeline builds (八字 narrative 7,768
+  input tokens; 塔罗 3,619 + 116 a card; 一生运势 24,135; 深度分析 turn 5,666–6,779 for 八字), with review paused as
+  the owner runs it; the estimates in config/points.json start from these. Deleted after use (rule 30).
+- Built (v11.0.0):
+  - `src/points` (pricing, the ledger), config/points.json, migration 010, the ledger in both stores;
+  - the server: `holdForJob` / `settleHold` in every AI request, 402 `points_short` with `need` and `available`, the
+    深度分析's fee and its budget guard, `/v1/points`, `/v1/points/top-ups` (simulated), `/v1/charts/{id}/quote`, the
+    prices on the 追问 and plan lists, `/v1/health` `points`; `grantDevPoints`, `pointsOn` (`MINGLI_POINTS`);
+  - the app: 我的积分 and its ☰ entry, `PriceLine` under the AI buttons, the 追问 and plan prices, `showPointsShort`;
+  - CLAUDE.md rule 9 (every AI request is paid); MODULES rows; web-test; OpenAPI.
+- Checked that the key tests fail without their behaviour: with the budget guard removed, and with the hold not
+  released when the daily cap refuses, their tests fail.
+- Mistakes:
+  - rule 67: an unquoted comma in an OpenAPI flow mapping split a description (the same as in S19, now a rule);
+  - rule 68: a 风水 test read `api.requests.last` and met the new balance request; it and two more now find their
+    request by method and path;
+  - the locale test caught 示范 in a 简体 string (演示 is the Mainland word).
+- Not run: anything against the live server, whose `.env` has the real model on (it would spend money).
+
 ## 2026-10-29 (g): S19, the owner's requests — 深度分析, the mic, 同名重算; 积分 planned for later; release v10.0.0
 
 - Owner requests (several messages), quoted in the tech plan:

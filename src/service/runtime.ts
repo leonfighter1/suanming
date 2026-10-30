@@ -22,7 +22,9 @@ import {
   type RoutingTable,
 } from "../ai/index.js";
 import type { Store } from "../api/store.js";
+import { loginKind } from "../auth/identifiers.js";
 import { noCaptcha, TurnstileVerifier } from "../auth/limits.js";
+import type { PointsLedger } from "../points/index.js";
 import { AuthService, type UserStore } from "../auth/service.js";
 import { parseKek } from "../db/envelope.js";
 import { PgStore } from "../db/pg-store.js";
@@ -350,6 +352,38 @@ export const DEV_ACCOUNTS = [
 export async function seedDevAccounts(auth: AuthService, devMode: boolean) {
   if (!devMode) throw new Error("dev accounts may only be seeded in dev mode");
   for (const a of DEV_ACCOUNTS) await auth.seedDevUser(a);
+}
+
+/**
+ * 积分 (v11.0.0, the owner: 「给所有dev给个相应的分数去进行计算」): every dev account starts with `points`, given once, so a
+ * database that keeps the accounts doesn't give them again at the next start. Returns how many got them now.
+ */
+export async function grantDevPoints(
+  auth: AuthService,
+  ledger: PointsLedger,
+  points: number,
+  now = new Date(),
+): Promise<number> {
+  let granted = 0;
+  for (const a of DEV_ACCOUNTS) {
+    const u = await auth.findLogin(loginKind(a.login), a.login);
+    if (!u) continue;
+    const entry = await ledger.creditPoints(
+      u.id,
+      points,
+      { kind: "grant", reason: "dev" },
+      now.toISOString(),
+    );
+    if (entry) granted++;
+  }
+  return granted;
+}
+
+/**
+ * The owner's 积分 switch (v11.0.0): on unless MINGLI_POINTS=off. Off, every AI request is free, as before v11.0.0.
+ */
+export function pointsOn(env: Record<string, string | undefined>): boolean {
+  return envFlag(env.MINGLI_POINTS) !== false;
 }
 
 /** A model-provider failure (outage, auth, rate limit): message if so, else undefined. */

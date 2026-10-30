@@ -7,6 +7,8 @@ export class HttpError extends Error {
     message: string,
     /** A machine-readable reason in the problem body (`code`), e.g. followup_pending (v7.0.0). */
     readonly code?: string,
+    /** More fields for the problem body, e.g. a 402's `need` and `available` 积分 (v11.0.0). */
+    readonly extra?: Record<string, unknown>,
   ) {
     super(message);
   }

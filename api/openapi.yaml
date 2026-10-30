@@ -29,6 +29,8 @@ tags:
     description: 追问, follow-up questions on a passed reading or 一生运势报告 (v7.0.0)
   - name: inquiries
     description: 深度分析, the master's questions on a chart before its reading (v10.0.0)
+  - name: points
+    description: 积分 — every AI request held, then charged at its measured cost; 充值 packs (v11.0.0)
   - name: archive
     description: 以往记录 — documents (Word / PDF), deleting a record, filing it under a person (v8.0.0)
   - name: ops
@@ -60,6 +62,12 @@ paths:
                       prohibited_patterns: { type: string }
                       tzdb: { type: string }
                   content_review: { type: string, enum: ["on", "paused"] }
+                  points:
+                    type: string
+                    enum: ["off", "on", "simulated"]
+                    description: >-
+                      Since v11.0.0: whether AI requests are paid in 积分, and "simulated" while 充值 adds
+                      a pack's 积分 without payment (development). MINGLI_POINTS=off turns them off.
                   ai:
                     type: string
                     description: >-
@@ -611,12 +619,14 @@ paths:
               schema: { $ref: "#/components/schemas/Report" }
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
+        "402": { $ref: "#/components/responses/PointsShort" }
         "404": { $ref: "#/components/responses/Problem" }
         "409":
           description: The 深度分析 named is still thinking, has its reading already, or failed
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
   /v1/inquiries:
@@ -630,7 +640,10 @@ paths:
         than `max_questions` (6). Each turn says what the master sees or infers from the last answer, then asks. It
         needs a goal, what the user wants to know: 400 `goal_required` without one of 4–300 characters. Offered for
         八字, 塔罗, 求签, 算卦 and 风水 charts (400 otherwise). Geo-Rule first; it takes one from the daily AI caps.
-        Returns 202 `thinking`; poll Location until the first question (`asking`).
+        Returns 202 `thinking`; poll Location until the first question (`asking`). With 积分 (v11.0.0) the
+        conversation is paid once, its 统一收费 (GET /v1/charts/{chart_id}/quote `inquiry`), held now and charged
+        once the first question has come (nothing when it never comes); a turn its fee can't carry at the margin is
+        not asked for, and the conversation is then ready with what was said.
       requestBody:
         required: true
         content:
@@ -665,6 +678,7 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        "402": { $ref: "#/components/responses/PointsShort" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -723,6 +737,98 @@ paths:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
+
+  /v1/points:
+    get:
+      tags: [points]
+      operationId: getPoints
+      summary: The account's 积分, the 充值 packs and the latest changes
+      description: |
+        Since v11.0.0. Every AI request (a reading, a 一生运势报告, a 追问, a 破除运势 plan, a 深度分析) holds its price
+        before it runs (402 `points_short` when the available 积分 don't cover it) and is charged what it cost once it
+        has delivered: its measured tokens at the model's list price, at 1,953.96 积分 a dollar (a 50% margin on the
+        cheapest 积分, after the payment fee and VAT), never more than it held. While the mock answers, no tokens are
+        reported and a request is charged its estimate. A failed or held request costs nothing. With 积分 off on the
+        server: `{ "enabled": false }`.
+      responses:
+        "200":
+          description: The balance, what running requests hold, the packs and up to 50 changes, newest first
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Points" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/points/top-ups:
+    post:
+      tags: [points]
+      operationId: topUpPoints
+      summary: 充值 one of the packs (simulated in development)
+      description: |
+        Since v11.0.0. In development 充值 is simulated: the pack's 积分 arrive without payment. Elsewhere 501
+        `payments_unavailable` until Phase 4's payments; 404 `points_off` with 积分 off.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [yuan]
+              properties:
+                yuan: { type: integer, description: "A pack's price in 元: 10, 20, 30, 40 or 50" }
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [entry, balance, held, available]
+                properties:
+                  entry: { $ref: "#/components/schemas/PointsEntry" }
+                  balance: { type: integer }
+                  held: { type: integer }
+                  available: { type: integer }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "501": { $ref: "#/components/responses/Problem" }
+
+  /v1/charts/{chart_id}/quote:
+    parameters:
+      - { name: chart_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [points]
+      operationId: quoteChart
+      summary: What each AI request on this chart costs now
+      description: |
+        Since v11.0.0: each request's estimate at the price of the model its main step is routed to now, so it moves
+        with ACTIVE_AI_MODEL. `hold` is what the request holds while it runs, the most it is charged. 404 `points_off`
+        with 积分 off.
+      parameters:
+        - name: topics
+          in: query
+          description: The topics a reading would be asked for, comma-separated (八字 grows with each); default all
+          schema: { type: string }
+      responses:
+        "200":
+          description: The reading, and the 深度分析 and the 一生运势报告 where the chart has them
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [report]
+                properties:
+                  report: { $ref: "#/components/schemas/Quote" }
+                  inquiry:
+                    description: The 深度分析's 统一收费, for every question it asks (at most max_questions)
+                    allOf:
+                      - { $ref: "#/components/schemas/Quote" }
+                      - type: object
+                        properties:
+                          max_questions: { type: integer }
+                  life_report: { $ref: "#/components/schemas/Quote" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
 
   /v1/calendar/lunar:
     get:
@@ -909,6 +1015,7 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        "402": { $ref: "#/components/responses/PointsShort" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
     get:
@@ -1332,6 +1439,9 @@ paths:
                 required: [price, items]
                 properties:
                   price: { $ref: "#/components/schemas/Price" }
+                  points:
+                    description: Since v11.0.0, with 积分 on, what a plan costs in 积分; a plan is then paid in them
+                    allOf: [{ $ref: "#/components/schemas/Quote" }]
                   items:
                     type: array
                     items: { $ref: "#/components/schemas/Remedy" }
@@ -1344,7 +1454,10 @@ paths:
       description: |
         Paid per topic. TODO(Phase 4 payments): the purchase receipt will be
         verified here; until then `payment.status` is `placeholder` and nothing
-        is charged. Buying a topic that already has a plan returns that plan (200).
+        is charged, or (since v11.0.0, with 积分 on) `points`: the plan's price is held
+        and it is charged what it cost once made (402 `points_short` when short). With
+        积分 no plan is preloaded: it is made when bought. Buying a topic that already
+        has a plan returns that plan (200).
         Plans exist for bazi and tarot reports only: an astrology, 求籤, 风水 or 起名 report
         gets a 400 before anything is charged, and none is preloaded for it. Each method writes
         its plans with its own prompt (`remedy_bazi@N`, `remedy_tarot@N`). A tarot
@@ -1377,6 +1490,7 @@ paths:
               schema: { $ref: "#/components/schemas/Remedy" }
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
+        "402": { $ref: "#/components/responses/PointsShort" }
         "404": { $ref: "#/components/responses/Problem" }
         "409":
           description: The report has not passed (pending or held)
@@ -1427,6 +1541,7 @@ paths:
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
+        "402": { $ref: "#/components/responses/PointsShort" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -1464,6 +1579,7 @@ paths:
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
+        "402": { $ref: "#/components/responses/PointsShort" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -1536,7 +1652,7 @@ components:
               deleted:
                 type: object
                 additionalProperties: { type: integer }
-                description: reports or life_reports, remedies, followups, inquiries (since v10.0.0), charts
+                description: reports or life_reports, remedies, followups, inquiries (since v10.0.0), charts; an account's points (its 积分 changes, since v11.0.0)
               completed_at: { type: string, format: date-time }
     FollowUpList:
       description: Oldest first, with the most a reading may have
@@ -1547,6 +1663,9 @@ components:
             required: [limit, items]
             properties:
               limit: { type: integer, description: "20" }
+              price:
+                description: Since v11.0.0, with 积分 on, what one more costs
+                allOf: [{ $ref: "#/components/schemas/Quote" }]
               items:
                 type: array
                 items: { $ref: "#/components/schemas/FollowUp" }
@@ -1580,6 +1699,21 @@ components:
       content:
         application/problem+json:
           schema: { $ref: "#/components/schemas/Problem" }
+    PointsShort:
+      description: |
+        Since v11.0.0: the account's available 积分 don't cover the request's price (`code: points_short`).
+        Nothing was made and no daily AI cap was taken. 充值 (POST /v1/points/top-ups) and ask again.
+      content:
+        application/problem+json:
+          schema:
+            allOf:
+              - { $ref: "#/components/schemas/Problem" }
+              - type: object
+                required: [code, need, available]
+                properties:
+                  code: { const: points_short }
+                  need: { type: integer, description: "What the request costs, in 积分" }
+                  available: { type: integer, description: The balance less what running jobs hold }
 
   schemas:
     SignupProfile:
@@ -2226,6 +2360,83 @@ components:
         amount: { type: number }
         currency: { type: string, description: ISO 4217 }
 
+    Quote:
+      description: What an AI request costs in 积分 (v11.0.0)
+      type: object
+      required: [points, hold]
+      properties:
+        points: { type: integer, description: Its estimate at the routed model's price }
+        hold: { type: integer, description: What it holds while it runs; the most it is charged }
+
+    Points:
+      description: An account's 积分 (v11.0.0)
+      type: object
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean
+          description: "false when the server has 积分 off; nothing else is sent then"
+        balance: { type: integer }
+        held: { type: integer, description: What running requests hold }
+        available: { type: integer, description: balance less held }
+        top_up: { type: string, enum: [simulated, unavailable] }
+        packs:
+          type: array
+          items:
+            type: object
+            required: [yuan, points, bonus_percent]
+            properties:
+              yuan: { type: integer }
+              points: { type: integer }
+              bonus_percent: { type: integer, description: "Over 100 积分 a 元: 20元 = 2200 is 10" }
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/PointsEntry" }
+        holds:
+          type: array
+          items:
+            type: object
+            required: [points, for, created_at]
+            properties:
+              points: { type: integer }
+              for: { $ref: "#/components/schemas/PointsFor" }
+              created_at: { type: string, format: date-time }
+
+    PointsFor:
+      description: What a charge or a hold is for
+      type: object
+      required: [kind, id]
+      properties:
+        kind: { type: string, enum: [report, life_report, followup, inquiry, remedy] }
+        id: { type: string, format: uuid }
+        system: { type: string, description: The method of the chart it is on }
+
+    PointsEntry:
+      description: One change to the balance
+      type: object
+      required: [id, kind, points, balance, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [grant, topup, charge] }
+        points:
+          { type: integer, description: "Signed: more for a grant or a top-up, less for a charge" }
+        balance: { type: integer, description: The balance after it }
+        created_at: { type: string, format: date-time }
+        for: { $ref: "#/components/schemas/PointsFor" }
+        basis:
+          type: string
+          enum: [measured, estimate, flat]
+          description: "A charge: its measured tokens, its estimate (the mock reported none) or the 深度分析's flat fee"
+        usd:
+          type: number
+          description: A measured charge's cost in US dollars at list price; shown only while 充值 is simulated
+        pack:
+          type: object
+          properties:
+            yuan: { type: integer }
+            points: { type: integer }
+        reason: { type: string, description: "A grant's reason: dev, the dev accounts' start" }
+
     Remedy:
       type: object
       required: [remedy_id, report_id, topic, status, created_at, updated_at, locked]
@@ -2244,16 +2455,18 @@ components:
             Preloaded (generated right after the report passed) but not bought:
             content is withheld until the purchase.
         payment:
-          description: Present once bought
+          description: |
+            Present once bought: a placeholder price, or (since v11.0.0) `points`, paid in 积分
+            (GET /v1/points says what it cost).
           type: object
-          required: [status, amount, currency]
+          required: [status]
           properties:
             status:
               type: string
-              enum: [placeholder]
+              enum: [placeholder, points]
               description: Phase 4 adds real receipt states
-            amount: { type: number }
-            currency: { type: string }
+            amount: { type: number, description: placeholder only }
+            currency: { type: string, description: placeholder only }
         message: { type: string }
         progress:
           type: object

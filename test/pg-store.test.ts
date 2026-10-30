@@ -324,6 +324,7 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
         life_reports: 1,
         followups: 1,
         inquiries: 1,
+        points: 0,
       });
       expect(await store.getInquiry(ra.talk.id)).toBeUndefined();
       expect(await store.getInquiry(rb.talk.id)).toEqual(rb.talk);
@@ -618,6 +619,7 @@ describe("the API on the database store", () => {
         life_reports: 0,
         followups: 0,
         inquiries: 0,
+        points: 0,
       });
       expect(await pg.rawRows("reports")).toEqual([]);
 

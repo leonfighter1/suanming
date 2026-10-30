@@ -46,7 +46,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S17 Claude 与模型选择      | Claude as the AI service; the models to choose from         | medium | v9.2.0            | done        |
 | S18 八字 AI 解读           | the AI's own reading, a 总结, no 行动建议, the skill        | medium | v9.3.0            | done        |
 | S19 深度分析               | the master asks first; 麦克风; 同名重算                     | big    | v10.0.0 + summary | done        |
-| S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | later             | waits       |
+| S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | v11.0.0 + summary | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1869,44 +1869,133 @@ As built (v10.0.0):
 - **Not done:** a real conversation, which waits for the owner's switch; 追问 after a 深度分析 reading reads the
   reading, not the conversation; exports don't carry the conversation; held turns have no review console.
 
-## S20 积分 (waits for the owner)
+## S20 积分 (big → v11.0.0)
 
-**Owner (2026-10-29):** 「收费系统可以留到以后做，现在主要要精炼一下ai测算系统」. Planned in S19's first messages and kept
-here for then, with what was measured:
+**Owner requests (2026-10-29):** planned during S19 (「引入积分系统，按 10元=1000积分 … 保证利润在50%基础以上 … 看看有没有
+办法知道当前的提交问题给花费了多少，以此反馈到积分上去。为了节省预算，我们可以暂时采用模拟策略。给所有dev给个相应的分数去进行计算」;
+「对话了解阶段给一个统一的收费」; 「50快不是1250积分。是增加25%」, 「每多10块加5%」), then deferred
+(「收费系统可以留到以后做」), then asked for: 「GO AND BUILD THE POINTS SYSTEM NOW」.
+
+Read as:
 
 - **Packs:** 1 元 = 100 积分, 5% more for each 10 元 from 20 元 up, to 25% at 50 元: 10 元 = 1000, 20 元 = 2200,
-  30 元 = 3450, 40 元 = 4800, 50 元 = 6250 (the owner: 10元=1000积分, 50元 +25%, 每多10块加5%).
-- **What a request costs is known:** every call reports its tokens (input, output, cache reads and writes); each
-  report keeps them per step (`agents[].usage`), and `costUsd` prices them at the model's list price. Claude Opus
-  5.5: $4 / $20 per million input / output tokens, cache reads $0.20, 5-minute cache writes $5 (the claude-api
-  skill, 2026-10-29). The charge would be that cost at a markup keeping ≥ 50% gross margin on the cheapest 积分 (the
-  50 元 pack's: 0.008 元), after the payment fee (0.6%, 微信 / 支付宝; an app store takes 15–30% and needs its own
-  packs) and VAT (6%), at a cautious 7.3 CNY per USD: about 1,950 积分 per dollar of tokens.
-- **Measured prompts** (2026-10-29, the real prompts built from the app's fixtures; tokens estimated at 1.3 per
-  CJK character and 3.5 other characters per token), and the output a reading of each kind should write (including
-  Opus 5.5's thinking, which bills as output):
+  30 元 = 3450, 40 元 = 4800, 50 元 = 6250. They live in config/points.json, so the owner can change them.
+- **Every AI request is paid at what it cost:** each call reports its tokens and each record keeps them per step
+  (`agents[].usage`); `costUsd` prices them at the model's list price (Claude Opus 5.5: $4 / $20 per million input /
+  output tokens, the claude-api skill). The charge is that cost at the price that keeps a gross margin of at least
+  50% on the cheapest 积分 (the 50 元 pack's), after the payment fee (0.6%, 微信 / 支付宝) and VAT (6%), at a cautious
+  7.3 CNY per USD: 50 × (1 − 0.006 − 0.06) / 6250 = 0.007472 元 per 积分, so 7.3 / (0.5 × 0.007472) = 1,953.96 积分
+  per dollar of tokens. A model without a list price (DeepSeek) is priced as Claude Opus 5.5.
+- **模拟策略:** while the mock answers (`IS_AI_MOCK=TRUE`) no tokens are reported, and a request is charged its
+  estimate instead, so the whole flow can be tried without spending. 充值 is simulated in development (a pack's
+  积分 arrive without payment); the dev accounts start with 10,000 积分 each, given once.
+- **The 深度分析's 统一收费:** one flat fee for the conversation, however many questions the master asks (1–6), charged
+  once its first question has come; the reading after it is paid as any reading. The fee covers five typical turns
+  and one at its largest; a turn that would take the spending past what the fee allows at the margin closes the
+  conversation instead (the reading goes on with what was said).
 
-  | Reading                  | Input tokens   | Output tokens  | Cost (Opus 5.5) | 积分   |
-  | ------------------------ | -------------- | -------------- | --------------- | ------ |
-  | 八字 AI 解读             | ~9,000         | ~16,000        | ~$0.35          | ~690   |
-  | 塔罗 (10 cards) + 行动   | ~5,000 + 8,000 | ~7,000 + 2,500 | ~$0.24          | ~470   |
-  | 求签 + 行动              | ~3,000 + 4,000 | ~4,500 + 2,500 | ~$0.17          | ~320   |
-  | 一生运势报告 (two steps) | ~26,000        | ~26,000        | ~$0.62          | ~1,220 |
-  | 追问 (八字)              | ~18,000        | ~3,500         | ~$0.14          | ~280   |
-  | 深度分析, one question   | ~8,000         | ~1,200         | ~$0.06          | ~110   |
+### WP20.1 The price of a request (→ v11.0.0)
 
-- **Before it ships:** 破除运势 plans must stop preloading (every passed report generates every topic's plan in the
-  background, tokens nobody pays for); the 深度分析's flat fee (five typical questions plus one at its largest, with
-  a guard that asks no further question once the money spent would break the margin); a ledger (memory and PGlite);
-  402 when short; holds so two requests can't spend the same 积分; simulated 充值 and dev grants in dev mode; real
-  payments (Phase 4) with their own legal review (receipts, refunds, how long records are kept).
-- **Levers on cost**, the owner's call: a cheaper model for some steps (Claude Sonnet 5.5 halves the price, Claude
-  Haiku 5.5 is a twentieth), effort low for the 深度分析, caching the chart beside the system prompt across a
-  conversation's turns.
+- config/points.json: the packs, the pricing terms, the hold factor (1.5), the dev grant and the estimates.
+  Estimates are tokens per request (all its steps, without the guard, which is paused): measured inputs from the
+  prompts the pipelines build (2026-10-29, a scratch script over the mock, 1.3 tokens per CJK character and 3.5 per
+  other character), and the output a reading of each kind should write, Claude's thinking included (it bills as
+  output). 八字 grows per topic asked, 塔罗 per card.
+- src/points: `pointsPerUsd`, `pointsFor` (rounded up), `quote` (the estimate at the price of the model the routing
+  gives the request's main step now, so `ACTIVE_AI_MODEL` moves every price), `inquiryFee`, `measuredCost`.
+- At Claude Opus 5.5:
+
+  | Request                    | Input tokens | Output tokens | Cost   | 积分  |
+  | -------------------------- | ------------ | ------------- | ------ | ----- |
+  | 八字 AI 解读 (six topics)  | 8,000        | 16,000        | $0.352 | 688   |
+  | 塔罗, one card             | 9,440        | 8,820         | $0.214 | 419   |
+  | 塔罗, three cards          | 10,720       | 9,860         | $0.240 | 470   |
+  | 塔罗, ten cards (凯尔特)   | 15,200       | 13,500        | $0.331 | 647   |
+  | 求签                       | 7,000        | 7,000         | $0.168 | 329   |
+  | 算卦                       | 8,000        | 8,000         | $0.192 | 376   |
+  | 风水                       | 6,800        | 7,000         | $0.167 | 327   |
+  | 一生运势报告               | 24,500       | 26,000        | $0.618 | 1,208 |
+  | 追问 on 八字               | 17,000       | 3,500         | $0.138 | 270   |
+  | 追问 on 一生运势报告       | 25,000       | 3,500         | $0.170 | 333   |
+  | 追问 on the other methods  | 8,000        | 3,000         | $0.092 | 180   |
+  | 破除运势 plan, 八字        | 8,700        | 6,000         | $0.155 | 303   |
+  | 破除运势 plan, 塔罗        | 4,500        | 5,000         | $0.118 | 231   |
+  | 深度分析 (统一收费, 5 + 1) | 6,200 a turn | 1,500 a turn  | $0.382 | 747   |
+
+### WP20.2 The ledger (→ v11.0.0)
+
+- Per account: the balance, every change (grant, top-up, charge: what it paid for, how it was priced, the measured
+  cost) and the holds of running jobs. In both stores (memory; PGlite migration 010); holding is atomic, so two
+  requests can't spend the same 积分. Holds belong to running jobs and no job survives a restart: a database opens
+  with none. Deleted with the account (simulated 积分 only; real payments keep records by law, Phase 4).
+
+### WP20.3 Charging every AI request (→ v11.0.0)
+
+- Readings, 一生运势报告, 追问, 破除运势 plans and the 深度分析: the price is held before the job (402 `points_short`
+  with what it needs and what is available, before anything is made or any daily AI cap is taken); when the job
+  delivers, its measured cost is charged, at most what was held; a failed or held job is charged nothing.
+- With 积分 on, 破除运势 plans are made when bought, never preloaded: a preload spends tokens nobody pays for, which
+  the margin can't carry (the preload came from the owner's 「plans should open faster」, 2026-10-26; a bought plan
+  now takes about a minute).
+- API: `GET /v1/points` (the balance, what is held, the packs, the latest changes), `POST /v1/points/top-ups`
+  (simulated in development; 501 elsewhere until Phase 4), `GET /v1/charts/{id}/quote` (what each request on the
+  chart costs), and the price on the 追问 and plan lists. `MINGLI_POINTS=off` turns it all off.
+
+### WP20.4 积分 in the app (→ v11.0.0)
+
+- 我的积分 in the ☰ menu with the balance; its page: what is available and held, the packs (模拟充值 while
+  simulated), how charging works, and every change.
+- Every AI button says what it costs (约 N 积分; the 深度分析 its 统一收费); 积分不足 offers 去充值.
+
+Lessons: rules 12, 17, 35, 37, 42, 44, 45, 49, 58, 59, 63, 66; G7; the keyboard-access skill.
+
+As built (v11.0.0):
+
+- **WP20.1:** `src/points/pricing.ts` and `config/points.json` as specified; `checkPointsConfig` holds the packs to at
+  least 100 积分 a 元 and every method to an estimate. The prices in the table above are pinned in
+  test/points.test.ts with their arithmetic, at Claude Opus 5.5 and through `withModel` (Sonnet 5.5 halves them, a
+  model without a list price is priced as Opus 5.5).
+- **WP20.2:** `PointsLedger` in both stores: the in-memory one checks and writes without awaiting in between; PGlite's
+  `holdPoints` locks the balance row (`FOR UPDATE`, right on PostgreSQL too) in a transaction, and PGlite runs every
+  query through its transaction lock, so two holds at once can't both succeed (tested with 2 and with 10 at once).
+  Migration 010 (`points_balances`, `points_entries`, `points_holds`); the receipts count `points`.
+- **WP20.3:** `holdForJob` (the price held, then the daily AI caps; a refusal of either takes nothing) and
+  `settleHold` in every job: the reading, the 一生运势报告, 追问, the plan and the 深度分析 (its fee settles after the
+  first turn; `fee` is kept on the conversation, and `inquiryOverBudget` closes it before a turn the fee can't carry).
+  The reading's checks (focus, context) moved before the hold, so a bad request holds nothing. The plan record's
+  payment is `{ status: "points" }`. `MINGLI_POINTS` (`pointsOn`), `grantDevPoints`, `/v1/health` `points`. 402
+  problems carry `need` and `available` (`HttpError` takes extra fields).
+- **WP20.4:** 我的积分 (`PointsPage`) and its ☰ entry with the balance; `PriceLine` under the AI, 深度分析 and 一生运势
+  buttons (the reading's quote is asked for with the topics chosen, and shared with the 一生运势 button); the 追问 line
+  says what one more costs; plans say 约 N 积分; `showPointsShort` on every AI request (积分不足 → 去充值).
+- **Not done:** real payments and their records (Phase 4, with its legal review); app-store packs (a store takes
+  15–30%: they need their own prices); a review console for what 积分 bought. A real charge waits for the owner's real
+  model run: measured charges are tested with scripted token counts.
 
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S20 积分 (done 2026-10-29: v11.0.0)
+
+1. **Delivered (v11.0.0):** WP20.1 the price of every AI request, from config/points.json at the routed model's list
+   price, with a 50% margin on the cheapest 积分; WP20.2 the ledger with atomic holds in both stores; WP20.3 every AI
+   request held, then charged its measured cost (its estimate under the mock), the 深度分析's 统一收费 with its guard,
+   no preloaded plans, simulated 充值 and the dev accounts' 10,000; WP20.4 我的积分, the price on every AI button and
+   积分不足.
+2. **Numbers:** 26 new server tests (test/points.test.ts), 639 in all; 9 new app tests (app/test/points_test.dart),
+   234 in all, and three older app tests now find the request they check by its path. Migration 010. Prompt input
+   sizes measured from the pipelines' own prompts (八字 7,768 tokens, 塔罗 3,619 + 116 a card, 一生运势 24,135).
+3. **Against the plan:** S20 was deferred mid-S19 and then asked for at once (「GO AND BUILD THE POINTS SYSTEM NOW」).
+   A request holds 1.5 times its estimate (but never more than is available), so a reading needs only its price to
+   start; the plans are charged their measured cost like every request (the HKD 18 placeholder stays for a server
+   without 积分); the 深度分析's fee is one for every method (统一), priced from 八字's, the largest.
+4. **Mistakes:** rule 67 (a comma in a YAML flow mapping split an OpenAPI description, as in S19); rule 68 (a test that
+   read the last request met the new balance request). The locale test caught 示范 in 简体 copy (演示 is the Mainland
+   word).
+5. **Next:** the owner tries 积分 with the real model (each charge then shows its dollars) and, if the prices should
+   change, edits config/points.json. Waiting for the owner: Phase 4 payments, the mail and SMS providers, the Phase 3
+   gate, WP7.2, WP7.3, WP1.8.
 
 ### S19 深度分析、麦克风、同名重算 (done 2026-10-29: v10.0.0)
 
@@ -2451,4 +2540,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP19.2    | done                         | v10.0.0 |
 | WP19.3    | done                         | v10.0.0 |
 | WP19.4    | done                         | v10.0.0 |
-| S20 积分  | waits for the owner          | —       |
+| WP20.1    | done                         | v11.0.0 |
+| WP20.2    | done                         | v11.0.0 |
+| WP20.3    | done                         | v11.0.0 |
+| WP20.4    | done                         | v11.0.0 |

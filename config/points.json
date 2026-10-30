@@ -1,0 +1,47 @@
+{
+  "_readme": "积分 (v11.0.0, tech plan S20, the owner 2026-10-29). packs: 10元 = 1000 积分, 5% more for each 10元 from 20元 up, +25% at 50元. Every AI request is paid at its measured token cost (src/points): pricing keeps a gross margin of at least `margin` on the cheapest 积分 (the largest pack's), after the payment fee and VAT, at a cautious usd_cny; a model without a list price is priced as reference_model. estimates are the tokens a request sends and writes (all its steps, the paused guard left out): they price it before it runs, set what is held (hold_factor times that), and are what it is charged when no tokens are reported (the mock). Inputs measured 2026-10-29 from the prompts the pipelines build (1.3 tokens per CJK character, 3.5 other characters per token); outputs include Claude's thinking. per_topic and per_card add to a reading for each topic asked (八字) or card drawn (塔罗). inquiry: the 深度分析's flat fee covers typical_turns turns and one largest_turn. dev_grant: what each dev account starts with, given once.",
+  "version": 1,
+  "packs": [
+    { "yuan": 10, "points": 1000 },
+    { "yuan": 20, "points": 2200 },
+    { "yuan": 30, "points": 3450 },
+    { "yuan": 40, "points": 4800 },
+    { "yuan": 50, "points": 6250 }
+  ],
+  "pricing": {
+    "usd_cny": 7.3,
+    "margin": 0.5,
+    "payment_fee": 0.006,
+    "vat": 0.06,
+    "reference_model": "claude-opus-5-5"
+  },
+  "hold_factor": 1.5,
+  "dev_grant": 10000,
+  "estimates": {
+    "report": {
+      "bazi": { "input": 8000, "output": 5500, "per_topic": { "output": 1750 } },
+      "tarot": { "input": 8800, "output": 8300, "per_card": { "input": 640, "output": 520 } },
+      "qiuqian": { "input": 7000, "output": 7000 },
+      "liuyao": { "input": 8000, "output": 8000 },
+      "fengshui": { "input": 6800, "output": 7000 },
+      "naming": { "input": 8000, "output": 8000 },
+      "astrology": { "input": 6000, "output": 4000, "per_topic": { "output": 1750 } }
+    },
+    "life_report": { "input": 24500, "output": 26000 },
+    "followup": {
+      "bazi": { "input": 17000, "output": 3500 },
+      "life_report": { "input": 25000, "output": 3500 },
+      "default": { "input": 8000, "output": 3000 }
+    },
+    "remedy": {
+      "bazi": { "input": 8700, "output": 6000 },
+      "tarot": { "input": 4500, "output": 5000 },
+      "default": { "input": 8700, "output": 6000 }
+    },
+    "inquiry": {
+      "turn": { "input": 6200, "output": 1500 },
+      "largest_turn": { "input": 7000, "output": 4000 },
+      "typical_turns": 5
+    }
+  }
+}

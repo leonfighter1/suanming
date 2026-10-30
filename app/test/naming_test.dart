@@ -78,7 +78,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('naming-suggest')));
     await frames(tester);
-    expect(jsonDecode(api.requests.last.body), {
+    expect(jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body), {
       'system': 'naming',
       'bazi_chart_id': fixture('chart_bazi')['chart_id'],
       'surname': '陳',
@@ -111,7 +111,7 @@ void main() {
     await _openNaming(tester, api);
     await tester.enterText(find.byKey(const Key('naming-surname')), '歐陽');
     await press(tester, LogicalKeyboardKey.enter, control: true);
-    expect((jsonDecode(api.requests.last.body) as Map)['surname'], '歐陽');
+    expect((jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body) as Map)['surname'], '歐陽');
     expect(find.byKey(const Key('names-card')), findsOneWidget);
     await tester.enterText(find.byKey(const Key('naming-surname')), '陳');
     await tester.pump();

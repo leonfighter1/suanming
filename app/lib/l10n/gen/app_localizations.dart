@@ -4181,6 +4181,198 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'重新再算'**
   String get recalcAgain;
+
+  /// No description provided for @pointsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'我的积分'**
+  String get pointsTitle;
+
+  /// No description provided for @pointsAvailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'可用积分'**
+  String get pointsAvailable;
+
+  /// No description provided for @pointsBalanceLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'余额 {balance} 积分'**
+  String pointsBalanceLine(int balance);
+
+  /// No description provided for @pointsHeldLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'进行中的测算先冻结了 {held} 积分，完成后按实际用量扣除，多的退回'**
+  String pointsHeldLine(int held);
+
+  /// No description provided for @pointsTopUp.
+  ///
+  /// In zh, this message translates to:
+  /// **'充值'**
+  String get pointsTopUp;
+
+  /// No description provided for @pointsTopUpSimulated.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试阶段为模拟充值：不收钱，点一下积分就到账。'**
+  String get pointsTopUpSimulated;
+
+  /// No description provided for @pointsTopUpUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'充值即将开放：正式支付会在下一阶段接入。'**
+  String get pointsTopUpUnavailable;
+
+  /// No description provided for @pointsPackYuan.
+  ///
+  /// In zh, this message translates to:
+  /// **'{yuan} 元'**
+  String pointsPackYuan(int yuan);
+
+  /// No description provided for @pointsPackPoints.
+  ///
+  /// In zh, this message translates to:
+  /// **'{points} 积分'**
+  String pointsPackPoints(int points);
+
+  /// No description provided for @pointsPackBonus.
+  ///
+  /// In zh, this message translates to:
+  /// **'多送 {percent}%'**
+  String pointsPackBonus(int percent);
+
+  /// No description provided for @pointsToppedUp.
+  ///
+  /// In zh, this message translates to:
+  /// **'已充值 {points} 积分（模拟，未收费）'**
+  String pointsToppedUp(int points);
+
+  /// No description provided for @pointsHowTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'怎么计费'**
+  String get pointsHowTitle;
+
+  /// No description provided for @pointsHow.
+  ///
+  /// In zh, this message translates to:
+  /// **'每次 AI 测算先按预估冻结积分，完成后按这次实际用掉的 AI 用量扣除，多冻结的退回；没有完成、没有给出结果的不扣。深度分析统一收费，不论大师问几个问题；之后的最终解读另计。'**
+  String get pointsHow;
+
+  /// No description provided for @pointsEntries.
+  ///
+  /// In zh, this message translates to:
+  /// **'积分明细'**
+  String get pointsEntries;
+
+  /// No description provided for @pointsNoEntries.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有积分记录'**
+  String get pointsNoEntries;
+
+  /// No description provided for @pointsBazi.
+  ///
+  /// In zh, this message translates to:
+  /// **'八字'**
+  String get pointsBazi;
+
+  /// No description provided for @pointsForReading.
+  ///
+  /// In zh, this message translates to:
+  /// **'{method} AI 解读'**
+  String pointsForReading(String method);
+
+  /// No description provided for @pointsForInquiry.
+  ///
+  /// In zh, this message translates to:
+  /// **'{method} 深度分析'**
+  String pointsForInquiry(String method);
+
+  /// No description provided for @pointsGrantDev.
+  ///
+  /// In zh, this message translates to:
+  /// **'开发测试赠送'**
+  String get pointsGrantDev;
+
+  /// No description provided for @pointsTopUpEntry.
+  ///
+  /// In zh, this message translates to:
+  /// **'充值 {yuan} 元（模拟）'**
+  String pointsTopUpEntry(int yuan);
+
+  /// No description provided for @pointsBasisMeasured.
+  ///
+  /// In zh, this message translates to:
+  /// **'按实际用量'**
+  String get pointsBasisMeasured;
+
+  /// No description provided for @pointsBasisEstimate.
+  ///
+  /// In zh, this message translates to:
+  /// **'演示模式，按预估'**
+  String get pointsBasisEstimate;
+
+  /// No description provided for @pointsBasisFlat.
+  ///
+  /// In zh, this message translates to:
+  /// **'统一收费'**
+  String get pointsBasisFlat;
+
+  /// No description provided for @pointsCost.
+  ///
+  /// In zh, this message translates to:
+  /// **'AI 成本 {usd} 美元'**
+  String pointsCost(String usd);
+
+  /// No description provided for @pointsAbout.
+  ///
+  /// In zh, this message translates to:
+  /// **'约 {points} 积分'**
+  String pointsAbout(int points);
+
+  /// No description provided for @pointsAboutLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'约 {points} 积分 · 完成后按实际用量扣除 · 可用 {available}'**
+  String pointsAboutLine(int points, int available);
+
+  /// No description provided for @pointsInquiryFee.
+  ///
+  /// In zh, this message translates to:
+  /// **'统一收费 {points} 积分，不论问几个问题；最终解读另计'**
+  String pointsInquiryFee(int points);
+
+  /// No description provided for @pointsShortTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'积分不足'**
+  String get pointsShortTitle;
+
+  /// No description provided for @pointsShortBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'这次约需 {need} 积分，你现在可用 {available} 积分。充值后再试一次。'**
+  String pointsShortBody(int need, int available);
+
+  /// No description provided for @pointsGoTopUp.
+  ///
+  /// In zh, this message translates to:
+  /// **'去充值'**
+  String get pointsGoTopUp;
+
+  /// No description provided for @pointsFollowUpLeft.
+  ///
+  /// In zh, this message translates to:
+  /// **'还可追问 {n} 次 · 每问约 {points} 积分'**
+  String pointsFollowUpLeft(int n, int points);
+
+  /// No description provided for @remedyConfirmPoints.
+  ///
+  /// In zh, this message translates to:
+  /// **'“{topic}”的破除运势方案约需 {points} 积分，生成后按实际用量从积分中扣除。'**
+  String remedyConfirmPoints(String topic, int points);
 }
 
 class _AppLocalizationsDelegate

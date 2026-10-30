@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../application/providers.dart';
 import '../domain/document.dart';
+import '../generated/contract.g.dart' show topicsBySystem;
 import '../domain/life_report.dart';
 import '../domain/models.dart';
 import '../domain/profile.dart';
@@ -21,6 +22,7 @@ import 'widgets/follow_up.dart';
 import 'widgets/life_blocks.dart';
 import 'widgets/life_figures.dart';
 import 'widgets/life_stages.dart';
+import 'widgets/points.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
 /// 一生运势报告: polls until ready, then shows the six sections and offers the
@@ -511,7 +513,10 @@ Future<void> startLifeReport(BuildContext context, WidgetRef ref, {required Char
       ),
     );
   } catch (e) {
-    messenger.showSnackBar(SnackBar(content: Text('$e')));
+    if (!context.mounted || !await showPointsShort(context, e)) messenger.showSnackBar(SnackBar(content: Text('$e')));
+  } finally {
+    // What is held or was charged meanwhile (积分, v11.0.0).
+    if (context.mounted) ref.invalidate(pointsProvider);
   }
 }
 
@@ -529,22 +534,30 @@ class _LifeReportButtonState extends ConsumerState<LifeReportButton> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return compactButtons(
-      context,
-      FilledButton.tonalIcon(
-        key: const Key('life-generate'),
-        onPressed: _busy
-            ? null
-            : () async {
-                setState(() => _busy = true);
-                await startLifeReport(context, ref, chart: widget.chart, profile: widget.profile);
-                if (mounted) setState(() => _busy = false);
-              },
-        icon: _busy
-            ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-            : const Icon(Icons.auto_stories),
-        label: Text(l10n.lifeGenerate),
-      ),
+    // 积分 (v11.0.0): what the report costs, under the button; asked with the reading's own first quote (all topics).
+    final quote = ref.watch(chartQuoteProvider(quoteKey(widget.chart.chartId, topicsBySystem['bazi']))).value;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        compactButtons(
+          context,
+          FilledButton.tonalIcon(
+            key: const Key('life-generate'),
+            onPressed: _busy
+                ? null
+                : () async {
+                    setState(() => _busy = true);
+                    await startLifeReport(context, ref, chart: widget.chart, profile: widget.profile);
+                    if (mounted) setState(() => _busy = false);
+                  },
+            icon: _busy
+                ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.auto_stories),
+            label: Text(l10n.lifeGenerate),
+          ),
+        ),
+        PriceLine(id: 'life', quote: quote?.lifeReport),
+      ],
     );
   }
 }

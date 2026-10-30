@@ -16,6 +16,14 @@ import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
 import type { AgentName, TarotFocus, Topic } from "../ai/types.js";
 import type { ChartPerson } from "../service/charts.js";
+import {
+  InMemoryLedger,
+  type PointsCharge,
+  type PointsCredit,
+  type PointsFor,
+  type PointsHold,
+  type PointsLedger,
+} from "../points/index.js";
 
 export type { ChartPerson };
 
@@ -103,6 +111,8 @@ export interface InquiryRecord {
   closing?: string;
   /** The reading made from it. */
   report_id?: string;
+  /** 积分 (v11.0.0): the 统一收费 it is paid with, which bounds what its turns may spend. */
+  fee?: number;
   /** Who wrote the turns, as every AI output says (the last turn's). */
   ai_disclosure?: {
     generated: true;
@@ -141,8 +151,8 @@ export interface RemedyRecord {
    * withheld) until bought; buying only unlocks them, so they open instantly.
    */
   unlocked: boolean;
-  /** Set on purchase. */
-  payment?: { status: "placeholder"; amount: number; currency: string };
+  /** Set on purchase: a placeholder price, or (v11.0.0) paid in 积分, whose ledger says what it cost. */
+  payment?: { status: "placeholder"; amount: number; currency: string } | { status: "points" };
   remedy?: Remedy;
   review?: ReviewDecision;
   error?: string;
@@ -184,7 +194,8 @@ export interface FollowUpRecord {
   progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
 
-export interface Store {
+/** The records, and since v11.0.0 (S20) each account's 积分 (src/points/ledger.ts). */
+export interface Store extends PointsLedger {
   putChart(c: ChartRecord): Promise<void>;
   getChart(id: string): Promise<ChartRecord | undefined>;
   putReport(r: ReportRecord): Promise<void>;
@@ -224,7 +235,7 @@ export interface Store {
   deleteLifeReport(id: string): Promise<{ life_reports: number; followups: number }>;
   /** A chart, unless a reading or a 一生运势报告 still reads it, or it is a 每日一牌's; true when it went. */
   deleteChartIfUnused(id: string): Promise<boolean>;
-  /** Account deletion: remove everything the user owns. Returns counts for the receipt. */
+  /** Account deletion: remove everything the user owns. Returns counts for the receipt (`points`: its 积分 entries). */
   deleteOwnerData(owner: string): Promise<{
     charts: number;
     reports: number;
@@ -232,6 +243,7 @@ export interface Store {
     life_reports: number;
     followups: number;
     inquiries: number;
+    points: number;
   }>;
 }
 
@@ -242,6 +254,25 @@ export class InMemoryStore implements Store {
   private lifeReports = new Map<string, LifeReportRecord>();
   private followUps = new Map<string, FollowUpRecord>();
   private inquiries = new Map<string, InquiryRecord>();
+  private readonly ledger = new InMemoryLedger();
+  pointsOf(owner: string) {
+    return this.ledger.pointsOf(owner);
+  }
+  holdPoints(owner: string, need: number, want: number, what: PointsFor, at: string) {
+    return this.ledger.holdPoints(owner, need, want, what, at);
+  }
+  settlePoints(hold: PointsHold, charge: PointsCharge | undefined, at: string) {
+    return this.ledger.settlePoints(hold, charge, at);
+  }
+  creditPoints(owner: string, points: number, credit: PointsCredit, at: string) {
+    return this.ledger.creditPoints(owner, points, credit, at);
+  }
+  listPoints(owner: string, limit: number) {
+    return this.ledger.listPoints(owner, limit);
+  }
+  listHolds(owner: string) {
+    return this.ledger.listHolds(owner);
+  }
   async putInquiry(i: InquiryRecord) {
     this.inquiries.set(i.id, structuredClone(i));
   }
@@ -381,7 +412,8 @@ export class InMemoryStore implements Store {
     let inquiries = 0;
     for (const [id, i] of this.inquiries)
       if (i.owner === owner && this.inquiries.delete(id)) inquiries++;
-    return { charts, reports, remedies, life_reports, followups, inquiries };
+    const points = this.ledger.deleteOwner(owner);
+    return { charts, reports, remedies, life_reports, followups, inquiries, points };
   }
 }
 

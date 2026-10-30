@@ -12,6 +12,60 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v11.0.0 (2026-10-29): 积分 — every AI request paid at what it really cost
+
+Your request (「GO AND BUILD THE POINTS SYSTEM NOW」), as stage S20 of the [tech plan](docs/tech-plan.md). A big update:
+pushed. Payments stay simulated for now, as you asked (暂时采用模拟策略).
+
+- **Packs (充值):** 10元 = 1000 积分, 20元 = 2200, 30元 = 3450, 40元 = 4800, 50元 = 6250: 5% more for each 10元 from
+  20元 up, 25% more at 50元. They are in `config/points.json`, so you can change them.
+- **What a request costs is measured (「看看有没有办法知道当前的提交问题给花费了多少」):** every AI call reports the tokens
+  it used, and the server prices them at the model's list price (Claude Opus 5.5: $4 / $20 per million input / output
+  tokens). That cost is the charge, turned into 积分 at 1,953.96 积分 a dollar: the price that keeps a 50% margin even
+  on the cheapest 积分 (the 50元 pack's, after the 0.6% payment fee and 6% VAT, at 7.3 CNY a dollar).
+- **How a request is charged:**
+  - Before it runs, its estimated price is held (1.5 times the estimate, never more than you have); two requests at
+    once can't use the same 积分.
+  - When it has finished, it is charged what it really used, at most what was held; the rest is released.
+  - A request that failed or gave no result costs nothing.
+  - With too few 积分, the app says 积分不足 (这次约需 688 积分，你现在可用 100 积分) and offers 去充值; nothing is made.
+- **What things cost now, at Claude Opus 5.5** (estimates; each is then charged what it really used):
+
+  | Request                                     | 积分            |
+  | ------------------------------------------- | --------------- |
+  | 八字 AI 解读 (six topics; fewer cost less)  | 688             |
+  | 塔罗 (one card / three / ten)               | 419 / 470 / 647 |
+  | 求签 / 算卦 / 风水                          | 329 / 376 / 327 |
+  | 一生运势报告                                | 1,208           |
+  | 追问 (八字 / 一生运势报告 / the others)     | 270 / 333 / 180 |
+  | 破除运势 plan (八字 / 塔罗)                 | 303 / 231       |
+  | 深度分析 (统一收费, however many questions) | 747             |
+
+  `ACTIVE_AI_MODEL` moves every price with the model: Claude Sonnet 5.5 halves them.
+
+- **深度分析's 统一收费 (「对话了解阶段给一个统一的收费」):** one fee for the whole conversation, however many questions
+  the master asks (1–6). It is charged once the first question has come, and nothing if it never comes; the final
+  reading after it is paid as any reading. If a conversation's AI use would pass what its fee covers at the 50%
+  margin, the master asks no further question and you go on to the reading.
+- **模拟 (「为了节省预算，我们可以暂时采用模拟策略。给所有dev给个相应的分数去进行计算」):** 充值 is simulated: tap a pack and
+  its 积分 arrive, nothing is paid. The dev accounts (admin, xumei, qianli, wuyong, leonfighter, test@mingli.local)
+  start with 10,000 积分 each, given once. While `IS_AI_MOCK=TRUE` no tokens are used, so each request is charged its
+  estimate; with the real model each charge shows 按实际用量 and its AI cost in dollars.
+- **In the app:**
+  - ☰ → **我的积分** with what is available, beside it in the menu.
+  - Its page shows what is available and what running requests hold, the packs (模拟充值), how charging works, and
+    every change: what it was for, how it was priced, the AI cost, and the balance after.
+  - Under every AI button its price: 约 688 积分 · 完成后按实际用量扣除 · 可用 10000; under 深度分析 its 统一收费; under
+    一生运势报告 its price. 追问 says 每问约 270 积分; a plan says 解锁 · 约 303 积分.
+- **破除运势 plans are now made when bought** (about a minute), no longer made ahead after every reading: a plan made
+  ahead costs tokens nobody pays for, which a 50% margin can't carry. With 积分 off they are made ahead again.
+- **Switch:** `MINGLI_POINTS=off` in `.env` makes every AI request free, as before. The console says which is on.
+- **Verified:** 26 new server tests (the packs and the margin worked out by hand, every price, the model choice, the
+  ledger in memory and in the database, two requests at once, a restart, every request charged or not, the
+  深度分析's fee and its guard, 充值, the dev accounts), 639 in all; 9 new app tests (我的积分 on a 360 × 740 phone, the
+  prices, 积分不足 → 去充值, 追问, plans, keyboard, 繁體), 234 in all; harness PASS. Not tried: a charge from the real
+  model, which waits for your run with it.
+
 ### v10.0.0 (2026-10-29): 深度分析 — the master asks first; the mic; 同名重算
 
 Your requests of today, as stage S19 of the [tech plan](docs/tech-plan.md). A big update: pushed, with v9.1.0–v9.3.0.

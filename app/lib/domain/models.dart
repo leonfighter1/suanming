@@ -5,11 +5,13 @@ import '../generated/contract.g.dart' show conclusionParts;
 import 'fengshui.dart';
 import 'liuyao.dart';
 import 'naming.dart';
+import 'points.dart';
 import 'qiuqian.dart';
 
 export 'fengshui.dart';
 export 'liuyao.dart';
 export 'naming.dart';
+export 'points.dart';
 export 'qiuqian.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -630,14 +632,22 @@ class RemedyView {
 
 /// GET /v1/reports/{id}/remedies: the price and the plans already bought.
 class RemedyList {
-  const RemedyList(this.amount, this.currency, this.items);
+  const RemedyList(this.amount, this.currency, this.items, [this.points]);
   factory RemedyList.fromJson(Json j) {
     final p = j['price'] as Json;
-    return RemedyList((p['amount'] as num).toDouble(), p['currency'] as String, _list(j['items'], RemedyView.fromJson));
+    return RemedyList(
+      (p['amount'] as num).toDouble(),
+      p['currency'] as String,
+      _list(j['items'], RemedyView.fromJson),
+      Quote.maybe(j['points']),
+    );
   }
   final double amount;
   final String currency;
   final List<RemedyView> items;
+
+  /// 积分 (v11.0.0): what a plan costs in them; with them on a plan is paid in 积分, not [priceLabel].
+  final Quote? points;
 
   String get priceLabel => '$currency ${amount.toStringAsFixed(amount == amount.roundToDouble() ? 0 : 2)}';
 }
@@ -686,13 +696,16 @@ class FollowUpView {
 
 /// A reading's 追问, oldest first, and how many it may have.
 class FollowUpList {
-  const FollowUpList(this.limit, this.items);
+  const FollowUpList(this.limit, this.items, [this.price]);
 
   factory FollowUpList.fromJson(Json j) =>
-      FollowUpList((j['limit'] as num).toInt(), _list(j['items'], FollowUpView.fromJson));
+      FollowUpList((j['limit'] as num).toInt(), _list(j['items'], FollowUpView.fromJson), Quote.maybe(j['price']));
 
   final int limit;
   final List<FollowUpView> items;
+
+  /// 积分 (v11.0.0): what one more costs; null while the server has them off.
+  final Quote? price;
 
   bool get answering => items.any((f) => f.status == 'pending');
 

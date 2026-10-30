@@ -12,10 +12,15 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../platform/printer.dart';
 import '../design.dart';
 import '../labels.dart';
+import 'points.dart';
+
+/// What a plan costs as its button and its pay popup say it: 「约 N 积分」 with 积分 on (v11.0.0), else the
+/// placeholder price.
+String _price(AppLocalizations l10n, RemedyList l) => l.points == null ? l.priceLabel : l10n.pointsAbout(l.points!.points);
 
 /// 破除運勢: a separate, paid module. One plan per topic, each naming the topic
 /// and periods it targets. Payment is a Phase 4 TODO: the pay popup "charges"
-/// directly and the server records a placeholder.
+/// directly and the server records a placeholder, or (v11.0.0) the plan is paid in 积分.
 class RemedyCard extends ConsumerWidget {
   const RemedyCard({super.key, required this.reportId, required this.topics});
   final String reportId;
@@ -96,7 +101,7 @@ class RemedyButton extends ConsumerWidget {
         ? l10n.remedyFor(l10n.topic(topic))
         : bought
         ? l10n.remedyView
-        : l10n.remedyUnlock(l.priceLabel);
+        : l10n.remedyUnlock(_price(l10n, l));
     void onPressed() => openRemedy(context, ref, reportId: reportId, topic: topic, list: l);
     final button = compactButtons(
       context,
@@ -148,7 +153,11 @@ Future<void> openRemedy(
           key: const Key('remedy-confirm'),
           icon: const Icon(Icons.auto_fix_high),
           title: Text(l10n.remedyConfirmTitle(topicLabel)),
-          content: Text(l10n.remedyConfirmBody(topicLabel, list.priceLabel)),
+          content: Text(
+            list.points == null
+                ? l10n.remedyConfirmBody(topicLabel, list.priceLabel)
+                : l10n.remedyConfirmPoints(topicLabel, list.points!.points),
+          ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
             // Default action: pay (TODO Phase 4: real store purchase).
@@ -156,7 +165,7 @@ Future<void> openRemedy(
               key: const Key('remedy-pay'),
               autofocus: true,
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.remedyPay(list.priceLabel)),
+              child: Text(l10n.remedyPay(_price(l10n, list))),
             ),
           ],
         ),
@@ -166,10 +175,13 @@ Future<void> openRemedy(
     try {
       remedy = await ref.read(apiClientProvider).buyRemedy(reportId, topic);
     } catch (e) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorTitle}: $e')));
+      if (context.mounted && !await showPointsShort(context, e) && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorTitle}: $e')));
+      }
       return;
     }
     ref.invalidate(remediesProvider(reportId));
+    ref.invalidate(pointsProvider);
   }
   if (!context.mounted) return;
   await showDialog<void>(

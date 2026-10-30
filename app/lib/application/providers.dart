@@ -383,6 +383,28 @@ final placeRegionsProvider = FutureProvider.family<List<PlaceRegion>, String>(
 
 final pollIntervalProvider = Provider<Duration>((ref) => AppConfig.pollInterval);
 
+/// 积分 (v11.0.0, S20): the account's balance, packs and latest changes. Off (nothing shown, nothing costs) when the
+/// server has them off, or is one from before them (404).
+final pointsProvider = FutureProvider.autoDispose<PointsView>((ref) async {
+  try {
+    return await ref.watch(apiClientProvider).points();
+  } on ApiException catch (e) {
+    if (e.status == 404) return PointsView.off;
+    rethrow;
+  }
+});
+
+/// The [chartQuoteProvider] key for a chart and the topics a reading would be asked for (default all).
+String quoteKey(String chartId, [Iterable<String>? topics]) => topics == null ? chartId : '$chartId|${topics.join(',')}';
+
+/// What each AI request on a chart costs now, keyed by [quoteKey]. Null while 积分 are off.
+final chartQuoteProvider = FutureProvider.autoDispose.family<ChartQuote?, String>((ref, key) async {
+  if (!(await ref.watch(pointsProvider.future)).enabled) return null;
+  final [chartId, ...rest] = key.split('|');
+  final topics = rest.isEmpty ? null : rest.first.split(',').where((t) => t.isNotEmpty).toList();
+  return ref.watch(apiClientProvider).chartQuote(chartId, topics: topics);
+});
+
 /// Price and bought 破除運勢 plans of a report.
 final remediesProvider = FutureProvider.autoDispose.family<RemedyList, String>(
   (ref, reportId) => ref.watch(apiClientProvider).listRemedies(reportId),

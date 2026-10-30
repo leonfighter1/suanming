@@ -6,6 +6,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../history_page.dart';
 import '../keyboard.dart';
+import '../points_page.dart';
 import '../profiles_page.dart';
 import '../review_page.dart';
 import '../settings_page.dart';
@@ -29,6 +30,8 @@ class AppMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(authProvider).value;
+    // 积分 (v11.0.0): asked for again each time the menu opens, so the balance is the latest.
+    final points = ref.watch(pointsProvider).value;
     final current = ref.watch(settingsProvider).apiLocaleCode;
     final language = appLanguages.firstWhere((l) => l.$1 == current, orElse: () => appLanguages.first).$2;
     return Drawer(
@@ -43,6 +46,18 @@ class AppMenu extends ConsumerWidget {
             title: Text(l10n.history),
             onTap: () => _open(context, const HistoryPage()),
           ),
+          if (points?.enabled ?? false)
+            ListTile(
+              key: const Key('open-points'),
+              leading: const Icon(Icons.toll_outlined),
+              title: Text(l10n.pointsTitle),
+              trailing: Text(
+                '${points!.available}',
+                key: const Key('menu-points'),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
+              ),
+              onTap: () => _open(context, const PointsPage()),
+            ),
           ListTile(
             key: const Key('open-profiles'),
             leading: const Icon(Icons.people_alt_outlined),

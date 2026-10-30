@@ -9,14 +9,18 @@ import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { checkRouting, loadRouting } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
+import { InMemoryStore } from "../src/api/store.js";
 import { notifyFromEnv } from "../src/notify/index.js";
+import { loadPointsConfig } from "../src/points/index.js";
 import {
   buildAuth,
   buildProviders,
   describeAi,
   DEV_ACCOUNTS,
+  grantDevPoints,
   loadSecrets,
   openStore,
+  pointsOn,
   seedDevAccounts,
   watchAi,
 } from "../src/service/runtime.js";
@@ -60,8 +64,12 @@ const aiQuota = {
 
 // Readings and accounts: in memory, or kept in the encrypted database (MINGLI_STORE=pglite, S5).
 const persistence = await openStore(secrets);
+const store = persistence.store ?? new InMemoryStore();
 const auth = buildAuth(secrets, true, persistence.users);
 await seedDevAccounts(auth, true);
+// 积分 (S20): on unless MINGLI_POINTS=off. 充值 is simulated here (development): no payment, the pack's 积分 arrive.
+const points = pointsOn(process.env) ? loadPointsConfig() : undefined;
+const granted = points ? await grantDevPoints(auth, store, points.dev_grant) : 0;
 // Mail and text messages (S15): the development outbox until the owner picks providers (MINGLI_MAIL / MINGLI_SMS).
 const notify = notifyFromEnv(true);
 // The GitHub Pages web test (docs/web-test.md) calls this API from its https origin.
@@ -78,7 +86,8 @@ const server = createApiServer({
   corsPrivateNetwork: lan,
   // The database keeps records only for accounts: no X-Dev-User shortcut with it.
   devHeaders: loopbackOnly && !persistence.store,
-  ...(persistence.store && { store: persistence.store }),
+  store,
+  ...(points && { points: { config: points, simulateTopUp: true } }),
   // Content review is paused by owner decision (2026-10-26) until the legal &
   // obligations work: MINGLI_REVIEW=on turns holds, the guard and 内容审核 back on.
   review: process.env.MINGLI_REVIEW === "on",
@@ -124,6 +133,13 @@ server.listen(port, host, () => {
     `CORS origins: localhost${loopbackOnly ? "" : ", private-network http"}, ${corsOrigins.join(", ")}`,
   );
   console.log(`dev accounts: ${DEV_ACCOUNTS.map((a) => `${a.login} / ${a.password}`).join(", ")}`);
+  console.log(
+    points
+      ? `积分: on; 充值 is simulated (no payment); each dev account starts with ${points.dev_grant}` +
+          (granted ? ` (given now to ${granted})` : " (given before)") +
+          "; MINGLI_POINTS=off makes AI requests free"
+      : "积分: off (MINGLI_POINTS=off): AI requests are free",
+  );
   console.log(
     `mail: ${notify.mail.name}, sms: ${notify.sms.name}` +
       (notify.outbox

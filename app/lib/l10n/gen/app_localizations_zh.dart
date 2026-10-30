@@ -2180,6 +2180,135 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get recalcAgain => '重新再算';
+
+  @override
+  String get pointsTitle => '我的积分';
+
+  @override
+  String get pointsAvailable => '可用积分';
+
+  @override
+  String pointsBalanceLine(int balance) {
+    return '余额 $balance 积分';
+  }
+
+  @override
+  String pointsHeldLine(int held) {
+    return '进行中的测算先冻结了 $held 积分，完成后按实际用量扣除，多的退回';
+  }
+
+  @override
+  String get pointsTopUp => '充值';
+
+  @override
+  String get pointsTopUpSimulated => '测试阶段为模拟充值：不收钱，点一下积分就到账。';
+
+  @override
+  String get pointsTopUpUnavailable => '充值即将开放：正式支付会在下一阶段接入。';
+
+  @override
+  String pointsPackYuan(int yuan) {
+    return '$yuan 元';
+  }
+
+  @override
+  String pointsPackPoints(int points) {
+    return '$points 积分';
+  }
+
+  @override
+  String pointsPackBonus(int percent) {
+    return '多送 $percent%';
+  }
+
+  @override
+  String pointsToppedUp(int points) {
+    return '已充值 $points 积分（模拟，未收费）';
+  }
+
+  @override
+  String get pointsHowTitle => '怎么计费';
+
+  @override
+  String get pointsHow =>
+      '每次 AI 测算先按预估冻结积分，完成后按这次实际用掉的 AI 用量扣除，多冻结的退回；没有完成、没有给出结果的不扣。深度分析统一收费，不论大师问几个问题；之后的最终解读另计。';
+
+  @override
+  String get pointsEntries => '积分明细';
+
+  @override
+  String get pointsNoEntries => '还没有积分记录';
+
+  @override
+  String get pointsBazi => '八字';
+
+  @override
+  String pointsForReading(String method) {
+    return '$method AI 解读';
+  }
+
+  @override
+  String pointsForInquiry(String method) {
+    return '$method 深度分析';
+  }
+
+  @override
+  String get pointsGrantDev => '开发测试赠送';
+
+  @override
+  String pointsTopUpEntry(int yuan) {
+    return '充值 $yuan 元（模拟）';
+  }
+
+  @override
+  String get pointsBasisMeasured => '按实际用量';
+
+  @override
+  String get pointsBasisEstimate => '演示模式，按预估';
+
+  @override
+  String get pointsBasisFlat => '统一收费';
+
+  @override
+  String pointsCost(String usd) {
+    return 'AI 成本 $usd 美元';
+  }
+
+  @override
+  String pointsAbout(int points) {
+    return '约 $points 积分';
+  }
+
+  @override
+  String pointsAboutLine(int points, int available) {
+    return '约 $points 积分 · 完成后按实际用量扣除 · 可用 $available';
+  }
+
+  @override
+  String pointsInquiryFee(int points) {
+    return '统一收费 $points 积分，不论问几个问题；最终解读另计';
+  }
+
+  @override
+  String get pointsShortTitle => '积分不足';
+
+  @override
+  String pointsShortBody(int need, int available) {
+    return '这次约需 $need 积分，你现在可用 $available 积分。充值后再试一次。';
+  }
+
+  @override
+  String get pointsGoTopUp => '去充值';
+
+  @override
+  String pointsFollowUpLeft(int n, int points) {
+    return '还可追问 $n 次 · 每问约 $points 积分';
+  }
+
+  @override
+  String remedyConfirmPoints(String topic, int points) {
+    return '“$topic”的破除运势方案约需 $points 积分，生成后按实际用量从积分中扣除。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4357,4 +4486,133 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get recalcAgain => '重新再算';
+
+  @override
+  String get pointsTitle => '我的積分';
+
+  @override
+  String get pointsAvailable => '可用積分';
+
+  @override
+  String pointsBalanceLine(int balance) {
+    return '餘額 $balance 積分';
+  }
+
+  @override
+  String pointsHeldLine(int held) {
+    return '進行中的測算先凍結了 $held 積分，完成後按實際用量扣除，多的退回';
+  }
+
+  @override
+  String get pointsTopUp => '充值';
+
+  @override
+  String get pointsTopUpSimulated => '測試階段為模擬充值：不收錢，點一下積分就到帳。';
+
+  @override
+  String get pointsTopUpUnavailable => '充值即將開放：正式付款會在下一階段接入。';
+
+  @override
+  String pointsPackYuan(int yuan) {
+    return '$yuan 元';
+  }
+
+  @override
+  String pointsPackPoints(int points) {
+    return '$points 積分';
+  }
+
+  @override
+  String pointsPackBonus(int percent) {
+    return '多送 $percent%';
+  }
+
+  @override
+  String pointsToppedUp(int points) {
+    return '已充值 $points 積分（模擬，未收費）';
+  }
+
+  @override
+  String get pointsHowTitle => '怎麼計費';
+
+  @override
+  String get pointsHow =>
+      '每次 AI 測算先按預估凍結積分，完成後按這次實際用掉的 AI 用量扣除，多凍結的退回；沒有完成、沒有給出結果的不扣。深度分析統一收費，不論大師問幾個問題；之後的最終解讀另計。';
+
+  @override
+  String get pointsEntries => '積分明細';
+
+  @override
+  String get pointsNoEntries => '還沒有積分紀錄';
+
+  @override
+  String get pointsBazi => '八字';
+
+  @override
+  String pointsForReading(String method) {
+    return '$method AI 解讀';
+  }
+
+  @override
+  String pointsForInquiry(String method) {
+    return '$method 深度分析';
+  }
+
+  @override
+  String get pointsGrantDev => '開發測試贈送';
+
+  @override
+  String pointsTopUpEntry(int yuan) {
+    return '充值 $yuan 元（模擬）';
+  }
+
+  @override
+  String get pointsBasisMeasured => '按實際用量';
+
+  @override
+  String get pointsBasisEstimate => '示範模式，按預估';
+
+  @override
+  String get pointsBasisFlat => '統一收費';
+
+  @override
+  String pointsCost(String usd) {
+    return 'AI 成本 $usd 美元';
+  }
+
+  @override
+  String pointsAbout(int points) {
+    return '約 $points 積分';
+  }
+
+  @override
+  String pointsAboutLine(int points, int available) {
+    return '約 $points 積分 · 完成後按實際用量扣除 · 可用 $available';
+  }
+
+  @override
+  String pointsInquiryFee(int points) {
+    return '統一收費 $points 積分，不論問幾個問題；最終解讀另計';
+  }
+
+  @override
+  String get pointsShortTitle => '積分不足';
+
+  @override
+  String pointsShortBody(int need, int available) {
+    return '這次約需 $need 積分，你現在可用 $available 積分。充值後再試一次。';
+  }
+
+  @override
+  String get pointsGoTopUp => '去充值';
+
+  @override
+  String pointsFollowUpLeft(int n, int points) {
+    return '還可追問 $n 次 · 每問約 $points 積分';
+  }
+
+  @override
+  String remedyConfirmPoints(String topic, int points) {
+    return '「$topic」的破除運勢方案約需 $points 積分，生成後按實際用量從積分中扣除。';
+  }
 }

@@ -22,7 +22,7 @@ class ApiUnreachable implements Exception {
 }
 
 class ApiException implements Exception {
-  const ApiException(this.status, this.title, [this.detail, this.code]);
+  const ApiException(this.status, this.title, [this.detail, this.code, this.problem = const {}]);
   final int status;
   final String title;
   final String? detail;
@@ -30,8 +30,14 @@ class ApiException implements Exception {
   /// Machine-readable reason, e.g. `captcha_required`, `region`, `age`.
   final String? code;
 
+  /// The whole problem body, for a code's own fields (a 402's `need` and `available`, v11.0.0).
+  final Json problem;
+
   bool get isRegionBlocked => status == 451;
   bool get isUnauthorized => status == 401;
+
+  /// 积分不足 (v11.0.0): the request costs more than the account has available.
+  bool get isPointsShort => status == 402 && code == 'points_short';
 
   @override
   String toString() => detail ?? title;
@@ -337,6 +343,20 @@ class ApiClient {
   Future<FollowUpView> askFollowUp(String parent, String question) async =>
       FollowUpView.fromJson(await _authed('POST', '/v1/$parent/followups', {'question': question}));
 
+  // ---- 积分 (v11.0.0) ----
+
+  /// The balance, what running requests hold, the 充值 packs and the latest changes; `enabled: false` when the
+  /// server has 积分 off.
+  Future<PointsView> points() async => PointsView.fromJson(await _authed('GET', '/v1/points'));
+
+  /// 充值 one pack by its price in 元 (simulated in development: no payment).
+  Future<void> topUp(int yuan) => _authed('POST', '/v1/points/top-ups', {'yuan': yuan});
+
+  /// What each AI request on a chart costs now; [topics] the reading would be asked for (default all).
+  Future<ChartQuote> chartQuote(String chartId, {List<String>? topics}) async => ChartQuote.fromJson(
+        await _authed('GET', '/v1/charts/$chartId/quote${topics == null ? '' : '?topics=${topics.join(',')}'}'),
+      );
+
   // ---- 破除運勢 plans (paid per topic) ----
 
   Future<RemedyList> listRemedies(String reportId) async =>
@@ -433,7 +453,7 @@ class ApiClient {
   ApiException _problem(http.Response res) {
     try {
       final p = jsonDecode(utf8.decode(res.bodyBytes)) as Json;
-      return ApiException(res.statusCode, p['title'] as String? ?? 'Error', p['detail'] as String?, p['code'] as String?);
+      return ApiException(res.statusCode, p['title'] as String? ?? 'Error', p['detail'] as String?, p['code'] as String?, p);
     } on FormatException {
       return ApiException(res.statusCode, 'HTTP ${res.statusCode}');
     }
