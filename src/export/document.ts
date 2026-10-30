@@ -98,7 +98,7 @@ export function parseDocument(raw: unknown): Doc {
  * The file's name: the given one without path separators, control characters or a trailing dot, cut to length, with
  * the format's extension; 命理大师 when nothing is left.
  */
-export function documentName(raw: unknown, ext: "pdf" | "docx"): string {
+export function documentName(raw: unknown, ext: "pdf" | "docx" | "csv"): string {
   const base = (typeof raw === "string" ? raw : "")
     .replace(/[\\/:*?"<>|\p{Cc}]/gu, " ")
     .replace(/\s+/g, " ")

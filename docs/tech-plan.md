@@ -48,6 +48,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S19 深度分析               | the master asks first; 麦克风; 同名重算                     | big    | v10.0.0 + summary | done        |
 | S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | v11.0.0 + summary | done        |
 | S21 有所求才能去求         | 塔罗, 求签 and 算卦 drawn only for a question               | medium | v11.1.0           | done        |
+| S22 管理后台               | admin dashboard: accounts, tokens, money, users, exports    | big    | v12.0.0 + summary | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2005,6 +2006,87 @@ test/ask-first.test.ts and app/test/ask_first_test.dart. About thirty older serv
 now ask before they draw; three tests that expected a 400 for another reason (a bad lot set, a manual cast without
 its time, 17 picks) ask too, so they still fail for their own reason (rule 63).
 
+## S22 管理后台 (big → v12.0.0)
+
+**Owner request (2026-10-29):** 「新建一个新的project folder- admin dashboard，这个专门用来管理app下的所有账户，查看所用的所有token和所有
+盈利和收益等等数据。除此之外管理员登录后可以查看和管理active user 也可以控制用户权限，还有可以给用户增加积分。还可以导出收益曲线和
+report。这是一个单独的数据系统，为了展示效果，可以设置一些preset的data 到各个用户，这样我们可以只管的再数据表里看见。这是一个很大的
+系统，做好tech plan 按照步骤一步步去做」; then 「做完了可以直接push 不需要等我回复」.
+
+Read as:
+
+- **A project of its own:** `admin/`, a Flutter web app with its own pubspec and tests, for admins only. It signs in
+  with an admin account and reads everything through the API's `/v1/admin/*`. It reuses the app's theme, design
+  system and keyboard layer (a path dependency on `../app`), so it looks and works like the app. It is served by
+  the API at `/admin/` once built (`npm run admin:build`).
+- **One database:** the dashboard reads the data the app makes. PGlite is one process's database, so the admin API
+  lives in the API server, beside the app's; the dashboard is the separate system on top.
+- **账户管理:** every account with its balance, spending, AI use and last activity: search, filters, sorting. Per
+  account its details, its 积分 changes, its AI use by method, and actions: suspend or reactivate, the admin role,
+  permissions (AI readings, 充值), sign out everywhere, 增加积分 (a grant with a note).
+- **Token and money:** every AI job's steps recorded with their tokens and cost (plain numbers, no text); revenue
+  (充值), its net after the payment fee and VAT, the AI cost, gross profit and margin, 积分 sold, used and still
+  held by users; by day, by method and by model.
+- **Active users:** active in the last 15 minutes, today, 7 and 30 days; sign one out or suspend them from there.
+- **Exports:** the revenue curve (CSV, and the chart as a PNG) and a period's report (PDF, Word, CSV).
+- **Preset data (展示效果):** demo accounts with 90 days of history (sign-ups, 充值, readings across the methods, 追问,
+  深度分析), made from a fixed seed so tests can pin their numbers, marked demo, in development only;
+  `MINGLI_ADMIN_DEMO=off` leaves them out. Demo accounts can't sign in.
+
+### WP22.1 Accounts and AI use, on the server (→ v11.2.0)
+
+- Accounts gain a role (`user` | `admin`), a status (`active` | `suspended`), permissions (`ai`, `top_up`), the last
+  time they were active (to the minute, written at most every five minutes) and a demo mark: plain columns
+  (migration 011), none of them personal text.
+- Enforced: a suspended account can't sign in (403 `account_suspended`) and its sessions end; `ai: false` refuses
+  every AI request (403 `ai_not_allowed`), `top_up: false` 充值 (403 `top_up_not_allowed`).
+- Admins: the role, given to the `admin` dev account and to the logins in `MINGLI_ADMINS`. The admin routes don't
+  depend on 内容审核, which stays paused.
+- AI use: one row per step of every AI job (`ai_usage`, migration 011): who, what (kind, method, step), the model,
+  input, output and cache tokens, the cost at list price, whether it delivered. Kept when an account is deleted,
+  without its owner. The store lists accounts, every 积分 change and every usage row for the admin.
+
+### WP22.2 The admin API (→ v11.2.0, with WP22.1)
+
+- `GET /v1/admin/me`; `GET /v1/admin/overview?days=` (the KPIs); `GET /v1/admin/series?days=` (by day: revenue,
+  net, AI cost, profit, 积分 sold and used, tokens, AI requests, new and active accounts); `GET /v1/admin/breakdown`
+  (by method and by model); `GET /v1/admin/users?q=&status=&role=&sort=&page=`; `GET /v1/admin/users/{id}`;
+  `PATCH /v1/admin/users/{id}` (status, role, permissions); `POST /v1/admin/users/{id}/points` (a grant with a
+  note); `POST /v1/admin/users/{id}/sign-out`; `GET /v1/admin/active`; `GET /v1/admin/reports?days=&format=csv|pdf|docx`.
+- The numbers come from pure functions in `src/admin` over the rows, tested with hand-worked values. An admin can't
+  suspend or demote themselves (409), so the dashboard always keeps one way in.
+
+### WP22.3 Preset data (→ v11.3.0)
+
+- `seedAdminDemo` (src/admin/demo.ts): about 36 demo accounts over the last 90 days, from a fixed seed: sign-ups,
+  充值 by the packs, readings by method, 追问, 深度分析, each with tokens near the estimates and its 积分 charged,
+  balances that never go below nothing, last activity; a few suspended. Seeded at a dev start when there are none.
+
+### WP22.4 The dashboard (→ v11.4.0)
+
+- `admin/`: sign-in (admins only); a shell with 概览, 用户, 活跃用户, 收益, 用量, 报表; KPI tiles; the revenue curve
+  (a painter: revenue, cost, profit by day, a period of 7, 30 or 90 days, arrow keys move along it); the users table
+  (search, filters, sorting, pages) and an account's page with its actions; the active users; exports.
+- Keyboard: Tab reaches every control, Enter presses, Esc goes back (the app's keyboard layer).
+
+### WP22.5 Serving, the harness, the release (→ v12.0.0)
+
+- The API serves `admin/build/web` at `/admin/`; `npm run admin:build` builds it through an ASCII junction; a
+  harness gate runs the dashboard's pub get, analyze, tests and web build (`scripts/check-admin.ps1`, a junction to
+  the repository root, since the dashboard needs `../app`).
+- docs/web-test.md, MODULES, the README entry, the stage summary; pushed.
+
+Lessons: rules 12, 17, 35, 36, 37, 42, 44, 45, 52, 58, 59, 63, 67, 68; G7; the keyboard-access skill.
+
+As built:
+
+- **v11.2.0 (WP22.1–22.2):** `src/admin` (`usage.ts` the rows, `stats.ts` the numbers, `report.ts` the exports,
+  `routes.ts` the API); the account fields and `touch` / `list` in both user stores; `recordUsage` / `listUsage`,
+  `allPoints` / `allBalances` in both stores; migration 011 (the account columns, `ai_usage`, a grant's `note`);
+  `recordJob` at every AI job's end, `assertAllowed` in `holdForJob`, 充值, a 深度分析's answers and a preloaded
+  plan's purchase. The app signs a suspended account out and says why at sign-in, and shows an admin's grant as
+  管理员赠送 with its note. An account with the admin role reviews in 内容审核 too.
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
@@ -2588,3 +2670,8 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP20.4    | done                         | v11.0.0 |
 | WP21.1    | done                         | v11.1.0 |
 | WP21.2    | done                         | v11.1.0 |
+| WP22.1    | done                         | v11.2.0 |
+| WP22.2    | done                         | v11.2.0 |
+| WP22.3    | next                         | v11.3.0 |
+| WP22.4    | planned                      | v11.4.0 |
+| WP22.5    | planned                      | v12.0.0 |

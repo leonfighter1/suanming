@@ -31,6 +31,8 @@ tags:
     description: 深度分析, the master's questions on a chart before its reading (v10.0.0)
   - name: points
     description: 积分 — every AI request held, then charged at its measured cost; 充值 packs (v11.0.0)
+  - name: admin
+    description: 管理后台 — accounts, AI use, money, active users, exports; admins only (v11.2.0)
   - name: archive
     description: 以往记录 — documents (Word / PDF), deleting a record, filing it under a person (v8.0.0)
   - name: ops
@@ -628,6 +630,7 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "402": { $ref: "#/components/responses/PointsShort" }
+        "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "409":
           description: The 深度分析 named is still thinking, has its reading already, or failed
@@ -687,6 +690,7 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "402": { $ref: "#/components/responses/PointsShort" }
+        "403": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -799,6 +803,7 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
         "501": { $ref: "#/components/responses/Problem" }
 
   /v1/charts/{chart_id}/quote:
@@ -837,6 +842,285 @@ paths:
                   life_report: { $ref: "#/components/schemas/Quote" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/me:
+    get:
+      tags: [admin]
+      operationId: adminMe
+      summary: The signed-in admin
+      description: |
+        Since v11.2.0. Every `/v1/admin/*` route (but 内容审核's reviews) is for admins only: an account with the
+        admin role, or one of the server's MINGLI_ADMINS logins (403 `admin_only` otherwise). Days are the
+        dashboard's time zone's (`tz`, default Asia/Shanghai).
+      responses:
+        "200":
+          description: The admin
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, login, role, admin_by_config]
+                properties:
+                  id: { type: string, format: uuid }
+                  login: { type: string }
+                  role: { const: admin }
+                  admin_by_config: { type: boolean }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/overview:
+    get:
+      tags: [admin]
+      operationId: adminOverview
+      summary: A period's KPIs
+      description: |
+        Accounts (total, new, suspended, admins, demo); active in the last 15 minutes, 24 hours, 7 and 30 days; AI jobs,
+        tokens and cost; money in 元 (充值, its net after the payment fee and VAT, the AI cost at the CNY rate, gross
+        profit and margin); 积分 sold, granted, used, and held by accounts now.
+      parameters:
+        - $ref: "#/components/parameters/AdminDays"
+        - $ref: "#/components/parameters/AdminTz"
+      responses:
+        "200":
+          description: The KPIs
+          content:
+            application/json:
+              schema: { type: object }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/series:
+    get:
+      tags: [admin]
+      operationId: adminSeries
+      summary: Day by day (the revenue curve)
+      description: |
+        For each day of the period, oldest first: new and active accounts, AI jobs, input, output and all tokens,
+        充值, net, AI cost and profit in 元 with the margin, and 积分 sold, granted and used.
+      parameters:
+        - $ref: "#/components/parameters/AdminDays"
+        - $ref: "#/components/parameters/AdminTz"
+      responses:
+        "200":
+          description: The days
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [days, tz, items]
+                properties:
+                  days: { type: integer }
+                  tz: { type: string }
+                  items: { type: array, items: { type: object } }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/breakdown:
+    get:
+      tags: [admin]
+      operationId: adminBreakdown
+      summary: AI use by what was asked and by model
+      parameters:
+        - $ref: "#/components/parameters/AdminDays"
+        - $ref: "#/components/parameters/AdminTz"
+      responses:
+        "200":
+          description: The most costly first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [byMethod, byModel]
+                properties:
+                  byMethod: { type: array, items: { type: object } }
+                  byModel: { type: array, items: { type: object } }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/users:
+    get:
+      tags: [admin]
+      operationId: adminUsers
+      summary: Every account with its numbers, a page at a time
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [active, suspended] } }
+        - { name: role, in: query, schema: { type: string, enum: [user, admin] } }
+        - { name: demo, in: query, schema: { type: string, enum: [include, exclude, only] } }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [created, last_seen, balance, topup, used, jobs, cost] }
+        - { name: order, in: query, schema: { type: string, enum: [asc, desc] } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100 } }
+      responses:
+        "200":
+          description: The page, with how many there are
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, page, pages, per_page, items]
+                properties:
+                  total: { type: integer }
+                  page: { type: integer }
+                  pages: { type: integer }
+                  per_page: { type: integer }
+                  items: { type: array, items: { $ref: "#/components/schemas/AdminUser" } }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/users/{user_id}:
+    parameters:
+      - { name: user_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      operationId: adminUser
+      summary: One account, its 积分 changes, its AI jobs and its use by method
+      responses:
+        "200":
+          description: The account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user, entries, jobs, by_method]
+                properties:
+                  user: { $ref: "#/components/schemas/AdminUser" }
+                  entries: { type: array, items: { $ref: "#/components/schemas/PointsEntry" } }
+                  jobs: { type: array, items: { type: object } }
+                  by_method: { type: array, items: { type: object } }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    patch:
+      tags: [admin]
+      operationId: adminUpdateUser
+      summary: Suspend or reactivate, the admin role, permissions
+      description: |
+        Suspending ends every session at once. An admin can't suspend or demote themselves (409 `admin_self`), nor
+        demote an admin named in MINGLI_ADMINS (409 `admin_by_config`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [active, suspended] }
+                role: { type: string, enum: [user, admin] }
+                permissions:
+                  type: object
+                  properties:
+                    ai: { type: boolean }
+                    top_up: { type: boolean }
+      responses:
+        "200":
+          description: The account as it is now
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUser" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/users/{user_id}/points:
+    parameters:
+      - { name: user_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      operationId: adminGrantPoints
+      summary: 增加积分 — a grant with a note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [points]
+              properties:
+                points: { type: integer, minimum: 1, maximum: 1000000 }
+                note: { type: string, maxLength: 200 }
+      responses:
+        "201":
+          description: Granted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [entry, balance, held, available]
+                properties:
+                  entry: { $ref: "#/components/schemas/PointsEntry" }
+                  balance: { type: integer }
+                  held: { type: integer }
+                  available: { type: integer }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/users/{user_id}/sign-out:
+    parameters:
+      - { name: user_id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      operationId: adminSignOut
+      summary: Ends every session of the account
+      responses:
+        "200":
+          description: Signed out; its access tokens lapse within their 15 minutes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signed_out: { type: boolean }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/active:
+    get:
+      tags: [admin]
+      operationId: adminActive
+      summary: Active accounts, by their last request
+      responses:
+        "200":
+          description: How many in each window, and who in the last 15 minutes and 24 hours
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [counts, now, day]
+                properties:
+                  counts: { type: object }
+                  now: { type: array, items: { $ref: "#/components/schemas/AdminUser" } }
+                  day: { type: array, items: { $ref: "#/components/schemas/AdminUser" } }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/reports:
+    get:
+      tags: [admin]
+      operationId: adminReport
+      summary: Exports — the revenue curve or the accounts as CSV, a period's report as PDF or Word
+      parameters:
+        - $ref: "#/components/parameters/AdminDays"
+        - $ref: "#/components/parameters/AdminTz"
+        - { name: format, in: query, schema: { type: string, enum: [csv, pdf, docx] } }
+        - name: kind
+          in: query
+          description: With csv, series (the revenue curve, by day; the default) or users
+          schema: { type: string, enum: [series, users] }
+      responses:
+        "200":
+          description: The file, as a download
+          content:
+            text/csv: {}
+            application/pdf: {}
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document: {}
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "503":
+          description: A PDF needs a CJK font on the server
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
 
   /v1/calendar/lunar:
     get:
@@ -1024,6 +1308,7 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "402": { $ref: "#/components/responses/PointsShort" }
+        "403": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
     get:
@@ -1502,6 +1787,7 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "402": { $ref: "#/components/responses/PointsShort" }
+        "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "409":
           description: The report has not passed (pending or held)
@@ -1553,6 +1839,7 @@ paths:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
         "402": { $ref: "#/components/responses/PointsShort" }
+        "403": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -1591,6 +1878,7 @@ paths:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
         "402": { $ref: "#/components/responses/PointsShort" }
+        "403": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
@@ -1637,6 +1925,16 @@ components:
       bearerFormat: JWT
 
   parameters:
+    AdminDays:
+      name: days
+      in: query
+      description: The period, the last N days ending today (default 30)
+      schema: { type: integer, minimum: 1, maximum: 366 }
+    AdminTz:
+      name: tz
+      in: query
+      description: Whose calendar a day is, an IANA time zone (default Asia/Shanghai)
+      schema: { type: string }
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -2392,6 +2690,33 @@ components:
         amount: { type: number }
         currency: { type: string, description: ISO 4217 }
 
+    AdminUser:
+      description: An account as 管理后台 lists it (v11.2.0); all-time sums
+      type: object
+      required: [id, login, role, status, permissions, demo, created_at, balance, held]
+      properties:
+        id: { type: string, format: uuid }
+        login: { type: string, description: "The username, else the masked email or phone" }
+        country: { type: string }
+        role: { type: string, enum: [user, admin] }
+        admin_by_config: { type: boolean }
+        status: { type: string, enum: [active, suspended] }
+        permissions:
+          type: object
+          properties:
+            ai: { type: boolean }
+            top_up: { type: boolean }
+        demo: { type: boolean }
+        created_at: { type: string, format: date-time }
+        last_seen_at: { type: string, format: date-time }
+        balance: { type: integer }
+        held: { type: integer }
+        topup_cny: { type: number }
+        points_used: { type: integer }
+        jobs: { type: integer }
+        tokens: { type: integer }
+        cost_cny: { type: number }
+
     Quote:
       description: What an AI request costs in 积分 (v11.0.0)
       type: object
@@ -2467,7 +2792,10 @@ components:
           properties:
             yuan: { type: integer }
             points: { type: integer }
-        reason: { type: string, description: "A grant's reason: dev, the dev accounts' start" }
+        reason:
+          type: string
+          description: "A grant's reason: dev, the dev accounts' start; admin:<id>, an admin's (v11.2.0)"
+        note: { type: string, description: What an admin wrote with a grant (v11.2.0) }
 
     Remedy:
       type: object

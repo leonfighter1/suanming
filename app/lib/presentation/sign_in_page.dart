@@ -58,6 +58,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         'email_invalid' => l10n.emailInvalid,
         'email_taken' => l10n.emailTaken,
         'password_weak' => l10n.passwordWeak,
+        // 管理后台 (v11.2.0): an admin suspended the account.
+        'account_suspended' => l10n.accountSuspended,
         _ when e.status == 429 => l10n.captchaRequired,
         _ when e.status == 401 && !_register => l10n.loginFailed,
         _ => e.toString(),

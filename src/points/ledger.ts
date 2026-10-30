@@ -35,8 +35,10 @@ export interface PointsEntry {
   usd?: number;
   /** A top-up's pack. */
   pack?: Pack;
-  /** A grant's reason: "dev" for the dev accounts' start. */
+  /** A grant's reason: "dev" for the dev accounts' start, "admin:<id>" for an admin's (v11.2.0). */
   reason?: string;
+  /** What an admin wrote with a grant (v11.2.0). */
+  note?: string;
 }
 
 /** What a running job holds: at most it is charged `points`; `quote` is its estimate. */
@@ -49,7 +51,8 @@ export interface PointsHold {
   created_at: string;
 }
 
-export type PointsCredit = { kind: "topup"; pack: Pack } | { kind: "grant"; reason: string };
+export type PointsCredit =
+  { kind: "topup"; pack: Pack } | { kind: "grant"; reason: string; note?: string };
 
 export interface PointsBalance {
   balance: number;
@@ -90,6 +93,10 @@ export interface PointsLedger {
   /** Newest first. */
   listPoints(owner: string, limit: number): Promise<PointsEntry[]>;
   listHolds(owner: string): Promise<PointsHold[]>;
+  /** 管理后台 (v11.2.0): every account's changes since `since` (all without it), oldest first. */
+  allPoints(since?: string): Promise<PointsEntry[]>;
+  /** 管理后台 (v11.2.0): every account's balance and what its running jobs hold. */
+  allBalances(): Promise<Map<string, PointsBalance>>;
 }
 
 /** The ledger in memory. Each call reads and writes without awaiting in between, so it is atomic. */
@@ -159,7 +166,9 @@ export class InMemoryLedger implements PointsLedger {
       points,
       balance,
       created_at: at,
-      ...(credit.kind === "topup" ? { pack: { ...credit.pack } } : { reason: credit.reason }),
+      ...(credit.kind === "topup"
+        ? { pack: { ...credit.pack } }
+        : { reason: credit.reason, ...(credit.note && { note: credit.note }) }),
     });
   }
 
@@ -180,6 +189,24 @@ export class InMemoryLedger implements PointsLedger {
 
   async listHolds(owner: string) {
     return [...this.holds.values()].filter((h) => h.owner === owner).map((h) => structuredClone(h));
+  }
+
+  async allPoints(since?: string) {
+    // Written in time order; a stable sort keeps that order among entries of the same millisecond.
+    return this.entries
+      .filter((e) => !since || e.created_at >= since)
+      .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0))
+      .map((e) => structuredClone(e));
+  }
+
+  async allBalances() {
+    const all = new Map<string, PointsBalance>();
+    for (const [owner, balance] of this.balances) all.set(owner, { balance, held: 0 });
+    for (const h of this.holds.values()) {
+      const b = all.get(h.owner) ?? { balance: 0, held: 0 };
+      all.set(h.owner, { ...b, held: b.held + h.points });
+    }
+    return all;
   }
 
   /** Account deletion: everything of the owner's; the number of entries it had. */

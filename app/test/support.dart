@@ -166,6 +166,10 @@ class FakeApi {
   int inquiryPlanned = 2;
   bool inquiryFails = false;
 
+  /// 管理后台 (v11.2.0): an admin suspended the account: sign-in and every signed-in call answer 403
+  /// account_suspended.
+  bool suspended = false;
+
   /// 积分 (v11.0.0): off (`enabled: false`) unless a test turns them on. On, each AI request costs its price here at
   /// once (the server holds it, then charges what it cost); with less than that available it answers 402
   /// points_short. 充值 is simulated unless [pointsTopUp] says otherwise.
@@ -239,6 +243,7 @@ class FakeApi {
         if (b['password'] != 'long enough pw') {
           return _json({'title': 'Authentication failed', 'detail': 'email or password is incorrect', 'status': 401}, 401);
         }
+        if (suspended) return _problem(403, 'this account has been suspended', 'account_suspended');
         return _json(_tokens(), 200);
       case ('POST', '/v1/auth/refresh'):
         return _json(_tokens(), 200);
@@ -249,6 +254,7 @@ class FakeApi {
       expireAccessOnce = false;
       return _json({'title': 'Authentication failed', 'status': 401}, 401);
     }
+    if (suspended) return _problem(403, 'this account has been suspended', 'account_suspended');
     if (req.method == 'GET' && path == '/v1/me') return _json(_me, 200);
     // 积分 (v11.0.0): the balance and changes, 充值, a chart's prices.
     if (req.method == 'GET' && path == '/v1/points') {

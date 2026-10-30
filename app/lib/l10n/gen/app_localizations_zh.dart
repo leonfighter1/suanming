@@ -2191,6 +2191,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recalcAgain => '重新再算';
 
   @override
+  String get accountSuspended => '这个账号已被管理员停用，暂时不能登录。如有疑问请联系客服。';
+
+  @override
   String get pointsTitle => '我的积分';
 
   @override
@@ -2263,6 +2266,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pointsGrantDev => '开发测试赠送';
+
+  @override
+  String get pointsGrantAdmin => '管理员赠送';
 
   @override
   String pointsTopUpEntry(int yuan) {
@@ -4506,6 +4512,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get recalcAgain => '重新再算';
 
   @override
+  String get accountSuspended => '這個帳戶已被管理員停用，暫時不能登入。如有疑問請聯絡客服。';
+
+  @override
   String get pointsTitle => '我的積分';
 
   @override
@@ -4578,6 +4587,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get pointsGrantDev => '開發測試贈送';
+
+  @override
+  String get pointsGrantAdmin => '管理員贈送';
 
   @override
   String pointsTopUpEntry(int yuan) {

@@ -12,6 +12,31 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v11.2.0 (2026-10-29): 管理后台, the server — accounts, AI use, money and the admin API
+
+Your request for an admin dashboard, as stage S22 of the [tech plan](docs/tech-plan.md); this first step is the
+server it reads (the dashboard itself, `admin/`, comes in v11.4.0). Pushed, as you said (做完了可以直接push).
+
+- **Every AI job's use is recorded:** each step of every reading, 一生运势报告, 追问, plan and 深度分析, with its
+  model, input, output and cache tokens, its cost at list price and whether it delivered. Numbers only, never a text;
+  kept when an account is deleted, without its owner, so the totals stay.
+- **Accounts gain** a role (user or admin), a status (active or suspended), two permissions (AI readings, 充值), the
+  time of their last request (to the minute) and a demo mark.
+  - A **suspended** account can't sign in, its sessions end at once, and the app signs it out with the message
+    这个账号已被管理员停用.
+  - With **AI readings off**, every AI request is refused (`ai_not_allowed`); with **充值 off**, 充值 is.
+- **Admins** are the logins in `MINGLI_ADMINS` (by default `admin`) and any account an admin gives the role; an admin
+  also reviews in 内容审核. An admin can't suspend or demote themselves, so there is always a way in.
+- **The admin API** (`/v1/admin/*`, admins only): the KPIs; day by day (the revenue curve: 充值, its net after the
+  payment fee and VAT, the AI cost in 元, gross profit and margin, tokens, AI jobs, new and active accounts, 积分
+  sold, granted and used); AI use by method and by model; every account with its balance, spending, AI use and last
+  activity (search, filters, sorting, pages); one account's details; suspend or reactivate, the role, permissions,
+  sign out everywhere, 增加积分 with a note; the active accounts (15 minutes, 24 hours, 7 and 30 days); and exports:
+  the revenue curve and the accounts as CSV, a period's report as PDF or Word. Days are counted in Shanghai time.
+- **In the app:** 我的积分 shows an admin's grant as 管理员赠送 with its note.
+- **Verified:** 18 new server tests (every figure worked out by hand, the API, suspension, permissions, the database
+  store), 665 in all; 2 new app tests, 239 in all; harness PASS.
+
 ### v11.1.0 (2026-10-29): 有所求才能去求 — 塔罗, 求签 and 算卦 are drawn only for a question
 
 Your requests (「求签和算卦 算法必须要有所问之问题之后才能去求 … 是必须要有所求才能去求」, 「塔罗牌也是一样」), as stage S21 of

@@ -138,6 +138,27 @@ void main() {
     expect(find.textContaining('按实际用量 · AI 成本 0.340 美元'), findsOneWidget);
   });
 
+  testWidgets('管理后台 (v11.2.0): an admin\'s grant shows as 管理员赠送 with its note', (tester) async {
+    final api = withPoints()
+      ..pointsEntries.insert(0, {
+        'id': '7c7c7c7c-0000-4000-8000-000000000003',
+        'kind': 'grant',
+        'points': 2000,
+        'balance': 12000,
+        'created_at': '2026-10-29T11:00:00.000Z',
+        'reason': 'admin:0b1c',
+        'note': '活动奖励',
+      });
+    await start(tester, api);
+    await tester.tap(find.byKey(const Key('open-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('open-points')));
+    await settle(tester);
+    await scrollToFinder(tester, find.text('管理员赠送'));
+    expect(find.text('+2000'), findsOneWidget);
+    expect(find.textContaining('活动奖励'), findsOneWidget);
+  });
+
   testWidgets('every AI button says what it costs, priced by the topics asked', (tester) async {
     final api = withPoints();
     await start(tester, api, size: const Size(412, 900));

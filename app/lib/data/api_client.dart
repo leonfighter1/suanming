@@ -411,6 +411,12 @@ class ApiClient {
     try {
       return await call(t.access);
     } on ApiException catch (e) {
+      // 管理后台 (v11.2.0): a suspended account is signed out here, and the sign-in page says why.
+      if (e.code == 'account_suspended') {
+        await tokens.clear();
+        onSignedOut?.call();
+        rethrow;
+      }
       if (!e.isUnauthorized) rethrow;
       if (!await (_refreshing ??= _refresh().whenComplete(() => _refreshing = null))) {
         await tokens.clear();

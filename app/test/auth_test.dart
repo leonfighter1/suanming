@@ -65,6 +65,37 @@ void main() {
     expect(find.byKey(const Key('entry-bazi')), findsNothing);
   });
 
+  testWidgets('管理后台 (v11.2.0): a suspended account is told so at sign-in, and signed out if it was in', (tester) async {
+    final api = FakeApi()..suspended = true;
+    await tester.pumpWidget(testApp(api, signedIn: false));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('login')), 'me@example.com');
+    await tester.enterText(find.byKey(const Key('password')), 'long enough pw');
+    await tester.tap(find.byKey(const Key('auth-submit')));
+    await settle(tester);
+    expect(find.text('這個帳戶已被管理員停用，暫時不能登入。如有疑問請聯絡客服。'), findsOneWidget);
+    expect(find.byKey(const Key('entry-bazi')), findsNothing);
+
+    // Signed in when the admin suspends it: the next call signs the app out.
+    await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
+    final inside = FakeApi();
+    final tokens = InMemoryTokenStore(Tokens(inside.access, 'refresh-0'));
+    await tester.pumpWidget(testApp(inside, tokens: tokens));
+    await settle(tester);
+    expect(find.byKey(const Key('entry-bazi')), findsOneWidget);
+    inside.suspended = true;
+    await tester.tap(find.byKey(const Key('open-menu')));
+    await settle(tester);
+    // Whatever asks the server next meets the refusal: the menu's balance, or else 历史记录.
+    final history = find.byKey(const Key('menu-history'));
+    if (history.evaluate().isNotEmpty) {
+      await tester.tap(history);
+      await settle(tester);
+    }
+    expect(await tokens.read(), isNull);
+    expect(find.byKey(const Key('auth-submit')), findsOneWidget);
+  });
+
   testWidgets('signing in sends what was typed as the login: a username, an email or a phone (v8.2.0)', (tester) async {
     final api = FakeApi();
     await tester.pumpWidget(testApp(api, signedIn: false));

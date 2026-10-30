@@ -49,7 +49,15 @@ import { SCHEMA_VERSION, type ChartFact, type ChartSystem } from "../chart-fact/
 import { loadGeoMatrix, loadRuleSet, methodsFor, resolveRegion } from "../compliance/index.js";
 import { AccountError, AccountService } from "../auth/account.js";
 import { maskEmail } from "../auth/identifiers.js";
-import { AuthError, AuthService, publicUser } from "../auth/service.js";
+import {
+  AuthError,
+  AuthService,
+  permissionsOf,
+  publicUser,
+  type AccountPermissions,
+} from "../auth/service.js";
+import { adminRoute } from "../admin/routes.js";
+import { usageRows } from "../admin/usage.js";
 import { VerifyError, type ContactKind } from "../auth/verify.js";
 import { lifeDocument, localTime, readingDocument } from "../export/report-doc.js";
 import {
@@ -136,6 +144,9 @@ export const API_VERSION = "0.2.0";
 /** 发到邮箱 (v9.0.0): records in one message, and messages a day per account. */
 export const MAIL_DOCUMENTS = 10;
 export const MAIL_PER_DAY = 20;
+
+/** 管理后台 (v11.2.0): how often an account's last activity is written. */
+export const SEEN_EVERY_MS = 5 * 60_000;
 
 export interface ApiOptions {
   secrets: EngineSecrets;
@@ -372,6 +383,7 @@ export function publicPointsEntry(e: PointsEntry, showCost: boolean) {
     ...(showCost && e.usd !== undefined && { usd: e.usd }),
     ...(e.pack && { pack: e.pack }),
     ...(e.reason && { reason: e.reason }),
+    ...(e.note && { note: e.note }),
   };
 }
 
@@ -525,10 +537,12 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   async function reviewer(c: Caller): Promise<string | undefined> {
     const u = auth ? await auth.users.get(c.user) : undefined;
     const names = u ? [u.username, u.email] : [c.user];
-    return names
+    const named = names
       .filter((n): n is string => n !== undefined)
       .map((n) => n.toLowerCase())
       .find((n) => admins.has(n));
+    // An account given the admin role in 管理后台 (v11.2.0) reviews too.
+    return named ?? (u?.role === "admin" ? (u.username ?? u.email ?? u.id) : undefined);
   }
 
   function clientIp(req: IncomingMessage): string {
@@ -620,11 +634,39 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     );
   }
 
+  /** 管理后台 (v11.2.0): what an admin allows this account; 403 `ai_not_allowed` / `top_up_not_allowed` when not. */
+  async function assertAllowed(c: Caller, what: keyof AccountPermissions) {
+    const u = auth && (await auth.users.get(c.user));
+    if (u && !permissionsOf(u)[what]) {
+      throw new HttpError(
+        403,
+        what === "ai"
+          ? "AI readings are turned off for this account"
+          : "充值 is turned off for this account",
+        `${what}_not_allowed`,
+      );
+    }
+  }
+
+  /** Prices a step on a model without a list price (the usage rows' cost), whether or not 积分 are on. */
+  const referenceModel = (pointsConfig ?? loadPointsConfig()).pricing.reference_model;
+
+  /** 管理后台 (v11.2.0): an AI job's steps as it ends, delivered or not: its tokens were spent either way. */
+  async function recordJob(
+    job: { kind: ChargeKind; id: string; owner: string; system?: string },
+    agents: readonly AgentTrace[] | undefined,
+    delivered: boolean,
+  ) {
+    if (!agents?.length) return;
+    await store.recordUsage(usageRows(job, agents, delivered, now().toISOString(), referenceModel));
+  }
+
   /**
-   * Before an AI job: its price held, then the daily AI caps, so a refusal of either takes nothing. Undefined while
-   * 积分 are off.
+   * Before an AI job: the account allowed AI, its price held, then the daily AI caps, so a refusal takes nothing.
+   * The hold is undefined while 积分 are off.
    */
   async function holdForJob(c: Caller, kind: ChargeKind, what: PointsFor, about?: QuoteFor) {
+    await assertAllowed(c, "ai");
     const hold = await holdPoints(c, priceOf(kind, about), what);
     try {
       takeAiQuota(c.user);
@@ -678,7 +720,14 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   async function caller(req: IncomingMessage): Promise<Caller> {
     if (req.headers.authorization || !opts.devMode || opts.devHeaders === false) {
       if (!auth) throw new HttpError(401, "authentication not configured");
+      // A suspended account is refused here (403 account_suspended, v11.2.0).
       const u = await auth.authenticate(req.headers.authorization);
+      // 管理后台 (v11.2.0): when it was last active, to the minute, at most every five minutes.
+      const t = now();
+      if (!u.last_seen_at || t.getTime() - Date.parse(u.last_seen_at) >= SEEN_EVERY_MS) {
+        const minute = new Date(Math.floor(t.getTime() / 60_000) * 60_000).toISOString();
+        track("last seen", auth.users.touch(u.id, minute));
+      }
       return { user: u.id, country: u.country };
     }
     const country = String(req.headers["x-dev-country"] ?? "").toUpperCase();
@@ -827,7 +876,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     // The account may have been deleted while this ran; never resurrect its data.
-    if (!(await store.getReport(record.id))) return settleHold(hold, undefined);
+    const gone = !(await store.getReport(record.id));
+    await recordJob(
+      { kind: "report", id: record.id, owner: record.owner, system: fact.system },
+      next.report?.agents,
+      !gone && next.status === "passed",
+    );
+    if (gone) return settleHold(hold, undefined);
     await store.putReport(next);
     await settleHold(hold, next.status === "passed" ? next.report?.agents : undefined);
     if (next.status === "passed") await mailWhenDone("report", record.id);
@@ -916,6 +971,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     const current = await store.getRemedy(record.id);
+    await recordJob(
+      { kind: "remedy", id: record.id, owner: record.owner, system: fact.system },
+      next.remedy?.agents,
+      !!current && next.status === "passed",
+    );
     if (!current) return settleHold(hold, undefined);
     // Bought while generating: keep the purchase.
     await store.putRemedy({ ...next, unlocked: current.unlocked, payment: current.payment });
@@ -972,6 +1032,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (existing) {
       // Preloaded: buying only unlocks it. TODO(Phase 4 payments): verify the receipt. With 积分 (a plan preloaded
       // before they were on), buying it pays what it cost to make.
+      if (!existing.unlocked) await assertAllowed(c, "ai");
       if (!existing.unlocked && pointsConfig) {
         const hold = await holdPoints(c, priceOf("remedy", quoteFor(fact)), {
           ...plan,
@@ -1098,7 +1159,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       };
     }
     // The account may have been deleted while this ran; never resurrect its data.
-    if (!(await store.getFollowUp(record.id))) return settleHold(hold, undefined);
+    const gone = !(await store.getFollowUp(record.id));
+    await recordJob(
+      { kind: "followup", id: record.id, owner: record.owner, system: fact.system },
+      next.followup?.agents,
+      !gone && next.status === "passed",
+    );
+    if (gone) return settleHold(hold, undefined);
     await store.putFollowUp(next);
     await settleHold(hold, next.status === "passed" ? next.followup?.agents : undefined);
   }
@@ -1230,6 +1297,12 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
     // The account or the reading may have gone, or the user moved on, meanwhile: never resurrect or overwrite.
     const current = await store.getInquiry(record.id);
+    // Each turn's steps, under the conversation's id.
+    await recordJob(
+      { kind: "inquiry", id: record.id, owner: record.owner, system: fact.system },
+      step?.agents,
+      step?.status === "passed",
+    );
     if (!current || current.status !== "thinking") return settleHold(hold, undefined);
     const { progress: _p, error: _e, ...rest } = current;
     const base: InquiryRecord = {
@@ -1352,6 +1425,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       throw new InputError(`answer must be at most ${INQUIRY_ANSWER_MAX} characters`);
     }
     const record = await ownedInquiry(id, c);
+    // Each answer asks the model for the next turn (v11.2.0).
+    await assertAllowed(c, "ai");
     if (record.status === "thinking") {
       throw new HttpError(409, "the master is still thinking", "inquiry_thinking");
     }
@@ -1421,7 +1496,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         updated_at: now().toISOString(),
       };
     }
-    if (!(await store.getLifeReport(record.id))) return settleHold(hold, undefined);
+    const gone = !(await store.getLifeReport(record.id));
+    await recordJob(
+      { kind: "life_report", id: record.id, owner: record.owner, system: fact.system },
+      next.life?.agents,
+      !gone && next.status === "passed",
+    );
+    if (gone) return settleHold(hold, undefined);
     await store.putLifeReport(next);
     await settleHold(hold, next.status === "passed" ? next.life?.agents : undefined);
     if (next.status === "passed") await mailWhenDone("life_report", record.id);
@@ -1926,6 +2007,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
     if (path === "/v1/points/top-ups" && req.method === "POST") {
       if (!pointsConfig) throw new HttpError(404, "积分 are off on this server", "points_off");
+      await assertAllowed(c, "top_up");
       if (!simulatedTopUp) {
         throw new HttpError(
           501,
@@ -1980,6 +2062,20 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       if (opts.review === false) throw new HttpError(404, "content review is paused");
       if (!who) throw new HttpError(403, "reviewers only");
       return reviews(req, res, path, who);
+    }
+
+    // ---- 管理后台 (v11.2.0, tech plan S22): admins only (src/admin/routes.ts) ----
+    if (path.startsWith("/v1/admin/")) {
+      if (!auth) throw new HttpError(404, "auth not configured");
+      const ctx = {
+        store,
+        auth,
+        config: pointsConfig ?? loadPointsConfig(),
+        admins,
+        now,
+        log: (m: string) => log(m),
+      };
+      if (await adminRoute(ctx, req, res, path, c.user)) return;
     }
 
     // ---- 一生运势报告 ----

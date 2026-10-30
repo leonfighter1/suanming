@@ -22,6 +22,7 @@ import type {
   ReportRecord,
   Store,
 } from "../api/store.js";
+import type { UsageRow } from "../admin/usage.js";
 import type { UserRecord, UserStore } from "../auth/service.js";
 import type { SocialProvider } from "../auth/social.js";
 import type {
@@ -48,6 +49,7 @@ const MIGRATIONS = [
   "008_logins",
   "009_inquiries",
   "010_points",
+  "011_admin",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -71,7 +73,7 @@ type Row = Record<string, unknown>;
 const iso = (v: unknown) => (v as Date).toISOString();
 
 const ENTRY_COLUMNS =
-  "id, user_id, kind, points, balance, for_kind, for_id, system, basis, usd, pack_yuan, pack_points, reason, created_at";
+  "id, user_id, kind, points, balance, for_kind, for_id, system, basis, usd, pack_yuan, pack_points, reason, note, created_at";
 
 /** A 积分 change as its row holds it (v11.0.0). */
 function entryOf(r: Row): PointsEntry {
@@ -95,12 +97,13 @@ function entryOf(r: Row): PointsEntry {
       pack: { yuan: r.pack_yuan as number, points: r.pack_points as number },
     }),
     ...(r.reason != null && { reason: r.reason as string }),
+    ...(r.note != null && { note: r.note as string }),
   };
 }
 
 function insertEntry(db: Db, e: PointsEntry) {
   return db.query(
-    `INSERT INTO points_entries (${ENTRY_COLUMNS}) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    `INSERT INTO points_entries (${ENTRY_COLUMNS}) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
     [
       e.id,
       e.owner,
@@ -115,6 +118,7 @@ function insertEntry(db: Db, e: PointsEntry) {
       e.pack?.yuan ?? null,
       e.pack?.points ?? null,
       e.reason ?? null,
+      e.note ?? null,
       e.created_at,
     ],
   );
@@ -255,6 +259,14 @@ export class PgStore implements Store, UserStore {
       locale: row.locale as UserRecord["locale"],
       age_confirmed_at: iso(row.age_confirmed_at),
       created_at: iso(row.created_at),
+      // 管理后台 (v11.2.0): plain columns; the defaults stay off the record, as on one made before them.
+      ...(row.role === "admin" && { role: "admin" as const }),
+      ...(row.status === "suspended" && { status: "suspended" as const }),
+      ...(row.permissions != null && {
+        permissions: row.permissions as UserRecord["permissions"],
+      }),
+      ...(row.last_seen_at != null && { last_seen_at: iso(row.last_seen_at) }),
+      ...(row.demo === true && { demo: true }),
     };
   }
 
@@ -324,22 +336,45 @@ export class PgStore implements Store, UserStore {
       social,
       bytes(u.username_lookup),
       bytes(u.phone_lookup),
+      u.role ?? "user",
+      u.status ?? "active",
+      u.permissions ?? null,
+      u.last_seen_at ?? null,
+      u.demo === true,
     ];
     if (fresh) {
       await this.db.query(
-        `INSERT INTO users (id, email_ciphertext, email_lookup, password_hash, country, locale, age_confirmed_at, created_at, social_lookup, username_lookup, phone_lookup, data_key_wrapped)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        `INSERT INTO users (id, email_ciphertext, email_lookup, password_hash, country, locale, age_confirmed_at, created_at, social_lookup, username_lookup, phone_lookup,
+           role, status, permissions, last_seen_at, demo, data_key_wrapped)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
         [...values, fresh.wrapped],
       );
       this.keys.set(u.id, fresh.dek);
     } else {
+      // last_seen_at only moves forward here: touch() may have written a later one meanwhile.
       await this.db.query(
         `UPDATE users SET email_ciphertext = $2, email_lookup = $3, password_hash = $4, country = $5, locale = $6,
-           age_confirmed_at = $7, created_at = $8, social_lookup = $9, username_lookup = $10, phone_lookup = $11
+           age_confirmed_at = $7, created_at = $8, social_lookup = $9, username_lookup = $10, phone_lookup = $11,
+           role = $12, status = $13, permissions = $14, demo = $16,
+           last_seen_at = GREATEST(last_seen_at, $15::timestamptz)
          WHERE id = $1`,
         values,
       );
     }
+  }
+
+  async list() {
+    const rows = await this.db.query<Row>("SELECT * FROM users ORDER BY created_at, id");
+    const users: UserRecord[] = [];
+    for (const r of rows.rows) users.push((await this.user(r))!);
+    return users;
+  }
+
+  async touch(id: string, at: string) {
+    await this.db.query(
+      "UPDATE users SET last_seen_at = GREATEST(last_seen_at, $2::timestamptz) WHERE id = $1",
+      [id, at],
+    );
   }
 
   /**
@@ -664,7 +699,9 @@ export class PgStore implements Store, UserStore {
         points,
         balance,
         created_at: at,
-        ...(credit.kind === "topup" ? { pack: { ...credit.pack } } : { reason: credit.reason }),
+        ...(credit.kind === "topup"
+          ? { pack: { ...credit.pack } }
+          : { reason: credit.reason, ...(credit.note && { note: credit.note }) }),
       };
       await insertEntry(tx, entry);
       return entry;
@@ -694,6 +731,79 @@ export class PgStore implements Store, UserStore {
         id: r.for_id as string,
         ...(r.system != null && { system: r.system as string }),
       },
+      created_at: iso(r.created_at),
+    }));
+  }
+
+  async allPoints(since?: string) {
+    const rows = await this.db.query<Row>(
+      `SELECT ${ENTRY_COLUMNS} FROM points_entries WHERE created_at >= COALESCE($1::timestamptz, '-infinity')
+       ORDER BY created_at, seq`,
+      [since ?? null],
+    );
+    return rows.rows.map(entryOf);
+  }
+
+  async allBalances() {
+    const rows = await this.db.query<{ user_id: string; balance: number; held: number }>(
+      `SELECT u.user_id, COALESCE(b.balance, 0) AS balance, COALESCE(h.held, 0)::integer AS held
+       FROM (SELECT user_id FROM points_balances UNION SELECT user_id FROM points_holds) u
+       LEFT JOIN points_balances b ON b.user_id = u.user_id
+       LEFT JOIN (SELECT user_id, sum(points) AS held FROM points_holds GROUP BY user_id) h ON h.user_id = u.user_id`,
+    );
+    return new Map(rows.rows.map((r) => [r.user_id, { balance: r.balance, held: r.held }]));
+  }
+
+  // ---- 管理后台 (v11.2.0): every AI job's steps, numbers only ----
+
+  async recordUsage(rows: UsageRow[]) {
+    if (!rows.length) return;
+    await this.db.transaction(async (tx) => {
+      for (const r of rows) {
+        await tx.query(
+          `INSERT INTO ai_usage (job_id, user_id, kind, system, agent, model, input_tokens, output_tokens,
+             cache_read_tokens, cache_write_tokens, usd, delivered, demo, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+          [
+            r.job_id,
+            r.owner ?? null,
+            r.kind,
+            r.system ?? null,
+            r.agent,
+            r.model,
+            r.input_tokens,
+            r.output_tokens,
+            r.cache_read_tokens,
+            r.cache_write_tokens,
+            r.usd,
+            r.delivered,
+            r.demo === true,
+            r.created_at,
+          ],
+        );
+      }
+    });
+  }
+
+  async listUsage(since?: string) {
+    const rows = await this.db.query<Row>(
+      `SELECT * FROM ai_usage WHERE created_at >= COALESCE($1::timestamptz, '-infinity') ORDER BY created_at, seq`,
+      [since ?? null],
+    );
+    return rows.rows.map((r): UsageRow => ({
+      job_id: r.job_id as string,
+      ...(r.user_id != null && { owner: r.user_id as string }),
+      kind: r.kind as UsageRow["kind"],
+      ...(r.system != null && { system: r.system as string }),
+      agent: r.agent as string,
+      model: r.model as string,
+      input_tokens: r.input_tokens as number,
+      output_tokens: r.output_tokens as number,
+      cache_read_tokens: r.cache_read_tokens as number,
+      cache_write_tokens: r.cache_write_tokens as number,
+      usd: r.usd as number,
+      delivered: r.delivered as boolean,
+      ...(r.demo === true && { demo: true }),
       created_at: iso(r.created_at),
     }));
   }
@@ -768,6 +878,8 @@ export class PgStore implements Store, UserStore {
       const points = await purge("points_entries");
       await purge("points_holds");
       await purge("points_balances");
+      // Its AI use stays for the totals, without its owner.
+      await tx.query("UPDATE ai_usage SET user_id = NULL WHERE user_id = $1", [owner]);
       const counts = { charts, reports, remedies, life_reports, followups, inquiries, points };
       await tx.query(
         "INSERT INTO deletion_requests (subject_hash, channel, status, evidence) VALUES ($1, 'app', 'in_progress', $2)",
@@ -795,5 +907,6 @@ const TABLES = [
   "points_balances",
   "points_entries",
   "points_holds",
+  "ai_usage",
   "deletion_requests",
 ] as const;

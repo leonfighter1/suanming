@@ -16,6 +16,7 @@ import type { ChartFact } from "../chart-fact/index.js";
 import type { Locale } from "../ai/terms.js";
 import type { AgentName, TarotFocus, Topic } from "../ai/types.js";
 import type { ChartPerson } from "../service/charts.js";
+import type { UsageRow } from "../admin/usage.js";
 import {
   InMemoryLedger,
   type PointsCharge,
@@ -240,7 +241,14 @@ export interface Store extends PointsLedger {
   deleteLifeReport(id: string): Promise<{ life_reports: number; followups: number }>;
   /** A chart, unless a reading or a 一生运势报告 still reads it, or it is a 每日一牌's; true when it went. */
   deleteChartIfUnused(id: string): Promise<boolean>;
-  /** Account deletion: remove everything the user owns. Returns counts for the receipt (`points`: its 积分 entries). */
+  /** 管理后台 (v11.2.0): an AI job's steps, as it ends. */
+  recordUsage(rows: UsageRow[]): Promise<void>;
+  /** Every AI job's steps since `since` (all without it), oldest first. */
+  listUsage(since?: string): Promise<UsageRow[]>;
+  /**
+   * Account deletion: remove everything the user owns. Returns counts for the receipt (`points`: its 积分 entries).
+   * Its AI use stays, without its owner, so the totals don't change.
+   */
   deleteOwnerData(owner: string): Promise<{
     charts: number;
     reports: number;
@@ -277,6 +285,22 @@ export class InMemoryStore implements Store {
   }
   listHolds(owner: string) {
     return this.ledger.listHolds(owner);
+  }
+  allPoints(since?: string) {
+    return this.ledger.allPoints(since);
+  }
+  allBalances() {
+    return this.ledger.allBalances();
+  }
+  private usage: UsageRow[] = [];
+  async recordUsage(rows: UsageRow[]) {
+    this.usage.push(...rows.map((r) => structuredClone(r)));
+  }
+  async listUsage(since?: string) {
+    return this.usage
+      .filter((r) => !since || r.created_at >= since)
+      .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0))
+      .map((r) => structuredClone(r));
   }
   async putInquiry(i: InquiryRecord) {
     this.inquiries.set(i.id, structuredClone(i));
@@ -418,6 +442,7 @@ export class InMemoryStore implements Store {
     for (const [id, i] of this.inquiries)
       if (i.owner === owner && this.inquiries.delete(id)) inquiries++;
     const points = this.ledger.deleteOwner(owner);
+    for (const r of this.usage) if (r.owner === owner) delete r.owner;
     return { charts, reports, remedies, life_reports, followups, inquiries, points };
   }
 }

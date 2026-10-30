@@ -51,6 +51,7 @@ class PointsEntryView {
     this.usd,
     this.packYuan,
     this.reason,
+    this.note,
   });
   factory PointsEntryView.fromJson(Json j) {
     final f = j['for'] as Json?;
@@ -67,6 +68,7 @@ class PointsEntryView {
       usd: (j['usd'] as num?)?.toDouble(),
       packYuan: (pack?['yuan'] as num?)?.toInt(),
       reason: j['reason'] as String?,
+      note: j['note'] as String?,
     );
   }
   final String id;
@@ -90,6 +92,9 @@ class PointsEntryView {
   final double? usd;
   final int? packYuan;
   final String? reason;
+
+  /// What an admin wrote with a grant (v11.2.0).
+  final String? note;
 }
 
 /// The account's 积分 (GET /v1/points): the balance, what running requests hold, the 充值 packs and the latest

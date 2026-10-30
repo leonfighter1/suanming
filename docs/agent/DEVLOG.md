@@ -2,6 +2,23 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (j): S22 begins, the owner's request — 管理后台; v11.2.0 is its server
+
+- Owner request (quoted in the tech plan): a new project folder, an admin dashboard for every account, the tokens,
+  the profit and revenue; managing active users, permissions, 增加积分; exporting the revenue curve and reports; a data
+  system of its own with preset data; a tech plan, done step by step. Then 「做完了可以直接push 不需要等我回复」:
+  v11.1.0 was pushed, and finished steps are pushed after their PASS (memory updated).
+- Decided (in the plan): `admin/` is a Flutter web project reusing the app's theme, design and keyboard layer by a
+  path dependency; the admin API lives in the API server, since PGlite is one process's database; the harness's
+  Flutter gate junctions only the project folder, so `admin/` gets its own gate script with a junction to the root.
+- Built (v11.2.0): `src/admin` (usage rows, the numbers, the exports, the routes), the account's role, status,
+  permissions, last activity and demo mark (migration 011, plain columns), `ai_usage`, a grant's note; the
+  suspension everywhere (sign-in, each request, refresh); `assertAllowed`; the app's sign-out on suspension and the
+  admin grant's label.
+- Kept apart on purpose: `/v1/me`'s `role` still means 内容审核's reviewer (the app shows 内容审核 by it); the
+  dashboard asks `/v1/admin/me`.
+- Checked that the suspension test fails without the per-request check.
+
 ## 2026-10-29 (i): S21, the owner's requests — 塔罗, 求签 and 算卦 drawn only for a question; release v11.1.0
 
 - Owner requests: 「求签和算卦 算法必须要有所问之问题之后才能去求。也就是说问题不能为空 是必须要有所求才能去求」, then, while

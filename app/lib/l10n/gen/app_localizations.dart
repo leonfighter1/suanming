@@ -4200,6 +4200,12 @@ abstract class AppLocalizations {
   /// **'重新再算'**
   String get recalcAgain;
 
+  /// No description provided for @accountSuspended.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个账号已被管理员停用，暂时不能登录。如有疑问请联系客服。'**
+  String get accountSuspended;
+
   /// No description provided for @pointsTitle.
   ///
   /// In zh, this message translates to:
@@ -4313,6 +4319,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'开发测试赠送'**
   String get pointsGrantDev;
+
+  /// No description provided for @pointsGrantAdmin.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理员赠送'**
+  String get pointsGrantAdmin;
 
   /// No description provided for @pointsTopUpEntry.
   ///

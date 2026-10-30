@@ -37,6 +37,23 @@ export interface AccountSettings {
 
 export const DEFAULT_SETTINGS: AccountSettings = { email_reports: false };
 
+/** 管理后台 (v11.2.0, tech plan S22): what an account is and may do. */
+export type AccountRole = "user" | "admin";
+export type AccountStatus = "active" | "suspended";
+export interface AccountPermissions {
+  /** AI readings, 一生运势报告, 追问, plans and the 深度分析. */
+  ai: boolean;
+  /** 充值. */
+  top_up: boolean;
+}
+export const DEFAULT_PERMISSIONS: AccountPermissions = { ai: true, top_up: true };
+
+/** What an account may do: its own permissions over the defaults. */
+export const permissionsOf = (u: Pick<UserRecord, "permissions">): AccountPermissions => ({
+  ...DEFAULT_PERMISSIONS,
+  ...u.permissions,
+});
+
 export interface UserRecord {
   id: string;
   email?: string;
@@ -58,6 +75,16 @@ export interface UserRecord {
   locale: Locale;
   age_confirmed_at: string;
   created_at: string;
+  /** Absent: a user (v11.2.0). */
+  role?: AccountRole;
+  /** Absent: active. A suspended account can't sign in, and its sessions end. */
+  status?: AccountStatus;
+  /** Absent: everything allowed. */
+  permissions?: Partial<AccountPermissions>;
+  /** Its last request, to the minute; written at most every five minutes (active users). */
+  last_seen_at?: string;
+  /** Preset data for the dashboard (v11.4.0): no person's; it has no password, so it can't sign in. */
+  demo?: boolean;
 }
 
 export interface UserStore {
@@ -68,6 +95,13 @@ export interface UserStore {
   bySocial(provider: SocialProvider, sub: string): Promise<UserRecord | undefined>;
   put(u: UserRecord): Promise<void>;
   delete(id: string): Promise<void>;
+  /** Every account (管理后台, v11.2.0), oldest first. */
+  list(): Promise<UserRecord[]>;
+  /**
+   * Notes an account's last activity, and nothing else: a request's own changes to the account (a setting, a
+   * username) may be written at the same time, and must not be undone by a copy read before them.
+   */
+  touch(id: string, at: string): Promise<void>;
 }
 
 export class InMemoryUserStore implements UserStore {
@@ -92,12 +126,27 @@ export class InMemoryUserStore implements UserStore {
     return [...this.users.values()].find((u) => u.social[p] === sub);
   }
   async put(u: UserRecord) {
-    this.users.set(u.id, structuredClone(u));
+    // The last activity only moves forward: touch() may have written a later one since this copy was read.
+    const seen = [this.users.get(u.id)?.last_seen_at, u.last_seen_at].filter(Boolean).sort().at(-1);
+    this.users.set(u.id, { ...structuredClone(u), ...(seen && { last_seen_at: seen }) });
   }
   async delete(id: string) {
     this.users.delete(id);
   }
+  async list() {
+    return [...this.users.values()]
+      .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0))
+      .map((u) => structuredClone(u));
+  }
+  async touch(id: string, at: string) {
+    const u = this.users.get(id);
+    if (u) u.last_seen_at = at;
+  }
 }
+
+/** 管理后台 (v11.2.0): the refusal a suspended account meets everywhere. */
+const suspended = () =>
+  new AuthError(403, "this account has been suspended by an administrator", "account_suspended");
 
 /** Auth failures carry an HTTP status. */
 export class AuthError extends Error {
@@ -114,7 +163,9 @@ export class AuthError extends Error {
       | "username_taken"
       | "email_invalid"
       | "email_taken"
-      | "password_weak",
+      | "password_weak"
+      // 管理后台 (v11.2.0): an admin suspended the account.
+      | "account_suspended",
   ) {
     super(message);
   }
@@ -288,6 +339,8 @@ export class AuthService {
       throw new AuthError(401, "the login or password is incorrect");
     }
     keys.forEach((k) => this.limiter.clear(k));
+    // Said only to someone who knows the password.
+    if (user.status === "suspended") throw suspended();
     return this.deps.tokens.issue(user.id);
   }
 
@@ -331,13 +384,24 @@ export class AuthService {
 
   async refresh(refreshToken: unknown): Promise<TokenPair> {
     if (typeof refreshToken !== "string") throw new AuthError(400, "refresh_token is required");
+    let rotated: Awaited<ReturnType<TokenService["rotate"]>>;
     try {
-      const { userId, tokens } = await this.deps.tokens.rotate(refreshToken);
-      if (!(await this.users.get(userId))) throw new Error("user deleted");
-      return tokens;
+      rotated = await this.deps.tokens.rotate(refreshToken);
     } catch (e) {
       throw new AuthError(401, (e as Error).message);
     }
+    const user = await this.users.get(rotated.userId);
+    if (!user) throw new AuthError(401, "user deleted");
+    if (user.status === "suspended") {
+      this.deps.tokens.revokeUser(user.id);
+      throw suspended();
+    }
+    return rotated.tokens;
+  }
+
+  /** 管理后台 (v11.2.0): ends every session of an account; its access tokens lapse within their 15 minutes. */
+  signOutEverywhere(userId: string) {
+    this.deps.tokens.revokeUser(userId);
   }
 
   logout(refreshToken: unknown) {
@@ -356,6 +420,7 @@ export class AuthService {
     }
     const user = await this.users.get(id);
     if (!user) throw new AuthError(401, "account no longer exists");
+    if (user.status === "suspended") throw suspended();
     return user;
   }
 

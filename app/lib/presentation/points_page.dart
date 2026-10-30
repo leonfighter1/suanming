@@ -14,7 +14,11 @@ String pointsWhat(AppLocalizations l10n, PointsEntryView e) {
   String method(String? s) => s == 'bazi' ? l10n.pointsBazi : l10n.methodLabel(s ?? '');
   return switch ((e.kind, e.forKind)) {
     ('topup', _) => l10n.pointsTopUpEntry(e.packYuan ?? 0),
-    ('grant', _) => e.reason == 'dev' ? l10n.pointsGrantDev : l10n.pointsTitle,
+    ('grant', _) => e.reason == 'dev'
+        ? l10n.pointsGrantDev
+        : (e.reason ?? '').startsWith('admin')
+        ? l10n.pointsGrantAdmin
+        : l10n.pointsTitle,
     (_, 'report') => l10n.pointsForReading(method(e.system)),
     (_, 'inquiry') => l10n.pointsForInquiry(method(e.system)),
     (_, 'followup') => l10n.kindFollowUp,
@@ -201,6 +205,7 @@ class _EntryRow extends StatelessWidget {
     final details = [
       DateFormat('yyyy-MM-dd HH:mm').format(e.createdAt.toLocal()),
       ?basis,
+      ?e.note,
       if (e.usd != null) l10n.pointsCost(e.usd!.toStringAsFixed(3)),
     ].join(' · ');
     final gain = e.points > 0;
