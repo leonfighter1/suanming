@@ -6,6 +6,20 @@ import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../tokens.dart';
 
+// A lot's slip in small (今日一签 on 首页, S26): as large as 每日一牌's card beside its name, its border as fine as its
+// size.
+const _slipWidth = 44.0;
+const _slipHeight = 76.0;
+const _slipBorder = 1.5;
+
+/// 籤紙's colours: the yellow paper temples print lots on, darker at night (mixed while the theme changes), its ink
+/// and its border.
+({Color paper, Color ink, Color accent}) _slip(ThemeTokens t) => (
+      paper: t.pick(const Color(0xFFF3DCA6), const Color(0xFF3F3321)),
+      ink: t.pick(const Color(0xFF3B2A22), const Color(0xFFF1E4C8)),
+      accent: t.pick(ThemeTokens.light.accent, const Color(0xFFE59A86)),
+    );
+
 /// 求籤 (v4.3.0): the lot drawn, as a temple prints it on its slip: the set, the lot's title and label,
 /// and its four lines in the reader's script (English readers see the original).
 class LotCard extends ConsumerWidget {
@@ -20,11 +34,7 @@ class LotCard extends ConsumerWidget {
     final lot = lots?.lot(lotNumber);
     if (lots == null || lot == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    final t = ThemeTokens.of(context);
-    // 籤紙: the yellow paper temples print lots on, darker at night (mixed while the theme changes).
-    final paper = t.pick(const Color(0xFFF3DCA6), const Color(0xFF3F3321));
-    final ink = t.pick(const Color(0xFF3B2A22), const Color(0xFFF1E4C8));
-    final accent = t.pick(ThemeTokens.light.accent, const Color(0xFFE59A86));
+    final (:paper, :ink, :accent) = _slip(ThemeTokens.of(context));
     return AppCard(
       title: l10n.qiuqianYourLot,
       icon: Icons.temple_buddhist_outlined,
@@ -62,6 +72,33 @@ class LotCard extends ConsumerWidget {
           ),
           const SizedBox(height: Space.s),
           Text(l10n.qiuqianTextNote, style: theme.textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
+/// A lot's slip in small (今日一签 on 首页, S26): the 籤紙 with the lot's label (甲甲 … 癸癸) down it.
+class LotSlip extends StatelessWidget {
+  const LotSlip({super.key, required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final (:paper, :ink, :accent) = _slip(ThemeTokens.of(context));
+    return Container(
+      width: _slipWidth,
+      height: _slipHeight,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: paper,
+        borderRadius: BorderRadius.circular(Radii.xs),
+        border: Border.all(color: accent, width: _slipBorder),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final c in label.split('')) Text(c, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: ink)),
         ],
       ),
     );

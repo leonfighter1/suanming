@@ -709,6 +709,30 @@ abstract class AppLocalizations {
   /// **'每天一张，当天不变。点开看大图，也可以请 AI 解读。'**
   String get dailyCardHint;
 
+  /// No description provided for @dailyLot.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日一签'**
+  String get dailyLot;
+
+  /// No description provided for @dailyLotHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'每天一签，当天不变。点开看签诗，也可以请 AI 解读。'**
+  String get dailyLotHint;
+
+  /// No description provided for @dailyHexagram.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日一卦'**
+  String get dailyHexagram;
+
+  /// No description provided for @dailyHexagramHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'每天一卦，当天不变。点开看卦辞，也可以请 AI 解读。'**
+  String get dailyHexagramHint;
+
   /// No description provided for @spreadSingleShort.
   ///
   /// In zh, this message translates to:

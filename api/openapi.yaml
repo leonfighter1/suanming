@@ -1840,6 +1840,46 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "451": { $ref: "#/components/responses/Unavailable" }
 
+  /v1/east/daily:
+    get:
+      tags: [charts]
+      operationId: getEastDaily
+      summary: 今日一卦 or 今日一签, the account's 东方 draw of the day (the same all day)
+      description: |
+        A 签 (a lot of the 關聖帝君一百籤, confirmed by 擲筊) or a 卦 (an auto cast of three coins on the
+        reader's clock). Which one is keyed from the account and the date among the 东方 methods served
+        in the region (求签, 算卦): it changes from day to day and stays the same all day. Its draw id
+        comes from the account and the date under the draw key, as 每日一牌's does, under labels of its
+        own: unguessable without the key, replayable by the audit. Stored as the account's chart on
+        first request (GET /v1/charts/{chart_id} opens it, POST /v1/reports reads it without a
+        question) but not listed in GET /v1/charts. Since v15.0.0.
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: The reader's calendar date; within a day of the server's UTC date.
+          schema: { type: string, format: date }
+        - name: timezone
+          in: query
+          required: true
+          description: The reader's IANA time zone, e.g. Asia/Hong_Kong; a day's 卦 is cast on its clock.
+          schema: { type: string }
+      responses:
+        "200":
+          description: The day's 签 or 卦 (chart_fact.system is qiuqian or liuyao)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [chart_id, chart_fact, date]
+                properties:
+                  chart_id: { type: string, format: uuid }
+                  chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
+                  date: { type: string, format: date }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "451": { $ref: "#/components/responses/Unavailable" }
+
   /v1/reports/{report_id}:
     get:
       tags: [reports]
@@ -2411,7 +2451,8 @@ components:
           description: |
             What the cards are drawn for (since v11.1.0, the owner: nothing is drawn before something is asked).
             Trimmed, at most 300 characters; kept with the chart, never in its facts; its reading answers it. 400
-            `question_required` without one. 每日一牌 (GET /v1/tarot/daily) is dealt without a draw and needs none.
+            `question_required` without one. 每日一牌 (GET /v1/tarot/daily) and 今日一卦 / 今日一签 (GET
+            /v1/east/daily) are dealt without a draw and need none.
           type: string
           maxLength: 300
         spread: { type: string, enum: [single, three_card, celtic_cross, two_paths, relationship] }

@@ -123,7 +123,9 @@ Window classes are Material's, by the window's width (`WindowClass.of`, `layout.
   - The 管理后台 keeps its own container, 1440 (「管理员界面就不用改了」).
 - **Columns on a desktop window** (the large class; 「在超大屏幕布局时可以采用2X2布局。如果只有一个那就采用1x1」):
   - `CardGrid` sets cards two to a row with a gutter between; a card alone in its row spans it. On 首页, 东方's four
-    methods are 2 × 2 and 西方's one is 1 × 1.
+    methods are 2 × 2 and 西方's one is 1 × 1. Each group's card of the day follows its methods across the container:
+    今日一卦 or 今日一签 under 东方, 今日一牌 under 西方. Its picture is 44 × 76: the card, the lot's slip (`LotSlip`)
+    or the hexagram's lines.
   - The sign-in page puts its banner at the left, as tall as the form at the right (5 of 12 columns).
   - Phones and tablets keep one column.
 - **Columns** for a layout of parts side by side: `Grid.span(width, n, columns:, gutter:)`. The dashboard's main column

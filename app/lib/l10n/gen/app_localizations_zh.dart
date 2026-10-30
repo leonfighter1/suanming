@@ -326,6 +326,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dailyCardHint => '每天一张，当天不变。点开看大图，也可以请 AI 解读。';
 
   @override
+  String get dailyLot => '今日一签';
+
+  @override
+  String get dailyLotHint => '每天一签，当天不变。点开看签诗，也可以请 AI 解读。';
+
+  @override
+  String get dailyHexagram => '今日一卦';
+
+  @override
+  String get dailyHexagramHint => '每天一卦，当天不变。点开看卦辞，也可以请 AI 解读。';
+
+  @override
   String get spreadSingleShort => '单张';
 
   @override
@@ -2684,6 +2696,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get dailyCardHint => '每天一張，當天不變。點開看大圖，也可以請 AI 解讀。';
+
+  @override
+  String get dailyLot => '今日一籤';
+
+  @override
+  String get dailyLotHint => '每天一籤，當天不變。點開看籤詩，也可以請 AI 解讀。';
+
+  @override
+  String get dailyHexagram => '今日一卦';
+
+  @override
+  String get dailyHexagramHint => '每天一卦，當天不變。點開看卦辭，也可以請 AI 解讀。';
 
   @override
   String get spreadSingleShort => '單張';

@@ -378,6 +378,19 @@ line in every model call, and the `id` rule group records any hit.
 - Since v6.1.0 the home page has two groups: 東方 (八字, 求籤, 算卦, 風水, in the region's order) and 西方 (塔羅).
   On a phone, 塔羅's spread choices sit three to a row.
 
+## 首页 on a wide screen, the sign-in page, 今日一卦 / 今日一签 (v14.1.0, v15.0.0)
+
+- **A wide window:** widen the browser past 1200.
+  - 東方's four methods sit two to a row (2 × 2); 西方's 塔羅 spans its row (1 × 1).
+  - Past 1620 the content stays 1620 wide, in the middle.
+  - Signed out, the sign-in page shows its banner at the left, as tall as the form at the right.
+  - Below 1200 (a tablet, a phone) everything is one column, as before.
+- **今日一卦 / 今日一籤** sits under 東方, as 今日一牌 does under 西方:
+  - It is the server's draw for your account for the day: a 籤 on some days, a 卦 on others, the same all day.
+  - Open it to see the 籤 with its poem, or the hexagram with its texts.
+  - 生成 AI 解讀 reads it without a question. With `IS_AI_MOCK=TRUE` the reading is the mock's demo text.
+  - The draw is per account and day: another account, or tomorrow, may show the other kind.
+
 ## Readings in three parts, and whose chart it is (v6.2.0)
 
 - Every AI paragraph shows, in order:

@@ -2,9 +2,13 @@
  * 每日一牌 (tech plan WP3.3): one card a day per account. Its draw id comes from the account and
  * the date under the draw key, so the card stays the same all day, can't be guessed without the
  * key, and the audit replays it like any draw (the stored draw_id seeds the same shuffle).
+ *
+ * 今日一卦 / 今日一签 (S26) are dealt the same way, under labels of their own.
  */
 import { createHmac } from "node:crypto";
 import type { ChartFact } from "../chart-fact/index.js";
+import { computeLiuyao } from "../engines/liuyao/index.js";
+import { computeQiuqian } from "../engines/qiuqian/index.js";
 import { computeTarot } from "../engines/tarot/index.js";
 import { InputError, type EngineSecrets } from "./charts.js";
 
@@ -47,4 +51,58 @@ export function dailyDate(raw: unknown, now: Date): string {
 /** The day's card: a single-card draw seeded by its draw id. */
 export function drawDaily(secrets: EngineSecrets, drawId: string, now?: () => Date): ChartFact {
   return computeTarot({ spread: "single" }, { ...secrets, now, newDrawId: () => drawId });
+}
+
+/** The 东方 methods 今日一卦 / 今日一签 comes from (S26): 求签's 签 or 算卦's 卦. */
+export const EAST_DAILY = ["qiuqian", "liuyao"] as const;
+export type EastDailySystem = (typeof EAST_DAILY)[number];
+
+/**
+ * The account's 东方 draw of the day (S26; owner, 2026-10-30: 「东方系列，我们可以增加今日一卦或者今日一签功能，可以随机
+ * 出现」): which of [systems] (the served ones of EAST_DAILY) it is, keyed from the account and the date, so it changes
+ * at random from day to day and stays the same all day; and its draw id and chart id, under labels of their own,
+ * never 每日一牌's.
+ */
+export function eastDaily(
+  drawKey: Buffer,
+  user: string,
+  date: string,
+  systems: readonly EastDailySystem[],
+) {
+  if (systems.length === 0) throw new Error("no 东方 method to deal from");
+  const pick = createHmac("sha256", drawKey).update(`daily-east-pick|${user}|${date}`).digest()[0]!;
+  return {
+    system: systems[pick % systems.length]!,
+    drawId: keyedUuid(drawKey, `daily-east-draw|${user}|${date}`),
+    chartId: keyedUuid(drawKey, `daily-east-chart|${user}|${date}`),
+  };
+}
+
+/** The reader's IANA time zone (a day's 卦 is cast on its clock). */
+export function dailyZone(raw: unknown): string {
+  const problem = "timezone must be an IANA time zone, e.g. Asia/Hong_Kong";
+  if (typeof raw !== "string" || raw === "") throw new InputError(problem);
+  try {
+    new Intl.DateTimeFormat("en", { timeZone: raw });
+  } catch {
+    throw new InputError(problem);
+  }
+  return raw;
+}
+
+/**
+ * The day's 签 (a lot of the 關聖帝君一百籤, confirmed by 擲筊 as on the 求签 page) or 卦 (an auto cast of three coins,
+ * cast now on the reader's clock), seeded by its draw id so the audit replays it. Each from its own engine (rule 8).
+ */
+export function drawEastDaily(
+  system: EastDailySystem,
+  secrets: EngineSecrets,
+  drawId: string,
+  timezone: string,
+  now?: () => Date,
+): ChartFact {
+  const ctx = { ...secrets, now, newDrawId: () => drawId };
+  return system === "qiuqian"
+    ? computeQiuqian({ lot_set: "guandi_100" }, ctx)
+    : computeLiuyao({ mode: "auto", timezone }, ctx);
 }

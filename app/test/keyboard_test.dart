@@ -53,7 +53,7 @@ void main() {
     testWidgets('home: Tab goes along the bar, then the entries; the focused card shows the ring', (tester) async {
       await start(tester);
       final stops = <String?>[];
-      for (var i = 0; i < 7; i++) {
+      for (var i = 0; i < 8; i++) {
         await press(tester, LogicalKeyboardKey.tab);
         stops.add(focusedKey());
       }
@@ -65,13 +65,14 @@ void main() {
         'entry-qiuqian', // 求籤 (v4.3.0)
         'entry-liuyao', // 算卦 (v6.0.0), after 求籤
         'entry-fengshui', // 风水 (v4.4.0)
+        'east-daily', // 今日一卦 / 今日一籤 (S26), under 東方
         'entry-tarot', // 西方
         'daily-card', // 每日一牌 (v2.6.0)
       ]);
       expect(ringShown(tester, find.byKey(const Key('daily-card'))), isTrue); // the last one Tab reached
       expect(ringShown(tester, home), isFalse);
-      // Shift+Tab goes back through 塔罗, 风水 and 算卦 to 求籤; Enter opens it.
-      for (final back in ['entry-tarot', 'entry-fengshui', 'entry-liuyao', 'entry-qiuqian']) {
+      // Shift+Tab goes back through 塔罗, the day's 籤, 风水 and 算卦 to 求籤; Enter opens it.
+      for (final back in ['entry-tarot', 'east-daily', 'entry-fengshui', 'entry-liuyao', 'entry-qiuqian']) {
         await press(tester, LogicalKeyboardKey.tab, shift: true);
         expect(focusedKey(), back);
       }

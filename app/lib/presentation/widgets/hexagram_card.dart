@@ -131,10 +131,13 @@ class HexagramCard extends ConsumerWidget {
 /// in the accent colour with ○ (老陽) or × (老陰) beside it. [values] are 初爻 first, 6–9; fewer than six while a
 /// cast is being revealed.
 class HexagramLines extends StatelessWidget {
-  const HexagramLines({super.key, required this.values, this.marks = true, this.width = 72});
+  const HexagramLines({super.key, required this.values, this.marks = true, this.width = 72, this.room = _markRoom});
   final List<int> values;
   final bool marks;
   final double width;
+
+  /// The room at each side for a moving line's mark; none for a picture without marks (今日一卦 on 首页, S26).
+  final double room;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +152,7 @@ class HexagramLines extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(width: _markRoom),
+            SizedBox(width: room),
             if (LiuyaoChart.yang(v))
               bar(width, colour)
             else ...[
@@ -158,7 +161,7 @@ class HexagramLines extends StatelessWidget {
               bar(width * 0.42, colour),
             ],
             SizedBox(
-              width: _markRoom,
+              width: room,
               child: moves
                   ? Text(v == 9 ? '○' : '×', textAlign: TextAlign.center, style: TextStyle(color: scheme.primary))
                   : null,

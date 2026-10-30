@@ -2,6 +2,31 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (l): S26 WP26.2 — 今日一卦 / 今日一签; S26 done, release v15.0.0
+
+- v14.1.0 committed and tagged after its harness PASS (c7eaec6). WP26.2 was drafted in the scratchpad (`s26b/`)
+  while that harness ran, and copied in after.
+- Checked against earlier decisions (rule 34): the owner's v11.1.0 rule (有所求才能去求) covers the reader's own
+  draws. 每日一牌 was already left without a question, since the server deals it. The day's 签 and 卦 follow
+  每日一牌, and the 求签 and 算卦 pages keep the rule. To be told to the owner, who may want it otherwise.
+- The prompts needed nothing: narrative_qiuqian@3 and narrative_liuyao@3 already read a draw without a question
+  (「or without one, to the reader's present situation」). No prompt version changed (rule 8).
+- Built:
+  - server: `EAST_DAILY`, `eastDaily` (the pick, the ids, under labels of their own), `dailyZone`, `drawEastDaily`
+    (src/service/daily.ts); the route after 每日一牌's, the Geo-Rule first with the methods served; the OpenAPI
+    entry;
+  - app: `eastDaily` (ApiClient), `eastDailyProvider` (the device's date and zone), daily_east.dart
+    (`EastDailyCard`, `EastDailyPage`), `LotSlip` with the slip's colours shared with `LotCard`, `HexagramLines`'
+    `room`; four strings in 简体 and 繁體; the fake's `eastDaily`.
+- Tests: test/east-daily.test.ts (6); app/test/daily_east_test.dart (5); keyboard_test's home Tab order (east-daily
+  after 东方). The new test's tops met rule 61 (the card slides in after the others): `closeTo`, and grid_test's tops
+  too.
+- Rendered with the real fonts: the 签 and the 卦 on 390 and 1440, light and dark, and their pages.
+- The harness passed on the second run. The first failed at the app's analyze, rule 23 again: it was the first run
+  after the version bump, as with v14.1.0. The generated files were back, newly written, by the time it ended. To try
+  next time: bump the version before the last manual Flutter run, so its regeneration is over before the harness.
+- Committed and tagged, then the harness once more on the committed tree, then pushed with v14.1.0.
+
 ## 2026-10-30 (k): S26 WP26.1 — the app's container, 首页 2 × 2; v14.1.0 (local)
 
 - Owner requests after v14.0.0, in three messages:

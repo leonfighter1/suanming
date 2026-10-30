@@ -5,6 +5,7 @@ import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_form_page.dart';
 import 'daily_card.dart';
+import 'daily_east.dart';
 import 'design.dart';
 import 'fengshui_page.dart';
 import 'history_page.dart';
@@ -39,16 +40,16 @@ class HomePage extends ConsumerWidget {
     var order = 2;
     FadeSlideIn fadeIn(Widget child) => FadeSlideIn(index: order++, child: child);
     // A group's methods in a CardGrid (S26: on a desktop window 东方's four 2 × 2, 西方's one 1 × 1), then its card
-    // of the day.
+    // of the day: 今日一卦 or 今日一签 under 东方 (S26), 今日一牌 under 西方.
     final groups = <Widget>[
       for (final (key, title, members, daily) in [
-        ('east', l10n.homeEast, _east, null),
+        ('east', l10n.homeEast, _east, const EastDailyCard()),
         ('west', l10n.homeWest, _west, const DailyCard()),
       ])
         if (methods.any(members.contains)) ...[
           fadeIn(_GroupTitle(key: Key('group-$key'), title: title)),
           CardGrid(children: [for (final system in methods.where(members.contains)) fadeIn(_entry(context, l10n, system))]),
-          if (daily != null) fadeIn(daily),
+          fadeIn(daily),
         ],
     ];
     return Scaffold(

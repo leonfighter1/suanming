@@ -17,6 +17,7 @@ import '../domain/places.dart';
 import '../domain/profile.dart';
 import '../domain/terms.dart';
 import '../platform/speech.dart';
+import '../platform/time_zone.dart';
 
 const zhHant = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
 const zhHans = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
@@ -371,6 +372,13 @@ final dailyCardProvider = FutureProvider.autoDispose<ChartResult>((ref) {
   final d = DateTime.now();
   String two(int n) => n.toString().padLeft(2, '0');
   return ref.watch(apiClientProvider).dailyCard('${d.year}-${two(d.month)}-${two(d.day)}');
+});
+
+/// 今日一卦 / 今日一签 for the device's calendar date and time zone (GET /v1/east/daily, S26).
+final eastDailyProvider = FutureProvider.autoDispose<ChartResult>((ref) {
+  final d = DateTime.now();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return ref.watch(apiClientProvider).eastDaily('${d.year}-${two(d.month)}-${two(d.day)}', deviceTimeZone());
 });
 
 /// The methods the home page offers, in the region's entry order (GET /v1/methods, v4.3.0); the

@@ -104,6 +104,9 @@ class FakeApi {
   /// /v1/me's staff role (S25): admin, manager or integrator; none by default.
   String? staff;
 
+  /// GET /v1/east/daily (S26): the day's 东方 draw, 'qiuqian' (a 签) or 'liuyao' (a 卦); null, neither is served.
+  String? eastDaily = 'qiuqian';
+
   /// 发到邮箱 (v9.0.0): the requests, as sent.
   final emailed = <Map<String, dynamic>>[];
 
@@ -601,6 +604,14 @@ class FakeApi {
     // 每日一牌: the single-card draw, for any date.
     if (req.method == 'GET' && path == '/v1/tarot/daily') {
       return _json({...fixture('chart_tarot_single'), 'date': '2026-10-25'}, 200);
+    }
+    // 今日一卦 / 今日一签 (S26): the day's [eastDaily] draw, for any date; 451 when it is null.
+    if (req.method == 'GET' && path == '/v1/east/daily') {
+      return switch (eastDaily) {
+        'qiuqian' => _json({...fixture('chart_qiuqian'), 'date': '2026-10-25'}, 200),
+        'liuyao' => _json({...fixture('chart_liuyao'), 'date': '2026-10-25'}, 200),
+        _ => _problem(451, 'neither 求签 nor 算卦 is available here', 'unavailable'),
+      };
     }
     // The three-card draw that report_tarot_passed reads.
     if (req.method == 'GET' && path == '/v1/charts/33333333-3333-4333-8333-333333333333') {

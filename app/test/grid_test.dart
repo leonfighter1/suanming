@@ -102,15 +102,17 @@ void main() {
         }
         expect(east[1].left, east[0].right + 24, reason: 'width $width');
         expect(east[1].right, left + content, reason: 'width $width');
-        expect([east[0].top, east[2].left], [east[1].top, left], reason: 'width $width: 2 × 2');
-        expect(east[2].top, east[0].bottom, reason: 'width $width: the second row under the first');
-        expect(east[3].top, east[2].top, reason: 'width $width');
+        expect(east[2].left, left, reason: 'width $width: 2 × 2');
+        // Tops through the parts' entrance, which slides them in (rule 61): closeTo.
+        expect(east[1].top, closeTo(east[0].top, 0.01), reason: 'width $width: 2 × 2');
+        expect(east[2].top, closeTo(east[0].bottom, 0.01), reason: 'width $width: the second row under the first');
+        expect(east[3].top, closeTo(east[2].top, 0.01), reason: 'width $width');
       } else {
         for (final r in east) {
           expect([r.left, r.width], [left, content], reason: 'width $width');
         }
         for (var i = 1; i < east.length; i++) {
-          expect(east[i].top, east[i - 1].bottom, reason: 'width $width: one under another');
+          expect(east[i].top, closeTo(east[i - 1].bottom, 0.01), reason: 'width $width: one under another');
         }
       }
       final title = find.descendant(of: find.byKey(const Key('group-east')), matching: find.byType(Text));

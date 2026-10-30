@@ -272,6 +272,11 @@ class ApiClient {
   Future<ChartResult> dailyCard(String date) async =>
       ChartResult.fromJson(await _authed('GET', '/v1/tarot/daily?date=$date'));
 
+  /// 今日一卦 / 今日一签 (S26) for [date] (the device's date) in [timezone] (the device's IANA zone, the clock a 卦 is
+  /// cast on): the account's 东方 draw of the day, a 签 or a 卦 as the server deals it, the same all day.
+  Future<ChartResult> eastDaily(String date, String timezone) async => ChartResult.fromJson(
+      await _authed('GET', '/v1/east/daily?date=$date&timezone=${Uri.encodeQueryComponent(timezone)}'));
+
   Future<Json> decideReview(String kind, String id, {required bool approve, String? note}) =>
       _authed('POST', '/v1/admin/reviews/$kind/$id', {'decision': approve ? 'approve' : 'reject', if (note != null && note.trim().isNotEmpty) 'note': note.trim()});
 

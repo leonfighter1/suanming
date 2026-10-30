@@ -13,6 +13,35 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v15.0.0 (2026-10-30): 今日一卦 / 今日一签 under 东方; the app's container (stage S26)
+
+Your request of today: 「另外我看到西方有今日一牌功能， 那么东方系列，我们剋增加今日一卦或者今日一签功能，可以随机出现。」, with the
+container and the 2 × 2 of v14.1.0. This completes stage S26 of the [tech plan](docs/tech-plan.md). Pushed, with
+v14.1.0.
+
+- **今日一卦 / 今日一签** sits under 东方, as 今日一牌 does under 西方.
+  - **What it is:** the server's 东方 draw for your account for the day. On some days it is a 籤 of the 關聖帝君一百籤;
+    on others a 卦 (three coins, six tosses, cast on your device's clock). Which one changes at random from day to
+    day, and within a day it stays the same, on every device.
+  - **On 首页:** 今日一籤 shows the lot's slip and title (第八十九籤 · 壬壬). 今日一卦 shows the hexagram's lines and
+    names (第13卦 · 天火同人 → 乾為天).
+  - **Open it:** the 籤 with its poem, as on the 求籤 page; or the hexagram with its moving lines and the texts it is
+    read by, as on the 算卦 page. Then 生成 AI 解讀 or 深度分析, read as 求籤 or 算卦 reads and paid in 积分 as usual.
+  - **No question:** you draw nothing for it, so, like 今日一牌, it needs no question. 求籤 and 算卦 themselves still
+    wait for your question (your v11.1.0 rule).
+  - **Where a region offers neither** 求籤 nor 算卦, the card isn't shown; where it offers one, every day is that one.
+- **The rest of the stage** (details in v14.1.0 below): the sign-in page and 首页 in one container of at most 1620,
+  fluid on phones and tablets. On a desktop window, 东方 is 2 × 2, 西方 1 × 1, and the sign-in page's banner sits
+  beside its form. The 管理后台 is unchanged.
+- **To try it:** docs/web-test.md, 「首页 on a wide screen, the sign-in page, 今日一卦 / 今日一签」.
+- **Verified:**
+  - **Server tests 690 → 696:** the same all day; another day or account gets its own; both kinds over the days;
+    the date and time-zone checks; the Geo-Rule; not listed; replays; read without a question.
+  - **App tests 254 → 259:** each kind on 首页 and on its page; Tab, Enter and Esc; hidden when there is none; its
+    place under the 2 × 2.
+  - **Renders** with the real fonts, light and dark: the day's 籤 and 卦 on a phone and a desktop, and their pages.
+  - **Harness:** PASS, and once more on the final tree before the push.
+
 ### v14.1.0 (2026-10-30): the app's container; 首页 two to a row on a desktop
 
 Your requests of today: 「登录界面也需要添加新的container… 大于 1620px 时要设置一个max-width 1620px. 本体可以是fluid…

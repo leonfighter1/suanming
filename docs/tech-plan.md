@@ -52,7 +52,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S23 Found on the way       | a card's focus ring only for the card itself                | small  | v12.0.1           | done        |
 | S24 设计系统与管理后台布局 | tokens, light and dark, the grid; the asymmetric dashboard  | big    | v13.0.0 + summary | done        |
 | S25 消息模板与分发         | mail and SMS templates, one dispatcher, staff roles         | big    | v14.0.0 + summary | done        |
-| S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | in progress |
+| S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2453,6 +2453,37 @@ Lessons: rules 37, 42, 43, 53, 58, 64, 67, 68.
 
 ## 阶段总结 (stage summaries)
 
+### S26 宽屏布局与今日一卦、今日一签 (done 2026-10-30: v14.1.0–v15.0.0)
+
+1. **Delivered:**
+   - **WP26.1 (v14.1.0), the app's container:**
+     - `Grid.container` (1620) and `containerPadding`: fluid on phones and tablets, at most 1620 wide and centred
+       on a wider window;
+     - the sign-in page in it: on a desktop window its banner at the left, as tall as the form at the right;
+     - 首页 in it, each group's methods in a `CardGrid` (东方 2 × 2, 西方 1 × 1);
+     - the 管理后台 unchanged, at the owner's word.
+   - **WP26.2 (v15.0.0), 今日一卦 / 今日一签:**
+     - `GET /v1/east/daily` deals the account's 东方 draw of the day: a 签 or a 卦, keyed from the account and the
+       date among the 东方 methods served. It is the same all day, replays from its draw id, is not listed among the
+       charts, and is read without a question;
+     - on 首页 it sits under 东方 with its picture (the lot's slip, or the hexagram's lines). Its page shows
+       `LotCard` or `HexagramCard`, then the method's own reading.
+2. **Numbers:**
+   - **Tests:** server 690 → 696, app 253 → 259 (254 at v14.1.0); the 管理后台 stays at 75.
+   - **Harness:** PASS at both releases. v14.1.0 passed on its third run: rule 23 on the first, then a transient
+     ECONNRESET.
+   - **Renders** with the real fonts: 首页 and the sign-in page from 390 to 2560 wide, light and dark; the day's 签
+     and 卦, and their pages.
+3. **Against the plan:** nothing of substance. Positions measured as 首页's parts slide in became `closeTo` (rule 61) once the new card came in after the others.
+4. **Mistakes and what they teach:**
+   - **Rule 23,** corrected in place: deleting the `flutter_build` records helps, but doesn't always stop Flutter
+     deleting `lib/l10n/gen`. Run the harness once more.
+   - **Rule 61** came back in a new test: tops measured while the cards still slide in. Use `closeTo`.
+   - **A transient ECONNRESET** in a server test under the full suite passed alone and on the rerun. Watched, not
+     yet a rule.
+5. **Next:** nothing planned. Waiting for the owner: the mail and SMS providers, Phase 4 payments, the Phase 3 gate,
+   WP7.2, WP7.3 and WP1.8.
+
 ### S25 消息模板与分发 (done 2026-10-30: v13.1.0–v14.0.0)
 
 1. **Delivered:**
@@ -3172,4 +3203,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP25.3b   | done                         | v13.3.0 |
 | WP25.4    | done                         | v14.0.0 |
 | WP26.1    | done                         | v14.1.0 |
-| WP26.2    | planned                      | v15.0.0 |
+| WP26.2    | done                         | v15.0.0 |

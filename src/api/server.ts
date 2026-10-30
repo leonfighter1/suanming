@@ -119,7 +119,15 @@ import {
 } from "../export/document.js";
 import { renderDocx } from "../export/render-docx.js";
 import { renderPdf } from "../export/render-pdf.js";
-import { dailyDate, dailyIds, drawDaily } from "../service/daily.js";
+import {
+  dailyDate,
+  dailyIds,
+  dailyZone,
+  drawDaily,
+  drawEastDaily,
+  EAST_DAILY,
+  eastDaily,
+} from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
 import { shareFont } from "../share/font.js";
 import { renderQiuqianShare } from "../share/qiuqian-image.js";
@@ -2428,6 +2436,32 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
             id: chartId,
             owner: c.user,
             fact: drawDaily(opts.secrets, drawId, now),
+            created_at: now().toISOString(),
+            daily: date,
+          };
+          await store.putChart(chart);
+        }
+        return send(res, 200, { chart_id: chart.id, chart_fact: chart.fact, date });
+      }
+      // 今日一卦 / 今日一签 (S26): the account's 东方 draw of the day, a 签 or a 卦 at random, the same all day
+      // (src/service/daily.ts). Only the 东方 methods served in the region take part; none, and it isn't served.
+      if (path === "/v1/east/daily") {
+        assertServed(c.country);
+        const served = methodsFor(resolveRegion(loadGeoMatrix(), c.country)!).map((m) => m.system);
+        const systems = EAST_DAILY.filter((s) => served.includes(s));
+        if (systems.length === 0) {
+          throw new GeoRefusedError(`neither 求签 nor 算卦 is available in ${c.country}`);
+        }
+        const query = new URL(req.url ?? "/", "http://localhost").searchParams;
+        const date = dailyDate(query.get("date"), now());
+        const timezone = dailyZone(query.get("timezone"));
+        const { system, drawId, chartId } = eastDaily(opts.secrets.drawKey, c.user, date, systems);
+        let chart = await store.getChart(chartId);
+        if (!chart) {
+          chart = {
+            id: chartId,
+            owner: c.user,
+            fact: drawEastDaily(system, opts.secrets, drawId, timezone, now),
             created_at: now().toISOString(),
             daily: date,
           };
