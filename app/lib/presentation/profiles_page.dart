@@ -111,14 +111,7 @@ class ProfileEditPage extends ConsumerStatefulWidget {
 }
 
 class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
-  late BirthProfile _p = widget.profile ??
-      BirthProfile(
-        id: DateTime.now().microsecondsSinceEpoch.toRadixString(36),
-        name: '',
-        gender: 'male',
-        birthLocal: DateTime(1990, 1, 1, 12),
-        cityKey: 'hk',
-      );
+  late BirthProfile _p = widget.profile ?? BirthProfile.blank();
   late final _name = TextEditingController(text: _p.name);
 
   /// Changed since the page opened: Esc and ← ask before dropping it.
@@ -213,14 +206,7 @@ class ProfileDialog extends ConsumerStatefulWidget {
 }
 
 class _ProfileDialogState extends ConsumerState<ProfileDialog> {
-  late BirthProfile _p = widget.profile ??
-      BirthProfile(
-        id: DateTime.now().microsecondsSinceEpoch.toRadixString(36),
-        name: '',
-        gender: 'male',
-        birthLocal: DateTime(1990, 1, 1, 12),
-        cityKey: 'hk',
-      );
+  late BirthProfile _p = widget.profile ?? BirthProfile.blank();
   late final _name = TextEditingController(text: _p.name);
   bool _busy = false;
 

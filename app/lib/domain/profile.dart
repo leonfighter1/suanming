@@ -23,6 +23,15 @@ class BirthProfile {
     this.life = const LifeContext(),
   });
 
+  /// A new profile's starting values (S28: 个人资料's page and its dialog each had a copy).
+  factory BirthProfile.blank() => BirthProfile(
+        id: DateTime.now().microsecondsSinceEpoch.toRadixString(36),
+        name: '',
+        gender: 'male',
+        birthLocal: DateTime(1990, 1, 1, 12),
+        cityKey: 'hk',
+      );
+
   factory BirthProfile.fromJson(Map<String, dynamic> j) => BirthProfile(
         id: j['id'] as String,
         name: j['name'] as String,
