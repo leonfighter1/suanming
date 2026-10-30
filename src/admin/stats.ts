@@ -105,6 +105,24 @@ export interface DayRow extends Money {
 }
 
 /** Day by day over the last [days] days, oldest first. */
+/**
+ * What a period's days and AI use add up to, as 概览 and the period before it both count it (S28): a column of the days
+ * summed, the AI jobs, their cost in USD to the micro-dollar, and the money.
+ */
+function periodSums(d: AdminData, day: DayRow[], usage: AdminData["usage"]) {
+  const usd = usage.reduce((n, u) => n + u.usd, 0);
+  return {
+    sum: <K extends keyof DayRow>(k: K) => day.reduce((n, r) => n + (r[k] as number), 0),
+    jobs: new Set(usage.map((u) => u.job_id)).size,
+    costUsd: Math.round(usd * 1e6) / 1e6,
+    money: money(
+      d.config,
+      day.reduce((n, r) => n + r.topup_cny, 0),
+      usd,
+    ),
+  };
+}
+
 export function series(d: AdminData, days: number): DayRow[] {
   const keys = windowDays(d.now, days, d.tz);
   const rows = new Map(
@@ -212,21 +230,17 @@ function previousOf(d: AdminData, days: number): Previous {
     const local = localDay(u.created_at, d.tz);
     return local >= from && local <= to;
   });
-  const sum = <K extends keyof DayRow>(k: K) => day.reduce((n, r) => n + (r[k] as number), 0);
+  const { sum, jobs, costUsd, money: total } = periodSums(d, day, usage);
   return {
     from,
     to,
     accounts: { new: sum("new_accounts") },
     ai: {
-      jobs: new Set(usage.map((u) => u.job_id)).size,
+      jobs,
       tokens: sum("tokens"),
-      cost_usd: Math.round(usage.reduce((n, u) => n + u.usd, 0) * 1e6) / 1e6,
+      cost_usd: costUsd,
     },
-    money: money(
-      d.config,
-      day.reduce((n, r) => n + r.topup_cny, 0),
-      usage.reduce((n, u) => n + u.usd, 0),
-    ),
+    money: total,
     points: { sold: sum("points_sold"), granted: sum("points_granted"), used: sum("points_used") },
   };
 }
@@ -252,7 +266,7 @@ export function overview(d: AdminData, days: number): Overview {
   const inWindow = (iso: string) => localDay(iso, d.tz) >= from;
   const usage = d.usage.filter((u) => inWindow(u.created_at));
   const delivered = new Set(usage.filter((u) => u.delivered).map((u) => u.job_id));
-  const sum = <K extends keyof DayRow>(k: K) => day.reduce((n, r) => n + (r[k] as number), 0);
+  const { sum, jobs, costUsd, money: total } = periodSums(d, day, usage);
   let outstanding = 0;
   for (const b of d.balances.values()) outstanding += b.balance;
   return {
@@ -273,18 +287,14 @@ export function overview(d: AdminData, days: number): Overview {
       month: d.users.filter((u) => activeWithin(u, d.now, ACTIVE_WINDOWS.month)).length,
     },
     ai: {
-      jobs: new Set(usage.map((u) => u.job_id)).size,
+      jobs,
       delivered_jobs: delivered.size,
       input_tokens: sum("input_tokens"),
       output_tokens: sum("output_tokens"),
       tokens: sum("tokens"),
-      cost_usd: Math.round(usage.reduce((n, u) => n + u.usd, 0) * 1e6) / 1e6,
+      cost_usd: costUsd,
     },
-    money: money(
-      d.config,
-      day.reduce((n, r) => n + r.topup_cny, 0),
-      usage.reduce((n, u) => n + u.usd, 0),
-    ),
+    money: total,
     points: {
       sold: sum("points_sold"),
       granted: sum("points_granted"),
