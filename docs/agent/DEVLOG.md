@@ -2,6 +2,35 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (o): S28 — the refactoring plan, phases A and B; v16.1.0 (local)
+
+- Owner requests after v16.0.0 (pushed):
+  - 「有没有根据skill进行代码重构？没有的画请继续」;
+  - 「prepare tech documents to plan the restructuring and refactoring」;
+  - then a new batch for after S28: a CMS (text and images, in the database, edited by authorised roles, as much text
+    as possible), an introduction page with a 2 × 2 grid of the services, sessions ending two days after sign-in, and
+    a sign-out animation. Queued as S29.
+- The plan: docs/refactor-plan.md (049a728), from a throwaway scan of repeated blocks (`dupes.mjs`, scratchpad): 260
+  in 391 files.
+- Phase A, tests and scripts, no version:
+  - `testApi` (test/api.ts) in 20 files;
+  - `settle` was a copy of keys.dart's `frames`, so each file calls `frames` with its own count;
+  - `scrollAndTap` went to support.dart;
+  - `test/oracle/stats.ts` and `scripts/verify-run.ts`;
+  - the verify gates' results were unchanged.
+- Phase B, code, in ten small commits (b251dfe … 7408629): dates, `StepNumber`, `DayCardTile`, `watchQuestion`,
+  `BirthProfile.blank`, `readingHeadings`; `chartRequest`, `dailyChart`, `newHold`/`creditEntry`, share
+  `common.ts`, `periodSums`.
+- Checks, each step before and after:
+  - renders with the real fonts (scratchpad `zz_shots_s28.dart`, `git stash`, `cmp`): six screens identical;
+  - the share images' hashes from fixed draws (a throwaway `zz-share-hash.ts`, deleted): identical.
+- Mistakes on the way, none committed:
+  - a transform that cut a block with its leading newline glued two lines;
+  - shell-escaped patterns broke twice.
+  - Moved to script files written with the Write tool.
+- Measures: 260 → 123 → 108. The plan's targets were estimates; the table now shows both. What's left is listed in
+  docs/refactor-plan.md.
+
 ## 2026-10-30 (n): S27 WP27.3 — 外观 by the time of day, the sun and the moon; S27 done, release v16.0.0
 
 - v15.1.0 committed and tagged after a harness PASS on its first run (3631ab9). The version had gone up before the

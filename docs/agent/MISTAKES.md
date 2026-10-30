@@ -83,8 +83,15 @@
 79. In Dart, never assign arrow closures inside a cascade: one statement per callback, or a block body for the closure.
 80. Write a test of what a server check reports from the check itself (read it, e.g. templateProblems reads subject and body), and when a fake mirrors it, cite the server function it mirrors.
 81. Start a test server and its sign-ins in the describe whose tests call it (its beforeAll, or a shared start() each such describe calls), never in a top-level beforeAll ahead of slow tests: an idle keep-alive connection meets the server 5 s timeout. A failure seen twice is a cause to find, not a flake: name the test with --reporter=verbose.
+82. Write a code transform as a script file with the Write tool, never inline node -e with nested quotes. Cut a block with its own trailing newline, never a leading one, and write a file only after every replacement in it matched exactly once.
 
 ## Log
+
+### 2026-10-30: Code transforms broke on shell escaping and on cutting a block with its leading newline
+- **Symptom:** S28: an inline node -e transform with nested quotes lost a template literal and a backslash twice; another cut each block together with the newline before it, which glued the line above to the line below and made the next match fail.
+- **Root cause:** The shell rewrote dollar-brace, backslashes and newlines inside the quoted script; a block cut as newline-plus-block takes the previous line ending with it.
+- **Fix:** Wrote each transform as a script file with the Write tool, cut every block with its own trailing newline, collapsed blank runs after, and checked every replacement matched exactly once before writing any file.
+- **Rule:** Write a code transform as a script file with the Write tool, never inline node -e with nested quotes. Cut a block with its own trailing newline, never a leading one, and write a file only after every replacement in it matched exactly once. (Rule 82)
 
 ### 2026-10-30: A slow test between the sign-ins and the first API call reset the connection
 - **Symptom:** messages.test.ts: the first test of the 后台 roles failed with fetch failed, ECONNRESET, under the full suite only (twice in five harness runs, then three runs out of three); alone it passed.

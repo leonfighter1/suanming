@@ -195,6 +195,17 @@ No app or server code changes.
   - Accept: the server tests pass. The share images' bytes are the same for the tests' readings, since sharp
     renders deterministically with the same font.
 
+- **Done (v16.1.0):**
+  - app: `domain/dates.dart` (`ymd`, `localMinute`), `StepNumber`, `DayCardTile`, `watchQuestion`, `BirthProfile.blank`, and
+    `readingHeadings` on the reading page;
+  - server: `chartRequest`, `dailyChart`, `newHold` and `creditEntry`, `src/share/common.ts`, `periodSums`;
+  - the touched screens rendered byte for byte the same, and the share images too.
+  - F14 (errors in a SnackBar) stays as it is: sharing it would rename fields through four pages.
+  - The scan: 123 → 108. The rest is Phase C's AI mechanics (30), servers of other shapes in tests (27), repeated
+    call lines in app tests (34: the same `frames(tester, 12)` in many files is not logic), kept or false repeats in
+    app code (11: F14, parameter lists) and Phase D's 管理后台 parts (4). The targets below were estimates; the
+    measures table shows what each phase did.
+
 ### Phase C: the AI mechanics (→ v16.2.0)
 
 - **WP28.6 `src/ai/envelope.ts` (F2).** Every entry point (`generateReport`, `generateRemedy`, `generateLifeReport`,
@@ -220,12 +231,12 @@ No app or server code changes.
 
 ## Measures
 
-| Measure                    | Now  | After A | After B | After C | After D |
-| -------------------------- | ---- | ------- | ------- | ------- | ------- |
-| Repeated blocks (the scan) | 260  | < 110   | < 80    | < 60    | < 60    |
-| `src/api/server.ts` lines  | 2647 | 2647    | < 2550  | < 2550  | < 900   |
-| Server tests passing       | 696  | 696     | 696     | 696     | 696     |
-| App tests passing          | 265  | 265     | 265+    | 265+    | 265+    |
+| Measure (planned → done)   | Now  | After A     | After B    | After C | After D |
+| -------------------------- | ---- | ----------- | ---------- | ------- | ------- |
+| Repeated blocks (the scan) | 260  | < 110 → 123 | < 80 → 108 | < 80    | < 80    |
+| `src/api/server.ts` lines  | 2647 | 2647        | 2650       | 2650    | < 900   |
+| Server tests passing       | 696  | 696         | 696        | 696     | 696     |
+| App tests passing          | 265  | 265         | 265        | 265+    | 265+    |
 
 App tests may only grow: a new home can get a test of its own.
 

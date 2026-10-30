@@ -13,6 +13,34 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v16.1.0 (2026-10-30): the code restructured, one home for each thing (S28 phases A and B)
+
+Your requests of today: 「有没有根据skill进行代码重构？没有的画请继续」 and 「prepare tech documents to plan the restructuring and
+refactoring」. Nothing changes for users: the same screens, the same answers. This release carries phases A and B of
+stage S28, planned in [docs/refactor-plan.md](docs/refactor-plan.md).
+
+- **The plan:** docs/refactor-plan.md surveys the code: 260 repeated blocks in 391 files, and the largest files. It
+  sets the rules for every step (no behaviour change, the smallest diff, each method its own) and orders the work in
+  four phases.
+- **Phase A, tests and scripts:**
+  - one `testApi` for twenty server test files that started the API by hand;
+  - the app tests' 27 copies of `settle` call the existing `frames`, and four copies of `scrollAndTap` became one;
+  - the statistical batteries and the verify scripts each share one home.
+- **Phase B, code:**
+  - **app:** one home each for dates (`ymd`, `localMinute`), the numbered badge (`StepNumber`), the cards of the day's
+    tile (`DayCardTile`), 有所求's listener (`watchQuestion`), a new profile (`BirthProfile.blank`) and the reading
+    page's export headings;
+  - **server:** `chartRequest`, `dailyChart`, the 积分 hold and credit rules both stores wrote (`newHold`,
+    `creditEntry`), the share images' common parts and the 管理后台's period sums.
+- **Verified:**
+  - **Every step:** the tests that cover it, before and after.
+  - **Unchanged output:** the touched screens render byte for byte the same in light and dark, and so do the share
+    images; the verify gates' results are unchanged.
+  - **Counts:** repeated blocks 260 → 108. Server tests 696, app tests 265 and 管理后台 tests 75 all pass.
+  - **Harness:** PASS.
+- **Next:** phase C (the AI pipelines' shared mechanics) and phase D (the API's routes in modules). Then your new
+  requests, as S29: the content system, the introduction page, two-day sessions and the sign-out animation.
+
 ### v16.0.0 (2026-10-30): the theme follows the time of day, with the sun and the moon on the banner (stage S27)
 
 Your request of today: 「Theme加上太阳和月亮到banner上去, 表示时间，皮肤会跟随时间变化而变化。当地时间7点到第二天凌晨6点为深色，其余为

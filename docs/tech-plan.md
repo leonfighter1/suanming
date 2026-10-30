@@ -3330,9 +3330,9 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP28.1    | done                         | —       |
 | WP28.2    | done                         | —       |
 | WP28.3    | done                         | —       |
-| WP28.4    | in progress                  | v16.1.0 |
-| WP28.5    | planned                      | v16.1.0 |
-| WP28.6    | planned                      | v16.2.0 |
+| WP28.4    | done                         | v16.1.0 |
+| WP28.5    | done                         | v16.1.0 |
+| WP28.6    | in progress                  | v16.2.0 |
 | WP28.7    | planned                      | v16.2.0 |
 | WP28.8    | planned                      | v17.0.0 |
 | WP28.9    | planned                      | v17.0.0 |
