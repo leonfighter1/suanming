@@ -15,6 +15,7 @@ import {
 import { yearGanZhi } from "../engines/bazi/index.js";
 import { yijingFacts } from "../engines/yijing/index.js";
 import type { UserContext } from "./context.js";
+import { disclosureOf, guardVerdict, providerOf } from "./envelope.js";
 import { expectationLayer } from "./layers.js";
 import {
   modelFacts,
@@ -28,7 +29,7 @@ import {
 } from "./pipeline.js";
 import { guardUser, lifeUser, todayLine } from "./prompts.js";
 import { engineTrend } from "./trend.js";
-import { loadRouting, routeFor } from "./routing.js";
+import { loadRouting } from "./routing.js";
 import { guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
 import type { AgentName, GuardOutput } from "./types.js";
@@ -268,12 +269,7 @@ export async function generateLifeReport(
   const rules = compileRules(loadRuleSet(), region.rule_groups);
   const regionLine = contentBlockLine(region);
   const routing = deps.routing ?? loadRouting();
-  const providerFor = (agent: AgentName) => {
-    const route = routeFor(routing, agent, opts.locale);
-    const provider = deps.providers[route.provider];
-    if (!provider) throw new Error(`provider "${route.provider}" not configured`);
-    return { route, provider };
-  };
+  const providerFor = (agent: AgentName) => providerOf(routing, deps.providers, agent, opts.locale);
   const facts = lifeFacts(chart, opts.locale);
   const cycles = (chart.facts as unknown as BaziFacts).dayun.cycles;
   // 虚岁 from the civil birth year (v1.3.0); older charts: the library's start_age, the same count.
@@ -430,17 +426,9 @@ export async function generateLifeReport(
         }),
       check: (value) => ({ value, feedback: [], block: [], review: [] }),
     });
-    traces.push(guard.trace);
-    if (!guard.ok) {
-      status = "manual_review";
-      reasons.push(guard.reason);
-    } else {
-      review = guard.value;
-      if (!review.pass) {
-        status = "manual_review";
-        reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
-      }
-    }
+    const verdict = guardVerdict(guard, traces, reasons);
+    if (verdict.held) status = "manual_review";
+    if (verdict.review) review = verdict.review;
     if (status === "passed" && ruleViolations.some((v) => v.action === "review")) {
       status = "manual_review";
       reasons.push("rule layer: review-level patterns present");
@@ -454,13 +442,7 @@ export async function generateLifeReport(
     locale: opts.locale,
     created_at: now.toISOString(),
     facts,
-    ai_disclosure: {
-      generated: true,
-      model: [...new Set(traces.map((t) => t.model))].join(","),
-      prompt_version: traces.map((t) => t.prompt_version).join(","),
-      label_required: labelRequired,
-      generated_at: now.toISOString(),
-    },
+    ai_disclosure: disclosureOf(traces, labelRequired, now),
     compliance: {
       rule_violations: ruleViolations,
       ...(review && { review }),

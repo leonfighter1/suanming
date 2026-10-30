@@ -28,8 +28,9 @@ import {
   type ReportStatus,
 } from "./pipeline.js";
 import type { UserContext } from "./context.js";
+import { guardVerdict, providerOf } from "./envelope.js";
 import { guardUser, METHOD_PROMPTS, remedyUser, todayLine } from "./prompts.js";
-import { loadRouting, routeFor } from "./routing.js";
+import { loadRouting } from "./routing.js";
 import { guardSchema } from "./schemas.js";
 import { glossaryFor, normalizeTerms, type Locale } from "./terms.js";
 import { HORIZONS, NO_PLAN_TOPICS, type AgentName, type GuardOutput, type Topic } from "./types.js";
@@ -124,12 +125,7 @@ export async function generateRemedy(
   const rules = compileRules(loadRuleSet(), region.rule_groups);
   const regionLine = contentBlockLine(region);
   const routing = deps.routing ?? loadRouting();
-  const providerFor = (agent: AgentName) => {
-    const route = routeFor(routing, agent, locale);
-    const provider = deps.providers[route.provider];
-    if (!provider) throw new Error(`provider "${route.provider}" not configured`);
-    return { route, provider };
-  };
+  const providerFor = (agent: AgentName) => providerOf(routing, deps.providers, agent, locale);
   // A 八字 plan reads its focused view: the periods where its topic scores lowest (WP2.3).
   const facts =
     chart.system === "bazi"
@@ -261,17 +257,9 @@ export async function generateRemedy(
             check: (value) => ({ value, feedback: [], block: [], review: [] }),
           });
     if (guard) {
-      traces.push(guard.trace);
-      if (!guard.ok) {
-        status = "manual_review";
-        reasons.push(guard.reason);
-      } else {
-        review = guard.value;
-        if (!review.pass) {
-          status = "manual_review";
-          reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
-        }
-      }
+      const verdict = guardVerdict(guard, traces, reasons);
+      if (verdict.held) status = "manual_review";
+      if (verdict.review) review = verdict.review;
     }
     if (
       deps.review !== false &&

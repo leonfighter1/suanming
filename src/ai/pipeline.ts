@@ -24,6 +24,7 @@ import {
 } from "../compliance/index.js";
 import { baziView, readingFocus } from "./bazi-view.js";
 import type { UserContext } from "./context.js";
+import { disclosureOf, guardVerdict, providerOf } from "./envelope.js";
 import { expectationLayer, factsLayer } from "./layers.js";
 import {
   actionUser,
@@ -214,7 +215,7 @@ export interface CheckResult<T> {
   review: Violation[];
 }
 
-type AgentOutcome<T> =
+export type AgentOutcome<T> =
   | { ok: true; value: T; block: Violation[]; review: Violation[]; trace: AgentTrace }
   | { ok: false; reason: string; held?: T; block: Violation[]; trace: AgentTrace };
 
@@ -478,12 +479,7 @@ export async function generateReport(
     opts.question,
   );
   const chartSummary = factsLayer(chart, opts.locale, now.getUTCFullYear());
-  const providerFor = (agent: AgentName) => {
-    const route = routeFor(routing, agent, opts.locale);
-    const provider = deps.providers[route.provider];
-    if (!provider) throw new Error(`provider "${route.provider}" not configured`);
-    return { route, provider };
-  };
+  const providerFor = (agent: AgentName) => providerOf(routing, deps.providers, agent, opts.locale);
 
   const termFixes: string[] = [];
   let dropped = 0;
@@ -761,17 +757,9 @@ export async function generateReport(
             check: (value) => ({ value, feedback: [], block: [], review: [] }),
           });
       if (guard) {
-        traces.push(guard.trace);
-        if (!guard.ok) {
-          status = "manual_review";
-          reasons.push(guard.reason);
-        } else {
-          review = guard.value;
-          if (!review.pass) {
-            status = "manual_review";
-            reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
-          }
-        }
+        const verdict = guardVerdict(guard, traces, reasons);
+        if (verdict.held) status = "manual_review";
+        if (verdict.review) review = verdict.review;
       }
       if (enforce && status === "passed" && ruleViolations.some((v) => v.action === "review")) {
         status = "manual_review";
@@ -798,13 +786,7 @@ export async function generateReport(
       engine_version: chart.engine.version,
       schema_version: chart.schema_version,
     },
-    ai_disclosure: {
-      generated: true,
-      model: [...new Set(traces.map((t) => t.model))].join(","),
-      prompt_version: traces.map((t) => t.prompt_version).join(","),
-      label_required: labelRequired,
-      generated_at: now.toISOString(),
-    },
+    ai_disclosure: disclosureOf(traces, labelRequired, now),
     compliance: {
       geo_matrix_version: matrix.matrix_version,
       rule_violations: ruleViolations,

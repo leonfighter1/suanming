@@ -18,6 +18,7 @@ import {
   type Violation,
 } from "../compliance/index.js";
 import type { UserContext } from "./context.js";
+import { disclosureOf, guardVerdict, providerOf } from "./envelope.js";
 import { checkTexts } from "./faithfulness.js";
 import {
   METHOD_RULE_GROUPS,
@@ -32,7 +33,7 @@ import {
   type ReportStatus,
 } from "./pipeline.js";
 import { guardUser, inquiryUser, METHOD_PROMPTS, todayLine } from "./prompts.js";
-import { loadRouting, routeFor } from "./routing.js";
+import { loadRouting } from "./routing.js";
 import { guardSchema, inquirySchema } from "./schemas.js";
 import { LOCALES, normalizeTerms, type Locale } from "./terms.js";
 import type { AgentName, GuardOutput, TarotFocus } from "./types.js";
@@ -167,12 +168,7 @@ export async function generateInquiryTurn(
     ...(METHOD_RULE_GROUPS[chart.system] ?? []),
   ]);
   const regionLine = contentBlockLine(region);
-  const providerFor = (agent: AgentName) => {
-    const route = routeFor(routing, agent, locale);
-    const provider = deps.providers[route.provider];
-    if (!provider) throw new Error(`provider "${route.provider}" not configured`);
-    return { route, provider };
-  };
+  const providerFor = (agent: AgentName) => providerOf(routing, deps.providers, agent, locale);
 
   // 2. What the reading will read: its own view of the chart and its brief.
   const { facts, brief, glossary } = readingInputs(
@@ -347,17 +343,9 @@ export async function generateInquiryTurn(
           check: (value) => ({ value, feedback: [], block: [], review: [] }),
         });
     if (guard) {
-      traces.push(guard.trace);
-      if (!guard.ok) {
-        status = "manual_review";
-        reasons.push(guard.reason);
-      } else {
-        review = guard.value;
-        if (!review.pass) {
-          status = "manual_review";
-          reasons.push(`guard: ${review.violations.length} issue(s) flagged`);
-        }
-      }
+      const verdict = guardVerdict(guard, traces, reasons);
+      if (verdict.held) status = "manual_review";
+      if (verdict.review) review = verdict.review;
     }
     if (enforce && status === "passed" && ruleViolations.some((v) => v.action === "review")) {
       status = "manual_review";
@@ -377,13 +365,7 @@ export async function generateInquiryTurn(
     done: value?.done ?? true,
     planned: value?.planned ?? Math.max(1, asked),
     focus: value?.focus ?? "",
-    ai_disclosure: {
-      generated: true,
-      model: [...new Set(traces.map((t) => t.model))].join(","),
-      prompt_version: traces.map((t) => t.prompt_version).join(","),
-      label_required: region.ai_disclosure.visible_label === "required",
-      generated_at: now.toISOString(),
-    },
+    ai_disclosure: disclosureOf(traces, region.ai_disclosure.visible_label === "required", now),
     compliance: {
       geo_matrix_version: matrix.matrix_version,
       rule_violations: ruleViolations,
