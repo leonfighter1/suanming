@@ -13,6 +13,26 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v16.2.0 (2026-10-30): the AI pipelines share their mechanics (S28 phase C)
+
+Phase C of the refactoring planned in [docs/refactor-plan.md](docs/refactor-plan.md). Nothing changes for users or
+for the model: every reading is built and checked as before.
+
+- **One home for the pipelines' mechanics:** `src/ai/envelope.ts` holds what the five AI entry points (reading,
+  破除运势, 一生运势报告, 追问, 深度分析) each wrote:
+  - which model an agent's step runs on;
+  - the guard's verdict;
+  - the AI disclosure a result carries.
+    Each entry point keeps its own prompts, steps and checks.
+- **The user messages' closing lines** (the sections in order, the language, the region's line, a check's feedback)
+  are written once instead of in ten builders. No released prompt text changes.
+- **Verified:**
+  - **Fixtures:** `npm run sync:app` rewrote every app fixture byte for byte the same.
+  - **User messages:** 69, from 23 builder calls in three languages, are byte for byte the same before and after.
+  - **Tests:** the pinned prompt hashes and the 696 server tests pass.
+  - **Counts:** repeated blocks 108 → 90.
+  - **Harness:** PASS.
+
 ### v16.1.0 (2026-10-30): the code restructured, one home for each thing (S28 phases A and B)
 
 Your requests of today: 「有没有根据skill进行代码重构？没有的画请继续」 and 「prepare tech documents to plan the restructuring and

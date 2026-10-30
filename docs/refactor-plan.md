@@ -217,6 +217,13 @@ No app or server code changes.
   - First, a test records every builder's output for fixed inputs, for every method and locale. It must pass before
     the change and after.
 
+- **Done (v16.2.0):**
+  - `src/ai/envelope.ts` (`providerOf`, `guardVerdict`, `disclosureOf`) for the five entry points;
+  - `sectionsLine` and `endLines` for the builders;
+  - `npm run sync:app` rewrote every app fixture byte for byte the same;
+  - 69 user messages from 23 builder calls in three languages were byte for byte the same before and after;
+  - the scan went from 108 to 90 (the AI pairs from 30 to 12).
+
 ### Phase D: the API's structure (→ v17.0.0, the stage's end, pushed)
 
 - **WP28.8 `ApiContext` and the first route group.** The calendar and places routes are stateless, so they go first.
@@ -231,12 +238,12 @@ No app or server code changes.
 
 ## Measures
 
-| Measure (planned → done)   | Now  | After A     | After B    | After C | After D |
-| -------------------------- | ---- | ----------- | ---------- | ------- | ------- |
-| Repeated blocks (the scan) | 260  | < 110 → 123 | < 80 → 108 | < 80    | < 80    |
-| `src/api/server.ts` lines  | 2647 | 2647        | 2650       | 2650    | < 900   |
-| Server tests passing       | 696  | 696         | 696        | 696     | 696     |
-| App tests passing          | 265  | 265         | 265        | 265+    | 265+    |
+| Measure (planned → done)   | Now  | After A     | After B    | After C   | After D |
+| -------------------------- | ---- | ----------- | ---------- | --------- | ------- |
+| Repeated blocks (the scan) | 260  | < 110 → 123 | < 80 → 108 | < 80 → 90 | < 80    |
+| `src/api/server.ts` lines  | 2647 | 2647        | 2650       | 2650      | < 900   |
+| Server tests passing       | 696  | 696         | 696        | 696       | 696     |
+| App tests passing          | 265  | 265         | 265        | 265       | 265+    |
 
 App tests may only grow: a new home can get a test of its own.
 

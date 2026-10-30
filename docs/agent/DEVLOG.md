@@ -2,6 +2,20 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (p): S28 phase C — the AI mechanics in one home; v16.2.0 (local)
+
+- v16.1.0 committed and tagged after its harness PASS (0770f5f).
+- WP28.6 (869b1d9): `src/ai/envelope.ts`:
+  - `providerOf`: five identical `providerFor` bodies;
+  - `guardVerdict`: the guard's trace, a hold and its reason, as four pipelines and 一生运势 wrote it;
+  - `disclosureOf`: the disclosure object, keys in their order;
+  - `AgentOutcome` exported, imported type-only, so no runtime cycle.
+  - Checked: `npm run sync:app` rewrote every fixture with no diff; the pinned prompt hashes and 696 tests pass.
+- WP28.7 (5c80e9f): `sectionsLine` (4 builders) and `endLines` (10). 一生运势's builder ends differently, without the
+  language line, and stays as it was. Checked: a throwaway script hashed 69 user messages (23 calls with all optional
+  fields and with none, three languages) before and after: all the same. Deleted after (rule 30).
+- The scan: 108 → 90; the AI pairs 30 → 12.
+
 ## 2026-10-30 (o): S28 — the refactoring plan, phases A and B; v16.1.0 (local)
 
 - Owner requests after v16.0.0 (pushed):
