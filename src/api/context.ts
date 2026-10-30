@@ -17,7 +17,7 @@ import type {
   QuoteFor,
 } from "../points/index.js";
 import type { ApiOptions } from "./server.js";
-import type { Store } from "./store.js";
+import type { ChartRecord, Store } from "./store.js";
 
 /** Who is asking: the account, and the region stored on it at sign-up (Geo-Rule). */
 export interface Caller {
@@ -90,4 +90,11 @@ export interface ApiContext {
     agents: readonly AgentTrace[] | undefined,
     delivered: boolean,
   ) => Promise<void>;
+  /** A request on one of the caller's charts: its body, and the chart its chart_id names (400 or 404 otherwise). */
+  chartRequest: (
+    req: IncomingMessage,
+    c: Caller,
+  ) => Promise<{ body: Record<string, unknown>; chart: ChartRecord }>;
+  /** 测算完成后发到邮箱 (v9.0.0): a passed reading or 一生运势报告 to its owner's verified email, when they asked. */
+  mailWhenDone: (kind: "report" | "life_report", id: string) => Promise<void>;
 }

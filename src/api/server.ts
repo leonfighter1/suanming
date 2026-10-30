@@ -14,7 +14,6 @@ import {
   followUpAvailable,
   generateFollowUp,
   generateInquiryTurn,
-  generateLifeReport,
   generateReport,
   INQUIRY_ANSWER_MAX,
   INQUIRY_GOAL_MAX,
@@ -104,6 +103,7 @@ import { archiveRoute } from "./routes/archive.js";
 import { dailyRoute } from "./routes/daily.js";
 import { pointsRoute } from "./routes/points.js";
 import { ownedPassedReport, preloadRemedies, remediesRoute } from "./routes/remedies.js";
+import { lifeRoute, ownedPassedLifeReport } from "./routes/life.js";
 import { publicRoute } from "./routes/public.js";
 import {
   InMemoryStore,
@@ -120,7 +120,6 @@ import {
   heldWhy,
   publicFollowUp,
   publicInquiry,
-  publicLifeReport,
   publicReport,
   questionRequired,
   reviewSummary,
@@ -610,16 +609,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
   }
 
-  /** The caller's passed 一生运势报告 and its chart, or 404 / 409. */
-  async function ownedPassedLifeReport(id: string, c: Caller) {
-    const r = UUID_RE.test(id) ? await store.getLifeReport(id) : undefined;
-    if (!r || r.owner !== c.user) throw new HttpError(404, "life report not found");
-    if (r.status !== "passed" || !r.life) throw new HttpError(409, "the report is not ready");
-    const chart = await store.getChart(r.chart_id);
-    if (!chart) throw new HttpError(404, "chart not found");
-    return { record: r, life: r.life, fact: chart.fact };
-  }
-
   /** What a 追问 asks about: the caller's passed reading with what it was asked for and told, or 404 / 409. */
   async function followUpParent(
     kind: FollowUpRecord["parent"]["kind"],
@@ -627,7 +616,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     c: Caller,
   ): Promise<{ parent: FollowUpParent; fact: ChartFact }> {
     if (kind === "life_report") {
-      const { record, life, fact } = await ownedPassedLifeReport(id, c);
+      const { record, life, fact } = await ownedPassedLifeReport(api, id, c);
       return { parent: { kind, life, ...(record.context && { context: record.context }) }, fact };
     }
     const { record, report, fact } = await ownedPassedReport(api, id, c);
@@ -991,95 +980,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
-  async function runLifeJob(
-    record: LifeReportRecord,
-    fact: ChartFact,
-    c: Caller,
-    context?: ReportRecord["context"],
-    hold?: PointsHold,
-  ) {
-    let next: LifeReportRecord;
-    try {
-      const life = await generateLifeReport(
-        fact,
-        { locale: record.locale, country: c.country, context },
-        {
-          providers: opts.providers,
-          routing: opts.routing?.(),
-          review: opts.review !== false,
-          now,
-          onProgress: async ({ stage, attempt }) => {
-            const current = await store.getLifeReport(record.id);
-            if (current?.status !== "pending") return;
-            await store.putLifeReport({
-              ...current,
-              progress: { stage, attempt, updated_at: now().toISOString() },
-            });
-          },
-        },
-      );
-      next = { ...record, status: life.status, life, updated_at: now().toISOString() };
-      if (life.status !== "passed") log(`life report ${record.id} held: ${heldWhy(life)}`);
-    } catch (e) {
-      const upstream = upstreamMessage(e);
-      log(
-        `life report ${record.id} failed: ${upstream ?? (e as Error).message}`,
-        upstream ? undefined : e,
-      );
-      next = {
-        ...record,
-        status: "failed",
-        error: upstream ?? "internal error",
-        updated_at: now().toISOString(),
-      };
-    }
-    const gone = !(await store.getLifeReport(record.id));
-    await recordJob(
-      { kind: "life_report", id: record.id, owner: record.owner, system: fact.system },
-      next.life?.agents,
-      !gone && next.status === "passed",
-    );
-    if (gone) return settleHold(hold, undefined);
-    await store.putLifeReport(next);
-    await settleHold(hold, next.status === "passed" ? next.life?.agents : undefined);
-    if (next.status === "passed") await mailWhenDone("life_report", record.id);
-  }
-
-  async function createLifeReport(req: IncomingMessage, c: Caller) {
-    const { body, chart } = await chartRequest(req, c);
-    if (chart.fact.system !== "bazi") throw new InputError("a life report needs a bazi chart");
-    const locale = body.locale as Locale;
-    if (!LOCALES.includes(locale))
-      throw new InputError(`locale must be one of ${LOCALES.join(", ")}`);
-    assertServed(c.country, "bazi");
-    const context = parseUserContext(body.context);
-    const lifeId = randomUUID();
-    const hold = await holdForJob(c, "life_report", {
-      kind: "life_report",
-      id: lifeId,
-      system: "bazi",
-    });
-    const ts = now().toISOString();
-    const record: LifeReportRecord = {
-      id: lifeId,
-      owner: c.user,
-      chart_id: chart.id,
-      status: "pending",
-      locale,
-      created_at: ts,
-      updated_at: ts,
-      // Kept for the report's 追问 (v7.0.0), sealed with it.
-      ...(context && { context }),
-    };
-    await store.putLifeReport(record);
-    track(`life report ${record.id}`, runLifeJob(record, chart.fact, c, context, hold));
-    return {
-      status: 202,
-      body: publicLifeReport(record),
-      headers: { location: `/v1/life-reports/${record.id}`, "retry-after": "5" },
-    };
-  }
-
   async function heldItem(kind: string, id: string) {
     if (!UUID_RE.test(id)) return undefined;
     if (kind === "report") {
@@ -1362,6 +1262,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     holdForJob,
     settleHold,
     recordJob,
+    chartRequest,
+    mailWhenDone,
   };
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
@@ -1465,42 +1367,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       if (await adminRoute(ctx, req, res, path, c.user)) return;
     }
 
-    // ---- 一生运势报告 ----
-    if (path === "/v1/life-reports" && req.method === "POST") {
-      const out = await createLifeReport(req, c);
-      return send(res, out.status, out.body, out.headers);
-    }
-    if (path === "/v1/life-reports" && req.method === "GET") {
-      const rows = await store.listLifeReports(c.user, 50);
-      return send(res, 200, {
-        items: await Promise.all(
-          rows.map(async (r) => {
-            const {
-              facts: _f,
-              layers: _l,
-              ai_disclosure: _a,
-              ...view
-            } = publicLifeReport(r) as Record<string, unknown>;
-            // Whose report it is (v6.2.0), from its chart: 「xxx 的一生运势报告」 on every device.
-            const person = (await store.getChart(r.chart_id))?.person;
-            return { ...view, ...(person && { person }) };
-          }),
-        ),
-      });
-    }
-    const lm = /^\/v1\/life-reports\/([^/]+)$/.exec(path);
-    if (lm && req.method === "GET") {
-      const r = UUID_RE.test(lm[1]!) ? await store.getLifeReport(lm[1]!) : undefined;
-      if (!r || r.owner !== c.user) throw new HttpError(404, "life report not found");
-      const view = publicLifeReport(r);
-      const person = (await store.getChart(r.chart_id))?.person;
-      return send(
-        res,
-        200,
-        { ...view, ...(person && { person }) },
-        aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
-      );
-    }
+    // ---- 一生运势报告 (routes/life.ts) ----
+    if (await lifeRoute(api, req, res, path, c)) return;
 
     // ---- 以往记录 (v8.0.0, S14) and the documents (routes/archive.ts) ----
     if (await archiveRoute(api, req, res, path, c)) return;
