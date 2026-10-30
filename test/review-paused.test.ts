@@ -1,5 +1,4 @@
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   generateLifeReport,
   generateRemedy,
@@ -8,10 +7,10 @@ import {
   MockProvider,
   type NarrativeOutput,
 } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { buildAuth } from "../src/service/runtime.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 // Owner decision 2026-10-26: content review is paused until the legal & obligations work.
 const chart = computeBazi(
@@ -76,25 +75,22 @@ describe("content review paused", () => {
 });
 
 describe("API with review paused", () => {
-  const mock = new MockProvider();
   const secrets = { digestPepper: PEPPER, drawKey: DRAW_KEY };
   const auth = buildAuth({ ...secrets, ephemeral: true } as never, true);
-  const api = createApiServer({
-    secrets,
-    providers: { deepseek: mock, anthropic: mock },
-    auth,
-    devMode: true,
-    devHeaders: false,
-    review: false,
-    admins: ["boss"],
-    log: () => {},
-  });
   let base = "";
+  const api = testApi(
+    {
+      secrets,
+      auth,
+      devHeaders: false,
+      review: false,
+      admins: ["boss"],
+    },
+    (b) => (base = b),
+  );
   let token = "";
   beforeAll(async () => {
     await auth.seedDevUser({ login: "boss", password: "boss", country: "HK", locale: "zh-Hans" });
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
     token = (
       await (
         await fetch(base + "/v1/auth/login", {
@@ -105,7 +101,6 @@ describe("API with review paused", () => {
       ).json()
     ).access_token;
   });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
 
   it("health says so, nobody is a reviewer, and the console is closed", async () => {
     expect((await (await fetch(base + "/v1/health")).json()).content_review).toBe("paused");

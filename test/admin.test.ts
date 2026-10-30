@@ -1,8 +1,7 @@
 // S22 WP22.1–22.2 (docs/tech-plan.md, the owner 2026-10-29): 管理后台. 「管理app下的所有账户，查看所用的所有token和所有盈利和收益
 // 等等数据。除此之外管理员登录后可以查看和管理active user 也可以控制用户权限，还有可以给用户增加积分。还可以导出收益曲线和report」.
 import { randomBytes, randomUUID } from "node:crypto";
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   MockProvider,
   type AgentName,
@@ -10,7 +9,7 @@ import {
   type LLMProvider,
   type Usage,
 } from "../src/ai/index.js";
-import { createApiServer, SEEN_EVERY_MS } from "../src/api/server.js";
+import { SEEN_EVERY_MS } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import {
   activeUsers,
@@ -30,6 +29,7 @@ import { PgStore } from "../src/db/pg-store.js";
 import { loadPointsConfig, type PointsEntry } from "../src/points/index.js";
 import { buildAuth } from "../src/service/runtime.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const config = loadPointsConfig();
 const TZ = "Asia/Shanghai";
@@ -356,20 +356,21 @@ const provider = billed({ narrative: { input_tokens: 10_000, output_tokens: 15_0
 const store = new InMemoryStore();
 const auth = buildAuth({ ...secrets, ephemeral: true } as never, true);
 let clock = new Date("2026-10-30T04:00:00.000Z");
-const api = createApiServer({
-  secrets,
-  providers: { deepseek: provider, anthropic: provider },
-  auth,
-  store,
-  devMode: true,
-  devHeaders: false,
-  review: false,
-  admins: ["boss"],
-  points: { simulateTopUp: true },
-  now: () => clock,
-  log: () => {},
-});
 let base = "";
+const api = testApi(
+  {
+    secrets,
+    providers: { deepseek: provider, anthropic: provider },
+    auth,
+    store,
+    devHeaders: false,
+    review: false,
+    admins: ["boss"],
+    points: { simulateTopUp: true },
+    now: () => clock,
+  },
+  (b) => (base = b),
+);
 const sessions: Record<string, { access_token: string; refresh_token: string }> = {};
 const ids: Record<string, string> = {};
 const LOGINS = ["boss", "alice", "bob"];
@@ -387,14 +388,11 @@ beforeAll(async () => {
   for (const login of LOGINS) {
     await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
   }
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
   for (const login of LOGINS) {
     sessions[login] = await (await signIn(login)).json();
     ids[login] = (await auth.findLogin("username", login))!.id;
   }
 });
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
 
 const call = (who: string, path: string, method = "GET", body?: unknown) =>
   fetch(base + path, {

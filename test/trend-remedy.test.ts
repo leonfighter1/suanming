@@ -1,11 +1,12 @@
 import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateRemedy, generateReport, MockProvider, PROMPTS } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
 import { computeAstrology } from "../src/engines/astrology/index.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const chart = computeBazi(
   {
@@ -155,19 +156,8 @@ describe("generateRemedy", () => {
 });
 
 describe("remedy API", () => {
-  const mock = new MockProvider();
-  const api = createApiServer({
-    secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-    providers: { deepseek: mock, anthropic: mock },
-    devMode: true,
-    log: () => {},
-  });
   let base = "";
-  beforeAll(async () => {
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
+  const api = testApi({}, (b) => (base = b));
   const H = (user = "u1") => ({
     "content-type": "application/json",
     "x-dev-country": "HK",

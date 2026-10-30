@@ -1,7 +1,7 @@
 // WP13.2 (docs/tech-plan.md, the owner's request 2026-10-28): 追问 on every reading, answered from that reading alone
 // (「不能胡编乱造，一定要基于之前的回答和各个卦象所表达的东西」).
 import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   FOLLOWUP_LIMIT,
   FollowUpInputError,
@@ -20,6 +20,7 @@ import { computeBazi } from "../src/engines/bazi/index.js";
 import { DECK } from "../src/engines/tarot/deck.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const bazi = computeBazi(
   { local: "1990-03-15T14:30", timezone: "Asia/Hong_Kong", longitude: 114.17, gender: "male" },
@@ -278,18 +279,13 @@ describe("追问, the pipeline (WP13.2)", () => {
 // ---- the API ----
 
 const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  devMode: true,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    providers: { deepseek: mock, anthropic: mock },
+  },
+  (b) => (base = b),
+);
 const H = (user = "fu-user") => ({
   "content-type": "application/json",
   "x-dev-country": "HK",

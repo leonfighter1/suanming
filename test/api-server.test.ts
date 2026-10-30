@@ -1,26 +1,21 @@
 import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { MockProvider } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
 import { AuthService } from "../src/auth/service.js";
 import { TokenService } from "../src/auth/tokens.js";
 import { loadGeoMatrix } from "../src/compliance/geo.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  devMode: true,
-  log: () => {},
-});
 let base = "";
-
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    providers: { deepseek: mock, anthropic: mock },
+  },
+  (b) => (base = b),
+);
 
 const H = (country = "HK", user = "u1", extra: Record<string, string> = {}) => ({
   "content-type": "application/json",

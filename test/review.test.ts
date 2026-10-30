@@ -1,9 +1,8 @@
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
 import { buildAuth } from "../src/service/runtime.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 // Guard verdicts in call order: the narrative report is held, the second passes.
 const held = {
@@ -32,24 +31,23 @@ const blocking = {
 const secrets = { digestPepper: PEPPER, drawKey: DRAW_KEY };
 const mock = new MockProvider({ guard: [held], narrative: [] });
 const auth = buildAuth({ ...secrets, ephemeral: true } as never, true);
-const api = createApiServer({
-  secrets,
-  providers: { deepseek: mock, anthropic: mock },
-  auth,
-  devMode: true,
-  devHeaders: false,
-  preloadRemedies: false,
-  admins: ["boss"],
-  log: () => {},
-});
 let base = "";
+const api = testApi(
+  {
+    secrets,
+    providers: { deepseek: mock, anthropic: mock },
+    auth,
+    devHeaders: false,
+    preloadRemedies: false,
+    admins: ["boss"],
+  },
+  (b) => (base = b),
+);
 const tokens: Record<string, string> = {};
 beforeAll(async () => {
   for (const login of ["boss", "user1"]) {
     await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
   }
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
   for (const login of ["boss", "user1"]) {
     const t = await (
       await fetch(base + "/v1/auth/login", {
@@ -61,7 +59,6 @@ beforeAll(async () => {
     tokens[login] = t.access_token;
   }
 });
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
 
 const call = (who: string, path: string, body?: unknown) =>
   fetch(base + path, {

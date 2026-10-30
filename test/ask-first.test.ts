@@ -1,30 +1,24 @@
 // v11.1.0 (the owner, 2026-10-29): 「求签和算卦 算法必须要有所问之问题之后才能去求。也就是说问题不能为空 是必须要有所求才能去求」,
 // then 「塔罗牌也是一样」. 塔罗, 求签 and 算卦 are drawn only for a question; the reading answers that question. 每日一牌
 // is the day's card, dealt without a draw; 八字 and 风水 are not drawn.
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import { computeChart } from "../src/service/charts.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const mock = new MockProvider();
 const store = new InMemoryStore();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  devMode: true,
-  store,
-  review: false,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    providers: { deepseek: mock, anthropic: mock },
+    store,
+    review: false,
+  },
+  (b) => (base = b),
+);
 
 const H = (user: string, country = "HK") => ({
   "content-type": "application/json",

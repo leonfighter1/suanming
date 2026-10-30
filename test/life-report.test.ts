@@ -1,9 +1,8 @@
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateLifeReport, LIFE_TOPICS, MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
-import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 // The owner's sample: 吴勇, male, 1987-11-23 03:30, 江苏靖江 (120.26°E).
 const chart = computeBazi(
@@ -103,19 +102,8 @@ describe("generateLifeReport", () => {
 });
 
 describe("life report API", () => {
-  const mock = new MockProvider();
-  const api = createApiServer({
-    secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-    providers: { deepseek: mock, anthropic: mock },
-    devMode: true,
-    log: () => {},
-  });
   let base = "";
-  beforeAll(async () => {
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
+  const api = testApi({}, (b) => (base = b));
   const H = (user = "u1") => ({
     "content-type": "application/json",
     "x-dev-country": "HK",

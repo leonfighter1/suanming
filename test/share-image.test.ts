@@ -1,12 +1,10 @@
 // S7 WP7.1 (docs/tech-plan.md): a passed tarot reading as a share image, made on the server (the owner's
 // phase document: 分享图由服务端生成，带水印与免责声明). A CJK font must be there: CI installs
 // fonts-noto-cjk; on Windows, Noto Sans SC or 微软雅黑 is found.
-import type { AddressInfo } from "node:net";
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateReport, MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
 import { lotTitle } from "../src/ai/qiuqian.js";
 import type { Locale } from "../src/ai/terms.js";
 import { computeQiuqian } from "../src/engines/qiuqian/index.js";
@@ -15,6 +13,7 @@ import { shareFont } from "../src/share/font.js";
 import { qiuqianShareTexts, renderQiuqianShare } from "../src/share/qiuqian-image.js";
 import { renderTarotShare, shareTexts } from "../src/share/tarot-image.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const QUESTION = "這份工作還要繼續嗎？";
 const draw = (spread: "three_card" | "celtic_cross", id: string) =>
@@ -118,18 +117,13 @@ describe("the image", () => {
 });
 
 describe("GET /v1/reports/{id}/share.jpg", () => {
-  const api = createApiServer({
-    secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-    providers: { deepseek: new MockProvider(), anthropic: new MockProvider() },
-    devMode: true,
-    log: () => {},
-  });
   let base = "";
-  beforeAll(async () => {
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
+  const api = testApi(
+    {
+      providers: { deepseek: new MockProvider(), anthropic: new MockProvider() },
+    },
+    (b) => (base = b),
+  );
   const H = (user = "u1") => ({
     "content-type": "application/json",
     "x-dev-country": "HK",

@@ -1,10 +1,8 @@
 // 风水 (tech plan WP6.3, the owner's Phase 3 spec): general principles of direction and space, never a 吉凶
 // judgement of a home, every one a simplified_rule; its own rule group; Malaysia gives it more weight.
-import type { AddressInfo } from "node:net";
 import OpenCC from "opencc-js";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateReport, MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
 import { validateChartFact } from "../src/chart-fact/index.js";
 import {
   compileRules,
@@ -18,6 +16,7 @@ import { computeFengshui, type FengshuiFacts } from "../src/engines/fengshui/ind
 import { DIRECTIONS, FACINGS, ROOM_IDS, ROOMS } from "../src/engines/fengshui/principles.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const all = ROOM_IDS.flatMap((r) => ROOMS[r].principles.map((p) => ({ room: r, ...p })));
 const texts = all.flatMap((p) => [p.text, p.why]);
@@ -205,18 +204,13 @@ describe("the entry order and the API", () => {
     expect(order("SG")).toEqual(["bazi", "tarot", "qiuqian", "liuyao", "fengshui", "astrology"]);
   });
 
-  const api = createApiServer({
-    secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-    providers: { deepseek: new MockProvider(), anthropic: new MockProvider() },
-    devMode: true,
-    log: () => {},
-  });
   let base = "";
-  beforeAll(async () => {
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
+  const api = testApi(
+    {
+      providers: { deepseek: new MockProvider(), anthropic: new MockProvider() },
+    },
+    (b) => (base = b),
+  );
   const post = (path: string, body: unknown) =>
     fetch(base + path, {
       method: "POST",

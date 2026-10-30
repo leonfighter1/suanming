@@ -1,31 +1,22 @@
 // WP3.3 (docs/tech-plan.md): 每日一牌, one card a day per account, the same all day.
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { dailyDate, dailyIds, keyedUuid } from "../src/service/daily.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 // 15:00 UTC on 2026-10-25: already 2026-10-26 east of UTC+9, still 2026-10-25 elsewhere.
 const NOW = new Date("2026-10-25T15:00:00Z");
 const store = new InMemoryStore();
-const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  store,
-  devMode: true,
-  now: () => NOW,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    store,
+    now: () => NOW,
+  },
+  (b) => (base = b),
+);
 const get = (path: string, user = "u1", country = "HK") =>
   fetch(base + path, {
     headers: { "content-type": "application/json", "x-dev-country": country, "x-dev-user": user },

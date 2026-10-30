@@ -1,10 +1,8 @@
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { describe, expect, it } from "vitest";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { placeCountry, placeIndex } from "../src/places/index.js";
-import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 describe("birthplace gazetteer (data/places)", () => {
   const codes = placeIndex().countries.map((c) => c.code);
@@ -76,19 +74,8 @@ describe("birthplace gazetteer (data/places)", () => {
 });
 
 describe("GET /v1/places", () => {
-  const mock = new MockProvider();
-  const api = createApiServer({
-    secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-    providers: { deepseek: mock, anthropic: mock },
-    devMode: true,
-    log: () => {},
-  });
   let base = "";
-  beforeAll(async () => {
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
+  const api = testApi({}, (b) => (base = b));
 
   it("lists countries and serves one country's regions, publicly and cacheably", async () => {
     const list = await fetch(base + "/v1/places");

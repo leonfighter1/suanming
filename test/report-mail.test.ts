@@ -1,7 +1,7 @@
 // S15 WP15.4 (v9.0.0), the owner: 每当一个算法AI算完成后，可以选择给邮箱发送报告结果（…默认为否，改为是后自动发送）.
 // The documents the server writes itself, their HTML and text, the MIME, and the mails: on completion, and by hand.
 import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateLifeReport, generateReport, MockProvider } from "../src/ai/index.js";
 import { createApiServer, MAIL_DOCUMENTS } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
@@ -15,6 +15,7 @@ import { lifeDocument, localTime, readingDocument } from "../src/export/report-d
 import { buildMime, MemoryMail, MemorySms, type MailMessage } from "../src/notify/index.js";
 import { shareFont } from "../src/share/font.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const providers = (mock = new MockProvider()) => ({ deepseek: mock, anthropic: mock });
 const bazi = computeBazi(
@@ -284,24 +285,20 @@ const held = {
   },
 };
 const guarded = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: providers(guarded),
-  store: new InMemoryStore(),
-  auth,
-  mail,
-  sms: new MemorySms(),
-  admins: ["reviewer"],
-  preloadRemedies: false,
-  now,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    providers: providers(guarded),
+    store: new InMemoryStore(),
+    auth,
+    mail,
+    sms: new MemorySms(),
+    admins: ["reviewer"],
+    preloadRemedies: false,
+    now,
+  },
+  (b) => (base = b),
+);
 
 const call = async (method: string, path: string, body: unknown, token: string) => {
   const res = await fetch(base + path, {

@@ -1,13 +1,12 @@
 // 求籤 (tech plan WP6.1 + 6.2): the reading, its checks, and the API. Mock provider only.
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { checkFaithfulness, generateReport, MockProvider, type Report } from "../src/ai/index.js";
 import { chineseNumeral, lotTitle } from "../src/ai/qiuqian.js";
-import { createApiServer } from "../src/api/server.js";
 import { loadGeoMatrix, methodsFor, resolveRegion } from "../src/compliance/index.js";
 import { computeQiuqian, type QiuqianFacts } from "../src/engines/qiuqian/index.js";
 import { lotSet } from "../src/engines/qiuqian/lots.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const chart = computeQiuqian(
   {},
@@ -157,18 +156,13 @@ describe("the entry order (WP6.2)", () => {
 });
 
 describe("the API", () => {
-  const api = createApiServer({
-    secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-    providers: { deepseek: new MockProvider(), anthropic: new MockProvider() },
-    devMode: true,
-    log: () => {},
-  });
   let base = "";
-  beforeAll(async () => {
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  });
-  afterAll(() => new Promise<void>((r) => api.close(() => r())));
+  const api = testApi(
+    {
+      providers: { deepseek: new MockProvider(), anthropic: new MockProvider() },
+    },
+    (b) => (base = b),
+  );
   const H = (country = "TW") => ({
     "content-type": "application/json",
     "x-dev-country": country,

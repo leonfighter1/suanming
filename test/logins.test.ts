@@ -1,9 +1,6 @@
 // S15 WP15.3 (v8.2.0), the owner: 用户可以用用户名或者邮箱登录或者手机号登录，手机号需要绑定用户本人. How a login is
 // read, the codes that bind a phone or verify an email, and the account routes, against memory transports.
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { beforeAll, describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import { AccountError, AccountService } from "../src/auth/account.js";
 import {
@@ -28,7 +25,8 @@ import {
   VerifyError,
 } from "../src/auth/verify.js";
 import { MemoryMail, MemorySms, NoMail, NoSms } from "../src/notify/index.js";
-import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 describe("telling a login apart", () => {
   it("an @ makes an email, digits a phone, anything else a username", () => {
@@ -163,24 +161,18 @@ const auth = new AuthService({
 });
 const mail = new MemoryMail();
 const sms = new MemorySms();
-const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  store: new InMemoryStore(),
-  auth,
-  mail,
-  sms,
-  admins: ["admin"],
-  now,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    store: new InMemoryStore(),
+    auth,
+    mail,
+    sms,
+    admins: ["admin"],
+    now,
+  },
+  (b) => (base = b),
+);
 
 const call = async (method: string, path: string, body?: unknown, token?: string) => {
   const res = await fetch(base + path, {

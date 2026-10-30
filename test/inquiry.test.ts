@@ -3,7 +3,7 @@
 // (「根据卦象或者推算结果再去问对方问题 … 要根据用户的输入做出合理推断」); 1–6 questions (「最多不超过6个问题」); it needs a goal
 // (「使用这一功能一定要给出个明确的目标才行」); the reading then reads the conversation.
 import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   GeoRefusedError,
   generateInquiryTurn,
@@ -27,6 +27,7 @@ import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { DECK } from "../src/engines/tarot/deck.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const bazi = computeBazi(
   { local: "1990-03-15T14:30", timezone: "Asia/Hong_Kong", longitude: 114.17, gender: "male" },
@@ -335,18 +336,13 @@ describe("the reading reads its 深度分析 (WP19.1)", () => {
 // ---- the API ----
 
 const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  devMode: true,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    providers: { deepseek: mock, anthropic: mock },
+  },
+  (b) => (base = b),
+);
 
 const H = (user = "iq-user") => ({
   "content-type": "application/json",

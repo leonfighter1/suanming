@@ -1,8 +1,5 @@
-import type { AddressInfo } from "node:net";
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT, type JWK } from "jose";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import {
   CAPTCHA_AFTER,
@@ -13,7 +10,8 @@ import {
 import { AuthService } from "../src/auth/service.js";
 import { SocialVerifier } from "../src/auth/social.js";
 import { TokenService } from "../src/auth/tokens.js";
-import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 // Clock the tests can move forward (token expiry).
 let clock = Date.parse("2026-10-26T00:00:00Z");
@@ -46,21 +44,15 @@ const auth = new AuthService({
   }),
   now,
 });
-const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  store,
-  auth,
-  now,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    store,
+    auth,
+    now,
+  },
+  (b) => (base = b),
+);
 
 const json = { "content-type": "application/json" };
 const post = (path: string, body: unknown, token?: string) =>

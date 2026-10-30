@@ -1,35 +1,26 @@
 // S26 WP26.2 (owner, 2026-10-30): 「我看到西方有今日一牌功能， 那么东方系列，我们剋增加今日一卦或者今日一签功能，可以随机出现」.
 // The account's 东方 draw of the day, a 签 or a 卦, keyed from the account and the date and the same all day, dealt as
 // 每日一牌 is (src/service/daily.ts).
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import { verifyCast } from "../src/engines/liuyao/index.js";
 import { verifyDraw } from "../src/engines/qiuqian/index.js";
 import { dailyIds, EAST_DAILY, eastDaily } from "../src/service/daily.js";
-import { DRAW_KEY, PEPPER, withMatrix } from "./helpers.js";
+import { DRAW_KEY, withMatrix } from "./helpers.js";
+import { testApi } from "./api.js";
 
 // 15:00 UTC on 2026-10-25: already 2026-10-26 east of UTC+9, still 2026-10-25 elsewhere; 23:00 in Hong Kong.
 const NOW = new Date("2026-10-25T15:00:00Z");
 const store = new InMemoryStore();
-const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  store,
-  devMode: true,
-  review: false,
-  now: () => NOW,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    store,
+    review: false,
+    now: () => NOW,
+  },
+  (b) => (base = b),
+);
 const H = (user: string, country: string) => ({
   "content-type": "application/json",
   "x-dev-country": country,

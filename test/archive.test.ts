@@ -1,11 +1,8 @@
 // S14 (docs/tech-plan.md, the owner's request 2026-10-28): 以往记录 — a record as Word or PDF, deleting one record,
 // and filing a record under a person.
 import { existsSync } from "node:fs";
-import type { AddressInfo } from "node:net";
 import { inflateRawSync } from "node:zlib";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import {
   contentDisposition,
@@ -16,7 +13,8 @@ import {
 import { renderDocx } from "../src/export/render-docx.js";
 import { renderPdf } from "../src/export/render-pdf.js";
 import { shareFont } from "../src/share/font.js";
-import { DRAW_KEY, PEPPER, withNamingOn } from "./helpers.js";
+import { withNamingOn } from "./helpers.js";
+import { testApi } from "./api.js";
 
 /** The entries of a zip (a .docx is one), inflated: enough of the format to read what Word would. */
 function unzip(buf: Buffer): Record<string, string> {
@@ -116,21 +114,14 @@ describe("documents (WP14.1)", () => {
 
 // ---- the API ----
 
-const mock = new MockProvider();
 const store = new InMemoryStore();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  store,
-  devMode: true,
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    store,
+  },
+  (b) => (base = b),
+);
 const H = (user: string) => ({
   "content-type": "application/json",
   "x-dev-country": "HK",

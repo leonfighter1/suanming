@@ -1,23 +1,19 @@
 import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { MockProvider } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
+import { testApi } from "./api.js";
 
 const mock = new MockProvider();
-const api = createApiServer({
-  secrets: { digestPepper: PEPPER, drawKey: DRAW_KEY },
-  providers: { deepseek: mock, anthropic: mock },
-  devMode: true,
-  corsOrigins: ["https://leonfighter1.github.io"],
-  log: () => {},
-});
 let base = "";
-beforeAll(async () => {
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-});
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
+const api = testApi(
+  {
+    providers: { deepseek: mock, anthropic: mock },
+    corsOrigins: ["https://leonfighter1.github.io"],
+  },
+  (b) => (base = b),
+);
 
 const preflight = (origin: string, extra: Record<string, string> = {}) =>
   fetch(base + "/v1/health", {
