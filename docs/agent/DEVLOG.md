@@ -2,6 +2,39 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (k): S26 WP26.1 — the app's container, 首页 2 × 2; v14.1.0 (local)
+
+- Owner requests after v14.0.0, in three messages:
+  - the sign-in page in a container of at most 1620, fluid on tablets and phones;
+  - 2 × 2 on extra-large screens, 1 × 1 for a lone method;
+  - 今日一卦 or 今日一签 for 东方, at random;
+  - then 「管理员界面就不用改了」.
+- Planned as S26: WP26.1 the layout, WP26.2 the daily draw.
+- How the requests were read:
+  - 「登录界面」 is the app's sign-in page. The 管理后台's is already a 380 card, and the app's stretched across the
+    window.
+  - 「超大屏幕」 is a desktop window (the large class, 1200 and up), where a fluid column would stretch. The cap
+    applies from 1620.
+  - The 2 × 2 fits 东方's four methods, and the 1 × 1 西方's one.
+- Built:
+  - layout.dart: `Grid.container`, `containerPadding`, `CardGrid`;
+  - `HeroBanner`: a `margin`, and its text block at its own height, so the text is centred in a taller banner;
+  - the sign-in page's two columns (IntrinsicHeight). The form moved into `_form`, re-indented by a script, not dart
+    format;
+  - 首页's groups in `CardGrid`s, each group's card of the day under it.
+- Checked against earlier decisions (rule 34): the v6.1.0 groups and the region's order stay, and 今日一牌 stays under
+  西方.
+- Tests:
+  - grid_test's home test at five widths, and a new sign-in test (signing in and signing up);
+  - the whole app suite (254) through the junction;
+  - renders at five widths in both themes.
+- The harness passed on the third run:
+  - **Run 1** failed at the app's analyze: app_localizations was missing (rule 23) although both `flutter_build`
+    records had been deleted. Rule 23 is corrected in place: deleting them helps but does not always prevent it.
+  - **Run 2** failed with one server test in messages.test.ts: `fetch failed`, ECONNRESET. The change has no server
+    code. The file passed alone, and the full suite passed. Watch whether it comes back.
+  - **Run 3:** PASS.
+
 ## 2026-10-30 (j): S25 WP25.4 — the records; S25 done, release v14.0.0
 
 - v13.3.0 committed and tagged after its harness PASS (67d9d3b).

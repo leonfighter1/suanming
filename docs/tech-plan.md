@@ -50,6 +50,9 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S21 有所求才能去求         | 塔罗, 求签 and 算卦 drawn only for a question               | medium | v11.1.0           | done        |
 | S22 管理后台               | admin dashboard: accounts, tokens, money, users, exports    | big    | v12.0.0 + summary | done        |
 | S23 Found on the way       | a card's focus ring only for the card itself                | small  | v12.0.1           | done        |
+| S24 设计系统与管理后台布局 | tokens, light and dark, the grid; the asymmetric dashboard  | big    | v13.0.0 + summary | done        |
+| S25 消息模板与分发         | mail and SMS templates, one dispatcher, staff roles         | big    | v14.0.0 + summary | done        |
+| S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2383,6 +2386,71 @@ Read as:
 Lessons: rules 16, 35, 37, 42, 45, 52, 57, 67, 68, 70; G1, G10; security-baseline (no address or content in the
 console).
 
+## S26 宽屏布局与今日一卦、今日一签 (big → v15.0.0)
+
+**Owner requests (2026-10-30), after v14.0.0:**
+
+- 「登录界面也需要添加新的container。 作为超大屏幕的container要大一些，大于 1620px 时要设置一个max-width 1620px. 本体可以是fluid。
+  但是要有限制，在tablet和mobile device 可以不用有这限制了」
+- 「在超大屏幕布局时可以采用2X2布局。如果只有一个那就采用1x1， 另外我看到西方有今日一牌功能， 那么东方系列，我们剋增加今日一卦或者
+  今日一签功能，可以随机出现。」
+- 「管理员界面就不用改了，目前来说还不错」
+
+Read as:
+
+- **The app's container** (`Grid.container`, 1620). On phones and tablets it is fluid: the window class's margin
+  only. On a window wider than 1620 it is 1620 wide and centred, with the margin inside it, like the 管理后台's
+  container. The 管理后台 stays at 1440 (「管理员界面就不用改了」). The sign-in page and 首页 use the container. Pages of
+  reading and forms keep their columns (720, and 1200 for 塔罗).
+- **Columns on a desktop window** (the large class, 1200 and up):
+  - 首页: each group's methods two to a row, so 东方's four are 2 × 2 and 西方's one is 1 × 1. A method alone in its
+    row spans it.
+  - The sign-in page: its banner at the left, as tall as the form at the right.
+  - Phones and tablets keep one column.
+- **今日一卦 / 今日一签 under 东方**, as 今日一牌 is under 西方:
+  - **The draw:** the server deals the account's 东方 draw of the day. It is a 卦 (an auto cast of three coins in
+    the reader's time zone) or a 签 (a lot of the 關聖帝君一百籤). Which one is keyed from the account and the date:
+    random from day to day, the same all day.
+  - **No question:** as with 每日一牌, the reader draws nothing, so it needs no question. The owner's v11.1.0 rule
+    (有所求才能去求) is about the reader's own draws on the 求签 and 算卦 pages, and those pages keep it.
+  - **Its page:** the 签 (`LotCard`) or the 卦 (`HexagramCard`), then an AI reading as that method gives one: its
+    own prompts (rule 8), paid in 积分 (rule 9), nothing preloaded.
+
+### WP26.1 The container, and the sign-in page and 首页 in columns (→ v14.1.0)
+
+- **layout.dart:** `Grid.container` (1620) and `containerPadding(context)`. Also `CardGrid`: cards two to a row on
+  a desktop window, with a card alone in its row spanning it.
+- **The sign-in page:** in the container. On a desktop window, `HeroBanner` at the left, as tall as the form, and
+  the form at the right (5 of 12 columns).
+- **首页:** in the container, each group's methods in a `CardGrid`.
+- **Tests:**
+  - 首页 at 390, 1024, 1280 and 2560: the margins, the container, 2 × 2 and 1 × 1, the titles on the cards' edge, and
+    Tab by rows;
+  - the sign-in page at 390, 1280 and 2560.
+- **The ui-design skill:** the container, and columns on a desktop window.
+
+Lessons: rules 25, 27, 43, 46, 49, 51, 58, 64.
+
+### WP26.2 今日一卦 / 今日一签 (→ v15.0.0)
+
+- **The server:** `GET /v1/east/daily?date=…&timezone=…` (`eastDaily` in src/service/daily.ts, under labels of its
+  own):
+  - which of the served 东方 methods (求签, 算卦) it is today, keyed;
+  - the draw under the day's draw id: `computeQiuqian`, or `computeLiuyao` auto in the reader's zone;
+  - kept as the account's chart with `daily`, so it is not listed and is read without a question;
+  - the OpenAPI entry.
+- **The app:**
+  - `eastDailyProvider`;
+  - `EastDailyCard` under 东方: for 今日一签 the lot's title, for 今日一卦 the hexagram's name and lines;
+  - its page: `LotCard` or `HexagramCard`, then `ReportRequest`.
+- **Tests:**
+  - server: the same all day; another day or account gets its own; both kinds over the days; the date and zone
+    checks; the Geo-Rule; not listed; replays; a reading needs no question;
+  - app: the card for each kind, its page, Tab, Enter and Esc, and hidden when there is none.
+- **Release:** the records and the stage summary; pushed.
+
+Lessons: rules 37, 42, 43, 53, 58, 64, 67, 68.
+
 ## 阶段总结 (stage summaries)
 
 ### S25 消息模板与分发 (done 2026-10-30: v13.1.0–v14.0.0)
@@ -3103,3 +3171,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP25.3    | done                         | v13.2.0 |
 | WP25.3b   | done                         | v13.3.0 |
 | WP25.4    | done                         | v14.0.0 |
+| WP26.1    | done                         | v14.1.0 |
+| WP26.2    | planned                      | v15.0.0 |

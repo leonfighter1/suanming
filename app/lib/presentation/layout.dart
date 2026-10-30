@@ -44,6 +44,11 @@ abstract final class Grid {
   /// A page that sets things side by side: a tarot spread.
   static const wide = 1200.0;
 
+  /// The app's container (owner, 2026-10-30: 「大于 1620px 时要设置一个max-width 1620px。本体可以是fluid」): 首页 and
+  /// the sign-in page fill it. Fluid on a phone and a tablet; on a wider window at most this wide, centred, the
+  /// window class's margin inside it ([containerPadding]).
+  static const container = 1620.0;
+
   /// The width of [span] of [columns] columns across [width], with the gutters between them.
   static double span(double width, int span, {required int columns, required double gutter}) =>
       (width - gutter * (columns - 1)) / columns * span + gutter * (span - 1);
@@ -61,4 +66,46 @@ EdgeInsets pagePadding(
   final width = MediaQuery.sizeOf(context).width;
   final side = math.max(WindowClass.of(width).margin, (width - maxWidth) / 2);
   return EdgeInsets.fromLTRB(side, top, side, bottom);
+}
+
+/// A page's padding in the app's container ([Grid.container]): the window class's margin at the sides and, on a
+/// window wider than the container, the room beyond it, so the container is centred with the margin inside it. On a
+/// phone and a tablet only the margin (「在tablet和mobile device 可以不用有这限制了」). For a page's scrolling list, so
+/// its scrollbar stays at the window's edge.
+EdgeInsets containerPadding(BuildContext context, {double top = Space.m, double bottom = Space.xxl}) {
+  final width = MediaQuery.sizeOf(context).width;
+  final side = math.max(0.0, (width - Grid.container) / 2) + WindowClass.of(width).margin;
+  return EdgeInsets.fromLTRB(side, top, side, bottom);
+}
+
+/// Cards side by side on a desktop window (the large class; owner, 2026-10-30: 「在超大屏幕布局时可以采用2X2布局。如果
+/// 只有一个那就采用1x1」): two to a row with the gutter between, each row as tall as its tallest card, and a card alone in
+/// its row across the whole row. One column on a phone and a tablet. Each card keeps its own gap below (an `AppCard`'s),
+/// and Tab goes row by row.
+class CardGrid extends StatelessWidget {
+  const CardGrid({super.key, required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final window = WindowClass.ofContext(context);
+    if (window != WindowClass.large) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i += 2)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: children[i]),
+                if (i + 1 < children.length) ...[SizedBox(width: window.gutter), Expanded(child: children[i + 1])],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }

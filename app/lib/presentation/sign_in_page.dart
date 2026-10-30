@@ -6,6 +6,7 @@ import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/language_menu.dart';
 
 /// Regions offered at sign-up (geo_rule_matrix: served regions). The server
@@ -101,6 +102,19 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(settingsProvider).apiLocaleCode;
     final canSubmit = !_busy && (!_register || (_ageConfirmed && _username.text.trim().isNotEmpty));
+    // In the app's container (S26): one column on a phone and a tablet. On a desktop window the banner at the left,
+    // as tall as the form, and the form at the right, five of the twelve columns.
+    final window = WindowClass.ofContext(context);
+    final wide = window == WindowClass.large;
+    final padding = containerPadding(context);
+    final banner = HeroBanner(
+      key: const Key('auth-banner'),
+      title: _register ? l10n.createAccount : l10n.signIn,
+      subtitle: l10n.disclaimerShort,
+      icon: Icons.auto_awesome,
+      margin: wide ? EdgeInsets.zero : null,
+    );
+    final form = _form(l10n, locale, canSubmit);
     // Enter in a field moves on, Enter in 密码 submits; Ctrl+Enter submits from anywhere.
     return SubmitShortcut(
       onSubmit: canSubmit ? _submit : null,
@@ -108,111 +122,131 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         // The language can be switched before signing in, too.
         appBar: AppBar(title: Text(l10n.appTitle), actions: const [LanguageMenu(), SizedBox(width: Space.xs)]),
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(Space.l, Space.m, Space.l, Space.xxl),
-          children: [
-            HeroBanner(
-              title: _register ? l10n.createAccount : l10n.signIn,
-              subtitle: l10n.disclaimerShort,
-              icon: Icons.auto_awesome,
-            ),
-            if (_register) ...[
-              TextField(
-                key: const Key('username'),
-                controller: _username,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.newUsername],
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  labelText: l10n.username,
-                  prefixIcon: const Icon(Icons.person_outline),
-                  helperText: l10n.usernameHint,
-                  helperMaxLines: 2,
-                ),
-              ),
-              const SizedBox(height: Space.m),
-              TextField(
-                key: const Key('email'),
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.email],
-                decoration: InputDecoration(labelText: l10n.emailOptional, prefixIcon: const Icon(Icons.mail_outline)),
-              ),
-            ] else
-              TextField(
-                key: const Key('login'),
-                controller: _login,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.username, AutofillHints.email, AutofillHints.telephoneNumber],
-                decoration: InputDecoration(
-                  labelText: l10n.loginField,
-                  prefixIcon: const Icon(Icons.person_outline),
-                  helperText: l10n.loginFieldHint,
-                ),
-              ),
-            const SizedBox(height: Space.m),
-            TextField(
-              key: const Key('password'),
-              controller: _password,
-              obscureText: true,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => canSubmit ? _submit() : null,
-              autofillHints: [_register ? AutofillHints.newPassword : AutofillHints.password],
-              decoration: InputDecoration(
-                labelText: l10n.password,
-                prefixIcon: const Icon(Icons.lock_outline),
-                helperText: _register ? l10n.passwordHint : null,
-              ),
-            ),
-            if (_register) ...[
-              const SizedBox(height: Space.m),
-              DropdownButtonFormField<String>(
-                key: const Key('country'),
-                initialValue: _country,
-                decoration: InputDecoration(labelText: l10n.regionAccount, helperText: l10n.regionAccountHint),
-                items: [
-                  for (final e in signupRegions.entries)
-                    DropdownMenuItem(value: e.key, child: Text(e.value[locale] ?? e.key)),
-                ],
-                onChanged: (v) => setState(() => _country = v ?? _country),
-              ),
-              CheckboxListTile(
-                key: const Key('age-confirm'),
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _ageConfirmed,
-                title: Text(l10n.ageConfirm),
-                onChanged: (v) => setState(() => _ageConfirmed = v ?? false),
-              ),
-            ],
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: Space.s),
-                child: Text(_error!, key: const Key('auth-error'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
-              ),
-            const SizedBox(height: Space.l),
-            FilledButton(
-              key: const Key('auth-submit'),
-              onPressed: canSubmit ? _submit : null,
-              child: Text(_register ? l10n.createAccount : l10n.signIn),
-            ),
-            TextButton(
-              key: const Key('auth-toggle'),
-              onPressed: () => setState(() {
-                _register = !_register;
-                _error = null;
-              }),
-              child: Text(_register ? l10n.haveAccount : l10n.noAccount),
-            ),
-            const Divider(height: Space.xxl),
-            // Needs the sign_in_with_apple / google_sign_in SDKs and console setup (client ids).
-            OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.apple), label: Text('${l10n.appleSignIn} · ${l10n.comingSoon}')),
-            const SizedBox(height: Space.s),
-            OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.g_mobiledata), label: Text('${l10n.googleSignIn} · ${l10n.comingSoon}')),
-          ],
+          padding: padding,
+          children: wide
+              ? [
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: banner),
+                        SizedBox(width: window.gutter),
+                        SizedBox(
+                          key: const Key('auth-form'),
+                          width: Grid.span(
+                            MediaQuery.sizeOf(context).width - padding.horizontal,
+                            5,
+                            columns: window.columns,
+                            gutter: window.gutter,
+                          ),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: form),
+                        ),
+                      ],
+                    ),
+                  ),
+                ]
+              : [banner, ...form],
         ),
       ),
     );
   }
+
+  /// The fields and buttons: signing in, or signing up.
+  List<Widget> _form(AppLocalizations l10n, String locale, bool canSubmit) => [
+        if (_register) ...[
+          TextField(
+            key: const Key('username'),
+            controller: _username,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.newUsername],
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              labelText: l10n.username,
+              prefixIcon: const Icon(Icons.person_outline),
+              helperText: l10n.usernameHint,
+              helperMaxLines: 2,
+            ),
+          ),
+          const SizedBox(height: Space.m),
+          TextField(
+            key: const Key('email'),
+            controller: _email,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
+            decoration: InputDecoration(labelText: l10n.emailOptional, prefixIcon: const Icon(Icons.mail_outline)),
+          ),
+        ] else
+          TextField(
+            key: const Key('login'),
+            controller: _login,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.username, AutofillHints.email, AutofillHints.telephoneNumber],
+            decoration: InputDecoration(
+              labelText: l10n.loginField,
+              prefixIcon: const Icon(Icons.person_outline),
+              helperText: l10n.loginFieldHint,
+            ),
+          ),
+        const SizedBox(height: Space.m),
+        TextField(
+          key: const Key('password'),
+          controller: _password,
+          obscureText: true,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => canSubmit ? _submit() : null,
+          autofillHints: [_register ? AutofillHints.newPassword : AutofillHints.password],
+          decoration: InputDecoration(
+            labelText: l10n.password,
+            prefixIcon: const Icon(Icons.lock_outline),
+            helperText: _register ? l10n.passwordHint : null,
+          ),
+        ),
+        if (_register) ...[
+          const SizedBox(height: Space.m),
+          DropdownButtonFormField<String>(
+            key: const Key('country'),
+            initialValue: _country,
+            decoration: InputDecoration(labelText: l10n.regionAccount, helperText: l10n.regionAccountHint),
+            items: [
+              for (final e in signupRegions.entries)
+                DropdownMenuItem(value: e.key, child: Text(e.value[locale] ?? e.key)),
+            ],
+            onChanged: (v) => setState(() => _country = v ?? _country),
+          ),
+          CheckboxListTile(
+            key: const Key('age-confirm'),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _ageConfirmed,
+            title: Text(l10n.ageConfirm),
+            onChanged: (v) => setState(() => _ageConfirmed = v ?? false),
+          ),
+        ],
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: Space.s),
+            child: Text(_error!, key: const Key('auth-error'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ),
+        const SizedBox(height: Space.l),
+        FilledButton(
+          key: const Key('auth-submit'),
+          onPressed: canSubmit ? _submit : null,
+          child: Text(_register ? l10n.createAccount : l10n.signIn),
+        ),
+        TextButton(
+          key: const Key('auth-toggle'),
+          onPressed: () => setState(() {
+            _register = !_register;
+            _error = null;
+          }),
+          child: Text(_register ? l10n.haveAccount : l10n.noAccount),
+        ),
+        const Divider(height: Space.xxl),
+        // Needs the sign_in_with_apple / google_sign_in SDKs and console setup (client ids).
+        OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.apple), label: Text('${l10n.appleSignIn} · ${l10n.comingSoon}')),
+        const SizedBox(height: Space.s),
+        OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.g_mobiledata), label: Text('${l10n.googleSignIn} · ${l10n.comingSoon}')),
+      ];
 }

@@ -13,6 +13,30 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v14.1.0 (2026-10-30): the app's container; 首页 two to a row on a desktop
+
+Your requests of today: 「登录界面也需要添加新的container… 大于 1620px 时要设置一个max-width 1620px. 本体可以是fluid…
+在tablet和mobile device 可以不用有这限制了」 and 「在超大屏幕布局时可以采用2X2布局。如果只有一个那就采用1x1」. This is work package
+WP26.1 of stage S26 in the [tech plan](docs/tech-plan.md); 今日一卦 / 今日一签 follow in WP26.2. The 管理后台 is unchanged,
+as you said (「管理员界面就不用改了」).
+
+- **The app's container:** the sign-in page and 首页 keep to one container.
+  - On a phone and a tablet it is fluid: the window's margin at the sides (16 on a phone, 24 on a tablet), nothing
+    else.
+  - On a window wider than 1620 it is 1620 wide and centred, with the margin (32) inside it.
+  - Pages of reading and forms keep their columns (720; 塔罗 1200).
+- **首页 on a desktop window** (1200 and wider): each group's methods two to a row, the two in a row the same height.
+  - 东方's four are 2 × 2: 八字排盘 and 求签, then 算卦 and 风水 (your region's order).
+  - 西方's one, 塔罗, spans its row (1 × 1). 今日一牌 and 最近记录 follow, across the container.
+  - Tab goes row by row.
+- **The sign-in page on a desktop window:** the banner at the left, as tall as the form at the right (five of the
+  twelve columns). When you sign up, the banner grows with the longer form. Phones and tablets keep one column.
+- **Verified:**
+  - **Tests:** 首页 at 390, 700, 1024, 1280 and 2560 (the margins, the 1620 container, 2 × 2 and 1 × 1, the group
+    titles on the cards' edge); the sign-in page at the same widths, signing in and signing up. App tests 253 → 254.
+  - **Renders** with the real fonts, light and dark, at 390, 1024, 1280, 1920 and 2560.
+  - **Harness:** PASS.
+
 ### v14.0.0 (2026-10-30): mail and SMS you can edit, staff roles, and the way in from the app
 
 Your requests of today: the back office edits what each mail and SMS says, with the mail and its preview following

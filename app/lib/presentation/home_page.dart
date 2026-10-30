@@ -35,11 +35,20 @@ class HomePage extends ConsumerWidget {
     // The methods in the region's entry order (GET /v1/methods, v4.3.0): 求籤 first in Taiwan and Hong Kong, the
     // default order elsewhere and while the order loads. Each group under its name, 东方 first.
     final methods = (ref.watch(methodsProvider).value ?? defaultMethods).where(defaultMethods.contains).toList();
-    final entries = <Widget>[
-      for (final (key, title, members) in [('east', l10n.homeEast, _east), ('west', l10n.homeWest, _west)])
+    // Each part comes in after the one before it (FadeSlideIn's index), the banner and the profile prompt first.
+    var order = 2;
+    FadeSlideIn fadeIn(Widget child) => FadeSlideIn(index: order++, child: child);
+    // A group's methods in a CardGrid (S26: on a desktop window 东方's four 2 × 2, 西方's one 1 × 1), then its card
+    // of the day.
+    final groups = <Widget>[
+      for (final (key, title, members, daily) in [
+        ('east', l10n.homeEast, _east, null),
+        ('west', l10n.homeWest, _west, const DailyCard()),
+      ])
         if (methods.any(members.contains)) ...[
-          _GroupTitle(key: Key('group-$key'), title: title),
-          for (final system in methods.where(members.contains)) _entry(context, l10n, system),
+          fadeIn(_GroupTitle(key: Key('group-$key'), title: title)),
+          CardGrid(children: [for (final system in methods.where(members.contains)) fadeIn(_entry(context, l10n, system))]),
+          if (daily != null) fadeIn(daily),
         ],
     ];
     return Scaffold(
@@ -54,8 +63,9 @@ class HomePage extends ConsumerWidget {
           const SizedBox(width: Space.m),
         ],
       ),
+      // In the app's container (S26): fluid on a phone and a tablet, at most 1620 on a wider window.
       body: ListView(
-        padding: pagePadding(context),
+        padding: containerPadding(context),
         children: [
           FadeSlideIn(
             child: HeroBanner(
@@ -76,9 +86,8 @@ class HomePage extends ConsumerWidget {
                 child: Text(l10n.noProfileBody),
               ),
             ),
-          for (final (i, entry) in entries.indexed) FadeSlideIn(index: 2 + i, child: entry),
-          FadeSlideIn(index: 2 + entries.length, child: const DailyCard()),
-          FadeSlideIn(index: 3 + entries.length, child: const RecentHistory()),
+          ...groups,
+          fadeIn(const RecentHistory()),
         ],
       ),
     );

@@ -116,6 +116,16 @@ Window classes are Material's, by the window's width (`WindowClass.of`, `layout.
   sides, and on a wide window enough to keep the content in a column at most `Grid.reading` (720) wide. A page that
   sets things side by side takes a wider column (`maxWidth: Grid.wide`, 1200: the tarot page, whose cards stay at their
   full size, owner v1.1.x). The list keeps its scrollbar at the window's edge.
+- **The app's container** (owner, 2026-10-30: 「大于 1620px 时要设置一个max-width 1620px。本体可以是fluid…在tablet和mobile
+  device 可以不用有这限制了」). 首页 and the sign-in page take `containerPadding(context)`:
+  - on a phone and a tablet the content is fluid, with only the class's margin;
+  - on a wider window it is at most `Grid.container` (1620) wide and centred, with the margin inside.
+  - The 管理后台 keeps its own container, 1440 (「管理员界面就不用改了」).
+- **Columns on a desktop window** (the large class; 「在超大屏幕布局时可以采用2X2布局。如果只有一个那就采用1x1」):
+  - `CardGrid` sets cards two to a row with a gutter between; a card alone in its row spans it. On 首页, 东方's four
+    methods are 2 × 2 and 西方's one is 1 × 1.
+  - The sign-in page puts its banner at the left, as tall as the form at the right (5 of 12 columns).
+  - Phones and tablets keep one column.
 - **Columns** for a layout of parts side by side: `Grid.span(width, n, columns:, gutter:)`. The dashboard's main column
   and panel are 8 : 4 at large widths.
 - **A dialog** keeps its own width (`ConstrainedBox`, 520–640), as Material's dialogs do.
@@ -229,8 +239,8 @@ compact grid, and a panel of its own at the right. The building blocks are in
 
 1. **Colours** from `Theme.of(context).colorScheme` or `ThemeTokens.of(context)`; a drawn object's two colours through
    `pick` or the theme's `darkness`. A new token goes into both themes and into theme_test's contrast check.
-2. **The page's list** takes `pagePadding(context)` (a dashboard page: `DashboardLayout`); nothing stretches across a
-   wide window.
+2. **The page's list** takes `pagePadding(context)` (首页 and the sign-in page: `containerPadding`; a dashboard page:
+   `DashboardLayout`); nothing stretches across a wide window.
 3. **Every gap and padding** is a `Space` step or a named use; a corner a `Radii` step; a drawing's own geometry a
    named constant.
 4. **Text** takes a role of the ramp; long text `ReadingText`; numbers in a column tabular figures.
@@ -251,7 +261,7 @@ compact grid, and a panel of its own at the right. The building blocks are in
 | `admin/test/dashboard_test.dart`    | the container at 2560 (1440, centred, one left edge for every page); the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter |
 | `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                                                                                   |
 | `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                                                                                        |
-| `app/test/grid_test.dart`           | window classes; the type ramp; 首页 in the grid at 390, 700 and 1280 (margins, the 720 column, titles on the cards' edge); the rules themselves                                                                                                                                                                         |
+| `app/test/grid_test.dart`           | window classes; the type ramp; 首页 at 390 to 2560 (margins, the 1620 container, 2 × 2 and 1 × 1, titles on the cards' edge); the sign-in page's two columns; the rules                                                                                                                                                 |
 | `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own                                                              |
 
 A drawn object (coins, the 签 and its tube, tarot backs, the title's mark) may break the colour, size and corner rules

@@ -70,21 +70,87 @@ void main() {
     }
   });
 
-  testWidgets('the home page in the grid: 16 at the sides on a phone, 24 on a small tablet, a centred 720 on a desktop; '
-      'the group titles on the cards\' edge', (tester) async {
+  // S26 (owner, 2026-10-30): 「大于 1620px 时要设置一个max-width 1620px。本体可以是fluid…在tablet和mobile device 可以不用有这
+  // 限制了」, 「在超大屏幕布局时可以采用2X2布局。如果只有一个那就采用1x1」.
+  // Window width → the content's left edge and width, the margin inside the container: 390 - 2 × 16 = 358,
+  // 700 - 2 × 24 = 652, 1024 - 2 × 24 = 976 (a tablet, no limit), 1280 - 2 × 32 = 1216; on 2560 the container is
+  // 1620 at (2560 - 1620) / 2 = 470, so the content starts at 470 + 32 = 502 and is 1620 - 2 × 32 = 1556 wide.
+  const widths = [(390.0, 16.0, 358.0), (700.0, 24.0, 652.0), (1024.0, 24.0, 976.0), (1280.0, 32.0, 1216.0), (2560.0, 502.0, 1556.0)];
+
+  testWidgets('首页 in the app\'s container: fluid on a phone and a tablet, at most 1620 wider; on a desktop the methods '
+      'two to a row (东方 2 × 2, 西方 1 × 1); the group titles on the cards\' edge', (tester) async {
     addTearDown(tester.view.reset);
     tester.view.devicePixelRatio = 1;
-    // Window width → the cards' left edge and width: (390 - 2 × 16), (700 - 2 × 24), and (1280 - 720) / 2 = 280.
-    for (final (width, left, cardWidth) in [(390.0, 16.0, 358.0), (700.0, 24.0, 652.0), (1280.0, 280.0, 720.0)]) {
+    for (final (width, left, content) in widths) {
       tester.view.physicalSize = Size(width, 1600);
       await tester.pumpWidget(const SizedBox()); // a fresh app (rule 24)
       await tester.pumpWidget(testApp(FakeApi()));
       await settle(tester);
-      final card = tester.getRect(find.byKey(const Key('entry-bazi')));
-      expect(card.left, left, reason: 'width $width');
-      expect(card.width, cardWidth, reason: 'width $width');
+      final desktop = width >= 1200;
+      // 东方 in the region's order (the fake's: 八字, 求签, 算卦, 风水), then 西方's 塔罗.
+      final east = [for (final m in ['bazi', 'qiuqian', 'liuyao', 'fengshui']) tester.getRect(find.byKey(Key('entry-$m')))];
+      final tarot = tester.getRect(find.byKey(const Key('entry-tarot')));
+      expect(east.first.left, left, reason: 'width $width');
+      expect(tarot.left, left, reason: 'width $width');
+      // 1 × 1: a group's only method spans the content.
+      expect(tarot.width, content, reason: 'width $width');
+      if (desktop) {
+        // Two to a row with the gutter (24) between: (1216 - 24) / 2 = 596 and (1556 - 24) / 2 = 766 a card.
+        final card = (content - 24) / 2;
+        for (final r in east) {
+          expect(r.width, card, reason: 'width $width');
+        }
+        expect(east[1].left, east[0].right + 24, reason: 'width $width');
+        expect(east[1].right, left + content, reason: 'width $width');
+        expect([east[0].top, east[2].left], [east[1].top, left], reason: 'width $width: 2 × 2');
+        expect(east[2].top, east[0].bottom, reason: 'width $width: the second row under the first');
+        expect(east[3].top, east[2].top, reason: 'width $width');
+      } else {
+        for (final r in east) {
+          expect([r.left, r.width], [left, content], reason: 'width $width');
+        }
+        for (var i = 1; i < east.length; i++) {
+          expect(east[i].top, east[i - 1].bottom, reason: 'width $width: one under another');
+        }
+      }
       final title = find.descendant(of: find.byKey(const Key('group-east')), matching: find.byType(Text));
       expect(tester.getTopLeft(title).dx, left, reason: 'width $width');
+    }
+  });
+
+  testWidgets('the sign-in page in the container: one column on a phone and a tablet; on a desktop the banner at the '
+      'left as tall as the form at the right, five of the twelve columns', (tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.devicePixelRatio = 1;
+    for (final (width, left, content) in widths) {
+      tester.view.physicalSize = Size(width, 1600);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(testApp(FakeApi(), signedIn: false));
+      await settle(tester);
+      final banner = tester.getRect(find.byKey(const Key('auth-banner')));
+      final login = tester.getRect(find.byKey(const Key('login')));
+      // The form's last control: Google, coming soon.
+      final google = tester.getRect(find.byType(OutlinedButton).last);
+      expect(banner.left, left, reason: 'width $width');
+      if (width >= 1200) {
+        // Five columns of twelve, gutters of 24: (1216 - 11 × 24) / 12 × 5 + 4 × 24 = 492.67; (1556 - 264) / 12 × 5
+        // + 96 = 634.33.
+        final form = (content - 11 * 24) / 12 * 5 + 4 * 24;
+        expect(login.width, closeTo(form, 0.01), reason: 'width $width');
+        expect(login.right, closeTo(left + content, 0.01), reason: 'width $width');
+        expect(banner.right, closeTo(login.left - 24, 0.01), reason: 'width $width');
+        expect([banner.top, banner.bottom], [login.top, google.bottom], reason: 'width $width: as tall as the form');
+        // Signing up, the longer form (the region's menu, the age box): the banner grows with it.
+        await tester.tap(find.byKey(const Key('auth-toggle')));
+        await settle(tester);
+        final tall = tester.getRect(find.byKey(const Key('auth-banner')));
+        expect(tester.getTopLeft(find.byKey(const Key('username'))).dy, tall.top, reason: 'width $width');
+        expect(tall.bottom, tester.getRect(find.byType(OutlinedButton).last).bottom, reason: 'width $width');
+        expect(tall.height, greaterThan(banner.height), reason: 'width $width');
+      } else {
+        expect([banner.width, login.left, login.width], [content, left, content], reason: 'width $width');
+        expect(login.top, greaterThanOrEqualTo(banner.bottom), reason: 'width $width: the form under the banner');
+      }
     }
   });
 

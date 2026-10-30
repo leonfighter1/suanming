@@ -400,18 +400,28 @@ class _RevealScroll extends DrivenScrollActivity {
 
 /// Large gradient header used at the top of the main screens.
 class HeroBanner extends StatelessWidget {
-  const HeroBanner({super.key, required this.title, this.subtitle, this.icon, this.trailing});
+  const HeroBanner({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.icon,
+    this.trailing,
+    this.margin,
+  });
   final String title;
   final String? subtitle;
   final IconData? icon;
   final Widget? trailing;
+
+  /// The room round it: by default the gap below; none beside the form on a wide sign-in page (S26).
+  final EdgeInsets? margin;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     return Container(
-      margin: const EdgeInsets.only(bottom: Space.l),
+      margin: margin ?? const EdgeInsets.only(bottom: Space.l),
       padding: const EdgeInsets.all(Space.xl),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Radii.hero),
@@ -427,7 +437,9 @@ class HeroBanner extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
+            // Its own height, so a banner made taller than its text (beside a form) holds the text in its middle.
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: text.headlineSmall?.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w600)),
