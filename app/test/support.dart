@@ -15,6 +15,8 @@ import 'package:mingli_app/data/settings_store.dart';
 import 'package:mingli_app/data/token_store.dart';
 import 'package:mingli_app/domain/terms.dart';
 
+import 'keys.dart';
+
 /// Fixtures are generated from the real engine + pipeline by `npm run sync:app`.
 Map<String, dynamic> fixture(String name) =>
     jsonDecode(File('test/fixtures/$name.json').readAsStringSync()) as Map<String, dynamic>;
@@ -44,6 +46,16 @@ Future<void> scrollToFinder(WidgetTester tester, Finder finder, {double delta = 
 
 /// Scroll the main list down to [key] (see [scrollToFinder]).
 Future<void> scrollTo(WidgetTester tester, Key key) => scrollToFinder(tester, find.byKey(key));
+
+/// Scroll the main list to [finder], let the page take [n] frames and tap it; with [after], [n] frames again after the
+/// tap (S28: one home for four copies).
+Future<void> scrollAndTap(WidgetTester tester, Finder finder, {bool after = false, int n = 12}) async {
+  await scrollToFinder(tester, finder);
+  await tester.ensureVisible(finder);
+  await frames(tester, n);
+  await tester.tap(finder);
+  if (after) await frames(tester, n);
+}
 
 /// On the home page, open a method: scroll to its entry, then tap it. Since v6.1.0 the 西方 group (塔羅) sits
 /// below the 東方 one, off a phone's first screen.

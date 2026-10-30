@@ -11,12 +11,6 @@ import 'keys.dart';
 import 'reading_page_test.dart' show openTarotReading;
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 /// Opens the history's 八字 reading (report_passed) on a phone-sized screen.
 Future<FakeApi> openReading(WidgetTester tester, {FakeApi? api}) async {
   tester.view.physicalSize = const Size(412, 900);
@@ -24,11 +18,11 @@ Future<FakeApi> openReading(WidgetTester tester, {FakeApi? api}) async {
   addTearDown(tester.view.reset);
   final fake = api ?? FakeApi(pendingPolls: 0);
   await tester.pumpWidget(testApp(fake, locale: zhHans));
-  await settle(tester);
+  await frames(tester, 12);
   await openFromMenu(tester, 'menu-history');
-  await settle(tester);
+  await frames(tester, 12);
   await tester.tap(find.text('八字排盘').last);
-  await settle(tester);
+  await frames(tester, 12);
   return fake;
 }
 
@@ -49,7 +43,7 @@ void main() {
 
     expect(fab.hitTestable(), findsOneWidget);
     await tester.tap(fab);
-    await settle(tester);
+    await frames(tester, 12);
     final field = find.byKey(const Key('followup-field'));
     expect(field.hitTestable(), findsOneWidget);
     expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
@@ -76,16 +70,16 @@ void main() {
   testWidgets('asking: Enter sends, the answer comes in three parts, and a suggestion asks the next', (tester) async {
     final api = await openReading(tester);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.enterText(find.byKey(const Key('followup-field')), '明年我的事业怎么样？');
     // Enter in the field: the web performs its action, as receiveAction does here.
     await tester.testTextInput.receiveAction(TextInputAction.send);
-    await settle(tester);
+    await frames(tester, 12);
     expect(lastAsk(api), {'question': '明年我的事业怎么样？'});
     await scrollTo(tester, const ValueKey<String>('followup-question-0'));
     expect(find.text('明年我的事业怎么样？'), findsOneWidget);
 
-    await settle(tester);
+    await frames(tester, 12);
     await scrollTo(tester, const ValueKey<String>('followup-answer-0'));
     final answer = fixture('followup_passed')['answer'] as Map<String, dynamic>;
     final p = (answer['paragraphs'] as List).first as Map<String, dynamic>;
@@ -97,7 +91,7 @@ void main() {
     await scrollTo(tester, const ValueKey<String>('followup-suggestion-0'));
     expect(find.text(next), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey<String>('followup-suggestion-0')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(lastAsk(api), {'question': next});
   });
 
@@ -105,11 +99,11 @@ void main() {
     final api = FakeApi(pendingPolls: 0)..followUpInScope = false;
     await openReading(tester, api: api);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.enterText(find.byKey(const Key('followup-field')), '我家的猫会好起来吗？');
     await tester.tap(find.byKey(const Key('followup-send')));
-    await settle(tester);
-    await settle(tester);
+    await frames(tester, 12);
+    await frames(tester, 12);
     await scrollTo(tester, const ValueKey<String>('followup-out-of-scope-0'));
     expect(find.text('超出这次结果能回答的范围'), findsOneWidget);
   });
@@ -117,7 +111,7 @@ void main() {
   testWidgets('busy, the limit and the day\'s cap each get their own message', (tester) async {
     final api = await openReading(tester);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     for (final (status, code, text) in [
       (409, 'followup_pending', '上一个追问还在回答，请稍候'),
       (409, 'followup_limit', '这次结果的追问次数已用完'),
@@ -126,10 +120,10 @@ void main() {
       api.followUpError = {'title': 'x', 'status': status, 'code': ?code};
       await tester.enterText(find.byKey(const Key('followup-field')), '问题');
       await tester.tap(find.byKey(const Key('followup-send')));
-      await settle(tester);
+      await frames(tester, 12);
       expect(find.text(text), findsOneWidget, reason: '$status $code');
       ScaffoldMessenger.of(tester.element(find.byKey(const Key('followup-card')))).removeCurrentSnackBar();
-      await settle(tester);
+      await frames(tester, 12);
     }
   });
 
@@ -137,11 +131,11 @@ void main() {
     final api = FakeApi(pendingPolls: 0)..followUpLimit = 1;
     await openReading(tester, api: api);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.enterText(find.byKey(const Key('followup-field')), '第一问');
     await tester.tap(find.byKey(const Key('followup-send')));
-    await settle(tester);
-    await settle(tester);
+    await frames(tester, 12);
+    await frames(tester, 12);
     await scrollTo(tester, const Key('followup-send'));
     expect(tester.widget<FilledButton>(find.byKey(const Key('followup-send'))).onPressed, isNull);
     expect(tester.widget<TextField>(find.byKey(const Key('followup-field'))).enabled, isFalse);
@@ -151,7 +145,7 @@ void main() {
   testWidgets('Tab reaches the field and the send button', (tester) async {
     await openReading(tester);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(focusedKey(), 'followup-field');
     await tester.enterText(find.byKey(const Key('followup-field')), '问题');
     await press(tester, LogicalKeyboardKey.tab);
@@ -170,7 +164,7 @@ void main() {
       await openReading(tester, api: api);
       expect(find.byKey(const Key('followup-fab')), findsOneWidget, reason: fixtureName);
       await tester.tap(find.byKey(const Key('followup-fab')));
-      await settle(tester);
+      await frames(tester, 12);
       expect(find.text(starter), findsOneWidget, reason: fixtureName);
     }
   });
@@ -181,18 +175,18 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi(pendingPolls: 0);
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('一生运势报告'));
-    await settle(tester);
-    await settle(tester);
+    await frames(tester, 12);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('我哪个阶段最需要用心？'), findsOneWidget);
     await tester.enterText(find.byKey(const Key('followup-field')), '我哪个阶段最需要用心？');
     await tester.tap(find.byKey(const Key('followup-send')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.requests.last.url.path, matches(RegExp(r'^/v1/life-reports/[^/]+/followups$')));
   });
 }

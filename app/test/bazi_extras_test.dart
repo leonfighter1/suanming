@@ -7,23 +7,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/domain/profile.dart';
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
 
 Future<FakeApi> openChart(WidgetTester tester, {ProfileStore? profiles}) async {
   final api = FakeApi();
   await tester.pumpWidget(testApp(api, profiles: profiles));
-  await settle(tester);
+  await frames(tester, 10);
   await tester.tap(find.byKey(const Key('entry-bazi')));
-  await settle(tester);
+  await frames(tester, 10);
   await scrollTo(tester, const Key('compute-chart'));
   await tester.tap(find.byKey(const Key('compute-chart')));
-  await settle(tester);
+  await frames(tester, 10);
   return api;
 }
 

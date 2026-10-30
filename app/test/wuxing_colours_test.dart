@@ -6,18 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/presentation/theme.dart';
 
+import 'keys.dart';
 import 'support.dart';
 
 /// WCAG 2 contrast ratio of two colours.
 double contrast(Color a, Color b) {
   final (x, y) = (a.computeLuminance(), b.computeLuminance());
   return (max(x, y) + 0.05) / (min(x, y) + 0.05);
-}
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
 }
 
 void main() {
@@ -46,23 +41,23 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(FakeApi()));
-    await settle(tester);
+    await frames(tester, 10);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 10);
     await scrollTo(tester, const Key('compute-chart'));
     await tester.tap(find.byKey(const Key('compute-chart')));
-    await settle(tester);
+    await frames(tester, 10);
 
     final grid = find.byKey(const Key('pillar-grid'));
     int rows() => (tester.widget<Table>(grid).children).length;
     expect(rows(), 4); // pillar names, 十神, 天干, 地支
     expect(find.descendant(of: grid, matching: find.text('納音')), findsNothing); // the test app reads 繁體
     await tester.tap(find.byKey(const Key('pillar-more')));
-    await settle(tester);
+    await frames(tester, 10);
     expect(rows(), 8);
     expect(find.descendant(of: grid, matching: find.text('納音')), findsOneWidget);
     await tester.tap(find.byKey(const Key('pillar-more')));
-    await settle(tester);
+    await frames(tester, 10);
     expect(rows(), 4);
   });
 }

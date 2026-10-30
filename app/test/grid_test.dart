@@ -9,13 +9,8 @@ import 'package:mingli_app/presentation/layout.dart';
 import 'package:mingli_app/presentation/theme.dart';
 
 import 'design_rules.dart';
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
 
 void main() {
   test('window classes: 4, 8 or 12 columns, their margins and gutters on the 4-point scale', () {
@@ -86,7 +81,7 @@ void main() {
       tester.view.physicalSize = Size(width, 1600);
       await tester.pumpWidget(const SizedBox()); // a fresh app (rule 24)
       await tester.pumpWidget(testApp(FakeApi()));
-      await settle(tester);
+      await frames(tester, 12);
       final desktop = width >= 1200;
       // 东方 in the region's order (the fake's: 八字, 求签, 算卦, 风水), then 西方's 塔罗.
       final east = [for (final m in ['bazi', 'qiuqian', 'liuyao', 'fengshui']) tester.getRect(find.byKey(Key('entry-$m')))];
@@ -129,7 +124,7 @@ void main() {
       tester.view.physicalSize = Size(width, 1600);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(testApp(FakeApi(), signedIn: false));
-      await settle(tester);
+      await frames(tester, 12);
       final banner = tester.getRect(find.byKey(const Key('auth-banner')));
       final login = tester.getRect(find.byKey(const Key('login')));
       // The form's last control: Google, coming soon.
@@ -145,7 +140,7 @@ void main() {
         expect([banner.top, banner.bottom], [login.top, google.bottom], reason: 'width $width: as tall as the form');
         // Signing up, the longer form (the region's menu, the age box): the banner grows with it.
         await tester.tap(find.byKey(const Key('auth-toggle')));
-        await settle(tester);
+        await frames(tester, 12);
         final tall = tester.getRect(find.byKey(const Key('auth-banner')));
         expect(tester.getTopLeft(find.byKey(const Key('username'))).dy, tall.top, reason: 'width $width');
         expect(tall.bottom, tester.getRect(find.byType(OutlinedButton).last).bottom, reason: 'width $width');
@@ -165,14 +160,14 @@ void main() {
     Future<void> fresh() async {
       await tester.pumpWidget(const SizedBox()); // rule 24
       await tester.pumpWidget(testApp(FakeApi()));
-      await settle(tester);
+      await frames(tester, 12);
     }
 
     // The container: (2560 - 1620) / 2 = 470 beyond it at each side; the content 32 inside it, from 502, 1556 wide.
     for (final m in ['bazi', 'tarot', 'qiuqian', 'liuyao', 'fengshui']) {
       await fresh();
       await openEntry(tester, m);
-      await settle(tester);
+      await frames(tester, 12);
       final card = tester.getRect(find.byType(AppCard).first);
       expect([card.left, card.width], [502.0, 1556.0], reason: m);
     }
@@ -180,17 +175,17 @@ void main() {
     // container itself, 470 to 2090.
     await fresh();
     await openEntry(tester, 'bazi');
-    await settle(tester);
+    await frames(tester, 12);
     await scrollTo(tester, const Key('city'));
     await tester.tap(find.byKey(const Key('city')));
-    await settle(tester);
+    await frames(tester, 12);
     final search = tester.getRect(find.byKey(const Key('place-search')));
     expect([search.left, search.width], [470.0 + 16, 1620.0 - 32]);
     await fresh();
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-settings')));
-    await settle(tester);
+    await frames(tester, 12);
     final tile = tester.getRect(find.byKey(const Key('settings-username')));
     expect([tile.left, tile.width], [470.0, 1620.0]);
   });

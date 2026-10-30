@@ -8,13 +8,8 @@ import 'package:mingli_app/data/settings_store.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/home_page.dart';
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
 
 /// The banner's picture of the time: the sun, or the moon.
 Finder bannerIcon(IconData icon) => find.descendant(of: find.byType(HeroBanner), matching: find.byIcon(icon));
@@ -33,7 +28,7 @@ void main() {
       (tester) async {
     var now = DateTime(2026, 10, 30, 18, 59, 30);
     await tester.pumpWidget(testApp(FakeApi(), byTime: true, overrides: [clockProvider.overrideWithValue(() => now)]));
-    await settle(tester);
+    await frames(tester, 12);
     final home = find.byType(HomePage);
     expect(Theme.of(tester.element(home)).brightness, Brightness.light);
     expect(bannerIcon(Icons.wb_sunny_rounded), findsOneWidget);
@@ -42,7 +37,7 @@ void main() {
     // 30 s later it is 19:00: the turn comes by itself, and the page fades into the dark theme.
     now = DateTime(2026, 10, 30, 19);
     await tester.pump(const Duration(seconds: 30));
-    await settle(tester);
+    await frames(tester, 12);
     expect(Theme.of(tester.element(home)).brightness, Brightness.dark);
     expect(bannerIcon(Icons.nightlight_round), findsOneWidget);
     expect(bannerIcon(Icons.wb_sunny_rounded), findsNothing);
@@ -50,7 +45,7 @@ void main() {
     // At 06:00, light again.
     now = DateTime(2026, 10, 31, 6);
     await tester.pump(const Duration(hours: 11));
-    await settle(tester);
+    await frames(tester, 12);
     expect(Theme.of(tester.element(home)).brightness, Brightness.light);
     expect(bannerIcon(Icons.wb_sunny_rounded), findsOneWidget);
   });
@@ -61,7 +56,7 @@ void main() {
       theme: ThemeMode.light,
       overrides: [clockProvider.overrideWithValue(() => DateTime(2026, 10, 30, 22))],
     ));
-    await settle(tester);
+    await frames(tester, 12);
     expect(Theme.of(tester.element(find.byType(HomePage))).brightness, Brightness.light);
     expect(bannerIcon(Icons.nightlight_round), findsOneWidget);
   });
@@ -74,11 +69,11 @@ void main() {
       theme: ThemeMode.light,
       overrides: [clockProvider.overrideWithValue(() => DateTime(2026, 10, 30, 22))],
     ));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('theme-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     final options = find.descendant(of: find.byType(SimpleDialog), matching: find.byType(ListTile)).evaluate();
     expect([for (final e in options) (e.widget.key! as ValueKey<String>).value], ['theme-time', 'theme-system', 'theme-light', 'theme-dark']);
     final time = find.byKey(const Key('theme-time'));
@@ -86,7 +81,7 @@ void main() {
     expect(find.descendant(of: time, matching: find.text('晚上 7 點到早上 6 點為深色，其餘為淺色')), findsOneWidget);
 
     await tester.tap(time);
-    await settle(tester);
+    await frames(tester, 12);
     expect(Theme.of(tester.element(find.byType(HomePage))).brightness, Brightness.dark); // 22:00
     expect(tester.widget<Text>(find.byKey(const Key('theme-current'))).data, '跟隨時間');
     expect(store.savedTheme, 'time');

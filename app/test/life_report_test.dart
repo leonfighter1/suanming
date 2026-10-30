@@ -9,13 +9,8 @@ import 'package:mingli_app/domain/life_report.dart';
 import 'package:mingli_app/l10n/gen/app_localizations_zh.dart';
 import 'package:mingli_app/presentation/life_export.dart';
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
 
 void main() {
   final view = LifeReportView.fromJson(fixture('life_passed'));
@@ -63,20 +58,20 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
 
     // The life report lives inside 八字排盘 now: no separate home card.
     expect(find.byKey(const Key('entry-life')), findsNothing);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('排盘'), findsOneWidget); // chart mode first
     await tester.tap(find.text('一生运势报告'));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('生成一生运势报告'), findsOneWidget);
     await scrollTo(tester, const Key('compute-chart'));
     await tester.tap(find.byKey(const Key('compute-chart')));
-    await settle(tester);
-    await settle(tester);
+    await frames(tester, 12);
+    await frames(tester, 12);
 
     final body = jsonDecode(api.requests.lastWhere((r) => r.url.path == '/v1/life-reports').body) as Map;
     expect(body['locale'], 'zh-Hans');
@@ -103,22 +98,22 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi(pendingPolls: 0)..person = {'name': '吴勇', 'birthplace': '中国 · 江苏 · 靖江市'};
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore(), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('吴勇 一生运势报告'), findsOneWidget);
     expect(find.text('吴勇 的命盘'), findsOneWidget);
 
     await tester.tap(find.text('吴勇 一生运势报告'));
-    await settle(tester);
-    await settle(tester);
+    await frames(tester, 12);
+    await frames(tester, 12);
     expect(find.text('吴勇 一生运势报告'), findsWidgets); // the title and the cover
     expect(find.text('中国 · 江苏 · 靖江市'), findsOneWidget);
 
     Navigator.of(tester.element(find.text('中国 · 江苏 · 靖江市'))).pop();
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('吴勇 的命盘'));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('吴勇 的命盘'), findsOneWidget);
     expect(find.text('出生地：中国 · 江苏 · 靖江市'), findsOneWidget); // first in the facts card
   });
@@ -128,9 +123,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0), profiles: InMemoryProfileStore(), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('一生运势报告'), findsOneWidget);
     expect(find.text('八字排盘'), findsWidgets);
     expect(find.textContaining('的命盘'), findsNothing);

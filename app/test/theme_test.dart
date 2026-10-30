@@ -10,18 +10,13 @@ import 'package:mingli_app/presentation/home_page.dart';
 import 'package:mingli_app/presentation/theme.dart';
 import 'package:mingli_app/presentation/tokens.dart';
 
+import 'keys.dart';
 import 'support.dart';
 
 /// WCAG 2 contrast ratio of two colours.
 double contrast(Color a, Color b) {
   final (x, y) = (a.computeLuminance(), b.computeLuminance());
   return (max(x, y) + 0.05) / (min(x, y) + 0.05);
-}
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
 }
 
 /// Every box on screen and where it is: what a change of theme must leave alone.
@@ -127,10 +122,10 @@ void main() {
     Future<(List<Rect>, List<Rect>)> layouts(ThemeMode mode) async {
       await tester.pumpWidget(const SizedBox()); // a fresh app (rule 24)
       await tester.pumpWidget(testApp(FakeApi(), theme: mode));
-      await settle(tester);
+      await frames(tester, 12);
       final page = layoutOf(tester);
       await tester.tap(find.byKey(const Key('open-menu')));
-      await settle(tester);
+      await frames(tester, 12);
       return (page, layoutOf(tester));
     }
 
@@ -146,12 +141,12 @@ void main() {
   testWidgets('外觀 in the menu: the page fades into the theme picked, the 五行 too, and it is kept', (tester) async {
     final store = InMemorySettingsStore();
     await tester.pumpWidget(testApp(FakeApi(), settings: store, theme: ThemeMode.light));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(tester.widget<Text>(find.byKey(const Key('theme-current'))).data, '淺色');
     await tester.tap(find.byKey(const Key('theme-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     for (final (key, label) in [('theme-system', '跟隨系統'), ('theme-light', '淺色'), ('theme-dark', '深色')]) {
       expect(find.descendant(of: find.byKey(Key(key)), matching: find.text(label)), findsOneWidget);
     }
@@ -174,7 +169,7 @@ void main() {
     expect(wood, isNot(ThemeTokens.light.wood));
     expect(wood, isNot(ThemeTokens.dark.wood));
 
-    await settle(tester);
+    await frames(tester, 12);
     final after = tester.element(find.byType(HomePage));
     expect(ThemeTokens.of(after).darkness, 1);
     expect(Theme.of(after).scaffoldBackgroundColor, ThemeTokens.dark.background);

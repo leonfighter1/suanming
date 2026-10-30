@@ -9,12 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 /// The 塔罗 page, three cards (the default), with 抽牌 pressed: the ritual is open.
 Future<FakeApi> openRitual(WidgetTester tester) async {
   tester.view.physicalSize = const Size(1000, 2400);
@@ -22,15 +16,15 @@ Future<FakeApi> openRitual(WidgetTester tester) async {
   addTearDown(tester.view.reset);
   final api = FakeApi();
   await tester.pumpWidget(testApp(api));
-  await settle(tester);
+  await frames(tester, 10);
   await openEntry(tester, 'tarot');
-  await settle(tester);
+  await frames(tester, 10);
   // The cards are drawn only for a question (v11.1.0).
   await ask(tester, 'tarot-question');
   await tester.ensureVisible(find.byKey(const Key('draw')));
   await tester.pump(); // rule 27
   await tester.tap(find.byKey(const Key('draw')));
-  await settle(tester);
+  await frames(tester, 10);
   expect(find.byKey(const Key('tarot-ritual')), findsOneWidget);
   return api;
 }
@@ -43,7 +37,7 @@ Future<void> tapKey(WidgetTester tester, String key) async {
   await tester.ensureVisible(find.byKey(Key(key)));
   await tester.pump(); // rule 27
   await tester.tap(find.byKey(Key(key)));
-  await settle(tester);
+  await frames(tester, 10);
 }
 
 void main() {
@@ -77,15 +71,15 @@ void main() {
     final api = await openRitual(tester);
     await tabTo(tester, 'ritual-shuffle');
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 10);
     await tabTo(tester, 'ritual-cut-2');
     expect(ringShown(tester, find.byKey(const Key('ritual-cut-2'))), isTrue);
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 10);
     for (final p in [0, 1, 2]) {
       await tabTo(tester, 'ritual-pick-$p');
       await press(tester, LogicalKeyboardKey.enter);
-      await settle(tester);
+      await frames(tester, 10);
     }
     expect(chartRequest(api)['ritual'], {
       'cut': 52,

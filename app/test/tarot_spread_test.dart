@@ -13,13 +13,6 @@ import 'package:mingli_app/presentation/widgets/tarot_spread.dart';
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  // Progress indicators animate forever, so pumpAndSettle would time out.
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 /// A fresh app of [size] on the 塔罗 page, [question] typed, [focus] chosen, [spread] picked,
 /// cards drawn. With [finalReport], a requested reading comes back as that report at once.
 Future<FakeApi> drawAt(
@@ -37,32 +30,32 @@ Future<FakeApi> drawAt(
   final api = finalReport == null ? FakeApi() : FakeApi(finalReport: finalReport, pendingPolls: 0);
   await tester.pumpWidget(const SizedBox.shrink()); // a fresh app, not the last one updated (rule 24)
   await tester.pumpWidget(testApp(api));
-  await settle(tester);
+  await frames(tester, 10);
   await openEntry(tester, 'tarot');
-  await settle(tester);
+  await frames(tester, 10);
   await ask(tester, 'tarot-question', question);
   if (focus != null) {
     await tester.ensureVisible(find.byKey(Key('focus-$focus')));
     await tester.pump(); // a frame after the jump, before the tap (rule 27)
     await tester.tap(find.byKey(Key('focus-$focus')));
-    await settle(tester);
+    await frames(tester, 10);
   }
   if (spread != null) {
     await tester.ensureVisible(find.byKey(Key('spread-$spread')));
     await tester.pump(); // a frame after the jump, before the tap (rule 27)
     // The segment's button takes the touch; its label isn't in the hit path, hence no warning.
     await tester.tap(find.byKey(Key('spread-$spread')), warnIfMissed: false);
-    await settle(tester);
+    await frames(tester, 10);
   }
   await tester.ensureVisible(find.byKey(const Key('draw')));
   await tester.pump(); // a frame after the jump, before the tap (rule 27)
   await tester.tap(find.byKey(const Key('draw')));
-  await settle(tester);
+  await frames(tester, 10);
   // The ritual (v3.0.0) has its own tests (tarot_ritual_test.dart); here the deck picks, as before.
   await tester.ensureVisible(find.byKey(const Key('ritual-skip')));
   await tester.pump(); // rule 27
   await tester.tap(find.byKey(const Key('ritual-skip')));
-  await settle(tester);
+  await frames(tester, 10);
   return api;
 }
 
@@ -78,9 +71,9 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(const SizedBox.shrink()); // rule 24
     await tester.pumpWidget(testApp(FakeApi()));
-    await settle(tester);
+    await frames(tester, 10);
     await openEntry(tester, 'tarot');
-    await settle(tester);
+    await frames(tester, 10);
   }
 
   testWidgets('the picker draws each spread small and lists its positions before the draw', (tester) async {
@@ -93,7 +86,7 @@ void main() {
     expect(listed(), expected('three_card')); // the default
     for (final id in ['celtic_cross', 'single', 'two_paths', 'relationship']) {
       await tester.tap(find.byKey(Key('spread-$id')), warnIfMissed: false); // the segment takes it
-      await settle(tester);
+      await frames(tester, 10);
       expect(listed(), expected(id));
     }
     // Each segment carries its small drawing: 1, 3 and 10 card outlines.
@@ -137,9 +130,9 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpWidget(const SizedBox.shrink()); // rule 24
       await tester.pumpWidget(testApp(FakeApi()));
-      await settle(tester);
+      await frames(tester, 10);
       await openEntry(tester, 'tarot');
-      await settle(tester);
+      await frames(tester, 10);
       final tops = [for (final id in ids) at(id).top];
       expect(tops.sublist(0, 3).toSet(), hasLength(1), reason: '$width: $tops');
       expect(tops.sublist(3).toSet(), hasLength(1), reason: '$width: $tops');
@@ -245,17 +238,17 @@ void main() {
     final semantics = tester.ensureSemantics();
     // Touching the third card first turns the first one: the classic order.
     await tester.tap(find.byKey(const Key('tarot-card-3')));
-    await settle(tester);
+    await frames(tester, 10);
     expect(spoken(tester, 1), isNot(contains('未翻開')));
     expect(spoken(tester, 2), contains('下一張'));
     expect(spoken(tester, 3), contains('未翻開'));
     // A turned card opens large with what its position stands for.
     await tester.tap(find.byKey(const Key('tarot-card-1')));
-    await settle(tester);
+    await frames(tester, 10);
     final view = find.byKey(const Key('tarot-card-view'));
     expect(find.descendant(of: view, matching: find.text(testTerms.positionMeaning('past', 'zh-Hant'))), findsOneWidget);
     await tester.tap(find.byKey(const Key('tarot-card-view-close')));
-    await settle(tester);
+    await frames(tester, 10);
     expect(view, findsNothing);
     semantics.dispose();
   });
@@ -274,14 +267,14 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('tarot-card-5')));
     await tester.pump(); // a frame after the jump, before the tap (rule 27)
     await tester.tap(find.byKey(const Key('tarot-card-5')));
-    await settle(tester);
+    await frames(tester, 10);
     final view = find.byKey(const Key('tarot-card-view'));
     expect(find.descendant(of: view, matching: find.text('第 1 張 · 現在')), findsOneWidget);
     // Touching it there turns it; closed again, the spread shows it turned.
     await tester.tap(find.byKey(const Key('tarot-card-view-card')));
-    await settle(tester);
+    await frames(tester, 10);
     await tester.tap(find.byKey(const Key('tarot-card-view-close')));
-    await settle(tester);
+    await frames(tester, 10);
     expect(view, findsNothing);
     final semantics = tester.ensureSemantics();
     expect(spoken(tester, 1), isNot(contains('未翻開')));
@@ -294,9 +287,9 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('tarot-card-5')));
     await tester.pump(); // a frame after the jump, before the tap (rule 27)
     await tester.tap(find.byKey(const Key('tarot-card-5'))); // opens card 1, face down
-    await settle(tester);
+    await frames(tester, 10);
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 10);
     final first = (fixture('chart_tarot_celtic')['chart_fact']['facts']['cards'] as List).first as Map;
     final view = find.byKey(const Key('tarot-card-view'));
     expect(find.descendant(of: view, matching: find.textContaining(testTerms.card(first['card_id'] as String, 'zh-Hant'))), findsWidgets);
@@ -309,11 +302,11 @@ void main() {
     expect(find.text('問題：我該不該換工作？'), findsOneWidget);
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.byKey(const Key('tarot-card-3'))); // each touch turns the next card
-      await settle(tester);
+      await frames(tester, 10);
     }
     await scrollTo(tester, const Key('generate-report'));
     await tester.tap(find.byKey(const Key('generate-report')));
-    await settle(tester);
+    await frames(tester, 10);
     final sent = api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports');
     expect((jsonDecode(sent.body) as Map)['question'], '我該不該換工作？');
     expect((jsonDecode(sent.body) as Map).containsKey('focus'), isFalse); // 不限 by default
@@ -331,14 +324,14 @@ void main() {
     );
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.byKey(const Key('tarot-card-3')));
-      await settle(tester);
+      await frames(tester, 10);
     }
     // A tarot reading's parts are fixed: no topic chips to pick.
     await scrollTo(tester, const Key('generate-report'));
     expect(find.byKey(const Key('tarot-sections')), findsOneWidget);
     expect(find.byType(FilterChip), findsNothing);
     await tester.tap(find.byKey(const Key('generate-report')));
-    await settle(tester);
+    await frames(tester, 10);
     final sent = jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports').body) as Map;
     expect(sent['focus'], 'career_wealth');
     expect(sent['topics'], ['tarot_cards', 'tarot_synthesis', 'tarot_advice']);
@@ -388,9 +381,9 @@ void main() {
       ],
     );
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 10);
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 10);
     final art = find.byKey(const Key('history-art'));
     expect(art, findsOneWidget);
     expect(find.descendant(of: art, matching: find.byType(Image)), findsNWidgets(draw.length));

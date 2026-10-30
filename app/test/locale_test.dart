@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
 import 'package:mingli_app/data/settings_store.dart';
 
+import 'keys.dart';
 import 'support.dart';
 
 /// Storage that can't be read, as in a private window or without a secure context.
@@ -20,22 +21,16 @@ class _BrokenStore implements SettingsStore {
   Future<void> setTheme(String mode) => Future.error(StateError('no storage'));
 }
 
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 void main() {
   testWidgets('the app starts in 简体中文, listed first in the language menu', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('八字排盘'), findsWidgets);
     expect(find.text('你好，测试用户'), findsOneWidget);
     expect(supportedAppLocales.first, zhHans);
 
     await openFromMenu(tester, 'language-menu');
-    await settle(tester);
+    await frames(tester, 12);
     final labels = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data).whereType<String>().toList();
     expect(labels.indexOf('简体中文'), lessThan(labels.indexOf('繁體中文')));
   });
@@ -69,23 +64,23 @@ void main() {
     final store = InMemorySettingsStore();
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api, locale: null, settings: store));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('八字排盘'), findsWidgets);
     await openFromMenu(tester, 'language-menu');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('language-zh-Hant')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(store.saved, 'zh-Hant');
 
     // A restart: main() reads the saved language before the first frame.
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(testApp(api, locale: await startLocale(store), settings: store));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('八字排盤'), findsWidgets);
     expect(find.text('八字排盘'), findsNothing);
     // The ☰ menu (v8.1.0) shows the language it started in.
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁體中文');
   });
 
@@ -97,11 +92,11 @@ void main() {
     expect(await startLocale(InMemorySettingsStore()..saved = 'en'), zhHans);
     // Picking a language where it can't be saved still switches it.
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null, settings: _BrokenStore()));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'language-menu');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('language-zh-Hant')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(tester.widget<Text>(find.byKey(const Key('language-current'))).data, '繁體中文');
   });
 }

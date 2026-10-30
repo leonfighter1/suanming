@@ -10,13 +10,6 @@ import 'package:mingli_app/application/providers.dart' show zhHans;
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  // Progress indicators animate forever, so pumpAndSettle would time out; 900 ms covers BringIntoView (rule 61).
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 /// A fake server with 积分 on: [balance] available, the dev grant as its one change.
 FakeApi withPoints({int balance = 10000, String email = 'test@mingli.local'}) {
   final api = FakeApi(email: email, pendingPolls: 0)
@@ -40,16 +33,16 @@ Future<void> start(WidgetTester tester, FakeApi api, {Size size = const Size(360
   addTearDown(tester.view.reset);
   await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
   await tester.pumpWidget(testApp(api, locale: zhHans));
-  await settle(tester);
+  await frames(tester, 12);
 }
 
 /// The 八字 chart page of the test account's default profile.
 Future<void> openChart(WidgetTester tester) async {
   await openEntry(tester, 'bazi');
-  await settle(tester);
+  await frames(tester, 12);
   await scrollTo(tester, const Key('compute-chart'));
   await tester.tap(find.byKey(const Key('compute-chart')));
-  await settle(tester);
+  await frames(tester, 12);
 }
 
 String textOf(WidgetTester tester, Key key) => tester.widget<Text>(find.byKey(key)).data!;
@@ -58,13 +51,13 @@ void main() {
   testWidgets('with 积分 off the app shows none of them', (tester) async {
     await start(tester, FakeApi(email: 'test@mingli.local', pendingPolls: 0));
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     // The menu is open (历史记录 and 个人资料 are on screen); 我的积分 is not in it.
     expect(find.byKey(const Key('menu-history')).hitTestable(), findsOneWidget);
     expect(find.byKey(const Key('open-profiles')).hitTestable(), findsOneWidget);
     expect(find.byKey(const Key('open-points')), findsNothing);
     await systemBack(tester);
-    await settle(tester);
+    await frames(tester, 12);
     await openChart(tester);
     await scrollTo(tester, const Key('generate-report'));
     expect(find.byKey(const Key('generate-report')), findsOneWidget);
@@ -77,10 +70,10 @@ void main() {
     final api = withPoints();
     await start(tester, api);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(textOf(tester, const Key('menu-points')), '10000');
     await tester.tap(find.byKey(const Key('open-points')));
-    await settle(tester);
+    await frames(tester, 12);
 
     expect(find.text('我的积分'), findsOneWidget);
     expect(textOf(tester, const Key('points-available')), '10000');
@@ -95,7 +88,7 @@ void main() {
     }
 
     await tester.tap(find.byKey(const ValueKey<String>('points-pack-50')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.requests.where((r) => r.url.path == '/v1/points/top-ups'), hasLength(1));
     expect(find.text('已充值 6250 积分（模拟，未收费）'), findsOneWidget);
     // 10000 + 6250 = 16250.
@@ -121,9 +114,9 @@ void main() {
     for (final size in const [Size(360, 740), Size(2560, 1600)]) {
       await start(tester, withPoints(), size: size);
       await tester.tap(find.byKey(const Key('open-menu')));
-      await settle(tester);
+      await frames(tester, 12);
       await tester.tap(find.byKey(const Key('open-points')));
-      await settle(tester);
+      await frames(tester, 12);
       final boxes = [for (final yuan in const [10, 20, 30, 40, 50]) tester.getRect(find.byKey(ValueKey<String>('points-pack-$yuan')))];
       for (final b in boxes) {
         expect(b.size, boxes.first.size, reason: '$size: every box as large as 10 元\'s');
@@ -154,9 +147,9 @@ void main() {
       });
     await start(tester, api);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-points')));
-    await settle(tester);
+    await frames(tester, 12);
     await scrollToFinder(tester, find.text('八字 AI 解读'));
     expect(find.text('-665'), findsOneWidget);
     expect(find.text('余额 9335 积分'), findsOneWidget);
@@ -176,9 +169,9 @@ void main() {
       });
     await start(tester, api);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-points')));
-    await settle(tester);
+    await frames(tester, 12);
     await scrollToFinder(tester, find.text('管理员赠送'));
     expect(find.text('+2000'), findsOneWidget);
     expect(find.textContaining('活动奖励'), findsOneWidget);
@@ -202,7 +195,7 @@ void main() {
     final health = find.widgetWithText(FilterChip, '健康');
     await scrollToFinder(tester, health, delta: -300);
     await tester.tap(health);
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.quoteTopics, [all, 'wuxing,personality,career_wealth,relationships,dayun_liunian']);
   });
 
@@ -212,7 +205,7 @@ void main() {
     await openChart(tester);
     await scrollTo(tester, const Key('generate-report'));
     await tester.tap(find.byKey(const Key('generate-report')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('points-short')), findsOneWidget);
     expect(textOf(tester, const Key('points-short-body')), '这次约需 688 积分，你现在可用 100 积分。充值后再试一次。');
     // No reading was opened.
@@ -220,17 +213,17 @@ void main() {
     // 去充值 has the focus: Enter takes the reader there.
     expect(focusedKey(), 'points-go-top-up');
     await tester.tap(find.byKey(const Key('points-go-top-up')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('points-balance')), findsOneWidget);
     expect(textOf(tester, const Key('points-available')), '100');
     await tester.tap(find.byKey(const ValueKey<String>('points-pack-10')));
-    await settle(tester);
+    await frames(tester, 12);
     // Back on the chart, the reading goes ahead: 100 + 1000 − 688 = 412.
     await systemBack(tester);
-    await settle(tester);
+    await frames(tester, 12);
     await scrollTo(tester, const Key('generate-report'));
     await tester.tap(find.byKey(const Key('generate-report')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.requests.where((r) => r.method == 'POST' && r.url.path == '/v1/reports'), hasLength(2));
     expect(api.pointsBalance, 412);
   });
@@ -239,19 +232,19 @@ void main() {
     final api = withPoints(balance: 100, email: 'me@example.com');
     await start(tester, api, size: const Size(412, 900));
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('八字排盘').last);
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('还可追问 20 次 · 每问约 270 积分'), findsOneWidget);
     await tester.enterText(find.byKey(const Key('followup-field')), '明年我的事业怎么样？');
     await tester.pump(); // rule 19
     await tester.tap(find.byKey(const Key('followup-send')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(textOf(tester, const Key('points-short-body')), '这次约需 270 积分，你现在可用 100 积分。充值后再试一次。');
     await tester.tap(find.text('取消'));
-    await settle(tester);
+    await frames(tester, 12);
     // The question stays, to send again after 充值.
     expect(find.text('明年我的事业怎么样？'), findsOneWidget);
   });
@@ -260,20 +253,20 @@ void main() {
     final api = withPoints(email: 'me@example.com');
     await start(tester, api, size: const Size(1000, 2400));
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('八字排盘').last);
-    await settle(tester);
+    await frames(tester, 12);
     final buy = find.byKey(const Key('remedy-buy-career_wealth'));
     await scrollToFinder(tester, buy);
     await tester.ensureVisible(buy);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.descendant(of: buy, matching: find.text('解锁 · 约 303 积分')), findsOneWidget);
     await tester.tap(buy);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('“事业财运”的破除运势方案约需 303 积分，生成后按实际用量从积分中扣除。'), findsOneWidget);
     expect(find.text('确认支付 约 303 积分'), findsOneWidget);
     await tester.tap(find.byKey(const Key('remedy-pay')));
-    await settle(tester);
+    await frames(tester, 12);
     // 10000 − 303 = 9697; the plan opens, without the placeholder's 演示支付.
     expect(api.pointsBalance, 9697);
     expect(find.byKey(const Key('remedy-target')), findsOneWidget);
@@ -284,9 +277,9 @@ void main() {
     final api = withPoints();
     await start(tester, api);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-points')));
-    await settle(tester);
+    await frames(tester, 12);
     final stops = await tabStops(tester);
     for (final yuan in [10, 20, 30, 40, 50]) {
       expect(stops, contains('points-pack-$yuan'));
@@ -294,7 +287,7 @@ void main() {
     expect(stops.indexOf('points-pack-10'), lessThan(stops.indexOf('points-pack-50')));
     await tabTo(tester, 'points-pack-20');
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 12);
     // 10000 + 2200 = 12200.
     expect(api.pointsBalance, 12200);
   });
@@ -305,12 +298,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.descendant(of: find.byKey(const Key('open-points')), matching: find.text('我的積分')), findsOneWidget);
     await tester.tap(find.byKey(const Key('open-points')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('測試階段為模擬充值：不收錢，點一下積分就到帳。'), findsOneWidget);
     expect(find.text('餘額 10000 積分'), findsWidgets);
   });

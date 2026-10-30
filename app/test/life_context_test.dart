@@ -8,21 +8,8 @@ import 'package:mingli_app/domain/models.dart';
 import 'package:mingli_app/domain/places.dart';
 import 'package:mingli_app/domain/profile.dart';
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
-Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
-  await scrollToFinder(tester, finder);
-  await tester.ensureVisible(finder);
-  await settle(tester);
-  await tester.tap(finder);
-  await settle(tester);
-}
 
 /// Opens the passed fixture report from the history page.
 Future<FakeApi> openReport(WidgetTester tester, {bool preload = false}) async {
@@ -31,11 +18,11 @@ Future<FakeApi> openReport(WidgetTester tester, {bool preload = false}) async {
   addTearDown(tester.view.reset);
   final api = FakeApi(pendingPolls: 0)..preloadRemedies = preload;
   await tester.pumpWidget(testApp(api));
-  await settle(tester);
+  await frames(tester, 12);
   await openFromMenu(tester, 'menu-history');
-  await settle(tester);
+  await frames(tester, 12);
   await tester.tap(find.text('八字排盤').last);
-  await settle(tester);
+  await frames(tester, 12);
   return api;
 }
 
@@ -71,26 +58,26 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi(email: 'test@mingli.local', pendingPolls: 0);
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore()));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
 
-    await scrollAndTap(tester, find.byKey(const Key('life-context')));
-    await scrollAndTap(tester, find.byKey(const Key('life-marital')));
+    await scrollAndTap(tester, find.byKey(const Key('life-context')), after: true);
+    await scrollAndTap(tester, find.byKey(const Key('life-marital')), after: true);
     await tester.tap(find.text('已婚').last);
-    await settle(tester);
+    await frames(tester, 12);
     await scrollTo(tester, const Key('life-concern'));
     await tester.enterText(find.byKey(const Key('life-occupation')), '軟件工程師');
     await tester.enterText(find.byKey(const Key('life-concern')), '明年適合轉工嗎？');
-    await settle(tester);
+    await frames(tester, 12);
 
-    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')), after: true);
     // The chart request never carries the name or the situation.
     final chartBody = jsonDecode(api.requests.lastWhere((r) => r.url.path == '/v1/charts').body) as Map;
     expect(chartBody.containsKey('context'), isFalse);
     expect(chartBody.containsKey('name'), isFalse);
 
-    await scrollAndTap(tester, find.byKey(const Key('generate-report')));
+    await scrollAndTap(tester, find.byKey(const Key('generate-report')), after: true);
     final body = jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/reports').body) as Map;
     expect(body['context'], {
       'name': '测试用户',
@@ -101,7 +88,7 @@ void main() {
       'concern': '明年適合轉工嗎？',
     });
     // ...and the report shows it at the top of the facts card.
-    await settle(tester);
+    await frames(tester, 12);
     await scrollToFinder(tester, find.text('出生地：香港'));
     expect(find.text('出生地：香港'), findsOneWidget);
   });
@@ -113,10 +100,10 @@ void main() {
     final store = InMemoryProfileStore();
     final api = FakeApi(email: 'test@mingli.local', pendingPolls: 0);
     await tester.pumpWidget(testApp(api, profiles: store));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
-    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
+    await frames(tester, 12);
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')), after: true);
     final book = ProfileBook.decode(store.data['u1']);
     final chartId = fixture('chart_bazi')['chart_id'] as String;
     expect(book.chartLabels[chartId], '测试用户');
@@ -139,11 +126,11 @@ void main() {
     expect(ready, findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('remedy-buy-health')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('remedy-buy-health')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('remedy-pay')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.requests.where((r) => r.method == 'POST' && r.url.path.endsWith('/remedies')), hasLength(1));
     // Content is there straight away: no generating spinner.
     expect(find.byKey(const Key('remedy-generating')), findsNothing);

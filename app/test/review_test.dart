@@ -5,13 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
 import 'package:mingli_app/presentation/review_page.dart';
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
 
 void main() {
   test('the content view lists AI text only, labelled, without engine data', () {
@@ -24,10 +19,10 @@ void main() {
 
   testWidgets('only reviewers see 内容审核', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     // 内容审核 sits in the ☰ menu (v8.1.0), beside 设置: a positive anchor, then its absence (rule 43).
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('open-settings')), findsOneWidget);
     expect(find.byKey(const Key('open-review')), findsNothing);
   });
@@ -38,15 +33,15 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi(email: 'admin');
     await tester.pumpWidget(testApp(api, locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
 
     await openFromMenu(tester, 'open-review');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('内容审核'), findsOneWidget);
 
     final id = fixture('review_report')['id'];
     await tester.tap(find.byKey(Key('review-$id')));
-    await settle(tester);
+    await frames(tester, 12);
     // Why: the reason and the AI reviewer's finding with the quoted sentence.
     expect(find.textContaining('guard: 1 issue(s) flagged'), findsOneWidget);
     expect(find.byKey(const Key('guard-finding')), findsOneWidget);
@@ -54,7 +49,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('review-note')), '表述可接受');
     await scrollTo(tester, const Key('review-approve'));
     await tester.tap(find.byKey(const Key('review-approve')));
-    await settle(tester);
+    await frames(tester, 12);
 
     final post = api.requests.lastWhere((r) => r.method == 'POST' && r.url.path.startsWith('/v1/admin/reviews/'));
     expect(jsonDecode(post.body), {'decision': 'approve', 'note': '表述可接受'});

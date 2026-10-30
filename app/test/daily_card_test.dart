@@ -6,12 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 void main() {
   testWidgets('首页 shows the card of the day; it opens large, with an AI reading to ask for', (tester) async {
     tester.view.physicalSize = const Size(1000, 2000);
@@ -19,7 +13,7 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi();
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 10);
 
     final card = (fixture('chart_tarot_single')['chart_fact']['facts']['cards'] as List).first as Map;
     final name = testTerms.card(card['card_id'] as String, 'zh-Hant'); // the test app reads 繁體
@@ -34,7 +28,7 @@ void main() {
     expect(asked.every((d) => RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(d ?? '')), isTrue);
 
     await tester.tap(find.byKey(const Key('daily-card')));
-    await settle(tester);
+    await frames(tester, 10);
     expect(find.byKey(const Key('daily-card-spread')), findsOneWidget);
     expect(find.byKey(const Key('tarot-card-1')), findsOneWidget);
     await scrollTo(tester, const Key('generate-report'));
@@ -49,14 +43,14 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(FakeApi()));
-    await settle(tester);
+    await frames(tester, 10);
     await tabTo(tester, 'daily-card');
     expect(ringShown(tester, find.byKey(const Key('daily-card'))), isTrue);
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 10);
     expect(find.byKey(const Key('daily-card-spread')), findsOneWidget);
     await press(tester, LogicalKeyboardKey.escape);
-    await settle(tester);
+    await frames(tester, 10);
     expect(find.byKey(const Key('daily-card')), findsOneWidget);
   });
 }

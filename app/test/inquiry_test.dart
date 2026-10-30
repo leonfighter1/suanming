@@ -12,13 +12,6 @@ import 'package:mingli_app/platform/speech.dart';
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  // Progress indicators animate forever, so pumpAndSettle would time out; 900 ms covers BringIntoView (rule 61).
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 /// Speech recognition that hears [heard] at once, or fails with [error].
 class FakeSpeech implements SpeechInput {
   FakeSpeech({this.heard = '我想換一份能學東西的工作', this.error});
@@ -59,24 +52,24 @@ Future<FakeApi> drawTarot(
   await tester.pumpWidget(
     testApp(fake, overrides: [if (speech != null) speechInputProvider.overrideWithValue(speech)]),
   );
-  await settle(tester);
+  await frames(tester, 12);
   await openEntry(tester, 'tarot');
-  await settle(tester);
+  await frames(tester, 12);
   // The cards are drawn only for a question (v11.1.0).
   await ask(tester, 'tarot-question', question);
   await scrollTo(tester, const Key('spread-single'));
   // The segment's button takes the touch; its label isn't in the hit path, hence no warning.
   await tester.tap(find.byKey(const Key('spread-single')), warnIfMissed: false);
-  await settle(tester);
+  await frames(tester, 12);
   await scrollTo(tester, const Key('draw'));
   await tester.tap(find.byKey(const Key('draw')));
-  await settle(tester);
+  await frames(tester, 12);
   await scrollTo(tester, const Key('ritual-skip'));
   await tester.tap(find.byKey(const Key('ritual-skip')));
-  await settle(tester);
+  await frames(tester, 12);
   await scrollTo(tester, const Key('tarot-card-1'));
   await tester.tap(find.byKey(const Key('tarot-card-1')));
-  await settle(tester);
+  await frames(tester, 12);
   return fake;
 }
 
@@ -84,7 +77,7 @@ Future<FakeApi> drawTarot(
 Future<void> startInquiry(WidgetTester tester) async {
   await scrollTo(tester, const Key('inquiry-start'));
   await tester.tap(find.byKey(const Key('inquiry-start')));
-  await settle(tester);
+  await frames(tester, 12);
 }
 
 Map<String, dynamic> lastPost(FakeApi api, String path) =>
@@ -94,7 +87,7 @@ Future<void> answer(WidgetTester tester, String text) async {
   await tester.enterText(find.byKey(const Key('inquiry-field')), text);
   await tester.pump(); // rule 19
   await tester.tap(find.byKey(const Key('inquiry-send')));
-  await settle(tester);
+  await frames(tester, 12);
 }
 
 void main() {
@@ -122,13 +115,13 @@ void main() {
     await tester.enterText(find.byKey(const Key('inquiry-goal-field')), '看看');
     await tester.pump();
     await tester.tap(find.byKey(const Key('inquiry-goal-start')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('目標太短了，請寫清楚你最想知道什麼'), findsOneWidget);
     expect(api.inquiries, isEmpty);
     await tester.enterText(find.byKey(const Key('inquiry-goal-field')), '明年適不適合換工作？');
     await tester.pump();
     await tester.tap(find.byKey(const Key('inquiry-goal-start')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(lastPost(api, '/v1/inquiries')['goal'], '明年適不適合換工作？');
     expect(find.text('大師現在有問題要問你'), findsOneWidget);
   });
@@ -163,7 +156,7 @@ void main() {
     expect(find.byKey(const Key('inquiry-start-reading')).hitTestable(), findsOneWidget);
     expect(find.text('大師現在有問題要問你'), findsNothing);
     await tester.tap(find.byKey(const Key('inquiry-start-reading')));
-    await settle(tester);
+    await frames(tester, 12);
     final asked = lastPost(api, '/v1/reports');
     expect(asked['inquiry_id'], '99999999-9999-4999-8999-000000000001');
     expect(asked['question'], '我們還有可能嗎？');
@@ -181,11 +174,11 @@ void main() {
     await tester.enterText(find.byKey(const Key('inquiry-field')), '她知道我想分手');
     // Enter in the field: the web performs its action, as receiveAction does here.
     await tester.testTextInput.receiveAction(TextInputAction.send);
-    await settle(tester);
+    await frames(tester, 12);
     expect(lastPost(api, '/v1/inquiries/99999999-9999-4999-8999-000000000001/answers'), {'answer': '她知道我想分手'});
     expect(find.text('（示範）大師的第2個問題？'), findsOneWidget);
     await tester.tap(find.byKey(const Key('inquiry-skip')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(lastPost(api, '/v1/reports')['inquiry_id'], '99999999-9999-4999-8999-000000000001');
   });
 
@@ -198,7 +191,7 @@ void main() {
     expect(find.text('大師現在有問題要問你'), findsNothing);
     api.inquiryFails = false;
     await tester.tap(find.byKey(const Key('inquiry-retry')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.inquiries, hasLength(2));
     expect(find.text('（示範）大師的第1個問題？'), findsOneWidget);
   });
@@ -208,7 +201,7 @@ void main() {
     await drawTarot(tester, question: '我們還有可能嗎？', speech: speech);
     await startInquiry(tester);
     await tester.tap(find.byKey(const Key('mic-inquiry')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(tester.widget<TextField>(find.byKey(const Key('inquiry-field'))).controller!.text, '我想換一份能學東西的工作');
     expect(speech.lang, 'zh-TW'); // the test app reads 繁體
   });
@@ -217,7 +210,7 @@ void main() {
     await drawTarot(tester, question: '我們還有可能嗎？', speech: FakeSpeech(error: 'not-allowed'));
     await startInquiry(tester);
     await tester.tap(find.byKey(const Key('mic-inquiry')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('需要允許使用麥克風，才能語音輸入'), findsOneWidget);
 
     // The test VM can't listen, as a phone app can't: no button, beside a field that is there (rule 43).
@@ -253,46 +246,46 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 12);
     await openEntry(tester, 'tarot');
-    await settle(tester);
+    await frames(tester, 12);
 
     // Another question: no dialog, the ritual starts.
     await tester.enterText(find.byKey(const Key('tarot-question')), '工作順利嗎？');
     await tester.pump();
     await scrollTo(tester, const Key('draw'));
     await tester.tap(find.byKey(const Key('draw')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('recalc-dialog')), findsNothing);
     expect(find.byKey(const Key('ritual-skip')), findsOneWidget);
 
     // The same question, punctuated otherwise: asked first.
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 12);
     await openEntry(tester, 'tarot');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.enterText(find.byKey(const Key('tarot-question')), '我們的關係會往哪裡走');
     await tester.pump();
     await scrollTo(tester, const Key('draw'));
     await tester.tap(find.byKey(const Key('draw')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('recalc-dialog')), findsOneWidget);
     expect(find.text('「$me」在 2026-10-25 已經算過塔羅，問的是「我們的關係會往哪裡走？」。是否還要重新再算一次？'), findsOneWidget);
     // 查看之前的 opens the earlier reading, and no new draw starts.
     await tester.tap(find.byKey(const Key('recalc-view')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('ritual-skip')), findsNothing);
     expect(find.byKey(const Key('jump-list'), skipOffstage: false), findsOneWidget);
 
     // Back, and 重新再算 goes on to the draw.
     await systemBack(tester);
-    await settle(tester);
+    await frames(tester, 12);
     await scrollTo(tester, const Key('draw'));
     await tester.tap(find.byKey(const Key('draw')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('recalc-again')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('ritual-skip')), findsOneWidget);
   });
 
@@ -304,11 +297,11 @@ void main() {
     expect(stops.indexOf('inquiry-field'), lessThan(stops.indexOf('inquiry-skip')));
     expect(stops.indexOf('inquiry-skip'), lessThan(stops.indexOf('inquiry-send')));
     await press(tester, LogicalKeyboardKey.escape);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('leave-confirm')), findsOneWidget);
     expect(find.text('深度分析還沒做完，返回後這次的問答就結束了。'), findsOneWidget);
     await tester.tap(find.byKey(const Key('leave-stay')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('大師現在有問題要問你'), findsOneWidget);
   });
 
@@ -318,18 +311,18 @@ void main() {
     addTearDown(tester.view.reset);
     final api = FakeApi(email: 'test@mingli.local', pendingPolls: 0)..person = {'name': me};
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 12);
     await openEntry(tester, 'bazi');
-    await settle(tester);
+    await frames(tester, 12);
     await scrollTo(tester, const Key('compute-chart'));
     await tester.tap(find.byKey(const Key('compute-chart')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('recalc-dialog')), findsOneWidget);
     expect(find.textContaining('「$me」在 '), findsOneWidget);
     expect(find.textContaining('已經算過八字排盤。是否還要重新再算一次？'), findsOneWidget);
     expect(api.requests.where((r) => r.method == 'POST' && r.url.path == '/v1/charts'), isEmpty);
     await tester.tap(find.byKey(const Key('recalc-again')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(api.requests.where((r) => r.method == 'POST' && r.url.path == '/v1/charts'), hasLength(1));
     expect(find.text('$me 的命盤'), findsWidgets);
   });
@@ -341,15 +334,15 @@ void main() {
     await tester.pumpWidget(
       testApp(FakeApi(pendingPolls: 0), overrides: [speechInputProvider.overrideWithValue(FakeSpeech(heard: '明年工作怎麼樣？'))]),
     );
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('八字排盤').last);
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('followup-fab')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('mic-followup')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(tester.widget<TextField>(find.byKey(const Key('followup-field'))).controller!.text, '明年工作怎麼樣？');
   });
 
@@ -360,7 +353,7 @@ void main() {
       ..inquiryPlanned = 5;
     await drawTarot(tester, question: '我們還有可能嗎？', api: api);
     tester.view.physicalSize = const Size(360, 740);
-    await settle(tester);
+    await frames(tester, 12);
     await startInquiry(tester);
     for (var n = 1; n <= 5; n++) {
       expect(find.byKey(const Key('inquiry-send')).hitTestable(), findsOneWidget, reason: 'question $n');

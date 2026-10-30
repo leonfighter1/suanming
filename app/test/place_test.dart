@@ -6,44 +6,31 @@ import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/domain/places.dart';
 import 'package:mingli_app/domain/profile.dart';
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
-Future<void> scrollAndTap(WidgetTester tester, Finder finder, {Finder? scrollable}) async {
-  await scrollToFinder(tester, finder, scrollable: scrollable);
-  await tester.ensureVisible(finder);
-  await settle(tester);
-  await tester.tap(finder);
-  await settle(tester);
-}
 
 void main() {
   testWidgets('birthplace: country → province → city, and the chart uses its timezone and longitude', (tester) async {
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore()));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
 
-    await scrollAndTap(tester, find.byKey(const Key('city')));
+    await scrollAndTap(tester, find.byKey(const Key('city')), after: true);
     expect(find.text('國家和地區'), findsOneWidget);
     // Common countries first; 中國 → (廣東) → 廣州市.
     await tester.tap(find.byKey(const Key('country-CN')).first);
-    await settle(tester);
+    await frames(tester, 12);
     // The fixture trims 中國 to one region (廣東), so the picker goes straight to its cities.
     expect(find.textContaining('中國 · 廣東 · 城市'), findsOneWidget);
     expect(find.textContaining('Asia/Shanghai · 113.25°'), findsWidgets);
     await tester.tap(find.byKey(const Key('city-1809858')));
-    await settle(tester);
+    await frames(tester, 12);
 
     expect(find.text('中國 · 廣東 · 廣州市'), findsOneWidget);
     expect(find.textContaining('Asia/Shanghai'), findsOneWidget);
-    await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')), after: true);
     final body = jsonDecode(api.requests.lastWhere((r) => r.url.path == '/v1/charts').body) as Map;
     expect(body['timezone'], 'Asia/Shanghai');
     expect(body['longitude'], 113.25);
@@ -52,24 +39,24 @@ void main() {
   testWidgets('birthplace search works in any language, and back returns to the previous step', (tester) async {
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api, profiles: InMemoryProfileStore()));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
-    await scrollAndTap(tester, find.byKey(const Key('city')));
+    await frames(tester, 12);
+    await scrollAndTap(tester, find.byKey(const Key('city')), after: true);
 
     await tester.enterText(find.byKey(const Key('place-search')), 'hong');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('香港'), findsOneWidget);
     expect(find.text('中國'), findsNothing);
     await tester.tap(find.text('香港'));
-    await settle(tester);
+    await frames(tester, 12);
     // Search field clears per step; 沙田 matches its district.
     await tester.enterText(find.byKey(const Key('place-search')), '沙田');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('沙田區'), findsOneWidget);
 
     await tester.tap(find.byType(BackButton));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('國家和地區'), findsOneWidget);
   });
 

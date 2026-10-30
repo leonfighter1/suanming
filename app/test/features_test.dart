@@ -8,40 +8,28 @@ import 'package:mingli_app/domain/models.dart';
 import 'package:mingli_app/domain/profile.dart';
 import 'package:mingli_app/generated/contract.g.dart' show conclusionParts;
 
+import 'keys.dart';
 import 'support.dart';
-
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
-Future<void> scrollAndTap(WidgetTester tester, Finder finder) async {
-  await scrollToFinder(tester, finder);
-  await tester.ensureVisible(finder);
-  await settle(tester);
-  await tester.tap(finder);
-}
 
 void main() {
   testWidgets('test account gets an editable default profile used by the 八字 form', (tester) async {
     final profiles = InMemoryProfileStore();
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api, profiles: profiles));
-    await settle(tester);
+    await frames(tester, 12);
 
     expect(find.text('你好，测试用户'), findsOneWidget);
     final book = ProfileBook.decode(profiles.data['u1']);
     expect(book.defaultProfile!.name, '测试用户');
 
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('profile-picker')), findsOneWidget);
     // 農曆 preview for the profile's birth date
     expect(find.textContaining('農曆 庚午年二月十九'), findsOneWidget);
 
     await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
-    await settle(tester);
+    await frames(tester, 12);
     final body = jsonDecode(api.requests.lastWhere((r) => r.url.path == '/v1/charts').body) as Map;
     expect(body['local'], '1990-03-15T14:30');
     // Since v6.2.0 (the owner's bug report) whose chart it is goes with it, as `person`, beside the birth fields
@@ -61,15 +49,15 @@ void main() {
   testWidgets('accounts without a profile are prompted to create one', (tester) async {
     final profiles = InMemoryProfileStore();
     await tester.pumpWidget(testApp(FakeApi(), profiles: profiles));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('create-profile-prompt')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('create-profile-prompt')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.enterText(find.byKey(const Key('profile-name')), '小明');
-    await settle(tester);
+    await frames(tester, 12);
     await scrollAndTap(tester, find.byKey(const Key('save-profile')));
-    await settle(tester);
+    await frames(tester, 12);
 
     expect(ProfileBook.decode(profiles.data['u1']).defaultProfile!.name, '小明');
     expect(find.text('你好，小明'), findsOneWidget);
@@ -78,13 +66,13 @@ void main() {
   testWidgets('while pending, the live pipeline stage is shown', (tester) async {
     final api = FakeApi(pendingPolls: -1, pendingStage: 'action');
     await tester.pumpWidget(testApp(api, pollInterval: const Duration(seconds: 5)));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
     await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
-    await settle(tester);
+    await frames(tester, 12);
     await scrollAndTap(tester, find.byKey(const Key('generate-report')));
-    await settle(tester);
+    await frames(tester, 12);
 
     expect(find.byKey(const Key('analyzing')), findsOneWidget);
     expect(find.text('AI 正在深度分析中'), findsOneWidget);
@@ -92,19 +80,19 @@ void main() {
     expect(find.textContaining('已用時'), findsOneWidget);
     // Leave the page so the poller and timers stop, then let the last poll delay elapse.
     Navigator.of(tester.element(find.byKey(const Key('analyzing')))).pop();
-    await settle(tester);
+    await frames(tester, 12);
     await tester.pump(const Duration(seconds: 6));
   });
 
   testWidgets('history lists earlier readings and opens them', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0)));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('歷史紀錄'), findsOneWidget);
     expect(find.text('八字排盤'), findsWidgets);
     await tester.tap(find.text('八字排盤').last);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('ai-label')), findsOneWidget);
     expect(find.byKey(const Key('report-menu')), findsOneWidget);
   });
@@ -115,23 +103,23 @@ void main() {
   testWidgets('農曆 date input: pick a 農曆 month, it converts to 公曆, and the basis reaches the API', (tester) async {
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('農曆').first); // date-mode segment
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('lunar-year')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('lunar-month-1990')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.text('三月').last);
-    await settle(tester);
+    await frames(tester, 12);
     final solarReq = api.requests.lastWhere((r) => r.url.path == '/v1/calendar/solar');
     expect(solarReq.url.queryParameters, {'year': '1990', 'month': '3', 'day': '19', 'leap': 'false'});
     expect(find.text('公曆 1990-04-14'), findsOneWidget);
 
     await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
-    await settle(tester);
+    await frames(tester, 12);
     final body = chartRequest(api);
     expect(body['local'], '1990-04-14T14:30');
     expect((body['options'] as Map)['inputBasis'], {'date': 'lunar', 'time': 'exact'});
@@ -140,19 +128,19 @@ void main() {
   testWidgets('時辰 input: chips show 干支, picking one sets the midpoint, and the basis reaches the API', (tester) async {
     final api = FakeApi(email: 'test@mingli.local');
     await tester.pumpWidget(testApp(api));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('entry-bazi')));
-    await settle(tester);
+    await frames(tester, 12);
     await scrollAndTap(tester, find.text('時辰').first); // time-mode segment
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('辛未時'), findsOneWidget);
     expect(find.text('甲子時'), findsOneWidget); // 早子
     expect(find.text('丙子時'), findsOneWidget); // 晚子
     await scrollAndTap(tester, find.byKey(const Key('shichen-未')));
-    await settle(tester);
+    await frames(tester, 12);
 
     await scrollAndTap(tester, find.byKey(const Key('compute-chart')));
-    await settle(tester);
+    await frames(tester, 12);
     final body = chartRequest(api);
     expect(body['local'], '1990-03-15T14:00');
     expect((body['options'] as Map)['inputBasis'], {'date': 'gregorian', 'time': 'shichen', 'shichen': '未'});
@@ -161,7 +149,7 @@ void main() {
   testWidgets('admin gets two editable test profiles', (tester) async {
     final profiles = InMemoryProfileStore();
     await tester.pumpWidget(testApp(FakeApi(email: 'admin'), profiles: profiles));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.text('你好，管理员'), findsOneWidget);
     final book = ProfileBook.decode(profiles.data['u1']);
     expect(book.profiles.map((p) => p.name), ['管理员', '测试家人']);
@@ -186,7 +174,7 @@ void main() {
       final profiles = InMemoryProfileStore()..data['u1'] = ProfileBook(profiles: [p], defaultId: 'default').encode();
       await tester.pumpWidget(const SizedBox.shrink()); // a fresh app (rule 24)
       await tester.pumpWidget(testApp(FakeApi(email: 'admin'), profiles: profiles));
-      await settle(tester);
+      await frames(tester, 12);
       return ProfileBook.decode(profiles.data['u1']);
     }
 

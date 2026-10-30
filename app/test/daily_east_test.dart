@@ -10,13 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  // The last part of 首页 comes in after the others (FadeSlideIn's index): let them all arrive.
-  for (var i = 0; i < 14; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 /// 首页 with the server dealing [kind] today ('qiuqian', 'liuyao', or null: neither is served).
 Future<FakeApi> openHome(WidgetTester tester, String? kind, {Size size = const Size(1000, 2400)}) async {
   tester.view.physicalSize = size;
@@ -24,7 +17,7 @@ Future<FakeApi> openHome(WidgetTester tester, String? kind, {Size size = const S
   addTearDown(tester.view.reset);
   final api = FakeApi()..eastDaily = kind;
   await tester.pumpWidget(testApp(api));
-  await settle(tester);
+  await frames(tester, 14);
   return api;
 }
 
@@ -56,7 +49,7 @@ void main() {
     }
 
     await tester.tap(card);
-    await settle(tester);
+    await frames(tester, 14);
     expect(find.byKey(const Key('east-daily-lot')), findsOneWidget);
     expect(find.text('樽前無事且高歌'), findsOneWidget); // the lot's first line
     await scrollTo(tester, const Key('generate-report'));
@@ -78,7 +71,7 @@ void main() {
     expect(find.descendant(of: card, matching: find.byKey(const Key('hexagram-lines'))), findsOneWidget);
 
     await tester.tap(card);
-    await settle(tester);
+    await frames(tester, 14);
     expect(find.byKey(const Key('east-daily-hexagram')), findsOneWidget);
     await scrollTo(tester, const Key('generate-report'));
     await tester.tap(find.byKey(const Key('generate-report')));
@@ -111,10 +104,10 @@ void main() {
     await tabTo(tester, 'east-daily');
     expect(ringShown(tester, find.byKey(const Key('east-daily'))), isTrue);
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 14);
     expect(find.byKey(const Key('east-daily-lot')), findsOneWidget);
     await press(tester, LogicalKeyboardKey.escape);
-    await settle(tester);
+    await frames(tester, 14);
     expect(find.byKey(const Key('east-daily')), findsOneWidget);
   });
 }

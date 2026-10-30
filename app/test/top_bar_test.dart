@@ -8,12 +8,6 @@ import 'package:mingli_app/presentation/design.dart' show Space, focusOutline;
 import 'keys.dart';
 import 'support.dart';
 
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 12; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
 String current(WidgetTester tester) => tester.widget<Text>(find.byKey(const Key('language-current'))).data!;
 
 final menu = find.byKey(const Key('app-menu'));
@@ -24,7 +18,7 @@ void main() {
   // and 设置 each had a button.
   testWidgets('the home bar: the mark and the name, then a framed ☰ at the right end, nothing else', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     final bar = find.byType(AppBar);
     expect(find.descendant(of: bar, matching: find.byTooltip('菜单')), findsOneWidget);
     for (final tip in ['历史记录', '个人资料', '语言', '设置']) {
@@ -50,10 +44,10 @@ void main() {
 
   testWidgets('☰ opens the menu from the right: the icon, the account, then every page and setting in order', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     expect(menu, findsNothing);
     await tester.tap(find.byKey(const Key('open-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(menu, findsOneWidget);
     // An end drawer, flush with the screen's right edge, where ☰ is.
     final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
@@ -70,27 +64,27 @@ void main() {
 
     // 个人资料: one tap in the menu; the menu closes behind it.
     await tester.tap(find.byKey(const Key('open-profiles')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.widgetWithText(AppBar, '个人资料'), findsOneWidget);
     await systemBack(tester);
-    await settle(tester);
+    await frames(tester, 12);
     expect(menu, findsNothing);
 
     // 历史记录 too (v9.1.0: off the bar, first in the menu).
     await openFromMenu(tester, 'menu-history');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.widgetWithText(AppBar, '历史记录'), findsOneWidget);
     await systemBack(tester);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('entry-bazi')), findsOneWidget); // back on 首页
     expect(menu, findsNothing);
   });
 
   testWidgets('设置 opens from the menu, with the account under 账号与登录', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'open-settings');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.widgetWithText(AppBar, '设置'), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('settings-account')), matching: find.text('账号与登录')), findsOneWidget);
     expect(find.text('test@mingli.local · 未验证，点此验证'), findsOneWidget);
@@ -105,40 +99,40 @@ void main() {
 
   testWidgets('语言 in the menu shows the current language and switches in one dialog', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'language-menu');
-    await settle(tester);
+    await frames(tester, 12);
     // Chinese only (the owner removed English, v5.4.0): 简体 and 繁體, nothing else.
     expect(find.byKey(const Key('language-zh-Hans')), findsOneWidget);
     expect(find.byKey(const Key('language-en')), findsNothing);
     await tester.tap(find.byKey(const Key('language-zh-Hant')));
-    await settle(tester);
+    await frames(tester, 12);
     // The menu stays open, showing the new language.
     expect(current(tester), '繁體中文');
     expect(find.descendant(of: menu, matching: find.text('語言')), findsOneWidget);
     await tester.tap(find.byKey(const Key('open-settings')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.widgetWithText(AppBar, '設定'), findsOneWidget);
     await systemBack(tester);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.descendant(of: find.byKey(const Key('entry-bazi')), matching: find.text('八字排盤')), findsOneWidget);
   });
 
   testWidgets('退出登录 in the menu signs out', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await openFromMenu(tester, 'menu-sign-out');
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('auth-submit')), findsOneWidget);
   });
 
   testWidgets('from the keyboard: Tab reaches ☰, Enter opens the menu, Tab stays in it, Esc closes it', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     await press(tester, LogicalKeyboardKey.tab);
     expect(focusedKey(), 'open-menu');
     await press(tester, LogicalKeyboardKey.enter);
-    await settle(tester);
+    await frames(tester, 12);
     expect(menu, findsOneWidget);
     final stops = <String?>[];
     for (var i = 0; i < 9; i++) {
@@ -158,25 +152,25 @@ void main() {
       'open-profiles',
     ]);
     await press(tester, LogicalKeyboardKey.escape);
-    await settle(tester);
+    await frames(tester, 12);
     expect(menu, findsNothing);
     expect(find.byKey(const Key('entry-bazi')), findsOneWidget); // still on 首页
     // Esc on 首页 itself does nothing.
     await press(tester, LogicalKeyboardKey.escape);
-    await settle(tester);
+    await frames(tester, 12);
     expect(find.byKey(const Key('entry-bazi')), findsOneWidget);
   });
 
   testWidgets('signed out, the sign-in bar has 语言 too', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(), signedIn: false, locale: zhHans));
-    await settle(tester);
+    await frames(tester, 12);
     final submit = find.byKey(const Key('auth-submit'));
     expect(find.descendant(of: submit, matching: find.text('登录')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('language-menu')));
-    await settle(tester);
+    await frames(tester, 12);
     await tester.tap(find.byKey(const Key('language-zh-Hant')));
-    await settle(tester);
+    await frames(tester, 12);
     expect(current(tester), '繁');
     expect(find.descendant(of: submit, matching: find.text('登入')), findsOneWidget);
   });
@@ -187,7 +181,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: locale));
-      await settle(tester);
+      await frames(tester, 12);
       for (final key in ['title-mark', 'open-menu']) {
         final r = tester.getRect(find.byKey(Key(key)));
         expect(r.left >= 0 && r.right <= 360, isTrue, reason: '$key at $r');
@@ -198,7 +192,7 @@ void main() {
       expect(title.getMaxIntrinsicWidth(double.infinity), lessThanOrEqualTo(title.size.width + 0.5));
 
       await tester.tap(find.byKey(const Key('open-menu')));
-      await settle(tester);
+      await frames(tester, 12);
       expect(tester.takeException(), isNull);
       expect(tester.getRect(menu).right, 360, reason: 'from the right, where ☰ is');
       final last = tester.getRect(find.byKey(const Key('menu-sign-out')));
