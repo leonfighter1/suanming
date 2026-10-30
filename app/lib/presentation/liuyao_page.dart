@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import '../data/api_client.dart';
+import '../domain/dates.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/time_zone.dart';
@@ -82,9 +83,6 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
 
   bool get _manualReady => _time != null && _rows.every((r) => r != null);
 
-  static String _two(int n) => n.toString().padLeft(2, '0');
-  static String _local(DateTime t) => '${t.year}-${_two(t.month)}-${_two(t.day)}T${_two(t.hour)}:${_two(t.minute)}';
-
   Future<void> _cast(Map<String, Object?> request) async {
     if (!_asking) return;
     // 同名重算 (v10.0.0): the same question cast for before? Ask first.
@@ -123,7 +121,7 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
   void _castPick() => _cast({'mode': 'pick', 'draw_id': _layoutId, 'picks': [..._picks]});
   void _castManual() => _cast({
         'mode': 'manual',
-        'local': _local(_time!),
+        'local': localMinute(_time!),
         'lines': [
           for (final v in _rows) _byLines ? {'value': v} : {'coins': _coinsOf[v]},
         ],
@@ -377,7 +375,7 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
             key: const Key('liuyao-time'),
             onPressed: cast ? null : _pickTime,
             icon: const Icon(Icons.schedule),
-            label: Text(time == null ? l10n.liuyaoTimePick : _local(time).replaceFirst('T', ' ')),
+            label: Text(time == null ? l10n.liuyaoTimePick : localMinute(time).replaceFirst('T', ' ')),
           ),
           TextButton(
             key: const Key('liuyao-time-now'),

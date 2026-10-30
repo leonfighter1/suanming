@@ -10,6 +10,7 @@ import '../data/api_client.dart';
 import '../data/profile_store.dart';
 import '../data/settings_store.dart';
 import '../data/token_store.dart';
+import '../domain/dates.dart';
 import '../domain/inquiry.dart';
 import '../domain/life_report.dart';
 import '../domain/models.dart';
@@ -412,18 +413,14 @@ final lifeReportsProvider = FutureProvider.autoDispose<List<LifeReportView>>(
 );
 
 /// 每日一牌 for the device's calendar date (GET /v1/tarot/daily).
-final dailyCardProvider = FutureProvider.autoDispose<ChartResult>((ref) {
-  final d = DateTime.now();
-  String two(int n) => n.toString().padLeft(2, '0');
-  return ref.watch(apiClientProvider).dailyCard('${d.year}-${two(d.month)}-${two(d.day)}');
-});
+final dailyCardProvider = FutureProvider.autoDispose<ChartResult>(
+  (ref) => ref.watch(apiClientProvider).dailyCard(ymd(DateTime.now())),
+);
 
 /// 今日一卦 / 今日一签 for the device's calendar date and time zone (GET /v1/east/daily, S26).
-final eastDailyProvider = FutureProvider.autoDispose<ChartResult>((ref) {
-  final d = DateTime.now();
-  String two(int n) => n.toString().padLeft(2, '0');
-  return ref.watch(apiClientProvider).eastDaily('${d.year}-${two(d.month)}-${two(d.day)}', deviceTimeZone());
-});
+final eastDailyProvider = FutureProvider.autoDispose<ChartResult>(
+  (ref) => ref.watch(apiClientProvider).eastDaily(ymd(DateTime.now()), deviceTimeZone()),
+);
 
 /// The methods the home page offers, in the region's entry order (GET /v1/methods, v4.3.0); the
 /// app shows the ones it has a page for. Unreachable or refused: the default order.

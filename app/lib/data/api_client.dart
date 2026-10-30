@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../domain/dates.dart';
 import '../domain/document.dart';
 import '../domain/inquiry.dart';
 import '../domain/life_report.dart';
@@ -384,9 +385,6 @@ class ApiClient {
     final j = await _authed('GET', '/v1/reports?limit=$limit');
     return (j['items'] as List).cast<Json>().map(HistoryItem.fromJson).toList();
   }
-
-  static String ymd(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   /// 農曆 equivalent and the 時辰 (with 干支) of a 公曆 date. Public, no sign-in.
   Future<CalendarDay> calendarDay(DateTime d) async =>

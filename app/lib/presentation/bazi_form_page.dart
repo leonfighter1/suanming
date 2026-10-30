@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
+import '../domain/dates.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
@@ -69,7 +69,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
       final locale = ref.read(settingsProvider).apiLocaleCode;
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'bazi',
-        'local': DateFormat("yyyy-MM-dd'T'HH:mm").format(p.birthLocal),
+        'local': localMinute(p.birthLocal),
         'timezone': place.timezone,
         'longitude': place.longitude,
         'gender': p.gender,

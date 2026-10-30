@@ -1,6 +1,8 @@
 // A record as a document (v8.0.0, the owner: 下载后可以生成Word文档和PDF). The app builds it from what it shows; the
 // server renders it to Word or PDF (POST /v1/documents, src/export/document.ts has the same block types).
 
+import 'dates.dart';
+
 /// Word or PDF.
 enum DocFormat {
   pdf('pdf', 'application/pdf'),
@@ -44,8 +46,7 @@ class Doc {
 /// The file's name without its extension: `命理大师-title-date`, with characters a file name can't hold left out
 /// (the server checks it again).
 String docFileName(String title, DateTime? at) {
-  String two(int n) => n.toString().padLeft(2, '0');
-  final day = at == null ? '' : '-${at.year}-${two(at.month)}-${two(at.day)}';
+  final day = at == null ? '' : '-${ymd(at)}';
   final clean = title.replaceAll(RegExp(r'[\\/:*?"<>|]'), ' ').replaceAll(RegExp(r'\s+'), '-');
   return '命理大师-$clean$day';
 }
