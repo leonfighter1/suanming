@@ -462,6 +462,22 @@ class HeroBanner extends StatelessWidget {
   }
 }
 
+/// A step's number in a round badge: 求签's rounds, 风水's principles (S28: each had a copy).
+class StepNumber extends StatelessWidget {
+  const StepNumber(this.number, {super.key});
+  final int number;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return CircleAvatar(
+      radius: 12,
+      backgroundColor: theme.colorScheme.primaryContainer,
+      child: Text('$number', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
+    );
+  }
+}
+
 /// Small rounded label (status, source level, stage). A long one wraps within its parent's width rather than run
 /// past it (an AI's 喜 or 忌 can be a sentence); in a row, where its width is unbounded, it keeps to one line.
 class Pill extends StatelessWidget {

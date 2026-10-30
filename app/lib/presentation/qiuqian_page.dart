@@ -312,14 +312,7 @@ class _Rounds extends ConsumerWidget {
             child: Row(
               children: [
                 // Which try this is: 1, 2, …
-                CircleAvatar(
-                  radius: 12,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    '${i + 1}',
-                    style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-                  ),
-                ),
+                StepNumber(i + 1),
                 const SizedBox(width: Space.m),
                 Expanded(
                   child: Column(
