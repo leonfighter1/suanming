@@ -1,6 +1,9 @@
 /**
  * v1 product API (api/openapi.yaml): auth, account, charts, async reports, health.
  *
+ * The routes live in routes/*.ts, one module per group (S28); this file keeps what they share, handed to each as
+ * the ApiContext (context.ts), the order they are tried in (handle), CORS and the problem responses.
+ *
  * Identity: `Authorization: Bearer <access token>`; the region is the one stored
  * on the account at sign-up (Geo-Rule checked then), never a client header.
  * devMode additionally accepts `X-Dev-User` / `X-Dev-Country` when no bearer
