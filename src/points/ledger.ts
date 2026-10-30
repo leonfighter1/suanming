@@ -100,6 +100,50 @@ export interface PointsLedger {
 }
 
 /** The ledger in memory. Each call reads and writes without awaiting in between, so it is atomic. */
+/**
+ * A hold for a request quoted at [need] points, asking up to [want], with [available] free (S28: both stores wrote
+ * this rule): none when the quote is under 1 or more than is free, else the larger of the two, no more than is free.
+ */
+export function newHold(
+  owner: string,
+  available: number,
+  need: number,
+  want: number,
+  what: PointsFor,
+  at: string,
+): PointsHold | undefined {
+  if (need < 1 || available < need) return undefined;
+  return {
+    id: randomUUID(),
+    owner,
+    points: Math.min(Math.max(want, need), available),
+    quote: need,
+    for: { ...what },
+    created_at: at,
+  };
+}
+
+/** The entry a credit makes, leaving [balance]: a top-up's pack, or a grant's reason and note (S28: both stores). */
+export function creditEntry(
+  owner: string,
+  credit: PointsCredit,
+  points: number,
+  balance: number,
+  at: string,
+): PointsEntry {
+  return {
+    id: randomUUID(),
+    owner,
+    kind: credit.kind,
+    points,
+    balance,
+    created_at: at,
+    ...(credit.kind === "topup"
+      ? { pack: { ...credit.pack } }
+      : { reason: credit.reason, ...(credit.note && { note: credit.note }) }),
+  };
+}
+
 export class InMemoryLedger implements PointsLedger {
   private readonly balances = new Map<string, number>();
   private entries: PointsEntry[] = [];
@@ -116,16 +160,15 @@ export class InMemoryLedger implements PointsLedger {
   }
 
   async holdPoints(owner: string, need: number, want: number, what: PointsFor, at: string) {
-    const available = (this.balances.get(owner) ?? 0) - this.heldBy(owner);
-    if (need < 1 || available < need) return undefined;
-    const hold: PointsHold = {
-      id: randomUUID(),
+    const hold = newHold(
       owner,
-      points: Math.min(Math.max(want, need), available),
-      quote: need,
-      for: { ...what },
-      created_at: at,
-    };
+      (this.balances.get(owner) ?? 0) - this.heldBy(owner),
+      need,
+      want,
+      what,
+      at,
+    );
+    if (!hold) return undefined;
     this.holds.set(hold.id, hold);
     return structuredClone(hold);
   }
@@ -159,17 +202,7 @@ export class InMemoryLedger implements PointsLedger {
     }
     const balance = (this.balances.get(owner) ?? 0) + points;
     this.balances.set(owner, balance);
-    return this.add({
-      id: randomUUID(),
-      owner,
-      kind: credit.kind,
-      points,
-      balance,
-      created_at: at,
-      ...(credit.kind === "topup"
-        ? { pack: { ...credit.pack } }
-        : { reason: credit.reason, ...(credit.note && { note: credit.note }) }),
-    });
+    return this.add(creditEntry(owner, credit, points, balance, at));
   }
 
   private add(e: PointsEntry) {

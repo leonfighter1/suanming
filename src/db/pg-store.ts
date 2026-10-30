@@ -38,6 +38,7 @@ import type {
   PointsFor,
   PointsHold,
 } from "../points/index.js";
+import { creditEntry, newHold } from "../points/index.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
@@ -644,16 +645,8 @@ export class PgStore implements Store, UserStore {
           [owner],
         )
       ).rows[0]!.held;
-      const available = balance - held;
-      if (need < 1 || available < need) return undefined;
-      const hold: PointsHold = {
-        id: randomUUID(),
-        owner,
-        points: Math.min(Math.max(want, need), available),
-        quote: need,
-        for: { ...what },
-        created_at: at,
-      };
+      const hold = newHold(owner, balance - held, need, want, what, at);
+      if (!hold) return undefined;
       await tx.query(
         `INSERT INTO points_holds (id, user_id, points, quote, for_kind, for_id, system, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
@@ -697,17 +690,7 @@ export class PgStore implements Store, UserStore {
       }
       const balance = (await lockedBalance(tx, owner)) + points;
       await setBalance(tx, owner, balance, at);
-      const entry: PointsEntry = {
-        id: randomUUID(),
-        owner,
-        kind: credit.kind,
-        points,
-        balance,
-        created_at: at,
-        ...(credit.kind === "topup"
-          ? { pack: { ...credit.pack } }
-          : { reason: credit.reason, ...(credit.note && { note: credit.note }) }),
-      };
+      const entry = creditEntry(owner, credit, points, balance, at);
       await insertEntry(tx, entry);
       return entry;
     });
