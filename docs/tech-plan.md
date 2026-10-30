@@ -2385,6 +2385,54 @@ console).
 
 ## 阶段总结 (stage summaries)
 
+### S25 消息模板与分发 (done 2026-10-30: v13.1.0–v14.0.0)
+
+1. **Delivered:**
+   - **WP25.1–25.2b (v13.1.0), the server:**
+     - templates for the four messages in a small markup, checked before they are kept;
+     - one `Dispatcher` for every mail and SMS (wording, render, transport, a masked log);
+     - the mail page in the app's tokens, light, and dark under `prefers-color-scheme` (Outlook's marks too);
+     - migration 012;
+     - the admin API's 消息 routes;
+     - staff roles (admin, manager, integrator) with one capability check for every admin route, and `/v1/me` `staff`.
+   - **WP25.3 (v13.2.0), the 管理后台:**
+     - the 消息 page: cards by channel, 发送方式 and 最近发送 in the panel;
+     - the editor: languages, value chips at the cursor, the server's check as you type, 保存, 撤销修改, 恢复默认 and
+       发送测试, leaving asked about;
+     - its preview: the server's own page in a sandboxed frame, light or dark as the dashboard is;
+     - every screen by role, with a role picker on an account's page;
+     - one centred container on a wide window, at the owner's request mid-stage.
+   - **WP25.3b (v13.3.0), the app's way in:** ☰ → 管理后台 for staff opens the dashboard in a new tab with the login
+     filled in; off the web its address is copied. The dashboard takes the login off its address once read.
+   - **WP25.4 (v14.0.0):** docs/web-test.md (roles, 消息, the container, the way in), the ui-design skill (the
+     container, the preview, roles), the records; pushed.
+2. **Numbers:**
+   - **Tests:** server 676 → 690, app 250 → 253, 管理后台 56 → 75.
+   - **Harness:** PASS at every release.
+   - **Templates:** four messages in seven wordings: 简体 and 繁體 for each, English for the two codes.
+   - **The real browser:** headless Chrome over the DevTools protocol, against a private server: the frame light and
+     dark, an edit with a value chip, and a test send into the outbox.
+3. **Against the plan:**
+   - **The container** was not in the plan: it came from the owner mid-stage. It also gave 活跃 and 导出 the other
+     pages' left edge.
+   - **The panel** became a card inside the container, no longer a full-height surface at the window's edge.
+   - **The editor's panel** is wider for a mail (`asideWide`, 480).
+   - **The preview** asks for the scheme the dashboard shows rather than relying on the frame's
+     `prefers-color-scheme`.
+   - **The 收益 page** keeps the curve's PNG for managers but shows the server's CSV only with `user_data`.
+   - **The role filter** became chips.
+4. **Mistakes and what they teach:**
+   - **Rule 78:** PgStore read back only `admin` from the role column. When a stored field gains values, round-trip
+     each one through PGlite.
+   - **Rule 79:** a Dart cascade took the next assignment into an arrow closure's body. One statement per callback.
+     The global list is read-only on this machine, so the rule went into the project's list.
+   - **Rule 80:** a test expected a server check to report what it does not (the subject counts too). Write a check's
+     test from the check.
+   - **Looking at it:** the renders with the real fonts found the role field repeating its title and 保存 alone on a
+     phone; the real browser found nothing new, but it proved the frame, the chips and the outbox.
+5. **Next:** nothing planned. Waiting for the owner: the mail and SMS providers and their settings, Phase 4
+   payments, the Phase 3 gate, WP7.2, WP7.3 and WP1.8.
+
 ### S24 设计系统与管理后台布局 (done 2026-10-30: v12.1.0–v13.0.0)
 
 1. **Delivered:**
@@ -3054,4 +3102,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP25.2b   | done                         | v13.1.0 |
 | WP25.3    | done                         | v13.2.0 |
 | WP25.3b   | done                         | v13.3.0 |
-| WP25.4    | planned                      | v14.0.0 |
+| WP25.4    | done                         | v14.0.0 |

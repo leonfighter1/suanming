@@ -13,6 +13,38 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v14.0.0 (2026-10-30): mail and SMS you can edit, staff roles, and the way in from the app
+
+Your requests of today: the back office edits what each mail and SMS says, with the mail and its preview following
+light and dark, tested on the server without a third-party service; three staff roles; a way into the back office
+from the app's menu; and a container on wide screens. Stage S25 of the [tech plan](docs/tech-plan.md), complete.
+Pushed, with v13.1.0 to v13.3.0.
+
+- **What the stage brought** (details in the entries below):
+  - **One way out for every message (v13.1.0):** the codes by mail and SMS, the report mail and the records mail go
+    through one dispatcher: its wording (an admin's, else the default), its values, its channel, a masked note in
+    the log. For now everything goes to the dev outbox (`.outbox/`); provider settings come later, as you asked.
+  - **Mail in the app's colours, light and dark (v13.1.0):** every mail is a page in the app's own colours, dark when
+    the reader's mail program is in dark mode.
+  - **消息 in the 管理后台 (v13.2.0):** each message per language: edit it, see the preview (the mail's real page,
+    light or dark as the dashboard is), check it as you type, save, reset, send a test, and see the latest sends.
+  - **Roles (v13.1.0–v13.2.0):**
+    - **admin:** everything.
+    - **manager:** sees the numbers and the accounts and gives roles and permissions, but never touches a user's
+      data.
+    - **integrator:** 消息 only.
+    - The server enforces it; every screen shows only what the role may do.
+  - **A container on wide screens (v13.2.0):** every page of the 管理后台 stays at most 1440 wide, centred.
+  - **The way in (v13.3.0):** staff see ☰ → 管理后台 in the app; it opens the dashboard with their login filled in.
+- **To try it:** docs/web-test.md, 管理后台:
+  - sign in as `integrator` / `integrator` (or `manager` / `manager`, `admin` / `admin`);
+  - open 报告完成邮件, change it, watch the preview, switch 外观;
+  - send a test and find it in `.outbox/mail/`.
+- **Verified:**
+  - **Tests:** server 676 → 690, app 250 → 253, 管理后台 56 → 75.
+  - **A real browser:** the mail's frame, light and dark; an edit; a test send.
+  - **Harness:** PASS at every release, and once more on the final tree before the push.
+
 ### v13.3.0 (2026-10-30): ☰ → 管理后台 for staff
 
 Your request: a signed-in account with back-office rights can enter the back office from the menu on the home page

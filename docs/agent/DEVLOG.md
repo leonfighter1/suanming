@@ -2,6 +2,14 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (j): S25 WP25.4 — the records; S25 done, release v14.0.0
+
+- v13.3.0 committed and tagged after its harness PASS (67d9d3b).
+- docs/web-test.md (the staff accounts, the roles, 消息 step by step, the container, the way in from the app); the S25
+  stage summary; the README entry. The ui-design skill took the container, the preview and the roles in v13.2.0.
+- To push after a fresh harness PASS on the final tree: v13.1.0 to v14.0.0 with their tags (the owner allows pushing
+  finished big updates).
+
 ## 2026-10-30 (i): S25 WP25.3b — ☰ → 管理后台 for staff; v13.3.0 (local)
 
 - v13.2.0 committed and tagged after its harness PASS (142c44e).

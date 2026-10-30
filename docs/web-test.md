@@ -210,19 +210,27 @@ card and the trend chart. The AI's reading is its own:
 
 ## 管理后台 (v12.0.0)
 
-The admin dashboard: every account, the tokens, the money, who is active, and exports. It is a web app of its own
-(`admin/`), served by the API beside the app's API.
+The admin dashboard: every account, the tokens, the money, who is active, exports, and the mail and SMS the server
+sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside the app's API.
 
 1. `npm run admin:build` (once, and after each change to `admin/`): builds it into `admin/build/served`, about a
    minute. It needs Flutter, like the app; it runs through a junction itself, so the CJK path doesn't matter.
 2. `npm run api`. The console says `管理后台: http://127.0.0.1:8787/admin/ (admins: admin)`; before a build it says
    `not built yet`.
-3. Open **http://127.0.0.1:8787/admin/** and sign in as **`admin` / `admin`**. Any other account is turned away
-   (这个账号不是管理员).
+3. Open **http://127.0.0.1:8787/admin/** and sign in as a staff account: **`admin` / `admin`** (everything),
+   **`manager` / `manager`** or **`integrator` / `integrator`** (v13.1.0). Any other account is turned away
+   (这个账号没有后台权限).
 
+- **The roles (v13.1.0–v13.2.0):** the server decides what each may do; the dashboard shows only that.
+  - **admin:** every page and action, and any role on an account's page.
+  - **manager:** 概览, 用户, 活跃, 收益, 用量. On an account: 停用, AI and 充值, and its role (普通用户, 集成人员 or 经理).
+    No 增加积分, no 在所有设备上退出, no exports, and nothing on an admin's account.
+  - **integrator:** 消息 only, as the whole page.
+  - The bar shows who is signed in and the role (「boss · 管理员」). A role changed while signed in shows at the next
+    refused action (你的角色不能做这件事), and the pages change with it.
 - **Who is an admin:** the logins in `MINGLI_ADMINS` (default `admin`; comma-separated, read at the start) and any
   account an admin makes one on its page. An admin named in `MINGLI_ADMINS` can't be demoted there, and nobody can
-  suspend or demote themselves, so there is always a way in.
+  suspend themselves or change their own role, so there is always a way in.
 - **The demo accounts:** a new store gets 36 demo accounts with 90 days of history, so every page has numbers
   (`管理后台: 36 demo accounts …` in the console). They have no password. `MINGLI_ADMIN_DEMO=off` leaves them out
   of a new store; with `MINGLI_STORE=pglite` they are made once and kept. The 用户 page filters them (含演示 / 不含演示
@@ -245,6 +253,25 @@ The admin dashboard: every account, the tokens, the money, who is active, and ex
   of days just before it), and the supporting figures sit in a grid. On a narrower window the panel's parts follow
   the figures.
 - **外观 (v12.1.0):** the ☀ / ☾ / Ⓐ button in the bar picks 跟随系统, 浅色 or 深色. The choice is kept in this browser.
+- **消息 (v13.2.0):** every mail and SMS the server sends (验证码邮件, 报告完成邮件, 记录发送邮件, 验证码短信), for admins
+  and integrators. To try it:
+  1. Sign in as `integrator` / `integrator`: 消息 is the whole page.
+  2. Open 报告完成邮件. Beside the editor, the preview shows the mail's own page with sample values (a sample 八字
+     reading), light or dark as the dashboard is: switch 外观 to 深色 and open it again.
+  3. Change the body: the preview follows a moment after you stop typing. Click `{{title}}` among the values: it goes
+     in where the cursor is. Type `{{who}}`: 「没有 {{who}} 这个变量」 shows under the body, and 保存 waits.
+  4. 发送测试 → an address → 发送: the draft goes through the server's dispatcher into `.outbox/mail/` (a `.eml` that
+     opens in Outlook, Thunderbird or Windows Mail, light or dark as that program is), and 最近发送 lists it with the
+     address masked.
+  5. 保存 (or Ctrl+Enter): every later 报告完成邮件 in that language uses it, and the card says 「简体中文 · 已修改」.
+     恢复默认 puts the default back.
+  - The edits are kept in the store: in memory until a restart, or with `MINGLI_STORE=pglite` for good.
+  - No third-party service yet: mail and SMS go to `.outbox/` (the 发送方式 panel says so).
+- **On a wide window (v13.2.0):** every page keeps to one centred container, 1440 px at most, its panel a card beside
+  the main column; the bar and the rail stay at the window's edges.
+- **From the app (v13.3.0):** a staff account sees ☰ → 管理后台 in the app. On the web it opens the dashboard in a new
+  tab with the login filled in (the password is still asked; the login leaves the address bar once read). Off the web
+  the address is copied instead.
 
 ## 外观: light and dark (v12.1.0)
 
