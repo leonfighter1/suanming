@@ -183,11 +183,14 @@ void main() {
     expect(store.savedTheme, 'dark');
   });
 
-  test('the app starts in the theme last picked, else the system’s', () async {
-    expect(await startTheme(InMemorySettingsStore()), ThemeMode.system);
-    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'dark'), ThemeMode.dark);
-    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'light'), ThemeMode.light);
-    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'sepia'), ThemeMode.system);
-    expect(await startTheme(_BrokenStore()), ThemeMode.system);
+  test('the app starts in the theme last picked, else by the time of day (跟随时间, S27)', () async {
+    const byTime = (mode: ThemeMode.system, byTime: true);
+    expect(await startTheme(InMemorySettingsStore()), byTime);
+    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'time'), byTime);
+    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'system'), (mode: ThemeMode.system, byTime: false));
+    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'dark'), (mode: ThemeMode.dark, byTime: false));
+    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'light'), (mode: ThemeMode.light, byTime: false));
+    expect(await startTheme(InMemorySettingsStore()..savedTheme = 'sepia'), byTime);
+    expect(await startTheme(_BrokenStore()), byTime);
   });
 }

@@ -79,8 +79,14 @@ background, card, raised and inset in both themes, and each "on" colour on its f
 
 - **Same layout, colours only.** Both themes have the same fields, the same borders (width), paddings and widgets.
   `theme_test` lays the home page out in both, with the menu open too, and finds every box in the same place.
-- **The switch:** 外观 (跟随系统, 浅色, 深色) in the app's ☰ menu, kept on the device like the language
-  (`SettingsStore.theme`); in the dashboard's bar, kept in the browser (`prefsProvider`).
+- **The switch:** 外观 in the app's ☰ menu, kept on the device like the language (`SettingsStore.theme`); in the
+  dashboard's bar, kept in the browser (`prefsProvider`).
+  - The app offers 跟随时间, 跟随系统, 浅色 and 深色.
+  - 跟随时间 (S27) is the default where nothing was picked: dark from 19:00 to 06:00 local time, light otherwise.
+    `nightProvider` turns it by itself at 06:00 and 19:00 (owner, 2026-10-30: 「当地时间7点到第二天凌晨6点为深色，其余为
+    浅色」).
+  - The app's banner (首页, the sign-in page) shows the time of day, whatever 外观 is: `sunOrMoon` gives the sun by
+    day and the moon at night.
 - **The change fades:** `MaterialApp(themeAnimationStyle: AnimationStyle(duration: Motion.theme, curve:
 Motion.themeCurve))`. Every colour lerps: the Material scheme and `ThemeTokens` (a `ThemeExtension`). The tests switch
   the theme and check colours half-way, the 五行 and the chart series too.

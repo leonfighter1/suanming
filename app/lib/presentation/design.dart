@@ -399,6 +399,10 @@ class _RevealScroll extends DrivenScrollActivity {
 }
 
 /// Large gradient header used at the top of the main screens.
+/// The time of day on the app's banner (S27; owner, 2026-10-30: 「Theme加上太阳和月亮到banner上去，表示时间」): the moon at
+/// night (19:00 to 06:00, `nightProvider`), the sun by day.
+IconData sunOrMoon(bool night) => night ? Icons.nightlight_round : Icons.wb_sunny_rounded;
+
 class HeroBanner extends StatelessWidget {
   const HeroBanner({
     super.key,

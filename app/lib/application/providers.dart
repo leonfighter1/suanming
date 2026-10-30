@@ -28,47 +28,91 @@ const supportedAppLocales = [zhHans, zhHant];
 String apiLocale(Locale l) => l.scriptCode == 'Hans' ? 'zh-Hans' : 'zh-Hant';
 
 class Settings {
-  const Settings({required this.locale, this.themeMode = ThemeMode.system});
+  const Settings({required this.locale, this.themeMode = ThemeMode.system, this.byTime = false});
   final Locale locale;
 
   /// 外观 (v12.1.0): the system's light or dark, or one of them always.
   final ThemeMode themeMode;
+
+  /// 跟随时间 (S27; owner, 2026-10-30: 「皮肤会跟随时间变化而变化。当地时间7点到第二天凌晨6点为深色，其余为浅色」): the theme
+  /// follows the local time of day ([nightProvider]) instead of [themeMode]. Where the reader picked nothing, the default.
+  final bool byTime;
   String get apiLocaleCode => apiLocale(locale);
 }
 
 class SettingsNotifier extends Notifier<Settings> {
-  SettingsNotifier([this._initial = zhHans, this._theme = ThemeMode.system]);
+  SettingsNotifier([this._initial = zhHans, this._theme = ThemeMode.system, this._byTime = false]);
   final Locale _initial;
   final ThemeMode _theme;
+  final bool _byTime;
 
   /// 简体中文 by default (owner, 2026-10-26) and the system's theme; main() passes the ones the reader last picked.
   @override
-  Settings build() => Settings(locale: _initial, themeMode: _theme);
+  Settings build() => Settings(locale: _initial, themeMode: _theme, byTime: _byTime);
 
   /// Switches the language and keeps it for the next start (v5.1.0). A failed save only loses that.
   void setLocale(Locale l) {
-    state = Settings(locale: l, themeMode: state.themeMode);
+    state = Settings(locale: l, themeMode: state.themeMode, byTime: state.byTime);
     unawaited(ref.read(settingsStoreProvider).setLanguage(apiLocale(l)).catchError((Object _) {}));
   }
 
-  /// Switches the theme and keeps it for the next start (v12.1.0). The page keeps its layout: only colours change.
-  void setThemeMode(ThemeMode mode) {
-    state = Settings(locale: state.locale, themeMode: mode);
-    unawaited(ref.read(settingsStoreProvider).setTheme(mode.name).catchError((Object _) {}));
+  /// Switches the theme and keeps it for the next start (v12.1.0): [mode], or with [byTime] the time of day's (S27).
+  /// The page keeps its layout: only colours change.
+  void setThemeMode(ThemeMode mode, {bool byTime = false}) {
+    state = Settings(locale: state.locale, themeMode: mode, byTime: byTime);
+    unawaited(ref.read(settingsStoreProvider).setTheme(byTime ? 'time' : mode.name).catchError((Object _) {}));
   }
 }
 
-/// The theme to start in: the one the reader last picked, else the system's. Storage that can't be read starts with
-/// the system's too.
-Future<ThemeMode> startTheme(SettingsStore store) async {
+/// The theme to start in: the one the reader last picked, else the time of day's (跟随时间, S27). Storage that can't be
+/// read starts with the time of day's too.
+Future<({ThemeMode mode, bool byTime})> startTheme(SettingsStore store) async {
+  const byTime = (mode: ThemeMode.system, byTime: true);
   try {
     return switch (await store.theme()) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      'light' => (mode: ThemeMode.light, byTime: false),
+      'dark' => (mode: ThemeMode.dark, byTime: false),
+      'system' => (mode: ThemeMode.system, byTime: false),
+      _ => byTime,
     };
   } catch (_) {
-    return ThemeMode.system;
+    return byTime;
+  }
+}
+
+/// The clock 跟随时间 and the banner read (S27): the device's local time; tests give their own.
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+/// Night by the local clock (owner, 2026-10-30: 「当地时间7点到第二天凌晨6点为深色，其余为浅色」): 19:00 to 06:00.
+bool isNight(DateTime t) => t.hour >= 19 || t.hour < 6;
+
+/// The next turn after [t]: that day's 06:00 or 19:00, else the next day's 06:00.
+DateTime nextTurn(DateTime t) {
+  for (final turn in [DateTime(t.year, t.month, t.day, 6), DateTime(t.year, t.month, t.day, 19)]) {
+    if (t.isBefore(turn)) return turn;
+  }
+  return DateTime(t.year, t.month, t.day + 1, 6);
+}
+
+/// Whether it is night now ([isNight]), turning by itself at 06:00 and 19:00 while the app is open: 跟随时间's theme and
+/// the banner's moon or sun.
+final nightProvider = NotifierProvider<NightNotifier, bool>(NightNotifier.new);
+
+class NightNotifier extends Notifier<bool> {
+  Timer? _turn;
+
+  @override
+  bool build() {
+    ref.onDispose(() => _turn?.cancel());
+    return _now();
+  }
+
+  /// Night or day now, and a timer for the next turn, which asks again.
+  bool _now() {
+    final now = ref.read(clockProvider)();
+    _turn?.cancel();
+    _turn = Timer(nextTurn(now).difference(now), () => state = _now());
+    return isNight(now);
   }
 }
 

@@ -111,7 +111,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       key: const Key('auth-banner'),
       title: _register ? l10n.createAccount : l10n.signIn,
       subtitle: l10n.disclaimerShort,
-      icon: Icons.auto_awesome,
+      icon: sunOrMoon(ref.watch(nightProvider)),
       margin: wide ? EdgeInsets.zero : null,
     );
     final form = _form(l10n, locale, canSubmit);

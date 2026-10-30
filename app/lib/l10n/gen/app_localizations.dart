@@ -163,6 +163,18 @@ abstract class AppLocalizations {
   /// **'深色'**
   String get themeDark;
 
+  /// No description provided for @themeTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'跟随时间'**
+  String get themeTime;
+
+  /// No description provided for @themeTimeHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'晚上 7 点到早上 6 点为深色，其余为浅色'**
+  String get themeTimeHint;
+
   /// No description provided for @region.
   ///
   /// In zh, this message translates to:

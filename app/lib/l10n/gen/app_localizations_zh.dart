@@ -43,6 +43,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get themeDark => '深色';
 
   @override
+  String get themeTime => '跟随时间';
+
+  @override
+  String get themeTimeHint => '晚上 7 点到早上 6 点为深色，其余为浅色';
+
+  @override
   String get region => '地区';
 
   @override
@@ -2413,6 +2419,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get themeDark => '深色';
+
+  @override
+  String get themeTime => '跟隨時間';
+
+  @override
+  String get themeTimeHint => '晚上 7 點到早上 6 點為深色，其餘為淺色';
 
   @override
   String get region => '地區';

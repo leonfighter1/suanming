@@ -13,6 +13,29 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v16.0.0 (2026-10-30): the theme follows the time of day, with the sun and the moon on the banner (stage S27)
+
+Your request of today: 「Theme加上太阳和月亮到banner上去, 表示时间，皮肤会跟随时间变化而变化。当地时间7点到第二天凌晨6点为深色，其余为
+浅色。」, with every page in the container, the 充值 boxes and the coding skill of v15.1.0. This completes stage S27 of
+the [tech plan](docs/tech-plan.md). Pushed, with v14.1.0 to v15.1.0.
+
+- **跟随时间, the new default 外观:**
+  - From 19:00 to 06:00 local time the app is dark; the rest of the day it is light.
+  - The change comes by itself at 19:00 and at 06:00 while the app is open, fading over 0.3 s as any change of 外观
+    does.
+  - ☰ → 外观 lists 跟随时间 first, with its hours, then 跟随系统, 浅色 and 深色. If you picked one of those before, it
+    is kept: choose 跟随时间 to switch.
+- **The sun and the moon:** the banner on 首页 and on the sign-in page shows the sun by day (06:00 to 19:00) and the
+  moon at night, whatever 外观 is.
+- **The rest of the stage** (details in v15.1.0 below): every page in the 1620 container, the 充值 boxes one size,
+  and the coding skill.
+- **To try it:** docs/web-test.md, 「外观: light and dark」.
+- **Verified:**
+  - **App tests 261 → 265:** the hours at their edges and over the year's end; the theme and the banner turning at
+    19:00 and at 06:00 in an open app; the moon at night on a light page; 跟随时间 picked from the menu and kept.
+  - **Renders** with the real fonts: 首页 by day and at night.
+  - **Harness:** PASS, and once more on the final tree before the push.
+
 ### v15.1.0 (2026-10-30): every page in the 1620 container; the 充值 boxes one size
 
 Your requests of today: 「各自算法的大小container似乎没有加上大屏幕1620px的限制，现在挺小的。我的要求时对于所有的页面，基本框架在大屏时

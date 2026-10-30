@@ -53,7 +53,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S24 设计系统与管理后台布局 | tokens, light and dark, the grid; the asymmetric dashboard  | big    | v13.0.0 + summary | done        |
 | S25 消息模板与分发         | mail and SMS templates, one dispatcher, staff roles         | big    | v14.0.0 + summary | done        |
 | S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
-| S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | in progress |
+| S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2511,6 +2511,29 @@ Lessons: rules 42, 52, 53, 70, 76.
 
 ## 阶段总结 (stage summaries)
 
+### S27 每个页面的容器、充值框、跟随时间的外观 (done 2026-10-30: v15.1.0–v16.0.0)
+
+1. **Delivered:**
+   - **WP27.1 (no version):** the coding skill (`.claude/skills/coding`), named in CLAUDE.md: use what exists, one
+     home for each thing, the smallest change, read the diff.
+   - **WP27.2 (v15.1.0):**
+     - `pagePadding` is the 1620 container, so every page moved in one place, 设置 and the place picker too
+       (`margin: false` for lists of tiles);
+     - the 充值 packs are one size.
+   - **WP27.3 (v16.0.0):** 外观 → 跟随时间, the default: dark from 19:00 to 06:00 by the local clock, turning by
+     itself. The banner shows the sun by day and the moon at night.
+2. **Numbers:**
+   - **Tests:** app 259 → 265; server 696 and the 管理后台 75, unchanged.
+   - **Harness:** PASS at both releases, each on its first run.
+   - **Renders:** 我的积分 on a phone; 八字, 塔罗 and 设置 at 1920; 首页 by day and at night; the 外观 dialog.
+3. **Against the plan:**
+   - The packs needed one line each as well as one width: the test font's wide glyphs wrapped a bonus line.
+   - 88, not 96, keeps three packs to a row on a 360 phone.
+4. **Mistakes and what they teach:** none new. Rule 23 gained its prevention: bump the version before the last
+   manual Flutter run, and the first harness run passes.
+5. **Next:** push v14.1.0 to v16.0.0. Then nothing planned; waiting for the owner: the mail and SMS providers, Phase
+   4 payments, the Phase 3 gate, WP7.2, WP7.3 and WP1.8.
+
 ### S26 宽屏布局与今日一卦、今日一签 (done 2026-10-30: v14.1.0–v15.0.0)
 
 1. **Delivered:**
@@ -3266,4 +3289,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP26.2    | done                         | v15.0.0 |
 | WP27.1    | done                         | —       |
 | WP27.2    | done                         | v15.1.0 |
-| WP27.3    | planned                      | v16.0.0 |
+| WP27.3    | done                         | v16.0.0 |

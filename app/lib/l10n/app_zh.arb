@@ -11,6 +11,8 @@
   "themeSystem": "跟随系统",
   "themeLight": "浅色",
   "themeDark": "深色",
+  "themeTime": "跟随时间",
+  "themeTimeHint": "晚上 7 点到早上 6 点为深色，其余为浅色",
   "region": "地区",
   "birthTime": "出生时间（当地时间）",
   "pickDate": "日期",

@@ -72,7 +72,8 @@ class HomePage extends ConsumerWidget {
             child: HeroBanner(
               title: me == null ? l10n.appTitle : l10n.greeting(me.name),
               subtitle: l10n.disclaimerShort,
-              icon: Icons.auto_awesome,
+              // The time of day (S27): the sun, or the moon.
+              icon: sunOrMoon(ref.watch(nightProvider)),
             ),
           ),
           if (book != null && me == null)

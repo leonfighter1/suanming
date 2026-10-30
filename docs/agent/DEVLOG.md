@@ -2,6 +2,27 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (n): S27 WP27.3 — 外观 by the time of day, the sun and the moon; S27 done, release v16.0.0
+
+- v15.1.0 committed and tagged after a harness PASS on its first run (3631ab9). The version had gone up before the
+  manual Flutter runs, and rule 23 didn't strike, so rule 23 now says to do that.
+- Built, by the coding skill's rules:
+  - `Settings.byTime` beside `themeMode`, not a new enum: fewer callers changed. `setThemeMode(mode, byTime:)`;
+    `startTheme` returns both, `time` or nothing stored meaning by the time of day;
+  - `clockProvider`, `isNight` (19:00–06:00), `nextTurn`, and `nightProvider`, whose timer to the next turn asks
+    again;
+  - `app.dart` picks dark or light from it under 跟随时间;
+  - `sunOrMoon` (design.dart) on 首页's and the sign-in banner;
+  - the 外观 dialog builds its four choices as `Settings` and labels them with the existing `themeLabel`;
+  - two strings in 简体 and 繁體; testApp's `byTime`.
+- Read as the default where nothing was picked: the owner describes the behaviour, not an option. A reader's
+  earlier choice stays.
+- Tests:
+  - theme_time_test.dart (4): the hours at their edges and over the year's end; a timer turn at 19:00 and 06:00 with
+    a fake clock; the moon on a light page; the dialog;
+  - theme_test's start-up test: the new default.
+- Rendered: 首页 by day (sun, light) and at night (moon, dark), the dialog, the sign-in page at night.
+
 ## 2026-10-30 (m): S27 WP27.1–27.2 — the coding skill; every page in the container, the 充值 boxes; v15.1.0 (local)
 
 - Owner request before the push of v15.0.0, in one message:

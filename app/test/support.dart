@@ -745,12 +745,14 @@ Widget testApp(
   SettingsStore? settings,
   // 外观 (v12.1.0); null = the system's.
   ThemeMode? theme,
+  // 跟随时间 (S27): the theme by the time of day (the app's default where nothing was picked).
+  bool byTime = false,
 }) {
   final store = tokens ?? InMemoryTokenStore(signedIn ? Tokens(api.access, 'refresh-0') : null);
   return ProviderScope(
     overrides: [
-      if (locale != null || theme != null)
-        settingsProvider.overrideWith(() => SettingsNotifier(locale ?? zhHans, theme ?? ThemeMode.system)),
+      if (locale != null || theme != null || byTime)
+        settingsProvider.overrideWith(() => SettingsNotifier(locale ?? zhHans, theme ?? ThemeMode.system, byTime)),
       settingsStoreProvider.overrideWithValue(settings ?? InMemorySettingsStore()),
       tokenStoreProvider.overrideWithValue(store),
       profileStoreProvider.overrideWithValue(profiles ?? InMemoryProfileStore()),

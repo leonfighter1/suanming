@@ -275,13 +275,17 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
 
 ## 外观: light and dark (v12.1.0)
 
-In the app, ☰ → 外观 picks 跟随系统, 浅色 or 深色. The choice is kept on the device like the language, so it survives a
-reload. The page fades into the other theme over 0.3 s, and nothing moves. To try it:
+In the app, ☰ → 外观 picks 跟随时间, 跟随系统, 浅色 or 深色. The choice is kept on the device like the language, so it
+survives a reload. The page fades into the other theme over 0.3 s, and nothing moves. To try it:
 
 1. Open the app, ☰ → 外观 → 深色: the page fades to dark; ☰ → 外观 shows 深色.
 2. Reload: the app opens dark.
 3. 外观 → 跟随系统: the app follows the system's light or dark. Switching the system (Windows: Settings →
    Personalisation → Colours) while the app is open fades it over too.
+4. 外观 → 跟随时间 (since v16.0.0, and the default for a reader who never picked): dark from 19:00 to 06:00 local
+   time, light otherwise. It turns by itself at 19:00 and 06:00 with the app open. To see the other side, change the
+   computer's clock or time zone and reload.
+5. 首页's banner (and the sign-in page's) shows the sun by day and the moon at night, whatever 外观 is.
 
 The colours are the tokens in `app/lib/presentation/tokens.dart`, both themes side by side; the rules are in the
 ui-design skill.

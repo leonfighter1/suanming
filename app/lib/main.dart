@@ -16,7 +16,7 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         settingsStoreProvider.overrideWithValue(settings),
-        settingsProvider.overrideWith(() => SettingsNotifier(locale, theme)),
+        settingsProvider.overrideWith(() => SettingsNotifier(locale, theme.mode, theme.byTime)),
       ],
       child: const MingliApp(),
     ),

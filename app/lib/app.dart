@@ -20,8 +20,9 @@ class MingliApp extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
-      // 外观 (v12.1.0): a change fades every colour, border and state into the other theme; nothing moves.
-      themeMode: settings.themeMode,
+      // 外观 (v12.1.0): a change fades every colour, border and state into the other theme; nothing moves. 跟随时间
+      // (S27): dark from 19:00 to 06:00 by the local clock, light otherwise, turning by itself.
+      themeMode: settings.byTime ? (ref.watch(nightProvider) ? ThemeMode.dark : ThemeMode.light) : settings.themeMode,
       themeAnimationStyle: const AnimationStyle(duration: Motion.theme, curve: Motion.themeCurve),
       locale: settings.locale,
       supportedLocales: supportedAppLocales,

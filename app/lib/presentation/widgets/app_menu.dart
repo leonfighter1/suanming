@@ -93,7 +93,7 @@ class AppMenu extends ConsumerWidget {
             key: const Key('theme-menu'),
             leading: const Icon(Icons.contrast),
             title: Text(l10n.appearance),
-            trailing: Text(themeLabel(l10n, ref.watch(settingsProvider).themeMode), key: const Key('theme-current')),
+            trailing: Text(themeLabel(l10n, ref.watch(settingsProvider)), key: const Key('theme-current')),
             onTap: () => pickTheme(context, ref),
           ),
           ListTile(
@@ -206,37 +206,45 @@ Future<void> pickLanguage(BuildContext context, WidgetRef ref) async {
   if (code != null) settings.setLocale(code == 'zh-Hant' ? zhHant : zhHans);
 }
 
-/// 跟随系统, 浅色 or 深色.
-String themeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
-      ThemeMode.light => l10n.themeLight,
-      ThemeMode.dark => l10n.themeDark,
-      ThemeMode.system => l10n.themeSystem,
-    };
+/// 跟随时间, 跟随系统, 浅色 or 深色: what the theme follows in [s].
+String themeLabel(AppLocalizations l10n, Settings s) => s.byTime
+    ? l10n.themeTime
+    : switch (s.themeMode) {
+        ThemeMode.light => l10n.themeLight,
+        ThemeMode.dark => l10n.themeDark,
+        ThemeMode.system => l10n.themeSystem,
+      };
 
-/// 外观 from the menu (v12.1.0): 跟随系统, 浅色 or 深色, the current one ticked and focused. The page under the dialog
-/// fades into the theme picked, its layout unchanged.
+/// 外观 from the menu (v12.1.0): 跟随时间 (S27, with its hours), 跟随系统, 浅色 or 深色, the current one ticked and
+/// focused. The page under the dialog fades into the theme picked, its layout unchanged.
 Future<void> pickTheme(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context);
   final settings = ref.read(settingsProvider.notifier);
-  final current = ref.read(settingsProvider).themeMode;
-  final mode = await showDialog<ThemeMode>(
+  final now = ref.read(settingsProvider);
+  final choices = [
+    for (final m in [null, ThemeMode.system, ThemeMode.light, ThemeMode.dark])
+      Settings(locale: now.locale, themeMode: m ?? ThemeMode.system, byTime: m == null),
+  ];
+  String keyOf(Settings s) => s.byTime ? 'time' : s.themeMode.name;
+  final picked = await showDialog<Settings>(
     context: context,
     builder: (ctx) => SimpleDialog(
       title: Text(l10n.appearance),
       children: [
-        for (final m in [ThemeMode.system, ThemeMode.light, ThemeMode.dark])
+        for (final c in choices)
           ListTile(
-            key: Key('theme-${m.name}'),
-            autofocus: m == current,
-            selected: m == current,
-            leading: Icon(m == current ? Icons.check : null),
-            title: Text(themeLabel(l10n, m)),
-            onTap: () => Navigator.pop(ctx, m),
+            key: Key('theme-${keyOf(c)}'),
+            autofocus: keyOf(c) == keyOf(now),
+            selected: keyOf(c) == keyOf(now),
+            leading: Icon(keyOf(c) == keyOf(now) ? Icons.check : null),
+            title: Text(themeLabel(l10n, c)),
+            subtitle: c.byTime ? Text(l10n.themeTimeHint) : null,
+            onTap: () => Navigator.pop(ctx, c),
           ),
       ],
     ),
   );
-  if (mode != null) settings.setThemeMode(mode);
+  if (picked != null) settings.setThemeMode(picked.themeMode, byTime: picked.byTime);
 }
 
 class _Header extends StatelessWidget {
