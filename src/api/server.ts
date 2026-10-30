@@ -1372,17 +1372,42 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   }
 
   /**
-   * 深度分析 (v10.0.0): the master's questions on a chart before its reading. It needs a goal (the owner:
-   * 「使用这一功能一定要给出个明确的目标才行」): 400 goal_required without one. The first question comes in the background.
-   * One from the daily AI caps, as a reading takes.
+   * The account's draw of the day (每日一牌, 今日一卦 / 今日一签; S28): the chart kept under [chartId], else [draw] kept
+   * now as that day's chart. Each route keeps its own draw (rule 8).
    */
-  async function createInquiry(req: IncomingMessage, c: Caller) {
+  async function dailyChart(c: Caller, chartId: string, date: string, draw: () => ChartFact) {
+    let chart = await store.getChart(chartId);
+    if (!chart) {
+      chart = {
+        id: chartId,
+        owner: c.user,
+        fact: draw(),
+        created_at: now().toISOString(),
+        daily: date,
+      };
+      await store.putChart(chart);
+    }
+    return { chart_id: chart.id, chart_fact: chart.fact, date };
+  }
+
+  /** A request on one of the caller's charts: its body, and the chart its chart_id names (400 or 404 otherwise; S28). */
+  async function chartRequest(req: IncomingMessage, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
     const chartId = body.chart_id;
     if (typeof chartId !== "string" || !UUID_RE.test(chartId))
       throw new InputError("chart_id must be a UUID");
     const chart = await store.getChart(chartId);
     if (!chart || chart.owner !== c.user) throw new HttpError(404, "chart not found");
+    return { body, chart };
+  }
+
+  /**
+   * 深度分析 (v10.0.0): the master's questions on a chart before its reading. It needs a goal (the owner:
+   * 「使用这一功能一定要给出个明确的目标才行」): 400 goal_required without one. The first question comes in the background.
+   * One from the daily AI caps, as a reading takes.
+   */
+  async function createInquiry(req: IncomingMessage, c: Caller) {
+    const { body, chart } = await chartRequest(req, c);
     if (!inquiryAvailable(chart.fact)) {
       throw new InputError(`深度分析 is not offered for ${chart.fact.system} readings`);
     }
@@ -1532,12 +1557,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   }
 
   async function createLifeReport(req: IncomingMessage, c: Caller) {
-    const body = (await readJson(req)) as Record<string, unknown>;
-    const chartId = body.chart_id;
-    if (typeof chartId !== "string" || !UUID_RE.test(chartId))
-      throw new InputError("chart_id must be a UUID");
-    const chart = await store.getChart(chartId);
-    if (!chart || chart.owner !== c.user) throw new HttpError(404, "chart not found");
+    const { body, chart } = await chartRequest(req, c);
     if (chart.fact.system !== "bazi") throw new InputError("a life report needs a bazi chart");
     const locale = body.locale as Locale;
     if (!LOCALES.includes(locale))
@@ -1730,12 +1750,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   }
 
   async function createReport(req: IncomingMessage, c: Caller) {
-    const body = (await readJson(req)) as Record<string, unknown>;
-    const chartId = body.chart_id;
-    if (typeof chartId !== "string" || !UUID_RE.test(chartId))
-      throw new InputError("chart_id must be a UUID");
-    const chart = await store.getChart(chartId);
-    if (!chart || chart.owner !== c.user) throw new HttpError(404, "chart not found");
+    const { body, chart } = await chartRequest(req, c);
     const locale = body.locale as Locale;
     if (!LOCALES.includes(locale))
       throw new InputError(`locale must be one of ${LOCALES.join(", ")}`);
@@ -2430,18 +2445,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           now(),
         );
         const { drawId, chartId } = dailyIds(opts.secrets.drawKey, c.user, date);
-        let chart = await store.getChart(chartId);
-        if (!chart) {
-          chart = {
-            id: chartId,
-            owner: c.user,
-            fact: drawDaily(opts.secrets, drawId, now),
-            created_at: now().toISOString(),
-            daily: date,
-          };
-          await store.putChart(chart);
-        }
-        return send(res, 200, { chart_id: chart.id, chart_fact: chart.fact, date });
+        return send(
+          res,
+          200,
+          await dailyChart(c, chartId, date, () => drawDaily(opts.secrets, drawId, now)),
+        );
       }
       // 今日一卦 / 今日一签 (S26): the account's 东方 draw of the day, a 签 or a 卦 at random, the same all day
       // (src/service/daily.ts). Only the 东方 methods served in the region take part; none, and it isn't served.
@@ -2456,18 +2464,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         const date = dailyDate(query.get("date"), now());
         const timezone = dailyZone(query.get("timezone"));
         const { system, drawId, chartId } = eastDaily(opts.secrets.drawKey, c.user, date, systems);
-        let chart = await store.getChart(chartId);
-        if (!chart) {
-          chart = {
-            id: chartId,
-            owner: c.user,
-            fact: drawEastDaily(system, opts.secrets, drawId, timezone, now),
-            created_at: now().toISOString(),
-            daily: date,
-          };
-          await store.putChart(chart);
-        }
-        return send(res, 200, { chart_id: chart.id, chart_fact: chart.fact, date });
+        return send(
+          res,
+          200,
+          await dailyChart(c, chartId, date, () =>
+            drawEastDaily(system, opts.secrets, drawId, timezone, now),
+          ),
+        );
       }
       const limit = Math.min(
         Math.max(
