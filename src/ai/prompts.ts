@@ -1413,9 +1413,7 @@ export function narrativeUser(args: {
     args.context ? tag("user_context", args.context) : "",
     args.inquiry ? tag("inquiry", args.inquiry) : "",
     `Write these topics, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1451,9 +1449,7 @@ export function tarotUser(args: {
     args.context ? tag("user_context", args.context) : "",
     args.inquiry ? tag("inquiry", args.inquiry) : "",
     `Write these topics, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1478,10 +1474,8 @@ export function namingUser(args: {
     tag("names", args.names),
     tag("glossary", args.glossary),
     args.context ? tag("user_context", args.context) : "",
-    `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    sectionsLine(args.topics, args.locale),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1511,10 +1505,8 @@ export function liuyaoUser(args: {
     args.question ? tag("user_question", args.question) : "",
     args.context ? tag("user_context", args.context) : "",
     args.inquiry ? tag("inquiry", args.inquiry) : "",
-    `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    sectionsLine(args.topics, args.locale),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1544,10 +1536,8 @@ export function fengshuiUser(args: {
     args.description ? tag("user_description", args.description) : "",
     args.context ? tag("user_context", args.context) : "",
     args.inquiry ? tag("inquiry", args.inquiry) : "",
-    `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    sectionsLine(args.topics, args.locale),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1577,10 +1567,8 @@ export function qiuqianUser(args: {
     args.question ? tag("user_question", args.question) : "",
     args.context ? tag("user_context", args.context) : "",
     args.inquiry ? tag("inquiry", args.inquiry) : "",
-    `Write these sections, in this order: ${args.topics.map((t) => `${t} (${TOPIC_LABELS[t][args.locale]})`).join(", ")}.`,
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    sectionsLine(args.topics, args.locale),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1603,9 +1591,7 @@ export function actionUser(args: {
     tag("chart_summary", args.chartSummary.join("\n")),
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1634,9 +1620,7 @@ export function remedyUser(args: {
     args.trend ? tag("trend", args.trend) : "",
     args.context ? tag("user_context", args.context) : "",
     tag("glossary", args.glossary),
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1720,9 +1704,7 @@ export function followupUser(args: {
     tag("reading", args.reading),
     args.thread.length ? tag("thread", args.thread) : "",
     tag("follow_up_question", args.question),
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -1765,12 +1747,24 @@ export function inquiryUser(args: {
       "progress",
       `Questions asked: ${asked}. Planned: ${planned ?? "not set yet: set it on this turn"}. At most: ${max}.`,
     ),
-    `Write in ${LANGUAGE[args.locale]}.`,
-    args.regionLine ?? "",
-    feedbackBlock(args.feedback),
+    ...endLines(args),
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+/** The sections to write, in their order, each with its name in the reader's language (S28: four builders wrote it). */
+function sectionsLine(topics: readonly Topic[], locale: Locale) {
+  return `Write these sections, in this order: ${topics.map((t) => `${t} (${TOPIC_LABELS[t][locale]})`).join(", ")}.`;
+}
+
+/** How a user message ends (S28: ten builders wrote these lines): its language, the region's line, a check's feedback. */
+function endLines(args: { locale: Locale; regionLine?: string; feedback?: string[] }) {
+  return [
+    `Write in ${LANGUAGE[args.locale]}.`,
+    args.regionLine ?? "",
+    feedbackBlock(args.feedback),
+  ];
 }
 
 function feedbackBlock(feedback?: string[]) {
