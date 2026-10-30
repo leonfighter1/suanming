@@ -20,7 +20,6 @@ import {
   INQUIRY_ANSWER_MAX,
   INQUIRY_GOAL_MAX,
   INQUIRY_GOAL_MIN,
-  INQUIRY_MAX_QUESTIONS,
   inquiryAvailable,
   inquiryGoal,
   loadRouting,
@@ -124,6 +123,7 @@ const SHARE_RENDERERS: Partial<Record<ChartSystem, typeof renderTarotShare>> = {
 };
 import type { ApiContext, Caller } from "./context.js";
 import { authRoute, accountRoute } from "./routes/account.js";
+import { pointsRoute } from "./routes/points.js";
 import { publicRoute } from "./routes/public.js";
 import {
   InMemoryStore,
@@ -142,8 +142,6 @@ import {
   publicFollowUp,
   publicInquiry,
   publicLifeReport,
-  publicPack,
-  publicPointsEntry,
   publicRemedy,
   publicReport,
   questionRequired,
@@ -1574,6 +1572,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     delivery,
     reviewer,
     clientIp,
+    pointsConfig,
+    simulatedTopUp,
+    priceOf,
+    assertAllowed,
   };
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
@@ -1651,75 +1653,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // ---- account (routes/account.ts) ----
     if (await accountRoute(api, req, res, path, c)) return;
 
-    // ---- 积分 (v11.0.0, tech plan S20): the balance, 充值, and what each AI request on a chart costs ----
-    if (path === "/v1/points" && req.method === "GET") {
-      if (!pointsConfig) return send(res, 200, { enabled: false });
-      const { balance, held } = await store.pointsOf(c.user);
-      const [entries, holds] = await Promise.all([
-        store.listPoints(c.user, 50),
-        store.listHolds(c.user),
-      ]);
-      return send(res, 200, {
-        enabled: true,
-        balance,
-        held,
-        available: Math.max(0, balance - held),
-        top_up: simulatedTopUp ? "simulated" : "unavailable",
-        packs: pointsConfig.packs.map(publicPack),
-        entries: entries.map((e) => publicPointsEntry(e, simulatedTopUp)),
-        holds: holds.map((h) => ({ points: h.points, for: h.for, created_at: h.created_at })),
-      });
-    }
-    if (path === "/v1/points/top-ups" && req.method === "POST") {
-      if (!pointsConfig) throw new HttpError(404, "积分 are off on this server", "points_off");
-      await assertAllowed(c, "top_up");
-      if (!simulatedTopUp) {
-        throw new HttpError(
-          501,
-          "充值 needs real payments, which come with Phase 4",
-          "payments_unavailable",
-        );
-      }
-      const body = (await readJson(req)) as Record<string, unknown>;
-      const pack = pointsConfig.packs.find((p) => p.yuan === body.yuan);
-      if (!pack) {
-        throw new InputError(
-          `yuan must be one of the packs: ${pointsConfig.packs.map((p) => p.yuan).join(", ")}`,
-        );
-      }
-      // Simulated (development): the pack's 积分 arrive without payment. TODO(Phase 4): a verified payment.
-      const entry = await store.creditPoints(
-        c.user,
-        pack.points,
-        { kind: "topup", pack },
-        now().toISOString(),
-      );
-      const { balance, held } = await store.pointsOf(c.user);
-      return send(res, 201, {
-        entry: publicPointsEntry(entry!, simulatedTopUp),
-        balance,
-        held,
-        available: Math.max(0, balance - held),
-      });
-    }
-    const qm = /^\/v1\/charts\/([^/]+)\/quote$/.exec(path);
-    if (qm && req.method === "GET") {
-      if (!pointsConfig) throw new HttpError(404, "积分 are off on this server", "points_off");
-      const ch = UUID_RE.test(qm[1]!) ? await store.getChart(qm[1]!) : undefined;
-      if (!ch || ch.owner !== c.user) throw new HttpError(404, "chart not found");
-      const allowed = TOPICS_BY_SYSTEM[ch.fact.system];
-      const asked = new URL(req.url ?? "/", "http://localhost").searchParams.get("topics");
-      const topics = asked
-        ? asked.split(",").filter((t) => allowed.includes(t as Topic)).length
-        : allowed.length;
-      return send(res, 200, {
-        report: priceOf("report", quoteFor(ch.fact, topics)),
-        ...(inquiryAvailable(ch.fact) && {
-          inquiry: { ...priceOf("inquiry"), max_questions: INQUIRY_MAX_QUESTIONS },
-        }),
-        ...(ch.fact.system === "bazi" && { life_report: priceOf("life_report") }),
-      });
-    }
+    // ---- 积分 (v11.0.0, tech plan S20; routes/points.ts) ----
+    if (await pointsRoute(api, req, res, path, c)) return;
 
     // ---- 内容审核: reviewers only ----
     if (path === "/v1/admin/reviews" || path.startsWith("/v1/admin/reviews/")) {

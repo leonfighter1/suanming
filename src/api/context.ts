@@ -5,7 +5,8 @@
  */
 import type { IncomingMessage } from "node:http";
 import type { AccountService } from "../auth/account.js";
-import type { AuthService } from "../auth/service.js";
+import type { AccountPermissions, AuthService } from "../auth/service.js";
+import type { ChargeKind, PointsConfig, Quote, QuoteFor } from "../points/index.js";
 import type { ApiOptions } from "./server.js";
 import type { Store } from "./store.js";
 
@@ -33,4 +34,12 @@ export interface ApiContext {
   reviewer: (c: Caller) => Promise<string | undefined>;
   /** The client's address, for the sign-in limits: behind a trusted proxy, the one it names. */
   clientIp: (req: IncomingMessage) => string;
+  /** 积分 (v11.0.0): their prices and packs; absent while they are off. */
+  pointsConfig?: PointsConfig;
+  /** 充值 adds a pack's 积分 without payment (development, until Phase 4). */
+  simulatedTopUp: boolean;
+  /** What an AI request costs now; undefined while 积分 are off. */
+  priceOf: (kind: ChargeKind, about?: QuoteFor) => Quote | undefined;
+  /** What an admin allows this account; 403 `ai_not_allowed` / `top_up_not_allowed` when not. */
+  assertAllowed: (c: Caller, what: keyof AccountPermissions) => Promise<void>;
 }
