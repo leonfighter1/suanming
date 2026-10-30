@@ -112,8 +112,18 @@ class AppCard extends StatefulWidget {
 }
 
 class _AppCardState extends State<AppCard> {
+  /// The card's own node: onFocusChange reports a field or button inside the card as the card's focus too, so the
+  /// ring asks this node whether the card itself has it (v12.0.1).
+  final _node = FocusNode(debugLabel: 'AppCard');
+
   /// The card itself has focus (not a button inside it).
   bool _focused = false;
+
+  @override
+  void dispose() {
+    _node.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +139,10 @@ class _AppCardState extends State<AppCard> {
           borderRadius: BorderRadius.circular(Radii.card),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
+            focusNode: _node,
             onTap: widget.onTap,
             onLongPress: widget.onLongPress,
-            onFocusChange: (f) => setState(() => _focused = f),
+            onFocusChange: (_) => setState(() => _focused = _node.hasPrimaryFocus),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Radii.card),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/l10n/gen/app_localizations.dart';
+import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 
 import 'keys.dart';
@@ -284,5 +285,37 @@ void main() {
     await frames(tester);
     expect(ringShown(tester, target), isFalse);
     expect(keyboardInUse, isFalse);
+  });
+
+  testWidgets('a card rings itself only when it has the focus, not a field or button inside it (v12.0.1)',
+      (tester) async {
+    final form = find.byKey(const Key('form-card'));
+    final tappable = find.byKey(const Key('tap-card'));
+    await tester.pumpWidget(
+      shellApp(
+        Scaffold(
+          body: ListView(
+            children: [
+              const AppCard(key: Key('form-card'), title: 'form', child: TextField(key: Key('field'))),
+              AppCard(
+                key: const Key('tap-card'),
+                onTap: () {},
+                child: TextButton(key: const Key('inner'), onPressed: () {}, child: const Text('inner')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tabTo(tester, 'field');
+    expect(ringShown(tester, form), isFalse);
+    await tabTo(tester, 'tap-card');
+    expect(ringShown(tester, tappable), isTrue);
+    await tabTo(tester, 'inner');
+    expect(ringShown(tester, tappable), isFalse);
+    // Back to the card from inside it (Shift+Tab): its ring again.
+    await press(tester, LogicalKeyboardKey.tab, shift: true);
+    expect(focusedKey(), 'tap-card');
+    expect(ringShown(tester, tappable), isTrue);
   });
 }

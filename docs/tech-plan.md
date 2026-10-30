@@ -49,7 +49,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | v11.0.0 + summary | done        |
 | S21 有所求才能去求         | 塔罗, 求签 and 算卦 drawn only for a question               | medium | v11.1.0           | done        |
 | S22 管理后台               | admin dashboard: accounts, tokens, money, users, exports    | big    | v12.0.0 + summary | done        |
-| S23 Found on the way       | a card's focus ring only for the card itself                | small  | v12.0.1           | next        |
+| S23 Found on the way       | a card's focus ring only for the card itself                | small  | v12.0.1           | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2116,6 +2116,16 @@ As built:
 
 ## 阶段总结 (stage summaries)
 
+### S23 Found on the way (done 2026-10-30: v12.0.1, small)
+
+1. **Delivered (v12.0.1):** WP23.1 `AppCard` keeps its own focus node and rings only while it has the focus itself;
+   the app and the 管理后台 both take it.
+2. **Numbers:** 1 new app test (240 in all), which failed before the fix.
+3. **Against the plan:** none.
+4. **Mistakes:** rule 75 (Focus.onFocusChange reports a descendant's focus too). Found by looking at the served page
+   in a browser, not by a test: the screenshot step earns its time.
+5. **Next:** nothing planned; the items waiting for the owner, as at S22's end.
+
 ### S22 管理后台 (done 2026-10-30: v12.0.0)
 
 1. **Delivered:** v11.2.0 (WP22.1–22.2) the server's part: every AI job's use recorded, the account's role, status,
@@ -2727,4 +2737,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP22.3    | done                         | v11.3.0 |
 | WP22.4    | done                         | v11.4.0 |
 | WP22.5    | done                         | v12.0.0 |
-| WP23.1    | next                         | v12.0.1 |
+| WP23.1    | done                         | v12.0.1 |

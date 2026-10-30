@@ -76,8 +76,15 @@
 72. A focus check must name the focused control itself (its key, or a focused element inside the widget it belongs to), never just an ancestor of a label: before the first Tab the primary focus is a scope above everything.
 73. In Git Bash, an argument that starts with / (a base href, a URL path, a /flag) reaches the program as a Windows path: prefix the command with MSYS_NO_PATHCONV=1, or run it from PowerShell or a script. Through powershell -File, an argument with a double quote inside is split: keep double quotes out of such arguments.
 74. A Flutter build script clears .dart_tool/flutter_build first (real path), builds through a junction it removes afterwards, writes a build that is served to its own --output folder (the harness builds build/web), and checks the output has its files: rule 23's stale-path deletion hits web build output too, through any junction still there.
+75. A widget that shows its own focus must ask its own node for hasPrimaryFocus: Focus.onFocusChange (and InkWell's) report hasFocus, which is true while anything inside has the focus. Test it with a focusable child inside.
 
 ## Log
+
+### 2026-10-30: AppCard ringed itself while a field inside it had the focus
+- **Symptom:** The 管理后台 sign-in page, rendered in headless Chrome, showed a focus ring round the whole card besides the focused field
+- **Root cause:** AppCard set its ring from InkWell.onFocusChange, which Focus calls with hasFocus: true while any descendant has the focus
+- **Fix:** AppCard keeps its own FocusNode and rings only while that node hasPrimaryFocus; a keyboard_shell_test case (a field in a card, a button in a tappable card, Shift+Tab back) failed before the fix
+- **Rule:** A widget that shows its own focus must ask its own node for hasPrimaryFocus: Focus.onFocusChange (and InkWell's) report hasFocus, which is true while anything inside has the focus. Test it with a focusable child inside. (Rule 75)
 
 ### 2026-10-30: A web build through a new junction deleted its own files
 - **Symptom:** npm run admin:build produced admin/build/web without favicon.png and manifest.json

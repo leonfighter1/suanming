@@ -13,6 +13,18 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v12.0.1 (2026-10-30): a card's focus ring only for the card itself
+
+Found while checking the 管理后台 in a browser (tech plan S23). Committed locally; it goes out with the next big
+update.
+
+- **Fixed, in the app and the 管理后台:** a card drew its keyboard focus ring round itself while a field or button
+  inside it had the focus, so two rings showed at once (on the 管理后台's sign-in card, as the page opened). Now a
+  card rings only when Tab reaches the card itself (a card that opens something, such as 每日一牌); a field or button
+  inside shows its own outline alone.
+- **Verified:** 1 new app test (a field in a card, a button in a tappable card, Shift+Tab back to the card), which
+  failed before the fix; 240 app tests in all; harness PASS.
+
 ### v12.0.0 (2026-10-30): 管理后台 — the admin dashboard, served at /admin/
 
 Your request (「新建一个新的project folder- admin dashboard，这个专门用来管理app下的所有账户…」), stage S22 of the

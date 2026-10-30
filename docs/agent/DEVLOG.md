@@ -2,6 +2,15 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (b): S23 WP23.1 — a card's focus ring only for the card itself; v12.0.1 (local)
+
+- v12.0.0 pushed after a second harness PASS on the final tree (a test-only change after the first: the serving test
+  now removes its temp folders). Removed a junction an earlier harness run had left (`harness-5b35d2a7` → app/, the
+  link only): rule 23's hazard. 80 plain `harness-*` folders with a stray `.dart_tool` remain in %TEMP%: the harness
+  tooling's, outside this repo.
+- WP23.1: `AppCard` keeps its own FocusNode and rings on `hasPrimaryFocus` (rule 75). The new keyboard_shell_test case
+  failed before the fix (the form card ringed while its field had the focus).
+
 ## 2026-10-30 (a): S22 WP22.5 — the 管理后台 served at /admin/; S22 done, release v12.0.0
 
 - v11.4.0 pushed after its harness PASS (the owner: 「你测试完成了可以push。」).
