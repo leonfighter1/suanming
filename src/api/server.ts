@@ -9,10 +9,6 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import {
-  FOLLOWUP_LIMIT,
-  FOLLOWUP_QUESTION_MAX,
-  followUpAvailable,
-  generateFollowUp,
   generateReport,
   loadRouting,
   parseUserContext,
@@ -23,8 +19,6 @@ import {
   TOPICS,
   TOPICS_BY_SYSTEM,
   type AgentTrace,
-  type FollowUpParent,
-  type FollowUpTurn,
   type InquiryContext,
   type LLMProvider,
   type Locale,
@@ -33,7 +27,7 @@ import {
   type TarotFocus,
   type Topic,
 } from "../ai/index.js";
-import { SCHEMA_VERSION, type ChartFact, type ChartSystem } from "../chart-fact/index.js";
+import { SCHEMA_VERSION, type ChartSystem } from "../chart-fact/index.js";
 import { loadGeoMatrix, loadRuleSet, methodsFor, resolveRegion } from "../compliance/index.js";
 import { AccountError, AccountService } from "../auth/account.js";
 import { AuthError, AuthService, permissionsOf, type AccountPermissions } from "../auth/service.js";
@@ -92,13 +86,13 @@ import { authRoute, accountRoute } from "./routes/account.js";
 import { archiveRoute } from "./routes/archive.js";
 import { dailyRoute } from "./routes/daily.js";
 import { pointsRoute } from "./routes/points.js";
-import { ownedPassedReport, preloadRemedies, remediesRoute } from "./routes/remedies.js";
-import { lifeRoute, ownedPassedLifeReport } from "./routes/life.js";
+import { preloadRemedies, remediesRoute } from "./routes/remedies.js";
+import { lifeRoute } from "./routes/life.js";
 import { inquiryRoute, ownedInquiry } from "./routes/inquiry.js";
+import { followUpRoute } from "./routes/followup.js";
 import { publicRoute } from "./routes/public.js";
 import {
   InMemoryStore,
-  type FollowUpRecord,
   type InquiryRecord,
   type ReviewDecision,
   type LifeReportRecord,
@@ -106,14 +100,7 @@ import {
   type ReportRecord,
   type Store,
 } from "./store.js";
-import {
-  chartSummary,
-  heldWhy,
-  publicFollowUp,
-  publicReport,
-  questionRequired,
-  reviewSummary,
-} from "./views.js";
+import { chartSummary, heldWhy, publicReport, questionRequired, reviewSummary } from "./views.js";
 
 export const API_VERSION = "0.2.0";
 
@@ -586,154 +573,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
   }
 
-  /** What a 追问 asks about: the caller's passed reading with what it was asked for and told, or 404 / 409. */
-  async function followUpParent(
-    kind: FollowUpRecord["parent"]["kind"],
-    id: string,
-    c: Caller,
-  ): Promise<{ parent: FollowUpParent; fact: ChartFact }> {
-    if (kind === "life_report") {
-      const { record, life, fact } = await ownedPassedLifeReport(api, id, c);
-      return { parent: { kind, life, ...(record.context && { context: record.context }) }, fact };
-    }
-    const { record, report, fact } = await ownedPassedReport(api, id, c);
-    return {
-      parent: {
-        kind,
-        report,
-        ...(record.question && { question: record.question }),
-        ...(record.focus && { focus: record.focus }),
-        ...(record.context && { context: record.context }),
-      },
-      fact,
-    };
-  }
-
-  async function runFollowUpJob(
-    record: FollowUpRecord,
-    parent: FollowUpParent,
-    fact: ChartFact,
-    thread: FollowUpTurn[],
-    c: Caller,
-    hold?: PointsHold,
-  ) {
-    let next: FollowUpRecord;
-    try {
-      const followup = await generateFollowUp(
-        fact,
-        parent,
-        record.question,
-        thread,
-        { country: c.country },
-        {
-          providers: opts.providers,
-          routing: opts.routing?.(),
-          review: opts.review !== false,
-          now,
-          onProgress: async ({ stage, attempt }) => {
-            const current = await store.getFollowUp(record.id);
-            if (current?.status !== "pending") return;
-            await store.putFollowUp({
-              ...current,
-              progress: { stage, attempt, updated_at: now().toISOString() },
-            });
-          },
-        },
-      );
-      next = { ...record, status: followup.status, followup, updated_at: now().toISOString() };
-      if (followup.status !== "passed") log(`follow-up ${record.id} held: ${heldWhy(followup)}`);
-    } catch (e) {
-      const upstream = upstreamMessage(e);
-      log(
-        `follow-up ${record.id} failed: ${upstream ?? (e as Error).message}`,
-        upstream ? undefined : e,
-      );
-      next = {
-        ...record,
-        status: "failed",
-        error: upstream ?? "internal error",
-        updated_at: now().toISOString(),
-      };
-    }
-    // The account may have been deleted while this ran; never resurrect its data.
-    const gone = !(await store.getFollowUp(record.id));
-    await recordJob(
-      { kind: "followup", id: record.id, owner: record.owner, system: fact.system },
-      next.followup?.agents,
-      !gone && next.status === "passed",
-    );
-    if (gone) return settleHold(hold, undefined);
-    await store.putFollowUp(next);
-    await settleHold(hold, next.status === "passed" ? next.followup?.agents : undefined);
-  }
-
-  /**
-   * 追问 (v7.0.0, S13): one question on a passed reading or 一生运势报告, answered in the background from that reading
-   * alone. One at a time, up to FOLLOWUP_LIMIT per reading; each takes one from the daily AI caps.
-   */
-  async function createFollowUp(
-    req: IncomingMessage,
-    kind: FollowUpRecord["parent"]["kind"],
-    id: string,
-    c: Caller,
-  ) {
-    const body = (await readJson(req)) as Record<string, unknown>;
-    const question = typeof body.question === "string" ? body.question.trim() : "";
-    if (!question) throw new InputError("question is required");
-    if ([...question].length > FOLLOWUP_QUESTION_MAX) {
-      throw new InputError(`question must be at most ${FOLLOWUP_QUESTION_MAX} characters`);
-    }
-    const { parent, fact } = await followUpParent(kind, id, c);
-    if (!followUpAvailable(kind, fact)) {
-      throw new InputError(`follow-up questions are not offered for ${fact.system} readings`);
-    }
-    assertServed(c.country, fact.system);
-    const earlier = await store.listFollowUps(id);
-    if (earlier.some((f) => f.status === "pending")) {
-      throw new HttpError(
-        409,
-        "the previous follow-up is still being answered",
-        "followup_pending",
-      );
-    }
-    if (earlier.filter((f) => f.status !== "failed").length >= FOLLOWUP_LIMIT) {
-      throw new HttpError(
-        409,
-        `this reading has had its ${FOLLOWUP_LIMIT} follow-up questions`,
-        "followup_limit",
-      );
-    }
-    const followUpId = randomUUID();
-    const hold = await holdForJob(
-      c,
-      "followup",
-      { kind: "followup", id: followUpId, system: fact.system },
-      { system: fact.system, parent: kind },
-    );
-    const ts = now().toISOString();
-    const record: FollowUpRecord = {
-      id: followUpId,
-      owner: c.user,
-      parent: { kind, id },
-      question,
-      status: "pending",
-      created_at: ts,
-      updated_at: ts,
-    };
-    await store.putFollowUp(record);
-    const thread = earlier.flatMap((f) =>
-      f.status === "passed" && f.followup?.answer
-        ? [{ question: f.question, answer: f.followup.answer }]
-        : [],
-    );
-    track(`follow-up ${record.id}`, runFollowUpJob(record, parent, fact, thread, c, hold));
-    return {
-      status: 202,
-      body: publicFollowUp(record),
-      headers: { location: `/v1/followups/${record.id}`, "retry-after": "5" },
-    };
-  }
-
   /** A request on one of the caller's charts: its body, and the chart its chart_id names (400 or 404 otherwise; S28). */
   async function chartRequest(req: IncomingMessage, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
@@ -1142,44 +981,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // ---- 深度分析 (v10.0.0, S19): the master's questions before a reading (routes/inquiry.ts) ----
     if (await inquiryRoute(api, req, res, path, c)) return;
 
-    // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 ----
-    const fq = /^\/v1\/(reports|life-reports)\/([^/]+)\/followups$/.exec(path);
-    if (fq && req.method === "POST") {
-      const kind = fq[1] === "reports" ? "report" : "life_report";
-      const out = await createFollowUp(req, kind, fq[2]!, c);
-      return send(res, out.status, out.body, out.headers);
-    }
-    if (fq && req.method === "GET") {
-      const id = fq[2]!;
-      const parent = !UUID_RE.test(id)
-        ? undefined
-        : fq[1] === "reports"
-          ? await store.getReport(id)
-          : await store.getLifeReport(id);
-      if (!parent || parent.owner !== c.user) throw new HttpError(404, "reading not found");
-      const items = (await store.listFollowUps(parent.id)).map(publicFollowUp);
-      // 积分 (v11.0.0): what one more costs.
-      const system = pointsConfig && (await store.getChart(parent.chart_id))?.fact.system;
-      const price =
-        system &&
-        priceOf("followup", {
-          system,
-          parent: fq[1] === "reports" ? "report" : "life_report",
-        });
-      return send(res, 200, { limit: FOLLOWUP_LIMIT, items, ...(price && { price }) });
-    }
-    const fo = /^\/v1\/followups\/([^/]+)$/.exec(path);
-    if (fo && req.method === "GET") {
-      const r = UUID_RE.test(fo[1]!) ? await store.getFollowUp(fo[1]!) : undefined;
-      if (!r || r.owner !== c.user) throw new HttpError(404, "follow-up not found");
-      const view = publicFollowUp(r);
-      return send(
-        res,
-        200,
-        view,
-        aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
-      );
-    }
+    // ---- 追问 (v7.0.0, S13): follow-up questions on a passed reading or 一生运势报告 (routes/followup.ts) ----
+    if (await followUpRoute(api, req, res, path, c)) return;
 
     // ---- 破除運勢 plans (paid per topic; payment is a Phase 4 TODO; routes/remedies.ts) ----
     if (await remediesRoute(api, req, res, path, c)) return;
