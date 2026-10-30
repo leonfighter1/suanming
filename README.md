@@ -13,6 +13,29 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v15.1.0 (2026-10-30): every page in the 1620 container; the 充值 boxes one size
+
+Your requests of today: 「各自算法的大小container似乎没有加上大屏幕1620px的限制，现在挺小的。我的要求时对于所有的页面，基本框架在大屏时
+都要有这个尺寸限制（包括设置页面）」 and 「充值页面十元的框跟其他的充值框大小不一」. This is work package WP27.2 of stage S27 in the
+[tech plan](docs/tech-plan.md); the theme by the time of day follows in WP27.3.
+
+- **Every page in the container:** every page of the app now keeps to the same container as 首页. That covers 八字,
+  塔罗, 求签, 算卦, 风水, 起名, the readings, 历史记录, 个人资料, 我的积分, 设置, the birthplace picker and the rest.
+  - On a phone and a tablet the page is fluid, as before.
+  - On a wide window it is up to 1620 wide and centred. Before, it was 720 (1200 for 塔罗).
+  - 设置's and the birthplace picker's rows keep their own inset, so on a phone they look as before.
+  - The 管理后台 is unchanged.
+- **充值:** the five packs' boxes are now one size. ¥10, which has no bonus, keeps the bonus line's room, every box is
+  the same width, and each line stays on one line. A phone shows three to a row.
+- **Coding rules:** a new project skill (`.claude/skills/coding`), named in CLAUDE.md: build from what exists, give each
+  thing one home, and keep each change as small as it can be. This release follows it: one function, `pagePadding`,
+  moved every page.
+- **Verified:**
+  - **Tests:** every page at 2560 (the methods, the birthplace picker, 设置, 我的积分); the packs one size on a phone
+    and on a wide window. App tests 259 → 261.
+  - **Renders** with the real fonts: 我的积分 on a phone; 八字, 塔罗 and 设置 at 1920.
+  - **Harness:** PASS.
+
 ### v15.0.0 (2026-10-30): 今日一卦 / 今日一签 under 东方; the app's container (stage S26)
 
 Your request of today: 「另外我看到西方有今日一牌功能， 那么东方系列，我们剋增加今日一卦或者今日一签功能，可以随机出现。」, with the

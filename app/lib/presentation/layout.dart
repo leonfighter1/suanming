@@ -38,15 +38,12 @@ enum WindowClass {
 
 /// The widths content may take (the ui-design skill).
 abstract final class Grid {
-  /// A page of reading and forms: about 40 characters of body text to a line.
+  /// A column of reading: about 40 characters of body text to a line.
   static const reading = 720.0;
 
-  /// A page that sets things side by side: a tarot spread.
-  static const wide = 1200.0;
-
-  /// The app's container (owner, 2026-10-30: 「大于 1620px 时要设置一个max-width 1620px。本体可以是fluid」): 首页 and
-  /// the sign-in page fill it. Fluid on a phone and a tablet; on a wider window at most this wide, centred, the
-  /// window class's margin inside it ([containerPadding]).
+  /// The app's container (owner, 2026-10-30: 「大于 1620px 时要设置一个max-width 1620px。本体可以是fluid」, then
+  /// 「对于所有的页面，基本框架在大屏时都要有这个尺寸限制（包括设置页面）」): every page fills it ([pagePadding]). Fluid on a
+  /// phone and a tablet; on a wider window at most this wide, centred, the window class's margin inside it.
   static const container = 1620.0;
 
   /// The width of [span] of [columns] columns across [width], with the gutters between them.
@@ -54,27 +51,19 @@ abstract final class Grid {
       (width - gutter * (columns - 1)) / columns * span + gutter * (span - 1);
 }
 
-/// A page's padding (the ui-design skill): the window class's margin at the sides, and on a wide window enough to keep
-/// the content in a centred column at most [maxWidth] wide; [top] and [bottom] as given. For a page's scrolling list,
-/// so its scrollbar stays at the window's edge.
+/// A page's padding (the ui-design skill): the app's container ([Grid.container]). The window class's margin at the
+/// sides and, on a window wider than the container, the room beyond it, so the container is centred with the margin
+/// inside it; on a phone and a tablet only the margin (「在tablet和mobile device 可以不用有这限制了」). Without [margin],
+/// only the room beyond the container: for a list whose rows carry their own inset (设置's tiles). [top] and [bottom]
+/// as given. For a page's scrolling list, so its scrollbar stays at the window's edge.
 EdgeInsets pagePadding(
   BuildContext context, {
-  double maxWidth = Grid.reading,
   double top = Space.m,
   double bottom = Space.xxl,
+  bool margin = true,
 }) {
   final width = MediaQuery.sizeOf(context).width;
-  final side = math.max(WindowClass.of(width).margin, (width - maxWidth) / 2);
-  return EdgeInsets.fromLTRB(side, top, side, bottom);
-}
-
-/// A page's padding in the app's container ([Grid.container]): the window class's margin at the sides and, on a
-/// window wider than the container, the room beyond it, so the container is centred with the margin inside it. On a
-/// phone and a tablet only the margin (「在tablet和mobile device 可以不用有这限制了」). For a page's scrolling list, so
-/// its scrollbar stays at the window's edge.
-EdgeInsets containerPadding(BuildContext context, {double top = Space.m, double bottom = Space.xxl}) {
-  final width = MediaQuery.sizeOf(context).width;
-  final side = math.max(0.0, (width - Grid.container) / 2) + WindowClass.of(width).margin;
+  final side = math.max(0.0, (width - Grid.container) / 2) + (margin ? WindowClass.of(width).margin : 0);
   return EdgeInsets.fromLTRB(side, top, side, bottom);
 }
 

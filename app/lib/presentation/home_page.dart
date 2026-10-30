@@ -66,7 +66,7 @@ class HomePage extends ConsumerWidget {
       ),
       // In the app's container (S26): fluid on a phone and a tablet, at most 1620 on a wider window.
       body: ListView(
-        padding: containerPadding(context),
+        padding: pagePadding(context),
         children: [
           FadeSlideIn(
             child: HeroBanner(

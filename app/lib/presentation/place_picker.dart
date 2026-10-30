@@ -7,6 +7,7 @@ import '../domain/places.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 
 /// Countries shown first: launch markets and common birthplaces.
 const commonCountries = ['HK', 'MO', 'TW', 'CN', 'SG', 'MY', 'US', 'CA', 'GB', 'AU'];
@@ -130,46 +131,50 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
           title: Text(l10n.placePick),
           leading: _country == null ? null : BackButton(onPressed: _back),
         ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(Space.l, Space.s, Space.l, 0),
-              child: Text(crumbs.isEmpty ? title : '$crumbs · $title', key: const Key('place-step'), style: Theme.of(context).textTheme.titleMedium),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(Space.l),
-              // Esc clears the search first; with it empty, Esc steps back a level.
-              child: Focus(
-                canRequestFocus: false,
-                skipTraversal: true,
-                onKeyEvent: (_, e) {
-                  if (e is! KeyDownEvent || e.logicalKey != LogicalKeyboardKey.escape || _q.isEmpty) {
-                    return KeyEventResult.ignored;
-                  }
-                  _step(() {});
-                  return KeyEventResult.handled;
-                },
-                child: TextField(
-                  key: const Key('place-search'),
-                  controller: _search,
-                  // Opened from the keyboard: type at once (no pop-up keyboard after a tap).
-                  autofocus: keyboardInUse,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.placeSearch),
-                  onChanged: (v) => setState(() => _q = v),
-                  // Enter takes the first entry and keeps the focus here for the next step.
-                  onEditingComplete: () {},
-                  onSubmitted: (_) => _pickFirst(),
+        // In the app's container (S27); its rows carry their own inset.
+        body: Padding(
+          padding: pagePadding(context, top: 0, bottom: 0, margin: false),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(Space.l, Space.s, Space.l, 0),
+                child: Text(crumbs.isEmpty ? title : '$crumbs · $title', key: const Key('place-step'), style: Theme.of(context).textTheme.titleMedium),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(Space.l),
+                // Esc clears the search first; with it empty, Esc steps back a level.
+                child: Focus(
+                  canRequestFocus: false,
+                  skipTraversal: true,
+                  onKeyEvent: (_, e) {
+                    if (e is! KeyDownEvent || e.logicalKey != LogicalKeyboardKey.escape || _q.isEmpty) {
+                      return KeyEventResult.ignored;
+                    }
+                    _step(() {});
+                    return KeyEventResult.handled;
+                  },
+                  child: TextField(
+                    key: const Key('place-search'),
+                    controller: _search,
+                    // Opened from the keyboard: type at once (no pop-up keyboard after a tap).
+                    autofocus: keyboardInUse,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: l10n.placeSearch),
+                    onChanged: (v) => setState(() => _q = v),
+                    // Enter takes the first entry and keeps the focus here for the next step.
+                    onEditingComplete: () {},
+                    onSubmitted: (_) => _pickFirst(),
+                  ),
                 ),
               ),
-            ),
-            Expanded(child: _list(context, locale)),
-            Padding(
-              padding: const EdgeInsets.all(Space.s),
-              child: Center(child: Text(l10n.placeSource, style: Theme.of(context).textTheme.bodySmall)),
-            ),
-          ],
+              Expanded(child: _list(context, locale)),
+              Padding(
+                padding: const EdgeInsets.all(Space.s),
+                child: Center(child: Text(l10n.placeSource, style: Theme.of(context).textTheme.bodySmall)),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -153,6 +153,10 @@ class _PointsPageState extends ConsumerState<PointsPage> {
   }
 }
 
+/// Every pack's box is as wide as the others (owner, 2026-10-30: 「十元的框跟其他的充值框大小不一」): room for the widest
+/// line, 6250 积分, and three to a row on a 360 phone.
+const _packWidth = 88.0;
+
 /// One pack: what it costs, the 积分 it brings and its bonus.
 class _PackButton extends StatelessWidget {
   const _PackButton({required this.pack, required this.busy, required this.onPressed});
@@ -164,23 +168,31 @@ class _PackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return OutlinedButton(
-      key: ValueKey<String>('points-pack-${pack.yuan}'),
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: Space.m, vertical: Space.s)),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          busy
-              ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : Text(l10n.pointsPackYuan(pack.yuan), style: theme.textTheme.titleMedium),
-          Text(l10n.pointsPackPoints(pack.points), style: theme.textTheme.bodySmall),
-          if (pack.bonusPercent > 0)
-            Text(
-              l10n.pointsPackBonus(pack.bonusPercent),
-              style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.tertiary),
-            ),
-        ],
+    return SizedBox(
+      width: _packWidth,
+      child: OutlinedButton(
+        key: ValueKey<String>('points-pack-${pack.yuan}'),
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: Space.m, vertical: Space.s)),
+        // Each line on one line, and the bonus line's room even without a bonus (10 元): every box as tall as the others.
+        child: DefaultTextStyle.merge(
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              busy
+                  ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : Text(l10n.pointsPackYuan(pack.yuan), style: theme.textTheme.titleMedium),
+              Text(l10n.pointsPackPoints(pack.points), style: theme.textTheme.bodySmall),
+              Text(
+                pack.bonusPercent > 0 ? l10n.pointsPackBonus(pack.bonusPercent) : '',
+                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.tertiary),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

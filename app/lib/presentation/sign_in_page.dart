@@ -106,7 +106,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     // as tall as the form, and the form at the right, five of the twelve columns.
     final window = WindowClass.ofContext(context);
     final wide = window == WindowClass.large;
-    final padding = containerPadding(context);
+    final padding = pagePadding(context);
     final banner = HeroBanner(
       key: const Key('auth-banner'),
       title: _register ? l10n.createAccount : l10n.signIn,

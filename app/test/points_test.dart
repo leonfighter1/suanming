@@ -115,6 +115,31 @@ void main() {
     expect(find.textContaining('完成后按这次实际用掉的 AI 用量扣除'), findsOneWidget);
   });
 
+  // S27 (owner, 2026-10-30): 「充值页面十元的框跟其他的充值框大小不一」; every page in the container.
+  testWidgets('every pack\'s box is the same size, on a phone and on a wide window; the page in the container',
+      (tester) async {
+    for (final size in const [Size(360, 740), Size(2560, 1600)]) {
+      await start(tester, withPoints(), size: size);
+      await tester.tap(find.byKey(const Key('open-menu')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('open-points')));
+      await settle(tester);
+      final boxes = [for (final yuan in const [10, 20, 30, 40, 50]) tester.getRect(find.byKey(ValueKey<String>('points-pack-$yuan')))];
+      for (final b in boxes) {
+        expect(b.size, boxes.first.size, reason: '$size: every box as large as 10 元\'s');
+      }
+      if (size.width < 600) {
+        // A phone: three to a row (the card's inside, 360 - 2 × 16 - 2 × 20 = 288, holds three of 88 and two gaps of 8:
+        // 280).
+        expect([boxes[1].top, boxes[2].top, boxes[3].top], [boxes[0].top, boxes[0].top, boxes[0].bottom + 8]);
+      } else {
+        // The container: (2560 - 1620) / 2 + 32 = 502 from the left, 1556 wide.
+        final card = tester.getRect(find.byKey(const Key('points-top-up')));
+        expect([card.left, card.width], [502.0, 1556.0]);
+      }
+    }
+  });
+
   testWidgets('a charge says what it paid for, how it was priced and, while 充值 is simulated, what the AI cost', (tester) async {
     final api = withPoints()
       ..pointsEntries.insert(0, {

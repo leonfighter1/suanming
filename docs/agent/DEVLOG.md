@@ -2,6 +2,28 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (m): S27 WP27.1–27.2 — the coding skill; every page in the container, the 充值 boxes; v15.1.0 (local)
+
+- Owner request before the push of v15.0.0, in one message:
+  - a coding skill: use what exists, restructure for one home, make each change small;
+  - every page in the 1620 container, 设置 too;
+  - the ¥10 充值 box the same size as the others;
+  - the theme by the time of day, with a sun and a moon on the banner;
+  - then push after testing.
+- Planned as S27: WP27.1 the skill, WP27.2 the container and the boxes, WP27.3 the theme. v15.0.0 waits, unpushed,
+  for the stage (its final-tree harness had passed: 5e80040).
+- WP27.1: the global reuse-first skill is read-only for this user (like GLOBAL_MISTAKES.md), so the rules became the
+  project skill `.claude/skills/coding`, named in CLAUDE.md's table (3ea42bb).
+- WP27.2, by the skill's rules:
+  - `pagePadding` became the container, with a `margin` switch for lists of tiles, so ~25 pages moved in one place;
+  - `containerPadding` (v14.1.0) and `Grid.wide` folded away;
+  - 设置 and the place picker took `pagePadding(margin: false)`;
+  - the packs got one width (88: three to a row on a 360 phone; 96 didn't fit, measured in the test) and one line
+    each. `DefaultTextStyle.merge`, because the test font's wide glyphs wrapped 「多送 10%」 and made one box taller.
+- The version went up first, before the manual Flutter runs, to try the DEVLOG (l) idea against rule 23.
+- Tests: grid_test (every page at 2560), points_test (the packs one size, phone and wide); renders of 我的积分, 八字,
+  塔罗 and 设置.
+
 ## 2026-10-30 (l): S26 WP26.2 — 今日一卦 / 今日一签; S26 done, release v15.0.0
 
 - v14.1.0 committed and tagged after its harness PASS (c7eaec6). WP26.2 was drafted in the scratchpad (`s26b/`)

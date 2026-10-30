@@ -5,6 +5,7 @@ import '../application/providers.dart';
 import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'layout.dart';
 import 'sign_in_page.dart';
 import 'widgets/contact_dialog.dart';
 import 'widgets/remedy.dart' show compactButtons;
@@ -121,7 +122,9 @@ class SettingsPage extends ConsumerWidget {
     if (user == null) return const SizedBox.shrink();
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
+      // In the app's container (S27); its tiles carry their own inset.
       body: ListView(
+        padding: pagePadding(context, top: 0, margin: false),
         children: [
           SettingsGroup(l10n.settingsAccountGroup, key: const Key('settings-account')),
           // The three logins (v8.2.0, WP15.3): each changed in its own dialog; an email or a phone counts once a code

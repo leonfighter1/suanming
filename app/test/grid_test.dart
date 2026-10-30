@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/layout.dart';
 import 'package:mingli_app/presentation/theme.dart';
 
@@ -154,6 +155,44 @@ void main() {
         expect(login.top, greaterThanOrEqualTo(banner.bottom), reason: 'width $width: the form under the banner');
       }
     }
+  });
+
+  // S27 (owner, 2026-10-30): 「对于所有的页面，基本框架在大屏时都要有这个尺寸限制（包括设置页面）」.
+  testWidgets('every page in the container on a wide window: the methods, the place picker, 设置', (tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(2560, 1600);
+    Future<void> fresh() async {
+      await tester.pumpWidget(const SizedBox()); // rule 24
+      await tester.pumpWidget(testApp(FakeApi()));
+      await settle(tester);
+    }
+
+    // The container: (2560 - 1620) / 2 = 470 beyond it at each side; the content 32 inside it, from 502, 1556 wide.
+    for (final m in ['bazi', 'tarot', 'qiuqian', 'liuyao', 'fengshui']) {
+      await fresh();
+      await openEntry(tester, m);
+      await settle(tester);
+      final card = tester.getRect(find.byType(AppCard).first);
+      expect([card.left, card.width], [502.0, 1556.0], reason: m);
+    }
+    // The place picker, from 八字's form, and 设置: their rows carry their own inset (16), so the list is the
+    // container itself, 470 to 2090.
+    await fresh();
+    await openEntry(tester, 'bazi');
+    await settle(tester);
+    await scrollTo(tester, const Key('city'));
+    await tester.tap(find.byKey(const Key('city')));
+    await settle(tester);
+    final search = tester.getRect(find.byKey(const Key('place-search')));
+    expect([search.left, search.width], [470.0 + 16, 1620.0 - 32]);
+    await fresh();
+    await tester.tap(find.byKey(const Key('open-menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('open-settings')));
+    await settle(tester);
+    final tile = tester.getRect(find.byKey(const Key('settings-username')));
+    expect([tile.left, tile.width], [470.0, 1620.0]);
   });
 
   test('the design rules catch what they are for, and nothing else', () {

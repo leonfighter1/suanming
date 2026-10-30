@@ -151,7 +151,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
             ],
           ),
           body: ListView(
-            padding: pagePadding(context, maxWidth: Grid.wide),
+            padding: pagePadding(context),
             children: [
               FadeSlideIn(
                 child: HeroBanner(title: l10n.homeTarot, subtitle: l10n.homeTarotDesc, icon: Icons.style_rounded),

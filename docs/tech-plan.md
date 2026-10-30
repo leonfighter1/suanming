@@ -3265,5 +3265,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP26.1    | done                         | v14.1.0 |
 | WP26.2    | done                         | v15.0.0 |
 | WP27.1    | done                         | —       |
-| WP27.2    | planned                      | v15.1.0 |
+| WP27.2    | done                         | v15.1.0 |
 | WP27.3    | planned                      | v16.0.0 |
