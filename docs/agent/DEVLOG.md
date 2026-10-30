@@ -2,6 +2,24 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (e): S24 WP24.3 — the 管理后台, asymmetric; v12.3.0 (local)
+
+- Server: `overview` gained `previous` (the days before, summed alike), tested with hand-worked values on the WP22
+  fixture (one day: the 29th with alice's reading; two days: the 27th–28th with her 充值); the OpenAPI description
+  says so.
+- Built `widgets/dashboard.dart` (DashboardLayout, HeroFigure, StatTile, StatGrid, Change, ChangeLabel, Sparkline,
+  PanelSection, NumberRow, Meter) from scratchpad drafts written while the v12.1.0 and v12.2.0 harness runs held the
+  repository. Pages: 概览 (充值), 收益 (毛利, exports in the panel), 用量 (Tokens, models in the panel), 活跃 (who is
+  on), 用户 (filters in the panel), an account (积分余额, actions in the panel). KpiTile and KpiGrid removed.
+- Found on the way: Flutter asserts when a ListTile's ink sits under a coloured box (the panel was a Container), so
+  the panel is a Material; a Column inside a panel centred its short lines (怎么算), now stretched (skill rule 8); a
+  three-tile grid left an empty cell (never more columns than tiles); a change's text could overflow a phone tile
+  (Flexible, rule 77).
+- Tests: several looked at cards the taller pages pushed below the built area; they scroll there now (`scrollToIt`,
+  with a negative delta to go back up; rules 25, 64). My first count of the up arrows was wrong (6, not 5); the
+  comment now lists them. Looked at renders: 概览, 收益, 用量, 用户 and an account at 1440 (light and dark), 1024
+  and phone width.
+
 ## 2026-10-30 (d): S24 WP24.2 — grid, spacing, type ramp, alignment; v12.2.0 (local)
 
 - v12.1.0's first harness run failed at the app gate's analyze: `lib/l10n/gen` deleted as stale after my manual runs

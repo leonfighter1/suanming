@@ -215,6 +215,24 @@ class FakeAdmin {
           'margin': 0.822,
         },
         'points': {'sold': days * 9000, 'granted': 5000, 'used': days * 7000, 'outstanding': 120000},
+        // The period before (v12.3.0), set so each change is easy to work out: 充值 90 against 80 a day (+12.5 %),
+        // AI cost 14.97 against 15.97 (-6.3 %, good), profit 69.09 against 58 (+19.1 %), margin 82.2 % against 78 %
+        // (+4.2 points), new accounts the same (flat), AI requests 5 against 4 (+25 %), tokens 51,000 against 60,000
+        // (-15 %, bad), 积分 sold the same, used 7,000 against 5,000 (+40 %).
+        'previous': {
+          'from': '2026-08-01',
+          'to': series(days).first['day'],
+          'accounts': {'new': days ~/ 7},
+          'ai': {'jobs': days * 4, 'tokens': days * 60000, 'cost_usd': days * 2.19},
+          'money': {
+            'topup_cny': days * 80.0,
+            'net_cny': days * 74.72,
+            'cost_cny': days * 15.97,
+            'profit_cny': days * 58.0,
+            'margin': 0.78,
+          },
+          'points': {'sold': days * 9000, 'granted': 4000, 'used': days * 5000},
+        },
       };
 
   List<Json> series(int days) => [
@@ -433,3 +451,14 @@ Future<void> go(WidgetTester tester, String label) async {
 
 /// The text of the widget with [key].
 String textOf(WidgetTester tester, String key) => tester.widget<Text>(find.byKey(ValueKey<String>(key))).data!;
+
+/// The main column's list on a dashboard page (DashboardLayout, v12.3.0).
+Finder get mainList =>
+    find.descendant(of: find.byKey(const Key('page-main')), matching: find.byType(Scrollable)).first;
+
+/// Scrolls the main column until [finder] is built and on screen, then a frame (rules 27, 64): a card below the hero
+/// and the figures is past the list's built area. A negative [delta] goes back up (rule 25).
+Future<void> scrollToIt(WidgetTester tester, Finder finder, {double delta = 300}) async {
+  await tester.scrollUntilVisible(finder, delta, scrollable: mainList);
+  await tester.pump();
+}

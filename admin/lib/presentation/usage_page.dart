@@ -6,54 +6,66 @@ import '../application/providers.dart';
 import '../domain/models.dart';
 import 'format.dart';
 import 'widgets/common.dart';
-import 'widgets/kpi_tile.dart';
+import 'widgets/dashboard.dart';
 import 'widgets/line_chart.dart';
 import 'widgets/tables.dart';
 
-/// 用量 (管理后台, tech plan S22): the period's AI requests, their tokens and what they cost, each day, by kind of job
-/// and by model.
+/// 用量 (管理后台, tech plan S22; laid out in S24 WP24.3): the period's tokens as the hero figure, the requests and
+/// what they cost in the grid, each day's tokens and each kind of job; in the panel, each model.
 class UsagePage extends ConsumerWidget {
   const UsagePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final breakdown = ref.watch(breakdownProvider);
-    return PageBody(
-      children: [
+    final days = ref.watch(seriesProvider).value ?? const <DayRow>[];
+    return DashboardLayout(
+      main: [
         const PageHeader('用量', subtitle: 'AI 请求、tokens 和成本', trailing: PeriodPicker()),
         AsyncView(
           ref.watch(overviewProvider),
           onRetry: () => ref.invalidate(overviewProvider),
-          data: (o) => KpiGrid(
-            children: [
-              KpiTile(
-                label: 'Tokens',
-                value: compact(o.tokens),
-                icon: Icons.data_usage,
-                detail: '输入 ${count(o.inputTokens)} · 输出 ${count(o.outputTokens)}',
-              ),
-              KpiTile(
-                label: 'AI 请求',
-                value: count(o.jobs),
-                icon: Icons.memory_outlined,
-                detail: '完成 ${count(o.deliveredJobs)}',
-              ),
-              KpiTile(
-                label: 'AI 成本',
-                value: yuan(o.money.cost),
-                icon: Icons.payments_outlined,
-                detail: '${usd(o.costUsd)}（按各模型的公开价格）',
-              ),
-              KpiTile(
-                label: '每次平均',
-                value: o.jobs == 0 ? '—' : yuan(o.money.cost / o.jobs),
-                icon: Icons.functions,
-                detail: o.jobs == 0 ? null : '${compact((o.tokens / o.jobs).round())} tokens',
-              ),
-            ],
-          ),
+          data: (o) {
+            final p = o.previous;
+            final against = '前 ${o.days} 天';
+            Change? change(num now, num? before, {bool upIsGood = true}) =>
+                before == null ? null : Change(now.toDouble(), before.toDouble(), against: against, upIsGood: upIsGood);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                HeroFigure(
+                  label: 'Tokens',
+                  value: compact(o.tokens),
+                  change: change(o.tokens, p?.tokens),
+                  caption: '输入 ${count(o.inputTokens)} · 输出 ${count(o.outputTokens)}',
+                  trend: [for (final d in days) d.tokens.toDouble()],
+                  trendLabel: '每日 tokens，${o.from} 至 ${o.to}',
+                ),
+                StatGrid(
+                  children: [
+                    StatTile(
+                      label: 'AI 请求',
+                      value: count(o.jobs),
+                      change: change(o.jobs, p?.jobs),
+                      detail: '完成 ${count(o.deliveredJobs)}',
+                    ),
+                    StatTile(
+                      label: 'AI 成本',
+                      value: yuan(o.money.cost),
+                      change: change(o.money.cost, p?.money.cost, upIsGood: false),
+                      detail: '${usd(o.costUsd)}（按各模型的公开价格）',
+                    ),
+                    StatTile(
+                      label: '每次平均',
+                      value: o.jobs == 0 ? '—' : yuan(o.money.cost / o.jobs),
+                      detail: o.jobs == 0 ? null : '${compact((o.tokens / o.jobs).round())} tokens',
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
-        const SizedBox(height: Space.l),
         AppCard(
           title: '每日 tokens',
           icon: Icons.stacked_line_chart,
@@ -68,9 +80,11 @@ class UsagePage extends ConsumerWidget {
           icon: Icons.category_outlined,
           child: AsyncView(breakdown, onRetry: () => ref.invalidate(breakdownProvider), data: (b) => MethodTable(b.byMethod)),
         ),
-        AppCard(
+      ],
+      aside: [
+        PanelSection(
+          first: true,
           title: '各模型',
-          icon: Icons.hub_outlined,
           child: AsyncView(breakdown, onRetry: () => ref.invalidate(breakdownProvider), data: (b) => _Models(b.byModel)),
         ),
       ],
@@ -97,32 +111,29 @@ class _TokensChart extends StatelessWidget {
   }
 }
 
+/// Each model in the panel, the most costly first: its name, then its requests, tokens and cost, the numbers at the
+/// right.
 class _Models extends StatelessWidget {
   const _Models(this.rows);
   final List<ModelRow> rows;
 
   @override
-  Widget build(BuildContext context) => DataGrid(
-        label: '各模型',
-        empty: '这段时间没有 AI 请求',
-        columns: const [
-          DataColumn(label: Text('模型')),
-          DataColumn(label: Text('AI 次数'), numeric: true),
-          DataColumn(label: Text('输入 tokens'), numeric: true),
-          DataColumn(label: Text('输出 tokens'), numeric: true),
-          DataColumn(label: Text('AI 成本'), numeric: true),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (rows.isEmpty) {
+      return Text('这段时间没有 AI 请求', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, r) in rows.indexed) ...[
+          if (i > 0) const SizedBox(height: Space.l),
+          Text(r.model, key: ValueKey<String>('model-${r.model}'), style: theme.textTheme.titleSmall),
+          NumberRow('AI 次数', count(r.jobs)),
+          NumberRow('输入 / 输出 tokens', '${compact(r.inputTokens)} / ${compact(r.outputTokens)}'),
+          NumberRow('AI 成本', yuan(r.cost)),
         ],
-        rows: [
-          for (final r in rows)
-            DataRow(
-              cells: [
-                DataCell(Text(r.model)),
-                DataCell(numText(count(r.jobs))),
-                DataCell(numText(compact(r.inputTokens))),
-                DataCell(numText(compact(r.outputTokens))),
-                DataCell(numText(yuan(r.cost))),
-              ],
-            ),
-        ],
-      );
+      ],
+    );
+  }
 }

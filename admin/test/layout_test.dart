@@ -30,15 +30,22 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
   });
 
-  testWidgets('buttons size to their label (the app\'s compactButtons), side by side', (tester) async {
+  testWidgets('buttons size to their label (the app\'s compactButtons), side by side; a panel\'s span it', (tester) async {
     await pumpAdmin(tester);
+    await go(tester, '导出');
+    final pdf = tester.getRect(find.byKey(const Key('export-pdf')));
+    final docx = tester.getRect(find.byKey(const Key('export-docx')));
+    expect(pdf.width, lessThan(260));
+    expect(pdf.height, greaterThanOrEqualTo(40));
+    expect(docx.top, pdf.top);
+    expect(docx.left, greaterThan(pdf.right));
+    // In 收益's panel (S24 WP24.3) the exports stand one under another, each across the panel's column.
     await go(tester, '收益');
+    final aside = tester.getRect(find.byKey(const Key('aside')));
     final png = tester.getRect(find.byKey(const Key('export-png')));
     final csv = tester.getRect(find.byKey(const Key('export-series-csv')));
-    expect(png.width, lessThan(260));
-    expect(png.height, greaterThanOrEqualTo(40));
-    expect(csv.top, png.top);
-    expect(csv.left, greaterThan(png.right));
+    expect(png.width, closeTo(aside.width - 2 * 24, 1));
+    expect(csv.top, greaterThan(png.bottom));
   });
 
   testWidgets('on a phone: a bar under the pages, and every page fits the width', (tester) async {
@@ -50,13 +57,20 @@ void main() {
       await go(tester, page);
       expect(tester.takeException(), isNull, reason: page);
     }
-    // Two figures to a row.
-    final a = tester.getTopLeft(find.byKey(const ValueKey<String>('kpi-充值收入')));
-    final b = tester.getTopLeft(find.byKey(const ValueKey<String>('kpi-AI 成本')));
+    // The hero across the phone, then two figures to a row.
+    final hero = tester.getTopLeft(find.byKey(const ValueKey<String>('kpi-充值收入')));
+    final a = tester.getTopLeft(find.byKey(const ValueKey<String>('kpi-AI 成本')));
+    final b = tester.getTopLeft(find.byKey(const ValueKey<String>('kpi-毛利')));
+    expect(hero.dy, lessThan(a.dy));
     expect(a.dy, b.dy);
+    expect(b.dx, greaterThan(a.dx));
     await go(tester, '用户');
+    // The search and filters come first on a phone; the table under them.
+    await scrollToIt(tester, find.byKey(const Key('user-u-02')));
     await tester.tap(find.byKey(const Key('user-u-02')));
     await tester.pumpAndSettle();
+    // On a phone the actions follow the account's figures.
+    await scrollToIt(tester, find.byKey(const Key('switch-ai')));
     expect(find.byKey(const Key('switch-ai')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

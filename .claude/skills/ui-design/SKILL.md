@@ -184,6 +184,33 @@ takes a smaller step than its parent.
 6. **A table's row label** sits level with its cells' middle (`Table(defaultVerticalAlignment: middle)`, the 四柱 grid),
    not at their top.
 7. **The app bar is the window's,** across its full width; the content below it keeps to its column.
+8. **A column inside a panel or card stretches** (`CrossAxisAlignment.stretch`): a Column's default centres its
+   children, which pulls short lines off the left edge.
+
+## The dashboard
+
+The 管理后台's pages are asymmetric (owner, 2026-10-30): a hero figure as the anchor, the supporting figures in a
+compact grid, and a panel of its own at the right. The building blocks are in
+`admin/lib/presentation/widgets/dashboard.dart`; the rules come from the dataviz skill.
+
+- **`DashboardLayout(main:, aside:, narrowAt:)`:** the main column, at most `mainMax` (1080) wide, and the panel,
+  `asideWidth` (360) at the right with a scroll of its own, once the content is `asideFrom` (1080) wide: a window of
+  1200 and up beside the rail. Narrower, the panel joins the column after `narrowAt` of its parts (the end by default;
+  1 where it holds what one does: 用户's filters, an account's actions). The panel is a `Material` (card colour, a
+  hairline at its left), so the switches and rows inside show their ink.
+- **`HeroFigure`:** one per page, the page's first figure: its label, the value at `displaySmall` (48), its change, a
+  caption, and its days as a `Sparkline` beside it (5 : 7) or under it on a narrow card.
+- **`StatTile` in a `StatGrid`:** the supporting figures, at `headlineSmall` (24), in one card with hairlines between,
+  up to four across (never more columns than tiles), two on a phone. Each value has the key `kpi-<label>`.
+- **`Change` and `ChangeLabel`:** against the period before (`Overview.previous`, the server's `previous`), signed,
+  with an arrow, coloured by direction and whether up is good (success or danger), grey and 持平 when flat, 无数据 when
+  there was nothing before; a ratio's change in 个百分点. Never colour alone.
+- **The panel's parts:** `PanelSection` (a heading, a hairline between parts), `NumberRow` (a label and its number at
+  the right, tabular figures), `Meter` (a count out of a whole on the accent's soft step).
+- **Hierarchy:** size (48, 24, 14, 12), weight, and room: `xl` (24) between modules, `l` (16) inside a tile.
+- **The pages:** 概览 leads with 充值收入 (the panel: 此刻在线, 活跃, 账户, 积分); 收益 with 毛利 (the panel: the
+  exports, 怎么算); 用量 with Tokens (the panel: each model); 活跃 with who is on now; an account with its 积分余额 (the
+  panel: permissions, 增加积分, 在所有设备上退出); 用户 is its table, the search and filters in the panel.
 
 ## Tests that hold the rules
 
@@ -191,6 +218,8 @@ takes a smaller step than its parent.
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/test/theme_test.dart`          | token contrast; Material's roles are the tokens; same layout in both themes; 外觀 fades, half-way colours, kept on the device; start-up theme                                                                                                              |
 | `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                                                                                                                                          |
+| `admin/test/dashboard_test.dart`    | the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter         |
+| `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                      |
 | `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                           |
 | `app/test/grid_test.dart`           | window classes; the type ramp; 首页 in the grid at 390, 700 and 1280 (margins, the 720 column, titles on the cards' edge); the rules themselves                                                                                                            |
 | `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own |

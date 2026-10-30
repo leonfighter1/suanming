@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_admin/presentation/widgets/dashboard.dart';
+import 'package:mingli_app/presentation/tokens.dart';
 
 import '../../app/test/keys.dart';
 import 'support.dart';
@@ -11,19 +13,62 @@ void main() {
   testWidgets('概览 shows the period\'s money, accounts, activity, tokens and 积分', (tester) async {
     await pumpAdmin(tester);
     expect(find.text('2026-09-30 至 2026-10-29（北京时间）'), findsOneWidget);
+    // The hero, then the figures in the grid (S24 WP24.3).
     expect(textOf(tester, 'kpi-充值收入'), '¥2,700.00');
+    expect(find.text('净收入 ¥2,521.80（扣除支付手续费和增值税）'), findsOneWidget);
     expect(textOf(tester, 'kpi-AI 成本'), '¥449.10');
     expect(textOf(tester, 'kpi-毛利'), '¥2,072.70');
-    expect(find.text('毛利率 82.2%（毛利 ÷ 净收入）'), findsOneWidget);
-    expect(textOf(tester, 'kpi-账户'), '30');
-    expect(find.text('新增 4 · 停用 1 · 管理员 2 · 演示 26'), findsOneWidget);
-    expect(textOf(tester, 'kpi-活跃（15 分钟内）'), '3');
+    expect(textOf(tester, 'kpi-毛利率'), '82.2%');
+    expect(textOf(tester, 'kpi-新增账户'), '4');
+    expect(textOf(tester, 'kpi-AI 请求'), '150');
     expect(textOf(tester, 'kpi-Tokens'), '153.0万');
     expect(textOf(tester, 'kpi-售出积分'), '270,000');
-    // What each kind of AI job cost.
+    expect(textOf(tester, 'kpi-消耗积分'), '210,000');
+    // The panel: who is on now, how many were active, the accounts and the 积分.
+    expect(textOf(tester, 'online-count'), '3');
+    expect(find.byKey(const Key('online-admin-1')), findsOneWidget);
+    expect(find.text('8 / 30'), findsOneWidget);
+    expect(textOf(tester, 'panel-accounts'), '30');
+    expect(textOf(tester, 'panel-outstanding'), '120,000');
+    // What each kind of AI job cost, below the curve.
+    await scrollToIt(tester, find.text('八字 AI 解读'));
     expect(find.text('八字 AI 解读'), findsOneWidget);
     expect(find.text('一生运势报告'), findsOneWidget);
     expect(find.text('塔罗 追问'), findsOneWidget);
+  });
+
+  testWidgets('every figure on 概览 says how it changed against the period before: arrow, sign and colour', (tester) async {
+    await pumpAdmin(tester);
+    // The fake's period before (support.dart): each change worked out there.
+    Text said(String label, String text) => tester.widget<Text>(
+          find.descendant(
+            of: find.ancestor(
+              of: find.byKey(ValueKey<String>('kpi-$label')),
+              matching: find.byWidgetPredicate((w) => w is StatTile || w is HeroFigure),
+            ),
+            matching: find.text(text),
+          ),
+        );
+    final t = ThemeTokens.light;
+    for (final (label, text, colour) in [
+      ('充值收入', '+12.5%', t.success), // 90 against 80
+      ('AI 成本', '-6.3%', t.success), // 14.97 against 15.97: down, and up is bad
+      ('毛利', '+19.1%', t.success), // 69.09 against 58
+      ('毛利率', '+4.2 个百分点', t.success), // 82.2 % against 78 %
+      ('新增账户', '持平', t.textMuted),
+      ('AI 请求', '+25.0%', t.success), // 5 against 4
+      ('Tokens', '-15.0%', t.danger), // 51,000 against 60,000: down, and up is good
+      ('售出积分', '持平', t.textMuted),
+      ('消耗积分', '+40.0%', t.success), // 7,000 against 5,000
+    ]) {
+      expect(said(label, text).style?.color, colour, reason: label);
+    }
+    // Never colour alone: an arrow with the sign, and the period in words. Up: 充值, 毛利, 毛利率, AI 请求, 消耗积分 (5);
+    // down: AI 成本, Tokens (2); flat: 新增账户, 售出积分 (2); 9 in all.
+    expect(find.byIcon(Icons.arrow_upward), findsNWidgets(5));
+    expect(find.byIcon(Icons.arrow_downward), findsNWidgets(2));
+    expect(find.byIcon(Icons.remove), findsNWidgets(2));
+    expect(find.text('较前 30 天'), findsNWidgets(9));
   });
 
   testWidgets('the period picker asks for 7 or 90 days, and ←/→ move it', (tester) async {
@@ -59,12 +104,22 @@ void main() {
   testWidgets('收益: each day or added up, and every day in a table under the sums', (tester) async {
     await pumpAdmin(tester);
     await go(tester, '收益');
+    // 毛利 leads (S24 WP24.3); the 充值 is in the grid and in the table's sums.
+    expect(textOf(tester, 'kpi-毛利'), '¥2,072.70');
+    expect(textOf(tester, 'kpi-充值收入'), '¥2,700.00');
+    await scrollToIt(tester, find.text('合计'));
     expect(find.text('每日明细'), findsOneWidget);
-    expect(find.text('合计'), findsOneWidget);
-    expect(find.text('¥2,700.00'), findsOneWidget);
+    // The sums' 充值, in the table.
+    expect(
+      find.descendant(of: find.byKey(const ValueKey<String>('grid-每日明细')), matching: find.text('¥2,700.00')),
+      findsOneWidget,
+    );
+    await scrollToIt(tester, find.byKey(const Key('chart')), delta: -300);
     await tabTo(tester, 'chart');
     await press(tester, LogicalKeyboardKey.end);
     expect(textOf(tester, 'chart-picked'), '2026-10-29 · 充值 ¥180.00 · AI 成本 ¥14.97 · 毛利 ¥153.15');
+    // 每日 / 累计 heads the card, above the chart.
+    await scrollToIt(tester, find.byKey(const Key('cumulative')), delta: -300);
     await tester.tap(find.text('累计'));
     await tester.pumpAndSettle();
     // Added up over the 30 days: 15 days with a 充值.
@@ -165,8 +220,9 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
     expect(f.to('/v1/admin/breakdown'), hasLength(5));
-    expect(textOf(tester, 'problem'), '服务器出错了');
     expect(textOf(tester, 'kpi-充值收入'), '¥2,700.00');
+    await scrollToIt(tester, find.byKey(const Key('problem')));
+    expect(textOf(tester, 'problem'), '服务器出错了');
     expect(find.text('八字 AI 解读'), findsNothing);
     f.failPaths.clear();
     final before = f.to('/v1/admin/breakdown').length;

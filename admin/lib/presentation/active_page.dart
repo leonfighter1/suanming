@@ -9,7 +9,7 @@ import '../domain/models.dart';
 import 'format.dart';
 import 'users_page.dart';
 import 'widgets/common.dart';
-import 'widgets/kpi_tile.dart';
+import 'widgets/dashboard.dart';
 
 /// 活跃 (管理后台, tech plan S22): who is using the app now and today, by each account's latest request, fetched again
 /// every minute; each account opens its own page, to manage it.
@@ -47,15 +47,16 @@ class _ActivePageState extends ConsumerState<ActivePage> {
           data: (a) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              KpiGrid(
+              // Who is on now leads (S24 WP24.3); the longer windows support it.
+              HeroFigure(label: '15 分钟内', value: count(a.inNow), caption: '此刻在用的账户'),
+              StatGrid(
+                maxColumns: 3,
                 children: [
-                  KpiTile(label: '15 分钟内', value: count(a.inNow), icon: Icons.bolt_outlined),
-                  KpiTile(label: '24 小时内', value: count(a.inDay), icon: Icons.today_outlined),
-                  KpiTile(label: '7 天内', value: count(a.inWeek), icon: Icons.date_range_outlined),
-                  KpiTile(label: '30 天内', value: count(a.inMonth), icon: Icons.calendar_month_outlined),
+                  StatTile(label: '24 小时内', value: count(a.inDay), icon: Icons.today_outlined),
+                  StatTile(label: '7 天内', value: count(a.inWeek), icon: Icons.date_range_outlined),
+                  StatTile(label: '30 天内', value: count(a.inMonth), icon: Icons.calendar_month_outlined),
                 ],
               ),
-              const SizedBox(height: Space.l),
               AppCard(
                 title: '此刻在用（15 分钟内）',
                 icon: Icons.bolt_outlined,

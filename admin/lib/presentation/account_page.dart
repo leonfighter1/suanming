@@ -10,13 +10,15 @@ import 'format.dart';
 import 'messages.dart';
 import 'users_page.dart';
 import 'widgets/common.dart';
+import 'widgets/dashboard.dart';
 import 'widgets/tables.dart';
 
 /// The most an admin grants at once (the server's GRANT_MAX).
 const grantMax = 1000000;
 
-/// One account (管理后台, tech plan S22): its numbers; suspending it, the admin role and its permissions; 增加积分;
-/// signing it out everywhere; its 积分 ledger, its latest AI jobs and what each kind of job cost.
+/// One account (管理后台, tech plan S22; laid out in S24 WP24.3): its numbers, its 积分 ledger, its latest AI jobs and
+/// what each kind of job cost; in the panel, suspending it, the admin role and its permissions, 增加积分 and signing it
+/// out everywhere.
 class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({super.key, required this.id, required this.login});
   final String id;
@@ -115,37 +117,53 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         await ref.read(adminApiProvider).signOutEverywhere(widget.id);
         return '${u.login} 已在所有设备上退出';
       });
-
   @override
   Widget build(BuildContext context) {
     final detail = ref.watch(userProvider(widget.id));
     final user = detail.value?.user;
+    void retry() => ref.invalidate(userProvider(widget.id));
     return SubmitShortcut(
       onSubmit: _busy || user == null ? null : () => _grant(user),
       child: Scaffold(
         appBar: AppBar(title: Text(user?.login ?? widget.login)),
-        body: PageBody(
-          maxWidth: 980,
-          children: [
-            AsyncView(
-              detail,
-              onRetry: () => ref.invalidate(userProvider(widget.id)),
-              data: (d) => _cards(d),
-            ),
+        // The account's numbers and records in the main column; what an admin does to it in the panel (S24 WP24.3),
+        // after its figures on a narrow screen.
+        body: DashboardLayout(
+          narrowAt: 1,
+          main: [
+            AsyncView(detail, onRetry: retry, data: _figures),
+            AsyncView(detail, onRetry: retry, data: _records),
           ],
+          aside: [AsyncView(detail, onRetry: retry, data: _actions)],
         ),
       ),
     );
   }
 
-  Widget _cards(UserDetail d) {
+  /// 积分余额 as the hero, with how the ledger brought it there; the account's money and AI use; its facts.
+  Widget _figures(UserDetail d) {
     final u = d.user;
     final now = ref.watch(clockProvider)();
-    final self = ref.watch(sessionProvider)?.id == u.id;
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        HeroFigure(
+          label: '积分余额',
+          value: count(u.balance),
+          valueKey: const Key('account-balance'),
+          caption: u.held > 0 ? '其中 ${count(u.held)} 冻结在进行中的 AI 请求里' : '没有冻结的积分',
+          // The ledger lists the newest first; the line runs oldest to newest.
+          trend: [for (final e in d.entries.reversed) e.balance.toDouble()],
+          trendLabel: '积分余额，按积分记录从早到晚',
+        ),
+        StatGrid(
+          children: [
+            StatTile(label: '充值合计', value: yuan(u.topup)),
+            StatTile(label: '已用积分', value: count(u.pointsUsed)),
+            StatTile(label: 'AI 请求', value: count(u.jobs), detail: '${compact(u.tokens)} tokens'),
+            StatTile(label: 'AI 成本', value: yuan(u.cost)),
+          ],
+        ),
         AppCard(
           title: '账户',
           icon: Icons.person_outline,
@@ -158,20 +176,90 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               Fact('地区', u.country.isEmpty ? '—' : u.country),
               Fact('注册', localTime(u.createdAt)),
               Fact('最近活跃', u.lastSeenAt == null ? '—' : '${localTime(u.lastSeenAt!)}（${ago(u.lastSeenAt!, now)}）'),
-              Fact(
-                '积分余额',
-                u.held > 0 ? '${count(u.balance)}（${count(u.held)} 冻结在进行中的 AI 请求里）' : count(u.balance),
-                valueKey: const Key('account-balance'),
-              ),
-              Fact('充值合计', yuan(u.topup)),
-              Fact('已用积分', count(u.pointsUsed)),
-              Fact('AI 请求', '${count(u.jobs)} 次 · ${compact(u.tokens)} tokens · 成本 ${yuan(u.cost)}'),
             ],
           ),
         ),
-        AppCard(
+      ],
+    );
+  }
+
+  /// The account's 积分 ledger, its latest AI jobs, and what each kind of job cost.
+  Widget _records(UserDetail d) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppCard(
+            title: '积分记录',
+            icon: Icons.receipt_long_outlined,
+            child: DataGrid(
+              label: '积分记录',
+              empty: '还没有积分记录',
+              columns: const [
+                DataColumn(label: Text('时间')),
+                DataColumn(label: Text('项目')),
+                DataColumn(label: Text('积分'), numeric: true),
+                DataColumn(label: Text('余额'), numeric: true),
+                DataColumn(label: Text('备注')),
+              ],
+              rows: [
+                for (final e in d.entries)
+                  DataRow(
+                    cells: [
+                      DataCell(Text(localTime(e.createdAt))),
+                      DataCell(
+                        Text(entryOf(kind: e.kind, forKind: e.forKind, system: e.system, packYuan: e.packYuan, reason: e.reason)),
+                      ),
+                      DataCell(numText(e.points > 0 ? '+${count(e.points)}' : '-${count(-e.points)}')),
+                      DataCell(numText(count(e.balance))),
+                      DataCell(Text(e.note ?? '')),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          AppCard(
+            title: 'AI 记录',
+            icon: Icons.memory_outlined,
+            child: DataGrid(
+              label: 'AI 记录',
+              empty: '还没有 AI 请求',
+              columns: const [
+                DataColumn(label: Text('时间')),
+                DataColumn(label: Text('项目')),
+                DataColumn(label: Text('模型')),
+                DataColumn(label: Text('Tokens'), numeric: true),
+                DataColumn(label: Text('成本'), numeric: true),
+                DataColumn(label: Text('结果')),
+              ],
+              rows: [
+                for (final j in d.jobs)
+                  DataRow(
+                    cells: [
+                      DataCell(Text(localTime(j.createdAt))),
+                      DataCell(Text(whatOf(j.kind, j.system))),
+                      DataCell(Text(j.models.join('、'))),
+                      DataCell(numText(compact(j.tokens))),
+                      DataCell(numText(yuan(j.cost))),
+                      DataCell(Text(j.delivered ? '已完成' : '未完成')),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          AppCard(title: '各项目用量', icon: Icons.category_outlined, child: MethodTable(d.byMethod)),
+        ],
+      );
+
+  /// What an admin does to the account, in the panel: its permissions, a grant of 积分, signing it out everywhere.
+  Widget _actions(UserDetail d) {
+    final u = d.user;
+    final self = ref.watch(sessionProvider)?.id == u.id;
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PanelSection(
+          first: true,
           title: '权限',
-          icon: Icons.admin_panel_settings_outlined,
           child: Column(
             children: [
               SwitchListTile(
@@ -222,9 +310,8 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             ],
           ),
         ),
-        AppCard(
+        PanelSection(
           title: '增加积分',
-          icon: Icons.add_card_outlined,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -258,8 +345,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 decoration: const InputDecoration(labelText: '备注（可不填）', hintText: '例如：活动奖励、补偿'),
               ),
               const SizedBox(height: Space.s),
-              Align(
-                alignment: Alignment.centerLeft,
+              // The panel's main action spans its column.
+              SizedBox(
+                width: double.infinity,
                 child: FilledButton.icon(
                   key: const Key('grant-submit'),
                   onPressed: _busy ? null : () => _grant(u),
@@ -270,82 +358,25 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             ],
           ),
         ),
-        AppCard(
+        PanelSection(
           title: '登录',
-          icon: Icons.devices_outlined,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text('让这个账户在所有设备上退出登录，下次要重新登录。', style: theme.textTheme.bodyMedium),
               const SizedBox(height: Space.m),
-              OutlinedButton.icon(
-                key: const Key('sign-out-everywhere'),
-                onPressed: _busy ? null : () => _signOutEverywhere(u),
-                icon: const Icon(Icons.logout),
-                label: const Text('在所有设备上退出'),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const Key('sign-out-everywhere'),
+                  onPressed: _busy ? null : () => _signOutEverywhere(u),
+                  icon: const Icon(Icons.logout),
+                  label: const Text('在所有设备上退出'),
+                ),
               ),
             ],
           ),
         ),
-        AppCard(
-          title: '积分记录',
-          icon: Icons.receipt_long_outlined,
-          child: DataGrid(
-            label: '积分记录',
-            empty: '还没有积分记录',
-            columns: const [
-              DataColumn(label: Text('时间')),
-              DataColumn(label: Text('项目')),
-              DataColumn(label: Text('积分'), numeric: true),
-              DataColumn(label: Text('余额'), numeric: true),
-              DataColumn(label: Text('备注')),
-            ],
-            rows: [
-              for (final e in d.entries)
-                DataRow(
-                  cells: [
-                    DataCell(Text(localTime(e.createdAt))),
-                    DataCell(
-                      Text(entryOf(kind: e.kind, forKind: e.forKind, system: e.system, packYuan: e.packYuan, reason: e.reason)),
-                    ),
-                    DataCell(numText(e.points > 0 ? '+${count(e.points)}' : '-${count(-e.points)}')),
-                    DataCell(numText(count(e.balance))),
-                    DataCell(Text(e.note ?? '')),
-                  ],
-                ),
-            ],
-          ),
-        ),
-        AppCard(
-          title: 'AI 记录',
-          icon: Icons.memory_outlined,
-          child: DataGrid(
-            label: 'AI 记录',
-            empty: '还没有 AI 请求',
-            columns: const [
-              DataColumn(label: Text('时间')),
-              DataColumn(label: Text('项目')),
-              DataColumn(label: Text('模型')),
-              DataColumn(label: Text('Tokens'), numeric: true),
-              DataColumn(label: Text('成本'), numeric: true),
-              DataColumn(label: Text('结果')),
-            ],
-            rows: [
-              for (final j in d.jobs)
-                DataRow(
-                  cells: [
-                    DataCell(Text(localTime(j.createdAt))),
-                    DataCell(Text(whatOf(j.kind, j.system))),
-                    DataCell(Text(j.models.join('、'))),
-                    DataCell(numText(compact(j.tokens))),
-                    DataCell(numText(yuan(j.cost))),
-                    DataCell(Text(j.delivered ? '已完成' : '未完成')),
-                  ],
-                ),
-            ],
-          ),
-        ),
-        AppCard(title: '各项目用量', icon: Icons.category_outlined, child: MethodTable(d.byMethod)),
       ],
     );
   }

@@ -876,7 +876,9 @@ paths:
       description: |
         Accounts (total, new, suspended, admins, demo); active in the last 15 minutes, 24 hours, 7 and 30 days; AI jobs,
         tokens and cost; money in 元 (充值, its net after the payment fee and VAT, the AI cost at the CNY rate, gross
-        profit and margin); 积分 sold, granted, used, and held by accounts now.
+        profit and margin); 积分 sold, granted, used, and held by accounts now. `previous` (v12.3.0): the days before
+        the period, as many, with the same sums (new accounts, AI jobs, tokens and cost, money, 积分 sold, granted and
+        used), which the dashboard's changes are measured against.
       parameters:
         - $ref: "#/components/parameters/AdminDays"
         - $ref: "#/components/parameters/AdminTz"

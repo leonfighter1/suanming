@@ -59,6 +59,7 @@ class Overview {
     required this.pointsGranted,
     required this.pointsUsed,
     required this.pointsOutstanding,
+    this.previous,
   });
   factory Overview.fromJson(Json j) {
     final a = j['accounts'] as Json;
@@ -89,6 +90,7 @@ class Overview {
       pointsGranted: _i(p['granted']),
       pointsUsed: _i(p['used']),
       pointsOutstanding: _i(p['outstanding']),
+      previous: j['previous'] == null ? null : Previous.fromJson(j['previous'] as Json),
     );
   }
   final int days;
@@ -114,6 +116,51 @@ class Overview {
   final int pointsGranted;
   final int pointsUsed;
   final int pointsOutstanding;
+
+  /// The period before, summed alike (v12.3.0): what the changes are measured against; null from an older server.
+  final Previous? previous;
+}
+
+/// The days before the period, as many, with the period's sums (v12.3.0).
+class Previous {
+  const Previous({
+    required this.from,
+    required this.to,
+    required this.newAccounts,
+    required this.jobs,
+    required this.tokens,
+    required this.costUsd,
+    required this.money,
+    required this.pointsSold,
+    required this.pointsGranted,
+    required this.pointsUsed,
+  });
+  factory Previous.fromJson(Json j) {
+    final ai = j['ai'] as Json;
+    final p = j['points'] as Json;
+    return Previous(
+      from: j['from'] as String,
+      to: j['to'] as String,
+      newAccounts: _i((j['accounts'] as Json)['new']),
+      jobs: _i(ai['jobs']),
+      tokens: _i(ai['tokens']),
+      costUsd: _d(ai['cost_usd']),
+      money: Money.fromJson(j['money'] as Json),
+      pointsSold: _i(p['sold']),
+      pointsGranted: _i(p['granted']),
+      pointsUsed: _i(p['used']),
+    );
+  }
+  final String from;
+  final String to;
+  final int newAccounts;
+  final int jobs;
+  final int tokens;
+  final double costUsd;
+  final Money money;
+  final int pointsSold;
+  final int pointsGranted;
+  final int pointsUsed;
 }
 
 /// One day of the period (the revenue curve's points).

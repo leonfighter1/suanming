@@ -13,6 +13,63 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v12.3.0 (2026-10-30): the 管理后台, asymmetric: a big figure, a compact grid, a panel at the right
+
+You asked for an asymmetric dashboard with big numbers as the visual anchor, the supporting data in a compact grid, and
+an independent vertical panel on the right, with hierarchy from the modules' proportions, type size and space
+(「对于dashboard 可以采用非对称Dashboard布局…」). This is the third step of stage S24. It is committed locally and goes out
+with v13.0.0.
+
+- **Each page leads with one big figure** (48 px):
+  - **概览:** 充值收入.
+  - **收益:** 毛利.
+  - **用量:** Tokens.
+  - **活跃:** who is on now.
+  - **An account's page:** its 积分余额.
+
+  Under the figure is its change against the period before (for example "↑ +12.5% 较前 30 天") and a line on how it
+  came about. Beside it, a small line of the period's days shows how the figure went; on a phone that line sits under
+  the figure.
+
+- **The supporting figures sit in one compact grid,** four to a row on a wide screen and two on a phone, with thin
+  lines between them:
+  - **概览:** AI 成本, 毛利, 毛利率, 新增账户, AI 请求, Tokens, 售出积分 and 消耗积分.
+  - **Every figure** shows its change too:
+    - **Direction:** an arrow and a sign.
+    - **Colour:** green when the change is good and red when it's bad. AI cost going down is good, so it shows green.
+    - **Flat:** grey, marked 持平.
+    - **No earlier data:** marked 无数据.
+    - **毛利率:** its change is in 个百分点.
+- **A panel of its own on the right** with its own scrollbar, on windows 1200 px and wider:
+  - **概览:** 此刻在线 (who used the app in the last 15 minutes, each opening their account), 活跃 as bars against all
+    accounts, 账户 and 积分.
+  - **收益:** the exports (the curve as a PNG, the days as CSV) and how each figure is worked out.
+  - **用量:** each model's requests, tokens and cost.
+  - **用户:** the search and filters, beside the table.
+  - **An account's page:** its permissions, 增加积分 and 在所有设备上退出, beside its numbers and records.
+
+  On narrower windows the panel's content comes after the page's figures, and on 用户 before the table.
+
+- **Hierarchy:** the main column is wider than the panel (about 3 : 1). Text runs from 48 for the big figure to 24 for
+  the grid's figures to 14 and 12 for labels, with the same spacing steps as the app.
+- **The server:** 概览's data now carries the period before with the same sums (new accounts, AI requests, tokens and
+  cost, money, 积分), which the changes are measured against.
+- **Keyboard:** Tab reaches every row and control in the panel; Enter on someone in 此刻在线 opens their account; Esc
+  goes back.
+- **Verified:**
+  - 1 new server test (the period before, worked out by hand on one day and on two).
+  - 7 new 管理后台 tests:
+    - the panel at the right on a wide window, with its own scroll both ways;
+    - the panel after the content on a narrower one;
+    - the big figure at 48 px or more;
+    - four figures to a row;
+    - 用户's filters and an account's actions in the panel;
+    - Tab and Enter to someone online;
+    - every figure's change with its sign, arrow and colour.
+  - 676 server tests and 56 管理后台 tests pass.
+  - Screenshots in light and dark at 1440, 1024 and phone width.
+  - harness PASS.
+
 ### v12.2.0 (2026-10-30): one grid, spacing scale, type ramp and alignment rules across the app
 
 You asked to unify the grid, the spacing between components, the type scale and the alignment rules across the whole

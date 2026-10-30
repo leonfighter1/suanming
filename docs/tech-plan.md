@@ -2213,6 +2213,11 @@ Read as:
   - **An account's page:** hero 积分余额, the actions in the panel.
 - Tests: the panel beside the main column at 1440 and below it at 1024 and 390, with its own scroll; the hero at
   48 px or more; the changes and their signs from the fake's numbers; keys and Tab order kept.
+- **As built (v12.3.0):** as specified, with `narrowAt` (where the panel joins the column below `asideFrom`: after
+  用户's header and after an account's figures, so filters and actions stay near the top) and the panel a `Material`
+  (Flutter asserts on a ListTile whose ink a coloured box would hide). 活跃 leads with who is on now (no panel); 导出
+  keeps its plain page. `KpiTile` and `KpiGrid` were removed. The server's `previous` is tested with hand-worked
+  values over the WP22 fixture (one day and two). Tests that looked below the hero now scroll there (rules 25, 64).
 
 ### WP24.4 The skill, the records, the release (→ v13.0.0)
 
@@ -2848,5 +2853,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP23.1    | done                         | v12.0.1 |
 | WP24.1    | done                         | v12.1.0 |
 | WP24.2    | done                         | v12.2.0 |
-| WP24.3    | planned                      | v12.3.0 |
+| WP24.3    | done                         | v12.3.0 |
 | WP24.4    | planned                      | v13.0.0 |

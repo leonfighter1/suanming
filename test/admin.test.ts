@@ -222,6 +222,29 @@ describe("the dashboard's numbers (WP22.2)", () => {
     expect(o.points).toEqual({ sold: 7250, granted: 500, used: 1135, outstanding: 6615 });
   });
 
+  it("the period before, which 概览's changes are measured against (WP24.3): the same sums", () => {
+    // One day, the 30th; before it the 29th: alice's 八字 reading ($0.34 × 7.3 = ¥2.482), her 500 granted and 665 used;
+    // bob's 充值 came at 02:00 on the 30th, so none; no 充值, so net 0, a loss of ¥2.48 and no margin.
+    expect(overview(data, 1).previous).toEqual({
+      from: "2026-10-29",
+      to: "2026-10-29",
+      accounts: { new: 0 },
+      ai: { jobs: 1, tokens: 25_000, cost_usd: 0.34 },
+      money: { topup_cny: 0, net_cny: 0, cost_cny: 2.48, profit_cny: -2.48, margin: null },
+      points: { sold: 0, granted: 500, used: 665 },
+    });
+    // Two days, the 29th–30th; before them the 27th–28th: alice joins and pays 50 元 (net 50 × 0.934 = 46.70), nothing
+    // spent, so all of it is profit.
+    expect(overview(data, 2).previous).toEqual({
+      from: "2026-10-27",
+      to: "2026-10-28",
+      accounts: { new: 1 },
+      ai: { jobs: 0, tokens: 0, cost_usd: 0 },
+      money: { topup_cny: 50, net_cny: 46.7, cost_cny: 0, profit_cny: 46.7, margin: 1 },
+      points: { sold: 6250, granted: 0, used: 0 },
+    });
+  });
+
   it("by method and by model, the most costly first", () => {
     const b = breakdown(data, 3);
     expect(b.byMethod).toEqual([

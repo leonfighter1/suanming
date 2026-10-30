@@ -181,6 +181,49 @@ export interface Overview {
   money: Money;
   /** The period's 积分 flows, and what accounts hold now. */
   points: { sold: number; granted: number; used: number; outstanding: number };
+  /** The [days] days before the period, summed alike: what 概览's changes are measured against (v12.3.0). */
+  previous: Previous;
+}
+
+/**
+ * The period before: its new accounts, AI use, money and 积分 flows. No snapshots (who is active, what accounts hold):
+ * those are now's.
+ */
+export interface Previous {
+  from: string;
+  to: string;
+  accounts: { new: number };
+  ai: { jobs: number; tokens: number; cost_usd: number };
+  money: Money;
+  points: { sold: number; granted: number; used: number };
+}
+
+/** The [days] days before the last [days], summed as [overview] sums its period. */
+function previousOf(d: AdminData, days: number): Previous {
+  const day = series(d, days * 2).slice(0, days);
+  const from = day[0]!.day;
+  const to = day.at(-1)!.day;
+  const usage = d.usage.filter((u) => {
+    const local = localDay(u.created_at, d.tz);
+    return local >= from && local <= to;
+  });
+  const sum = <K extends keyof DayRow>(k: K) => day.reduce((n, r) => n + (r[k] as number), 0);
+  return {
+    from,
+    to,
+    accounts: { new: sum("new_accounts") },
+    ai: {
+      jobs: new Set(usage.map((u) => u.job_id)).size,
+      tokens: sum("tokens"),
+      cost_usd: Math.round(usage.reduce((n, u) => n + u.usd, 0) * 1e6) / 1e6,
+    },
+    money: money(
+      d.config,
+      day.reduce((n, r) => n + r.topup_cny, 0),
+      usage.reduce((n, u) => n + u.usd, 0),
+    ),
+    points: { sold: sum("points_sold"), granted: sum("points_granted"), used: sum("points_used") },
+  };
 }
 
 const MINUTE = 60_000;
@@ -243,6 +286,7 @@ export function overview(d: AdminData, days: number): Overview {
       used: sum("points_used"),
       outstanding,
     },
+    previous: previousOf(d, days),
   };
 }
 

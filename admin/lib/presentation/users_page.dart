@@ -10,6 +10,7 @@ import '../domain/models.dart';
 import 'account_page.dart';
 import 'format.dart';
 import 'widgets/common.dart';
+import 'widgets/dashboard.dart';
 
 /// Opens an account's own page.
 void openAccount(BuildContext context, AdminUser u) => Navigator.of(context).push(
@@ -94,77 +95,12 @@ class _UsersPageState extends ConsumerState<UsersPage> {
     final query = ref.watch(userQueryProvider);
     final users = ref.watch(usersProvider);
     final now = ref.watch(clockProvider)();
-    return PageBody(
-      children: [
+    return DashboardLayout(
+      // The table in the main column; the search and filters in the panel (S24 WP24.3), before the table on a narrow
+      // screen.
+      narrowAt: 1,
+      main: [
         PageHeader('用户', subtitle: users.whenOrNull(data: (p) => '共 ${count(p.total)} 个账户（全部时间的数字）')),
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                key: const Key('users-search'),
-                controller: _search,
-                textInputAction: TextInputAction.search,
-                onChanged: _searchFor,
-                onSubmitted: (t) => _searchFor(t, now: true),
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  labelText: '搜索',
-                  // The server matches the shown login (an email or phone shows only in part) or the id's start.
-                  hintText: '用户名，或账户 ID 的开头',
-                ),
-              ),
-              const SizedBox(height: Space.m),
-              Wrap(
-                spacing: Space.m,
-                runSpacing: Space.s,
-                children: [
-                  SegmentKeys<String>(
-                    child: SegmentedButton<String>(
-                      key: const Key('filter-status'),
-                      showSelectedIcon: false,
-                      segments: const [
-                        ButtonSegment(value: '', label: Text('全部状态')),
-                        ButtonSegment(value: 'active', label: Text('正常')),
-                        ButtonSegment(value: 'suspended', label: Text('已停用')),
-                      ],
-                      selected: {query.status ?? ''},
-                      onSelectionChanged: (s) =>
-                          _set((q) => q.copyWith(status: () => s.first.isEmpty ? null : s.first, page: 1)),
-                    ),
-                  ),
-                  SegmentKeys<String>(
-                    child: SegmentedButton<String>(
-                      key: const Key('filter-role'),
-                      showSelectedIcon: false,
-                      segments: const [
-                        ButtonSegment(value: '', label: Text('全部角色')),
-                        ButtonSegment(value: 'user', label: Text('用户')),
-                        ButtonSegment(value: 'admin', label: Text('管理员')),
-                      ],
-                      selected: {query.role ?? ''},
-                      onSelectionChanged: (s) =>
-                          _set((q) => q.copyWith(role: () => s.first.isEmpty ? null : s.first, page: 1)),
-                    ),
-                  ),
-                  SegmentKeys<String>(
-                    child: SegmentedButton<String>(
-                      key: const Key('filter-demo'),
-                      showSelectedIcon: false,
-                      segments: const [
-                        ButtonSegment(value: 'include', label: Text('含演示')),
-                        ButtonSegment(value: 'exclude', label: Text('不含演示')),
-                        ButtonSegment(value: 'only', label: Text('只看演示')),
-                      ],
-                      selected: {query.demo},
-                      onSelectionChanged: (s) => _set((q) => q.copyWith(demo: s.first, page: 1)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
         AppCard(
           child: AsyncView(
             users,
@@ -237,6 +173,76 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                 ),
               ],
             ),
+          ),
+        ),
+      ],
+      aside: [
+        PanelSection(
+          first: true,
+          title: '搜索',
+          child: TextField(
+            key: const Key('users-search'),
+            controller: _search,
+            textInputAction: TextInputAction.search,
+            onChanged: _searchFor,
+            onSubmitted: (t) => _searchFor(t, now: true),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              labelText: '搜索',
+              // The server matches the shown login (an email or phone shows only in part) or the id's start.
+              hintText: '用户名，或账户 ID 的开头',
+            ),
+          ),
+        ),
+        PanelSection(
+          title: '筛选',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SegmentKeys<String>(
+                child: SegmentedButton<String>(
+                  key: const Key('filter-status'),
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(value: '', label: Text('全部状态')),
+                    ButtonSegment(value: 'active', label: Text('正常')),
+                    ButtonSegment(value: 'suspended', label: Text('已停用')),
+                  ],
+                  selected: {query.status ?? ''},
+                  onSelectionChanged: (s) =>
+                      _set((q) => q.copyWith(status: () => s.first.isEmpty ? null : s.first, page: 1)),
+                ),
+              ),
+              const SizedBox(height: Space.s),
+              SegmentKeys<String>(
+                child: SegmentedButton<String>(
+                  key: const Key('filter-role'),
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(value: '', label: Text('全部角色')),
+                    ButtonSegment(value: 'user', label: Text('用户')),
+                    ButtonSegment(value: 'admin', label: Text('管理员')),
+                  ],
+                  selected: {query.role ?? ''},
+                  onSelectionChanged: (s) =>
+                      _set((q) => q.copyWith(role: () => s.first.isEmpty ? null : s.first, page: 1)),
+                ),
+              ),
+              const SizedBox(height: Space.s),
+              SegmentKeys<String>(
+                child: SegmentedButton<String>(
+                  key: const Key('filter-demo'),
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(value: 'include', label: Text('含演示')),
+                    ButtonSegment(value: 'exclude', label: Text('不含演示')),
+                    ButtonSegment(value: 'only', label: Text('只看演示')),
+                  ],
+                  selected: {query.demo},
+                  onSelectionChanged: (s) => _set((q) => q.copyWith(demo: s.first, page: 1)),
+                ),
+              ),
+            ],
           ),
         ),
       ],
