@@ -2,6 +2,15 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (k): S22 WP22.3 — preset data for 管理后台; v11.3.0
+
+- `seedAdminDemo`: 36 demo accounts with 90 days of history from a fixed seed, charged as the server charges; no
+  passwords; marked demo; made at a dev start when a store has none (`MINGLI_ADMIN_DEMO=off` to skip).
+- Checked the way the owner meets it: a private API instance (port 8799, memory store) started, the admin signed in
+  and read the overview (42 accounts, ¥2,720, 63.9%), then stopped. Killing the launcher's PID left the server up:
+  rule 69 (stop the port's owner, check the port).
+- Two runs differ only in the ledger's own entry ids: the test compares without them.
+
 ## 2026-10-29 (j): S22 begins, the owner's request — 管理后台; v11.2.0 is its server
 
 - Owner request (quoted in the tech plan): a new project folder, an admin dashboard for every account, the tokens,

@@ -8,6 +8,7 @@ import { existsSync, watchFile } from "node:fs";
 import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { checkRouting, loadRouting } from "../src/ai/index.js";
+import { adminDemoOn, seedAdminDemo } from "../src/admin/demo.js";
 import { createApiServer } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import { notifyFromEnv } from "../src/notify/index.js";
@@ -70,6 +71,10 @@ await seedDevAccounts(auth, true);
 // 积分 (S20): on unless MINGLI_POINTS=off. 充值 is simulated here (development): no payment, the pack's 积分 arrive.
 const points = pointsOn(process.env) ? loadPointsConfig() : undefined;
 const granted = points ? await grantDevPoints(auth, store, points.dev_grant) : 0;
+// 管理后台 (S22): demo accounts with 90 days of history for the dashboard, once, unless MINGLI_ADMIN_DEMO=off.
+const demo = adminDemoOn(process.env)
+  ? await seedAdminDemo({ auth, store, config: points ?? loadPointsConfig(), now: new Date() })
+  : undefined;
 // Mail and text messages (S15): the development outbox until the owner picks providers (MINGLI_MAIL / MINGLI_SMS).
 const notify = notifyFromEnv(true);
 // The GitHub Pages web test (docs/web-test.md) calls this API from its https origin.
@@ -139,6 +144,13 @@ server.listen(port, host, () => {
           (granted ? ` (given now to ${granted})` : " (given before)") +
           "; MINGLI_POINTS=off makes AI requests free"
       : "积分: off (MINGLI_POINTS=off): AI requests are free",
+  );
+  console.log(
+    !adminDemoOn(process.env)
+      ? "管理后台: no demo accounts (MINGLI_ADMIN_DEMO=off)"
+      : demo
+        ? `管理后台: ${demo.accounts} demo accounts with 90 days of history (${demo.jobs} AI jobs); MINGLI_ADMIN_DEMO=off leaves them out`
+        : "管理后台: the demo accounts are there from before; MINGLI_ADMIN_DEMO=off leaves new stores without them",
   );
   console.log(
     `mail: ${notify.mail.name}, sms: ${notify.sms.name}` +

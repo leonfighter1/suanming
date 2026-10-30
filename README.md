@@ -12,6 +12,24 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v11.3.0 (2026-10-29): 管理后台 preset data — demo accounts with 90 days of history
+
+Your request (「为了展示效果，可以设置一些preset的data 到各个用户」), step WP22.3 of stage S22. Pushed.
+
+- **36 demo accounts** (`demo-01` … `demo-36`, marked demo) are made at a development start when a store has none,
+  each with 90 days of history: they sign up (more as the weeks go on), 充值 by the packs when they run low, and ask
+  for readings across 八字, 塔罗, 求签, 算卦 and 风水, with 追问, 深度分析, plans and 一生运势报告. Each request's tokens
+  lie near its estimate at Claude Opus 5.5's prices, and its 积分 are charged as the server charges them; a few
+  requests fail and cost nothing. Some got a welcome grant with a note, two are suspended, one has AI turned off,
+  and some were active minutes ago, so every table and list has something in it.
+- **What it adds up to** (at the time of a start): about 570 AI jobs (49, then 156, then 365 in each 30 days), 108
+  top-ups, ¥2,720 of 充值, ¥917 of AI cost, ¥1,623 gross profit (a 63.9% margin).
+- They have no password, so nobody can sign in as them. The same seed gives the same history; with
+  `MINGLI_STORE=pglite` they are made once and kept. `MINGLI_ADMIN_DEMO=off` leaves them out of a new store.
+- **Verified:** 4 new server tests (the same every time; every charge its job's measured cost or the 深度分析's fee;
+  balances never below nothing; a growing curve; the database store takes the same history), 669 in all; a dev
+  start read back through the admin API; harness PASS.
+
 ### v11.2.0 (2026-10-29): 管理后台, the server — accounts, AI use, money and the admin API
 
 Your request for an admin dashboard, as stage S22 of the [tech plan](docs/tech-plan.md); this first step is the

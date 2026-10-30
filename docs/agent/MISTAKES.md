@@ -70,8 +70,15 @@
 66. A new or changed route's settings reach the model only through the server's routing: test it through withModel with the owner's ACTIVE_AI_MODEL (read its name from .env, never a key) as well as the bare table, before saying how it behaves.
 67. In api/openapi.yaml, quote every description inside a flow mapping { ... } that contains a comma, a colon or starts with true/false/null, and run npm run validate:openapi right after editing the spec.
 68. In app tests, find the request you check by its method and path (lastWhere / singleWhere), never api.requests.last: any page may add a background call (a balance, a price) after it.
+69. To stop a server you started in the background, stop the process that owns its port (Get-NetTCPConnection -LocalPort N -State Listen, check its command line is yours), never only the launcher's PID, and confirm the port is free afterwards. Start such checks on a spare port with MINGLI_STORE=memory so the owner's server and data are never touched.
 
 ## Log
+
+### 2026-10-29: Killing a background npx tsx start left its server running
+- **Symptom:** After kill of the PID saved from 'npx tsx scripts/api-server.ts &', port 8799 was still listening.
+- **Root cause:** The saved PID was npx's; the node process running tsx is its child and kept the port.
+- **Fix:** Stopped the process that owns the port (Get-NetTCPConnection -LocalPort 8799 -> OwningProcess, its command line checked first), then checked the port was free.
+- **Rule:** To stop a server you started in the background, stop the process that owns its port (Get-NetTCPConnection -LocalPort N -State Listen, check its command line is yours), never only the launcher's PID, and confirm the port is free afterwards. Start such checks on a spare port with MINGLI_STORE=memory so the owner's server and data are never touched. (Rule 69)
 
 ### 2026-10-29: A test read api.requests.last and met a new background request
 - **Symptom:** fengshui_test failed with FormatException: Unexpected end of input after 积分 came in; naming_test and qiuqian_test used the same pattern and passed only by timing.

@@ -2086,6 +2086,9 @@ As built:
   `recordJob` at every AI job's end, `assertAllowed` in `holdForJob`, 充值, a 深度分析's answers and a preloaded
   plan's purchase. The app signs a suspended account out and says why at sign-in, and shows an admin's grant as
   管理员赠送 with its note. An account with the admin role reviews in 内容审核 too.
+- **v11.3.0 (WP22.3):** `seedAdminDemo` (src/admin/demo.ts, a seeded mulberry32): 36 accounts, about 570 jobs,
+  108 top-ups over 90 days; seeded by scripts/api-server.ts at a dev start, once per store. Each account's events
+  run in time order, so its history's balances follow one another.
 
 ## 阶段总结 (stage summaries)
 
@@ -2672,6 +2675,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP21.2    | done                         | v11.1.0 |
 | WP22.1    | done                         | v11.2.0 |
 | WP22.2    | done                         | v11.2.0 |
-| WP22.3    | next                         | v11.3.0 |
-| WP22.4    | planned                      | v11.4.0 |
+| WP22.3    | done                         | v11.3.0 |
+| WP22.4    | next                         | v11.4.0 |
 | WP22.5    | planned                      | v12.0.0 |
