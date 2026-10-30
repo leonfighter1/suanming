@@ -51,4 +51,6 @@ export interface ApiContext {
   priceOf: (kind: ChargeKind, about?: QuoteFor) => Quote | undefined;
   /** What an admin allows this account; 403 `ai_not_allowed` / `top_up_not_allowed` when not. */
   assertAllowed: (c: Caller, what: keyof AccountPermissions) => Promise<void>;
+  /** Geo-Rule: refuses (451) before anything is computed for a region, or a method, not served. */
+  assertServed: (country: string, system?: string) => void;
 }

@@ -91,15 +91,6 @@ import {
 } from "../service/charts.js";
 import { documentName } from "../export/document.js";
 import { renderPdf } from "../export/render-pdf.js";
-import {
-  dailyDate,
-  dailyIds,
-  dailyZone,
-  drawDaily,
-  drawEastDaily,
-  EAST_DAILY,
-  eastDaily,
-} from "../service/daily.js";
 import { upstreamMessage } from "../service/runtime.js";
 import { shareFont } from "../share/font.js";
 import { renderQiuqianShare } from "../share/qiuqian-image.js";
@@ -113,6 +104,7 @@ const SHARE_RENDERERS: Partial<Record<ChartSystem, typeof renderTarotShare>> = {
 import type { ApiContext, Caller } from "./context.js";
 import { authRoute, accountRoute } from "./routes/account.js";
 import { archiveRoute } from "./routes/archive.js";
+import { dailyRoute } from "./routes/daily.js";
 import { pointsRoute } from "./routes/points.js";
 import { publicRoute } from "./routes/public.js";
 import {
@@ -1074,25 +1066,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     return r;
   }
 
-  /**
-   * The account's draw of the day (每日一牌, 今日一卦 / 今日一签; S28): the chart kept under [chartId], else [draw] kept
-   * now as that day's chart. Each route keeps its own draw (rule 8).
-   */
-  async function dailyChart(c: Caller, chartId: string, date: string, draw: () => ChartFact) {
-    let chart = await store.getChart(chartId);
-    if (!chart) {
-      chart = {
-        id: chartId,
-        owner: c.user,
-        fact: draw(),
-        created_at: now().toISOString(),
-        daily: date,
-      };
-      await store.putChart(chart);
-    }
-    return { chart_id: chart.id, chart_fact: chart.fact, date };
-  }
-
   /** A request on one of the caller's charts: its body, and the chart its chart_id names (400 or 404 otherwise; S28). */
   async function chartRequest(req: IncomingMessage, c: Caller) {
     const body = (await readJson(req)) as Record<string, unknown>;
@@ -1569,6 +1542,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     simulatedTopUp,
     priceOf,
     assertAllowed,
+    assertServed,
   };
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
@@ -1817,6 +1791,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       return;
     }
 
+    // ---- the cards of the day: 每日一牌, 今日一卦 / 今日一签 (routes/daily.ts) ----
+    if (await dailyRoute(api, req, res, path, c)) return;
+
     if (req.method === "GET") {
       const m = /^\/v1\/reports\/([^/]+)$/.exec(path);
       if (m) {
@@ -1828,41 +1805,6 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           200,
           view,
           aiHeaders("ai_disclosure" in view ? view.ai_disclosure : undefined),
-        );
-      }
-      // 每日一牌: the account's card of the day, the same all day (src/service/daily.ts).
-      if (path === "/v1/tarot/daily") {
-        assertServed(c.country, "tarot");
-        const date = dailyDate(
-          new URL(req.url ?? "/", "http://localhost").searchParams.get("date"),
-          now(),
-        );
-        const { drawId, chartId } = dailyIds(opts.secrets.drawKey, c.user, date);
-        return send(
-          res,
-          200,
-          await dailyChart(c, chartId, date, () => drawDaily(opts.secrets, drawId, now)),
-        );
-      }
-      // 今日一卦 / 今日一签 (S26): the account's 东方 draw of the day, a 签 or a 卦 at random, the same all day
-      // (src/service/daily.ts). Only the 东方 methods served in the region take part; none, and it isn't served.
-      if (path === "/v1/east/daily") {
-        assertServed(c.country);
-        const served = methodsFor(resolveRegion(loadGeoMatrix(), c.country)!).map((m) => m.system);
-        const systems = EAST_DAILY.filter((s) => served.includes(s));
-        if (systems.length === 0) {
-          throw new GeoRefusedError(`neither 求签 nor 算卦 is available in ${c.country}`);
-        }
-        const query = new URL(req.url ?? "/", "http://localhost").searchParams;
-        const date = dailyDate(query.get("date"), now());
-        const timezone = dailyZone(query.get("timezone"));
-        const { system, drawId, chartId } = eastDaily(opts.secrets.drawKey, c.user, date, systems);
-        return send(
-          res,
-          200,
-          await dailyChart(c, chartId, date, () =>
-            drawEastDaily(system, opts.secrets, drawId, timezone, now),
-          ),
         );
       }
       const limit = Math.min(
