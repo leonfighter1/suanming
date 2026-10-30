@@ -2,7 +2,26 @@
 
 Newest first. One entry per working session, key points only.
 
-## 2026-10-30 (b): S23 WP23.1 — a card's focus ring only for the card itself; v12.0.1 (local)
+## 2026-10-30 (c): S24 WP24.1 — one theme system from tokens, 外观; v12.1.0 (local)
+
+- Owner request (2026-10-30): an asymmetric 管理后台 with big figures, a compact grid and a right-hand panel; with a UI
+  design skill, one grid, spacing, type scale and alignment rules across the app; a unified light and dark theme
+  system (background, card, text, accent), the layout unchanged on a switch, colours, borders and states fading.
+  Planned as S24 (four WPs, v12.1.0 → v13.0.0). No earlier owner decision conflicts (rule 34): the tarot cards' size
+  (v1.1.x), the clean top bar (v8.1.0, v9.1.0) and the home groups (v6.1.0) stay.
+- No UI design skill existed (AgentSkills, ~/.claude/skills, .claude/skills): wrote `.claude/skills/ui-design`, using
+  the dataviz skill for charts and figures. Its first version covers colour, themes and motion.
+- Built `ThemeTokens` (tokens.dart, a ThemeExtension that lerps), `buildTheme` from it, `pick` / `darkness` for drawn
+  objects; removed every brightness check (五行, 签, the title's mark, the 求签 altar, the trend chart, the dashboard's
+  series); the 7-slot chart palette moved into the tokens (validated again on the new card colours). 外观 in the ☰
+  menu (`SettingsStore.theme`, `startTheme`) and the dashboard's bar (`prefsProvider`, localStorage behind a
+  conditional import). The focus ring fades (`Motion.fast`).
+- The new mid-switch test found a crash that predates S24: `ChipThemeData.lerp` fails when the theme's chip side resolves
+  to null for no states, so any light/dark change while the app ran (the system's too) crashed. A first fix
+  (`BorderSide.none` once chosen) shrank the chosen tarot spread chip by 2 px, caught by tarot_spread_test: Material
+  keeps a transparent side (rule 76).
+- Looked at real-font renders (msyh through FontLoader, a throwaway test kept out of the repo): both themes read
+  well. The wide home stretches its cards over 1280 px, which WP24.2's page frame addresses.
 
 - v12.0.0 pushed after a second harness PASS on the final tree (a test-only change after the first: the serving test
   now removes its temp folders). Removed a junction an earlier harness run had left (`harness-5b35d2a7` → app/, the

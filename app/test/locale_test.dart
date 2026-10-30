@@ -14,6 +14,10 @@ class _BrokenStore implements SettingsStore {
   Future<String?> language() => Future.error(StateError('no storage'));
   @override
   Future<void> setLanguage(String apiLocale) => Future.error(StateError('no storage'));
+  @override
+  Future<String?> theme() => Future.error(StateError('no storage'));
+  @override
+  Future<void> setTheme(String mode) => Future.error(StateError('no storage'));
 }
 
 Future<void> settle(WidgetTester tester) async {

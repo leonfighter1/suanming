@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'application/providers.dart';
 import 'l10n/gen/app_localizations.dart';
+import 'presentation/design.dart';
 import 'presentation/home_page.dart';
 import 'presentation/keyboard.dart';
 import 'presentation/sign_in_page.dart';
@@ -14,12 +15,15 @@ class MingliApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(settingsProvider).locale;
+    final settings = ref.watch(settingsProvider);
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
-      locale: locale,
+      // 外观 (v12.1.0): a change fades every colour, border and state into the other theme; nothing moves.
+      themeMode: settings.themeMode,
+      themeAnimationStyle: const AnimationStyle(duration: Motion.theme, curve: Motion.themeCurve),
+      locale: settings.locale,
       supportedLocales: supportedAppLocales,
       localizationsDelegates: const [
         AppLocalizations.delegate,

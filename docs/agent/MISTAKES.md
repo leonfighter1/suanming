@@ -77,8 +77,15 @@
 73. In Git Bash, an argument that starts with / (a base href, a URL path, a /flag) reaches the program as a Windows path: prefix the command with MSYS_NO_PATHCONV=1, or run it from PowerShell or a script. Through powershell -File, an argument with a double quote inside is split: keep double quotes out of such arguments.
 74. A Flutter build script clears .dart_tool/flutter_build first (real path), builds through a junction it removes afterwards, writes a build that is served to its own --output folder (the harness builds build/web), and checks the output has its files: rule 23's stale-path deletion hits web build output too, through any junction still there.
 75. A widget that shows its own focus must ask its own node for hasPrimaryFocus: Focus.onFocusChange (and InkWell's) report hasFocus, which is true while anything inside has the focus. Test it with a focusable child inside.
+76. Every WidgetState property in a component theme must resolve to a value for the empty state set: ChipThemeData.lerp, run by every change of theme, fails on null. Give each state Material's own default (a chosen flat chip keeps a transparent 1 px side, so `BorderSide.none` shrinks it by 2 px; rule 49), and test a theme change itself (switch, pump half the animation, check colours between the two themes), not only each theme on its own.
 
 ## Log
+
+### 2026-10-30: A change of theme crashed in the chip theme lerp
+- **Symptom:** Switching 浅色 to 深色 (and the system switching light and dark while the app runs) threw a null check in ChipThemeData._lerpSides inside AnimatedTheme; the page stopped rebuilding.
+- **Root cause:** The chip theme side was a WidgetStateBorderSide that resolved to null outside the focused state. ChipThemeData.lerp resolves both sides for the empty state set and fails when both are null. Every test built one theme at a time, so no test ran a theme change.
+- **Fix:** The chip side resolves to the chip own outline for every state (focus outline, transparent once selected, a faint one when disabled, outlineVariant otherwise). theme_test switches the theme from the menu and checks the colours half-way. A first try returned BorderSide.none once selected: tarot_spread_test caught the chosen spread chip 2 px smaller than the others.
+- **Rule:** Every WidgetState property in a component theme must resolve to a value for the empty state set: ChipThemeData.lerp, run by every change of theme, fails on null. Give each state Material's own default (a chosen flat chip keeps a transparent 1 px side, so `BorderSide.none` shrinks it by 2 px; rule 49), and test a theme change itself (switch, pump half the animation, check colours between the two themes), not only each theme on its own. (Rule 76)
 
 ### 2026-10-30: AppCard ringed itself while a field inside it had the focus
 - **Symptom:** The 管理后台 sign-in page, rendered in headless Chrome, showed a focus ring round the whole card besides the focused field

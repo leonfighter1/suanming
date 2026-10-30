@@ -728,11 +728,14 @@ Widget testApp(
   List<Override> overrides = const [],
   // The device's saved settings (the language picked, v5.1.0).
   SettingsStore? settings,
+  // 外观 (v12.1.0); null = the system's.
+  ThemeMode? theme,
 }) {
   final store = tokens ?? InMemoryTokenStore(signedIn ? Tokens(api.access, 'refresh-0') : null);
   return ProviderScope(
     overrides: [
-      if (locale != null) settingsProvider.overrideWith(() => SettingsNotifier(locale)),
+      if (locale != null || theme != null)
+        settingsProvider.overrideWith(() => SettingsNotifier(locale ?? zhHans, theme ?? ThemeMode.system)),
       settingsStoreProvider.overrideWithValue(settings ?? InMemorySettingsStore()),
       tokenStoreProvider.overrideWithValue(store),
       profileStoreProvider.overrideWithValue(profiles ?? InMemoryProfileStore()),

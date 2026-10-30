@@ -26,8 +26,12 @@ void main() {
       final scheme = buildTheme(brightness).colorScheme;
       for (final element in ['木', '火', '土', '金', '水']) {
         final colour = wuxingColor(element, dark: brightness == Brightness.dark);
-        // AppCard is surfaceContainerLow; pages are surface.
-        for (final (name, background) in [('surface', scheme.surface), ('card', scheme.surfaceContainerLow)]) {
+        // AppCard is surfaceContainerLow; pages are surface; a tile inside a card the inset (v12.1.0).
+        for (final (name, background) in [
+          ('surface', scheme.surface),
+          ('card', scheme.surfaceContainerLow),
+          ('inset', scheme.surfaceContainerHighest),
+        ]) {
           expect(contrast(colour, background), greaterThanOrEqualTo(4.5), reason: '$element on $name, $brightness');
         }
       }

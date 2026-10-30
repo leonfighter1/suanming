@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
+import 'package:mingli_app/presentation/tokens.dart';
 
 /// One line: its name, its colour and a value for each day.
 class ChartSeries {
@@ -13,12 +14,11 @@ class ChartSeries {
   final List<double> values;
 }
 
-/// The lines' colours, in this fixed order: the dataviz skill's reference palette, whose first three slots stay
-/// apart for colour-blind readers too (checked with its validator on the app's surfaces, light and dark). A light
-/// aqua line is below 3:1 on the surface: the legend, the picked day's numbers and the 收益 page's daily table carry it.
-List<Color> seriesColors(Brightness b) => b == Brightness.dark
-    ? const [Color(0xFF3987E5), Color(0xFFD95926), Color(0xFF199E70)]
-    : const [Color(0xFF2A78D6), Color(0xFFEB6834), Color(0xFF1BAF7A)];
+/// The lines' colours, in this fixed order: the theme's chart series (ThemeTokens.series, the dataviz skill's
+/// reference palette, whose first three slots stay apart for colour-blind readers too). They are mixed while the theme
+/// changes. A light aqua line is below 3:1 on the card: the legend, the picked day's numbers and the 收益 page's daily
+/// table carry it.
+List<Color> seriesColors(BuildContext context) => ThemeTokens.of(context).series.take(3).toList();
 
 String _plain(double v) => v.toStringAsFixed(0);
 

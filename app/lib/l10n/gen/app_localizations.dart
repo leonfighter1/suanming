@@ -139,6 +139,30 @@ abstract class AppLocalizations {
   /// **'语言'**
   String get language;
 
+  /// No description provided for @appearance.
+  ///
+  /// In zh, this message translates to:
+  /// **'外观'**
+  String get appearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'跟随系统'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In zh, this message translates to:
+  /// **'浅色'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In zh, this message translates to:
+  /// **'深色'**
+  String get themeDark;
+
   /// No description provided for @region.
   ///
   /// In zh, this message translates to:

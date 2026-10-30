@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
-import '../theme.dart';
+import '../tokens.dart';
 
 /// 求籤 (v4.3.0): the lot drawn, as a temple prints it on its slip: the set, the lot's title and label,
 /// and its four lines in the reader's script (English readers see the original).
@@ -20,11 +20,11 @@ class LotCard extends ConsumerWidget {
     final lot = lots?.lot(lotNumber);
     if (lots == null || lot == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
-    // 籤紙: the yellow paper temples print lots on, darker at night.
-    final paper = dark ? const Color(0xFF3F3321) : const Color(0xFFF3DCA6);
-    final ink = dark ? const Color(0xFFF1E4C8) : const Color(0xFF3B2A22);
-    final accent = dark ? const Color(0xFFE59A86) : AppColors.accent;
+    final t = ThemeTokens.of(context);
+    // 籤紙: the yellow paper temples print lots on, darker at night (mixed while the theme changes).
+    final paper = t.pick(const Color(0xFFF3DCA6), const Color(0xFF3F3321));
+    final ink = t.pick(const Color(0xFF3B2A22), const Color(0xFFF1E4C8));
+    final accent = t.pick(ThemeTokens.light.accent, const Color(0xFFE59A86));
     return AppCard(
       title: l10n.qiuqianYourLot,
       icon: Icons.temple_buddhist_outlined,
@@ -79,7 +79,7 @@ class JiaobeiBlocks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final darkness = ThemeTokens.of(context).darkness;
     return Semantics(
       label: blocks.map((b) => b == 'flat' ? l10n.blockFlat : l10n.blockRound).join(', '),
       child: ExcludeSemantics(
@@ -88,7 +88,7 @@ class JiaobeiBlocks extends StatelessWidget {
           children: [
             for (final (i, b) in blocks.indexed) ...[
               if (i > 0) const SizedBox(width: Space.s),
-              CustomPaint(size: Size(size, size / 2), painter: JiaobeiPainter(flat: b == 'flat', dark: dark)),
+              CustomPaint(size: Size(size, size / 2), painter: JiaobeiPainter(flat: b == 'flat', darkness: darkness)),
             ],
           ],
         ),
@@ -100,14 +100,16 @@ class JiaobeiBlocks extends StatelessWidget {
 /// One moon block in a box twice as wide as it is high: [flat] face up, or its round back. The 求籤 stage
 /// (qiuqian_stage.dart) paints the thrown blocks with it too.
 class JiaobeiPainter extends CustomPainter {
-  const JiaobeiPainter({required this.flat, required this.dark});
+  const JiaobeiPainter({required this.flat, required this.darkness});
   final bool flat;
-  final bool dark;
+
+  /// The theme's darkness (ThemeTokens.darkness): 0 light, 1 dark, in between while it changes.
+  final double darkness;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final red = dark ? const Color(0xFFD0604F) : const Color(0xFFA8382B);
-    final light = dark ? const Color(0xFFE8A190) : const Color(0xFFE0907C);
+    final red = Color.lerp(const Color(0xFFA8382B), const Color(0xFFD0604F), darkness)!;
+    final light = Color.lerp(const Color(0xFFE0907C), const Color(0xFFE8A190), darkness)!;
     // A half-moon: the round back above, the flat face below.
     final half = Path()
       ..moveTo(0, size.height)
@@ -137,5 +139,5 @@ class JiaobeiPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(JiaobeiPainter old) => old.flat != flat || old.dark != dark;
+  bool shouldRepaint(JiaobeiPainter old) => old.flat != flat || old.darkness != darkness;
 }

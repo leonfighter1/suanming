@@ -17,6 +17,7 @@ scripts and don't copy them.
 | Any app screen, dialog or widget   | **keyboard-access** (`.claude/skills/keyboard-access`): keyboard rules and building blocks | read its checklist; reuse `app/lib/presentation/keyboard.dart`                                                                                                   |
 | Planning, continuing, finishing    | **dev-workflow** (`.claude/skills/dev-workflow`): tech plan, stages, versions, push rule   | work through [docs/tech-plan.md](docs/tech-plan.md); finish with harness PASS → README 更新记录 → version → records → commit; push big updates only              |
 | Any AI prompt, reading or its page | **ai-reading** (`.claude/skills/ai-reading`): the owner's requirements for AI readings     | read it before changing a prompt, what a reading sends the model or writes, or its page, export or email                                                         |
+| Any colour, size, layout or theme  | **ui-design** (`.claude/skills/ui-design`): tokens, light and dark, grid, spacing, type    | read it before choosing a colour, a padding, a font size or a breakpoint in `app/` or `admin/`; take colours only from `ThemeTokens`                             |
 
 Records:
 

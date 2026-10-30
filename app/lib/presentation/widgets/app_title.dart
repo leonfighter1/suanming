@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
-import '../theme.dart';
+import '../tokens.dart';
 
 /// 首页's title (owner, v9.1.0: 「命理大师的text可以添加一些效果，比如前置一个svg的decor」): the app's mark, then the
 /// name in bold, spaced out, shading from 赭红 to gold. The mark is drawn, as an SVG would be, so it stays sharp at
@@ -15,9 +15,8 @@ class AppTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
-    final shade = [theme.colorScheme.primary, dark ? FaceDown.gold : AppColors.earth];
+    final t = ThemeTokens.of(context);
+    final shade = [t.accent, t.pick(ThemeTokens.light.earth, FaceDown.gold)];
     // The bar's own title style (titleLarge), bolder and spaced out.
     final style = DefaultTextStyle.of(context).style.copyWith(fontWeight: FontWeight.w700, letterSpacing: 3);
     return Row(
@@ -44,15 +43,18 @@ class BaguaMark extends StatelessWidget {
   const BaguaMark({super.key, this.size = 34});
   final double size;
 
+  /// The dark half on a dark bar: a deep 赭红 the gold stands out on.
+  static const _yinDark = Color(0xFF5C1F16);
+
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final t = ThemeTokens.of(context);
     return CustomPaint(
       size: Size.square(size),
       painter: _MarkPainter(
         // On the light bar the dark half and the trigrams in 赭红; on a dark one the trigrams in gold.
-        yin: dark ? const Color(0xFF5C1F16) : AppColors.accent,
-        lines: dark ? FaceDown.gold : AppColors.accent,
+        yin: t.pick(ThemeTokens.light.accent, _yinDark),
+        lines: t.pick(ThemeTokens.light.accent, FaceDown.gold),
       ),
     );
   }

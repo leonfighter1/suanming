@@ -383,8 +383,16 @@ class FakeAdmin {
 }
 
 /// The dashboard on a [size] screen, signed in as the admin unless [signIn] is false.
-Future<FakeAdmin> pumpAdmin(WidgetTester tester, {FakeAdmin? fake, Size size = wide, bool signIn = true}) async {
+/// [prefs] is the browser's storage (the theme picked, v12.1.0): empty unless a test gives one.
+Future<FakeAdmin> pumpAdmin(
+  WidgetTester tester, {
+  FakeAdmin? fake,
+  Size size = wide,
+  bool signIn = true,
+  Map<String, String>? prefs,
+}) async {
   final f = fake ?? FakeAdmin();
+  final stored = prefs ?? <String, String>{};
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -395,6 +403,7 @@ Future<FakeAdmin> pumpAdmin(WidgetTester tester, {FakeAdmin? fake, Size size = w
         httpClientProvider.overrideWithValue(f.client),
         clockProvider.overrideWithValue(() => testNow),
         saveFileProvider.overrideWithValue((file) async => f.saved.add(file)),
+        prefsProvider.overrideWithValue(Prefs(read: (k) => stored[k], write: (k, v) => stored[k] = v)),
       ],
       child: const AdminApp(),
     ),

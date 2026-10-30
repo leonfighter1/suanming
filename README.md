@@ -13,6 +13,43 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v12.1.0 (2026-10-30): one light and dark theme system, and 外观 to switch it
+
+You asked for a unified light and dark theme system that defines the background, card, text and accent of each, keeps
+the layout when the theme changes, and lets colours, borders and states fade naturally (「建立统一的浅色和深色主题系统…」).
+This is the first step of stage S24 of the [tech plan](docs/tech-plan.md). It is committed locally and goes out with
+v13.0.0.
+
+- **One set of colours per theme:** each theme now defines the same tokens: page background, card, raised (dialogs),
+  inset (fields and tiles inside a card), hairline and strong borders, text, secondary and muted text, the accent (朱砂)
+  with its soft fill, success, warning, danger and info with their fills, the 五行 and the chart colours. They are in
+  one file, light and dark side by side (`app/lib/presentation/tokens.dart`). The app and the 管理后台 both take their
+  colours only from there.
+  - **Light:** warm paper (`#F6F3EE`) with white cards.
+  - **Dark:** warm near-black (`#121010`) with dark brown cards.
+  - **Readable:** every text colour, the accent, the states and the 五行 are at least 4.5 : 1 on every surface in both
+    themes.
+- **外观 (new):**
+  - **In the app:** ☰ → 外观 → 跟随系统, 浅色 or 深色. The choice is kept on the device like the language.
+  - **In the 管理后台:** the new button in the top bar. The choice is kept in the browser.
+  - **Keyboard:** Tab reaches it, Enter opens it, the arrows move through the choices and Enter picks one.
+- **A change of theme fades:** every colour, border and state moves to the other theme over 0.3 s. This includes the
+  五行, the 签 paper, the title's mark, the 求签 altar's shadows and the chart lines, which used to switch abruptly
+  half-way. Nothing moves or changes size. The keyboard focus outline now fades in and out too.
+- **Fixed:** a change of light and dark while the app was open (the system switching at sunset, say) crashed the theme
+  animation in Flutter's chip theme, so the page stopped redrawing. The new 外观 switch would have hit the same crash.
+- **Verified:**
+  - 8 new tests:
+    - colour contrast in both themes;
+    - Material's colours are the tokens;
+    - the home page and the menu laid out identically in light and dark;
+    - a switch from the menu, with colours checked half-way;
+    - the theme the app starts in;
+    - 外观 in the 管理后台 by mouse and keyboard.
+  - 245 app tests and 48 管理后台 tests pass.
+  - Screenshots of both themes were checked with the real Chinese font.
+  - harness PASS.
+
 ### v12.0.1 (2026-10-30): a card's focus ring only for the card itself
 
 Found while checking the 管理后台 in a browser (tech plan S23). Committed locally; it goes out with the next big

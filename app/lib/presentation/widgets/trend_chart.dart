@@ -8,18 +8,14 @@ import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import '../labels.dart';
+import '../tokens.dart';
 
-/// Series colours: one fixed slot per entity (validated categorical order, light
-/// and dark steps), so a series keeps its colour whatever the filter shows.
+/// Series colours: one fixed slot per entity (the theme's series, ThemeTokens.series), so a series keeps its colour
+/// whatever the filter shows.
 const _seriesOrder = ['overall', 'wuxing', 'personality', 'career_wealth', 'relationships', 'dayun_liunian', 'health'];
-const _light = [0xFF2A78D6, 0xFFEB6834, 0xFF1BAF7A, 0xFFEDA100, 0xFFE87BA4, 0xFF008300, 0xFF6250D6];
-const _dark = [0xFF3987E5, 0xFFD95926, 0xFF199E70, 0xFFC98500, 0xFFD55181, 0xFF008300, 0xFF9085E9];
 
-Color seriesColor(BuildContext context, String key) {
-  final i = math.max(0, _seriesOrder.indexOf(key));
-  final dark = Theme.of(context).brightness == Brightness.dark;
-  return Color((dark ? _dark : _light)[i]);
-}
+Color seriesColor(BuildContext context, String key) =>
+    ThemeTokens.of(context).series[math.max(0, _seriesOrder.indexOf(key))];
 
 /// Report header: 運勢走勢 by age (大運) or by year (流年), per topic or combined,
 /// with the total score. Tap a period for its scores and the reason.

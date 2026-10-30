@@ -2114,6 +2114,107 @@ As built:
 - Ring only when the card itself has the primary focus (a tappable card); a test in keyboard_shell_test or
   keyboard_test with a field inside a card. The app and the dashboard both take the fix.
 
+## S24 设计系统与管理后台布局 (big → v13.0.0)
+
+**Owner request (2026-10-30):** 「对于dashboard 可以采用非对称Dashboard布局，以大数字为视觉锚点，辅助数据采用紧凑网格，右侧设置
+独立纵向面板 通过模块比例，字号和留白建立信息层级，在结合UI设计Skill， 对整个app进一步统一网格系统，组件间距，字体比例和对齐规则，
+让整个页面更有秩序。建立统一的浅色和神色主题系统，分别定义背景，卡片，文字和强调色，切换主题时保持布局和组件结构不变，让颜色，边框和
+状态自然过渡。」
+
+Read as:
+
+- **A UI design skill** (`.claude/skills/ui-design`). The repository has none yet. This stage writes one with the
+  rules of the design system: grid, spacing, type, alignment, colour tokens and themes, motion, and the dashboard's
+  figures (from the dataviz skill: one hero figure per view, the stat tile's contract, tabular figures only in
+  columns). It names the building blocks that carry the rules, and every screen change reads it. It works like the
+  keyboard-access skill does for keys. Tests hold the code to the rules.
+- **One theme system, light and dark:** each theme defines its background, card, inset, border, text (primary,
+  secondary, muted), accent and status colours as tokens, in one place, both themes side by side. `buildTheme` makes
+  the Material scheme and an `AppPalette` theme extension from them, and the 五行 and chart colours come from the
+  same tokens. Nothing picks a colour by checking the brightness any more. Everything lerps, so a theme change fades
+  every colour, border and state over 300 ms instead of jumping halfway through. The layout is the same in both
+  themes: same borders, same paddings, same widgets.
+- **Switching the theme:** 外观 (跟随系统, 浅色, 深色) in the app's ☰ menu, kept on the device like the language. The
+  dashboard gets the same choice in its bar, kept in the browser.
+- **A grid, a spacing scale, a type scale, alignment rules,** for the app and the dashboard alike:
+  - **Grid:** window classes as Material's (compact < 600, medium < 840, expanded < 1200, large); 4, 8 or 12
+    columns, margins and gutters by class. App pages sit in a centred column at most 720 wide; the dashboard is up to
+    1440 wide.
+  - **Spacing:** a 4-point scale, with names for its uses (inside a card, between cards, between sections).
+  - **Type:** one ramp, 11 to 48, with line heights for Chinese text and no letter spacing.
+  - **Radii:** one scale.
+  - **Alignment:** one left edge per column, numbers right-aligned in columns, an icon centred on its text's first
+    line.
+- **The dashboard, asymmetric:**
+  - **A hero figure per page:** at least 48 px, with its change against the period before it and a sparkline.
+  - **Supporting figures** in a compact grid of stat tiles, each with its change.
+  - **A right-hand panel** with its own scroll at large widths. On 概览 it shows who is online, then 活跃, 账户 and
+    积分. On 用户 it holds the filters, and on an account's page the actions. Below large widths the panel's parts
+    follow the main column.
+  - **Hierarchy** comes from the modules' proportions (8 : 4 columns), the type ramp and space.
+
+### WP24.1 Tokens and the theme system (→ v12.1.0)
+
+- `app/lib/presentation/tokens.dart`: `ThemeTokens.light` / `.dark` (background, card, inset, border, strong border,
+  text, secondary and muted text, accent, on-accent, soft accent, success, warning, danger and info with their soft
+  fills, the 五行, the chart series, gridlines); `AppPalette` (a `ThemeExtension`, lerped) for what the Material
+  scheme has no role for; `buildTheme` builds both from the tokens. Contrast pinned in a test: text, secondary,
+  muted and accent at least 4.5 : 1 on background, card and inset in both themes, status colours at least 3 : 1.
+- Every colour that was picked by brightness (五行, 签, the title's mark, the 求签 stage, the trend chart, the
+  dashboard's series) comes from the palette or `AppPalette.lerp`-safe pairs (`palette.pick(light, dark)`).
+- The theme animation: 300 ms, ease in and out. A test switches mid-way and finds colours between the two themes,
+  the 五行 too. A test lays a page out in both themes and finds every box in the same place.
+- 外观 in the ☰ menu (跟随系统 / 浅色 / 深色, the three ARB files, kept in `SettingsStore`); the dashboard's bar
+  button (kept in the browser's storage, behind a conditional import).
+- The skill's first version: tokens, theme rules, what is enforced.
+- **As built (v12.1.0):** as specified, with `raised` (dialogs) beside the inset and the 7-slot series of the 八字 trend
+  in the tokens (the dashboard takes the first three). The mid-switch test found a crash older than S24: Flutter's
+  `ChipThemeData.lerp` fails on a chip side that resolves to null, so any change of theme while the app ran crashed;
+  the theme's chip side now has a value for every state (rule 76).
+
+### WP24.2 Grid, spacing, type and alignment across the app (→ v12.2.0)
+
+- `Space` (the 4-point scale and its named uses), `Radii` (a scale), `Motion` (durations and curves),
+  `WindowClass` and `Grid` (columns, margins, gutters) and `PageFrame` (a page's centred column) in design.dart or a
+  `layout.dart` beside it.
+- The type ramp in `buildTheme`. A reading paragraph's style is its own (16 / 28).
+- Every app page through `PageFrame`. The off-scale numbers are replaced (6, 10, 14, 18, `Space.l + 4` and the
+  like). Section titles share the cards' left edge, and icons sit centred on their first line.
+- `app/test/design_rules_test.dart` scans `lib/presentation` and the dashboard's `lib`. It fails on:
+  - a raw `Color(0x…)` outside the tokens and the drawn objects (coins, 签, cards);
+  - a brightness check outside the theme;
+  - a `fontSize:` outside the type ramp and the painters;
+  - a number in `EdgeInsets` or a one-sided `SizedBox` gap;
+  - `Space.x ± n`;
+  - a `BorderRadius.circular(n)` with a number.
+- Every app test still passes; any layout tests that change are reviewed and noted.
+
+### WP24.3 The dashboard's asymmetric layout (→ v12.3.0)
+
+- The server: `GET /v1/admin/overview` gains `previous`, the period before with the same sums (money, new accounts,
+  AI jobs, tokens and cost, 积分). This is additive, written into the OpenAPI spec and tested with hand-worked values.
+- `admin/`: `DashboardLayout(main:, aside:)`, with the aside as a right-hand panel of its own scroll at large widths
+  and following the main column below that. Also `HeroFigure` (label, value of at least 48 px, change, sparkline),
+  `StatTile` (label, value, change coloured by direction and by whether up is good, with an arrow, never colour
+  alone), `Sparkline` and `PanelSection`.
+- The pages:
+  - **概览:** hero 充值收入. The grid has AI 成本, 毛利, 毛利率, 新增账户, AI 请求, Tokens, 售出积分 and 消耗积分. The
+    panel shows 此刻在线 (who, when), then 活跃, 账户 and 积分.
+  - **收益:** hero 充值收入, then 净收入, 毛利, 毛利率, 日均. The panel holds the exports.
+  - **用量:** hero Tokens, then input, output, requests and cost. The panel lists the models.
+  - **用户:** the filters in the panel.
+  - **An account's page:** hero 积分余额, the actions in the panel.
+- Tests: the panel beside the main column at 1440 and below it at 1024 and 390, with its own scroll; the hero at
+  48 px or more; the changes and their signs from the fake's numbers; keys and Tab order kept.
+
+### WP24.4 The skill, the records, the release (→ v13.0.0)
+
+- The ui-design skill completed (the grid, the dashboard rules, the checklist for a new screen), a row in CLAUDE.md's
+  table, MODULES rows, docs/web-test.md, the README entry, the stage summary; pushed after a fresh harness PASS.
+
+Lessons: rules 3, 7, 22, 33, 43, 46, 49, 50, 52, 58, 64, 70, 72, 74, 75; G11, G12; the keyboard-access and dataviz
+skills.
+
 ## 阶段总结 (stage summaries)
 
 ### S23 Found on the way (done 2026-10-30: v12.0.1, small)
@@ -2738,3 +2839,7 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP22.4    | done                         | v11.4.0 |
 | WP22.5    | done                         | v12.0.0 |
 | WP23.1    | done                         | v12.0.1 |
+| WP24.1    | done                         | v12.1.0 |
+| WP24.2    | planned                      | v12.2.0 |
+| WP24.3    | planned                      | v12.3.0 |
+| WP24.4    | planned                      | v13.0.0 |

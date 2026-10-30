@@ -141,7 +141,7 @@ void main() {
     await settle(tester);
     expect(menu, findsOneWidget);
     final stops = <String?>[];
-    for (var i = 0; i < 8; i++) {
+    for (var i = 0; i < 9; i++) {
       await press(tester, LogicalKeyboardKey.tab);
       stops.add(focusedKey());
     }
@@ -150,6 +150,7 @@ void main() {
       'menu-history',
       'open-profiles',
       'language-menu',
+      'theme-menu',
       'open-settings',
       'open-shortcuts',
       'menu-sign-out',

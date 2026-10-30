@@ -72,6 +72,13 @@ class AppMenu extends ConsumerWidget {
             onTap: () => pickLanguage(context, ref),
           ),
           ListTile(
+            key: const Key('theme-menu'),
+            leading: const Icon(Icons.contrast),
+            title: Text(l10n.appearance),
+            trailing: Text(themeLabel(l10n, ref.watch(settingsProvider).themeMode), key: const Key('theme-current')),
+            onTap: () => pickTheme(context, ref),
+          ),
+          ListTile(
             key: const Key('open-settings'),
             leading: const Icon(Icons.settings_outlined),
             title: Text(l10n.settings),
@@ -166,6 +173,39 @@ Future<void> pickLanguage(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (code != null) settings.setLocale(code == 'zh-Hant' ? zhHant : zhHans);
+}
+
+/// 跟随系统, 浅色 or 深色.
+String themeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
+      ThemeMode.light => l10n.themeLight,
+      ThemeMode.dark => l10n.themeDark,
+      ThemeMode.system => l10n.themeSystem,
+    };
+
+/// 外观 from the menu (v12.1.0): 跟随系统, 浅色 or 深色, the current one ticked and focused. The page under the dialog
+/// fades into the theme picked, its layout unchanged.
+Future<void> pickTheme(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
+  final settings = ref.read(settingsProvider.notifier);
+  final current = ref.read(settingsProvider).themeMode;
+  final mode = await showDialog<ThemeMode>(
+    context: context,
+    builder: (ctx) => SimpleDialog(
+      title: Text(l10n.appearance),
+      children: [
+        for (final m in [ThemeMode.system, ThemeMode.light, ThemeMode.dark])
+          ListTile(
+            key: Key('theme-${m.name}'),
+            autofocus: m == current,
+            selected: m == current,
+            leading: Icon(m == current ? Icons.check : null),
+            title: Text(themeLabel(l10n, m)),
+            onTap: () => Navigator.pop(ctx, m),
+          ),
+      ],
+    ),
+  );
+  if (mode != null) settings.setThemeMode(mode);
 }
 
 class _Header extends StatelessWidget {

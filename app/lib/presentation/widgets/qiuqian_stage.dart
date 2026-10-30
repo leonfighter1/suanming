@@ -1,8 +1,10 @@
 import 'dart:math';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
 import '../design.dart';
+import '../tokens.dart';
 import 'lot_card.dart';
 
 /// 求籤's altar, drawn (owner, v9.1.0: 「求签要添加新的动画效果。目前太单调了。比如有个甩签的画面」). Each [round] the
@@ -104,7 +106,8 @@ class _QiuqianStageState extends State<QiuqianStage> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
+    // 0 light, 1 dark: the shadows deepen with the theme, mid-way while it changes.
+    final dark = ThemeTokens.of(context).darkness;
     final blocks = widget.blocks;
     // The label's character in the page's own font, as any text on the page.
     final font = DefaultTextStyle.of(context).style;
@@ -295,7 +298,7 @@ class _FloorPainter extends CustomPainter {
   _FloorPainter(this.scene, this.line, this.dark);
   final _Scene scene;
   final Color line;
-  final bool dark;
+  final double dark;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -310,7 +313,7 @@ class _FloorPainter extends CustomPainter {
     canvas.drawOval(
       Rect.fromCenter(center: Offset(size.width * 0.3, floor + 1), width: 66, height: 9),
       Paint()
-        ..color = Colors.black.withValues(alpha: dark ? 0.4 : 0.18)
+        ..color = Colors.black.withValues(alpha: lerpDouble(0.18, 0.4, dark)!)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
     );
   }
@@ -393,7 +396,7 @@ class _FrontPainter extends CustomPainter {
   final _Scene scene;
   final double toss;
   final List<String>? blocks;
-  final bool dark;
+  final double dark;
 
   static const _block = Size(40, 20);
 
@@ -408,7 +411,7 @@ class _FrontPainter extends CustomPainter {
         canvas.drawOval(
           Rect.fromCenter(center: Offset(centre.dx, floor + 1), width: length * 0.9, height: 6),
           Paint()
-            ..color = Colors.black.withValues(alpha: dark ? 0.35 : 0.15)
+            ..color = Colors.black.withValues(alpha: lerpDouble(0.15, 0.35, dark)!)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
         );
         // The one that fell: a soft gold glow round it.
@@ -447,7 +450,7 @@ class _FrontPainter extends CustomPainter {
       canvas.drawOval(
         Rect.fromCenter(center: Offset(x, floor + 1), width: 34 * (0.4 + 0.6 * near), height: 5),
         Paint()
-          ..color = Colors.black.withValues(alpha: (dark ? 0.35 : 0.16) * near)
+          ..color = Colors.black.withValues(alpha: lerpDouble(0.16, 0.35, dark)! * near)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
       );
       canvas.save();
@@ -455,7 +458,7 @@ class _FrontPainter extends CustomPainter {
       canvas.rotate(spin);
       canvas.scale(1, max(cos(flip).abs(), 0.12));
       canvas.translate(-_block.width / 2, -_block.height / 2);
-      JiaobeiPainter(flat: shown == 'flat', dark: dark).paint(canvas, _block);
+      JiaobeiPainter(flat: shown == 'flat', darkness: dark).paint(canvas, _block);
       canvas.restore();
     }
   }

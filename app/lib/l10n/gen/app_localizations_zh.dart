@@ -31,6 +31,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get language => '语言';
 
   @override
+  String get appearance => '外观';
+
+  @override
+  String get themeSystem => '跟随系统';
+
+  @override
+  String get themeLight => '浅色';
+
+  @override
+  String get themeDark => '深色';
+
+  @override
   String get region => '地区';
 
   @override
@@ -2350,6 +2362,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get language => '語言';
+
+  @override
+  String get appearance => '外觀';
+
+  @override
+  String get themeSystem => '跟隨系統';
+
+  @override
+  String get themeLight => '淺色';
+
+  @override
+  String get themeDark => '深色';
 
   @override
   String get region => '地區';

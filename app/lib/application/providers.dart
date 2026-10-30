@@ -27,23 +27,47 @@ const supportedAppLocales = [zhHans, zhHant];
 String apiLocale(Locale l) => l.scriptCode == 'Hans' ? 'zh-Hans' : 'zh-Hant';
 
 class Settings {
-  const Settings({required this.locale});
+  const Settings({required this.locale, this.themeMode = ThemeMode.system});
   final Locale locale;
+
+  /// 外观 (v12.1.0): the system's light or dark, or one of them always.
+  final ThemeMode themeMode;
   String get apiLocaleCode => apiLocale(locale);
 }
 
 class SettingsNotifier extends Notifier<Settings> {
-  SettingsNotifier([this._initial = zhHans]);
+  SettingsNotifier([this._initial = zhHans, this._theme = ThemeMode.system]);
   final Locale _initial;
+  final ThemeMode _theme;
 
-  /// 简体中文 by default (owner, 2026-10-26); main() passes the language the reader last picked.
+  /// 简体中文 by default (owner, 2026-10-26) and the system's theme; main() passes the ones the reader last picked.
   @override
-  Settings build() => Settings(locale: _initial);
+  Settings build() => Settings(locale: _initial, themeMode: _theme);
 
   /// Switches the language and keeps it for the next start (v5.1.0). A failed save only loses that.
   void setLocale(Locale l) {
-    state = Settings(locale: l);
+    state = Settings(locale: l, themeMode: state.themeMode);
     unawaited(ref.read(settingsStoreProvider).setLanguage(apiLocale(l)).catchError((Object _) {}));
+  }
+
+  /// Switches the theme and keeps it for the next start (v12.1.0). The page keeps its layout: only colours change.
+  void setThemeMode(ThemeMode mode) {
+    state = Settings(locale: state.locale, themeMode: mode);
+    unawaited(ref.read(settingsStoreProvider).setTheme(mode.name).catchError((Object _) {}));
+  }
+}
+
+/// The theme to start in: the one the reader last picked, else the system's. Storage that can't be read starts with
+/// the system's too.
+Future<ThemeMode> startTheme(SettingsStore store) async {
+  try {
+    return switch (await store.theme()) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
+  } catch (_) {
+    return ThemeMode.system;
   }
 }
 

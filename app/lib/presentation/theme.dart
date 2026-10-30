@@ -1,23 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'design.dart';
-
-class AppColors {
-  static const accent = Color(0xFF8A3B2E);
-  // 五行 on a light surface: at least 4.5 : 1 contrast on a card (surfaceContainerLow), so small
-  // 干支 (藏干) read too (v3.1.0: 木, 土 and 金 darker; they were 4.45, 3.9 and 3.0 on a card).
-  static const wood = Color(0xFF387449);
-  static const fire = Color(0xFFC0392B);
-  static const earth = Color(0xFF8D6224);
-  static const metal = Color(0xFF6A6A6A);
-  static const water = Color(0xFF2B5F8F);
-  // The same on a dark surface, lighter (water was 2.6 : 1 there).
-  static const woodDark = Color(0xFF7CC08A);
-  static const fireDark = Color(0xFFEF7B6E);
-  static const earthDark = Color(0xFFD9A55B);
-  static const metalDark = Color(0xFFBDBDBD);
-  static const waterDark = Color(0xFF7FB2E5);
-}
+import 'tokens.dart';
 
 const _stemBranchElement = {
   '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土', '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水',
@@ -25,32 +9,52 @@ const _stemBranchElement = {
   '戌': '土', '亥': '水',
 };
 
-/// Colour of a 五行 element ('木' …) or of a stem/branch character; [dark] for a dark surface.
-Color wuxingColor(String elementOrChar, {bool dark = false}) {
-  switch (_stemBranchElement[elementOrChar] ?? elementOrChar) {
-    case '木':
-      return dark ? AppColors.woodDark : AppColors.wood;
-    case '火':
-      return dark ? AppColors.fireDark : AppColors.fire;
-    case '土':
-      return dark ? AppColors.earthDark : AppColors.earth;
-    case '金':
-      return dark ? AppColors.metalDark : AppColors.metal;
-    case '水':
-      return dark ? AppColors.waterDark : AppColors.water;
-  }
-  return Colors.grey;
-}
+String _elementOf(String elementOrChar) => _stemBranchElement[elementOrChar] ?? elementOrChar;
 
-/// [wuxingColor] for the theme in [context] (light or dark).
+/// Colour of a 五行 element ('木' …) or of a stem/branch character in the light theme, or with [dark] the dark one.
+Color wuxingColor(String elementOrChar, {bool dark = false}) =>
+    ThemeTokens.forBrightness(dark ? Brightness.dark : Brightness.light).wuxing(_elementOf(elementOrChar));
+
+/// [wuxingColor] for the theme round [context], mixed while the theme changes.
 Color wuxingColorOf(BuildContext context, String elementOrChar) =>
-    wuxingColor(elementOrChar, dark: Theme.of(context).brightness == Brightness.dark);
+    ThemeTokens.of(context).wuxing(_elementOf(elementOrChar));
 
+/// The app's theme (and the 管理后台's), made from [ThemeTokens] (tech plan S24): Material's colour roles are the
+/// tokens under Material's names, and the tokens themselves ride along as a theme extension for what Material has no
+/// role for. The two themes differ in colour only.
 ThemeData buildTheme(Brightness brightness) {
+  final t = ThemeTokens.forBrightness(brightness);
+  // Secondary and tertiary come from the accent; every other role is a token.
   final scheme = ColorScheme.fromSeed(
-    seedColor: AppColors.accent,
+    seedColor: ThemeTokens.light.accent,
     brightness: brightness,
     dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+  ).copyWith(
+    primary: t.accent,
+    onPrimary: t.onAccent,
+    primaryContainer: t.accentSoft,
+    onPrimaryContainer: t.onAccentSoft,
+    // A chosen segment or chip: the soft accent, as every selected state.
+    secondaryContainer: t.accentSoft,
+    onSecondaryContainer: t.onAccentSoft,
+    error: t.danger,
+    onError: t.onDanger,
+    errorContainer: t.dangerSoft,
+    onErrorContainer: t.onDangerSoft,
+    surface: t.background,
+    onSurface: t.text,
+    onSurfaceVariant: t.textSecondary,
+    surfaceContainerLowest: t.card,
+    surfaceContainerLow: t.card,
+    surfaceContainer: t.card,
+    surfaceContainerHigh: t.raised,
+    surfaceContainerHighest: t.inset,
+    surfaceTint: Colors.transparent,
+    outline: t.borderStrong,
+    outlineVariant: t.border,
+    inverseSurface: t.inverse,
+    onInverseSurface: t.onInverse,
+    inversePrimary: ThemeTokens.forBrightness(brightness == Brightness.dark ? Brightness.light : Brightness.dark).accent,
   );
   final rounded = RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.field));
   // Keyboard focus: the same clear outline on every button and chip.
@@ -60,9 +64,12 @@ ThemeData buildTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
-    scaffoldBackgroundColor: scheme.surface,
+    extensions: [t],
+    scaffoldBackgroundColor: t.background,
+    cardColor: t.card,
+    dividerColor: t.border,
     // Focus tint of list rows, section headers and cards (Material's default is faint grey).
-    focusColor: scheme.primary.withValues(alpha: 0.14),
+    focusColor: t.accent.withValues(alpha: 0.14),
     // One transition everywhere: shared-axis style zoom + fade.
     pageTransitionsTheme: PageTransitionsTheme(
       builders: {
@@ -71,23 +78,25 @@ ThemeData buildTheme(Brightness brightness) {
     ),
     appBarTheme: AppBarTheme(
       centerTitle: false,
-      backgroundColor: scheme.surface,
+      backgroundColor: t.background,
       surfaceTintColor: Colors.transparent,
       scrolledUnderElevation: 2,
     ),
     cardTheme: CardThemeData(
+      color: t.card,
       margin: const EdgeInsets.only(bottom: Space.m),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.card)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      fillColor: t.inset,
+      hintStyle: TextStyle(color: t.textMuted),
       contentPadding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m + 2),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.field), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.field), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(Radii.field),
-        borderSide: BorderSide(color: scheme.primary, width: 1.5),
+        borderSide: BorderSide(color: t.accent, width: 1.5),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -99,8 +108,19 @@ ThemeData buildTheme(Brightness brightness) {
     textButtonTheme: TextButtonThemeData(style: ButtonStyle(side: focusSide)),
     iconButtonTheme: IconButtonThemeData(style: ButtonStyle(side: focusSide)),
     segmentedButtonTheme: SegmentedButtonThemeData(style: SegmentedButton.styleFrom(shape: rounded)),
-    chipTheme: ChipThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.chip)), side: focusSide),
-    dividerTheme: DividerThemeData(color: scheme.outlineVariant.withValues(alpha: 0.5), space: Space.xl),
+    chipTheme: ChipThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Radii.chip)),
+      // The focus outline, else the chip's own (Material's flat chips: a transparent one once chosen, so a chip keeps
+      // its size). Never null: ChipThemeData's lerp, which every change of theme runs, fails on a side that resolves to
+      // nothing (v12.1.0).
+      side: WidgetStateBorderSide.resolveWith((states) {
+        if (states.contains(WidgetState.focused)) return focusOutline(scheme);
+        if (states.contains(WidgetState.selected)) return const BorderSide(color: Colors.transparent);
+        if (states.contains(WidgetState.disabled)) return BorderSide(color: scheme.onSurface.withValues(alpha: 0.12));
+        return BorderSide(color: scheme.outlineVariant);
+      }),
+    ),
+    dividerTheme: DividerThemeData(color: t.border, space: Space.xl),
     listTileTheme: const ListTileThemeData(contentPadding: EdgeInsets.symmetric(horizontal: Space.l)),
   );
 }

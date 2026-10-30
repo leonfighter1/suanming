@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 
+import 'tokens.dart';
+
 /// Spacing scale. Use these instead of ad-hoc numbers so screens line up.
 abstract final class Space {
   static const xs = 4.0;
@@ -20,6 +22,21 @@ abstract final class Radii {
   static const card = 20.0;
   static const field = 14.0;
   static const chip = 10.0;
+}
+
+/// How long things take (the ui-design skill). A state (hover, focus, a choice) changes in [fast], a size in [medium],
+/// the theme in [theme]; an entrance takes [enter].
+abstract final class Motion {
+  static const fast = Duration(milliseconds: 150);
+  static const medium = Duration(milliseconds: 250);
+  static const theme = Duration(milliseconds: 300);
+  static const enter = Duration(milliseconds: 420);
+
+  /// Things that move or grow.
+  static const curve = Curves.easeOutCubic;
+
+  /// A change of theme: every colour, border and state fades from one theme to the other.
+  static const themeCurve = Curves.easeInOut;
 }
 
 /// Anything lying face down, a tarot card's back or a covered coin (v6.1.0): navy, with a gold edge and gold marks.
@@ -68,16 +85,18 @@ class FocusRingState extends State<FocusRing> {
   bool get shown => widget.focused && FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: shown
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.radius),
-                border: Border.fromBorderSide(focusOutline(Theme.of(context).colorScheme)),
-              )
-            : const BoxDecoration(),
-        child: widget.child,
-      );
+  Widget build(BuildContext context) {
+    final outline = focusOutline(Theme.of(context).colorScheme);
+    // The ring fades in and out ([Motion.fast]); hidden, it is the same outline, transparent, so nothing moves.
+    return AnimatedContainer(
+      duration: Motion.fast,
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.radius),
+        border: Border.fromBorderSide(shown ? outline : outline.copyWith(color: outline.color.withValues(alpha: 0))),
+      ),
+      child: widget.child,
+    );
+  }
 }
 
 /// The one card style: soft surface, hairline border, generous padding, an
@@ -146,7 +165,7 @@ class _AppCardState extends State<AppCard> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Radii.card),
-                border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
+                border: Border.all(color: ThemeTokens.of(context).border),
               ),
               padding: widget.padding,
               child: AnimatedSize(

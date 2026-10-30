@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
@@ -5,6 +6,7 @@ import '../config.dart';
 import '../data/admin_api.dart';
 import '../domain/models.dart';
 import '../platform/download.dart';
+import '../platform/prefs.dart';
 
 /// When Riverpod asks again by itself after a failed request: a few times, quickly (0.2, 0.4, 0.8, 1.6 s), when the
 /// server erred or couldn't be reached; never when it said no (4xx, the session over), which asking again won't
@@ -18,6 +20,35 @@ Duration? retryAdmin(int retryCount, Object error) {
 
 /// The HTTP client the API talks through; null for the default one. Tests put a fake server here.
 final httpClientProvider = Provider<http.Client?>((ref) => null);
+
+/// Where the dashboard keeps its own settings: the browser's storage. Tests put a map here.
+class Prefs {
+  const Prefs({required this.read, required this.write});
+  final String? Function(String key) read;
+  final void Function(String key, String value) write;
+}
+
+final prefsProvider = Provider<Prefs>((ref) => const Prefs(read: readPref, write: writePref));
+
+/// 外观 (v12.1.0): the system's light or dark, or one of them always, kept in this browser. A change fades the
+/// colours; nothing moves.
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  static const key = 'mingli-admin-theme';
+
+  @override
+  ThemeMode build() => switch (ref.read(prefsProvider).read(key)) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+
+  void set(ThemeMode mode) {
+    state = mode;
+    ref.read(prefsProvider).write(key, mode.name);
+  }
+}
+
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
 
 final adminApiProvider = Provider<AdminApi>((ref) {
   final api = AdminApi(baseUrl: adminApiBase(), client: ref.watch(httpClientProvider));

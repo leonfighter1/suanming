@@ -84,7 +84,7 @@ class _TokensChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = seriesColors(Theme.of(context).brightness);
+    final colors = seriesColors(context);
     return LineChart(
       labels: [for (final d in days) d.day],
       series: [

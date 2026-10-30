@@ -24,6 +24,33 @@ const _dests = <_Dest>[
 /// The width from which the pages sit beside a rail rather than above a bar.
 const wideFrom = 840.0;
 
+/// 外观 in the bar (v12.1.0): 跟随系统, 浅色 or 深色, the current one ticked. Enter opens it, the arrows move, Esc closes.
+class ThemeMenu extends ConsumerWidget {
+  const ThemeMenu({super.key});
+
+  static const _choices = [(ThemeMode.system, '跟随系统'), (ThemeMode.light, '浅色'), (ThemeMode.dark, '深色')];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeProvider);
+    return PopupMenuButton<ThemeMode>(
+      key: const Key('theme'),
+      tooltip: '外观：${_choices.firstWhere((c) => c.$1 == mode).$2}',
+      icon: Icon(switch (mode) {
+        ThemeMode.light => Icons.light_mode_outlined,
+        ThemeMode.dark => Icons.dark_mode_outlined,
+        ThemeMode.system => Icons.brightness_auto_outlined,
+      }),
+      initialValue: mode,
+      onSelected: (m) => ref.read(themeModeProvider.notifier).set(m),
+      itemBuilder: (_) => [
+        for (final (m, label) in _choices)
+          CheckedPopupMenuItem(key: Key('theme-${m.name}'), value: m, checked: m == mode, child: Text(label)),
+      ],
+    );
+  }
+}
+
 /// The dashboard's six pages (管理后台, tech plan S22): a rail beside them on a wide screen, a bar under them on a phone.
 class AdminShell extends ConsumerStatefulWidget {
   const AdminShell({super.key});
@@ -66,6 +93,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               padding: const EdgeInsets.symmetric(horizontal: Space.s),
               child: Center(child: Text(me.login, key: const Key('admin-me'))),
             ),
+          const ThemeMenu(),
           IconButton(key: const Key('refresh'), tooltip: '刷新', onPressed: _refresh, icon: const Icon(Icons.refresh)),
           IconButton(
             key: const Key('sign-out'),

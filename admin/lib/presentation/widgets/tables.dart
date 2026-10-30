@@ -19,7 +19,7 @@ class RevenueChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = seriesColors(Theme.of(context).brightness);
+    final colors = seriesColors(context);
     List<double> line(double Function(DayRow d) of) {
       var sum = 0.0;
       return [for (final d in days) cumulative ? sum += of(d) : of(d)];
