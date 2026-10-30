@@ -53,6 +53,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S24 设计系统与管理后台布局 | tokens, light and dark, the grid; the asymmetric dashboard  | big    | v13.0.0 + summary | done        |
 | S25 消息模板与分发         | mail and SMS templates, one dispatcher, staff roles         | big    | v14.0.0 + summary | done        |
 | S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
+| S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2451,6 +2452,63 @@ Lessons: rules 25, 27, 43, 46, 49, 51, 58, 64.
 
 Lessons: rules 37, 42, 43, 53, 58, 64, 67, 68.
 
+## S27 每个页面的容器、充值框、跟随时间的外观 (big → v16.0.0)
+
+**Owner request (2026-10-30), before the push of v15.0.0:** 「Update SKill of coding, require coding using existing
+functionalities or mehtods as much as possible. refactoring the code structure，everytime make change, do little change
+as much as possible.. 另外在 push之前再更改一下， 各自算法的大小container似乎没有加上大屏幕1620px的限制，现在挺小的。我的要求时对于
+所有的页面，基本框架在大屏时都要有这个尺寸限制（包括设置页面）。另外充值页面十元的框跟其他的充值框大小不一,Theme加上太阳和月亮到banner上去,
+表示时间，皮肤会跟随时间变化而变化。当地时间7点到第二天凌晨6点为深色，其余为浅色。After thesting done, do the push yourself.」
+
+Read as:
+
+- **A coding skill** for every code change:
+  - build from what exists (functions, widgets, services), as reuse-first says;
+  - when something would be written twice, restructure so it has one home;
+  - keep every change as small as it can be.
+  - The global reuse-first skill is read-only on this machine, so it becomes a project skill, named in CLAUDE.md.
+- **Every page in the 1620 container.** The 管理后台 stays as it is (「管理员界面就不用改了」).
+  - `pagePadding` itself becomes the container, so all the pages that use it change in one place: the methods, the
+    readings, history, profiles, 积分, settings and the rest.
+  - The pages that didn't use it (设置, the place picker) take it.
+  - A long reading's lines grow with the page. Arranging a reading's parts side by side is not asked for.
+- **The 充值 boxes the same size:** ¥10 has no bonus line, so its box was shorter. Every pack box has one width and
+  keeps the bonus line's room.
+- **The theme follows the time:**
+  - 外观 gets 跟随时间: dark from 19:00 to 06:00 local time, light otherwise. It is the default where the reader has
+    picked nothing; 跟随系统, 浅色 and 深色 stay, and a choice made before is kept.
+  - The theme changes at 19:00 and 06:00 while the app is open.
+  - The app's banner (首页, the sign-in page) shows the sun by day and the moon by night.
+
+### WP27.1 The coding skill (no version)
+
+- `.claude/skills/coding/SKILL.md`, and its row in CLAUDE.md's table of skills.
+
+### WP27.2 Every page in the container; the 充值 boxes (→ v15.1.0)
+
+- `pagePadding`: the container (`Grid.container`, the margin inside), its `maxWidth` gone; `margin: false` for a list
+  whose rows carry their own inset (设置, the place picker). `containerPadding` folds back into it.
+- `_PackButton`: one width for every pack, and the bonus line's room even without a bonus.
+- Tests: a page of each kind at 2560 (a method, a reading, 设置, 积分), and the packs' sizes.
+
+Lessons: rules 25, 27, 43, 49, 58, 61, 64.
+
+### WP27.3 外观 by the time of day; the sun and the moon (→ v16.0.0)
+
+- `nightProvider`: the local clock's night (19:00–06:00), changing at 06:00 and 19:00 by a timer. Its clock is a
+  provider that tests replace.
+- `Settings.byTime` with its own value in storage (`time`); `startTheme` gives it where nothing was picked.
+- The 外观 dialog: 跟随时间 first, with its hours.
+- The banners: `sunOrMoon`.
+- Tests:
+  - the hours at their edges;
+  - the theme flips at 19:00 with the app open;
+  - the choice is kept;
+  - the banner's sun and moon;
+  - Tab and Enter in the dialog.
+
+Lessons: rules 42, 52, 53, 70, 76.
+
 ## 阶段总结 (stage summaries)
 
 ### S26 宽屏布局与今日一卦、今日一签 (done 2026-10-30: v14.1.0–v15.0.0)
@@ -3206,3 +3264,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP25.4    | done                         | v14.0.0 |
 | WP26.1    | done                         | v14.1.0 |
 | WP26.2    | done                         | v15.0.0 |
+| WP27.1    | done                         | —       |
+| WP27.2    | planned                      | v15.1.0 |
+| WP27.3    | planned                      | v16.0.0 |
