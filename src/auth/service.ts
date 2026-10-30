@@ -38,7 +38,8 @@ export interface AccountSettings {
 export const DEFAULT_SETTINGS: AccountSettings = { email_reports: false };
 
 /** 管理后台 (v11.2.0, tech plan S22): what an account is and may do. */
-export type AccountRole = "user" | "admin";
+/** An account's role (v11.2.0; integrator and manager since v13.1.0, src/admin/roles.ts). */
+export type AccountRole = "user" | "integrator" | "manager" | "admin";
 export type AccountStatus = "active" | "suspended";
 export interface AccountPermissions {
   /** AI readings, 一生运势报告, 追问, plans and the 深度分析. */

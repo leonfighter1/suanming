@@ -2,6 +2,23 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (g): S25 WP25.1–25.2b — message templates, the dispatcher, staff roles (server); v13.1.0 (local)
+
+- Owner requests (2026-10-30): the mail logic with back-office editing of each message's page, SMS too, server-side
+  dispatch tests only, no third party, settings later, the mail and its preview following the system's light or dark;
+  then, mid-work, three staff roles (admin, manager, integrator) and a way into the 管理后台 from the app's menu.
+  Planned as S25 (rule 34: no earlier owner decision on roles beyond "admins" (S22); "the provider waits for the
+  owner" (S15) still holds).
+- Built: `src/notify/templates.ts` (specs, defaults = the old texts in a small markup), `markup.ts`,
+  `render-message.ts`, `dispatch.ts` (Dispatcher, its in-memory log, MemoryTemplates); render-html.ts as the mail
+  page in the app's tokens with the dark theme under prefers-color-scheme and Outlook's marks; the store's templates
+  (memory, PGlite migration 012); `src/admin/roles.ts` and one capability check for every admin route
+  (`capabilityOf`); `src/admin/messages.ts`; `/v1/me` `staff`; the dev accounts manager and integrator.
+- The old report-mail.ts and the hard-coded code texts went; their wording lives on as the defaults (subjects
+  unchanged, so the login and report-mail tests held). The mail HTML now carries a style block (dark mode): the one
+  test that forbade it was changed on purpose.
+- Found: PgStore read only `admin` back from the role column (rule 78).
+
 ## 2026-10-30 (f): S24 WP24.4 — the skill, the records; S24 done, release v13.0.0
 
 - The ui-design skill's checklist for a new screen; docs/web-test.md (外观, the 管理后台's layout); the S24 summary;

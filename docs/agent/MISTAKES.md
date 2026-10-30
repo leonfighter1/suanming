@@ -79,8 +79,15 @@
 75. A widget that shows its own focus must ask its own node for hasPrimaryFocus: Focus.onFocusChange (and InkWell's) report hasFocus, which is true while anything inside has the focus. Test it with a focusable child inside.
 76. Every WidgetState property in a component theme must resolve to a value for the empty state set: ChipThemeData.lerp, run by every change of theme, fails on null. Give each state Material's own default (a chosen flat chip keeps a transparent 1 px side, so `BorderSide.none` shrinks it by 2 px; rule 49), and test a theme change itself (switch, pump half the animation, check colours between the two themes), not only each theme on its own.
 77. A label that can hold model or user text (a pill, a chip, a badge) lets it wrap: a loose Flexible inside a MainAxisSize.min row, never a bare Text in a Row. Test it with a long text in a narrow column.
+78. When a stored field gains values (an enum, a role, a status), grep every reader and writer of it in both stores (memory and PGlite, put and get, SQL checks) and round-trip each new value through PGlite in a test.
 
 ## Log
+
+### 2026-10-30: The database dropped the new roles
+- **Symptom:** messages.test: an account put into PGlite as manager came back without a role; in pglite mode every manager and integrator would have lost the role at the next read.
+- **Root cause:** The PgStore read mapped the role column with a check written for the two values of v11.2.0 (role === admin), so any other value read back as none. The column check and the type had been widened; this reader had not.
+- **Fix:** The reader keeps any role but the default; the S25 test round-trips manager and integrator through PGlite.
+- **Rule:** When a stored field gains values (an enum, a role, a status), grep every reader and writer of it in both stores (memory and PGlite, put and get, SQL checks) and round-trip each new value through PGlite in a test. (Rule 78)
 
 ### 2026-10-30: A label pill overflowed with a long text
 - **Symptom:** life_report_test: a RenderFlex overflowed by 71 px in a Pill (喜 · a full sentence) once pages sat in the 720 column, narrower than the test window.

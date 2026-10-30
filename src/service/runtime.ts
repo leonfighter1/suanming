@@ -25,7 +25,7 @@ import type { Store } from "../api/store.js";
 import { loginKind } from "../auth/identifiers.js";
 import { noCaptcha, TurnstileVerifier } from "../auth/limits.js";
 import type { PointsLedger } from "../points/index.js";
-import { AuthService, type UserStore } from "../auth/service.js";
+import { AuthService, type AccountRole, type UserStore } from "../auth/service.js";
 import { parseKek } from "../db/envelope.js";
 import { PgStore } from "../db/pg-store.js";
 import { SocialVerifier } from "../auth/social.js";
@@ -347,11 +347,33 @@ export const DEV_ACCOUNTS = [
     country: "HK",
     locale: "zh-Hant" as const,
   },
+  // 后台角色 (S25, v13.1.0): one of each staff role besides admin, to try the 管理后台 as each.
+  {
+    login: "manager",
+    password: "manager",
+    country: "HK",
+    locale: "zh-Hans" as const,
+    role: "manager" as const,
+  },
+  {
+    login: "integrator",
+    password: "integrator",
+    country: "HK",
+    locale: "zh-Hans" as const,
+    role: "integrator" as const,
+  },
 ];
 
 export async function seedDevAccounts(auth: AuthService, devMode: boolean) {
   if (!devMode) throw new Error("dev accounts may only be seeded in dev mode");
-  for (const a of DEV_ACCOUNTS) await auth.seedDevUser(a);
+  for (const { role, ...a } of DEV_ACCOUNTS as ((typeof DEV_ACCOUNTS)[number] & {
+    role?: AccountRole;
+  })[]) {
+    await auth.seedDevUser(a);
+    // Given once: a role an admin changed later in the dashboard stays.
+    const u = role && (await auth.findLogin(loginKind(a.login), a.login));
+    if (u && u.role === undefined) await auth.users.put({ ...u, role });
+  }
 }
 
 /**

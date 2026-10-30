@@ -57,17 +57,20 @@ import {
   type AccountPermissions,
 } from "../auth/service.js";
 import { adminRoute } from "../admin/routes.js";
+import { staffRoleOf } from "../admin/roles.js";
 import { usageRows } from "../admin/usage.js";
 import { VerifyError, type ContactKind } from "../auth/verify.js";
 import { lifeDocument, localTime, readingDocument } from "../export/report-doc.js";
 import {
+  Dispatcher,
   NoMail,
   NoSms,
+  pdfNote,
+  recordsTitle,
   type MailAttachment,
   type MailTransport,
   type SmsTransport,
 } from "../notify/index.js";
-import { recordsMail, reportMail } from "../notify/report-mail.js";
 import {
   CalendarInputError,
   lunarDate,
@@ -715,8 +718,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
   const mail = opts.mail ?? new NoMail();
   const sms = opts.sms ?? new NoSms();
+  /** Every message's way out (S25): its template (an admin's wording, else the default), its channel, its note. */
+  const messages = new Dispatcher({ mail, sms, templates: store, now });
   /** The account's own logins and settings (v8.2.0). */
-  const account = auth && new AccountService({ auth, mail, sms, now });
+  const account = auth && new AccountService({ auth, mail, sms, messages, now });
   const delivery = () => ({ mail: mail.name, sms: sms.name });
 
   async function caller(req: IncomingMessage): Promise<Caller> {
@@ -805,9 +810,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         contentType: "application/pdf",
         content: await renderPdf(doc, font),
       };
-      await mail.send(
-        reportMail({ to: owner.email, doc, locale: record.locale, ...(pdf && { pdf }) }),
-      );
+      await messages.send("report_mail", {
+        to: owner.email,
+        locale: record.locale,
+        vars: {
+          title: doc.title,
+          subtitle: doc.subtitle ?? "",
+          pdf_note: pdf ? pdfNote(record.locale) : "",
+        },
+        parts: { report: doc.blocks },
+        ...(pdf && { attachments: [pdf] }),
+      });
     } catch (e) {
       status = "failed";
       const why = ((e as Error).message ?? String(e)).replace(/[^\s@]+@[^\s@]+/g, "<address>");
@@ -1949,10 +1962,19 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
     // ---- account ----
     /** The caller's account as /v1/me shows it. */
-    const me = async () => ({
-      ...publicUser((await auth!.users.get(c.user))!),
-      role: opts.review !== false && (await reviewer(c)) ? "admin" : "user",
-    });
+    const me = async () => {
+      const u = (await auth!.users.get(c.user))!;
+      // 后台角色 (S25): the app's ☰ shows 管理后台 to staff; `role` stays what it was, 内容审核's reviewer.
+      const staff = staffRoleOf(
+        u,
+        [u.username, u.email].some((n) => !!n && admins.has(n.toLowerCase())),
+      );
+      return {
+        ...publicUser(u),
+        role: opts.review !== false && (await reviewer(c)) ? "admin" : "user",
+        ...(staff && { staff }),
+      };
+    };
     if (path === "/v1/me" && req.method === "GET") {
       if (!auth) throw new HttpError(404, "auth not configured");
       return send(res, 200, await me());
@@ -2091,6 +2113,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         auth,
         config: pointsConfig ?? loadPointsConfig(),
         admins,
+        messages,
         now,
         log: (m: string) => log(m),
       };
@@ -2252,9 +2275,14 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         });
       }
       try {
-        await mail.send(
-          recordsMail({ to: owner.email, titles: docs.map((d) => d.doc.title), locale, files }),
-        );
+        const titles = docs.map((d) => d.doc.title);
+        await messages.send("records_mail", {
+          to: owner.email,
+          locale,
+          vars: { title: recordsTitle(titles, locale), count: String(titles.length) },
+          parts: { records: titles },
+          attachments: files,
+        });
       } catch (e) {
         log(
           `mailing documents failed: ${(e as Error).message?.replace(/[^\s@]+@[^\s@]+/g, "<address>")}`,

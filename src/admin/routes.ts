@@ -6,7 +6,23 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Store } from "../api/store.js";
-import { permissionsOf, type AuthService, type UserRecord } from "../auth/service.js";
+import {
+  permissionsOf,
+  type AccountRole,
+  type AuthService,
+  type UserRecord,
+} from "../auth/service.js";
+import type { Dispatcher } from "../notify/dispatch.js";
+import { messagesRoute } from "./messages.js";
+import {
+  ACCOUNT_ROLES,
+  assignableRoles,
+  can,
+  CAPABILITIES,
+  staffRoleOf,
+  type Capability,
+  type StaffRole,
+} from "./roles.js";
 import { contentDisposition, documentName } from "../export/document.js";
 import { renderDocx } from "../export/render-docx.js";
 import { renderPdf } from "../export/render-pdf.js";
@@ -35,6 +51,8 @@ export interface AdminContext {
   config: PointsConfig;
   /** MINGLI_ADMINS, lower case: admins whatever their record says. */
   admins: Set<string>;
+  /** The server's dispatcher: the messages' templates, previews, test sends and log (S25). */
+  messages?: Dispatcher;
   now: () => Date;
   log: (msg: string) => void;
 }
@@ -46,13 +64,24 @@ export const GRANT_MAX = 1_000_000;
 const byConfig = (ctx: AdminContext, u: UserRecord) =>
   [u.username, u.email].some((n) => !!n && ctx.admins.has(n.toLowerCase()));
 
-/** The caller as an admin, or 403 admin_only. */
-async function adminOf(ctx: AdminContext, userId: string): Promise<UserRecord> {
+/** The caller and their staff role (admin, manager, integrator: roles.ts), or 403 admin_only. */
+async function staffOf(ctx: AdminContext, userId: string): Promise<{ me: UserRecord; role: StaffRole }> {
   const u = await ctx.auth.users.get(userId);
-  if (!u || !(u.role === "admin" || byConfig(ctx, u))) {
-    throw new HttpError(403, "admins only", "admin_only");
-  }
-  return u;
+  const role = u && staffRoleOf(u, byConfig(ctx, u));
+  if (!u || !role) throw new HttpError(403, "staff only", "admin_only");
+  return { me: u, role };
+}
+
+/**
+ * What a request needs (roles.ts): the messages, a user's data (增加积分, 在所有设备上退出, the exports), roles and
+ * permissions (an account's PATCH), else the view. One place, so no route goes unchecked.
+ */
+function capabilityOf(path: string, method: string): Capability {
+  if (path.startsWith("/v1/admin/messages/")) return "messages";
+  if (path === "/v1/admin/reports") return "user_data";
+  if (/^\/v1\/admin\/users\/[^/]+\/(points|sign-out)$/.test(path)) return "user_data";
+  if (/^\/v1\/admin\/users\/[^/]+$/.test(path) && method === "PATCH") return "assign";
+  return "view";
 }
 
 function daysOf(raw: string | null): number {
@@ -117,7 +146,7 @@ export async function adminRoute(
   userId: string,
 ): Promise<boolean> {
   if (!path.startsWith("/v1/admin/") || path.startsWith("/v1/admin/reviews")) return false;
-  const me = await adminOf(ctx, userId);
+  const { me, role } = await staffOf(ctx, userId);
   const url = new URL(req.url ?? "/", "http://localhost");
   const q = url.searchParams;
   const get = req.method === "GET";
@@ -126,10 +155,20 @@ export async function adminRoute(
     send(res, 200, {
       id: me.id,
       login: loginOf(me),
-      role: "admin",
+      role,
       admin_by_config: byConfig(ctx, me),
+      can: CAPABILITIES[role],
+      assignable_roles: assignableRoles(role),
     });
     return true;
+  }
+  if (!can(role, capabilityOf(path, req.method ?? "GET"))) {
+    throw new HttpError(403, `the ${role} role may not do this`, "not_allowed");
+  }
+  if (path.startsWith("/v1/admin/messages/")) {
+    if (!ctx.messages) throw new HttpError(404, "messages are not set up on this server");
+    if (await messagesRoute({ ...ctx, messages: ctx.messages }, req, res, path, me)) return true;
+    throw new HttpError(404, "not found");
   }
   const days = daysOf(q.get("days"));
   const tz = tzOf(q.get("tz"));
@@ -156,8 +195,8 @@ export async function adminRoute(
       ...(q.get("status") === "active" || q.get("status") === "suspended"
         ? { status: q.get("status") as "active" | "suspended" }
         : {}),
-      ...(q.get("role") === "user" || q.get("role") === "admin"
-        ? { role: q.get("role") as "user" | "admin" }
+      ...(ACCOUNT_ROLES.includes(q.get("role") as AccountRole)
+        ? { role: q.get("role") as AccountRole }
         : {}),
       ...(["include", "exclude", "only"].includes(q.get("demo") ?? "")
         ? { demo: q.get("demo") as "include" | "exclude" | "only" }
@@ -206,6 +245,10 @@ export async function adminRoute(
       const body = (await readJson(req)) as Record<string, unknown>;
       const next: UserRecord = { ...target };
       const changed: string[] = [];
+      // A manager assigns roles and permissions, but never to or on an admin.
+      if (role !== "admin" && staffRoleOf(target, byConfig(ctx, target)) === "admin") {
+        throw new HttpError(403, "only an admin changes an admin's account", "not_allowed");
+      }
       if (body.status !== undefined) {
         if (body.status !== "active" && body.status !== "suspended") {
           throw new HttpError(400, "status must be active | suspended");
@@ -218,22 +261,26 @@ export async function adminRoute(
         changed.push(`status ${body.status}`);
       }
       if (body.role !== undefined) {
-        if (body.role !== "user" && body.role !== "admin") {
-          throw new HttpError(400, "role must be user | admin");
+        const wanted = body.role as AccountRole;
+        if (!ACCOUNT_ROLES.includes(wanted)) {
+          throw new HttpError(400, `role must be ${ACCOUNT_ROLES.join(" | ")}`);
         }
-        if (id === me.id && body.role === "user") {
-          throw new HttpError(409, "an admin can't take their own role away", "admin_self");
+        if (!assignableRoles(role).includes(wanted)) {
+          throw new HttpError(403, `the ${role} role can't give the ${wanted} role`, "not_allowed");
         }
-        if (body.role === "user" && byConfig(ctx, target)) {
+        if (id === me.id && wanted !== (staffRoleOf(me, byConfig(ctx, me)) ?? "user")) {
+          throw new HttpError(409, "nobody changes their own role", "admin_self");
+        }
+        if (wanted !== "admin" && byConfig(ctx, target)) {
           throw new HttpError(
             409,
             "an admin by the server's MINGLI_ADMINS stays one",
             "admin_by_config",
           );
         }
-        if (body.role === "admin") next.role = "admin";
-        else delete next.role;
-        changed.push(`role ${body.role}`);
+        if (wanted === "user") delete next.role;
+        else next.role = wanted;
+        changed.push(`role ${wanted}`);
       }
       if (body.permissions !== undefined) {
         const p = body.permissions as Record<string, unknown> | null;

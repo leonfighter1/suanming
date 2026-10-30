@@ -4,7 +4,7 @@
  * is what binds a number to its owner (the owner: 手机号需要绑定用户本人). Codes go out through the transports, the
  * development outbox until the owner picks providers.
  */
-import type { Locale } from "../ai/terms.js";
+import { Dispatcher, MemoryTemplates } from "../notify/dispatch.js";
 import { DeliveryUnavailable, type MailTransport } from "../notify/mail.js";
 import type { SmsTransport } from "../notify/sms.js";
 import {
@@ -54,51 +54,32 @@ export interface CodeSent {
 
 const MINUTES = CODE_TTL_MS / 60_000;
 
-/** The text message with a code, in the account's language. */
-export function smsText(code: string, locale: Locale): string {
-  if (locale === "zh-Hant") {
-    return `【命理大師】你的驗證碼是 ${code}，${MINUTES} 分鐘內有效。如非本人操作，請忽略本訊息。`;
-  }
-  if (locale === "en") {
-    return `[命理大师] Your code is ${code}, valid for ${MINUTES} minutes. If this wasn't you, ignore this message.`;
-  }
-  return `【命理大师】你的验证码是 ${code}，${MINUTES} 分钟内有效。如非本人操作，请忽略本短信。`;
-}
-
-/** The mail with a code, in the account's language. */
-export function codeMail(code: string, locale: Locale): { subject: string; text: string } {
-  if (locale === "zh-Hant") {
-    return {
-      subject: `命理大師驗證碼：${code}`,
-      text: `你好：\n\n你正在為命理大師帳戶驗證這個電子郵件地址。驗證碼是 ${code}，${MINUTES} 分鐘內有效。\n\n如果不是你本人操作，請忽略本郵件，這個地址不會被加入任何帳戶。\n\n命理大師`,
-    };
-  }
-  if (locale === "en") {
-    return {
-      subject: `命理大师 code: ${code}`,
-      text: `Hello,\n\nYou are verifying this address for a 命理大师 account. The code is ${code}, valid for ${MINUTES} minutes.\n\nIf this wasn't you, ignore this mail: the address won't be added to any account.\n\n命理大师`,
-    };
-  }
-  return {
-    subject: `命理大师验证码：${code}`,
-    text: `你好：\n\n你正在为命理大师账号验证这个邮箱。验证码是 ${code}，${MINUTES} 分钟内有效。\n\n如果不是你本人操作，请忽略本邮件，这个邮箱不会被加入任何账号。\n\n命理大师`,
-  };
-}
-
 export class AccountService {
   readonly verifications: Verifications;
+  /** How codes leave: the templates and the transports (S25). */
+  private readonly messages: Dispatcher;
 
   constructor(
     private readonly d: {
       auth: AuthService;
       mail: MailTransport;
       sms: SmsTransport;
+      /** The server's dispatcher; without one, the default wordings over [mail] and [sms]. */
+      messages?: Dispatcher;
       verifications?: Verifications;
       now?: () => Date;
     },
   ) {
     this.verifications =
       d.verifications ?? new Verifications(() => (d.now?.() ?? new Date()).getTime());
+    this.messages =
+      d.messages ??
+      new Dispatcher({
+        mail: d.mail,
+        sms: d.sms,
+        templates: new MemoryTemplates(),
+        ...(d.now && { now: d.now }),
+      });
   }
 
   private get users() {
@@ -196,11 +177,12 @@ export class AccountService {
     if (other && other.id !== id) throw this.taken(kind);
     const { code, expires } = this.verifications.issue(id, kind, value);
     try {
-      if (kind === "email") {
-        await this.d.mail.send({ to: value, ...codeMail(code, u.locale) });
-      } else {
-        await this.d.sms.send(value, smsText(code, u.locale));
-      }
+      // The account's language's wording, an admin's if they changed it (S25: 消息模板).
+      await this.messages.send(kind === "email" ? "code_mail" : "code_sms", {
+        to: value,
+        locale: u.locale,
+        vars: { code, minutes: String(MINUTES) },
+      });
     } catch (e) {
       if (e instanceof DeliveryUnavailable) {
         throw new AccountError(503, e.message, "delivery_unavailable");

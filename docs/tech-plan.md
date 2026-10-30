@@ -2230,6 +2230,130 @@ Read as:
 Lessons: rules 3, 7, 22, 33, 43, 46, 49, 50, 52, 58, 64, 70, 72, 74, 75; G11, G12; the keyboard-access and dataviz
 skills.
 
+## S25 消息模板与分发 (big → v14.0.0)
+
+**Owner request (2026-10-30):** 「设计好邮件发送逻辑，让后台用户可以编辑各类发送邮件的前端页面。同时还有SMS等等。现在为了方便测试，
+只在server端先做简单的分发测试，暂时不用第三方的服务。各类的设置可以留到以后再弄。同时邮件的preview界面以及发送出去的邮件也要符合
+当前app的跟随系统模式。」
+
+Read as:
+
+- **One way out for every message:** the verification code by mail and by SMS, the report mail (测算完成后发到邮箱)
+  and the records mail (发到邮箱) all go through one dispatcher. It takes a template and its variables, renders the
+  message, sends it on its channel and records the dispatch. The channels are mail and SMS for now; another (an
+  in-app message, push) plugs in beside them.
+- **Templates admins edit:** each message has a template per language (简体, 繁體; English where the message has
+  one). The defaults are today's texts, in code. An admin's edits are kept in the store and win over the default
+  until reset. A mail template has a subject and a body in a small markup: `# heading`, paragraphs, `> note`, `---`,
+  `!! highlight` (the code box), `- list item`, and the message's own parts on a line of their own (`{{report}}`,
+  `{{records}}`). An SMS template is its text. `{{name}}` puts in a variable; a template naming an unknown one is not
+  saved.
+- **Mail that follows the reader's light or dark:** every mail is a page in the app's colours (ThemeTokens), light
+  by default with the dark theme under `prefers-color-scheme: dark` (and Outlook's own dark marks), so a mail
+  program in dark mode shows it dark. A test holds the mail's colours to the app's tokens.
+- **The 管理后台's 消息 page:** the templates by channel, each opening an editor beside a live preview. The preview is
+  the mail's real HTML and follows the dashboard's 外观 (the system's by default). It also has a test send through
+  the server's dispatch and the latest dispatches.
+- **No provider yet** (owner): mail and SMS go to the dev outbox (`.outbox/mail`, `.outbox/sms`); off elsewhere, as
+  before. Settings (provider, sender, limits) come later.
+
+**Owner request (2026-10-30, the same day):** 「针对后台设置不同的用户策略，现阶段，可以分为admin, manager,integrator, admin具备超级权限，
+manager, 可以进行权限分配，但是不能对用户的数据进行操作。integrator可以进入后台面板，但是只能对邮件和短信系统进行操作。另外如果登陆者具备
+各项权限，在主页登陆时可以在下拉菜单设置中选择进入后台系统」.
+
+Read as:
+
+- **Roles** (the account's `role`): `user`, `integrator`, `manager`, `admin`. The server decides everything; the
+  dashboard only shows what the server allows.
+
+  | Role       | The dashboard                                                         | Actions                                                                           |
+  | ---------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+  | admin      | every page                                                            | everything; any role                                                              |
+  | manager    | 概览, 用户 and an account's page, 活跃, 收益, 用量 (no 导出, no 消息) | roles (not admin) and permissions (停用, AI, 充值) of accounts that aren't admins |
+  | integrator | 消息 only                                                             | the mail and SMS templates, previews, test sends, the log                         |
+
+  A manager does nothing to a user's data: no 增加积分, no 在所有设备上退出, no exports (the reports and the user list).
+  Nobody changes their own role or suspends themselves; MINGLI_ADMINS stay admins. 内容审核 stays with admins.
+
+- **The way in from the app:** an account with any of the three roles sees 管理后台 in the app's ☰ menu, which opens the
+  dashboard (the API's `/admin/`) in a new tab with the login filled in; signing in there is the dashboard's own.
+
+### WP25.1 Templates, the mail page and the dispatcher, on the server (→ v13.1.0)
+
+- `src/notify/templates.ts`: each message's spec (channel, name, when it goes, its variables with sample values,
+  its languages, the default subject and body).
+- `src/notify/markup.ts`: the body markup into parts, variables filled.
+- `src/notify/render-mail.ts`: the themed page and its plain text, embedding a report's document blocks
+  (render-html.ts's blocks, now with the dark classes).
+- `src/notify/dispatch.ts`: `Dispatcher.send(kind, { to, locale, vars, parts, attachments })`: the template (the
+  store's, else the default), the render, the transport. Each dispatch is kept in memory (the last 200; the
+  recipient masked).
+- Store: `listMessageTemplates`, `putMessageTemplate`, `deleteMessageTemplate` (memory; PGlite migration 012, plain
+  columns).
+- The four messages go through it: `AccountService` (codes), the report mail, the records mail.
+- Tests:
+  - every template complete in every language, each variable known;
+  - the markup;
+  - the page's light and dark (color-scheme metas, the dark media query, the app's token colours);
+  - variables escaped;
+  - the dispatcher and its log;
+  - an edited template is what a code request sends;
+  - PGlite keeps an edit.
+
+### WP25.2 The admin API (→ v13.1.0, with WP25.1)
+
+- `GET /v1/admin/messages/templates`; `PUT` and `DELETE /v1/admin/messages/templates/{kind}/{locale}` (save, reset);
+  `POST /v1/admin/messages/preview` (a draft with sample values: subject, HTML, text; an SMS's length and parts);
+  `POST /v1/admin/messages/test` (a draft or the saved template to an address or number, through the dispatcher);
+  `GET /v1/admin/messages/log`.
+- For admins and integrators. A save is checked: unknown variables, a message's required part missing (`{{code}}`,
+  `{{report}}`), the lengths. Written into the OpenAPI spec.
+
+### WP25.2b Roles on the server (→ v13.1.0, with WP25.1–25.2)
+
+- The account's `role` takes `integrator` and `manager` too (PGlite migration: the role's check). `GET /v1/admin/me`
+  says the role and what it may do (`can`: view, assign, user_data, messages). Every admin route asks for its
+  capability (403 `not_allowed`). A manager's PATCH may set user, integrator or manager and the permissions, never on
+  an admin and never to admin. `GET /v1/me` says `staff` (the role, for the app's menu).
+- Tests: the matrix (each role against each route), the assignment rules, MINGLI_ADMINS, the self rules.
+- **As built (v13.1.0, WP25.1–25.2b):** as specified. Also: the dev accounts `manager` and `integrator`; the
+  old report-mail.ts and the code texts became the default templates (their subjects unchanged); the mail HTML gained
+  its dark style block (the test that forbade one changed on purpose). PgStore read only `admin` back from the role
+  column; the round trip in the new test caught it (rule 78).
+
+### WP25.3 The 管理后台's 消息 page (→ v13.2.0)
+
+- **Rail entry 消息:** the templates as cards by channel (each language marked when edited). The panel shows the
+  latest dispatches.
+- **The editor:**
+  - the language;
+  - the subject and the body, with the variables as chips that insert themselves;
+  - 保存 (Ctrl+Enter), 恢复默认 and 发送测试 (an address or a number);
+  - unsaved edits asked about on leaving (LeaveGuard).
+- **The preview,** in the panel: the mail's HTML in a frame on the web, its text elsewhere. It follows the dashboard's
+  外观 and is rendered again a moment after each edit. An SMS shows its text, length and parts.
+- Tests: the list, an edit saved and reset, the preview's request (draft, language, scheme) and what it shows, a test
+  send, the log, keys and Tab order.
+- **By role:**
+  - the sign-in takes any of the three roles;
+  - the rail shows only the role's pages;
+  - an account's page shows a role picker (普通用户 / 集成人员 / 经理 / 管理员, as the caller may set) and, for a
+    manager, only the permissions;
+  - tests per role.
+
+### WP25.3b The app's way in (→ v13.3.0)
+
+- ☰ → 管理后台 for staff (from `GET /v1/me`'s `staff`): opens `<api>/admin/?login=<login>` in a new tab (the web),
+  the dashboard's sign-in filled in. Hidden for everyone else. The three ARB files; tests.
+
+### WP25.4 Records, the release (→ v14.0.0)
+
+- docs/web-test.md (消息, the outbox), the ui-design skill (mail colours), MODULES, the README entry, the stage
+  summary; pushed after a fresh harness PASS.
+
+Lessons: rules 16, 35, 37, 42, 45, 52, 57, 67, 68, 70; G1, G10; security-baseline (no address or content in the
+console).
+
 ## 阶段总结 (stage summaries)
 
 ### S24 设计系统与管理后台布局 (done 2026-10-30: v12.1.0–v13.0.0)
@@ -2896,3 +3020,9 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP24.2    | done                         | v12.2.0 |
 | WP24.3    | done                         | v12.3.0 |
 | WP24.4    | done                         | v13.0.0 |
+| WP25.1    | done                         | v13.1.0 |
+| WP25.2    | done                         | v13.1.0 |
+| WP25.2b   | done                         | v13.1.0 |
+| WP25.3    | planned                      | v13.2.0 |
+| WP25.3b   | planned                      | v13.3.0 |
+| WP25.4    | planned                      | v14.0.0 |

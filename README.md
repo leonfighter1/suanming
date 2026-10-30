@@ -13,6 +13,57 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v13.1.0 (2026-10-30): message templates, one way out for mail and SMS, and staff roles (the server)
+
+Your requests: design the sending of mail and SMS so the back office can edit what each message looks like, with mail
+following the reader's light or dark mode, tested on the server without a third-party service
+(「设计好邮件发送逻辑，让后台用户可以编辑各类发送邮件的前端页面…」); and three staff roles
+(「针对后台设置不同的用户策略…admin, manager, integrator」). This is the server's part of stage S25; the 管理后台's pages
+come next. It is committed locally and goes out with v14.0.0.
+
+- **One way out for every message:** the verification code by mail and by SMS, the report mail (测算完成后发到邮箱) and
+  the records mail (发到邮箱) now all go through one dispatcher. It does four things for each message:
+  - picks its wording: an admin's edit if there is one, else the default;
+  - fills in the values;
+  - sends it on its channel;
+  - notes the send.
+
+  The log keeps the latest 200 sends with the recipient masked; a verification code is never written down.
+
+- **Templates:** each message has its wording per language (简体 and 繁體; English for the codes). The defaults are the
+  texts the app has sent until now. A mail's body is a small markup:
+  - `# title`, `## heading`, paragraphs;
+  - `> small note`, `---` for a line, `!! highlight` (the code shown large), `- list item`;
+  - `{{code}}`-style values, and the report or the record list on a line of their own (`{{report}}`, `{{records}}`).
+
+  A wording is checked before it is kept: no unknown values, the code mail must contain `{{code}}`, the lengths.
+
+- **Mail follows light and dark:** every mail is now a page in the app's own colours. It is light by default and dark
+  when the reader's mail program is in dark mode (Apple Mail, iOS, Outlook.com…). The plain-text version is still
+  there for programs that show only text. A test holds the mail's colours to the app's colours.
+- **No third-party service yet:** mail and SMS are written to the dev outbox (`.outbox/mail`, `.outbox/sms`). Provider
+  settings come later, as you asked.
+- **Staff roles** (enforced by the server, not just the screens):
+  - **admin:** everything.
+  - **manager:** sees the dashboard and assigns roles and permissions (user, integrator or manager; 停用, AI,
+    充值). Can't make anyone admin or touch an admin's account, and can't operate on users' data (no 增加积分, no
+    在所有设备上退出, no exports).
+  - **integrator:** only the mail and SMS templates, previews, test sends and the send log.
+  - **Everyone:** nobody changes their own role. Admins named in MINGLI_ADMINS stay admins.
+- **For trying it:** two new dev accounts, `manager` / `manager` and `integrator` / `integrator`.
+- **The API:** `GET /v1/admin/messages/templates`, saving and resetting a wording (`PUT` / `DELETE
+/v1/admin/messages/templates/{kind}/{locale}`), `POST /v1/admin/messages/preview` (a draft with sample values, light
+  or dark), `POST /v1/admin/messages/test` (a test send through the outbox), `GET /v1/admin/messages/log`.
+  `GET /v1/admin/me` now says the role and what it may do; `GET /v1/me` says `staff` (for the app's menu, next).
+- **Fixed on the way:** the database store would have dropped the manager and integrator roles at the next start (it
+  only knew admin); caught by the new test.
+- **Verified:**
+  - 14 new server tests: the templates and the markup, the mail page light and dark, the colours against the app's,
+    the SMS lengths, the dispatcher and its log, the database keeping an edit and the roles, every route against every
+    role, the role rules, the 消息 API.
+  - 690 server tests pass.
+  - harness PASS.
+
 ### v13.0.0 (2026-10-30): one design system for the app and the 管理后台
 
 Your request (「对于dashboard 可以采用非对称Dashboard布局…建立统一的浅色和深色主题系统…」), stage S24 of the

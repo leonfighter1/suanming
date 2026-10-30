@@ -847,24 +847,33 @@ paths:
     get:
       tags: [admin]
       operationId: adminMe
-      summary: The signed-in admin
+      summary: The signed-in staff member and what their role may do
       description: |
-        Since v11.2.0. Every `/v1/admin/*` route (but 内容审核's reviews) is for admins only: an account with the
-        admin role, or one of the server's MINGLI_ADMINS logins (403 `admin_only` otherwise). Days are the
-        dashboard's time zone's (`tz`, default Asia/Shanghai).
+        Since v11.2.0; roles since v13.1.0. Every `/v1/admin/*` route (but 内容审核's reviews) is for staff: an
+        account with the admin, manager or integrator role, or one of the server's MINGLI_ADMINS logins (an admin;
+        403 `admin_only` otherwise). Each route needs a capability of the role (403 `not_allowed` without it):
+        view (the numbers and accounts: admin, manager), assign (roles and permissions: admin, manager), user_data
+        (增加积分, signing an account out everywhere, the exports: admin), messages (the mail and SMS templates:
+        admin, integrator). Days are the dashboard's time zone's (`tz`, default Asia/Shanghai).
       responses:
         "200":
-          description: The admin
+          description: The staff member
           content:
             application/json:
               schema:
                 type: object
-                required: [id, login, role, admin_by_config]
+                required: [id, login, role, admin_by_config, can, assignable_roles]
                 properties:
                   id: { type: string, format: uuid }
                   login: { type: string }
-                  role: { const: admin }
+                  role: { type: string, enum: [integrator, manager, admin] }
                   admin_by_config: { type: boolean }
+                  can:
+                    type: array
+                    items: { type: string, enum: [view, assign, user_data, messages] }
+                  assignable_roles:
+                    type: array
+                    items: { type: string, enum: [user, integrator, manager, admin] }
         "401": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
 
@@ -945,7 +954,11 @@ paths:
       parameters:
         - { name: q, in: query, schema: { type: string } }
         - { name: status, in: query, schema: { type: string, enum: [active, suspended] } }
-        - { name: role, in: query, schema: { type: string, enum: [user, admin] } }
+        - {
+            name: role,
+            in: query,
+            schema: { type: string, enum: [user, integrator, manager, admin] },
+          }
         - { name: demo, in: query, schema: { type: string, enum: [include, exclude, only] } }
         - name: sort
           in: query
@@ -995,10 +1008,11 @@ paths:
     patch:
       tags: [admin]
       operationId: adminUpdateUser
-      summary: Suspend or reactivate, the admin role, permissions
+      summary: Suspend or reactivate, the role, permissions
       description: |
-        Suspending ends every session at once. An admin can't suspend or demote themselves (409 `admin_self`), nor
-        demote an admin named in MINGLI_ADMINS (409 `admin_by_config`).
+        Suspending ends every session at once. Nobody suspends themselves or changes their own role (409
+        `admin_self`); an admin named in MINGLI_ADMINS stays one (409 `admin_by_config`). A manager gives user,
+        integrator or manager, never admin, and changes nothing on an admin's account (403 `not_allowed`).
       requestBody:
         required: true
         content:
@@ -1007,7 +1021,7 @@ paths:
               type: object
               properties:
                 status: { type: string, enum: [active, suspended] }
-                role: { type: string, enum: [user, admin] }
+                role: { type: string, enum: [user, integrator, manager, admin] }
                 permissions:
                   type: object
                   properties:
@@ -1123,6 +1137,190 @@ paths:
           content:
             application/problem+json:
               schema: { $ref: "#/components/schemas/Problem" }
+
+  /v1/admin/messages/templates:
+    get:
+      tags: [admin]
+      operationId: adminMessageTemplates
+      summary: The messages and their wordings (v13.1.0)
+      description: |
+        Every message the server sends (the verification code by mail and by SMS, the report mail, the records mail)
+        with its channel, what it is, its variables (a name, what it holds, a sample; `part` for one on a line of its
+        own) and per language the wording in use (an admin's, `custom`, else the default) beside the default. A mail's
+        body is a small markup: `# title`, `## heading`, paragraphs, `> note`, `---`, `!! highlight`, `- item`.
+        `delivery` names what sends each channel (the dev outbox, or off: no provider yet). Admins and integrators.
+      responses:
+        "200":
+          description: The messages
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates, delivery]
+                properties:
+                  templates: { type: array, items: { type: object } }
+                  delivery:
+                    type: object
+                    properties:
+                      mail: { type: string }
+                      sms: { type: string }
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/messages/templates/{kind}/{locale}:
+    parameters:
+      - name: kind
+        in: path
+        required: true
+        schema: { type: string, enum: [code_mail, code_sms, report_mail, records_mail] }
+      - {
+          name: locale,
+          in: path,
+          required: true,
+          schema: { type: string, enum: [zh-Hans, zh-Hant, en] },
+        }
+    put:
+      tags: [admin]
+      operationId: adminSaveMessageTemplate
+      summary: Keep an admin's wording of a message in a language
+      description: |
+        Checked first (400 `invalid_template` with `problems`, in words): a mail needs its subject, an SMS has none;
+        every variable must be the message's, each required one used (`{{code}}`, `{{report}}`); a part only on a
+        line of its own; the lengths. 404 for a language the message has no wording in.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                subject: { type: string }
+                body: { type: string }
+      responses:
+        "200":
+          description: The wording in use now, with the default
+          content:
+            application/json:
+              schema: { type: object }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [admin]
+      operationId: adminResetMessageTemplate
+      summary: Back to the default wording
+      responses:
+        "200":
+          description: The wording in use now, the default
+          content:
+            application/json:
+              schema: { type: object }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/messages/preview:
+    post:
+      tags: [admin]
+      operationId: adminPreviewMessage
+      summary: A wording with the sample values, as a reader gets it
+      description: |
+        A draft (`subject`, `body`) or, without `body`, the wording in use, filled with the variables' samples: a
+        mail's subject, its page (HTML in the app's colours, light with the dark theme under prefers-color-scheme;
+        `scheme` marks it light or dark, as the dashboard's 外观) and its text; an SMS's text with its length and the
+        messages it takes. `problems` says what would stop a save.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, locale]
+              properties:
+                kind: { type: string }
+                locale: { type: string }
+                subject: { type: string }
+                body: { type: string }
+                scheme: { type: string, enum: [light, dark] }
+      responses:
+        "200":
+          description: The message
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [text, problems]
+                properties:
+                  subject: { type: string }
+                  html: { type: string }
+                  text: { type: string }
+                  sms:
+                    type: object
+                    properties:
+                      length: { type: integer }
+                      segments: { type: integer }
+                  problems: { type: array, items: { type: string } }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/messages/test:
+    post:
+      tags: [admin]
+      operationId: adminTestMessage
+      summary: Send a message with the sample values to an address or number
+      description: |
+        Through the server's dispatcher, as a real message goes (the dev outbox until the owner picks providers). A
+        draft (`body`) must be one that could be saved. 503 `delivery_unavailable` when the channel is off, 502
+        `delivery_failed` when the transport refused.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, locale, to]
+              properties:
+                kind: { type: string }
+                locale: { type: string }
+                to: { type: string, description: "An email for a mail; a phone number for an SMS" }
+                subject: { type: string }
+                body: { type: string }
+      responses:
+        "202":
+          description: Sent; the dispatch as the log keeps it
+          content:
+            application/json:
+              schema:
+                {
+                  type: object,
+                  properties: { entry: { $ref: "#/components/schemas/DispatchEntry" } },
+                }
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "502": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/messages/log:
+    get:
+      tags: [admin]
+      operationId: adminMessageLog
+      summary: The latest dispatches, newest first
+      description: |
+        Kept in memory (the last 200): when, what, in which language, to whom (masked), a mail's subject (a code
+        hidden), how it went (sent, off, failed) and by what transport; test sends marked.
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200 } }
+      responses:
+        "200":
+          description: The dispatches
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/DispatchEntry" } }
+        "403": { $ref: "#/components/responses/Problem" }
 
   /v1/calendar/lunar:
     get:
@@ -2064,6 +2262,31 @@ components:
           type: string
           enum: [user, admin]
           description: admin = 内容审核 reviewer (MINGLI_ADMINS); returned by /v1/me
+        staff:
+          type: string
+          enum: [integrator, manager, admin]
+          description: >-
+            v13.1.0: the account's 管理后台 role, when it has one (an admin named in MINGLI_ADMINS is admin). The
+            app's ☰ shows 管理后台 to staff. Returned by /v1/me.
+    DispatchEntry:
+      type: object
+      description: >-
+        v13.1.0: one message the server sent (or tried), as the dispatch log keeps it: the recipient masked, a
+        verification code never written down.
+      required: [id, at, kind, channel, locale, to, status, transport, custom]
+      properties:
+        id: { type: string }
+        at: { type: string, format: date-time }
+        kind: { type: string, enum: [code_mail, code_sms, report_mail, records_mail] }
+        channel: { type: string, enum: [mail, sms] }
+        locale: { type: string, enum: [zh-Hans, zh-Hant, en] }
+        to: { type: string, description: "Masked: s***@example.com, +86 *******8000" }
+        subject: { type: string }
+        status: { type: string, enum: [sent, off, failed] }
+        transport: { type: string }
+        custom: { type: boolean, description: "Sent with an admin's wording" }
+        test: { type: boolean }
+        error: { type: string }
     ReportMail:
       type: object
       description: >-
@@ -2700,7 +2923,7 @@ components:
         id: { type: string, format: uuid }
         login: { type: string, description: "The username, else the masked email or phone" }
         country: { type: string }
-        role: { type: string, enum: [user, admin] }
+        role: { type: string, enum: [user, integrator, manager, admin] }
         admin_by_config: { type: boolean }
         status: { type: string, enum: [active, suspended] }
         permissions:

@@ -11,6 +11,15 @@ import { NoSms, OutboxSms, type SmsTransport } from "./sms.js";
 export * from "./mail.js";
 export * from "./sms.js";
 export { buildMime, encodeWords, mailbox } from "./mime.js";
+export * from "./templates.js";
+export * from "./dispatch.js";
+export { parseMarkup, templateProblems, TEMPLATE_LIMITS, variablesIn } from "./markup.js";
+export {
+  renderMessage,
+  smsSegments,
+  type MessageParts,
+  type RenderedMessage,
+} from "./render-message.js";
 
 export interface Notify {
   mail: MailTransport;

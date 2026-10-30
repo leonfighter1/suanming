@@ -6,7 +6,12 @@
  * usage's dollars at usd_cny; the gross profit is the net less the AI cost (cash in a period against what its AI
  * cost). 积分 flow apart: sold (充值), granted, used (charges), and what accounts hold now.
  */
-import { permissionsOf, type AccountPermissions, type UserRecord } from "../auth/service.js";
+import {
+  permissionsOf,
+  type AccountPermissions,
+  type AccountRole,
+  type UserRecord,
+} from "../auth/service.js";
 import { maskEmail, maskPhone } from "../auth/identifiers.js";
 import type { PointsBalance, PointsConfig, PointsEntry } from "../points/index.js";
 import type { UsageRow } from "./usage.js";
@@ -384,7 +389,7 @@ export interface UserRow {
   /** The username, else the masked email or phone. */
   login: string;
   country: string;
-  role: "user" | "admin";
+  role: AccountRole;
   /** An admin by the server's settings: the dashboard can't take the role away. */
   admin_by_config: boolean;
   status: "active" | "suspended";
@@ -438,7 +443,7 @@ export function userRows(d: AdminData): UserRow[] {
       id: u.id,
       login: loginOf(u),
       country: u.country,
-      role: u.role === "admin" || byConfig ? "admin" : "user",
+      role: byConfig ? "admin" : (u.role ?? "user"),
       admin_by_config: byConfig,
       status: u.status ?? "active",
       permissions: permissionsOf(u),
@@ -470,7 +475,7 @@ export type UserSort = (typeof USER_SORTS)[number];
 export interface UserQuery {
   q?: string;
   status?: "active" | "suspended";
-  role?: "user" | "admin";
+  role?: AccountRole;
   /** include (default), exclude or only the demo accounts. */
   demo?: "include" | "exclude" | "only";
   sort?: UserSort;

@@ -146,15 +146,22 @@ describe("a document as a mail's body", () => {
     ],
   };
 
-  it("HTML: everything escaped, styles inline, bullets in one list, rows in a table", () => {
+  it("HTML: everything escaped, the light styles inline and the dark ones in a style block (S25), lists and rows", () => {
     const html = renderHtml(doc);
     expect(html).not.toContain("<script>");
     expect(html).toContain("1 &lt; 2 &amp; &lt;script&gt;alert(1)&lt;/script&gt;<br>second line");
     expect(html).toContain("<title>A &lt;b&gt;title&lt;/b&gt;</title>");
     expect(html.match(/<ul /g)).toHaveLength(1);
     expect(html.match(/<li /g)).toHaveLength(2);
-    expect(html).toContain('<td style="padding:4px 0;vertical-align:top">八字排盘</td>');
-    expect(html).not.toContain("<style");
+    // Inline, the light theme (a mail program may drop the style block): the app's text colour on its card.
+    expect(html).toContain(
+      '<td class="m-ink" style="color:#1F1A16;padding:4px 0;vertical-align:top">八字排盘</td>',
+    );
+    // The dark theme follows the reader's system: one style block, the dark text colour under the media query.
+    expect(html.match(/<style>/g)).toHaveLength(1);
+    expect(html).toContain('<meta name="color-scheme" content="light dark">');
+    const dark = html.slice(html.indexOf("@media (prefers-color-scheme:dark){"));
+    expect(dark).toContain(':root:not([data-scheme="light"]) .m-ink{color:#F2EDE7 !important}');
   });
 
   it("text: the title and subtitle, then blocks a blank line apart, list items together", () => {

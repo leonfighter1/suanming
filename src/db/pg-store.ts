@@ -23,8 +23,11 @@ import type {
   Store,
 } from "../api/store.js";
 import type { UsageRow } from "../admin/usage.js";
-import type { UserRecord, UserStore } from "../auth/service.js";
+import type { Locale } from "../ai/terms.js";
+import type { AccountRole, UserRecord, UserStore } from "../auth/service.js";
 import type { SocialProvider } from "../auth/social.js";
+import type { TemplateRecord } from "../notify/dispatch.js";
+import type { MessageKind } from "../notify/templates.js";
 import type {
   ChargeKind,
   PointsBasis,
@@ -50,6 +53,7 @@ const MIGRATIONS = [
   "009_inquiries",
   "010_points",
   "011_admin",
+  "012_messages",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -260,7 +264,8 @@ export class PgStore implements Store, UserStore {
       age_confirmed_at: iso(row.age_confirmed_at),
       created_at: iso(row.created_at),
       // 管理后台 (v11.2.0): plain columns; the defaults stay off the record, as on one made before them.
-      ...(row.role === "admin" && { role: "admin" as const }),
+      // Any role but the default (S25: integrator and manager besides admin).
+      ...(row.role != null && row.role !== "user" && { role: row.role as AccountRole }),
       ...(row.status === "suspended" && { status: "suspended" as const }),
       ...(row.permissions != null && {
         permissions: row.permissions as UserRecord["permissions"],
@@ -806,6 +811,38 @@ export class PgStore implements Store, UserStore {
       ...(r.demo === true && { demo: true }),
       created_at: iso(r.created_at),
     }));
+  }
+
+  // ---- 消息模板 (v13.1.0, S25): admins' wordings of the messages, plain text ----
+
+  async listMessageTemplates() {
+    const rows = await this.db.query<Row>("SELECT * FROM message_templates ORDER BY kind, locale");
+    return rows.rows.map((r): TemplateRecord => ({
+      kind: r.kind as MessageKind,
+      locale: r.locale as Locale,
+      ...(r.subject != null && { subject: r.subject as string }),
+      body: r.body as string,
+      updated_at: iso(r.updated_at),
+      ...(r.updated_by != null && { updated_by: r.updated_by as string }),
+    }));
+  }
+
+  async putMessageTemplate(t: TemplateRecord) {
+    await this.db.query(
+      `INSERT INTO message_templates (kind, locale, subject, body, updated_at, updated_by)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (kind, locale) DO UPDATE SET subject = EXCLUDED.subject, body = EXCLUDED.body,
+         updated_at = EXCLUDED.updated_at, updated_by = EXCLUDED.updated_by`,
+      [t.kind, t.locale, t.subject ?? null, t.body, t.updated_at, t.updated_by ?? null],
+    );
+  }
+
+  async deleteMessageTemplate(kind: MessageKind, locale: Locale) {
+    const r = await this.db.query("DELETE FROM message_templates WHERE kind = $1 AND locale = $2", [
+      kind,
+      locale,
+    ]);
+    return (r.affectedRows ?? 0) > 0;
   }
 
   async deleteReport(id: string) {

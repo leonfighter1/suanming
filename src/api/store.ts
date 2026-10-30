@@ -17,6 +17,8 @@ import type { Locale } from "../ai/terms.js";
 import type { AgentName, TarotFocus, Topic } from "../ai/types.js";
 import type { ChartPerson } from "../service/charts.js";
 import type { UsageRow } from "../admin/usage.js";
+import type { MessageKind } from "../notify/templates.js";
+import type { TemplateRecord, TemplateStore } from "../notify/dispatch.js";
 import {
   InMemoryLedger,
   type PointsCharge,
@@ -200,8 +202,11 @@ export interface FollowUpRecord {
   progress?: { stage: AgentName; attempt: number; updated_at: string };
 }
 
-/** The records, and since v11.0.0 (S20) each account's 积分 (src/points/ledger.ts). */
-export interface Store extends PointsLedger {
+/**
+ * The records, and since v11.0.0 (S20) each account's 积分 (src/points/ledger.ts); since v13.1.0 (S25) the admins'
+ * wordings of the messages (src/notify/dispatch.ts).
+ */
+export interface Store extends PointsLedger, TemplateStore {
   putChart(c: ChartRecord): Promise<void>;
   getChart(id: string): Promise<ChartRecord | undefined>;
   putReport(r: ReportRecord): Promise<void>;
@@ -301,6 +306,16 @@ export class InMemoryStore implements Store {
       .filter((r) => !since || r.created_at >= since)
       .sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0))
       .map((r) => structuredClone(r));
+  }
+  private templates = new Map<string, TemplateRecord>();
+  async listMessageTemplates() {
+    return [...this.templates.values()].map((t) => structuredClone(t));
+  }
+  async putMessageTemplate(t: TemplateRecord) {
+    this.templates.set(`${t.kind}/${t.locale}`, structuredClone(t));
+  }
+  async deleteMessageTemplate(kind: MessageKind, locale: Locale) {
+    return this.templates.delete(`${kind}/${locale}`);
   }
   async putInquiry(i: InquiryRecord) {
     this.inquiries.set(i.id, structuredClone(i));
