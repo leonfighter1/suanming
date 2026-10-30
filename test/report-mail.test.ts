@@ -3,7 +3,8 @@
 import type { AddressInfo } from "node:net";
 import { describe, expect, it } from "vitest";
 import { generateLifeReport, generateReport, MockProvider } from "../src/ai/index.js";
-import { createApiServer, MAIL_DOCUMENTS } from "../src/api/server.js";
+import { MAIL_DOCUMENTS } from "../src/api/routes/archive.js";
+import { createApiServer } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import { noCaptcha } from "../src/auth/limits.js";
 import { AuthService, InMemoryUserStore } from "../src/auth/service.js";

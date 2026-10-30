@@ -6,6 +6,7 @@
 import type { IncomingMessage } from "node:http";
 import type { AccountService } from "../auth/account.js";
 import type { AccountPermissions, AuthService } from "../auth/service.js";
+import type { Dispatcher, MailTransport } from "../notify/index.js";
 import type { ChargeKind, PointsConfig, Quote, QuoteFor } from "../points/index.js";
 import type { ApiOptions } from "./server.js";
 import type { Store } from "./store.js";
@@ -20,6 +21,8 @@ export interface ApiContext {
   opts: ApiOptions;
   store: Store;
   now: () => Date;
+  /** The server's log: never an address or a message's content. */
+  log: (msg: string, err?: unknown) => void;
   /** Absent only in devMode. */
   auth?: AuthService;
   /** The account's own logins and settings (v8.2.0); absent without auth. */
@@ -30,6 +33,12 @@ export interface ApiContext {
   idempotency: Map<string, { status: number; body: unknown; headers: Record<string, string> }>;
   /** How mail and text messages leave here, by the transports' names. */
   delivery: () => { mail: string; sms: string };
+  /** The mail transport ("off" until one is set up). */
+  mail: MailTransport;
+  /** Every message's way out (S25): its template, its channel, its note. */
+  messages: Dispatcher;
+  /** Counts a 发到邮箱 message against the account's day; 429 `too_many` past MAIL_PER_DAY. */
+  takeMailQuota: (user: string) => void;
   /** The reviewer's login when the caller is a reviewer, else undefined. */
   reviewer: (c: Caller) => Promise<string | undefined>;
   /** The client's address, for the sign-in limits: behind a trusted proxy, the one it names. */
