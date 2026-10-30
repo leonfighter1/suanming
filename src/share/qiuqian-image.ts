@@ -13,34 +13,16 @@ import type { Report } from "../ai/index.js";
 import { lotBrief } from "../ai/qiuqian.js";
 import type { Locale } from "../ai/terms.js";
 import type { ChartFact } from "../chart-fact/index.js";
+import { ACCENT, BRAND, clip, escape, H, MARGIN, PAPER, text, W } from "./common.js";
 import type { ShareFont } from "./font.js";
 
-const W = 1080;
-const H = 1350;
-const MARGIN = 60;
-const PAPER = "#fbf3ec";
 const SLIP = "#f3dca6"; // 籤紙, the yellow paper a temple prints its lots on
-const INK = "#3b2a22";
-const ACCENT = "#8a3b2e"; // the app's accent (AppColors.accent)
 
-const BRAND: Record<Locale, string> = {
-  "zh-Hans": "命理大师",
-  "zh-Hant": "命理大師",
-  en: "Mingli Master",
-};
 const METHOD: Record<Locale, string> = {
   "zh-Hans": "求签",
   "zh-Hant": "求籤",
   en: "Fortune Sticks",
 };
-
-/** Pango markup needs these escaped; a reading's text may hold any of them. */
-const escape = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-/** At most [max] characters, cut at a character, with an ellipsis. */
-const clip = (s: string, max: number) =>
-  [...s].length <= max ? s : `${[...s].slice(0, max - 1).join("")}…`;
 
 /** The texts the image shows, in order (exported so a test can check what is, and isn't, on it). */
 export function qiuqianShareTexts(report: Report, chart: ChartFact, locale: Locale) {
@@ -56,25 +38,6 @@ export function qiuqianShareTexts(report: Report, chart: ChartFact, locale: Loca
     label: report.layers?.expectation.ai_label ?? "",
     mark: `${BRAND[locale]} · ${report.created_at.slice(0, 10)}`,
   };
-}
-
-async function text(font: ShareFont, markup: string, width: number, px: number, color = INK) {
-  const buf = await sharp({
-    text: {
-      text: `<span foreground="${color}" size="${px * 1024}">${markup}</span>`,
-      font: font.family,
-      fontfile: font.file,
-      width,
-      rgba: true,
-      dpi: 72,
-      align: "centre",
-      wrap: "word-char",
-    },
-  })
-    .png()
-    .toBuffer();
-  const { width: w = 0, height: h = 0 } = await sharp(buf).metadata();
-  return { buf, w, h };
 }
 
 /** The share image of a passed 求籤 reading, as a JPEG. */
