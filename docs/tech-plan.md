@@ -2470,8 +2470,8 @@ Lessons: rules 37, 42, 43, 53, 58, 64, 67, 68.
        `LotCard` or `HexagramCard`, then the method's own reading.
 2. **Numbers:**
    - **Tests:** server 690 → 696, app 253 → 259 (254 at v14.1.0); the 管理后台 stays at 75.
-   - **Harness:** PASS at both releases. v14.1.0 passed on its third run: rule 23 on the first, then a transient
-     ECONNRESET.
+   - **Harness:** PASS at both releases. v14.1.0 passed on its third run: rule 23 on the first, then an ECONNRESET.
+     The ECONNRESET came back on v15.0.0's committed tree; it was traced and fixed (rule 81) before the push.
    - **Renders** with the real fonts: 首页 and the sign-in page from 390 to 2560 wide, light and dark; the day's 签
      and 卦, and their pages.
 3. **Against the plan:** nothing of substance. Positions measured as 首页's parts slide in became `closeTo` (rule 61) once the new card came in after the others.
@@ -2479,8 +2479,10 @@ Lessons: rules 37, 42, 43, 53, 58, 64, 67, 68.
    - **Rule 23,** corrected in place: deleting the `flutter_build` records helps, but doesn't always stop Flutter
      deleting `lib/l10n/gen`. Run the harness once more.
    - **Rule 61** came back in a new test: tops measured while the cards still slide in. Use `closeTo`.
-   - **A transient ECONNRESET** in a server test under the full suite passed alone and on the rerun. Watched, not
-     yet a rule.
+   - **Rule 81:** an ECONNRESET in messages.test.ts showed up only under the full suite: twice in five harness runs,
+     then three runs out of three. The file signed in at its top and then ran the slow PGlite test, so the first HTTP
+     call reused a keep-alive connection just as the server closed it. Start a test server and its sign-ins right
+     before the tests that call it. A failure seen twice is a cause to find, not a flake.
 5. **Next:** nothing planned. Waiting for the owner: the mail and SMS providers, Phase 4 payments, the Phase 3 gate,
    WP7.2, WP7.3 and WP1.8.
 

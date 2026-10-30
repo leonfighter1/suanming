@@ -25,7 +25,14 @@ Newest first. One entry per working session, key points only.
 - The harness passed on the second run. The first failed at the app's analyze, rule 23 again: it was the first run
   after the version bump, as with v14.1.0. The generated files were back, newly written, by the time it ended. To try
   next time: bump the version before the last manual Flutter run, so its regeneration is over before the harness.
-- Committed and tagged, then the harness once more on the committed tree, then pushed with v14.1.0.
+- Committed and tagged (ffcb0f9). The harness on the committed tree then failed at the server tests, with the
+  ECONNRESET of v14.1.0's second run.
+  - **Traced:** three full runs with `--reporter=verbose` failed three times out of three, all on the first test of
+    the 后台 roles. That is the first HTTP call after the PGlite test, while the sign-ins in the top-level `beforeAll`
+    had left keep-alive connections idle past the server's 5 s keep-alive.
+  - **Fixed (rule 81):** the server and the sessions start in a shared `start()` that each API describe calls in
+    its own `beforeAll`. The fix is a test change with no version; it is committed after v15.0.0, the harness runs on
+    that tree, and the push carries both.
 
 ## 2026-10-30 (k): S26 WP26.1 — the app's container, 首页 2 × 2; v14.1.0 (local)
 

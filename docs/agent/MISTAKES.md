@@ -82,8 +82,15 @@
 78. When a stored field gains values (an enum, a role, a status), grep every reader and writer of it in both stores (memory and PGlite, put and get, SQL checks) and round-trip each new value through PGlite in a test.
 79. In Dart, never assign arrow closures inside a cascade: one statement per callback, or a block body for the closure.
 80. Write a test of what a server check reports from the check itself (read it, e.g. templateProblems reads subject and body), and when a fake mirrors it, cite the server function it mirrors.
+81. Start a test server and its sign-ins in the describe whose tests call it (its beforeAll, or a shared start() each such describe calls), never in a top-level beforeAll ahead of slow tests: an idle keep-alive connection meets the server 5 s timeout. A failure seen twice is a cause to find, not a flake: name the test with --reporter=verbose.
 
 ## Log
+
+### 2026-10-30: A slow test between the sign-ins and the first API call reset the connection
+- **Symptom:** messages.test.ts: the first test of the 后台 roles failed with fetch failed, ECONNRESET, under the full suite only (twice in five harness runs, then three runs out of three); alone it passed.
+- **Root cause:** The file signed in over HTTP in a top-level beforeAll, then ran the PGlite test for seconds before its HTTP tests. The sign-ins keep-alive connections sat idle past the server 5 s keep-alive, and the next request reused one just as the server closed it.
+- **Fix:** The server and its sessions start in a shared start() that each API describe calls in its own beforeAll, so they begin right before the API tests. Three full runs passed.
+- **Rule:** Start a test server and its sign-ins in the describe whose tests call it (its beforeAll, or a shared start() each such describe calls), never in a top-level beforeAll ahead of slow tests: an idle keep-alive connection meets the server 5 s timeout. A failure seen twice is a cause to find, not a flake: name the test with --reporter=verbose. (Rule 81)
 
 ### 2026-10-30: A test expected a server check to report what it does not
 - **Symptom:** messages_test: 需要用到 {{code}} not shown after the body lost {{code}}

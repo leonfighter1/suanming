@@ -357,29 +357,36 @@ const ids: Record<string, string> = {};
  */
 const LOGINS = ["boss", "mgr", "integ", "alice", "carol", "dora"];
 
-beforeAll(async () => {
-  for (const login of LOGINS) {
-    await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
-  }
-  for (const [login, role] of [
-    ["mgr", "manager"],
-    ["integ", "integrator"],
-  ] as const) {
-    const u = (await auth.findLogin("username", login))!;
-    await auth.users.put({ ...u, role });
-  }
-  await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-  base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-  for (const login of LOGINS) {
-    const res = await fetch(base + "/v1/auth/login", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ login, password: login }),
-    });
-    sessions[login] = await res.json();
-    ids[login] = (await auth.findLogin("username", login))!.id;
-  }
-});
+/**
+ * The server and the sessions, started by the first describe that calls the API, right before its tests (rule 81).
+ * Started at the top of the file, the sign-ins' connections sat idle through the PGlite test above for seconds, and
+ * the first call after it reused one as the server's 5 s keep-alive closed it: ECONNRESET under the full suite.
+ */
+let started: Promise<void> | undefined;
+const start = () =>
+  (started ??= (async () => {
+    for (const login of LOGINS) {
+      await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
+    }
+    for (const [login, role] of [
+      ["mgr", "manager"],
+      ["integ", "integrator"],
+    ] as const) {
+      const u = (await auth.findLogin("username", login))!;
+      await auth.users.put({ ...u, role });
+    }
+    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
+    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
+    for (const login of LOGINS) {
+      const res = await fetch(base + "/v1/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ login, password: login }),
+      });
+      sessions[login] = await res.json();
+      ids[login] = (await auth.findLogin("username", login))!.id;
+    }
+  })());
 afterAll(() => new Promise<void>((r) => api.close(() => r())));
 
 const call = (who: string, path: string, method = "GET", body?: unknown) =>
@@ -395,6 +402,8 @@ const json = async (who: string, path: string, method = "GET", body?: unknown) =
   (await call(who, path, method, body)).json();
 
 describe("the 后台 roles", () => {
+  beforeAll(start);
+
   it("say what each may do: admin everything, a manager the numbers and roles, an integrator the messages", async () => {
     expect(await json("boss", "/v1/admin/me")).toMatchObject({
       role: "admin",
@@ -476,6 +485,8 @@ describe("the 后台 roles", () => {
 });
 
 describe("the 消息 API", () => {
+  beforeAll(start);
+
   it("lists every message with its wordings, keeps a checked edit, previews a draft light or dark, resets", async () => {
     const list = await json("integ", "/v1/admin/messages/templates");
     expect(list.delivery).toEqual({ mail: "memory", sms: "memory" });
