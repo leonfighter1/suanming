@@ -57,19 +57,12 @@ class DashboardLayout extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(side, Space.xl, side, Space.xxl),
               children: [
                 ...main.take(at),
-                // A Material, not a coloured box: the switches and rows inside paint their ink on it.
                 if (aside.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: Space.m),
-                    child: Material(
-                      key: const Key('aside'),
-                      color: t.card,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Radii.card),
-                        side: BorderSide(color: t.border),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Padding(
+                    child: _panel(
+                      t,
+                      Padding(
                         padding: const EdgeInsets.all(Space.xl),
                         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: aside),
                       ),
@@ -95,15 +88,9 @@ class DashboardLayout extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(0, Space.xl, side, Space.xl),
                 child: SizedBox(
                   width: panelWidth,
-                  child: Material(
-                    key: const Key('aside'),
-                    color: t.card,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Radii.card),
-                      side: BorderSide(color: t.border),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListView(
+                  child: _panel(
+                    t,
+                    ListView(
                       padding: const EdgeInsets.fromLTRB(Space.xl, Space.xl, Space.xl, Space.xxl),
                       children: aside,
                     ),
@@ -113,6 +100,19 @@ class DashboardLayout extends StatelessWidget {
             ],
           );
         },
+      );
+
+  /// The panel's card, the same in both places (S28, F18): the card colour and a hairline. A Material, not a coloured
+  /// box: the switches and rows inside paint their ink on it.
+  Widget _panel(ThemeTokens t, Widget child) => Material(
+        key: const Key('aside'),
+        color: t.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.card),
+          side: BorderSide(color: t.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: child,
       );
 }
 
