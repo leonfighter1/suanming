@@ -10,6 +10,19 @@ import '../life_report_page.dart';
 import '../report_page.dart';
 import 'remedy.dart' show compactButtons;
 
+/// 有所求才能去求 (owner, v11.1.0): calls [onAsking] each time [question] starts or stops holding something asked (S28:
+/// 塔罗, 求签 and 算卦 each had this listener).
+void watchQuestion(TextEditingController question, void Function(bool asking) onAsking) {
+  var asking = question.text.trim().isNotEmpty;
+  question.addListener(() {
+    final now = question.text.trim().isNotEmpty;
+    if (now != asking) {
+      asking = now;
+      onAsking(now);
+    }
+  });
+}
+
 /// A finished 测算 a new one would repeat (v10.0.0): its record, when it was made, and what it was asked.
 class EarlierReading {
   const EarlierReading({required this.id, required this.at, this.question, this.life = false});

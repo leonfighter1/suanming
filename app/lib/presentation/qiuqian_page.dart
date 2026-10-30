@@ -50,10 +50,7 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
   @override
   void initState() {
     super.initState();
-    _question.addListener(() {
-      final asking = _question.text.trim().isNotEmpty;
-      if (asking != _asking) setState(() => _asking = asking);
-    });
+    watchQuestion(_question, (asking) => setState(() => _asking = asking));
   }
 
   @override
