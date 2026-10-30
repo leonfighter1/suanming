@@ -25,8 +25,12 @@ building blocks. Every screen change follows the rules below, and the tests at t
 | Colour tokens, both themes side by side   | `app/lib/presentation/tokens.dart` `ThemeTokens.light`, `ThemeTokens.dark`                           |
 | The theme made from them                  | `app/lib/presentation/theme.dart` `buildTheme`, `wuxingColorOf`                                      |
 | Spacing, radii, motion, cards, focus ring | `app/lib/presentation/design.dart` `Space`, `Radii`, `Motion`, `AppCard`, `FocusRing`                |
+| Long text, empty pages, marks before text | `app/lib/presentation/design.dart` `ReadingText`, `EmptyState`, `firstLineInset`                     |
+| The type ramp                             | `app/lib/presentation/theme.dart` `_ramp` (through `Theme.of(context).textTheme`)                    |
+| Window classes, columns, page padding     | `app/lib/presentation/layout.dart` `WindowClass`, `Grid`, `pagePadding`                              |
 | 外观 (the theme switch)                   | app: `widgets/app_menu.dart` `pickTheme`; dashboard: `admin/lib/presentation/shell.dart` `ThemeMenu` |
-| Tests                                     | `app/test/theme_test.dart`, `admin/test/theme_test.dart`                                             |
+| The rules as checks                       | `app/test/design_rules.dart` (run by `grid_test.dart` and `admin/test/design_rules_test.dart`)       |
+| Tests                                     | `app/test/theme_test.dart`, `app/test/grid_test.dart`, `admin/test/theme_test.dart`                  |
 
 ## Colour
 
@@ -97,10 +101,99 @@ Motion.themeCurve))`. Every colour lerps: the Material scheme and `ThemeTokens` 
 
 Things that move or grow use `Motion.curve` (ease out). Reduce motion (`MediaQuery.disableAnimations`) jumps.
 
+## The grid
+
+Window classes are Material's, by the window's width (`WindowClass.of`, `layout.dart`):
+
+| Class      | Width       | Columns | Margin | Gutter | What                         |
+| ---------- | ----------- | ------- | ------ | ------ | ---------------------------- |
+| `compact`  | below 600   | 4       | 16     | 16     | a phone                      |
+| `medium`   | 600 to 839  | 8       | 24     | 24     | a small tablet, a phone wide |
+| `expanded` | 840 to 1199 | 12      | 24     | 24     | a tablet wide, a window      |
+| `large`    | 1200 and up | 12      | 32     | 24     | a desktop                    |
+
+- **A page is a centred column.** An app page's scrolling list takes `pagePadding(context)`: the class's margin at the
+  sides, and on a wide window enough to keep the content in a column at most `Grid.reading` (720) wide. A page that
+  sets things side by side takes a wider column (`maxWidth: Grid.wide`, 1200: the tarot page, whose cards stay at their
+  full size, owner v1.1.x). The list keeps its scrollbar at the window's edge.
+- **Columns** for a layout of parts side by side: `Grid.span(width, n, columns:, gutter:)`. The dashboard's main column
+  and panel are 8 : 4 at large widths.
+- **A dialog** keeps its own width (`ConstrainedBox`, 520–640), as Material's dialogs do.
+
+## Spacing
+
+A 4-point scale (`Space`): `xxs` 2, `xs` 4, `s` 8, `m` 12, `l` 16, `xl` 24, `xxl` 32, `xxxl` 48. Named uses:
+`Space.card` 20 (inside a card), `Space.field` 14 (a field's text to its edge: a 52-high field, as tall as the main
+button), `Space.empty` 96 (above an empty page's message), `Space.fab` 104 (a page's foot under the floating 追问).
+
+| Between                                     | Space                                                |
+| ------------------------------------------- | ---------------------------------------------------- |
+| an icon and its text; buttons in a row      | `s` (8)                                              |
+| a label and its value; a title and its text | `xs` (4)                                             |
+| cards in a column                           | `m` (12)                                             |
+| inside a card                               | `card` (20)                                          |
+| sections of a page; the dashboard's modules | `xl` (24)                                            |
+| the page's top / foot                       | `m` / `xxl`                                          |
+| `xxs` (2)                                   | only inside small parts (a pill, a key cap, a badge) |
+
+A drawing (a hexagram's lines, a coin, the 签) keeps its own geometry as named constants at the top of its file
+(`_lineGap`), never a bare number in `EdgeInsets`.
+
+## Type
+
+One ramp (`buildTheme`'s `_ramp`): sizes 11, 12, 14, 16, 20, 24, 32, 48, line heights in whole even points set for
+Chinese text, no letter spacing.
+
+| Role             | Size / line | Weight | Use                                                   |
+| ---------------- | ----------- | ------ | ----------------------------------------------------- |
+| `displaySmall`   | 48 / 56     | 600    | the one hero figure on a dashboard page               |
+| `headlineMedium` | 32 / 40     | 600    | a large figure on a page (我的积分's balance)         |
+| `headlineSmall`  | 24 / 32     | 600    | a page's title, a stat tile's value, the banner title |
+| `titleLarge`     | 20 / 28     | 600    | a method's name on 首页, a section's title            |
+| `titleMedium`    | 16 / 24     | 600    | a card's title                                        |
+| `titleSmall`     | 14 / 20     | 600    | a sub-heading, a term, a panel section's title        |
+| `bodyLarge`      | 16 / 24     | 400    | fields and list rows                                  |
+| `bodyMedium`     | 14 / 22     | 400    | the interface's text (the default)                    |
+| `bodySmall`      | 12 / 18     | 400    | details, captions                                     |
+| `labelLarge`     | 14 / 20     | 500    | buttons, a figure's label                             |
+| `labelMedium`    | 12 / 16     | 500    | small labels, key caps                                |
+| `labelSmall`     | 11 / 16     | 600    | pills, chart ticks                                    |
+
+- **Long text** takes `ReadingText`: `body` 16 / 28 for a reading's paragraphs, `small` 14 / 24 for notes, examples
+  and intros, `caption` 12 / 20. Never a line height of your own (`height: 1.6`).
+- **Numbers** in a column (tables, ticks, a panel's rows) use tabular figures; a figure standing alone (the hero, a
+  tile's value) keeps proportional ones (the dataviz skill).
+- **Weight** sets hierarchy with size: a title is semibold, a reading's term bold, body regular.
+
+## Radii
+
+`Radii`: `xxs` 2 (a bar, a tiny thumbnail), `xs` 4 (a thumbnail, a key cap, a meter), `chip` 8, `field` 12 (fields,
+buttons, segments, a box inside a card), `tile` 16 (an icon's tile), `card` 20, `hero` 24. A rounded box inside another
+takes a smaller step than its parent.
+
+## Alignment
+
+1. **One left edge a column.** A section's title starts on its cards' left edge (首页's 东方 and 西方); inside a card,
+   everything starts at `Space.card`.
+2. **Numbers right-aligned in columns**, with tabular figures (`DataColumn(numeric: true)`, `NumberRow`).
+3. **A mark before text that may wrap** (a bullet, an icon) sits centred on the first line:
+   `EdgeInsets.only(top: firstLineInset(style, size))`, never a guessed nudge.
+4. **Text starts at the start** (left). Only empty states, a hero banner's single line and centred figures centre.
+5. **Buttons:** a form's main button spans its column; buttons in a row size to their label (`compactButtons`) with
+   the main one last.
+6. **A table's row label** sits level with its cells' middle (`Table(defaultVerticalAlignment: middle)`, the 四柱 grid),
+   not at their top.
+7. **The app bar is the window's,** across its full width; the content below it keeps to its column.
+
 ## Tests that hold the rules
 
-| Test                                | Checks                                                                                                                                        |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/test/theme_test.dart`          | token contrast; Material's roles are the tokens; same layout in both themes; 外觀 fades, half-way colours, kept on the device; start-up theme |
-| `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                             |
-| `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                              |
+| Test                                | Checks                                                                                                                                                                                                                                                     |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/test/theme_test.dart`          | token contrast; Material's roles are the tokens; same layout in both themes; 外觀 fades, half-way colours, kept on the device; start-up theme                                                                                                              |
+| `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                                                                                                                                          |
+| `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                           |
+| `app/test/grid_test.dart`           | window classes; the type ramp; 首页 in the grid at 390, 700 and 1280 (margins, the 720 column, titles on the cards' edge); the rules themselves                                                                                                            |
+| `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own |
+
+A drawn object (coins, the 签 and its tube, tarot backs, the title's mark) may break the colour, size and corner rules
+in its own file (`drawings` in design_rules.dart): its colours are the object's, not the interface's.

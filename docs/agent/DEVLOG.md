@@ -2,6 +2,23 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (d): S24 WP24.2 — grid, spacing, type ramp, alignment; v12.2.0 (local)
+
+- v12.1.0's first harness run failed at the app gate's analyze: `lib/l10n/gen` deleted as stale after my manual runs
+  through the scratchpad junction (rule 23). Cleared `app/.dart_tool/flutter_build` first; the second run passed.
+- Built `layout.dart` (`WindowClass`, `Grid`, `pagePadding`), the `Space` scale with named uses, `Radii` steps,
+  `ReadingText`, `EmptyState`, `firstLineInset`, and the type ramp in `buildTheme`. `Space.page` went: 26 uses in 18
+  files now call `pagePadding(context)` (a script, run once); the tarot page takes `Grid.wide`.
+- `app/test/design_rules.dart` turns the skill's rules into line checks (with a test of the checks themselves); the app
+  had about 75 breaks, the 管理后台 2. Drawings keep their geometry as named constants (`_lineGap`), and a few
+  files that draw objects are allowed their own colours.
+- Found: `Pill` never let its text wrap, so a long one (an AI's 喜 as a sentence) overflowed once the 720 column was
+  narrower than the test window. A loose `Flexible` in a `MainAxisSize.min` row wraps when bounded and stays one line
+  when unbounded: Flex only asserts for a tight fit or a max-size row (checked in the SDK). The sign-up tests met the
+  form's 2 px taller helper lines in their 600 px window: they now scroll to 注册, and back up to the username after.
+- Looked at real-font renders: 首页 and the 八字 page in the 720 column; the 四柱 labels sat at their rows' top, now
+  middle.
+
 ## 2026-10-30 (c): S24 WP24.1 — one theme system from tokens, 外观; v12.1.0 (local)
 
 - Owner request (2026-10-30): an asymmetric 管理后台 with big figures, a compact grid and a right-hand panel; with a UI

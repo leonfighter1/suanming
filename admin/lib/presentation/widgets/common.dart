@@ -5,13 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
+import 'package:mingli_app/presentation/layout.dart';
 
 import '../../application/providers.dart';
 import '../messages.dart';
 
 // The pieces every page of the 管理后台 is made of (tech plan S22).
 
-/// A page's content: one scrolling column, at most [maxWidth] wide and centred on a wide screen.
+/// A page's content: one scrolling column with the window class's margins (the ui-design skill's grid), at most
+/// [maxWidth] wide and centred on a wide screen.
 class PageBody extends StatelessWidget {
   const PageBody({super.key, required this.children, this.maxWidth = 1180});
   final List<Widget> children;
@@ -20,7 +22,7 @@ class PageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, box) {
-          final side = math.max(Space.l, (box.maxWidth - maxWidth) / 2);
+          final side = math.max(WindowClass.ofContext(context).margin, (box.maxWidth - maxWidth) / 2);
           return ListView(padding: EdgeInsets.fromLTRB(side, Space.m, side, Space.xxl), children: children);
         },
       );

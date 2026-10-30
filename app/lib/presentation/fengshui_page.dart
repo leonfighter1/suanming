@@ -7,6 +7,7 @@ import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/principles_card.dart';
 import 'widgets/recalc_check.dart';
 import 'widgets/report_request.dart';
@@ -93,7 +94,7 @@ class _FengshuiPageState extends ConsumerState<FengshuiPage> {
       child: Scaffold(
         appBar: AppBar(title: Text(l10n.homeFengshui)),
         body: ListView(
-          padding: Space.page,
+          padding: pagePadding(context),
           children: [
             FadeSlideIn(
               child: HeroBanner(title: l10n.homeFengshui, subtitle: l10n.homeFengshuiDesc, icon: Icons.explore_outlined),

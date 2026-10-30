@@ -19,9 +19,27 @@ Color wuxingColor(String elementOrChar, {bool dark = false}) =>
 Color wuxingColorOf(BuildContext context, String elementOrChar) =>
     ThemeTokens.of(context).wuxing(_elementOf(elementOrChar));
 
+/// The type ramp (tech plan S24, the ui-design skill): 11 to 48 in steps of about 1.2, line heights in whole even
+/// points set for Chinese text, no letter spacing; titles semibold. Colours come from the scheme. Material's roles left
+/// out (display large and medium, headline large) are not used. Long text takes `ReadingText` (design.dart).
+const _ramp = TextTheme(
+  displaySmall: TextStyle(fontSize: 48, height: 56 / 48, fontWeight: FontWeight.w600, letterSpacing: 0),
+  headlineMedium: TextStyle(fontSize: 32, height: 40 / 32, fontWeight: FontWeight.w600, letterSpacing: 0),
+  headlineSmall: TextStyle(fontSize: 24, height: 32 / 24, fontWeight: FontWeight.w600, letterSpacing: 0),
+  titleLarge: TextStyle(fontSize: 20, height: 28 / 20, fontWeight: FontWeight.w600, letterSpacing: 0),
+  titleMedium: TextStyle(fontSize: 16, height: 24 / 16, fontWeight: FontWeight.w600, letterSpacing: 0),
+  titleSmall: TextStyle(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w600, letterSpacing: 0),
+  bodyLarge: TextStyle(fontSize: 16, height: 24 / 16, letterSpacing: 0),
+  bodyMedium: TextStyle(fontSize: 14, height: 22 / 14, letterSpacing: 0),
+  bodySmall: TextStyle(fontSize: 12, height: 18 / 12, letterSpacing: 0),
+  labelLarge: TextStyle(fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w500, letterSpacing: 0),
+  labelMedium: TextStyle(fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w500, letterSpacing: 0),
+  labelSmall: TextStyle(fontSize: 11, height: 16 / 11, fontWeight: FontWeight.w600, letterSpacing: 0),
+);
+
 /// The app's theme (and the 管理后台's), made from [ThemeTokens] (tech plan S24): Material's colour roles are the
 /// tokens under Material's names, and the tokens themselves ride along as a theme extension for what Material has no
-/// role for. The two themes differ in colour only.
+/// role for. The two themes differ in colour only. The type is one ramp ([_ramp]).
 ThemeData buildTheme(Brightness brightness) {
   final t = ThemeTokens.forBrightness(brightness);
   // Secondary and tertiary come from the accent; every other role is a token.
@@ -64,6 +82,7 @@ ThemeData buildTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
+    textTheme: _ramp,
     extensions: [t],
     scaffoldBackgroundColor: t.background,
     cardColor: t.card,
@@ -91,7 +110,7 @@ ThemeData buildTheme(Brightness brightness) {
       filled: true,
       fillColor: t.inset,
       hintStyle: TextStyle(color: t.textMuted),
-      contentPadding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.m + 2),
+      contentPadding: const EdgeInsets.symmetric(horizontal: Space.l, vertical: Space.field),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.field), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(Radii.field), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(

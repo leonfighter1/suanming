@@ -6,6 +6,7 @@ import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../labels.dart';
+import '../layout.dart';
 import 'follow_up.dart';
 import 'reading_paragraph.dart';
 import 'remedy.dart';
@@ -93,7 +94,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final layers = widget.layers;
-    final body = theme.textTheme.bodyLarge?.copyWith(height: 1.75);
+    final body = ReadingText.body(context);
     var i = 0;
     Widget target(int n, Widget child) =>
         Focus(focusNode: _targetFocus[n], child: KeyedSubtree(key: _targets[n], child: child));
@@ -102,7 +103,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
     final followUp = widget.reportId != null;
     final list = ListView(
       // Room at the bottom for the floating 继续追问, so the last card scrolls clear of it.
-      padding: followUp ? Space.page.copyWith(bottom: Space.xxl + 72) : Space.page,
+      padding: pagePadding(context, bottom: followUp ? Space.fab : Space.xxl),
       // Every card is built, so the jump list can reach the last one from the top.
       scrollCacheExtent: const ScrollCacheExtent.pixels(100000),
       children: [
@@ -172,8 +173,9 @@ class _FourLayerReportState extends State<FourLayerReport> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // The dot centred on the fact's first line.
                         Padding(
-                          padding: const EdgeInsets.only(top: 7, right: Space.s),
+                          padding: EdgeInsets.only(top: firstLineInset(DefaultTextStyle.of(context).style, 5), right: Space.s),
                           child: Container(width: 5, height: 5, decoration: BoxDecoration(color: scheme.primary, shape: BoxShape.circle)),
                         ),
                         Expanded(child: Text(f, textAlign: TextAlign.start)),
@@ -236,7 +238,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
                 Badge(label: Text(l10n.aiBadge)),
               ],
             ),
-            padding: const EdgeInsets.fromLTRB(Space.l + 4, Space.l + 4, Space.s, Space.s),
+            padding: const EdgeInsets.fromLTRB(Space.card, Space.card, Space.s, Space.s),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -263,7 +265,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
                                 child: Text(
                                   s.summary!,
                                   key: Key('summary-${s.topic}'),
-                                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, height: 1.5),
+                                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                               ),
                         children: [

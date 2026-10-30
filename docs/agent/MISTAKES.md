@@ -24,7 +24,7 @@
 20. Check whether a DropdownMenu is open with find.text(entry).hitTestable(), never a plain find.text.
 21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
 22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead. A dialog lies in the overlay, above the page's first RepaintBoundary: to include it, render the root layer, `(tester.binding.renderViews.first.debugLayer as OffsetLayer).toImage(...)` (v3.2.0).
-23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; the guard blocks `cmd /c rmdir` on a junction that points at the repo, so when it can't be removed, leave it and expect the next harness run to need a second try. After a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more.
+23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; the guard blocks `cmd /c rmdir` on a junction that points at the repo, so when it can't be removed, leave it. Before the harness after manual runs, delete `app/.dart_tool/flutter_build` on the real path (Flutter's record of the last run; rule 74): with no record there is nothing stale (v12.1.0: the second run passed). After a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more.
 24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
 25. In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta.
 26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
@@ -78,8 +78,15 @@
 74. A Flutter build script clears .dart_tool/flutter_build first (real path), builds through a junction it removes afterwards, writes a build that is served to its own --output folder (the harness builds build/web), and checks the output has its files: rule 23's stale-path deletion hits web build output too, through any junction still there.
 75. A widget that shows its own focus must ask its own node for hasPrimaryFocus: Focus.onFocusChange (and InkWell's) report hasFocus, which is true while anything inside has the focus. Test it with a focusable child inside.
 76. Every WidgetState property in a component theme must resolve to a value for the empty state set: ChipThemeData.lerp, run by every change of theme, fails on null. Give each state Material's own default (a chosen flat chip keeps a transparent 1 px side, so `BorderSide.none` shrinks it by 2 px; rule 49), and test a theme change itself (switch, pump half the animation, check colours between the two themes), not only each theme on its own.
+77. A label that can hold model or user text (a pill, a chip, a badge) lets it wrap: a loose Flexible inside a MainAxisSize.min row, never a bare Text in a Row. Test it with a long text in a narrow column.
 
 ## Log
+
+### 2026-10-30: A label pill overflowed with a long text
+- **Symptom:** life_report_test: a RenderFlex overflowed by 71 px in a Pill (喜 · a full sentence) once pages sat in the 720 column, narrower than the test window.
+- **Root cause:** Pill put its Text straight into a Row, so it could never wrap; the old full-width page only hid it. The 喜 and 忌 lists are model text and can be sentences.
+- **Fix:** The text is a loose Flexible in the pill's MainAxisSize.min row: it wraps when the parent is bounded and keeps one line in an unbounded row (Flex asserts only for a tight fit or a max-size row; checked in the SDK).
+- **Rule:** A label that can hold model or user text (a pill, a chip, a badge) lets it wrap: a loose Flexible inside a MainAxisSize.min row, never a bare Text in a Row. Test it with a long text in a narrow column. (Rule 77)
 
 ### 2026-10-30: A change of theme crashed in the chip theme lerp
 - **Symptom:** Switching 浅色 to 深色 (and the system switching light and dark while the app runs) threw a null check in ChipThemeData._lerpSides inside AnimatedTheme; the page stopped rebuilding.

@@ -9,6 +9,7 @@ import 'bazi_chart_page.dart';
 import 'life_report_page.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'profiles_page.dart';
 import 'widgets/birth_fields.dart';
 import 'widgets/life_context_fields.dart';
@@ -111,7 +112,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
         child: Scaffold(
           appBar: AppBar(title: Text(l10n.homeBazi)),
           body: ListView(
-            padding: Space.page,
+            padding: pagePadding(context),
             children: [
               // 排盘解读 or 一生运势报告: same person, same form.
               FadeSlideIn(

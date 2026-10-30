@@ -24,7 +24,7 @@ class LifeTopicBlock extends StatelessWidget {
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.primary),
           ),
           const SizedBox(height: Space.xs),
-          Text(topic.summary, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700, height: 1.7)),
+          Text(topic.summary, style: ReadingText.body(context)?.copyWith(fontWeight: FontWeight.w700)),
           for (final (period, text) in topic.points) period.isEmpty ? LifeBullet(text) : LifeLabeled(period, text),
         ],
       ),
@@ -50,20 +50,20 @@ class StageChart extends StatelessWidget {
           for (final s in stages)
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
+                padding: const EdgeInsets.symmetric(horizontal: Space.xxs),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text('${s.score}', style: Theme.of(context).textTheme.labelSmall),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: Space.xxs),
                     Container(
                       height: 110 * s.score / 100,
                       decoration: BoxDecoration(
                         color: s.score == best ? scheme.tertiary : color,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(Radii.xs)),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: Space.xs),
                     Text(s.ages, style: Theme.of(context).textTheme.labelSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
@@ -111,7 +111,7 @@ class LifeStageRow extends StatelessWidget {
               style: theme.textTheme.titleSmall?.copyWith(color: best ? scheme.tertiary : null),
             ),
           ),
-          Expanded(child: Text(stage.focus, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6))),
+          Expanded(child: Text(stage.focus, style: ReadingText.small(context))),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/models.dart' show Json;
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'layout.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
 /// Held content for 内容审核 (reviewers only), newest first.
@@ -32,17 +33,13 @@ class ReviewPage extends ConsumerWidget {
         onRefresh: () => ref.refresh(reviewsProvider.future),
         child: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => ListView(padding: Space.page, children: [Text('${l10n.errorTitle}\n$e')]),
+          error: (e, _) => ListView(padding: pagePadding(context), children: [Text('${l10n.errorTitle}\n$e')]),
           data: (items) => ListView(
-            padding: Space.page,
+            padding: pagePadding(context),
             children: [
               Text(l10n.reviewHint, style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: Space.m),
-              if (items.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 80),
-                  child: Text(l10n.reviewEmpty, textAlign: TextAlign.center),
-                ),
+              if (items.isEmpty) EmptyState(icon: Icons.fact_check_outlined, text: l10n.reviewEmpty),
               for (final it in items) _ReviewTile(item: it),
             ],
           ),
@@ -84,7 +81,7 @@ class _ReviewTile extends ConsumerWidget {
                   '${kindLabel(l10n, item['kind'] as String)} · ${blocked ? l10n.reviewBlocked : l10n.reviewHeld}',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: Space.xxs),
                 Text(
                   [
                     _date(item['created_at'] as String?),
@@ -163,7 +160,7 @@ class _ReviewDetailPageState extends ConsumerState<ReviewDetailPage> {
           final flagged = [...hits.map((h) => '${h['match']}'), ...guard.map((g) => '${g['quote']}')].where((s) => s.isNotEmpty).toList();
           final texts = reviewTexts(d['content']);
           return ListView(
-            padding: Space.page,
+            padding: pagePadding(context),
             children: [
               Wrap(
                 spacing: Space.s,
@@ -220,7 +217,7 @@ class _ReviewDetailPageState extends ConsumerState<ReviewDetailPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(label, style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant)),
-                                Text(text, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+                                Text(text, style: ReadingText.small(context)),
                               ],
                             ),
                           ),

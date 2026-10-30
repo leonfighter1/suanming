@@ -10,6 +10,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
+import 'layout.dart';
 import 'tarot_glossary_page.dart';
 import 'widgets/recalc_check.dart';
 import 'widgets/report_request.dart';
@@ -150,7 +151,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
             ],
           ),
           body: ListView(
-            padding: Space.page,
+            padding: pagePadding(context, maxWidth: Grid.wide),
             children: [
               FadeSlideIn(
                 child: HeroBanner(title: l10n.homeTarot, subtitle: l10n.homeTarotDesc, icon: Icons.style_rounded),

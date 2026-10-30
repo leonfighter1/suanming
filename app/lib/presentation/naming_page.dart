@@ -7,6 +7,7 @@ import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/names_card.dart';
 import 'widgets/report_request.dart';
 
@@ -64,7 +65,7 @@ class _NamingPageState extends ConsumerState<NamingPage> {
       child: Scaffold(
         appBar: AppBar(title: Text(l10n.homeNaming)),
         body: ListView(
-          padding: Space.page,
+          padding: pagePadding(context),
           children: [
             AppCard(
               child: Column(

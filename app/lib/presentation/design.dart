@@ -1,27 +1,59 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 
 import 'tokens.dart';
 
-/// Spacing scale. Use these instead of ad-hoc numbers so screens line up.
+/// The spacing scale (tech plan S24, the ui-design skill): steps of 4 points named by size, then the uses with names of
+/// their own. Every padding and gap is one of these; [xxs] only inside small parts (a pill, a key cap, a nudge). A
+/// page's sides come from its window class (layout.dart `pagePadding`).
 abstract final class Space {
+  static const xxs = 2.0;
   static const xs = 4.0;
   static const s = 8.0;
   static const m = 12.0;
   static const l = 16.0;
   static const xl = 24.0;
   static const xxl = 32.0;
+  static const xxxl = 48.0;
 
-  /// Horizontal page gutter.
-  static const page = EdgeInsets.fromLTRB(l, m, l, xxl);
+  /// Inside a card ([AppCard]'s padding).
+  static const card = 20.0;
+
+  /// Above and below a field's text: with its 24-point line a field is 52 high, as tall as the main button.
+  static const field = 14.0;
+
+  /// Room above an empty page's message ([EmptyState]).
+  static const empty = 96.0;
+
+  /// Room at a page's foot for the floating 追问 button, so it never covers the last card (rule 55).
+  static const fab = 104.0;
 }
 
+/// Corner radii (the ui-design skill), from a thin bar's to the banner's. A rounded box inside another takes a smaller
+/// step than its parent.
 abstract final class Radii {
+  /// A bar, a thin mark, a tiny thumbnail.
+  static const xxs = 2.0;
+
+  /// A thumbnail, a key cap, a meter.
+  static const xs = 4.0;
+
+  /// A chip, a pill, a small tile.
+  static const chip = 8.0;
+
+  /// A field, a button, a segment, a box inside a card.
+  static const field = 12.0;
+
+  /// An icon's tile.
+  static const tile = 16.0;
+
   static const card = 20.0;
-  static const field = 14.0;
-  static const chip = 10.0;
+
+  /// The banner at the top of 首页.
+  static const hero = 24.0;
 }
 
 /// How long things take (the ui-design skill). A state (hover, focus, a choice) changes in [fast], a size in [medium],
@@ -110,7 +142,7 @@ class AppCard extends StatefulWidget {
     this.icon,
     this.trailing,
     this.color,
-    this.padding = const EdgeInsets.all(Space.l + 4),
+    this.padding = const EdgeInsets.all(Space.card),
     this.onTap,
     this.onLongPress,
   });
@@ -382,14 +414,14 @@ class HeroBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: Space.l),
       padding: const EdgeInsets.all(Space.xl),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Radii.card + 4),
+        borderRadius: BorderRadius.circular(Radii.hero),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [scheme.primary, Color.lerp(scheme.primary, scheme.tertiary, 0.6)!],
         ),
         boxShadow: [
-          BoxShadow(color: scheme.primary.withValues(alpha: 0.25), blurRadius: 24, offset: const Offset(0, 10)),
+          BoxShadow(color: scheme.primary.withValues(alpha: 0.18), blurRadius: Space.xl, offset: const Offset(0, Space.s)),
         ],
       ),
       child: Row(
@@ -414,7 +446,8 @@ class HeroBanner extends StatelessWidget {
   }
 }
 
-/// Small rounded label (status, source level, stage).
+/// Small rounded label (status, source level, stage). A long one wraps within its parent's width rather than run
+/// past it (an AI's 喜 or 忌 can be a sentence); in a row, where its width is unbounded, it keeps to one line.
 class Pill extends StatelessWidget {
   const Pill(this.text, {super.key, this.color, this.icon, this.dotted = false});
   final String text;
@@ -428,21 +461,62 @@ class Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = color ?? Theme.of(context).colorScheme.secondary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.s + 2, vertical: Space.xs),
+      padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.xs),
       decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(Radii.chip)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[Icon(icon, size: 14, color: c), const SizedBox(width: Space.xs)],
-          Text(
-            text,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: c,
-                  fontWeight: FontWeight.w600,
-                  decoration: dotted ? TextDecoration.underline : null,
-                  decorationStyle: dotted ? TextDecorationStyle.dotted : null,
-                ),
+          // Loose, in a row of its own size: it may wrap, and it never asks for an unbounded width (rule 49).
+          Flexible(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: c,
+                    fontWeight: FontWeight.w600,
+                    decoration: dotted ? TextDecoration.underline : null,
+                    decorationStyle: dotted ? TextDecorationStyle.dotted : null,
+                  ),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Long text (the ui-design skill): a reading's paragraphs at 16 / 28, its notes, examples and intros at 14 / 24, a
+/// small note at 12 / 20. Short text takes the type ramp as it is.
+abstract final class ReadingText {
+  static TextStyle? body(BuildContext context) => Theme.of(context).textTheme.bodyLarge?.copyWith(height: 28 / 16);
+  static TextStyle? small(BuildContext context) => Theme.of(context).textTheme.bodyMedium?.copyWith(height: 24 / 14);
+  static TextStyle? caption(BuildContext context) => Theme.of(context).textTheme.bodySmall?.copyWith(height: 20 / 12);
+}
+
+/// How far down a mark of [size] (a bullet, an icon) goes beside text in [style] to sit centred on its first line: the
+/// ui-design skill's alignment rule for a mark before text that may wrap.
+double firstLineInset(TextStyle? style, double size) {
+  final line = (style?.fontSize ?? 14) * (style?.height ?? 1.5);
+  return math.max(0, (line - size) / 2);
+}
+
+/// A page with nothing to show yet (the ui-design skill): its icon, the message under it, centred, with room above.
+class EmptyState extends StatelessWidget {
+  const EmptyState({super.key, required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = ThemeTokens.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: Space.empty),
+      child: Column(
+        children: [
+          Icon(icon, size: Space.xxxl, color: t.textMuted),
+          const SizedBox(height: Space.l),
+          Text(text, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium?.copyWith(color: t.textSecondary)),
         ],
       ),
     );

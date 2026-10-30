@@ -166,7 +166,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               ),
             ),
             if (_register) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: Space.m),
               DropdownButtonFormField<String>(
                 key: const Key('country'),
                 initialValue: _country,
@@ -188,10 +188,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             ],
             if (_error != null)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: Space.s),
                 child: Text(_error!, key: const Key('auth-error'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
               ),
-            const SizedBox(height: 16),
+            const SizedBox(height: Space.l),
             FilledButton(
               key: const Key('auth-submit'),
               onPressed: canSubmit ? _submit : null,
@@ -205,10 +205,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               }),
               child: Text(_register ? l10n.haveAccount : l10n.noAccount),
             ),
-            const Divider(height: 32),
+            const Divider(height: Space.xxl),
             // Needs the sign_in_with_apple / google_sign_in SDKs and console setup (client ids).
             OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.apple), label: Text('${l10n.appleSignIn} · ${l10n.comingSoon}')),
-            const SizedBox(height: 8),
+            const SizedBox(height: Space.s),
             OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.g_mobiledata), label: Text('${l10n.googleSignIn} · ${l10n.comingSoon}')),
           ],
         ),

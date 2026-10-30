@@ -6,6 +6,7 @@ import '../domain/terms.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/tarot_spread.dart';
 
 /// 牌义图鉴 (v2.7.0): all 78 cards with their art and the three keywords painted on each,
@@ -32,7 +33,7 @@ class TarotGlossaryPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tarotGlossary)),
       body: ListView(
-        padding: Space.page,
+        padding: pagePadding(context),
         children: [
           for (final (name, cards) in groups)
             AppCard(
@@ -75,7 +76,7 @@ class _Tile extends StatelessWidget {
         child: Column(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(Radii.xs),
               child: Image.asset(
                 tarotArt(id),
                 width: 76,
@@ -110,7 +111,7 @@ class _CardMeaning extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(Radii.chip),
             child: Image.asset(
               tarotArt(id),
               width: 200,

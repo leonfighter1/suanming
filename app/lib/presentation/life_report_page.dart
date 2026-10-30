@@ -17,7 +17,9 @@ import '../platform/printer.dart';
 import 'archive_actions.dart' show lifeDocumentOf, shareDocuments;
 import 'design.dart';
 import 'labels.dart';
+import 'layout.dart';
 import 'life_export.dart';
+import 'tokens.dart';
 import 'widgets/follow_up.dart';
 import 'widgets/life_blocks.dart';
 import 'widgets/life_figures.dart';
@@ -268,7 +270,7 @@ class _PendingState extends State<_Pending> {
     final guard = widget.stage == 'guard';
     return ListView(
       key: const Key('life-pending'),
-      padding: Space.page,
+      padding: pagePadding(context),
       children: [
         const SizedBox(height: Space.xxl),
         Icon(Icons.auto_stories, size: 64, color: scheme.primary),
@@ -342,14 +344,14 @@ class _BodyState extends State<_Body> {
     final hant = widget.hant;
     final f = view.facts!;
     final l = view.layers!;
-    final body = theme.textTheme.bodyLarge?.copyWith(height: 1.8);
+    final body = ReadingText.body(context);
     final lunar = widget.chart.bazi.lunar;
     var i = 0;
     Widget fade(Widget w) => FadeSlideIn(index: i++, child: w);
 
     final list = ListView(
       // Room at the bottom for the floating 继续追问; every card built, so the button can bring up the last one.
-      padding: Space.page.copyWith(bottom: Space.xxl + 72),
+      padding: pagePadding(context, bottom: Space.fab),
       scrollCacheExtent: const ScrollCacheExtent.pixels(100000),
       children: [
         fade(LifeHero(title: l10n.lifeReportOf(header.name), subtitle: l10n.lifeSubtitle)),
@@ -421,7 +423,7 @@ class _BodyState extends State<_Body> {
                 runSpacing: Space.s,
                 children: [
                   for (final x in l.favorable())
-                    Pill('${l10n.lifeFavorable} · $x', icon: Icons.add_circle_outline, color: Colors.green.shade700),
+                    Pill('${l10n.lifeFavorable} · $x', icon: Icons.add_circle_outline, color: ThemeTokens.of(context).success),
                   for (final x in l.unfavorable())
                     Pill('${l10n.lifeUnfavorable} · $x', icon: Icons.remove_circle_outline, color: scheme.error),
                 ],

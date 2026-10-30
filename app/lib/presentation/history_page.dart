@@ -13,6 +13,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'archive_actions.dart';
 import 'design.dart';
 import 'keyboard.dart' show SegmentKeys;
+import 'layout.dart';
 import 'life_report_page.dart';
 import 'report_page.dart';
 import 'settings_page.dart';
@@ -343,19 +344,14 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         },
         child: history.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => ListView(padding: Space.page, children: [Text('$e')]),
+          error: (e, _) => ListView(padding: pagePadding(context), children: [Text('$e')]),
           data: (_) => records.isEmpty
               ? ListView(
-                  padding: Space.page,
-                  children: [
-                    const SizedBox(height: 120),
-                    Icon(Icons.history_toggle_off, size: 56, color: scheme.outline),
-                    const SizedBox(height: Space.l),
-                    Text(l10n.historyEmpty, textAlign: TextAlign.center),
-                  ],
+                  padding: pagePadding(context),
+                  children: [EmptyState(icon: Icons.history_toggle_off, text: l10n.historyEmpty)],
                 )
               : ListView(
-                  padding: Space.page,
+                  padding: pagePadding(context),
                   children: [
                     SegmentKeys(
                       child: SegmentedButton<bool>(
@@ -401,7 +397,7 @@ class _BarAction extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon),
-              const SizedBox(height: 2),
+              const SizedBox(height: Space.xxs),
               Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
             ],
           ),
@@ -549,7 +545,7 @@ class HistoryTile extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(right: Space.xs),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(Radii.xxs),
                             child: RotatedBox(
                               quarterTurns: i < item.cardsReversed.length && item.cardsReversed[i] ? 2 : 0,
                               child: Image.asset(

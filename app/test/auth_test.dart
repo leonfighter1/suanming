@@ -37,6 +37,8 @@ void main() {
     expect(tester.widget<FilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
     await tester.tap(find.byKey(const Key('age-confirm')));
     await settle(tester);
+    // The sign-up form runs past a short window (v12.2.0's type ramp: helper lines of 18).
+    await scrollTo(tester, const Key('auth-submit'));
     await tester.tap(find.byKey(const Key('auth-submit')));
     await settle(tester);
 
@@ -122,11 +124,14 @@ void main() {
     await tester.enterText(find.byKey(const Key('password')), 'long enough pw');
     await tester.tap(find.byKey(const Key('age-confirm')));
     await settle(tester);
+    await scrollTo(tester, const Key('auth-submit'));
     await tester.tap(find.byKey(const Key('auth-submit')));
     await settle(tester);
     expect(find.text('這個用戶名稱已被使用'), findsOneWidget);
     expect(find.byKey(const Key('entry-bazi')), findsNothing);
 
+    // Back up to the username (rule 25).
+    await scrollToFinder(tester, find.byKey(const Key('username')), delta: -300);
     await tester.enterText(find.byKey(const Key('username')), '徐梅');
     await settle(tester);
     // The error line moved 注册 down the page.

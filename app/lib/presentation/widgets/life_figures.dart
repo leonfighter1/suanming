@@ -5,6 +5,12 @@ import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../life_export.dart';
 import '../theme.dart' show wuxingColorOf;
+import '../tokens.dart';
+
+// A hexagram's drawing: its own geometry, not the interface's spacing (the ui-design skill). Each line is 11 high with
+// 3.5 above and below; a broken line's halves leave 14 between them.
+const _lineGap = 3.5;
+const _breakWidth = 14.0;
 
 /// Six lines drawn top (上爻) to bottom (初爻); the 命爻 in the accent colour.
 class HexagramFigure extends StatelessWidget {
@@ -26,12 +32,12 @@ class HexagramFigure extends StatelessWidget {
             children: [
               for (var line = 6; line >= 1; line--)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3.5),
+                  padding: const EdgeInsets.symmetric(vertical: _lineGap),
                   child: Row(
                     children: [
                       Expanded(child: _bar(moving == line ? scheme.error : scheme.onSurface)),
                       if (!hexagram.yang(line)) ...[
-                        const SizedBox(width: 14),
+                        const SizedBox(width: _breakWidth),
                         Expanded(child: _bar(moving == line ? scheme.error : scheme.onSurface)),
                       ] else
                         const SizedBox.shrink(),
@@ -50,7 +56,7 @@ class HexagramFigure extends StatelessWidget {
 
   Widget _bar(Color c) => Container(
     height: 11,
-    decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(2)),
+    decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(Radii.xxs)),
   );
 }
 
@@ -86,10 +92,10 @@ class LifeLineRow extends StatelessWidget {
           const SizedBox(height: Space.s),
           Text(
             line.text.split(RegExp('[：:]')).skip(1).join('：'),
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, height: 1.6),
+            style: ReadingText.small(context)?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: Space.xs),
-          Text(reading, style: theme.textTheme.bodyLarge?.copyWith(height: 1.7)),
+          Text(reading, style: ReadingText.body(context)),
         ],
       ),
     );
@@ -155,7 +161,7 @@ class LifeWuxingBars extends StatelessWidget {
       children: [
         for (final wx in order)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: Space.xs),
             child: Row(
               children: [
                 SizedBox(
@@ -167,7 +173,7 @@ class LifeWuxingBars extends StatelessWidget {
                 ),
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(Radii.xs),
                     child: LinearProgressIndicator(
                       value: (scores[wx] ?? 0) / max,
                       minHeight: 12,
@@ -201,6 +207,8 @@ class BazhaiCompass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // A good direction in the success colours, a bad one in danger's; the star and 吉 or 凶 say it in words too.
+    final t = ThemeTokens.of(context);
     BazhaiDirection? at(String dir) =>
         facts.directions.where((d) => d.direction == dir || d.direction == (_hantDir[dir] ?? dir)).firstOrNull;
     return Column(
@@ -214,12 +222,14 @@ class BazhaiCompass extends StatelessWidget {
                   child: AspectRatio(
                     aspectRatio: 1.25,
                     child: Container(
-                      margin: const EdgeInsets.all(3),
+                      margin: const EdgeInsets.all(Space.xs),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(Radii.chip),
                         color: dir.isEmpty
                             ? scheme.primaryContainer
-                            : (at(dir)!.good ? Colors.green : scheme.error).withValues(alpha: at(dir)!.good ? 0.12 : 0.10),
+                            : at(dir)!.good
+                                ? t.successSoft
+                                : t.dangerSoft,
                       ),
                       child: Center(
                         child: dir.isEmpty
@@ -236,7 +246,7 @@ class BazhaiCompass extends StatelessWidget {
                                     hantTerm(at(dir)!.star, hant),
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      color: at(dir)!.good ? Colors.green.shade800 : scheme.error,
+                                      color: at(dir)!.good ? t.success : t.danger,
                                     ),
                                   ),
                                   Text(at(dir)!.luck, style: Theme.of(context).textTheme.bodySmall),

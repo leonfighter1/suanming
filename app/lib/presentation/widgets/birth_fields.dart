@@ -321,7 +321,8 @@ class LunarPreview extends ConsumerWidget {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
       child: text.isEmpty
-          ? const SizedBox(height: 20)
+          // As tall as the pill that takes its place: its 16-point line and 4 above and below.
+          ? const SizedBox(height: Space.xl)
           : Align(
               key: ValueKey(text),
               alignment: Alignment.centerLeft,

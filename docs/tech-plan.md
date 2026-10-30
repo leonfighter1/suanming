@@ -2188,6 +2188,13 @@ Read as:
   - `Space.x ± n`;
   - a `BorderRadius.circular(n)` with a number.
 - Every app test still passes; any layout tests that change are reviewed and noted.
+- **As built (v12.2.0):** `layout.dart` (`WindowClass`, `Grid`, `pagePadding`); `Space` gained `xxs`, `xxxl` and the
+  named uses `card`, `field`, `empty`, `fab`; `Radii` became a scale; `ReadingText`, `EmptyState` and
+  `firstLineInset` in design.dart. The rules live in `app/test/design_rules.dart`, run over the app by `grid_test.dart`
+  and over the 管理后台 by `admin/test/design_rules_test.dart`; they also catch a line height of one's own, a
+  `Space`/`Radii` plus a number, and `Space.page`. Found on the way: `Pill` couldn't wrap (rule 77); the 四柱 grid's
+  labels now sit level with their rows' middle. Two sign-up tests now scroll to 注册 (the form's helper lines grew
+  2 px). No layout test's expected number changed.
 
 ### WP24.3 The dashboard's asymmetric layout (→ v12.3.0)
 
@@ -2840,6 +2847,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP22.5    | done                         | v12.0.0 |
 | WP23.1    | done                         | v12.0.1 |
 | WP24.1    | done                         | v12.1.0 |
-| WP24.2    | planned                      | v12.2.0 |
+| WP24.2    | done                         | v12.2.0 |
 | WP24.3    | planned                      | v12.3.0 |
 | WP24.4    | planned                      | v13.0.0 |

@@ -40,7 +40,7 @@ class RemedyCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.remedyDesc, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+          Text(l10n.remedyDesc, style: ReadingText.small(context)),
           const SizedBox(height: Space.s),
           for (final t in topics)
             Padding(
@@ -92,7 +92,7 @@ class RemedyButton extends ConsumerWidget {
       return const SizedBox(
         height: 40,
         width: 40,
-        child: Padding(padding: EdgeInsets.all(10), child: CircularProgressIndicator(strokeWidth: 2)),
+        child: Padding(padding: EdgeInsets.all(Space.m), child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
     final plan = l.items.where((r) => r.topic == topic && r.status != 'failed').firstOrNull;
@@ -286,7 +286,7 @@ class _PlanBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final body = theme.textTheme.bodyLarge?.copyWith(height: 1.75);
+    final body = ReadingText.body(context);
     Widget heading(String s) => Padding(
       padding: const EdgeInsets.only(top: Space.l, bottom: Space.s),
       child: Text(s, style: theme.textTheme.titleMedium?.copyWith(color: scheme.primary)),
@@ -327,7 +327,7 @@ class _PlanBody extends StatelessWidget {
                   CircleAvatar(
                     radius: 13,
                     backgroundColor: scheme.primary,
-                    child: Text('${i + 1}', style: TextStyle(color: scheme.onPrimary, fontSize: 13)),
+                    child: Text('${i + 1}', style: theme.textTheme.labelMedium?.copyWith(color: scheme.onPrimary)),
                   ),
                   const SizedBox(width: Space.m),
                   Expanded(

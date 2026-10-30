@@ -8,6 +8,7 @@ import '../generated/contract.g.dart' show inquiryAnswerMax;
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'report_page.dart';
 import 'widgets/points.dart';
 import 'widgets/remedy.dart' show compactButtons;
@@ -154,7 +155,7 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
             AsyncValue(value: final v?) => _body(context, v),
             AsyncValue(error: final e?) => Center(
                 child: Padding(
-                  padding: Space.page,
+                  padding: pagePadding(context),
                   child: Text('${l10n.errorTitle}\n$e', textAlign: TextAlign.center),
                 ),
               ),
@@ -172,7 +173,7 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
     final open = view.open;
     final asked = view.turns.length;
     return ListView(
-      padding: Space.page,
+      padding: pagePadding(context),
       children: [
         if (!view.ready && !view.failed)
           AppCard(
@@ -296,7 +297,7 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if ((view.closing ?? '').isNotEmpty) Text(view.closing!, style: theme.textTheme.bodyLarge?.copyWith(height: 1.6)),
+                  if ((view.closing ?? '').isNotEmpty) Text(view.closing!, style: ReadingText.body(context)),
                   if ((view.understanding ?? '').isNotEmpty) ...[
                     const SizedBox(height: Space.s),
                     Text(
@@ -365,14 +366,14 @@ class _MasterBubble extends StatelessWidget {
             Text(l10n.inquiryMaster, style: theme.textTheme.labelMedium?.copyWith(color: scheme.primary)),
             if (turn.say.isNotEmpty) ...[
               const SizedBox(height: Space.xs),
-              Text(turn.say, key: ValueKey<String>('inquiry-say-$index'), style: theme.textTheme.bodyLarge?.copyWith(height: 1.6)),
+              Text(turn.say, key: ValueKey<String>('inquiry-say-$index'), style: ReadingText.body(context)),
             ],
             if (turn.question.isNotEmpty) ...[
               const SizedBox(height: Space.xs),
               Text(
                 turn.question,
                 key: ValueKey<String>('inquiry-question-$index'),
-                style: theme.textTheme.bodyLarge?.copyWith(height: 1.6, fontWeight: FontWeight.w700),
+                style: ReadingText.body(context)?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ],

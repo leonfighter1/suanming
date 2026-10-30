@@ -5,6 +5,7 @@ import '../application/providers.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
+import 'layout.dart';
 import 'widgets/report_request.dart';
 import 'widgets/tarot_spread.dart';
 
@@ -30,7 +31,7 @@ class DailyCard extends ConsumerWidget {
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(Radii.xs),
             // Reversed upside down, as it was drawn.
             child: RotatedBox(
               quarterTurns: c.reversed ? 2 : 0,
@@ -77,7 +78,7 @@ class DailyCardPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.dailyCard)),
       body: ListView(
-        padding: Space.page,
+        padding: pagePadding(context),
         children: [
           FadeSlideIn(
             child: AppCard(

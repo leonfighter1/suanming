@@ -6,6 +6,13 @@ import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 
+// A hexagram's drawing: its own geometry, not the interface's spacing (the ui-design skill). Each line is 9 high with
+// 3.5 above and below, so six make 96; the moving mark has room at the right, and as much at the left keeps the lines
+// centred. The arrow between 本卦 and 變卦 sits level with the lines' middle, below the sides' titles.
+const _lineGap = 3.5;
+const _markRoom = 18.0;
+const _arrowDrop = 64.0;
+
 /// A line's name: 初九, 六二 … 上六 (yang 九, yin 六); 7 is 用九 / 用六.
 String lineName(int position, bool yang) {
   const places = ['初', '二', '三', '四', '五', '上'];
@@ -63,7 +70,7 @@ class HexagramCard extends ConsumerWidget {
               ),
               if (changed != null) ...[
                 Padding(
-                  padding: const EdgeInsets.only(top: 64),
+                  padding: const EdgeInsets.only(top: _arrowDrop),
                   child: Icon(Icons.arrow_forward, color: theme.colorScheme.outline),
                 ),
                 Expanded(
@@ -133,16 +140,16 @@ class HexagramLines extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     Widget bar(double w, Color c) =>
-        Container(width: w, height: 9, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(2)));
+        Container(width: w, height: 9, decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(Radii.xxs)));
     Widget line(int v) {
       final moves = marks && LiuyaoChart.moving(v);
       final colour = moves ? scheme.primary : scheme.onSurface;
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3.5),
+        padding: const EdgeInsets.symmetric(vertical: _lineGap),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(width: 18),
+            const SizedBox(width: _markRoom),
             if (LiuyaoChart.yang(v))
               bar(width, colour)
             else ...[
@@ -151,7 +158,7 @@ class HexagramLines extends StatelessWidget {
               bar(width * 0.42, colour),
             ],
             SizedBox(
-              width: 18,
+              width: _markRoom,
               child: moves
                   ? Text(v == 9 ? '○' : '×', textAlign: TextAlign.center, style: TextStyle(color: scheme.primary))
                   : null,

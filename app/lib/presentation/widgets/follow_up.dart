@@ -199,7 +199,7 @@ class _FollowUpCardState extends ConsumerState<FollowUpCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.followUpIntro, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+            Text(l10n.followUpIntro, style: ReadingText.small(context)),
             for (final (i, f) in items.indexed) _Turn(view: f, index: i),
             if (suggestions.isNotEmpty && left > 0 && !waiting) ...[
               const SizedBox(height: Space.m),

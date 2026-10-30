@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
+import 'package:mingli_app/presentation/layout.dart';
 
 import '../application/providers.dart';
 import 'messages.dart';
@@ -52,7 +53,7 @@ class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
       child: Scaffold(
         body: Center(
           child: SingleChildScrollView(
-            padding: Space.page,
+            padding: pagePadding(context),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 380),
               child: AppCard(

@@ -13,6 +13,54 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v12.2.0 (2026-10-30): one grid, spacing scale, type ramp and alignment rules across the app
+
+You asked to unify the grid, the spacing between components, the type scale and the alignment rules across the whole
+app, so every page is more orderly (「对整个app进一步统一网格系统，组件间距，字体比例和对齐规则」). This is the second step
+of stage S24. It is committed locally and goes out with v13.0.0.
+
+- **On a computer or tablet the pages sit in a centred column:**
+  - **Before:** on a wide window the cards stretched across the whole screen, 1,200 px and more.
+  - **Now:** every page is a column at most 720 px wide, centred, with margins by window size: 16 on a phone, 24 on a
+    tablet, 32 on a desktop.
+  - **The tarot page** gets a wider column (1,200), so the spreads keep their full-size cards.
+  - **Phones** look as before.
+- **One spacing scale:** every gap and padding is a step of 4 (2, 4, 8, 12, 16, 24, 32, 48) or one of a few named
+  uses, such as a card's inside (20) and a field's height (52, as tall as the main button). About 75 odd values (6, 7,
+  9, 10, 14, 3.5, "16 + 4" …) are gone.
+- **One type ramp:** twelve roles in eight sizes from 11 to 48, with line heights set for Chinese text and no letter
+  spacing; titles semibold. Long text has its own fixed styles:
+  - **A reading's paragraphs:** 16 / 28.
+  - **Notes and examples:** 14 / 24.
+  - **Small notes:** 12 / 20.
+
+  These replace about 25 one-off line heights (1.5, 1.6, 1.65, 1.7, 1.75, 1.8). Chart labels now use the ramp's
+  smallest size.
+
+- **Alignment rules:**
+  - **Section titles:** 首页's 东方 and 西方 now start on the cards' left edge (they were 4 px in).
+  - **Bullets and icons** before text that wraps now sit centred on the text's first line, worked out from the text's
+    size instead of a guessed nudge.
+  - **In the 四柱 grid,** a row's label sits level with the middle of its 干支 instead of at the top.
+  - **Empty pages** (以往记录, 内容审核) have one look: icon, message, the same room above.
+  - **Corners:** one scale (2, 4, 8, 12, 16, 20, 24).
+- **Fixed:**
+  - **A long label could run off the screen.** A label pill (喜 / 忌 on the 一生运势报告, which the AI may write as a
+    sentence) ran past the page's edge; it now wraps.
+  - **Colours:** the 一生运势 page's 喜 and the 八宅 grid's good directions used a fixed green that read badly in dark
+    mode; they now take the theme's success colours.
+- **For future work:** the rules are in the ui-design skill (`.claude/skills/ui-design`), and a test now fails on any
+  screen that breaks them, in the app or the 管理后台. It checks for a colour written in a widget, a font size, a bare
+  number as a gap, padding or corner, and a line height of its own. Drawn objects (coins, the 签, tarot backs) keep
+  their own.
+- **Verified:**
+  - 5 new tests: window classes; the type ramp; 首页 at phone, tablet and desktop widths (margins, the 720 column,
+    titles on the cards' edge); the rules, against good and bad examples; every screen of the app (and, in the
+    管理后台, every page) clean.
+  - 250 app tests and 49 管理后台 tests pass.
+  - Screenshots checked with the real Chinese font.
+  - harness PASS.
+
 ### v12.1.0 (2026-10-30): one light and dark theme system, and 外观 to switch it
 
 You asked for a unified light and dark theme system that defines the background, card, text and accent of each, keeps

@@ -8,6 +8,7 @@ import 'daily_card.dart';
 import 'design.dart';
 import 'fengshui_page.dart';
 import 'history_page.dart';
+import 'layout.dart';
 import 'liuyao_page.dart';
 import 'profiles_page.dart';
 import 'qiuqian_page.dart';
@@ -54,7 +55,7 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: Space.page,
+        padding: pagePadding(context),
         children: [
           FadeSlideIn(
             child: HeroBanner(
@@ -131,8 +132,9 @@ class _GroupTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // On the cards' left edge (the ui-design skill's alignment rule).
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.xs, Space.s, Space.xs, Space.m),
+      padding: const EdgeInsets.only(top: Space.s, bottom: Space.m),
       child: Semantics(
         header: true,
         child: Text(
@@ -164,7 +166,7 @@ class _Entry extends StatelessWidget {
           Container(
             width: 56,
             height: 56,
-            decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(Radii.field + 2)),
+            decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(Radii.tile)),
             child: Icon(icon, size: 30, color: scheme.onPrimaryContainer),
           ),
           const SizedBox(width: Space.l),

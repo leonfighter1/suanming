@@ -452,10 +452,10 @@ class _KeyRow extends StatelessWidget {
               children: [
                 for (final k in keys)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.xxs),
                     decoration: BoxDecoration(
                       color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(Radii.xs),
                       border: Border.all(color: scheme.outlineVariant),
                     ),
                     child: Text(k, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600)),

@@ -7,6 +7,7 @@ import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/birth_fields.dart';
 import 'widgets/life_context_fields.dart';
 import 'widgets/remedy.dart' show compactButtons;
@@ -37,7 +38,7 @@ class ProfilesPage extends ConsumerWidget {
               ),
             )
           : ListView.builder(
-              padding: Space.page,
+              padding: pagePadding(context),
               itemCount: profiles.length,
               itemBuilder: (_, i) {
                 final p = profiles[i];
@@ -165,7 +166,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             ],
           ),
           body: ListView(
-            padding: Space.page,
+            padding: pagePadding(context),
             children: [
               AppCard(
                 child: Column(

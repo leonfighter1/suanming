@@ -56,9 +56,12 @@ class LifeNote extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, size: 18, color: scheme.onSurfaceVariant),
+          Padding(
+            padding: EdgeInsets.only(top: firstLineInset(ReadingText.caption(context), 18)),
+            child: Icon(Icons.info_outline, size: 18, color: scheme.onSurfaceVariant),
+          ),
           const SizedBox(width: Space.s),
-          Expanded(child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.6))),
+          Expanded(child: Text(text, style: ReadingText.caption(context))),
         ],
       ),
     );
@@ -82,7 +85,7 @@ class LifeSection extends StatelessWidget {
               Container(
                 width: 4,
                 height: 22,
-                decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(Radii.xxs)),
               ),
               const SizedBox(width: Space.s),
               Expanded(
@@ -122,11 +125,12 @@ class LifeBullet extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 9, right: Space.s),
-          child: CircleAvatar(radius: 2.5),
+        // The dot centred on the first line.
+        Padding(
+          padding: EdgeInsets.only(top: firstLineInset(ReadingText.small(context), 5), right: Space.s),
+          child: const CircleAvatar(radius: 2.5),
         ),
-        Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.7))),
+        Expanded(child: Text(text, style: ReadingText.small(context))),
       ],
     ),
   );
@@ -147,7 +151,7 @@ class LifeQuote extends StatelessWidget {
         color: scheme.primaryContainer.withValues(alpha: 0.35),
         border: Border(left: BorderSide(color: scheme.primary, width: 4)),
       ),
-      child: Text(text, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, height: 1.7)),
+      child: Text(text, style: ReadingText.body(context)?.copyWith(fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -161,7 +165,7 @@ class LifeLabeled extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Space.xs + 2),
+      padding: const EdgeInsets.symmetric(vertical: Space.s),
       child: Text.rich(
         TextSpan(
           children: [
@@ -172,7 +176,7 @@ class LifeLabeled extends StatelessWidget {
             TextSpan(text: text),
           ],
         ),
-        style: theme.textTheme.bodyLarge?.copyWith(height: 1.8),
+        style: ReadingText.body(context),
       ),
     );
   }
@@ -190,7 +194,7 @@ class LifeHighlight extends StatelessWidget {
       margin: const EdgeInsets.only(top: Space.m),
       padding: const EdgeInsets.all(Space.m),
       decoration: BoxDecoration(color: scheme.tertiaryContainer.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(Radii.field)),
-      child: Text(text, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700, height: 1.7)),
+      child: Text(text, style: ReadingText.body(context)?.copyWith(fontWeight: FontWeight.w700)),
     );
   }
 }

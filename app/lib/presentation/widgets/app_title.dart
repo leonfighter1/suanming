@@ -23,7 +23,7 @@ class AppTitle extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const ExcludeSemantics(child: BaguaMark(key: Key('title-mark'), size: 34)),
-        const SizedBox(width: Space.s + 2),
+        const SizedBox(width: Space.s),
         Flexible(
           child: ShaderMask(
             blendMode: BlendMode.srcIn,

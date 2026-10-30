@@ -31,21 +31,17 @@ class ReadingParagraph extends StatelessWidget {
             p.term!,
             key: id == null ? null : ValueKey<String>('term-$id'),
             textAlign: TextAlign.start,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: scheme.primary,
-              fontWeight: FontWeight.w700,
-              height: 1.5,
-            ),
+            style: theme.textTheme.titleSmall?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: Space.xs),
         ],
-        Text(p.text, textAlign: TextAlign.start, style: theme.textTheme.bodyLarge?.copyWith(height: 1.75)),
+        Text(p.text, textAlign: TextAlign.start, style: ReadingText.body(context)),
         if (p.example != null) ...[
           const SizedBox(height: Space.s),
           Container(
             key: id == null ? null : ValueKey<String>('example-$id'),
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(Space.m, Space.s + 2, Space.m, Space.s + 2),
+            padding: const EdgeInsets.all(Space.m),
             decoration: BoxDecoration(
               color: scheme.secondaryContainer.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(Radii.field),
@@ -53,17 +49,14 @@ class ReadingParagraph extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // The bulb centred on the example's first line.
                 Padding(
-                  padding: const EdgeInsets.only(top: 2),
+                  padding: EdgeInsets.only(top: firstLineInset(ReadingText.small(context), 18)),
                   child: Icon(Icons.lightbulb_outline, size: 18, color: scheme.secondary),
                 ),
                 const SizedBox(width: Space.s),
                 Expanded(
-                  child: Text(
-                    p.example!,
-                    textAlign: TextAlign.start,
-                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.65),
-                  ),
+                  child: Text(p.example!, textAlign: TextAlign.start, style: ReadingText.small(context)),
                 ),
               ],
             ),

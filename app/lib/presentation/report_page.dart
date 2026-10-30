@@ -15,6 +15,7 @@ import 'archive_actions.dart';
 import 'design.dart';
 import 'inquiry_page.dart' show InquiryRecap;
 import 'labels.dart';
+import 'layout.dart';
 import 'theme.dart' show GanZhiText;
 import 'widgets/four_layer_report.dart';
 import 'widgets/lot_card.dart';
@@ -361,7 +362,7 @@ class _GeneratingState extends State<_Generating> with SingleTickerProviderState
     final stageLabel = {'narrative': l10n.stageNarrative, 'action': l10n.stageAction, 'guard': l10n.stageGuard};
 
     return ListView(
-      padding: Space.page,
+      padding: pagePadding(context),
       children: [
         const SizedBox(height: Space.xl),
         Center(
@@ -445,7 +446,7 @@ class _StageRow extends StatelessWidget {
             child: switch (state) {
               _StepState.done => Icon(Icons.check, size: 18, color: color),
               _StepState.active => Padding(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(Space.s),
                   child: CircularProgressIndicator(strokeWidth: 2, color: color),
                 ),
               _StepState.upcoming => Icon(Icons.circle_outlined, size: 14, color: color),

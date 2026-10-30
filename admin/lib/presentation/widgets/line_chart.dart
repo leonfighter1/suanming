@@ -75,7 +75,8 @@ class _LineChartState extends State<LineChart> {
     final theme = Theme.of(context);
     final n = widget.labels.length;
     final picked = _picked == null || n == 0 ? null : math.min(_picked!, _last);
-    final text = DefaultTextStyle.of(context).style.copyWith(fontSize: 11, color: theme.colorScheme.onSurfaceVariant);
+    // Ticks and the legend: the type ramp's smallest label, in the page's font (rule 50).
+    final text = theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onSurfaceVariant);
     final legend = Wrap(
       spacing: Space.l,
       runSpacing: Space.xs,

@@ -7,6 +7,7 @@ import '../domain/points.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'labels.dart';
+import 'layout.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
 /// What a 积分 change was, as the page lists it: the request a charge paid for, a top-up's pack, a grant.
@@ -69,7 +70,7 @@ class _PointsPageState extends ConsumerState<PointsPage> {
       body: switch (async) {
         AsyncValue(value: final p?) => _body(context, p),
         AsyncValue(error: final e?) => Center(
-            child: Padding(padding: Space.page, child: Text('${l10n.errorTitle}\n$e', textAlign: TextAlign.center)),
+            child: Padding(padding: pagePadding(context), child: Text('${l10n.errorTitle}\n$e', textAlign: TextAlign.center)),
           ),
         _ => const Center(child: CircularProgressIndicator()),
       },
@@ -81,7 +82,7 @@ class _PointsPageState extends ConsumerState<PointsPage> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return ListView(
-      padding: Space.page,
+      padding: pagePadding(context),
       children: [
         AppCard(
           key: const Key('points-balance'),
@@ -137,7 +138,7 @@ class _PointsPageState extends ConsumerState<PointsPage> {
           key: const Key('points-how'),
           title: l10n.pointsHowTitle,
           icon: Icons.info_outline,
-          child: Text(l10n.pointsHow, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+          child: Text(l10n.pointsHow, style: ReadingText.small(context)),
         ),
         AppCard(
           key: const Key('points-entries'),

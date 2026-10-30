@@ -8,6 +8,7 @@ import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/lot_card.dart';
 import 'widgets/qiuqian_stage.dart';
 import 'widgets/recalc_check.dart';
@@ -115,7 +116,7 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
         child: Scaffold(
           appBar: AppBar(title: Text(l10n.homeQiuqian)),
           body: ListView(
-            padding: Space.page,
+            padding: pagePadding(context),
             children: [
               FadeSlideIn(
                 child: HeroBanner(

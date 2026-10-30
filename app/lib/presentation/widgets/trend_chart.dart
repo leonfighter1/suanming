@@ -135,6 +135,8 @@ class _TrendCardState extends State<TrendCard> {
                     grid: scheme.outlineVariant,
                     ink: scheme.onSurfaceVariant,
                     surface: theme.cardColor,
+                    // The ramp's smallest, in the page's own font (rule 50).
+                    tick: theme.textTheme.labelSmall!.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ),
               ),
@@ -231,7 +233,7 @@ class _Detail extends StatelessWidget {
             ],
           ),
           const SizedBox(height: Space.s),
-          Text(point.note, textAlign: TextAlign.start, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+          Text(point.note, textAlign: TextAlign.start, style: ReadingText.small(context)),
         ],
       ),
     );
@@ -241,7 +243,15 @@ class _Detail extends StatelessWidget {
 typedef _Series = ({Color color, List<int> values, bool bold});
 
 class _TrendPainter extends CustomPainter {
-  _TrendPainter({required this.labels, required this.series, required this.selected, required this.grid, required this.ink, required this.surface});
+  _TrendPainter({
+    required this.labels,
+    required this.series,
+    required this.selected,
+    required this.grid,
+    required this.ink,
+    required this.surface,
+    required this.tick,
+  });
 
   static const leftPad = 28.0;
   static const bottomPad = 22.0;
@@ -254,6 +264,9 @@ class _TrendPainter extends CustomPainter {
   final Color ink;
   final Color surface;
 
+  /// The axis's labels: the type ramp's label small.
+  final TextStyle tick;
+
   @override
   void paint(Canvas canvas, Size size) {
     final plotW = size.width - leftPad;
@@ -261,7 +274,7 @@ class _TrendPainter extends CustomPainter {
     final step = plotW / labels.length;
     double x(int i) => leftPad + step * (i + 0.5);
     double y(int v) => topPad + plotH * (1 - v / 100);
-    final textStyle = TextStyle(color: ink, fontSize: 10);
+    final textStyle = tick;
 
     void text(String s, Offset at, {bool center = false}) {
       final tp = TextPainter(text: TextSpan(text: s, style: textStyle), textDirection: TextDirection.ltr)..layout();
@@ -319,5 +332,10 @@ class _TrendPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TrendPainter old) =>
-      old.selected != selected || old.labels != labels || old.series != series || old.grid != grid || old.ink != ink;
+      old.selected != selected ||
+      old.labels != labels ||
+      old.series != series ||
+      old.grid != grid ||
+      old.ink != ink ||
+      old.tick != tick;
 }

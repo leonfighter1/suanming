@@ -9,6 +9,7 @@ import '../l10n/gen/app_localizations.dart';
 import '../platform/time_zone.dart';
 import 'design.dart';
 import 'keyboard.dart';
+import 'layout.dart';
 import 'widgets/copper_coin.dart';
 import 'widgets/hexagram_card.dart';
 import 'widgets/recalc_check.dart';
@@ -188,7 +189,7 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         child: Scaffold(
           appBar: AppBar(title: Text(l10n.homeLiuyao)),
           body: ListView(
-            padding: Space.page,
+            padding: pagePadding(context),
             children: [
               FadeSlideIn(
                 child: HeroBanner(title: l10n.homeLiuyao, subtitle: l10n.homeLiuyaoDesc, icon: Icons.toll_outlined),

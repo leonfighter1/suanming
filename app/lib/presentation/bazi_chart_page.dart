@@ -9,6 +9,7 @@ import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
+import 'layout.dart';
 import 'theme.dart';
 import 'life_report_page.dart';
 import 'naming_page.dart';
@@ -215,7 +216,7 @@ class BaziChartPage extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(title: Text(title)),
         body: ListView(
-          padding: Space.page,
+          padding: pagePadding(context),
           children: [for (var i = 0; i < sections.length; i++) FadeSlideIn(index: i, child: sections[i])],
         ),
       ),
@@ -287,11 +288,11 @@ class _PillarGridState extends State<_PillarGrid> {
           decoration: shaded ? BoxDecoration(color: scheme.surfaceContainerHighest.withValues(alpha: 0.5)) : null,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: Space.s - 2, horizontal: Space.xs),
+              padding: const EdgeInsets.symmetric(vertical: Space.s, horizontal: Space.xs),
               child: tip == null ? Text(label, style: small) : TermTip(tip, label, style: small),
             ),
             for (final x in p)
-              Center(child: Padding(padding: const EdgeInsets.symmetric(vertical: Space.s - 2), child: cell(x))),
+              Center(child: Padding(padding: const EdgeInsets.symmetric(vertical: Space.s), child: cell(x))),
           ],
         );
     return Column(
@@ -302,6 +303,8 @@ class _PillarGridState extends State<_PillarGrid> {
           child: Table(
             key: const Key('pillar-grid'),
             columnWidths: const {0: IntrinsicColumnWidth()},
+            // A row's label level with its cells' middle (the ui-design skill's alignment rules), not at their top.
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               row('', (x) => Text(l10n.pillar(BaziChart.pillarOrder[p.indexOf(x)]), style: small), shaded: true),
               // Each 十神 and 长生 opens its tip (v3.2.0); the day pillar's own cell is 日主.
@@ -367,7 +370,7 @@ class _WuxingBar extends StatelessWidget {
                   color: wuxingColorOf(context, element),
                   backgroundColor: wuxingColorOf(context, element).withValues(alpha: 0.12),
                   minHeight: 10,
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(Radii.xs),
                 ),
               ),
             ),
@@ -546,16 +549,17 @@ class _TimelineState extends State<_Timeline> {
     final step = width + Space.s;
     Widget line(String s) =>
         Text(s, style: small, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis);
+    // The ring round the chosen item comes out of the padding, so the text keeps its 80 px (2026 · 虛歲 37).
+    const ring = 2.0;
     Widget item(_Step s) {
       Widget box = Container(
         width: width,
-        // The 2 px border comes out of the padding, so the text keeps its 80 px (2026 · 虛歲 37).
-        padding: const EdgeInsets.symmetric(horizontal: Space.s - 2, vertical: Space.m - 2),
+        padding: const EdgeInsets.symmetric(horizontal: Space.s - ring, vertical: Space.m - ring),
         decoration: BoxDecoration(
           color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(Radii.field),
           // Every item has the border, so opening one doesn't move its text.
-          border: Border.all(color: s.selected ? scheme.primary : Colors.transparent, width: 2),
+          border: Border.all(color: s.selected ? scheme.primary : Colors.transparent, width: ring),
         ),
         child: Column(
           children: [
@@ -579,7 +583,7 @@ class _TimelineState extends State<_Timeline> {
             right: 0,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: Space.s - 2, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.xxs),
                 decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(Radii.chip)),
                 child: Text(s.badge!, style: theme.textTheme.labelSmall?.copyWith(color: scheme.onPrimary)),
               ),
