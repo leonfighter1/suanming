@@ -4,16 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'daily_card.dart';
 import 'design.dart';
 import 'layout.dart';
-import 'tokens.dart';
 import 'widgets/hexagram_card.dart';
 import 'widgets/lot_card.dart';
 import 'widgets/report_request.dart';
-
-// The picture beside the name: as large as 每日一牌's card (daily_card.dart).
-const _artWidth = 44.0;
-const _artHeight = 76.0;
 
 /// 今日一卦 / 今日一签 on 首页, under 东方 (S26; owner, 2026-10-30: 「东方系列，我们剋增加今日一卦或者今日一签功能，可以随机
 /// 出现」): the account's 东方 draw of the day, a 签 or a 卦 as the server deals it, the same all day. It hides itself when
@@ -26,8 +22,6 @@ class EastDailyCard extends ConsumerWidget {
     final chart = ref.watch(eastDailyProvider).value;
     if (chart == null) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final t = ThemeTokens.of(context);
     final locale = ref.watch(settingsProvider).apiLocaleCode;
     final lot = chart.system == 'qiuqian';
     final String name;
@@ -47,31 +41,14 @@ class EastDailyCard extends ConsumerWidget {
       ].join(' → ');
       art = FittedBox(child: HexagramLines(values: cast.values, marks: false, room: 0));
     }
-    return AppCard(
-      key: const Key('east-daily'),
+    return DayCardTile(
+      cardKey: const Key('east-daily'),
       title: lot ? l10n.dailyLot : l10n.dailyHexagram,
-      icon: Icons.wb_sunny_outlined,
+      art: art,
+      name: name,
+      nameKey: const Key('east-daily-name'),
+      hint: lot ? l10n.dailyLotHint : l10n.dailyHexagramHint,
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => EastDailyPage(chart: chart))),
-      child: Row(
-        children: [
-          SizedBox(width: _artWidth, height: _artHeight, child: art),
-          const SizedBox(width: Space.l),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, key: const Key('east-daily-name'), style: theme.textTheme.titleMedium),
-                const SizedBox(height: Space.xs),
-                Text(
-                  lot ? l10n.dailyLotHint : l10n.dailyHexagramHint,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: t.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: t.textSecondary),
-        ],
-      ),
     );
   }
 }
