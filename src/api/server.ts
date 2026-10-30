@@ -49,17 +49,10 @@ import { SCHEMA_VERSION, type ChartFact, type ChartSystem } from "../chart-fact/
 import { loadGeoMatrix, loadRuleSet, methodsFor, resolveRegion } from "../compliance/index.js";
 import { AccountError, AccountService } from "../auth/account.js";
 import { maskEmail } from "../auth/identifiers.js";
-import {
-  AuthError,
-  AuthService,
-  permissionsOf,
-  publicUser,
-  type AccountPermissions,
-} from "../auth/service.js";
+import { AuthError, AuthService, permissionsOf, type AccountPermissions } from "../auth/service.js";
 import { adminRoute } from "../admin/routes.js";
-import { staffRoleOf } from "../admin/roles.js";
 import { usageRows } from "../admin/usage.js";
-import { VerifyError, type ContactKind } from "../auth/verify.js";
+import { VerifyError } from "../auth/verify.js";
 import { lifeDocument, localTime, readingDocument } from "../export/report-doc.js";
 import {
   Dispatcher,
@@ -129,6 +122,8 @@ const SHARE_RENDERERS: Partial<Record<ChartSystem, typeof renderTarotShare>> = {
   tarot: renderTarotShare,
   qiuqian: renderQiuqianShare,
 };
+import type { ApiContext, Caller } from "./context.js";
+import { authRoute, accountRoute } from "./routes/account.js";
 import { publicRoute } from "./routes/public.js";
 import {
   InMemoryStore,
@@ -240,11 +235,6 @@ export interface ApiOptions {
   points?: { config?: PointsConfig; simulateTopUp?: boolean };
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
-}
-
-interface Caller {
-  user: string;
-  country: string;
 }
 
 export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<void> } {
@@ -1572,6 +1562,20 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     };
   }
 
+  /** What the route groups share (context.ts): these same objects, never copies. */
+  const api: ApiContext = {
+    opts,
+    store,
+    now,
+    auth,
+    account,
+    admins,
+    idempotency,
+    delivery,
+    reviewer,
+    clientIp,
+  };
+
   async function handle(req: IncomingMessage, res: ServerResponse) {
     const path = new URL(req.url ?? "/", "http://localhost").pathname;
     // The 管理后台, once built: its page at /admin/, on the API's own origin, so it needs no
@@ -1619,27 +1623,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     // ---- the calendar and birthplaces: public, stateless (routes/public.ts) ----
     if (publicRoute(req, res, path)) return;
 
-    // ---- auth (no caller yet) ----
-    if (req.method === "POST" && path.startsWith("/v1/auth/")) {
-      if (!auth) throw new HttpError(404, "auth not configured");
-      const body = (await readJson(req)) as Record<string, unknown>;
-      const ip = clientIp(req);
-      switch (path) {
-        case "/v1/auth/register":
-          return send(res, 201, await auth.register(body as never));
-        case "/v1/auth/login":
-          return send(res, 200, await auth.login(body, ip));
-        case "/v1/auth/oauth":
-          return send(res, 200, await auth.socialSignIn(body));
-        case "/v1/auth/refresh":
-          return send(res, 200, await auth.refresh(body.refresh_token));
-        case "/v1/auth/logout":
-          auth.logout(body.refresh_token);
-          res.writeHead(204);
-          return res.end();
-      }
-      throw new HttpError(404, "not found");
-    }
+    // ---- auth (no caller yet; routes/account.ts) ----
+    if (await authRoute(api, req, res, path)) return;
 
     const c = await caller(req);
 
@@ -1663,72 +1648,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       return send(res, 201, newLayout(opts.secrets.drawKey));
     }
 
-    // ---- account ----
-    /** The caller's account as /v1/me shows it. */
-    const me = async () => {
-      const u = (await auth!.users.get(c.user))!;
-      // 后台角色 (S25): the app's ☰ shows 管理后台 to staff; `role` stays what it was, 内容审核's reviewer.
-      const staff = staffRoleOf(
-        u,
-        [u.username, u.email].some((n) => !!n && admins.has(n.toLowerCase())),
-      );
-      return {
-        ...publicUser(u),
-        role: opts.review !== false && (await reviewer(c)) ? "admin" : "user",
-        ...(staff && { staff }),
-      };
-    };
-    if (path === "/v1/me" && req.method === "GET") {
-      if (!auth) throw new HttpError(404, "auth not configured");
-      return send(res, 200, await me());
-    }
-    // The logins and settings (v8.2.0, tech plan WP15.3–15.4): a username; an email or a phone, each proved by a
-    // code (POST sends it, POST …/verify brings it back, DELETE removes it); 测算完成后发到邮箱.
-    if (path.startsWith("/v1/account/")) {
-      if (!auth || !account) throw new HttpError(404, "auth not configured");
-      if (path === "/v1/account/username" && req.method === "PUT") {
-        const body = (await readJson(req)) as Record<string, unknown>;
-        await account.setUsername(c.user, body.username);
-        return send(res, 200, await me());
-      }
-      const contact = /^\/v1\/account\/(email|phone)(\/verify)?$/.exec(path);
-      if (contact) {
-        const kind = contact[1] as ContactKind;
-        if (req.method === "POST" && !contact[2]) {
-          const body = (await readJson(req)) as Record<string, unknown>;
-          return send(res, 202, await account.startContact(c.user, kind, body[kind]));
-        }
-        if (req.method === "POST") {
-          const body = (await readJson(req)) as Record<string, unknown>;
-          await account.confirmContact(c.user, kind, body[kind], body.code);
-          return send(res, 200, await me());
-        }
-        if (req.method === "DELETE" && !contact[2]) {
-          await account.removeContact(c.user, kind);
-          return send(res, 200, await me());
-        }
-      }
-      if (path === "/v1/account/settings" && req.method === "GET") {
-        return send(res, 200, { settings: await account.settings(c.user), delivery: delivery() });
-      }
-      if (path === "/v1/account/settings" && req.method === "PATCH") {
-        const settings = await account.updateSettings(c.user, await readJson(req));
-        return send(res, 200, { settings, delivery: delivery() });
-      }
-      throw new HttpError(404, "not found");
-    }
-    if (path === "/v1/account" && req.method === "DELETE") {
-      if (!auth) throw new HttpError(404, "auth not configured");
-      // PIPEDA / Québec Law 25: delete the account and everything it owns, now.
-      const deleted = await store.deleteOwnerData(c.user);
-      account?.forget(c.user);
-      await auth.deleteAccount(c.user);
-      for (const k of idempotency.keys()) if (k.startsWith(`${c.user}:`)) idempotency.delete(k);
-      return send(res, 200, {
-        deleted: { account: true, ...deleted },
-        completed_at: now().toISOString(),
-      });
-    }
+    // ---- account (routes/account.ts) ----
+    if (await accountRoute(api, req, res, path, c)) return;
 
     // ---- 积分 (v11.0.0, tech plan S20): the balance, 充值, and what each AI request on a chart costs ----
     if (path === "/v1/points" && req.method === "GET") {
