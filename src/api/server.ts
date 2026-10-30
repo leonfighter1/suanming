@@ -89,11 +89,13 @@ import {
   type QuoteFor,
 } from "../points/index.js";
 import {
+  asksQuestion,
   changePerson,
   computeChart,
   computeNamingChart,
   InputError,
   parsePerson,
+  parseQuestion,
   UUID_RE,
   type EngineSecrets,
 } from "../service/charts.js";
@@ -372,6 +374,17 @@ export function publicPointsEntry(e: PointsEntry, showCost: boolean) {
     ...(e.reason && { reason: e.reason }),
   };
 }
+
+/**
+ * 400 question_required (v11.1.0, the owner: 「必须要有所求才能去求」): a 塔罗, 求签 or 算卦 draw, or its reading, with
+ * nothing asked.
+ */
+export const questionRequired = () =>
+  new HttpError(
+    400,
+    "ask your question first: 塔罗, 求签 and 算卦 are drawn for a question",
+    "question_required",
+  );
 
 /** A 充值 pack as the app offers it: its bonus over 100 积分 a 元, in percent (20元 = 2200: 10). */
 export function publicPack(p: { yuan: number; points: number }) {
@@ -1294,10 +1307,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
     assertServed(c.country, chart.fact.system);
     const context = parseUserContext(body.context);
-    const question =
-      typeof body.question === "string" && body.question.trim()
-        ? body.question.trim().slice(0, 300)
-        : undefined;
+    // The question the chart was drawn for (v11.1.0), which the reading after the conversation answers.
+    const asks = asksQuestion(chart.fact.system) && !chart.daily;
+    const question = (asks && chart.question) || parseQuestion(body.question);
+    if (asks && !question) throw questionRequired();
     const inquiryId = randomUUID();
     // The owner's 统一收费: one fee for the conversation however many questions it takes (1–6), held now.
     const hold = await holdForJob(c, "inquiry", {
@@ -1648,9 +1661,15 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         throw new HttpError(409, "this 深度分析 failed: read without it", "inquiry_failed");
       }
     }
-    // Every check before anything is held or counted (v11.0.0).
-    const question =
-      typeof body.question === "string" ? body.question.slice(0, 300) : inquiry?.question;
+    // Every check before anything is held or counted (v11.0.0). 塔罗, 求签 and 算卦 answer the question they were
+    // drawn for (v11.1.0); a chart drawn before then, the one the request asks. 每日一牌 is drawn for none.
+    const asks = asksQuestion(chart.fact.system) && !chart.daily;
+    const question = asks
+      ? (chart.question ?? parseQuestion(body.question) ?? inquiry?.question)
+      : typeof body.question === "string"
+        ? body.question.slice(0, 300)
+        : inquiry?.question;
+    if (asks && !question) throw questionRequired();
     const focus = (body.focus ?? inquiry?.focus) as TarotFocus | undefined;
     if (focus !== undefined && (chart.fact.system !== "tarot" || !TAROT_FOCUS.includes(focus))) {
       throw new InputError(`focus is for tarot readings: one of ${TAROT_FOCUS.join(", ")}`);
@@ -2322,6 +2341,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           chart_id: ch.id,
           chart_fact: ch.fact,
           ...(ch.person && { person: ch.person }),
+          ...(ch.question && { question: ch.question }),
         });
       }
     }
@@ -2335,8 +2355,15 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
       let out: { status: number; body: unknown; headers: Record<string, string> };
       if (path === "/v1/charts") {
-        const body = (await readJson(req)) as { system?: string; person?: unknown };
+        const body = (await readJson(req)) as {
+          system?: string;
+          person?: unknown;
+          question?: unknown;
+        };
         assertServed(c.country, body.system);
+        // 塔罗, 求签 and 算卦 are drawn for a question (v11.1.0): nothing is drawn before something is asked.
+        const question = asksQuestion(body.system) ? parseQuestion(body.question) : undefined;
+        if (asksQuestion(body.system) && !question) throw questionRequired();
         // Whose chart it is (v6.2.0): kept on the record for history on any device, never in the facts. A 起名
         // chart takes its 八字 chart's person unless the request names one (v8.0.0).
         const asked = parsePerson(body.person, body.system);
@@ -2353,10 +2380,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           fact,
           created_at: now().toISOString(),
           ...(person && { person }),
+          ...(question && { question }),
         });
         out = {
           status: 201,
-          body: { chart_id: id, chart_fact: fact, ...(person && { person }) },
+          body: {
+            chart_id: id,
+            chart_fact: fact,
+            ...(person && { person }),
+            ...(question && { question }),
+          },
           headers: { location: `/v1/charts/${id}` },
         };
       } else {

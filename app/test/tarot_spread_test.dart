@@ -26,7 +26,8 @@ Future<FakeApi> drawAt(
   WidgetTester tester,
   Size size, {
   String? spread,
-  String question = '',
+  // The cards are drawn only for a question (v11.1.0).
+  String question = '最近的工作會順利嗎？',
   String? focus,
   Map<String, dynamic>? finalReport,
 }) async {
@@ -39,9 +40,8 @@ Future<FakeApi> drawAt(
   await settle(tester);
   await openEntry(tester, 'tarot');
   await settle(tester);
-  if (question.isNotEmpty) await tester.enterText(find.byKey(const Key('tarot-question')), question);
+  await ask(tester, 'tarot-question', question);
   if (focus != null) {
-    await tester.pump(); // a frame after enterText (rule 19)
     await tester.ensureVisible(find.byKey(Key('focus-$focus')));
     await tester.pump(); // a frame after the jump, before the tap (rule 27)
     await tester.tap(find.byKey(Key('focus-$focus')));

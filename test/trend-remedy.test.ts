@@ -251,7 +251,11 @@ describe("remedy API", () => {
       });
     try {
       const { chart_id } = await (
-        await send("/v1/charts", { system: "tarot", spread: "three_card" })
+        await send("/v1/charts", {
+          system: "tarot",
+          spread: "three_card",
+          question: "最近的工作会顺利吗？",
+        })
       ).json();
       const r = await (await send("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
       await api4.drain();
@@ -295,7 +299,11 @@ describe("remedy API", () => {
       });
     try {
       const { chart_id } = await (
-        await send("/v1/charts", { system: "tarot", spread: "three_card" })
+        await send("/v1/charts", {
+          system: "tarot",
+          spread: "three_card",
+          question: "最近的工作会顺利吗？",
+        })
       ).json();
       const r = await (await send("/v1/reports", { chart_id, locale: "zh-Hant" })).json();
       await api2.drain();
@@ -420,7 +428,11 @@ describe("remedy API", () => {
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     const { chart_id } = await (
-      await send("/v1/charts", { system: "tarot", spread: "three_card" })
+      await send("/v1/charts", {
+        system: "tarot",
+        spread: "three_card",
+        question: "最近的工作会顺利吗？",
+      })
     ).json();
     const r = await (
       await send("/v1/reports", { chart_id, locale: "zh-Hant", topics: ["tarot_advice"] })

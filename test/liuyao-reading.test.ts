@@ -130,6 +130,7 @@ describe("the API", () => {
       const picks = Array.from({ length: 18 }, (_, i) => 23 - i);
       const res = await post("/v1/charts", {
         system: "liuyao",
+        question: "明年事业如何？",
         mode: "pick",
         timezone: "Asia/Hong_Kong",
         draw_id: layout.draw_id,
@@ -140,14 +141,21 @@ describe("the API", () => {
       expect(fact.facts.pick).toMatchObject({ picks, commitment: layout.commitment });
 
       expect(
-        (await post("/v1/charts", { system: "liuyao", mode: "auto", timezone: "Asia/Hong_Kong" }))
-          .status,
+        (
+          await post("/v1/charts", {
+            system: "liuyao",
+            question: "明年事业如何？",
+            mode: "auto",
+            timezone: "Asia/Hong_Kong",
+          })
+        ).status,
       ).toBe(201);
       // A manual cast needs its time; picks must be 18 different coins.
       expect(
         (
           await post("/v1/charts", {
             system: "liuyao",
+            question: "明年事业如何？",
             mode: "manual",
             timezone: "Asia/Hong_Kong",
             lines: Array(6).fill({ value: 7 }),
@@ -158,6 +166,7 @@ describe("the API", () => {
         (
           await post("/v1/charts", {
             system: "liuyao",
+            question: "明年事业如何？",
             mode: "pick",
             timezone: "Asia/Hong_Kong",
             draw_id: layout.draw_id,

@@ -483,7 +483,8 @@ paths:
       description: |
         Raw birth data is used for computation and not persisted (see docs/data-retention.md).
         Only the ChartFact (encrypted) and its keyed `input_digest` are stored, and since v6.2.0 a birth
-        chart's `person` (sealed with it).
+        chart's `person` (sealed with it). Since v11.1.0 a 塔罗, 求签 or 算卦 draw needs its `question`
+        (400 `question_required` without one, before anything is drawn), kept sealed with the chart.
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -503,6 +504,9 @@ paths:
                   chart_id: { type: string, format: uuid }
                   chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
                   person: { $ref: "#/components/schemas/ChartPerson" }
+                  question:
+                    type: string
+                    description: What a 塔罗, 求签 or 算卦 draw was asked (since v11.1.0)
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "422":
@@ -564,7 +568,11 @@ paths:
                   uniqueItems: true
                   items: { $ref: "#/components/schemas/Topic" }
                 question:
-                  description: Optional user question (tarot)
+                  description: |
+                    The user's question. A 塔罗, 求签 or 算卦 reading answers the one its chart was drawn
+                    for (since v11.1.0); this one counts only for a chart drawn before, which kept none (400
+                    `question_required` when neither has one). 每日一牌 needs none; 风水's is the room's
+                    description.
                   type: string
                   maxLength: 300
                 focus:
@@ -1156,6 +1164,9 @@ paths:
                   chart_id: { type: string, format: uuid }
                   chart_fact: { $ref: "../schemas/chart-fact.v0.1.schema.json" }
                   person: { $ref: "#/components/schemas/ChartPerson" }
+                  question:
+                    type: string
+                    description: What a 塔罗, 求签 or 算卦 draw was asked (since v11.1.0)
         "404": { $ref: "#/components/responses/Problem" }
 
   /v1/charts/{chart_id}/person:
@@ -1870,9 +1881,16 @@ components:
     TarotChartRequest:
       type: object
       additionalProperties: false
-      required: [system, spread]
+      required: [system, spread, question]
       properties:
         system: { const: tarot }
+        question:
+          description: |
+            What the cards are drawn for (since v11.1.0, the owner: nothing is drawn before something is asked).
+            Trimmed, at most 300 characters; kept with the chart, never in its facts; its reading answers it. 400
+            `question_required` without one. 每日一牌 (GET /v1/tarot/daily) is dealt without a draw and needs none.
+          type: string
+          maxLength: 300
         spread: { type: string, enum: [single, three_card, celtic_cross, two_paths, relationship] }
         ritual:
           description: |
@@ -1923,13 +1941,20 @@ components:
         算卦 (since v5.3.0): 六爻 by three coins (背 3, 字 2), six tosses, the first the 初爻. auto: the
         server tosses. pick: the 18 coins picked, in order, from a layout (POST /v1/liuyao/layouts).
         manual: the reader's own six lines, each three coins or the line itself (6–9), and the time
-        of the toss, to the minute, which is required. The question goes with the report. Readings
-        are in Chinese only.
+        of the toss, to the minute, which is required. The question is asked with the cast (since
+        v11.1.0) and the reading answers it. Readings are in Chinese only.
       type: object
       additionalProperties: false
-      required: [system, mode, timezone]
+      required: [system, mode, timezone, question]
       properties:
         system: { const: liuyao }
+        question:
+          description: |
+            What the coins are cast for (since v11.1.0, the owner: 算卦必须要有所问之问题之后才能去求). Trimmed, at most
+            300 characters; kept with the chart, never in its facts; its reading answers it. 400
+            `question_required` without one.
+          type: string
+          maxLength: 300
         mode: { type: string, enum: [auto, pick, manual] }
         timezone: { type: string, description: The reader's IANA time zone }
         draw_id: { type: string, format: uuid, description: "pick: the layout's id" }
@@ -1991,9 +2016,16 @@ components:
         server's key and the draw id, like a tarot draw.
       type: object
       additionalProperties: false
-      required: [system]
+      required: [system, question]
       properties:
         system: { const: qiuqian }
+        question:
+          description: |
+            所求之事, asked before the stick is shaken out (since v11.1.0, the owner: 必须要有所求才能去求). Trimmed,
+            at most 300 characters; kept with the chart, never in its facts or on its share image; its reading
+            answers it. 400 `question_required` without one.
+          type: string
+          maxLength: 300
         lot_set:
           type: string
           enum: [guandi_100]

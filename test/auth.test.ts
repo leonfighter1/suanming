@@ -186,7 +186,11 @@ describe("tokens", () => {
       await register("j@example.com", "long enough pw", { ...profile, country: "DE" })
     ).json();
     const chart = await (
-      await post("/v1/charts", { system: "tarot", spread: "single" }, t.access_token)
+      await post(
+        "/v1/charts",
+        { system: "tarot", spread: "single", question: "最近的工作会顺利吗？" },
+        t.access_token,
+      )
     ).json();
     const r = await (
       await post("/v1/reports", { chart_id: chart.chart_id, locale: "en" }, t.access_token)
@@ -236,7 +240,11 @@ describe("DELETE /v1/account", () => {
   it("deletes the account and everything it owns, immediately", async () => {
     const t = await (await register("k@example.com")).json();
     const chart = await (
-      await post("/v1/charts", { system: "tarot", spread: "single" }, t.access_token)
+      await post(
+        "/v1/charts",
+        { system: "tarot", spread: "single", question: "最近的工作会顺利吗？" },
+        t.access_token,
+      )
     ).json();
     const r = await (
       await post("/v1/reports", { chart_id: chart.chart_id, locale: "zh-Hant" }, t.access_token)
@@ -266,7 +274,11 @@ describe("DELETE /v1/account", () => {
   it("a report still generating when the account is deleted is not written back", async () => {
     const t = await (await register("l@example.com")).json();
     const chart = await (
-      await post("/v1/charts", { system: "tarot", spread: "single" }, t.access_token)
+      await post(
+        "/v1/charts",
+        { system: "tarot", spread: "single", question: "最近的工作会顺利吗？" },
+        t.access_token,
+      )
     ).json();
     const r = await (
       await post("/v1/reports", { chart_id: chart.chart_id, locale: "zh-Hant" }, t.access_token)

@@ -40,6 +40,11 @@ export interface ChartRecord {
    * sent to a model; sealed with the chart in the database store, and deleted with the account.
    */
   person?: ChartPerson;
+  /**
+   * What the draw was asked (v11.1.0, owner 2026-10-29: 「必须要有所求才能去求」): 塔罗, 求签 and 算卦 are drawn for a
+   * question, which their readings then answer. Kept with the chart, sealed like it; never in its ChartFact.
+   */
+  question?: string;
 }
 
 export type ReportRecordStatus = "pending" | "passed" | "blocked" | "manual_review" | "failed";

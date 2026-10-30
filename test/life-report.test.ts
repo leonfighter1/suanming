@@ -162,7 +162,11 @@ describe("life report API", () => {
 
   it("400 for a tarot chart or a bad locale", async () => {
     const { chart_id } = await (
-      await post("/v1/charts", { system: "tarot", spread: "single" })
+      await post("/v1/charts", {
+        system: "tarot",
+        spread: "single",
+        question: "最近的工作会顺利吗？",
+      })
     ).json();
     expect((await post("/v1/life-reports", { chart_id, locale: "zh-Hans" })).status).toBe(400);
     const b = await (

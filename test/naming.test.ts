@@ -320,7 +320,13 @@ describe("a 起名 reading and the API", () => {
             .status,
         ).toBe(404);
         const tarot = (
-          await (await post("/v1/charts", { system: "tarot", spread: "single" })).json()
+          await (
+            await post("/v1/charts", {
+              system: "tarot",
+              spread: "single",
+              question: "最近的工作会顺利吗？",
+            })
+          ).json()
         ).chart_id;
         expect(
           (await post("/v1/charts", { system: "naming", bazi_chart_id: tarot, surname: "陳" }))

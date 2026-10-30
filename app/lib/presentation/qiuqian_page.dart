@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
+import '../data/api_client.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'design.dart';
@@ -42,6 +43,18 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
   /// 直接看结果: every step's end at once.
   bool _skipped = false;
 
+  /// 有所求，才能去求 (owner, v11.1.0): no lot is drawn before something is asked.
+  bool _asking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _question.addListener(() {
+      final asking = _question.text.trim().isNotEmpty;
+      if (asking != _asking) setState(() => _asking = asking);
+    });
+  }
+
   @override
   void dispose() {
     _question.dispose();
@@ -49,15 +62,19 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
   }
 
   Future<void> _draw() async {
+    if (!_asking) return;
     // 同名重算 (v10.0.0): the same question drawn for before? Ask first.
     final name = ref.read(profilesProvider).value?.defaultProfile?.name;
     if (!await confirmRecalc(context, ref, system: 'qiuqian', name: name, question: _question.text)) return;
     if (!mounted) return;
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     try {
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'qiuqian',
+        // The lot is drawn for it (v11.1.0); its reading answers it.
+        'question': _question.text.trim(),
         // Whose reading it is, for 以往记录 (v8.0.0).
         ...readerPerson(ref.read(profilesProvider).value),
       });
@@ -72,7 +89,9 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
         _skipped = false;
       });
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(e is ApiException && e.code == 'question_required' ? l10n.qiuqianQuestionMissing : '$e')),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -83,6 +102,8 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
     final l10n = AppLocalizations.of(context);
     final chart = _chart;
     final lot = chart?.qiuqian;
+    // Every way to draw (the button, Enter, Ctrl+Enter) waits for the question.
+    final canDraw = !_busy && chart == null && _asking;
     final done = lot != null && _thrown && _round == lot.rounds.length - 1;
     // A lot can't be drawn again as it was: once one is out, ask before leaving.
     return LeaveGuard(
@@ -90,7 +111,7 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
       message: l10n.leaveQiuqianBody,
       // Ctrl+Enter draws, until a lot is out.
       child: SubmitShortcut(
-        onSubmit: _busy || chart != null ? null : _draw,
+        onSubmit: canDraw ? _draw : null,
         child: Scaffold(
           appBar: AppBar(title: Text(l10n.homeQiuqian)),
           body: ListView(
@@ -117,7 +138,7 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
                         enabled: chart == null,
                         textInputAction: TextInputAction.done,
                         inputFormatters: [LengthLimitingTextInputFormatter(300)],
-                        onSubmitted: (_) => _busy || chart != null ? null : _draw(),
+                        onSubmitted: (_) => canDraw ? _draw() : null,
                         decoration: InputDecoration(
                           labelText: l10n.qiuqianQuestion,
                           helperText: l10n.qiuqianQuestionHint,
@@ -140,13 +161,24 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
                       const SizedBox(height: Space.m),
                       Text(l10n.qiuqianHowTo, style: Theme.of(context).textTheme.bodyMedium),
                       const SizedBox(height: Space.l),
-                      if (chart == null)
+                      if (chart == null) ...[
                         FilledButton.icon(
                           key: const Key('draw-lot'),
-                          onPressed: _busy ? null : _draw,
+                          onPressed: canDraw ? _draw : null,
                           icon: const Icon(Icons.temple_buddhist_outlined),
                           label: Text(l10n.qiuqianDraw),
                         ),
+                        if (!_asking)
+                          Padding(
+                            padding: const EdgeInsets.only(top: Space.s),
+                            child: Text(
+                              l10n.qiuqianQuestionMissing,
+                              key: const Key('qiuqian-question-missing'),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
+                            ),
+                          ),
+                      ],
                     ],
                   ),
                 ),

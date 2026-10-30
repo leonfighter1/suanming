@@ -143,7 +143,11 @@ describe("GET /v1/reports/{id}/share.jpg", () => {
   };
 
   it("gives the owner the image of a passed tarot reading, with the AI headers; nobody else, nothing else", async () => {
-    const tarot = await reading({ system: "tarot", spread: "three_card" });
+    const tarot = await reading({
+      system: "tarot",
+      spread: "three_card",
+      question: "最近的工作会顺利吗？",
+    });
     await api.drain();
     const ok = await fetch(`${base}/v1/reports/${tarot.report_id}/share.jpg`, { headers: H() });
     expect(ok.status).toBe(200);
@@ -155,7 +159,7 @@ describe("GET /v1/reports/{id}/share.jpg", () => {
       (await fetch(`${base}/v1/reports/${tarot.report_id}/share.jpg`, { headers: H("u2") })).status,
     ).toBe(404);
     // A 求籤 reading has one too (v4.3.0).
-    const lot = await reading({ system: "qiuqian" });
+    const lot = await reading({ system: "qiuqian", question: "明年事业如何？" });
     await api.drain();
     const lotImage = await fetch(`${base}/v1/reports/${lot.report_id}/share.jpg`, { headers: H() });
     expect(lotImage.status).toBe(200);
@@ -175,7 +179,11 @@ describe("GET /v1/reports/{id}/share.jpg", () => {
   }, 30_000);
 
   it("says what to install when the server has no CJK font", async () => {
-    const tarot = await reading({ system: "tarot", spread: "single" });
+    const tarot = await reading({
+      system: "tarot",
+      spread: "single",
+      question: "最近的工作会顺利吗？",
+    });
     await api.drain();
     process.env.MINGLI_SHARE_FONT = "/no/such/font.ttf";
     try {

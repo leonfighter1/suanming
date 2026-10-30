@@ -47,7 +47,7 @@ const me = '测试用户';
 /// card is there.
 Future<FakeApi> drawTarot(
   WidgetTester tester, {
-  String question = '',
+  required String question,
   FakeApi? api,
   FakeSpeech? speech,
 }) async {
@@ -62,10 +62,8 @@ Future<FakeApi> drawTarot(
   await settle(tester);
   await openEntry(tester, 'tarot');
   await settle(tester);
-  if (question.isNotEmpty) {
-    await tester.enterText(find.byKey(const Key('tarot-question')), question);
-    await tester.pump(); // rule 19
-  }
+  // The cards are drawn only for a question (v11.1.0).
+  await ask(tester, 'tarot-question', question);
   await scrollTo(tester, const Key('spread-single'));
   // The segment's button takes the touch; its label isn't in the hit path, hence no warning.
   await tester.tap(find.byKey(const Key('spread-single')), warnIfMissed: false);
@@ -115,8 +113,9 @@ void main() {
     );
   });
 
-  testWidgets('without a goal the reminder asks for one first, and a short one is not enough', (tester) async {
-    final api = await drawTarot(tester);
+  testWidgets('a question too short to be a goal: the reminder asks for one first, and a short one is not enough', (tester) async {
+    // The cards are drawn only for a question (v11.1.0); three characters are less than a goal's four.
+    final api = await drawTarot(tester, question: '好嗎？');
     await startInquiry(tester);
     expect(find.byKey(const Key('inquiry-goal-dialog')), findsOneWidget);
     expect(find.text('使用深度分析，一定要先給出一個明確的目標：你最想透過這次測算知道什麼？'), findsOneWidget);

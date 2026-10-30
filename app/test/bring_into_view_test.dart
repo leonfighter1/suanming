@@ -134,6 +134,7 @@ void main() {
       await frames(tester, 10);
       await openEntry(tester, 'tarot');
       await frames(tester, 10);
+      await ask(tester, 'tarot-question'); // drawn only for a question (v11.1.0)
       await scrollTo(tester, const Key('draw'));
       await tester.tap(find.byKey(const Key('draw')));
       await frames(tester, 8);
@@ -183,6 +184,7 @@ void main() {
       await frames(tester, 10);
       await openEntry(tester, 'qiuqian');
       await frames(tester, 10);
+      await ask(tester, 'qiuqian-question', '今年適合換工作嗎？');
       await scrollTo(tester, const Key('draw-lot'));
       await tester.tap(find.byKey(const Key('draw-lot')));
       await frames(tester, 6);
@@ -209,6 +211,7 @@ void main() {
       await frames(tester, 10);
       await openEntry(tester, 'liuyao');
       await frames(tester, 10);
+      await ask(tester, 'liuyao-question', '這個項目能不能做成？');
       await scrollTo(tester, const Key('liuyao-toss'));
       await tester.tap(find.byKey(const Key('liuyao-toss')));
       await frames(tester, 8);

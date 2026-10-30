@@ -103,6 +103,21 @@ export function parsePerson(raw: unknown, system: unknown): ChartPerson | undefi
 }
 
 /**
+ * The methods drawn for a question (owner, 2026-10-29: 「求签和算卦 算法必须要有所问之问题之后才能去求 … 塔罗牌也是一样」):
+ * their draw needs one, so nothing is drawn before something is asked. 每日一牌 is the day's card, dealt without a draw.
+ */
+export const QUESTION_SYSTEMS: readonly string[] = ["tarot", "qiuqian", "liuyao"];
+export const QUESTION_MAX = 300;
+
+export const asksQuestion = (system: unknown) => QUESTION_SYSTEMS.includes(String(system));
+
+/** What was asked, trimmed and cut to QUESTION_MAX characters; undefined when it is empty or not a string. */
+export function parseQuestion(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  return [...raw.trim()].slice(0, QUESTION_MAX).join("") || undefined;
+}
+
+/**
  * 归类到… (v8.0.0): a chart's person after a change. A field the change names is set (empty or null clears it); a
  * field it leaves out stays as it was.
  */

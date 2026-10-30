@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
+import '../data/api_client.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/time_zone.dart';
@@ -60,6 +61,18 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
   bool _byLines = false;
   final _rows = List<int?>.filled(6, null);
 
+  /// 算卦必须要有所问之问题之后才能去求 (owner, v11.1.0): no coin is cast, or laid out, before something is asked.
+  bool _asking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _question.addListener(() {
+      final asking = _question.text.trim().isNotEmpty;
+      if (asking != _asking) setState(() => _asking = asking);
+    });
+  }
+
   @override
   void dispose() {
     _question.dispose();
@@ -72,16 +85,20 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
   static String _local(DateTime t) => '${t.year}-${_two(t.month)}-${_two(t.day)}T${_two(t.hour)}:${_two(t.minute)}';
 
   Future<void> _cast(Map<String, Object?> request) async {
+    if (!_asking) return;
     // 同名重算 (v10.0.0): the same question cast for before? Ask first.
     final name = ref.read(profilesProvider).value?.defaultProfile?.name;
     if (!await confirmRecalc(context, ref, system: 'liuyao', name: name, question: _question.text)) return;
     if (!mounted) return;
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     try {
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'liuyao',
         'timezone': deviceTimeZone(),
+        // The coins are cast for it (v11.1.0); its reading answers it.
+        'question': _question.text.trim(),
         ...request,
         // Whose reading it is, for 以往记录 (v8.0.0).
         ...readerPerson(ref.read(profilesProvider).value),
@@ -93,7 +110,9 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         _shown = _mode == 'auto' ? 0 : 6;
       });
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(e is ApiException && e.code == 'question_required' ? l10n.liuyaoQuestionMissing : '$e')),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -153,8 +172,8 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
     final chart = _chart;
     final cast = chart?.liuyao;
     final done = cast != null && _shown >= 6;
-    // The way to cast that is ready, for its button and for Ctrl+Enter.
-    final VoidCallback? cast_ = chart != null || _busy
+    // The way to cast that is ready, for its button and for Ctrl+Enter; none before the question is asked.
+    final VoidCallback? cast_ = chart != null || _busy || !_asking
         ? null
         : switch (_mode) {
             'pick' => _layoutId != null && _picks.length == 18 ? _castPick : null,
@@ -222,6 +241,15 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
                         ),
                       ),
                       const SizedBox(height: Space.m),
+                      if (chart == null && !_asking)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: Space.s),
+                          child: Text(
+                            l10n.liuyaoQuestionMissing,
+                            key: const Key('liuyao-question-missing'),
+                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                          ),
+                        ),
                       ...switch (_mode) {
                         'pick' => _pickPanel(l10n, cast, cast_),
                         'manual' => _manualPanel(l10n, theme, chart != null, cast_),
@@ -290,7 +318,8 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         if (_layoutId == null)
           FilledButton.icon(
             key: const Key('liuyao-lay-out'),
-            onPressed: _busy ? null : _layOut,
+            // Laying the coins out begins the cast: it waits for the question too.
+            onPressed: _busy || !_asking ? null : _layOut,
             icon: const Icon(Icons.grid_view),
             label: Text(l10n.liuyaoPickStart),
           )

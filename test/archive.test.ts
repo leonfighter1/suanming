@@ -242,7 +242,11 @@ describe("以往记录, the API (WP14.1–14.2)", () => {
   it("a reading deleted while it is written is never written back", async () => {
     const u = "del-c";
     const { chart_id } = await (
-      await post("/v1/charts", { system: "tarot", spread: "single" }, u)
+      await post(
+        "/v1/charts",
+        { system: "tarot", spread: "single", question: "最近的工作会顺利吗？" },
+        u,
+      )
     ).json();
     const { report_id } = await (
       await post("/v1/reports", { chart_id, locale: "zh-Hans" }, u)
@@ -256,7 +260,16 @@ describe("以往记录, the API (WP14.1–14.2)", () => {
   it("files any record under a person: set, rename or clear; a birth chart keeps its birthplace", async () => {
     const u = "file-a";
     const tarot = await (
-      await post("/v1/charts", { system: "tarot", spread: "single", person: { name: "我" } }, u)
+      await post(
+        "/v1/charts",
+        {
+          system: "tarot",
+          spread: "single",
+          question: "最近的工作会顺利吗？",
+          person: { name: "我" },
+        },
+        u,
+      )
     ).json();
     expect(tarot.person).toEqual({ name: "我" }); // since v8.0.0 any chart may name its person
     const set = await post(`/v1/charts/${tarot.chart_id}/person`, { name: "小明" }, u);

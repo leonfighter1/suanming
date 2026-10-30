@@ -1144,10 +1144,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get tarotQuestion => '你想问的问题（可选）';
+  String get tarotQuestion => '你想问的问题';
 
   @override
-  String get tarotQuestionHint => '抽牌前先在心里想好一个问题，解读会围绕它展开。';
+  String get tarotQuestionHint => '先写下你想问的问题才能抽牌：有所问，牌才有所答，解读也围绕它展开。';
+
+  @override
+  String get tarotQuestionMissing => '先写下你想问的问题，才能抽牌';
 
   @override
   String get tarotFocus => '想看哪方面（可选）';
@@ -1285,7 +1288,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qiuqianQuestion => '所求之事';
 
   @override
-  String get qiuqianQuestionHint => '心中默念或写下来都可以。问题只用于解签，不会出现在分享图上。';
+  String get qiuqianQuestionHint => '先写下所求之事才能求签：有所求，才能去求。问题只用于解签，不会出现在分享图上。';
+
+  @override
+  String get qiuqianQuestionMissing => '先写下所求之事，才能求签';
 
   @override
   String get qiuqianExample1 => '今年的工作会顺利吗？';
@@ -1471,10 +1477,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeWest => '西方';
 
   @override
-  String get liuyaoQuestion => '想问的事（可选）';
+  String get liuyaoQuestion => '想问的事';
 
   @override
-  String get liuyaoQuestionHint => '一次只问一件事，问得越具体，解读越贴切';
+  String get liuyaoQuestionHint => '先写下想问的事才能起卦。一次只问一件事，问得越具体，解读越贴切';
+
+  @override
+  String get liuyaoQuestionMissing => '先写下想问的事，才能起卦';
 
   @override
   String get liuyaoRemind => '起卦之前';
@@ -3450,10 +3459,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get tarotQuestion => '你想問的問題（可選）';
+  String get tarotQuestion => '你想問的問題';
 
   @override
-  String get tarotQuestionHint => '抽牌前先在心裡想好一個問題，解讀會圍繞它展開。';
+  String get tarotQuestionHint => '先寫下你想問的問題才能抽牌：有所問，牌才有所答，解讀也圍繞它展開。';
+
+  @override
+  String get tarotQuestionMissing => '先寫下你想問的問題，才能抽牌';
 
   @override
   String get tarotFocus => '想看哪方面（可選）';
@@ -3591,7 +3603,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get qiuqianQuestion => '所求之事';
 
   @override
-  String get qiuqianQuestionHint => '心中默念或寫下來都可以。問題只用於解籤，不會出現在分享圖上。';
+  String get qiuqianQuestionHint => '先寫下所求之事才能求籤：有所求，才能去求。問題只用於解籤，不會出現在分享圖上。';
+
+  @override
+  String get qiuqianQuestionMissing => '先寫下所求之事，才能求籤';
 
   @override
   String get qiuqianExample1 => '今年的工作會順利嗎？';
@@ -3777,10 +3792,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get homeWest => '西方';
 
   @override
-  String get liuyaoQuestion => '想問的事（可選）';
+  String get liuyaoQuestion => '想問的事';
 
   @override
-  String get liuyaoQuestionHint => '一次只問一件事，問得越具體，解讀越貼切';
+  String get liuyaoQuestionHint => '先寫下想問的事才能起卦。一次只問一件事，問得越具體，解讀越貼切';
+
+  @override
+  String get liuyaoQuestionMissing => '先寫下想問的事，才能起卦';
 
   @override
   String get liuyaoRemind => '起卦之前';

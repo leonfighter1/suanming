@@ -12,6 +12,27 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v11.1.0 (2026-10-29): 有所求才能去求 — 塔罗, 求签 and 算卦 are drawn only for a question
+
+Your requests (「求签和算卦 算法必须要有所问之问题之后才能去求 … 是必须要有所求才能去求」, 「塔罗牌也是一样」), as stage S21 of
+the [tech plan](docs/tech-plan.md). A medium update: committed and tagged here, pushed with the next big one.
+
+- **In the app:** on 塔罗, 求签 and 算卦 the draw waits for the question. 抽牌, 求签, and 算卦's 掷币, 摆好硬币, 看卦 and
+  起卦 stay grey until something is written (spaces alone don't count), and a line says 先写下你想问的问题，才能抽牌 /
+  先写下所求之事，才能求签 / 先写下想问的事，才能起卦. Enter in the field and Ctrl+Enter wait too. The labels no longer
+  say （可选）. An example question fills the field with one touch.
+- **塔罗:** once 抽牌 is pressed the question can't change until the cards are out, so the cards are drawn for the
+  question asked.
+- **On the server:** a 塔罗, 求签 or 算卦 draw without a question is refused before anything is drawn
+  (`question_required`). The question is kept with the draw, sealed like it, and the reading (and a 深度分析)
+  answers that question, whatever a later request says. A draw made before this update reads with the question
+  sent with the reading, as before.
+- **Not changed:** 每日一牌 is the day's card, dealt without a draw, so it needs no question; 八字 and 风水 aren't
+  drawn either.
+- **Verified:** 8 new server tests (no draw without a question, the question kept and answered, older draws, the
+  深度分析, 每日一牌), 647 in all; 3 new app tests (each page waits for the question by button, Enter and Ctrl+Enter,
+  and sends it), 237 in all; the older tests now ask before they draw; harness PASS.
+
 ### v11.0.0 (2026-10-29): 积分 — every AI request paid at what it really cost
 
 Your request (「GO AND BUILD THE POINTS SYSTEM NOW」), as stage S20 of the [tech plan](docs/tech-plan.md). A big update:

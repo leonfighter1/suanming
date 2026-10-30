@@ -327,7 +327,11 @@ describe("the owner's AI switch (IS_AI_MOCK / IS_AI_MODEL in .env)", () => {
         await fetch(base + "/v1/charts", {
           method: "POST",
           headers: h,
-          body: JSON.stringify({ system: "tarot", spread: "three_card" }),
+          body: JSON.stringify({
+            system: "tarot",
+            spread: "three_card",
+            question: "最近的工作会顺利吗？",
+          }),
         })
       ).json();
       const r = await fetch(base + "/v1/reports", {

@@ -125,6 +125,7 @@ void main() {
     await settle(tester);
     await openEntry(tester, 'tarot');
     await settle(tester);
+    await ask(tester, 'tarot-question'); // drawn only for a question (v11.1.0)
     await scrollAndTap(tester, find.byKey(const Key('draw')));
     await settle(tester);
     // The ritual opens first (v3.0.0); here the deck picks (tarot_ritual_test.dart has the rest).

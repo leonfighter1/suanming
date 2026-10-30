@@ -69,7 +69,11 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('draw-lot')));
     await frames(tester, 3);
-    expect(jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body), {'system': 'qiuqian'});
+    // The lot is drawn for the question (v11.1.0, the owner: 必须要有所求才能去求).
+    expect(jsonDecode(api.requests.lastWhere((r) => r.method == 'POST' && r.url.path == '/v1/charts').body), {
+      'system': 'qiuqian',
+      'question': '今年適合換工作嗎？',
+    });
 
     for (final (i, r) in _rounds.indexed) {
       final stick = testTerms.lots!.lot(r['lot'] as int)!.title('zh-Hant');
@@ -118,6 +122,7 @@ void main() {
 
   testWidgets('直接看結果 shows every round and the lot at once; Enter throws from the keyboard', (tester) async {
     await _openQiuqian(tester, FakeApi());
+    await ask(tester, 'qiuqian-question', '今年適合換工作嗎？');
     await tester.tap(find.byKey(const Key('draw-lot')));
     await _shaken(tester);
     // The fixture's draw: a 陰筊 on the first stick, the 聖筊 on the second.

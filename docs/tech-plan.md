@@ -47,6 +47,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S18 八字 AI 解读           | the AI's own reading, a 总结, no 行动建议, the skill        | medium | v9.3.0            | done        |
 | S19 深度分析               | the master asks first; 麦克风; 同名重算                     | big    | v10.0.0 + summary | done        |
 | S20 积分                   | points paid at the measured cost, ≥ 50% margin              | big    | v11.0.0 + summary | done        |
+| S21 有所求才能去求         | 塔罗, 求签 and 算卦 drawn only for a question               | medium | v11.1.0           | done        |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -1972,9 +1973,50 @@ As built (v11.0.0):
   15–30%: they need their own prices); a review console for what 积分 bought. A real charge waits for the owner's real
   model run: measured charges are tested with scripted token counts.
 
+## S21 有所求才能去求 (medium → v11.1.0)
+
+**Owner requests (2026-10-29), after v11.0.0:** 「求签和算卦 算法必须要有所问之问题之后才能去求。也就是说问题不能为空 是必须要有所求才能去
+求」, then 「塔罗牌也是一样」.
+
+Read as: a 塔罗, 求签 or 算卦 draw can happen only once a question has been asked, on the server as in the app; the
+reading answers that question. It replaces S6's 所問之事 「or to the reader's situation without one」. 每日一牌 is the
+day's card, dealt by the server without a draw, and needs none; 八字 and 风水 aren't drawn.
+
+### WP21.1 The server (→ v11.1.0)
+
+- `POST /v1/charts` for 塔罗, 求签 and 算卦 needs `question` (trimmed, at most 300 characters): 400
+  `question_required` without one, after the Geo-Rule and before anything is drawn. The question is kept with the
+  chart record (`ChartRecord.question`, sealed like it; never in its ChartFact) and returned with the chart.
+- The reading and the 深度分析 take the question the chart was drawn for; a chart drawn before v11.1.0, which kept
+  none, the request's (400 `question_required` when neither has one).
+
+### WP21.2 The app (→ v11.1.0)
+
+- On each of the three pages, every way to draw (the button, Enter in the field, Ctrl+Enter; for 算卦 also laying
+  out the coins) waits for the question, and a line under the button says 先写下…才能求签 / 起卦 / 抽牌. The labels lose
+  （可选）. The draw request carries the question; 塔罗's field is locked while the deck is shuffled, cut and picked,
+  so the cards are drawn for the question asked at 抽牌.
+
+Lessons: rules 19, 37, 58, 63, 67, 68.
+
+As built (v11.1.0): `QUESTION_SYSTEMS`, `asksQuestion`, `parseQuestion` in src/service/charts.ts and
+`questionRequired` in the server; the OpenAPI draw requests list `question` as required; tests in
+test/ask-first.test.ts and app/test/ask_first_test.dart. About thirty older server tests and eight app test files
+now ask before they draw; three tests that expected a 400 for another reason (a bad lot set, a manual cast without
+its time, 17 picks) ask too, so they still fail for their own reason (rule 63).
+
 ## 阶段总结 (stage summaries)
 
 Written when a stage completes, before its X.0.0 release (dev-workflow skill). Medium stages get a short one.
+
+### S21 有所求才能去求 (done 2026-10-29: v11.1.0, medium)
+
+1. **Delivered (v11.1.0):** WP21.1 a draw needs its question on the server, which keeps it with the chart for the
+   reading; WP21.2 the three pages wait for the question before any draw.
+2. **Numbers:** 8 new server tests (647 in all); 3 new app tests (237 in all).
+3. **Against the plan:** none; 每日一牌 stays without a question, since nothing is drawn for it (said to the owner).
+4. **Mistakes:** none new; rule 63 kept three refusal tests honest.
+5. **Next:** as at S20's end.
 
 ### S20 积分 (done 2026-10-29: v11.0.0)
 
@@ -2544,3 +2586,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP20.2    | done                         | v11.0.0 |
 | WP20.3    | done                         | v11.0.0 |
 | WP20.4    | done                         | v11.0.0 |
+| WP21.1    | done                         | v11.1.0 |
+| WP21.2    | done                         | v11.1.0 |

@@ -239,7 +239,8 @@ Chinese characters. On Windows it finds Noto Sans SC or 微软雅黑; on Linux, 
 
 ## 求籤 and the home order (v4.3.0)
 
-- 首页 → 求籤: type a question (optional), then 求籤.
+- 首页 → 求籤: type the question first, then 求籤 (since v11.1.0 a lot is drawn only for a question: 求籤 stays grey
+  until there is one; 塔罗 and 算卦 too).
 - Each round is a stick, then 擲筊. 聖筊 confirms it; 笑筊 or 陰筊 sends it back (放回再搖). 直接看結果 skips to the
   lot.
 - 生成 AI 解讀 reads the lot. With `IS_AI_MOCK=TRUE` the reading is the mock's demo text.

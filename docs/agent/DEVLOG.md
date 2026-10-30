@@ -2,6 +2,22 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (i): S21, the owner's requests — 塔罗, 求签 and 算卦 drawn only for a question; release v11.1.0
+
+- Owner requests: 「求签和算卦 算法必须要有所问之问题之后才能去求。也就是说问题不能为空 是必须要有所求才能去求」, then, while
+  it was being built, 「塔罗牌也是一样」.
+- Read as "the algorithm", so the server enforces it: `POST /v1/charts` refuses a 塔罗, 求签 or 算卦 draw without a
+  question (400 `question_required`) and keeps the question with the chart, sealed, never in its ChartFact; the
+  reading and the 深度分析 answer it. The app's pages wait for it on every way to draw.
+- Checked before building (rule 34): S6 had 求签 read 「or to the reader's situation without one」; the owner's new
+  rule replaces it. 每日一牌 is left without a question: nothing is drawn for it (told to the owner, who may want it
+  otherwise).
+- About thirty server tests and eight app test files drew without a question: they ask first now (an `ask()` helper
+  in app/test/support.dart). Three refusal tests (a bad lot set, a manual cast without its time, 17 picks) would
+  have kept passing on the new 400: they ask too, so they still fail for their own reason (rule 63). The 求签 test
+  that pinned the draw body `{system: qiuqian}` now expects the question in it: the behaviour the owner asked for.
+- Checked that the server test fails with the draw's check removed.
+
 ## 2026-10-29 (h): S20, the owner's request — 积分; release v11.0.0
 
 - Owner request: 「GO AND BUILD THE POINTS SYSTEM NOW」, after asking 「积分系统有没有做好」 (it wasn't: planned only, as S20,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
+import '../data/api_client.dart';
 import '../domain/models.dart';
 import '../generated/contract.g.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -52,6 +53,18 @@ class _TarotPageState extends ConsumerState<TarotPage> {
   /// 抽牌 so far: each one brings the ritual into view, even when it is open already (owner, v9.1.0).
   int _draws = 0;
 
+  /// 有所问，才能抽牌 (owner, v11.1.0: 塔罗牌也是一样): no card is drawn before something is asked.
+  bool _asking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _question.addListener(() {
+      final asking = _question.text.trim().isNotEmpty;
+      if (asking != _asking) setState(() => _asking = asking);
+    });
+  }
+
   @override
   void dispose() {
     _question.dispose();
@@ -59,8 +72,9 @@ class _TarotPageState extends ConsumerState<TarotPage> {
   }
 
   /// 抽牌 starts the ritual (v3.0.0): shuffle, cut, pick. A spread already out is put away. Since v10.0.0 it asks
-  /// first when this person has read the same question before (同名重算).
+  /// first when this person has read the same question before (同名重算); since v11.1.0 it needs the question.
   Future<void> _start() async {
+    if (!_asking) return;
     final name = ref.read(profilesProvider).value?.defaultProfile?.name;
     if (!await confirmRecalc(context, ref, system: 'tarot', name: name, question: _question.text)) return;
     if (!mounted) return;
@@ -76,10 +90,13 @@ class _TarotPageState extends ConsumerState<TarotPage> {
   Future<void> _draw({Map<String, Object?>? ritual}) async {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     try {
       final chart = await ref.read(apiClientProvider).createChart({
         'system': 'tarot',
         'spread': _spread,
+        // The cards are drawn for it (v11.1.0); its reading answers it.
+        'question': _question.text.trim(),
         'ritual': ?ritual,
         // Whose reading it is, for 以往记录 (v8.0.0).
         ...readerPerson(ref.read(profilesProvider).value),
@@ -97,7 +114,9 @@ class _TarotPageState extends ConsumerState<TarotPage> {
         precacheImage(AssetImage(tarotArt(c.cardId)), context, onError: (_, _) {});
       }
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(e is ApiException && e.code == 'question_required' ? l10n.tarotQuestionMissing : '$e')),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -115,7 +134,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
       message: l10n.leaveTarotBody,
       // Ctrl+Enter draws, until cards are out (a second draw would replace them).
       child: SubmitShortcut(
-        onSubmit: _busy || chart != null || _inRitual ? null : _start,
+        onSubmit: _busy || chart != null || _inRitual || !_asking ? null : _start,
         child: Scaffold(
           appBar: AppBar(
             title: Text(l10n.homeTarot),
@@ -148,9 +167,11 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                       TextField(
                         key: const Key('tarot-question'),
                         controller: _question,
+                        // Asked at 抽牌: it stays as it is until the cards are out.
+                        enabled: !_inRitual,
                         textInputAction: TextInputAction.done,
                         inputFormatters: [LengthLimitingTextInputFormatter(300)],
-                        onSubmitted: (_) => _busy ? null : _start(),
+                        onSubmitted: (_) => _busy || !_asking ? null : _start(),
                         decoration: InputDecoration(
                           labelText: l10n.tarotQuestion,
                           helperText: l10n.tarotQuestionHint,
@@ -172,7 +193,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                             ActionChip(
                               key: Key('example-$i'),
                               label: Text(q),
-                              onPressed: () => setState(() => _question.text = q),
+                              onPressed: _inRitual ? null : () => setState(() => _question.text = q),
                             ),
                         ],
                       ),
@@ -273,10 +294,20 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                       const SizedBox(height: Space.l),
                       FilledButton.icon(
                         key: const Key('draw'),
-                        onPressed: _busy ? null : _start,
+                        onPressed: _busy || !_asking ? null : _start,
                         icon: const Icon(Icons.style),
                         label: Text(l10n.draw),
                       ),
+                      if (!_asking)
+                        Padding(
+                          padding: const EdgeInsets.only(top: Space.s),
+                          child: Text(
+                            l10n.tarotQuestionMissing,
+                            key: const Key('tarot-question-missing'),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
+                          ),
+                        ),
                     ],
                   ),
                 ),

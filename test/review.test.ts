@@ -72,7 +72,11 @@ const call = (who: string, path: string, body?: unknown) =>
 
 async function tarotReport(who: string) {
   const { chart_id } = await (
-    await call(who, "/v1/charts", { system: "tarot", spread: "three_card" })
+    await call(who, "/v1/charts", {
+      system: "tarot",
+      spread: "three_card",
+      question: "最近的工作会顺利吗？",
+    })
   ).json();
   const r = await (
     await call(who, "/v1/reports", { chart_id, locale: "zh-Hans", topics: ["tarot_advice"] })

@@ -2278,14 +2278,20 @@ abstract class AppLocalizations {
   /// No description provided for @tarotQuestion.
   ///
   /// In zh, this message translates to:
-  /// **'你想问的问题（可选）'**
+  /// **'你想问的问题'**
   String get tarotQuestion;
 
   /// No description provided for @tarotQuestionHint.
   ///
   /// In zh, this message translates to:
-  /// **'抽牌前先在心里想好一个问题，解读会围绕它展开。'**
+  /// **'先写下你想问的问题才能抽牌：有所问，牌才有所答，解读也围绕它展开。'**
   String get tarotQuestionHint;
+
+  /// No description provided for @tarotQuestionMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'先写下你想问的问题，才能抽牌'**
+  String get tarotQuestionMissing;
 
   /// No description provided for @tarotFocus.
   ///
@@ -2524,8 +2530,14 @@ abstract class AppLocalizations {
   /// No description provided for @qiuqianQuestionHint.
   ///
   /// In zh, this message translates to:
-  /// **'心中默念或写下来都可以。问题只用于解签，不会出现在分享图上。'**
+  /// **'先写下所求之事才能求签：有所求，才能去求。问题只用于解签，不会出现在分享图上。'**
   String get qiuqianQuestionHint;
+
+  /// No description provided for @qiuqianQuestionMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'先写下所求之事，才能求签'**
+  String get qiuqianQuestionMissing;
 
   /// No description provided for @qiuqianExample1.
   ///
@@ -2884,14 +2896,20 @@ abstract class AppLocalizations {
   /// No description provided for @liuyaoQuestion.
   ///
   /// In zh, this message translates to:
-  /// **'想问的事（可选）'**
+  /// **'想问的事'**
   String get liuyaoQuestion;
 
   /// No description provided for @liuyaoQuestionHint.
   ///
   /// In zh, this message translates to:
-  /// **'一次只问一件事，问得越具体，解读越贴切'**
+  /// **'先写下想问的事才能起卦。一次只问一件事，问得越具体，解读越贴切'**
   String get liuyaoQuestionHint;
+
+  /// No description provided for @liuyaoQuestionMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'先写下想问的事，才能起卦'**
+  String get liuyaoQuestionMissing;
 
   /// No description provided for @liuyaoRemind.
   ///

@@ -578,7 +578,11 @@ describe("深度分析, the API (WP19.1)", () => {
   it("lists each reading with the question it was asked (同名重算)", async () => {
     const u = "iq-history";
     const chart = await (
-      await post("/v1/charts", { system: "tarot", spread: "three_card" }, u)
+      await post(
+        "/v1/charts",
+        { system: "tarot", spread: "three_card", question: "要不要换工作？" },
+        u,
+      )
     ).json();
     await post(
       "/v1/reports",

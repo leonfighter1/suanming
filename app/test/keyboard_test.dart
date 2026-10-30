@@ -184,6 +184,8 @@ void main() {
       expect(entry, findsOneWidget);
 
       await tapAndWait(tester, entry);
+      // 抽牌 waits for the question (v11.1.0): typed in its field first, then Tab on to the button.
+      await ask(tester, 'tarot-question', '我们的关系会怎样？');
       await tabTo(tester, 'draw');
       await press(tester, LogicalKeyboardKey.enter);
       // The ritual opens (v3.0.0); the deck picks here (the ritual's keys: tarot_ritual_test.dart).

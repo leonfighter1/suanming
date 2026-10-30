@@ -103,7 +103,11 @@ describe("public test mode", () => {
         await fetch(base + "/v1/charts", {
           method: "POST",
           headers: h,
-          body: JSON.stringify({ system: "tarot", spread: "three_card" }),
+          body: JSON.stringify({
+            system: "tarot",
+            spread: "three_card",
+            question: "最近的工作会顺利吗？",
+          }),
         })
       ).json();
       return fetch(base + "/v1/reports", {

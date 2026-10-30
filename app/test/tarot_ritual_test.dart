@@ -25,6 +25,8 @@ Future<FakeApi> openRitual(WidgetTester tester) async {
   await settle(tester);
   await openEntry(tester, 'tarot');
   await settle(tester);
+  // The cards are drawn only for a question (v11.1.0).
+  await ask(tester, 'tarot-question');
   await tester.ensureVisible(find.byKey(const Key('draw')));
   await tester.pump(); // rule 27
   await tester.tap(find.byKey(const Key('draw')));

@@ -114,7 +114,11 @@ describe("v1 API", () => {
     );
     expect(gap.status).toBe(422);
     const { chart_id } = await (
-      await post("/v1/charts", { system: "tarot", spread: "single" })
+      await post("/v1/charts", {
+        system: "tarot",
+        spread: "single",
+        question: "最近的工作会顺利吗？",
+      })
     ).json();
     expect(
       (await post("/v1/reports", { chart_id, locale: "zh-Hant", topics: ["wuxing"] })).status,
@@ -191,7 +195,11 @@ describe("history and live progress", () => {
     const h = H("HK", "hist");
     const c1 = await (await post("/v1/charts", bazi, h)).json();
     const c2 = await (
-      await post("/v1/charts", { system: "tarot", spread: "three_card" }, h)
+      await post(
+        "/v1/charts",
+        { system: "tarot", spread: "three_card", question: "最近的工作会顺利吗？" },
+        h,
+      )
     ).json();
     const r1 = await (
       await post("/v1/reports", { chart_id: c1.chart_id, locale: "zh-Hant" }, h)
@@ -261,14 +269,24 @@ describe("history and live progress", () => {
     // Since v8.0.0 (以往记录 by person) any chart may name its person; only a birth chart has a birthplace.
     const tarot = await post(
       "/v1/charts",
-      { system: "tarot", spread: "single", person: { name: "徐梅" } },
+      {
+        system: "tarot",
+        spread: "single",
+        question: "最近的工作会顺利吗？",
+        person: { name: "徐梅" },
+      },
       h,
     );
     expect(tarot.status).toBe(201);
     expect((await tarot.json()).person).toEqual({ name: "徐梅" });
     const placed = await post(
       "/v1/charts",
-      { system: "tarot", spread: "single", person: { name: "徐梅", birthplace: "上海" } },
+      {
+        system: "tarot",
+        spread: "single",
+        question: "最近的工作会顺利吗？",
+        person: { name: "徐梅", birthplace: "上海" },
+      },
       h,
     );
     expect(placed.status).toBe(400);

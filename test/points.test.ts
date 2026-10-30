@@ -802,7 +802,11 @@ describe("charging every AI request (WP20.3)", () => {
       points: 346,
       hold: 519,
     });
-    const tarot = await api.chart(u, { system: "tarot", spread: "three_card" });
+    const tarot = await api.chart(u, {
+      system: "tarot",
+      spread: "three_card",
+      question: "最近的工作会顺利吗？",
+    });
     const t = await api.get(`/v1/charts/${tarot}/quote`, u);
     expect(t.report).toEqual({ points: 470, hold: 705 });
     expect(t.inquiry.points).toBe(747);

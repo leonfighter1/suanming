@@ -22,6 +22,8 @@ Future<FakeApi> _open(WidgetTester tester, [FakeApi? fake]) async {
   await frames(tester, 10);
   await tester.tap(find.byKey(const Key('entry-liuyao')));
   await frames(tester, 10);
+  // The coins are cast only for a question (v11.1.0).
+  await ask(tester, 'liuyao-question', '這個項目能不能做成？');
   return api;
 }
 

@@ -22,7 +22,9 @@ Set by the owner on 2026-10-29 (tech plan S18, v9.3.0). Where a requirement is q
 「当给AI去运算时，只需要给出当前人的资料和具体背景和问题」, 「ai解读时尽量不采用引擎数据」.
 
 - **The person:** `<user_context>` (name, residence, marital status, children, occupation, family, what they want to
-  know) from the profile, `<user_question>` when they asked, `<today>`.
+  know) from the profile, `<user_question>` when they asked, `<today>`. 塔罗, 求签 and 算卦 always have a question
+  (owner, v11.1.0: 「必须要有所求才能去求」): nothing is drawn without one, and the reading answers the one it was drawn
+  for.
 - **The 排盘, from the engine:** the pillars with 藏干, 十神, 十二长生 and 纳音; 日主, 月令, the five-element count;
   合冲刑害破, 神煞, 空亡, 胎元; every 大运 and 流年 with its years, 干支 and 虚岁. The model never reckons a 干支, a year
   or an age itself (models get them wrong: an early run called 2027 丙午), and the reading must match the chart on its

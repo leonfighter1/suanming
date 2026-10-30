@@ -52,6 +52,14 @@ Future<void> openEntry(WidgetTester tester, String system) async {
   await tester.tap(find.byKey(Key('entry-$system')));
 }
 
+/// 塔罗, 求签 and 算卦 are drawn only for a question (v11.1.0, the owner: 必须要有所求才能去求): types [question] into
+/// the page's question field ([field]: `tarot-question`, `qiuqian-question` or `liuyao-question`), then pumps, so
+/// the draw button is enabled before the next tap (rule 19).
+Future<void> ask(WidgetTester tester, String field, [String question = '最近的工作會順利嗎？']) async {
+  await tester.enterText(find.byKey(Key(field)), question);
+  await tester.pump();
+}
+
 /// On the home page, open the ☰ menu (v8.1.0) and tap [key] in it: 个人资料, 语言, 设置, 内容审核 and the rest
 /// live there. The caller pumps for whatever the tap opens.
 Future<void> openFromMenu(WidgetTester tester, String key) async {
@@ -377,6 +385,11 @@ class FakeApi {
     }
     if (req.method == 'POST' && path == '/v1/charts') {
       final body = jsonDecode(req.body) as Map;
+      // 塔罗, 求签 and 算卦 are drawn only for a question (v11.1.0), as the server has it.
+      if (const ['tarot', 'qiuqian', 'liuyao'].contains(body['system']) &&
+          ((body['question'] as String?) ?? '').trim().isEmpty) {
+        return _problem(400, 'ask your question first', 'question_required');
+      }
       final tarot = switch (body['spread']) {
         'celtic_cross' => 'chart_tarot_celtic',
         'single' => 'chart_tarot_single',

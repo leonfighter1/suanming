@@ -184,11 +184,20 @@ describe("the API", () => {
   };
 
   it("draws a lot, reads it, and offers no focus and no plan", async () => {
-    const chart = await call("POST", "/v1/charts", { system: "qiuqian" });
+    const chart = await call("POST", "/v1/charts", {
+      system: "qiuqian",
+      question: "明年事业如何？",
+    });
     expect(chart.status).toBe(201);
     expect(chart.body.chart_fact.system).toBe("qiuqian");
     expect(
-      (await call("POST", "/v1/charts", { system: "qiuqian", lot_set: "mazu_60" })).status,
+      (
+        await call("POST", "/v1/charts", {
+          system: "qiuqian",
+          question: "明年事业如何？",
+          lot_set: "mazu_60",
+        })
+      ).status,
     ).toBe(400);
 
     const focus = await call("POST", "/v1/reports", {

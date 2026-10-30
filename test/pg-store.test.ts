@@ -594,7 +594,11 @@ describe("the API on the database store", () => {
         ).json()) as { access_token: string };
       const readTarot = async (token: string) => {
         const chart = await (
-          await post("/v1/charts", { system: "tarot", spread: "single" }, token)
+          await post(
+            "/v1/charts",
+            { system: "tarot", spread: "single", question: "最近的工作会顺利吗？" },
+            token,
+          )
         ).json();
         return (await (
           await post("/v1/reports", { chart_id: chart.chart_id, locale: "zh-Hant" }, token)
