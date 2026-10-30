@@ -14,20 +14,10 @@ import {
   type ConclusionPart,
   type Paragraph,
 } from "../src/ai/index.js";
-import { computeBazi } from "../src/engines/bazi/index.js";
 import { readingDocument } from "../src/export/report-doc.js";
-import { FIXED_NOW, PEPPER } from "./helpers.js";
+import { FIXED_NOW, sampleBazi } from "./helpers.js";
 
-const chart = computeBazi(
-  {
-    local: "1990-03-15T14:30",
-    timezone: "Asia/Hong_Kong",
-    longitude: 114.17,
-    gender: "male",
-    options: { liunianFrom: 2026 },
-  },
-  { digestPepper: PEPPER, now: FIXED_NOW },
-);
+const chart = sampleBazi();
 const deps = (mock: MockProvider) => ({
   providers: { deepseek: mock, anthropic: mock },
   now: FIXED_NOW,

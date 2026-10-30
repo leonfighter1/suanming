@@ -2,10 +2,25 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { GeoRuleMatrix } from "../src/compliance/geo.js";
+import { computeBazi } from "../src/engines/bazi/index.js";
 
 export const PEPPER = Buffer.alloc(32, 7);
 export const DRAW_KEY = Buffer.alloc(32, 9);
 export const FIXED_NOW = () => new Date("2026-10-25T00:00:00.000Z");
+
+/** The AI tests' 八字 chart (S28, F10): a man born 1990-03-15 14:30 in Hong Kong, its 流年 from 2026. */
+export function sampleBazi() {
+  return computeBazi(
+    {
+      local: "1990-03-15T14:30",
+      timezone: "Asia/Hong_Kong",
+      longitude: 114.17,
+      gender: "male",
+      options: { liunianFrom: 2026 },
+    },
+    { digestPepper: PEPPER, now: FIXED_NOW },
+  );
+}
 
 let matrixFiles = 0;
 

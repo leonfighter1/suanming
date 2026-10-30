@@ -15,9 +15,8 @@ import {
   type RoutingTable,
 } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
-import { computeBazi } from "../src/engines/bazi/index.js";
 import { buildProviders, modelChoice, watchAi } from "../src/service/runtime.js";
-import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { DRAW_KEY, FIXED_NOW, PEPPER, sampleBazi } from "./helpers.js";
 
 describe("the models to choose from (S17, v9.2.0)", () => {
   it("every route answers with Claude Opus 5.5 (owner, 2026-10-29), at medium effort but the 深度分析's", () => {
@@ -211,16 +210,7 @@ describe("the models to choose from (S17, v9.2.0)", () => {
   });
 
   it("a reading on the chosen model asks only that model's provider, at its effort", async () => {
-    const chart = computeBazi(
-      {
-        local: "1990-03-15T14:30",
-        timezone: "Asia/Hong_Kong",
-        longitude: 114.17,
-        gender: "male",
-        options: { liunianFrom: 2026 },
-      },
-      { digestPepper: PEPPER, now: FIXED_NOW },
-    );
+    const chart = sampleBazi();
     const claude = new MockProvider();
     const deepseek = new MockProvider();
     const r = await generateReport(

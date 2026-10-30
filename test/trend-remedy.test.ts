@@ -3,21 +3,11 @@ import { describe, expect, it } from "vitest";
 import { generateRemedy, generateReport, MockProvider, PROMPTS } from "../src/ai/index.js";
 import { createApiServer } from "../src/api/server.js";
 import { computeAstrology } from "../src/engines/astrology/index.js";
-import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
-import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { DRAW_KEY, FIXED_NOW, PEPPER, sampleBazi } from "./helpers.js";
 import { testApi } from "./api.js";
 
-const chart = computeBazi(
-  {
-    local: "1990-03-15T14:30",
-    timezone: "Asia/Hong_Kong",
-    longitude: 114.17,
-    gender: "male",
-    options: { liunianFrom: 2026 },
-  },
-  { digestPepper: PEPPER, now: FIXED_NOW },
-);
+const chart = sampleBazi();
 const deps = (mock: MockProvider) => ({
   providers: { deepseek: mock, anthropic: mock },
   now: FIXED_NOW,

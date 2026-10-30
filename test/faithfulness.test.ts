@@ -5,20 +5,10 @@ import {
   MockProvider,
   type NarrativeOutput,
 } from "../src/ai/index.js";
-import { computeBazi } from "../src/engines/bazi/index.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
-import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
+import { DRAW_KEY, FIXED_NOW, PEPPER, sampleBazi } from "./helpers.js";
 
-const bazi = computeBazi(
-  {
-    local: "1990-03-15T14:30",
-    timezone: "Asia/Hong_Kong",
-    longitude: 114.17,
-    gender: "male",
-    options: { liunianFrom: 2026 },
-  },
-  { digestPepper: PEPPER, now: FIXED_NOW },
-);
+const bazi = sampleBazi();
 const tarot = computeTarot(
   { spread: "three_card" },
   {
