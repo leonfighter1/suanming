@@ -726,5 +726,12 @@
   "pointsShortBody": "這次約需 {need} 積分，你現在可用 {available} 積分。充值後再試一次。",
   "pointsGoTopUp": "去充值",
   "pointsFollowUpLeft": "還可追問 {n} 次 · 每問約 {points} 積分",
-  "remedyConfirmPoints": "「{topic}」的破除運勢方案約需 {points} 積分，生成後按實際用量從積分中扣除。"
+  "remedyConfirmPoints": "「{topic}」的破除運勢方案約需 {points} 積分，生成後按實際用量從積分中扣除。",
+  "adminDashboard": "管理後台",
+  "adminDashboardOpen": "以{role}身份，在新分頁開啟",
+  "adminDashboardCopy": "以{role}身份：複製網址，在瀏覽器裡開啟",
+  "adminLinkCopied": "已複製管理後台的網址：{url}",
+  "staffAdmin": "管理員",
+  "staffManager": "經理",
+  "staffIntegrator": "集成人員"
 }

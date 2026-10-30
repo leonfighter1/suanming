@@ -2,6 +2,17 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (i): S25 WP25.3b — ☰ → 管理后台 for staff; v13.3.0 (local)
+
+- v13.2.0 committed and tagged after its harness PASS (142c44e).
+- Drafted in the scratchpad while that harness ran (`s25b/`), copied in after: app `platform/open_link*.dart`,
+  `AppUser.staff`, the menu entry (`adminUrl`, `staffName`), the ARB keys by Edit (a JSON round trip would have
+  reformatted both files, rule 45), `flutter gen-l10n` through the junction; 管理后台 `platform/login_hint*.dart`,
+  `loginHintProvider`, the sign-in's prefill and focus.
+- The re-read CLAUDE.md asks for colours only from ThemeTokens: the S25 screens' `colorScheme` uses became tokens
+  (`secondary` is seed-made, so the staff pill took `textSecondary`).
+- Checked: both analyses clean, 75 管理后台 tests, the app's menu tests, both web builds; then the harness.
+
 ## 2026-10-30 (h): S25 WP25.3 — the 管理后台's 消息 page, roles on screen, one container; v13.2.0 (local)
 
 - v13.1.0 committed and tagged after its harness PASS (the WP25.3 edits already begun stayed out of the commit).

@@ -121,7 +121,7 @@ class _MessageCard extends StatelessWidget {
                 Pill(
                   w.custom ? '${localeName(w.locale)} · 已修改' : localeName(w.locale),
                   key: ValueKey<String>('message-${t.kind}-${w.locale}'),
-                  color: w.custom ? theme.colorScheme.primary : tokens.textMuted,
+                  color: w.custom ? tokens.accent : tokens.textMuted,
                   icon: w.custom ? Icons.edit_outlined : null,
                 ),
             ],

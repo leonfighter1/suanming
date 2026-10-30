@@ -1,8 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
+import '../../data/api_client.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../../platform/open_link.dart';
 import '../design.dart';
 import '../history_page.dart';
 import '../keyboard.dart';
@@ -24,6 +28,20 @@ class AppMenu extends ConsumerWidget {
     final navigator = Navigator.of(context);
     navigator.pop();
     navigator.push(MaterialPageRoute<void>(builder: (_) => page));
+  }
+
+  /// Closes the menu and opens the 管理后台 in a new tab, straight from the tap so the browser takes it as the user's
+  /// own. Where there is no tab to open (the app off the web), its address goes on the clipboard and a line says so.
+  static Future<void> _openAdmin(BuildContext context, WidgetRef ref, AppUser user) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final url = adminUrl(ref.read(apiClientProvider).baseUrl, user.login);
+    Navigator.of(context).pop();
+    if (await openInNewTab(url)) return;
+    await Clipboard.setData(ClipboardData(text: url));
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l10n.adminLinkCopied(url))));
   }
 
   @override
@@ -91,6 +109,19 @@ class AppMenu extends ConsumerWidget {
               leading: const Icon(Icons.fact_check_outlined),
               title: Text(l10n.reviewTitle),
               onTap: () => _open(context, const ReviewPage()),
+            ),
+          // 管理后台 (S25; the owner: 如果登陆者具备各项权限…可以在下拉菜单设置中选择进入后台系统): staff only, as the server says
+          // (GET /v1/me's staff). The dashboard opens in a new tab with the login filled in; signing in is its own.
+          if (user?.staff case final staff?)
+            ListTile(
+              key: const Key('open-admin'),
+              leading: const Icon(Icons.admin_panel_settings_outlined),
+              title: Text(l10n.adminDashboard),
+              subtitle: Text(
+                kIsWeb ? l10n.adminDashboardOpen(staffName(l10n, staff)) : l10n.adminDashboardCopy(staffName(l10n, staff)),
+              ),
+              trailing: Icon(kIsWeb ? Icons.open_in_new : Icons.copy_outlined),
+              onTap: () => _openAdmin(context, ref, user!),
             ),
           // The keyboard list is also behind Ctrl+/ (or ?) on every page.
           ListTile(
@@ -260,3 +291,15 @@ class _Header extends StatelessWidget {
     );
   }
 }
+
+/// A staff role in the reader's words (tech plan S25).
+String staffName(AppLocalizations l10n, String role) => switch (role) {
+      'admin' => l10n.staffAdmin,
+      'manager' => l10n.staffManager,
+      'integrator' => l10n.staffIntegrator,
+      _ => role,
+    };
+
+/// The 管理后台 on the API's own address, its sign-in's login filled in (`?login=`, like a login hint; the dashboard
+/// takes it off its address once read).
+String adminUrl(String apiBase, String login) => '$apiBase/admin/?login=${Uri.encodeQueryComponent(login)}';

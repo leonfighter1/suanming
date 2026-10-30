@@ -54,6 +54,7 @@ class AppUser {
     required this.signInMethods,
     this.role = 'user',
     this.emailReports = false,
+    this.staff,
   });
   factory AppUser.fromJson(Json j) => AppUser(
         id: j['id'] as String,
@@ -65,6 +66,7 @@ class AppUser {
         signInMethods: (j['sign_in_methods'] as List).cast<String>(),
         role: j['role'] as String? ?? 'user',
         emailReports: (j['settings'] as Map?)?['email_reports'] as bool? ?? false,
+        staff: j['staff'] as String?,
       );
   final String id;
 
@@ -83,6 +85,9 @@ class AppUser {
 
   /// 测算完成后发到邮箱 (v8.2.0, WP15.4): 否 by default.
   final bool emailReports;
+
+  /// 后台角色 (tech plan S25): admin, manager or integrator; null for everyone else. The ☰ shows 管理后台 for it.
+  final String? staff;
 
   /// Who is signed in, as the menu header shows it: the username, else the email, else the phone.
   String get login => username ?? email ?? phone ?? '—';

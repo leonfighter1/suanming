@@ -48,6 +48,16 @@ void main() {
     expect(find.byKey(const Key('admin-me')), findsOneWidget);
   });
 
+  testWidgets('the login the app hands over (☰ → 管理后台, S25) is filled in, and the password comes first', (tester) async {
+    await pumpAdmin(tester, signIn: false, loginHint: 'boss');
+    expect(tester.widget<TextField>(find.byKey(const Key('admin-login'))).controller!.text, 'boss');
+    expect(focusedKey(), 'admin-password');
+    await tester.enterText(find.byKey(const Key('admin-password')), 'secret1');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('admin-me')), findsOneWidget);
+  });
+
   testWidgets('Ctrl+Enter signs in', (tester) async {
     await pumpAdmin(tester, signIn: false);
     await tester.enterText(find.byKey(const Key('admin-login')), 'boss');

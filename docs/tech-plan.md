@@ -2366,6 +2366,14 @@ Read as:
 
 - ☰ → 管理后台 for staff (from `GET /v1/me`'s `staff`): opens `<api>/admin/?login=<login>` in a new tab (the web),
   the dashboard's sign-in filled in. Hidden for everyone else. The three ARB files; tests.
+- **As built (v13.3.0):** as specified, with the two ARB files the app has now (简体, 繁體; English went on
+  2026-10-28). Also:
+  - the entry says the role (「以经理身份…」);
+  - off the web, where no tab can be opened, the address is copied and a line says so;
+  - the dashboard fills the login in, puts the focus on the password, and takes `?login=` off its address once read.
+    Our server logs no request URLs, and the dashboard loads nothing from elsewhere, so the login goes nowhere else;
+  - the CLAUDE.md rule "take colours only from ThemeTokens" came in with this update: the S25 screens' four
+    `colorScheme` uses and the role pill's `secondary` (seed-made, not a token) became tokens.
 
 ### WP25.4 Records, the release (→ v14.0.0)
 
@@ -3045,5 +3053,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP25.2    | done                         | v13.1.0 |
 | WP25.2b   | done                         | v13.1.0 |
 | WP25.3    | done                         | v13.2.0 |
-| WP25.3b   | planned                      | v13.3.0 |
+| WP25.3b   | done                         | v13.3.0 |
 | WP25.4    | planned                      | v14.0.0 |

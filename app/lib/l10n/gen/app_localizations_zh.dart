@@ -2336,6 +2336,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String remedyConfirmPoints(String topic, int points) {
     return '“$topic”的破除运势方案约需 $points 积分，生成后按实际用量从积分中扣除。';
   }
+
+  @override
+  String get adminDashboard => '管理后台';
+
+  @override
+  String adminDashboardOpen(String role) {
+    return '以$role身份，在新标签页打开';
+  }
+
+  @override
+  String adminDashboardCopy(String role) {
+    return '以$role身份：复制地址，在浏览器里打开';
+  }
+
+  @override
+  String adminLinkCopied(String url) {
+    return '已复制管理后台的地址：$url';
+  }
+
+  @override
+  String get staffAdmin => '管理员';
+
+  @override
+  String get staffManager => '经理';
+
+  @override
+  String get staffIntegrator => '集成人员';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4669,4 +4696,31 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String remedyConfirmPoints(String topic, int points) {
     return '「$topic」的破除運勢方案約需 $points 積分，生成後按實際用量從積分中扣除。';
   }
+
+  @override
+  String get adminDashboard => '管理後台';
+
+  @override
+  String adminDashboardOpen(String role) {
+    return '以$role身份，在新分頁開啟';
+  }
+
+  @override
+  String adminDashboardCopy(String role) {
+    return '以$role身份：複製網址，在瀏覽器裡開啟';
+  }
+
+  @override
+  String adminLinkCopied(String url) {
+    return '已複製管理後台的網址：$url';
+  }
+
+  @override
+  String get staffAdmin => '管理員';
+
+  @override
+  String get staffManager => '經理';
+
+  @override
+  String get staffIntegrator => '集成人員';
 }

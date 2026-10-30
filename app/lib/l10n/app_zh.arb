@@ -1046,5 +1046,15 @@
   "pointsFollowUpLeft": "还可追问 {n} 次 · 每问约 {points} 积分",
   "@pointsFollowUpLeft": { "placeholders": { "n": { "type": "int" }, "points": { "type": "int" } } },
   "remedyConfirmPoints": "“{topic}”的破除运势方案约需 {points} 积分，生成后按实际用量从积分中扣除。",
-  "@remedyConfirmPoints": { "placeholders": { "topic": { "type": "String" }, "points": { "type": "int" } } }
+  "@remedyConfirmPoints": { "placeholders": { "topic": { "type": "String" }, "points": { "type": "int" } } },
+  "adminDashboard": "管理后台",
+  "adminDashboardOpen": "以{role}身份，在新标签页打开",
+  "@adminDashboardOpen": { "placeholders": { "role": { "type": "String" } } },
+  "adminDashboardCopy": "以{role}身份：复制地址，在浏览器里打开",
+  "@adminDashboardCopy": { "placeholders": { "role": { "type": "String" } } },
+  "adminLinkCopied": "已复制管理后台的地址：{url}",
+  "@adminLinkCopied": { "placeholders": { "url": { "type": "String" } } },
+  "staffAdmin": "管理员",
+  "staffManager": "经理",
+  "staffIntegrator": "集成人员"
 }

@@ -341,7 +341,7 @@ class _MessageEditorPageState extends ConsumerState<MessageEditorPage> {
               ? '${localeName(_locale)}：已修改${saved.updatedAt == null ? '' : '（${localTime(saved.updatedAt!)}）'}'
               : '${localeName(_locale)}：默认内容',
           key: const Key('wording-state'),
-          style: theme.textTheme.bodySmall?.copyWith(color: saved.custom ? theme.colorScheme.primary : tk.textMuted),
+          style: theme.textTheme.bodySmall?.copyWith(color: saved.custom ? tk.accent : tk.textMuted),
         ),
         const SizedBox(height: Space.l),
         if (t.mail) ...[
@@ -506,7 +506,7 @@ class _Problems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colour = theme.colorScheme.error;
+    final colour = ThemeTokens.of(context).danger;
     final style = theme.textTheme.bodyMedium?.copyWith(color: colour);
     const size = Space.l;
     return Column(

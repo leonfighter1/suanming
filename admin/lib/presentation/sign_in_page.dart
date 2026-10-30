@@ -17,7 +17,9 @@ class AdminSignInPage extends ConsumerStatefulWidget {
 }
 
 class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
-  final _login = TextEditingController();
+  /// The login the app's ☰ → 管理后台 handed over (S25), if any: filled in, so the password comes first.
+  late final _login = TextEditingController(text: ref.read(loginHintProvider) ?? '');
+  late final _hinted = _login.text.isNotEmpty;
   final _password = TextEditingController();
   final _passwordFocus = FocusNode();
   bool _busy = false;
@@ -68,7 +70,7 @@ class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
                     TextField(
                       key: const Key('admin-login'),
                       controller: _login,
-                      autofocus: true,
+                      autofocus: !_hinted,
                       textInputAction: TextInputAction.next,
                       onSubmitted: (_) => _passwordFocus.requestFocus(),
                       decoration: const InputDecoration(labelText: '用户名 / 邮箱'),
@@ -78,6 +80,7 @@ class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
                       key: const Key('admin-password'),
                       controller: _password,
                       focusNode: _passwordFocus,
+                      autofocus: _hinted,
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _submit(),

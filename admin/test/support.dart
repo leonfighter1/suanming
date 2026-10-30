@@ -652,13 +652,15 @@ final messageSpecs = <Json>[
 ];
 
 /// The dashboard on a [size] screen, signed in as the admin unless [signIn] is false.
-/// [prefs] is the browser's storage (the theme picked, v12.1.0): empty unless a test gives one.
+/// [prefs] is the browser's storage (the theme picked, v12.1.0): empty unless a test gives one. [loginHint] is the
+/// login the app's ☰ → 管理后台 hands over (`?login=`, S25).
 Future<FakeAdmin> pumpAdmin(
   WidgetTester tester, {
   FakeAdmin? fake,
   Size size = wide,
   bool signIn = true,
   Map<String, String>? prefs,
+  String? loginHint,
 }) async {
   final f = fake ?? FakeAdmin();
   final stored = prefs ?? <String, String>{};
@@ -673,6 +675,7 @@ Future<FakeAdmin> pumpAdmin(
         clockProvider.overrideWithValue(() => testNow),
         saveFileProvider.overrideWithValue((file) async => f.saved.add(file)),
         prefsProvider.overrideWithValue(Prefs(read: (k) => stored[k], write: (k, v) => stored[k] = v)),
+        loginHintProvider.overrideWithValue(loginHint),
       ],
       child: const AdminApp(),
     ),

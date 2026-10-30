@@ -4427,6 +4427,48 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'“{topic}”的破除运势方案约需 {points} 积分，生成后按实际用量从积分中扣除。'**
   String remedyConfirmPoints(String topic, int points);
+
+  /// No description provided for @adminDashboard.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理后台'**
+  String get adminDashboard;
+
+  /// No description provided for @adminDashboardOpen.
+  ///
+  /// In zh, this message translates to:
+  /// **'以{role}身份，在新标签页打开'**
+  String adminDashboardOpen(String role);
+
+  /// No description provided for @adminDashboardCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'以{role}身份：复制地址，在浏览器里打开'**
+  String adminDashboardCopy(String role);
+
+  /// No description provided for @adminLinkCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制管理后台的地址：{url}'**
+  String adminLinkCopied(String url);
+
+  /// No description provided for @staffAdmin.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理员'**
+  String get staffAdmin;
+
+  /// No description provided for @staffManager.
+  ///
+  /// In zh, this message translates to:
+  /// **'经理'**
+  String get staffManager;
+
+  /// No description provided for @staffIntegrator.
+  ///
+  /// In zh, this message translates to:
+  /// **'集成人员'**
+  String get staffIntegrator;
 }
 
 class _AppLocalizationsDelegate

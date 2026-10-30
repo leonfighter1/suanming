@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/presentation/design.dart';
+import 'package:mingli_app/presentation/tokens.dart';
 
 import '../application/providers.dart';
 import '../domain/models.dart';
@@ -106,7 +107,7 @@ class _AdminShellState extends ConsumerState<AdminShell> {
                       TextSpan(text: me.login),
                       TextSpan(
                         text: ' · ${roleName(me.role)}',
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        style: TextStyle(color: ThemeTokens.of(context).textSecondary),
                       ),
                     ],
                   ),

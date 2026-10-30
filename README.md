@@ -13,6 +13,25 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v13.3.0 (2026-10-30): ☰ → 管理后台 for staff
+
+Your request: a signed-in account with back-office rights can enter the back office from the menu on the home page
+(「如果登陆者具备各项权限，在主页登陆时可以在下拉菜单设置中选择进入后台系统」). Stage S25, work package WP25.3b, committed
+locally; it goes out with v14.0.0.
+
+- **The way in:** an admin, manager or integrator sees **管理后台** in the app's ☰ menu, with their role
+  (「以经理身份…」). Nobody else sees it. The server says who is staff (`GET /v1/me`'s `staff`), so a role given or
+  taken away shows at the next sign-in.
+- **On the web** it opens the dashboard (the API's `/admin/`) in a new tab with your login already filled in; you
+  type only the password. The dashboard then takes the login out of its address, so a copied link doesn't carry it.
+- **Off the web** (the Android app), there is no tab to open: the dashboard's address is copied, and a line at the
+  bottom says so, for pasting into a browser.
+- **Keys:** the entry is in the menu's Tab order; Enter opens it.
+- **Also:** the 管理后台 screens from v13.2.0 now take every colour from the design tokens (the rule in CLAUDE.md); a
+  manager's or an integrator's role label turns from a tint of the accent to the secondary text colour.
+- **Verified:** 3 new app tests (hidden without a role; the role, the address with the login, the copy; 繁體, an
+  email login encoded, Tab and Enter), 1 new 管理后台 test (the login filled in, the password next); harness PASS.
+
 ### v13.2.0 (2026-10-30): the 管理后台's 消息 page, roles on every screen, and one container on wide screens
 
 Your requests: the back office edits what each mail and SMS says, with a preview that follows light and dark

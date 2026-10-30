@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/presentation/design.dart';
+import 'package:mingli_app/presentation/tokens.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 
 import '../application/providers.dart';
@@ -28,9 +29,14 @@ class AccountPills extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final t = ThemeTokens.of(context);
     final pills = [
+      // A staff role (S25): the admin in the accent, the others quieter.
       if (u.role != 'user')
-        Pill(u.adminByConfig ? '管理员（服务器指定）' : roleName(u.role), color: u.admin ? scheme.primary : scheme.secondary),
+        Pill(
+          u.adminByConfig ? '管理员（服务器指定）' : roleName(u.role),
+          color: u.admin ? t.accent : t.textSecondary,
+        ),
       if (u.suspended) Pill('已停用', color: scheme.error, icon: Icons.block),
       if (!u.ai) Pill('AI 已关', color: scheme.error),
       if (!u.topUpAllowed) Pill('充值已关', color: scheme.error),

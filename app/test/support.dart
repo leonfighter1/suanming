@@ -101,6 +101,9 @@ class FakeApi {
   /// 测算完成后发到邮箱 (v8.2.0, WP15.4).
   bool emailReports = false;
 
+  /// /v1/me's staff role (S25): admin, manager or integrator; none by default.
+  String? staff;
+
   /// 发到邮箱 (v9.0.0): the requests, as sent.
   final emailed = <Map<String, dynamic>>[];
 
@@ -711,6 +714,7 @@ class FakeApi {
         'created_at': '2026-10-26T00:00:00Z',
         // The dev reviewer (MINGLI_ADMINS default).
         'role': email == 'admin' || username == 'admin' ? 'admin' : 'user',
+        'staff': ?staff,
       };
 }
 
