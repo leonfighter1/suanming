@@ -4,6 +4,7 @@ docs/phases
 docs/poc/*-results.json
 docs/agent
 app/
+admin/
 docs/verification/*-results.json
 data/places
 data/yijing

@@ -1,0 +1,7 @@
+# The app's lint settings (app/analysis_options.yaml): the dashboard is checked the same way.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - web/**

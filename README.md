@@ -12,6 +12,50 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v11.4.0 (2026-10-29): 管理后台 — the dashboard
+
+Your request for an admin dashboard, step WP22.4 of stage S22: the dashboard itself, in its own project folder,
+`admin/`. Pushed after its tests, as you said (你测试完成了可以push).
+
+- **What it is:** a web app of its own for admins only: an account with the admin role, or a login in the server's
+  `MINGLI_ADMINS` (in development `admin`/`admin`). Any other account is turned away (这个账号不是管理员), and so is
+  a suspended one. It looks and works like the app: the same theme, cards and keys. The session lives in the browser
+  tab only; closing the tab signs out.
+- **Six pages**, in a rail on the left (on a phone, a bar at the bottom). 概览, 收益, 用量 and 导出 show the last 7, 30
+  or 90 days (Beijing time).
+  - **概览:** 充值收入 with its net (after the payment fee and VAT), AI 成本, 毛利 and its margin, accounts (new,
+    suspended, admins, demo), who is active, tokens, and 积分 sold, granted, used and still unused. Under them the
+    revenue curve and what each kind of AI job cost (八字 AI 解读, 塔罗 追问, 一生运势报告 …).
+  - **用户:** every account with its status, 积分 balance, 充值, 积分 used, AI requests, AI cost, last activity and
+    sign-up day. Search by username or the start of the account ID; filter by status, role and demo; click a column
+    to sort (the largest first, again for the other way); 25 to a page.
+  - **An account's page** (click its name): its details; switches for **停用账户** (asks first; it is signed out
+    everywhere at once), **管理员** (asks first), **可以用 AI** and **可以充值**; **增加积分** with a note (asks first;
+    100, 1,000 or 5,000 at a tap); **在所有设备上退出**; its 积分 ledger, its latest AI jobs and its use by kind. You
+    can't suspend yourself or take your own admin role, nor take the role from an admin the server names.
+  - **活跃:** who used the app in the last 15 minutes and 24 hours, and how many in 7 and 30 days; it fetches itself
+    again every minute. Each name opens the account's page, to sign it out or suspend it.
+  - **收益:** the revenue curve (充值, AI 成本, 毛利), each day or added up (累计); **导出图片（PNG）** saves the chart,
+    **导出数据（CSV）** its numbers; under it every day's money, accounts and AI jobs below the period's sums.
+  - **用量:** tokens, AI requests, their cost and the average per request; tokens per day (input and output); use by
+    kind of job and by model.
+  - **导出:** the 经营报表 as PDF or Word, the revenue curve and the user list as CSV. The browser downloads them.
+- **The curve:** point at it, tap it, or Tab to it and press ← / → (Home, End): the day's numbers show under it.
+  Its three colours stay apart for colour-blind readers too, in light and dark mode.
+- **Keys:** Tab reaches every control; Enter or Space presses; Esc closes a question, then goes back a page; ← / →
+  change the period and the filters; Ctrl+Enter signs in and 增加积分; Ctrl+/ lists the keys; a table wider than the
+  screen scrolls with ← / → once Tab has reached it.
+- **When something fails:** a part that couldn't load is asked for again a few times (about 3 s), then says why, with
+  **重试**; the rest of the page still shows. An expired session is renewed once for all the page's requests; a
+  session that has ended (suspended, no longer an admin) goes back to sign-in.
+- **To try it now:** `npm run api`, then, through an ASCII junction to the repository (Flutter needs an ASCII path
+  here), `flutter run -d chrome` in `admin/`, and sign in as `admin`/`admin`: the 36 demo accounts fill every page.
+  From v12.0.0 the API serves it at `/admin/` (`npm run admin:build`).
+- **Server:** a page on another origin (the dashboard under `flutter run`) can now read an export's file name.
+- **Verified:** 45 dashboard tests (sign-in and the session, every page against a fake API, the account's actions,
+  phone and wide layouts, the keyboard, no bare tap targets), analyze clean, a web build; the pages rendered with a
+  Chinese font and looked at, in light and dark; one new server test (670 in all); harness PASS.
+
 ### v11.3.0 (2026-10-29): 管理后台 preset data — demo accounts with 90 days of history
 
 Your request (「为了展示效果，可以设置一些preset的data 到各个用户」), step WP22.3 of stage S22. Pushed.

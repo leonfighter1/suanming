@@ -2089,6 +2089,12 @@ As built:
 - **v11.3.0 (WP22.3):** `seedAdminDemo` (src/admin/demo.ts, a seeded mulberry32): 36 accounts, about 570 jobs,
   108 top-ups over 90 days; seeded by scripts/api-server.ts at a dev start, once per store. Each account's events
   run in time order, so its history's balances follow one another.
+- **v11.4.0 (WP22.4):** `admin/` (package `mingli_admin`): `data/admin_api.dart` (the session in memory, one shared
+  refresh), `application/providers.dart` (the period, the queries, `retryAdmin`), the pages 概览, 用户 + an account's
+  page, 活跃, 收益, 用量, 导出 (named so for short rail labels; the plan's 活跃用户 and 报表), `widgets/line_chart.dart`
+  (hover, tap, ←/→; round steps), `widgets/common.dart` (PageBody, PeriodPicker, AsyncView, DataGrid),
+  `platform/download*.dart` (the browser's download). The active list opens each account's page, where it can be
+  signed out or suspended. CORS exposes `content-disposition`. 45 dashboard tests against a fake API.
 
 ## 阶段总结 (stage summaries)
 
@@ -2676,5 +2682,5 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP22.1    | done                         | v11.2.0 |
 | WP22.2    | done                         | v11.2.0 |
 | WP22.3    | done                         | v11.3.0 |
-| WP22.4    | next                         | v11.4.0 |
-| WP22.5    | planned                      | v12.0.0 |
+| WP22.4    | done                         | v11.4.0 |
+| WP22.5    | next                         | v12.0.0 |

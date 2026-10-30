@@ -2,6 +2,25 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-29 (l): S22 WP22.4 — the 管理后台 dashboard (`admin/`); v11.4.0
+
+- Owner's word for this step: 「你测试完成了可以push。」 — pushed after the tests and the harness.
+- Built `admin/`, a Flutter web project: sign-in for admins only, a shell (rail when wide, bar on a phone) with 概览,
+  用户 (and each account's page), 活跃, 收益, 用量 and 导出; a line-chart painter (hover, tap, ←/→); keyboard-scrolled
+  tables; the browser's own downloads (package:web: share_plus opens Windows' share sheet in Chrome). Reused from the
+  app: the theme, AppCard, Pill, Space, KeyboardShell, Pressable, SegmentKeys, SubmitShortcut and, app-wide,
+  compactButtons (rules 7 and 46; my first theme override duplicated it). The chart's colours are the dataviz
+  skill's first three slots, validated on the app's surfaces in both modes.
+- Found while writing tests: concurrent 401s each refreshing (the server rotates refresh tokens): one shared refresh
+  (rule 71). Riverpod 3 retries a failed provider for about 45 s behind a spinner: `retryAdmin`, four quick tries,
+  none for a 4xx (rule 70). A focus helper matched the app-wide scope (rule 72). Git Bash turned `--base-href /admin/`
+  into a Windows path (rule 73).
+- Looked at rendered screenshots (DengXian and the Material icons loaded into a temporary test): the axis showed
+  ¥36 / ¥87 / ¥139 and ¥-15, a "−" the font lacks vanished, labels wrapped in a table cell, buttons spanned the page.
+  Fixed: round steps (`niceStep`), -¥ for losses, an ASCII minus, labels on one line in tables, compactButtons.
+- Server: CORS now exposes `content-disposition`, so the dashboard run from its own origin (flutter run) gets an
+  export's file name.
+
 ## 2026-10-29 (k): S22 WP22.3 — preset data for 管理后台; v11.3.0
 
 - `seedAdminDemo`: 36 demo accounts with 90 days of history from a fixed seed, charged as the server charges; no

@@ -71,8 +71,36 @@
 67. In api/openapi.yaml, quote every description inside a flow mapping { ... } that contains a comma, a colon or starts with true/false/null, and run npm run validate:openapi right after editing the spec.
 68. In app tests, find the request you check by its method and path (lastWhere / singleWhere), never api.requests.last: any page may add a background call (a balance, a price) after it.
 69. To stop a server you started in the background, stop the process that owns its port (Get-NetTCPConnection -LocalPort N -State Listen, check its command line is yours), never only the launcher's PID, and confirm the port is free afterwards. Start such checks on a spare port with MINGLI_STORE=memory so the owner's server and data are never touched.
+70. With Riverpod 3, give the ProviderScope a retry policy (a few quick tries, none for a 4xx): its default retries for about 45 s while showing loading. In a test of an error state, pump past the retries, and assert the request each tap should send, so a missed tap cannot pass.
+71. When several requests can meet an expired token at once, share one refresh (an in-flight future) and retry without refreshing when the token already changed: the server rotates refresh tokens, so a second refresh with the same one fails.
+72. A focus check must name the focused control itself (its key, or a focused element inside the widget it belongs to), never just an ancestor of a label: before the first Tab the primary focus is a scope above everything.
+73. In Git Bash, an argument that starts with / (a base href, a URL path, a /flag) reaches the program as a Windows path: prefix the command with MSYS_NO_PATHCONV=1, or run it from PowerShell or a script. Through powershell -File, an argument with a double quote inside is split: keep double quotes out of such arguments.
 
 ## Log
+
+### 2026-10-29: Git Bash rewrote --base-href /admin/ into a Windows path
+- **Symptom:** flutter build web --base-href /admin/ failed: it received the base href C:/Program Files/Git/admin/
+- **Root cause:** Git Bash (MSYS) converts any argument that starts with / into a Windows path before the program sees it
+- **Fix:** Ran it as MSYS_NO_PATHCONV=1 flutter build web --base-href /admin/; the npm script and the harness gate run it from Node or PowerShell, where nothing is converted
+- **Rule:** In Git Bash, an argument that starts with / (a base href, a URL path, a /flag) reaches the program as a Windows path: prefix the command with MSYS_NO_PATHCONV=1, or run it from PowerShell or a script. Through powershell -File, an argument with a double quote inside is split: keep double quotes out of such arguments. (Rule 73)
+
+### 2026-10-29: A focus check matched the app-wide focus scope
+- **Symptom:** Tab reaches a rail entry: the loop stopped at once, and Enter opened nothing
+- **Root cause:** The check asked whether the focused element is an ancestor of the label; before the first Tab the primary focus is a scope above the whole app, which is an ancestor of everything
+- **Fix:** railFocusOn: the focused element must sit inside the NavigationRail and contain the label
+- **Rule:** A focus check must name the focused control itself (its key, or a focused element inside the widget it belongs to), never just an ancestor of a label: before the first Tab the primary focus is a scope above everything. (Rule 72)
+
+### 2026-10-29: Concurrent requests each refreshed an expired token
+- **Symptom:** Writing the session test: a page asks for three things at once, and each 401 started its own refresh
+- **Root cause:** The client refreshed per request; the server rotates refresh tokens (TokenService.rotate), so every refresh after the first would fail and sign the admin out
+- **Fix:** AdminApi shares one in-flight refresh (_refreshing) and retries without refreshing when the access token changed meanwhile; the test expects exactly one /v1/auth/refresh
+- **Rule:** When several requests can meet an expired token at once, share one refresh (an in-flight future) and retry without refreshing when the token already changed: the server rotates refresh tokens, so a second refresh with the same one fails. (Rule 71)
+
+### 2026-10-29: Riverpod 3 retried a failed provider by itself and hid the error
+- **Symptom:** The dashboard test for a failed part found no 重试 button: by the time it looked, the part had loaded; an earlier version passed although its tap on 重试 missed (off screen)
+- **Root cause:** Riverpod 3 retries a failing provider on its own (200 ms doubling to 6.4 s, 10 times, about 45 s) and reports it as loading meanwhile; a real outage would show a spinner for 45 s
+- **Fix:** ProviderScope(retry: retryAdmin): four quick retries (0.2 to 1.6 s) for a 5xx or no connection, none for a 4xx; the test pumps past them, counts the requests, then taps 重试 after ensureVisible and checks the new request
+- **Rule:** With Riverpod 3, give the ProviderScope a retry policy (a few quick tries, none for a 4xx): its default retries for about 45 s while showing loading. In a test of an error state, pump past the retries, and assert the request each tap should send, so a missed tap cannot pass. (Rule 70)
 
 ### 2026-10-29: Killing a background npx tsx start left its server running
 - **Symptom:** After kill of the PID saved from 'npx tsx scripts/api-server.ts &', port 8799 was still listening.

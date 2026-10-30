@@ -2518,9 +2518,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         "authorization, content-type, idempotency-key, x-dev-user, x-dev-country",
       );
       res.setHeader("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+      // content-disposition: an export's file name, for the 管理后台 run from its own origin (v11.4.0).
       res.setHeader(
         "access-control-expose-headers",
-        "location, retry-after, x-ai-generated, x-ai-model",
+        "location, retry-after, x-ai-generated, x-ai-model, content-disposition",
       );
       // Chrome Private Network Access: an https page (GitHub Pages) calling a local API.
       if (req.headers["access-control-request-private-network"] === "true") {

@@ -76,6 +76,13 @@ describe("CORS", () => {
     }
   });
 
+  it("lets a page from another origin read an export's file name (the 管理后台 in development)", async () => {
+    const res = await fetch(base + "/v1/health", { headers: { origin: "http://localhost:5000" } });
+    const exposed = res.headers.get("access-control-expose-headers")?.split(/,\s*/);
+    expect(exposed).toContain("content-disposition");
+    expect(exposed).toContain("x-ai-model");
+  });
+
   it("does not allow other origins", async () => {
     const res = await fetch(base + "/v1/health", { headers: { origin: "https://evil.example" } });
     expect(res.headers.get("access-control-allow-origin")).toBeNull();
