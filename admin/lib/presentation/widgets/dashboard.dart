@@ -18,34 +18,43 @@ const asideFrom = 1080.0;
 /// The panel's width: about a quarter of a wide window, the main column's three.
 const asideWidth = 360.0;
 
-/// The main column's widest: wider, lines get too long to read across.
-const mainMax = 1080.0;
+/// The panel's width where it shows a document at a readable width: the 消息 editor's preview of a mail (S25).
+const asideWide = 480.0;
 
-/// A dashboard page (the ui-design skill): [main] in a column; [aside], the page's panel, at the right with a scroll of
-/// its own from [asideFrom]. Below that the panel joins the column at [narrowAt] (after that many of [main]'s parts;
-/// at the end by default), so a page whose panel holds what one does (filters, actions) can keep it near the top. The
-/// panel is one surface in both places: the card colour and a hairline, its parts ([PanelSection]) one under another.
+/// The dashboard's container (owner, 2026-10-30: 「for wider screen user, make sure have a container to limit the size
+/// of it」): every page, its main column and its panel together, at most this wide and centred on a wider window, the
+/// window's margin inside it. The bar and the rail stay the window's.
+const pageMax = 1440.0;
+
+/// The room at each side of the container on a page [width] wide: none until the page is wider than [pageMax].
+double containerSide(double width) => math.max(0, (width - pageMax) / 2);
+
+/// A dashboard page (the ui-design skill): in the container ([pageMax]), [main] in a column and [aside], the page's
+/// panel, at the right from [asideFrom]: a card of its own, with a scroll of its own. Below that the panel joins the
+/// column at [narrowAt] (after that many of [main]'s parts; at the end by default), so a page whose panel holds what
+/// one does (filters, actions) can keep it near the top. The panel is the same card in both places: the card colour
+/// and a hairline, its parts ([PanelSection]) one under another.
 class DashboardLayout extends StatelessWidget {
-  const DashboardLayout({super.key, required this.main, this.aside = const [], this.narrowAt});
+  const DashboardLayout({super.key, required this.main, this.aside = const [], this.narrowAt, this.panelWidth = asideWidth});
   final List<Widget> main;
   final List<Widget> aside;
   final int? narrowAt;
 
+  /// The panel's width at the right: [asideWidth] (the constant), or [asideWide] for a document.
+  final double panelWidth;
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, box) {
-          final margin = WindowClass.ofContext(context).margin;
-          EdgeInsets padding(double width) {
-            final side = math.max(margin, (width - mainMax) / 2);
-            return EdgeInsets.fromLTRB(side, Space.xl, side, Space.xxl);
-          }
-
+          final window = WindowClass.ofContext(context);
+          // The container's edges: the margin inside it, and beyond it, on a wide window, the room left over.
+          final side = containerSide(box.maxWidth) + window.margin;
           final t = ThemeTokens.of(context);
           if (aside.isEmpty || box.maxWidth < asideFrom) {
             final at = (narrowAt ?? main.length).clamp(0, main.length);
             return ListView(
               key: const Key('page-main'),
-              padding: padding(box.maxWidth),
+              padding: EdgeInsets.fromLTRB(side, Space.xl, side, Space.xxl),
               children: [
                 ...main.take(at),
                 // A Material, not a coloured box: the switches and rows inside paint their ink on it.
@@ -70,21 +79,34 @@ class DashboardLayout extends StatelessWidget {
               ],
             );
           }
+          // The main column, a gutter, then the panel, level with the column's top and as tall as the window lets it
+          // be. The column's list takes the room beyond the container too, so the wheel scrolls it there.
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: ListView(key: const Key('page-main'), padding: padding(box.maxWidth - asideWidth), children: main),
+                child: ListView(
+                  key: const Key('page-main'),
+                  padding: EdgeInsets.fromLTRB(side, Space.xl, window.gutter, Space.xxl),
+                  children: main,
+                ),
               ),
-              SizedBox(
-                width: asideWidth,
-                child: Material(
-                  key: const Key('aside'),
-                  color: t.card,
-                  shape: Border(left: BorderSide(color: t.border)),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(Space.xl, Space.xl, Space.xl, Space.xxl),
-                    children: aside,
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, Space.xl, side, Space.xl),
+                child: SizedBox(
+                  width: panelWidth,
+                  child: Material(
+                    key: const Key('aside'),
+                    color: t.card,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(Radii.card),
+                      side: BorderSide(color: t.border),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(Space.xl, Space.xl, Space.xl, Space.xxl),
+                      children: aside,
+                    ),
                   ),
                 ),
               ),

@@ -2340,6 +2340,27 @@ Read as:
   - an account's page shows a role picker (普通用户 / 集成人员 / 经理 / 管理员, as the caller may set) and, for a
     manager, only the permissions;
   - tests per role.
+- **Owner request (2026-10-30, during WP25.3):** 「for wider screen user, make sure have a container to limit the size
+  of it. right now it is fluid container, wich is not very good look」. Read as: every page of the 管理后台 keeps to
+  one centred container on a wide window (its main column and its panel together), not the window's full width; the
+  bar and the rail stay the window's.
+- **As built (v13.2.0):** as specified, and:
+  - the container is `pageMax` (1440): `DashboardLayout` and `PageBody` (活跃, 导出) share it, so every page has one
+    left edge; the panel became a card of its own inside it, level with the column's top (it was a full-height
+    surface at the window's edge);
+  - the editor's panel is wider for a mail (`asideWide`, 480) so the preview reads at a mail's width; a phone gets
+    保存 across the column;
+  - the preview asks for the scheme the dashboard shows (light or dark, from the theme), since a frame's
+    `prefers-color-scheme` need not follow the page's; a sent mail still follows the reader's system;
+  - a 403 `not_allowed` makes the dashboard ask `/v1/admin/me` again, so a role changed mid-session changes the
+    pages at once; the 收益 page's CSV (a server export) shows only with `user_data`, its PNG (drawn in the browser)
+    for every role that sees the page;
+  - the role filter on 用户 became chips (five choices); the values' chips keep the field's cursor
+    (`TextFieldTapRegion`, the subject without select-all on focus);
+  - checked in a real browser too (headless Chrome over the DevTools protocol against a private server): the frame
+    light and dark, an edit and a value chip, a test send into the outbox;
+  - rules 79 (a Dart cascade and an arrow closure; the global list is read-only on this machine) and 80 (a test of a
+    server check written from the check).
 
 ### WP25.3b The app's way in (→ v13.3.0)
 
@@ -3023,6 +3044,6 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP25.1    | done                         | v13.1.0 |
 | WP25.2    | done                         | v13.1.0 |
 | WP25.2b   | done                         | v13.1.0 |
-| WP25.3    | planned                      | v13.2.0 |
+| WP25.3    | done                         | v13.2.0 |
 | WP25.3b   | planned                      | v13.3.0 |
 | WP25.4    | planned                      | v14.0.0 |

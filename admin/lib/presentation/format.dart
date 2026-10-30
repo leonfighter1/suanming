@@ -60,3 +60,39 @@ String entryOf({required String kind, String? forKind, String? system, int? pack
       'grant' => reason == 'dev' ? '开发测试赠送' : (reason ?? '').startsWith('admin') ? '管理员赠送' : '赠送',
       _ => forKind == null ? '消耗' : whatOf(forKind, system),
     };
+
+/// The account roles (tech plan S25), as the dashboard names them.
+const roleNames = {'user': '普通用户', 'integrator': '集成人员', 'manager': '经理', 'admin': '管理员'};
+
+/// What each role may do in the dashboard, in a line (the server's src/admin/roles.ts).
+const roleAbout = {
+  'user': '不能登录管理后台',
+  'integrator': '只能进入「消息」：编辑邮件和短信、预览、发送测试',
+  'manager': '查看数据，给账户分配角色和权限；不能增加积分、让账户退出登录或导出数据',
+  'admin': '所有页面和操作',
+};
+
+String roleName(String role) => roleNames[role] ?? role;
+
+/// The languages a message is written in.
+const localeNames = {'zh-Hans': '简体中文', 'zh-Hant': '繁體中文', 'en': 'English'};
+
+String localeName(String locale) => localeNames[locale] ?? locale;
+
+const channelNames = {'mail': '邮件', 'sms': '短信'};
+
+/// How a channel's messages leave this server: the dev outbox (no provider yet), none, or a test's memory.
+String deliveryOf(String transport) => switch (transport) {
+      'outbox' => '写进服务器的发件箱（.outbox），不经第三方服务',
+      'off' => '这台服务器没有发送方式，发不出去',
+      'memory' => '留在服务器的内存里（测试）',
+      _ => transport,
+    };
+
+/// How a dispatch went.
+String dispatchStatus(String status) => switch (status) {
+      'sent' => '已发出',
+      'off' => '没有发送方式',
+      'failed' => '发送失败',
+      _ => status,
+    };

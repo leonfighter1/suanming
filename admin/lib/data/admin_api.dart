@@ -5,12 +5,14 @@ import 'package:http/http.dart' as http;
 
 import '../domain/models.dart';
 
-/// The server said no: its status, its title and the code it named (admin_only, admin_self, …).
+/// The server said no: its status, its title and the code it named (admin_only, admin_self, …), and for a wording
+/// it can't keep (invalid_template) what is wrong with it.
 class AdminApiException implements Exception {
-  const AdminApiException(this.status, this.title, [this.code]);
+  const AdminApiException(this.status, this.title, [this.code, this.problems = const []]);
   final int status;
   final String title;
   final String? code;
+  final List<String> problems;
 
   @override
   String toString() => title;
@@ -43,10 +45,14 @@ class AdminApi {
   String? _access;
   String? _refresh;
 
-  /// Told when the session is gone (a failed refresh, the account suspended or no longer an admin).
+  /// Told when the session is gone (a failed refresh, the account suspended or no longer staff).
   void Function()? onSignedOut;
 
-  /// Signs in, then checks the account is an admin (403 admin_only otherwise, and the session is dropped).
+  /// Told when the server refused something to the caller's role (403 not_allowed): the role may have changed since
+  /// signing in, so the dashboard asks again what it may show.
+  void Function()? onNotAllowed;
+
+  /// Signs in, then checks the account has a staff role (403 admin_only otherwise, and the session is dropped).
   Future<AdminMe> signIn(String login, String password) async {
     final t = await _send('POST', '/v1/auth/login', body: {'login': login, 'password': password});
     _access = t['access_token'] as String;
@@ -104,6 +110,48 @@ class AdminApi {
   Future<AdminFile> report({required int days, required String format, String kind = 'series'}) =>
       _withAccess(() => _file('/v1/admin/reports?days=$days&format=$format&kind=$kind'));
 
+  // ---- 消息 (tech plan S25) ----
+
+  Future<MessageListing> messages() async => MessageListing.fromJson(await _authed('GET', '/v1/admin/messages/templates'));
+
+  /// Keeps [body] (and a mail's [subject]) as the message's wording in [locale]; the wording now in use.
+  Future<TemplateWording> saveTemplate(String kind, String locale, {String? subject, required String body}) async =>
+      TemplateWording.fromJson(
+        await _authed('PUT', '/v1/admin/messages/templates/$kind/$locale', {'subject': ?subject, 'body': body}),
+      );
+
+  /// The message back to its default wording in [locale].
+  Future<TemplateWording> resetTemplate(String kind, String locale) async =>
+      TemplateWording.fromJson(await _authed('DELETE', '/v1/admin/messages/templates/$kind/$locale'));
+
+  /// A draft with the sample values, the page [scheme] light or dark (the dashboard's).
+  Future<MessagePreview> preview(String kind, String locale, {String? subject, required String body, String? scheme}) async =>
+      MessagePreview.fromJson(await _authed('POST', '/v1/admin/messages/preview', {
+        'kind': kind,
+        'locale': locale,
+        'subject': ?subject,
+        'body': body,
+        'scheme': ?scheme,
+      }));
+
+  /// A test send with the sample values to [to]: the draft ([body], [subject]) or, without them, the saved wording.
+  Future<DispatchEntry> testSend(String kind, String locale, String to, {String? subject, String? body}) async {
+    final j = await _authed('POST', '/v1/admin/messages/test', {
+      'kind': kind,
+      'locale': locale,
+      'to': to,
+      'subject': ?subject,
+      'body': ?body,
+    });
+    return DispatchEntry.fromJson(j['entry'] as Json);
+  }
+
+  /// The latest dispatches, the newest first.
+  Future<List<DispatchEntry>> dispatchLog({int limit = 50}) async => [
+        for (final e in (await _authed('GET', '/v1/admin/messages/log?limit=$limit'))['items'] as List)
+          DispatchEntry.fromJson(e as Json),
+      ];
+
   // ---- transport ----
 
   Future<Json> _authed(String method, String path, [Object? body]) =>
@@ -115,9 +163,13 @@ class AdminApi {
     try {
       return await call();
     } on AdminApiException catch (e) {
-      // Suspended, or no longer an admin: the session is over.
+      // Suspended, or no longer staff: the session is over.
       if (e.code == 'account_suspended' || e.code == 'admin_only') {
         _ended();
+        rethrow;
+      }
+      if (e.code == 'not_allowed') {
+        onNotAllowed?.call();
         rethrow;
       }
       if (e.status != 401) rethrow;
@@ -169,6 +221,8 @@ class AdminApi {
       res = switch (method) {
         'GET' => await _http.get(uri, headers: _headers(auth)),
         'PATCH' => await _http.patch(uri, headers: _headers(auth), body: jsonEncode(body)),
+        'PUT' => await _http.put(uri, headers: _headers(auth), body: jsonEncode(body)),
+        'DELETE' => await _http.delete(uri, headers: _headers(auth)),
         _ => await _http.post(uri, headers: _headers(auth), body: jsonEncode(body)),
       };
     } on http.ClientException {
@@ -193,7 +247,12 @@ class AdminApi {
   static AdminApiException _problem(http.Response res) {
     try {
       final p = jsonDecode(utf8.decode(res.bodyBytes)) as Json;
-      return AdminApiException(res.statusCode, p['title'] as String? ?? 'HTTP ${res.statusCode}', p['code'] as String?);
+      return AdminApiException(
+        res.statusCode,
+        p['title'] as String? ?? 'HTTP ${res.statusCode}',
+        p['code'] as String?,
+        [for (final x in (p['problems'] as List? ?? const [])) '$x'],
+      );
     } on FormatException {
       return AdminApiException(res.statusCode, 'HTTP ${res.statusCode}');
     }

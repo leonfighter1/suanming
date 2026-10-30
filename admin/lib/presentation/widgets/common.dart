@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,20 +7,20 @@ import 'package:mingli_app/presentation/layout.dart';
 
 import '../../application/providers.dart';
 import '../messages.dart';
+import 'dashboard.dart' show containerSide;
 
 // The pieces every page of the 管理后台 is made of (tech plan S22).
 
-/// A page's content: one scrolling column with the window class's margins (the ui-design skill's grid), at most
-/// [maxWidth] wide and centred on a wide screen.
+/// A page's content without a panel: one scrolling column in the dashboard's container ([pageMax], centred on a
+/// wider window), the window class's margins inside it (the ui-design skill's grid), so its left edge is every page's.
 class PageBody extends StatelessWidget {
-  const PageBody({super.key, required this.children, this.maxWidth = 1180});
+  const PageBody({super.key, required this.children});
   final List<Widget> children;
-  final double maxWidth;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, box) {
-          final side = math.max(WindowClass.ofContext(context).margin, (box.maxWidth - maxWidth) / 2);
+          final side = containerSide(box.maxWidth) + WindowClass.ofContext(context).margin;
           return ListView(padding: EdgeInsets.fromLTRB(side, Space.m, side, Space.xxl), children: children);
         },
       );
@@ -254,3 +252,23 @@ class Fact extends StatelessWidget {
     );
   }
 }
+
+/// Asks before an action: [title], [body], 取消 and 确定. Enter confirms, Esc cancels; true when confirmed.
+Future<bool> confirmAction(BuildContext context, String title, String body) async =>
+    await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(key: const Key('confirm-no'), onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
+          FilledButton(
+            key: const Key('confirm-yes'),
+            autofocus: true,
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    ) ??
+    false;

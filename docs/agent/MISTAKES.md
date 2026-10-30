@@ -80,8 +80,22 @@
 76. Every WidgetState property in a component theme must resolve to a value for the empty state set: ChipThemeData.lerp, run by every change of theme, fails on null. Give each state Material's own default (a chosen flat chip keeps a transparent 1 px side, so `BorderSide.none` shrinks it by 2 px; rule 49), and test a theme change itself (switch, pump half the animation, check colours between the two themes), not only each theme on its own.
 77. A label that can hold model or user text (a pill, a chip, a badge) lets it wrap: a loose Flexible inside a MainAxisSize.min row, never a bare Text in a Row. Test it with a long text in a narrow column.
 78. When a stored field gains values (an enum, a role, a status), grep every reader and writer of it in both stores (memory and PGlite, put and get, SQL checks) and round-trip each new value through PGlite in a test.
+79. In Dart, never assign arrow closures inside a cascade: one statement per callback, or a block body for the closure.
+80. Write a test of what a server check reports from the check itself (read it, e.g. templateProblems reads subject and body), and when a fake mirrors it, cite the server function it mirrors.
 
 ## Log
+
+### 2026-10-30: A test expected a server check to report what it does not
+- **Symptom:** messages_test: 需要用到 {{code}} not shown after the body lost {{code}}
+- **Root cause:** The test was written from memory: templateProblems reads the subject too, and the default subject still held {{code}}; FakeAdmin mirrored the server correctly
+- **Fix:** The test clears the subject first, then checks both problems
+- **Rule:** Write a test of what a server check reports from the check itself (read it, e.g. templateProblems reads subject and body), and when a fake mirrors it, cite the server function it mirrors. (Rule 80)
+
+### 2026-10-30: A Dart cascade swallowed the next assignment into an arrow closure
+- **Symptom:** flutter analyze: this expression has a type of void so its value cannot be used, on api..onSignedOut = () => notifier.ended()..onNotAllowed = () => notifier.recheck()
+- **Root cause:** An arrow body is an expression, so the next ..onNotAllowed cascaded on the closure body (ended(), void) instead of on api
+- **Fix:** Two plain statements: api.onSignedOut = ...; api.onNotAllowed = ...; (admin/lib/application/providers.dart)
+- **Rule:** In Dart, never assign arrow closures inside a cascade: one statement per callback, or a block body for the closure. (Rule 79)
 
 ### 2026-10-30: The database dropped the new roles
 - **Symptom:** messages.test: an account put into PGlite as manager came back without a role; in pglite mode every manager and integrator would have lost the role at the next read.

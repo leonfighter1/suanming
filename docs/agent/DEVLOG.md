@@ -2,6 +2,28 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (h): S25 WP25.3 — the 管理后台's 消息 page, roles on screen, one container; v13.2.0 (local)
+
+- v13.1.0 committed and tagged after its harness PASS (the WP25.3 edits already begun stayed out of the commit).
+- Built (admin/): models (`Can`, `AdminMe` role/can/assignable, `AdminUser.role`, the message types), `AdminApi`
+  (PUT, DELETE, a problem's `problems`, `onNotAllowed` → `SessionNotifier.recheck`), the shell's pages by capability
+  (one page alone without a rail), `messages_page.dart` (cards by channel, 发送方式, 最近发送),
+  `message_editor_page.dart` (language, subject, body, value chips at the cursor, problems from the preview, 保存 /
+  撤销修改 / 恢复默认 / 发送测试, LeaveGuard, SubmitShortcut, a debounced preview with the dashboard's scheme),
+  `platform/mail_frame*.dart` (a sandboxed iframe with `srcdoc` on the web, the text on the VM), the account page's
+  role picker and capability-gated sections, the 用户 role chips, `confirmAction`.
+- Owner request mid-WP: 「for wider screen user, make sure have a container…」. `pageMax` 1440 for every page
+  (`DashboardLayout`, `PageBody`), the panel a card inside it; tests at 2560 (centred, one left edge, a pushed page).
+- Rendered with the real fonts (light, dark, 1440, 2560, 390): fixed the role field repeating its section's title and
+  保存 alone at the right on a phone. Then a real browser: headless Chrome driven over the DevTools protocol with
+  Node's WebSocket (scratchpad `cdp.mjs`) against a private server on 8796 (memory store): the integrator's sign-in,
+  the report mail's frame light and dark, an edit with a chip by mouse (the field keeps its cursor thanks to
+  `TextFieldTapRegion` and no select-all on focus), a test send into the outbox (removed after). My processes stopped
+  by port.
+- Rules 79 (a Dart cascade ate the next assignment into an arrow closure) and 80 (a test of a server check written
+  from memory). The global mistakes file is read-only for this user (Users: ReadAndExecute), so 79 went into the
+  project's list; not worked around.
+
 ## 2026-10-30 (g): S25 WP25.1–25.2b — message templates, the dispatcher, staff roles (server); v13.1.0 (local)
 
 - Owner requests (2026-10-30): the mail logic with back-office editing of each message's page, SMS too, server-side

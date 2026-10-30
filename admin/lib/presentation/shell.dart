@@ -3,22 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/presentation/design.dart';
 
 import '../application/providers.dart';
+import '../domain/models.dart';
 import 'active_page.dart';
+import 'format.dart';
+import 'messages_page.dart';
 import 'overview_page.dart';
 import 'reports_page.dart';
 import 'revenue_page.dart';
 import 'usage_page.dart';
 import 'users_page.dart';
 
-typedef _Dest = ({String label, IconData icon, IconData selected});
+/// A page of the dashboard, and what the role must be able to do to see it ([Can], tech plan S25).
+typedef _Dest = ({String label, IconData icon, IconData selected, String needs, Widget Function() page});
 
-const _dests = <_Dest>[
-  (label: '概览', icon: Icons.dashboard_outlined, selected: Icons.dashboard),
-  (label: '用户', icon: Icons.people_outline, selected: Icons.people),
-  (label: '活跃', icon: Icons.bolt_outlined, selected: Icons.bolt),
-  (label: '收益', icon: Icons.show_chart, selected: Icons.show_chart),
-  (label: '用量', icon: Icons.memory_outlined, selected: Icons.memory),
-  (label: '导出', icon: Icons.download_outlined, selected: Icons.download),
+final _dests = <_Dest>[
+  (label: '概览', icon: Icons.dashboard_outlined, selected: Icons.dashboard, needs: Can.view, page: OverviewPage.new),
+  (label: '用户', icon: Icons.people_outline, selected: Icons.people, needs: Can.view, page: UsersPage.new),
+  (label: '活跃', icon: Icons.bolt_outlined, selected: Icons.bolt, needs: Can.view, page: ActivePage.new),
+  (label: '收益', icon: Icons.show_chart, selected: Icons.show_chart, needs: Can.view, page: RevenuePage.new),
+  (label: '用量', icon: Icons.memory_outlined, selected: Icons.memory, needs: Can.view, page: UsagePage.new),
+  (label: '导出', icon: Icons.download_outlined, selected: Icons.download, needs: Can.userData, page: ReportsPage.new),
+  (label: '消息', icon: Icons.mail_outline, selected: Icons.mail, needs: Can.messages, page: MessagesPage.new),
 ];
 
 /// The width from which the pages sit beside a rail rather than above a bar.
@@ -51,7 +56,8 @@ class ThemeMenu extends ConsumerWidget {
   }
 }
 
-/// The dashboard's six pages (管理后台, tech plan S22): a rail beside them on a wide screen, a bar under them on a phone.
+/// The dashboard's pages (管理后台, tech plan S22), those the role may see (S25): a rail beside them on a wide screen, a
+/// bar under them on a phone; a role with one page (an integrator's 消息) gets the page alone.
 class AdminShell extends ConsumerStatefulWidget {
   const AdminShell({super.key});
 
@@ -60,7 +66,8 @@ class AdminShell extends ConsumerStatefulWidget {
 }
 
 class _AdminShellState extends ConsumerState<AdminShell> {
-  int _tab = 0;
+  /// The page shown, by its label: it stays when the role changes and the list with it.
+  String? _page;
 
   /// Everything fetched again.
   void _refresh() => ref
@@ -69,21 +76,22 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     ..invalidate(breakdownProvider)
     ..invalidate(usersProvider)
     ..invalidate(userProvider)
-    ..invalidate(activeProvider);
+    ..invalidate(activeProvider)
+    ..invalidate(messagesProvider)
+    ..invalidate(dispatchLogProvider);
 
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= wideFrom;
     final me = ref.watch(sessionProvider);
-    final page = switch (_tab) {
-      0 => const OverviewPage(),
-      1 => const UsersPage(),
-      2 => const ActivePage(),
-      3 => const RevenuePage(),
-      4 => const UsagePage(),
-      _ => const ReportsPage(),
-    };
-    void go(int i) => setState(() => _tab = i);
+    final can = me?.can ?? const <String>{};
+    final dests = [for (final d in _dests) if (can.contains(d.needs)) d];
+    if (dests.isEmpty) return const Scaffold(body: Center(child: Text('你的角色在这里没有可看的页面')));
+    final at = dests.indexWhere((d) => d.label == _page).clamp(0, dests.length - 1);
+    final page = KeyedSubtree(key: ValueKey<String>('page-${dests[at].label}'), child: dests[at].page());
+    void go(int i) => setState(() => _page = dests[i].label);
+    // A rail or a bar takes two pages or more.
+    final nav = dests.length > 1;
     return Scaffold(
       appBar: AppBar(
         title: Text(wide ? '命理大师 管理后台' : '管理后台'),
@@ -91,7 +99,20 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           if (wide && me != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Space.s),
-              child: Center(child: Text(me.login, key: const Key('admin-me'))),
+              child: Center(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: me.login),
+                      TextSpan(
+                        text: ' · ${roleName(me.role)}',
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                  key: const Key('admin-me'),
+                ),
+              ),
             ),
           const ThemeMenu(),
           IconButton(key: const Key('refresh'), tooltip: '刷新', onPressed: _refresh, icon: const Icon(Icons.refresh)),
@@ -104,15 +125,15 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           const SizedBox(width: Space.s),
         ],
       ),
-      body: wide
+      body: wide && nav
           ? Row(
               children: [
                 NavigationRail(
-                  selectedIndex: _tab,
+                  selectedIndex: at,
                   labelType: NavigationRailLabelType.all,
                   onDestinationSelected: go,
                   destinations: [
-                    for (final d in _dests)
+                    for (final d in dests)
                       NavigationRailDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selected), label: Text(d.label)),
                   ],
                 ),
@@ -121,13 +142,13 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               ],
             )
           : page,
-      bottomNavigationBar: wide
+      bottomNavigationBar: wide || !nav
           ? null
           : NavigationBar(
-              selectedIndex: _tab,
+              selectedIndex: at,
               onDestinationSelected: go,
               destinations: [
-                for (final d in _dests)
+                for (final d in dests)
                   NavigationDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selected), label: d.label),
               ],
             ),

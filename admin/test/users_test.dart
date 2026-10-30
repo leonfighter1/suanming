@@ -171,28 +171,41 @@ void main() {
     expect(inTable('充值已关'), findsOneWidget);
   });
 
-  testWidgets('the admin role: asked first; not for the server\'s own admins; never on oneself', (tester) async {
+  testWidgets('the role (S25): asked first; not for the server\'s own admins; never on oneself', (tester) async {
     final f = await pumpAdmin(tester, size: tall);
     await openUser(tester, 'u-01');
-    await tapOn(tester, 'switch-admin');
+    expect(textOf(tester, 'role-now'), '普通用户');
+    await tapOn(tester, 'role');
+    // An admin may give every role.
+    for (final r in ['user', 'integrator', 'manager', 'admin']) {
+      expect(find.byKey(ValueKey<String>('role-$r')), findsOneWidget, reason: r);
+    }
+    await tapOn(tester, 'role-admin');
     expect(find.text('设 user01 为管理员？'), findsOneWidget);
     await tapOn(tester, 'confirm-yes');
     expect(f.bodyOf(f.last('/v1/admin/users/u-01', method: 'PATCH')), {'role': 'admin'});
-    expect(switchOf(tester, 'switch-admin').value, isTrue);
+    expect(textOf(tester, 'role-now'), '管理员');
+    expect(find.text('user01 已是管理员'), findsOneWidget);
+    // Back to 普通用户: asked too, and the account leaves the dashboard.
+    await tapOn(tester, 'role');
+    await tapOn(tester, 'role-user');
+    expect(find.text('取消 user01 的后台角色？'), findsOneWidget);
+    await tapOn(tester, 'confirm-no');
+    expect(f.to('/v1/admin/users/u-01', method: 'PATCH'), hasLength(1));
     await press(tester, LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
 
     await openUser(tester, 'root-1', search: 'root');
-    expect(switchOf(tester, 'switch-admin').onChanged, isNull);
-    expect(find.text('由服务器设置（MINGLI_ADMINS）指定，不能在这里取消'), findsOneWidget);
+    expect(tester.widget<PopupMenuButton<String>>(find.byKey(const Key('role'))).enabled, isFalse);
+    expect(find.text('由服务器设置（MINGLI_ADMINS）指定，不能在这里改'), findsOneWidget);
     await press(tester, LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
 
     await openUser(tester, 'admin-1', search: 'boss');
-    expect(switchOf(tester, 'switch-admin').onChanged, isNull);
+    expect(tester.widget<PopupMenuButton<String>>(find.byKey(const Key('role'))).enabled, isFalse);
     expect(switchOf(tester, 'switch-suspended').onChanged, isNull);
     expect(find.text('不能停用自己'), findsOneWidget);
-    expect(find.text('不能取消自己的管理员'), findsOneWidget);
+    expect(find.text('不能改自己的角色'), findsOneWidget);
   });
 
   testWidgets('增加积分: a number and a note, asked first; a bad number goes nowhere; Ctrl+Enter, Esc', (tester) async {

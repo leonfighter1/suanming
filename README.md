@@ -4,7 +4,7 @@ Phase 0 (engines, ChartFact, compliance) and Phase 1 in progress (AI pipeline, v
 **Start here: [docs/SUMMARY.md](docs/SUMMARY.md)** (what each phase delivered).
 Details: [docs/phase-0-gate.md](docs/phase-0-gate.md) · [docs/phase-1-status.md](docs/phase-1-status.md) · [docs/phase-3-gate.md](docs/phase-3-gate.md) · agent instructions in [CLAUDE.md](CLAUDE.md).
 Web test: **https://leonfighter1.github.io/suanming/** ([docs/web-test.md](docs/web-test.md)).
-管理后台 (admins): `npm run admin:build`, then `npm run api` and **http://127.0.0.1:8787/admin/** ([admin/](admin/README.md)).
+管理后台 (staff: admin, manager, integrator): `npm run admin:build`, then `npm run api` and **http://127.0.0.1:8787/admin/** ([admin/](admin/README.md)).
 
 ## 更新记录 (release notes)
 
@@ -12,6 +12,66 @@ Newest first. Every update adds an entry: version and date, then by area what ch
 how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tech-plan.md) and are the ones pushed;
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
+
+### v13.2.0 (2026-10-30): the 管理后台's 消息 page, roles on every screen, and one container on wide screens
+
+Your requests: the back office edits what each mail and SMS says, with a preview that follows light and dark
+(「让后台用户可以编辑各类发送邮件的前端页面…邮件的preview界面…也要符合当前app的跟随系统模式」); what each role may do
+(「admin具备超级权限，manager可以进行权限分配…integrator…只能对邮件和短信系统进行操作」); and on a wide screen a container
+instead of a fluid page (「make sure have a container to limit the size of it」). Stage S25, work package WP25.3,
+committed locally; it goes out with v14.0.0.
+
+- **消息 (new page in the rail):** every message the server sends, as cards under 邮件 and 短信: 验证码邮件,
+  报告完成邮件, 记录发送邮件 and 验证码短信. Each card says when the message goes out and lists its languages, marking
+  any language an admin has changed (「繁體中文 · 已修改」). The panel shows how messages leave this server (the dev
+  outbox for now, no third-party service) and 最近发送, the latest sends: which message, the masked recipient, the
+  language, how it went (已发出, 没有发送方式, 发送失败) and when.
+- **The editor (open a card, or Tab to it and Enter):**
+  - **Language:** one at a time (简体中文 / 繁體中文 / English, ← → between them). Switching with unsaved edits asks
+    first.
+  - **Subject (mail) and body:** in the markup from v13.1.0. 「正文的写法」 under the buttons lists the marks.
+  - **Values as chips:** `{{code}}`, `{{title}}`… go in where the cursor is. A part such as `{{report}}` goes on a
+    line of its own and only into the body.
+  - **Checked as you type:** anything wrong shows under the body (「没有 {{who}} 这个变量」, 「需要用到 {{code}}」), and
+    保存 waits until it is fixed.
+  - **Buttons:** 保存 (or Ctrl+Enter), 撤销修改 (back to the saved wording), 恢复默认 (asks first), and 发送测试 (asks
+    for an address or a number, then sends the draft, or the saved wording, with sample values through the server's
+    dispatcher into the outbox; the send appears in 最近发送).
+  - **Leaving:** leaving with unsaved edits asks first (Esc or ←).
+- **The preview, beside the editor:**
+  - **A mail:** the server's own page, in a frame, exactly as a mail program shows it, with sample values. It is light
+    or dark as the dashboard is (外观: 跟随系统, 浅色 or 深色) and changes with it. The mail actually sent follows the
+    reader's own system.
+  - **An SMS:** its text, length and how many messages it takes (70 characters to one once there is Chinese in it).
+  - **Updates:** the preview is made again a moment after you stop typing.
+- **Roles on every screen** (the server decides; the screens leave out what it would refuse):
+  - **Sign-in:** admins, managers and integrators can sign in; anyone else sees 「这个账号没有后台权限」. The bar
+    shows who you are and your role (「boss · 管理员」).
+  - **integrator:** 消息 only, as the whole page (no rail).
+  - **manager:** 概览, 用户, 活跃, 收益, 用量; no 导出, no 消息, no CSV beside the revenue curve (the curve's picture
+    stays). On an account:
+    - the permissions (停用, AI, 充值) and the role, from 普通用户, 集成人员 or 经理;
+    - no 增加积分, no 在所有设备上退出;
+    - nothing on an admin's account, and the page says why.
+  - **admin:** everything, and any role on an account's page, which replaces the old 管理员 switch. Every change asks
+    first and says what the role may do.
+  - **Role changed mid-session:** if another admin changes your role while you are signed in, the next refused action
+    says 「你的角色不能做这件事」 and the pages change at once.
+  - **用户:** the role filter has all four roles; staff show their role in the list.
+- **A container on wide screens:** every page of the 管理后台 (its main column and its panel together) now stays at
+  most 1440 wide, centred, with the window's margin inside it, instead of spreading across a wide window. The panel is
+  a card of its own beside the column. 活跃 and 导出 keep the same left edge as the other pages. The bar and the rail
+  stay at the window's edges. On a phone 保存 spans the column.
+- **Verified:**
+  - 18 new 管理后台 tests:
+    - 消息: the list, editing and saving, 撤销修改 and 恢复默认, the chips, the checks, another language, test sends,
+      leaving with edits, an SMS, the preview's dark, the keys;
+    - each role's pages and actions, a role changed mid-session;
+    - the container at 2560 wide.
+  - 74 管理后台 tests pass; the server's 690 are unchanged.
+  - Looked at in a real browser against a private server: the mail page in its frame, light and dark; an edit and a
+    value chip by mouse; a test send into the outbox.
+  - harness PASS.
 
 ### v13.1.0 (2026-10-30): message templates, one way out for mail and SMS, and staff roles (the server)
 

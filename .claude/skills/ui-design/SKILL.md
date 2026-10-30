@@ -193,11 +193,17 @@ The 管理后台's pages are asymmetric (owner, 2026-10-30): a hero figure as th
 compact grid, and a panel of its own at the right. The building blocks are in
 `admin/lib/presentation/widgets/dashboard.dart`; the rules come from the dataviz skill.
 
-- **`DashboardLayout(main:, aside:, narrowAt:)`:** the main column, at most `mainMax` (1080) wide, and the panel,
-  `asideWidth` (360) at the right with a scroll of its own, once the content is `asideFrom` (1080) wide: a window of
-  1200 and up beside the rail. Narrower, the panel joins the column after `narrowAt` of its parts (the end by default;
-  1 where it holds what one does: 用户's filters, an account's actions). The panel is a `Material` (card colour, a
-  hairline at its left), so the switches and rows inside show their ink.
+- **The container** (owner, 2026-10-30: 「for wider screen user, make sure have a container to limit the size of it」):
+  every page, its main column and its panel together, is at most `pageMax` (1440) wide and centred in what the rail
+  leaves, the window class's margin inside it (`containerSide`). `PageBody` (a page without a panel: 活跃, 导出) keeps
+  to the same container, so every page has one left edge. The app bar and the rail stay the window's.
+- **`DashboardLayout(main:, aside:, narrowAt:, panelWidth:)`:** in the container, the main column and, once the
+  content is `asideFrom` (1080) wide (a window of 1200 and up beside the rail), the panel at the right: a card of its
+  own (card colour, a hairline, `Radii.card`), level with the column's top, as tall as the window lets it be, with a
+  scroll of its own; a gutter between. `asideWidth` (360) by default; `asideWide` (480) where it shows a document (the
+  消息 editor's mail preview). Narrower, the panel joins the column after `narrowAt` of its parts (the end by default;
+  1 where it holds what one does: 用户's filters, an account's actions). The panel is a `Material`, so the switches
+  and rows inside show their ink.
 - **`HeroFigure`:** one per page, the page's first figure: its label, the value at `displaySmall` (48), its change, a
   caption, and its days as a `Sparkline` beside it (5 : 7) or under it on a narrow card.
 - **`StatTile` in a `StatGrid`:** the supporting figures, at `headlineSmall` (24), in one card with hairlines between,
@@ -210,7 +216,14 @@ compact grid, and a panel of its own at the right. The building blocks are in
 - **Hierarchy:** size (48, 24, 14, 12), weight, and room: `xl` (24) between modules, `l` (16) inside a tile.
 - **The pages:** 概览 leads with 充值收入 (the panel: 此刻在线, 活跃, 账户, 积分); 收益 with 毛利 (the panel: the
   exports, 怎么算); 用量 with Tokens (the panel: each model); 活跃 with who is on now; an account with its 积分余额 (the
-  panel: permissions, 增加积分, 在所有设备上退出); 用户 is its table, the search and filters in the panel.
+  panel: permissions, the role, 增加积分, 在所有设备上退出, as far as the caller's role may); 用户 is its table, the
+  search and filters in the panel; 消息 (S25) its messages as cards by channel, two to a row (the panel: how they
+  leave, 最近发送), and each message's editor beside its preview (the panel, `asideWide`).
+- **By role** (S25): the rail shows only the pages the role may see (an integrator's one page stands alone, without a
+  rail), and a page leaves out what the server would refuse it. The server decides; the dashboard follows.
+- **A mail's preview** is the server's own page in a frame (the web) or its text (elsewhere), light or dark as the
+  dashboard is: the mail's colours are `MAIL_PALETTE` (`src/export/render-html.ts`), the app's tokens, held to
+  tokens.dart by a test. A sent mail follows the reader's system (`prefers-color-scheme`).
 
 ## Checklist for a new screen or widget
 
@@ -231,15 +244,15 @@ compact grid, and a panel of its own at the right. The building blocks are in
 
 ## Tests that hold the rules
 
-| Test                                | Checks                                                                                                                                                                                                                                                     |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/test/theme_test.dart`          | token contrast; Material's roles are the tokens; same layout in both themes; 外觀 fades, half-way colours, kept on the device; start-up theme                                                                                                              |
-| `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                                                                                                                                          |
-| `admin/test/dashboard_test.dart`    | the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter         |
-| `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                      |
-| `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                           |
-| `app/test/grid_test.dart`           | window classes; the type ramp; 首页 in the grid at 390, 700 and 1280 (margins, the 720 column, titles on the cards' edge); the rules themselves                                                                                                            |
-| `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own |
+| Test                                | Checks                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/test/theme_test.dart`          | token contrast; Material's roles are the tokens; same layout in both themes; 外觀 fades, half-way colours, kept on the device; start-up theme                                                                                                                                                                           |
+| `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                                                                                                                                                                                                       |
+| `admin/test/dashboard_test.dart`    | the container at 2560 (1440, centred, one left edge for every page); the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter |
+| `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                                                                                   |
+| `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                                                                                        |
+| `app/test/grid_test.dart`           | window classes; the type ramp; 首页 in the grid at 390, 700 and 1280 (margins, the 720 column, titles on the cards' edge); the rules themselves                                                                                                                                                                         |
+| `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own                                                              |
 
 A drawn object (coins, the 签 and its tube, tarot backs, the title's mark) may break the colour, size and corner rules
 in its own file (`drawings` in design_rules.dart): its colours are the object's, not the interface's.

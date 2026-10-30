@@ -6,15 +6,47 @@ int _i(Object? v) => (v as num?)?.toInt() ?? 0;
 double _d(Object? v) => (v as num?)?.toDouble() ?? 0;
 List<T> _list<T>(Object? v, T Function(Json) f) => [for (final e in (v as List? ?? const [])) f(e as Json)];
 
+/// What a staff role may do (tech plan S25; the server's src/admin/roles.ts): see the numbers and the accounts, give
+/// roles and permissions, change or take a user's data (增加积分, 在所有设备上退出, the exports), and the mail and SMS.
+abstract final class Can {
+  static const view = 'view';
+  static const assign = 'assign';
+  static const userData = 'user_data';
+  static const messages = 'messages';
+  static const all = {view, assign, userData, messages};
+}
+
+/// The signed-in staff member: their role (admin, manager or integrator), what it may do and the roles it may give.
 class AdminMe {
-  const AdminMe({required this.id, required this.login, required this.adminByConfig});
-  factory AdminMe.fromJson(Json j) =>
-      AdminMe(id: j['id'] as String, login: j['login'] as String, adminByConfig: j['admin_by_config'] == true);
+  const AdminMe({
+    required this.id,
+    required this.login,
+    required this.adminByConfig,
+    this.role = 'admin',
+    this.can = Can.all,
+    this.assignableRoles = const [],
+  });
+  factory AdminMe.fromJson(Json j) => AdminMe(
+        id: j['id'] as String,
+        login: j['login'] as String,
+        adminByConfig: j['admin_by_config'] == true,
+        // A server before roles let admins in only.
+        role: j['role'] as String? ?? 'admin',
+        can: j['can'] == null ? Can.all : {for (final c in j['can'] as List) c as String},
+        assignableRoles: [for (final r in (j['assignable_roles'] as List? ?? const [])) r as String],
+      );
   final String id;
   final String login;
 
   /// Named in the server's MINGLI_ADMINS: an admin whatever the dashboard does.
   final bool adminByConfig;
+  final String role;
+
+  /// [Can]'s: what the role may do. The server decides; the dashboard only leaves out what it would refuse.
+  final Set<String> can;
+
+  /// The roles this staff member may give an account (user, integrator, manager, admin).
+  final List<String> assignableRoles;
 }
 
 /// 充值 (what was paid), its net after the payment fee and VAT, the AI cost, gross profit and its margin.
@@ -254,7 +286,7 @@ class AdminUser {
     required this.id,
     required this.login,
     required this.country,
-    required this.admin,
+    this.role = 'user',
     required this.adminByConfig,
     required this.suspended,
     required this.ai,
@@ -276,7 +308,7 @@ class AdminUser {
       id: j['id'] as String,
       login: j['login'] as String,
       country: j['country'] as String? ?? '',
-      admin: j['role'] == 'admin',
+      role: j['role'] as String? ?? 'user',
       adminByConfig: j['admin_by_config'] == true,
       suspended: j['status'] == 'suspended',
       ai: p['ai'] != false,
@@ -296,7 +328,10 @@ class AdminUser {
   final String id;
   final String login;
   final String country;
-  final bool admin;
+
+  /// user, integrator, manager or admin (tech plan S25).
+  final String role;
+  bool get admin => role == 'admin';
   final bool adminByConfig;
   final bool suspended;
   final bool ai;
@@ -463,4 +498,187 @@ class Active {
   final int inDay;
   final int inWeek;
   final int inMonth;
+}
+
+// ---- 消息 (tech plan S25): the mail and SMS the server sends, their wordings, previews and dispatches ----
+
+/// A value a message's wording may use as `{{name}}`: what it is and the sample a preview fills in. A [part] (a
+/// report, a list of records) stands on a line of its own in the body.
+class TemplateVariable {
+  const TemplateVariable({required this.name, required this.about, required this.sample, this.part = false});
+  factory TemplateVariable.fromJson(Json j) => TemplateVariable(
+        name: j['name'] as String,
+        about: j['about'] as String? ?? '',
+        sample: j['sample'] as String? ?? '',
+        part: j['part'] == true,
+      );
+  final String name;
+  final String about;
+  final String sample;
+  final bool part;
+}
+
+/// A message's wording in one language: the one in use (an admin's when [custom], else the default) and the default.
+class TemplateWording {
+  const TemplateWording({
+    required this.locale,
+    this.subject,
+    required this.body,
+    required this.custom,
+    this.updatedAt,
+    this.defaultSubject,
+    required this.defaultBody,
+  });
+  factory TemplateWording.fromJson(Json j) {
+    final d = j['default'] as Json? ?? const {};
+    return TemplateWording(
+      locale: j['locale'] as String,
+      subject: j['subject'] as String?,
+      body: j['body'] as String? ?? '',
+      custom: j['custom'] == true,
+      updatedAt: j['updated_at'] == null ? null : DateTime.parse(j['updated_at'] as String),
+      defaultSubject: d['subject'] as String?,
+      defaultBody: d['body'] as String? ?? '',
+    );
+  }
+
+  /// zh-Hans, zh-Hant or en.
+  final String locale;
+
+  /// A mail's; an SMS has none.
+  final String? subject;
+  final String body;
+  final bool custom;
+  final DateTime? updatedAt;
+  final String? defaultSubject;
+  final String defaultBody;
+}
+
+/// A message the server sends (邮箱验证码, 报告邮件, …): its channel, what it is, its values and each language's wording.
+class MessageTemplate {
+  const MessageTemplate({
+    required this.kind,
+    required this.channel,
+    required this.name,
+    required this.about,
+    required this.variables,
+    required this.required,
+    required this.locales,
+  });
+  factory MessageTemplate.fromJson(Json j) => MessageTemplate(
+        kind: j['kind'] as String,
+        channel: j['channel'] as String,
+        name: j['name'] as String,
+        about: j['about'] as String? ?? '',
+        variables: _list(j['variables'], TemplateVariable.fromJson),
+        required: [for (final r in (j['required'] as List? ?? const [])) r as String],
+        locales: _list(j['locales'], TemplateWording.fromJson),
+      );
+
+  /// code_mail, code_sms, report_mail, records_mail.
+  final String kind;
+
+  /// mail or sms.
+  final String channel;
+  final String name;
+
+  /// When it goes out.
+  final String about;
+  final List<TemplateVariable> variables;
+
+  /// The values its wording must use ({{code}}, {{report}}).
+  final List<String> required;
+  final List<TemplateWording> locales;
+
+  bool get mail => channel == 'mail';
+
+  TemplateWording wording(String locale) => locales.firstWhere((w) => w.locale == locale, orElse: () => locales.first);
+}
+
+/// Every message, and what delivers each channel: outbox (the dev outbox, no provider yet), off (nothing on this
+/// server), memory (a test's).
+class MessageListing {
+  const MessageListing({required this.templates, required this.mail, required this.sms});
+  factory MessageListing.fromJson(Json j) {
+    final d = j['delivery'] as Json? ?? const {};
+    return MessageListing(
+      templates: _list(j['templates'], MessageTemplate.fromJson),
+      mail: d['mail'] as String? ?? 'off',
+      sms: d['sms'] as String? ?? 'off',
+    );
+  }
+  final List<MessageTemplate> templates;
+  final String mail;
+  final String sms;
+
+  MessageTemplate? byKind(String kind) => templates.where((t) => t.kind == kind).firstOrNull;
+}
+
+/// A wording with the sample values, as its reader gets it: a mail's subject, page and text; an SMS's text, its
+/// length and the messages it takes; and what is wrong with the wording (nothing when it can be kept).
+class MessagePreview {
+  const MessagePreview({this.subject, this.html, required this.text, this.length, this.segments, this.problems = const []});
+  factory MessagePreview.fromJson(Json j) {
+    final s = j['sms'] as Json?;
+    return MessagePreview(
+      subject: j['subject'] as String?,
+      html: j['html'] as String?,
+      text: j['text'] as String? ?? '',
+      length: s == null ? null : _i(s['length']),
+      segments: s == null ? null : _i(s['segments']),
+      problems: [for (final p in (j['problems'] as List? ?? const [])) p as String],
+    );
+  }
+  final String? subject;
+  final String? html;
+  final String text;
+  final int? length;
+  final int? segments;
+  final List<String> problems;
+}
+
+/// One message as the server's log keeps it: when, which, to whom (masked), and how it went.
+class DispatchEntry {
+  const DispatchEntry({
+    required this.id,
+    required this.at,
+    required this.kind,
+    required this.channel,
+    required this.locale,
+    required this.to,
+    this.subject,
+    required this.status,
+    required this.transport,
+    required this.custom,
+    this.test = false,
+    this.error,
+  });
+  factory DispatchEntry.fromJson(Json j) => DispatchEntry(
+        id: j['id'] as String,
+        at: DateTime.parse(j['at'] as String),
+        kind: j['kind'] as String,
+        channel: j['channel'] as String,
+        locale: j['locale'] as String,
+        to: j['to'] as String? ?? '',
+        subject: j['subject'] as String?,
+        status: j['status'] as String,
+        transport: j['transport'] as String? ?? '',
+        custom: j['custom'] == true,
+        test: j['test'] == true,
+        error: j['error'] as String?,
+      );
+  final String id;
+  final DateTime at;
+  final String kind;
+  final String channel;
+  final String locale;
+  final String to;
+  final String? subject;
+
+  /// sent, off (no way to send it on this server) or failed.
+  final String status;
+  final String transport;
+  final bool custom;
+  final bool test;
+  final String? error;
 }

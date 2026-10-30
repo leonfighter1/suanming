@@ -95,6 +95,20 @@ class FakeAdmin {
   /// The next admin call answers 403 admin_only (the role taken away mid-session).
   bool revokeNext = false;
 
+  /// The signed-in staff member's role (tech plan S25): admin (boss, admin-1), manager (mgr, mgr-1) or integrator
+  /// (integ, int-1); the last two aren't in the account list. Changing it mid-session is a role changed by another
+  /// admin: the server answers by it from then on, as the real one does.
+  String role = 'admin';
+
+  /// No way to send messages on this server (a test send answers 503 delivery_unavailable).
+  bool deliveryOff = false;
+
+  /// An admin's wordings, by kind/locale: {subject?, body, updated_at}.
+  final custom = <String, Json>{};
+
+  /// The dispatch log, the oldest first.
+  final log = <Json>[];
+
   /// The report formats that answer 503 (no Chinese font for a PDF).
   final failFormats = <String>{};
 
@@ -158,7 +172,31 @@ class FakeAdmin {
     }
     if (failPaths.contains(path)) return _problem(500, '服务器出错了');
     final days = int.tryParse(q['days'] ?? '') ?? 30;
-    if (path == '/v1/admin/me') return _json({'id': 'admin-1', 'login': 'boss', 'admin_by_config': false});
+    if (path == '/v1/admin/me') {
+      final (id, login) = switch (role) {
+        'manager' => ('mgr-1', 'mgr'),
+        'integrator' => ('int-1', 'integ'),
+        _ => ('admin-1', 'boss'),
+      };
+      return _json({
+        'id': id,
+        'login': login,
+        'role': role,
+        'admin_by_config': false,
+        'can': capabilities[role],
+        'assignable_roles': assignable[role],
+      });
+    }
+    // Every route asks for its capability, as the server's capabilityOf does.
+    final needs = path.startsWith('/v1/admin/messages/')
+        ? 'messages'
+        : path == '/v1/admin/reports' || RegExp(r'^/v1/admin/users/[^/]+/(points|sign-out)$').hasMatch(path)
+            ? 'user_data'
+            : RegExp(r'^/v1/admin/users/[^/]+$').hasMatch(path) && r.method == 'PATCH'
+                ? 'assign'
+                : 'view';
+    if (!capabilities[role]!.contains(needs)) return _problem(403, 'the $role role may not do this', 'not_allowed');
+    if (path.startsWith('/v1/admin/messages/')) return _messages(r);
     if (path == '/v1/admin/overview') return _json(overview(days));
     if (path == '/v1/admin/series') return _json({'items': series(days)});
     if (path == '/v1/admin/breakdown') return _json(breakdown(days));
@@ -175,6 +213,12 @@ class FakeAdmin {
           return _json(_detail(u));
         case ('PATCH', null):
           final b = bodyOf(r);
+          if (role != 'admin' && u['role'] == 'admin') {
+            return _problem(403, "only an admin changes an admin's account", 'not_allowed');
+          }
+          if (b['role'] != null && !assignable[role]!.contains(b['role'])) {
+            return _problem(403, "the $role role can't give the ${b['role']} role", 'not_allowed');
+          }
           if (id == 'admin-1' && b['status'] == 'suspended') return _problem(409, 'no', 'admin_self');
           if (b['status'] != null) u['status'] = b['status'];
           if (b['role'] != null) u['role'] = b['role'];
@@ -398,7 +442,214 @@ class FakeAdmin {
       },
     );
   }
+
+  // ---- 消息 (tech plan S25): the server's shapes (src/admin/messages.ts), the wordings checked as markup.ts does ----
+
+  /// The wording in use for [kind] in [locale]: an admin's, else the default; with the default.
+  Json wording(Json spec, String locale) {
+    final d = (spec['defaults'] as Json)[locale] as Json;
+    final c = custom['${spec['kind']}/$locale'];
+    return {
+      'locale': locale,
+      ...(c == null ? d : {'subject': ?c['subject'], 'body': c['body']}),
+      'custom': c != null,
+      if (c != null) 'updated_at': c['updated_at'],
+      'default': d,
+    };
+  }
+
+  Json? _spec(Object? kind) => messageSpecs.where((s) => s['kind'] == kind).firstOrNull;
+
+  /// What is wrong with a wording, in the server's words.
+  List<String> problemsOf(Json spec, String? subject, String body) {
+    final names = {for (final v in spec['variables'] as List) (v as Json)['name']};
+    final used = {for (final m in RegExp(r'\{\{(\w+)\}\}').allMatches('${subject ?? ''}\n$body')) m.group(1)};
+    return [
+      if (body.trim().isEmpty) '正文不能为空',
+      if (spec['channel'] == 'mail' && (subject ?? '').trim().isEmpty) '邮件需要标题',
+      for (final n in used) if (!names.contains(n)) '没有 {{$n}} 这个变量',
+      for (final n in spec['required'] as List) if (!used.contains(n)) '需要用到 {{$n}}',
+    ];
+  }
+
+  String _filled(String s) => s.replaceAllMapped(RegExp(r'\{\{(\w+)\}\}'), (m) => sampleValues[m.group(1)] ?? m.group(0)!);
+
+  http.Response _messages(http.Request r) {
+    final path = r.url.path;
+    if (path == '/v1/admin/messages/templates' && r.method == 'GET') {
+      return _json({
+        'templates': [
+          for (final s in messageSpecs)
+            {
+              for (final k in ['kind', 'channel', 'name', 'about', 'variables', 'required']) k: s[k],
+              'locales': [for (final l in (s['defaults'] as Json).keys) wording(s, l)],
+            },
+        ],
+        'delivery': {'mail': deliveryOff ? 'off' : 'outbox', 'sms': deliveryOff ? 'off' : 'outbox'},
+      });
+    }
+    final tm = RegExp(r'^/v1/admin/messages/templates/([^/]+)/([^/]+)$').firstMatch(path);
+    if (tm != null) {
+      final spec = _spec(tm.group(1));
+      final locale = tm.group(2)!;
+      if (spec == null || !(spec['defaults'] as Json).containsKey(locale)) return _problem(404, 'no such message');
+      if (r.method == 'PUT') {
+        final b = bodyOf(r);
+        final problems = problemsOf(spec, b['subject'] as String?, b['body'] as String? ?? '');
+        if (problems.isNotEmpty) {
+          return _json({'title': problems.join('；'), 'status': 400, 'code': 'invalid_template', 'problems': problems}, 400);
+        }
+        custom['${spec['kind']}/$locale'] = {'subject': ?b['subject'], 'body': b['body'], 'updated_at': _iso(testNow)};
+        return _json(wording(spec, locale));
+      }
+      if (r.method == 'DELETE') {
+        custom.remove('${spec['kind']}/$locale');
+        return _json(wording(spec, locale));
+      }
+    }
+    if (path == '/v1/admin/messages/preview' && r.method == 'POST') {
+      final b = bodyOf(r);
+      final spec = _spec(b['kind'])!;
+      final w = b['body'] is String ? b : wording(spec, b['locale'] as String);
+      final text = _filled(w['body'] as String).trim();
+      final problems = problemsOf(spec, w['subject'] as String?, w['body'] as String);
+      if (spec['channel'] == 'sms') {
+        return _json({'text': text, 'sms': smsSegments(text), 'problems': problems});
+      }
+      final subject = _filled(w['subject'] as String? ?? '');
+      return _json({
+        'subject': subject,
+        'text': text,
+        'html': '<!doctype html><html data-scheme="${b['scheme'] ?? ''}"><body>$text</body></html>',
+        'problems': problems,
+      });
+    }
+    if (path == '/v1/admin/messages/test' && r.method == 'POST') {
+      final b = bodyOf(r);
+      final spec = _spec(b['kind'])!;
+      final to = (b['to'] as String? ?? '').trim();
+      final mail = spec['channel'] == 'mail';
+      if (mail ? !to.contains('@') : !RegExp(r'^\+?[\d ]{6,}$').hasMatch(to)) {
+        return _problem(400, mail ? 'to must be an email address' : 'to must be a phone number');
+      }
+      if (b['body'] is String) {
+        final problems = problemsOf(spec, b['subject'] as String?, b['body'] as String);
+        if (problems.isNotEmpty) {
+          return _json({'title': problems.join('；'), 'status': 400, 'code': 'invalid_template', 'problems': problems}, 400);
+        }
+      }
+      if (deliveryOff) return _problem(503, 'no mail transport on this server', 'delivery_unavailable');
+      final entry = {
+        'id': 'd${log.length + 1}',
+        'at': _iso(testNow),
+        'kind': spec['kind'],
+        'channel': spec['channel'],
+        'locale': b['locale'],
+        'to': mail ? '${to[0]}***${to.substring(to.indexOf('@'))}' : '+86 *******${to.substring(to.length - 4)}',
+        if (mail) 'subject': '(subject)',
+        'status': 'sent',
+        'transport': 'outbox',
+        'custom': custom.containsKey('${spec['kind']}/${b['locale']}') || b['body'] is String,
+        'test': true,
+      };
+      log.add(entry);
+      return _json({'entry': entry}, 202);
+    }
+    if (path == '/v1/admin/messages/log' && r.method == 'GET') return _json({'items': log.reversed.toList()});
+    return _problem(404, 'not found');
+  }
 }
+
+/// What each staff role may do, and the roles it may give (the server's src/admin/roles.ts).
+const capabilities = {
+  'admin': ['view', 'assign', 'user_data', 'messages'],
+  'manager': ['view', 'assign'],
+  'integrator': ['messages'],
+};
+const assignable = {
+  'admin': ['user', 'integrator', 'manager', 'admin'],
+  'manager': ['user', 'integrator', 'manager'],
+  'integrator': <String>[],
+};
+
+/// The values a preview fills in (the server's samples).
+const sampleValues = {'code': '482913', 'minutes': '10', 'title': '八字 AI 解读', 'subtitle': '张三 · 1990-05-01', 'count': '2'};
+
+/// An SMS's length and the messages it takes (the server's smsSegments): 70 a message with Chinese in it, 67 a part.
+Json smsSegments(String text) {
+  final length = text.runes.length;
+  final ascii = RegExp(r'^[\x20-\x7E\n\r]*$').hasMatch(text);
+  final (one, part) = ascii ? (160, 153) : (70, 67);
+  return {'length': length, 'segments': length == 0 ? 0 : (length <= one ? 1 : (length / part).ceil())};
+}
+
+/// The four messages, as the server's specs list them (their wordings shortened).
+final messageSpecs = <Json>[
+  {
+    'kind': 'code_mail',
+    'channel': 'mail',
+    'name': '邮箱验证码',
+    'about': '注册、绑定邮箱或找回密码时发出',
+    'variables': [
+      {'name': 'code', 'about': '验证码', 'sample': '482913'},
+      {'name': 'minutes', 'about': '有效分钟数', 'sample': '10'},
+    ],
+    'required': ['code'],
+    'defaults': {
+      'zh-Hans': {'subject': '命理大师验证码：{{code}}', 'body': '# 验证你的邮箱\n\n你的验证码是：\n\n!! {{code}}\n\n{{minutes}} 分钟内有效。'},
+      'zh-Hant': {'subject': '命理大師驗證碼：{{code}}', 'body': '# 驗證你的郵箱\n\n你的驗證碼是：\n\n!! {{code}}'},
+      'en': {'subject': 'Your 命理大师 code: {{code}}', 'body': '# Verify your email\n\n!! {{code}}'},
+    },
+  },
+  {
+    'kind': 'report_mail',
+    'channel': 'mail',
+    'name': '报告邮件',
+    'about': '用户把一份解读发到自己的邮箱时发出',
+    'variables': [
+      {'name': 'title', 'about': '报告的标题', 'sample': '八字 AI 解读'},
+      {'name': 'subtitle', 'about': '为谁、何时', 'sample': '张三 · 1990-05-01'},
+      {'name': 'report', 'about': '报告的内容', 'sample': '', 'part': true},
+    ],
+    'required': ['report'],
+    'defaults': {
+      'zh-Hans': {'subject': '命理大师：{{title}}', 'body': '# {{title}}\n\n{{subtitle}}\n\n{{report}}'},
+      'zh-Hant': {'subject': '命理大師：{{title}}', 'body': '# {{title}}\n\n{{subtitle}}\n\n{{report}}'},
+    },
+  },
+  {
+    'kind': 'records_mail',
+    'channel': 'mail',
+    'name': '记录邮件',
+    'about': '用户把几条以往记录发到自己的邮箱时发出',
+    'variables': [
+      {'name': 'title', 'about': '邮件的标题', 'sample': '2 条测算记录'},
+      {'name': 'count', 'about': '记录的条数', 'sample': '2'},
+      {'name': 'records', 'about': '记录的列表', 'sample': '', 'part': true},
+    ],
+    'required': <String>[],
+    'defaults': {
+      'zh-Hans': {'subject': '命理大师：{{title}}', 'body': '# {{title}}\n\n{{records}}'},
+      'zh-Hant': {'subject': '命理大師：{{title}}', 'body': '# {{title}}\n\n{{records}}'},
+    },
+  },
+  {
+    'kind': 'code_sms',
+    'channel': 'sms',
+    'name': '短信验证码',
+    'about': '注册、绑定手机号或找回密码时发出',
+    'variables': [
+      {'name': 'code', 'about': '验证码', 'sample': '482913'},
+      {'name': 'minutes', 'about': '有效分钟数', 'sample': '10'},
+    ],
+    'required': ['code'],
+    'defaults': {
+      'zh-Hans': {'body': '【命理大师】你的验证码是 {{code}}，{{minutes}} 分钟内有效。如非本人操作，请忽略本短信。'},
+      'zh-Hant': {'body': '【命理大師】你的驗證碼是 {{code}}，{{minutes}} 分鐘內有效。'},
+      'en': {'body': '[命理大师] Your code is {{code}}, valid for {{minutes}} minutes.'},
+    },
+  },
+];
 
 /// The dashboard on a [size] screen, signed in as the admin unless [signIn] is false.
 /// [prefs] is the browser's storage (the theme picked, v12.1.0): empty unless a test gives one.

@@ -18,10 +18,10 @@ void main() {
     expect(f.last('/v1/admin/overview').url.queryParameters['days'], '30');
   });
 
-  testWidgets('an account that is not an admin is turned away, and its session dropped', (tester) async {
+  testWidgets('an account without a staff role is turned away, and its session dropped', (tester) async {
     final f = FakeAdmin()..admin = false;
     await pumpAdmin(tester, fake: f);
-    expect(find.text('这个账号不是管理员'), findsOneWidget);
+    expect(find.text('这个账号没有后台权限'), findsOneWidget);
     expect(find.byKey(const Key('admin-submit')), findsOneWidget);
     expect(f.to('/v1/auth/logout', method: 'POST'), hasLength(1));
   });

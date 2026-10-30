@@ -52,11 +52,14 @@ final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeMo
 
 final adminApiProvider = Provider<AdminApi>((ref) {
   final api = AdminApi(baseUrl: adminApiBase(), client: ref.watch(httpClientProvider));
+  // Two statements: in a cascade, the first closure's body would take the second assignment in.
   api.onSignedOut = () => ref.read(sessionProvider.notifier).ended();
+  api.onNotAllowed = () => ref.read(sessionProvider.notifier).recheck();
   return api;
 });
 
-/// The signed-in admin; null until signed in, and again once the session is over.
+/// The signed-in staff member (admin, manager or integrator: tech plan S25); null until signed in, and again once the
+/// session is over.
 class SessionNotifier extends Notifier<AdminMe?> {
   @override
   AdminMe? build() => null;
@@ -70,8 +73,24 @@ class SessionNotifier extends Notifier<AdminMe?> {
     state = null;
   }
 
-  /// The server ended the session (a failed refresh, the account no longer an admin).
+  /// The server ended the session (a failed refresh, the account no longer staff).
   void ended() => state = null;
+
+  Future<void>? _checking;
+
+  /// The server refused something to the role: asks again what the role is and may do, once however many requests
+  /// were refused, so the pages shown follow a role changed since signing in.
+  Future<void> recheck() => _checking ??= _recheckOnce().whenComplete(() => _checking = null);
+
+  Future<void> _recheckOnce() async {
+    if (state == null) return;
+    try {
+      final me = await ref.read(adminApiProvider).me();
+      if (state != null) state = me;
+    } on Object {
+      // No longer staff ends the session by itself (admin_only); anything else leaves the role as it was.
+    }
+  }
 }
 
 final sessionProvider = NotifierProvider<SessionNotifier, AdminMe?>(SessionNotifier.new);
@@ -111,6 +130,12 @@ final userProvider = FutureProvider.autoDispose.family<UserDetail, String>(
   (ref, id) => ref.watch(adminApiProvider).user(id),
 );
 final activeProvider = FutureProvider.autoDispose<Active>((ref) => ref.watch(adminApiProvider).active());
+
+/// 消息 (tech plan S25): every message with its wordings, and the latest dispatches.
+final messagesProvider = FutureProvider.autoDispose<MessageListing>((ref) => ref.watch(adminApiProvider).messages());
+final dispatchLogProvider = FutureProvider.autoDispose<List<DispatchEntry>>(
+  (ref) => ref.watch(adminApiProvider).dispatchLog(),
+);
 
 /// What "now" is, for 「5 分钟前」; tests fix it.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);

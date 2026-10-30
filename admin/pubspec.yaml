@@ -1,7 +1,7 @@
 name: mingli_admin
 description: "命理大师 管理后台 (tech plan S22): accounts, AI use, money, active users and exports, for admins."
 publish_to: "none"
-version: 13.1.0+56
+version: 13.2.0+57
 
 environment:
   sdk: ^3.13.7

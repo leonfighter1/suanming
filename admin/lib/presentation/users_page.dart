@@ -17,8 +17,9 @@ void openAccount(BuildContext context, AdminUser u) => Navigator.of(context).pus
       MaterialPageRoute<void>(builder: (_) => AccountPage(id: u.id, login: u.login)),
     );
 
-/// What sets an account apart, as small labels: 管理员, 已停用, AI or 充值 turned off, 演示. In a table they stay on
-/// one line (the column takes their width); [wrap] lets them flow onto more lines on an account's page.
+/// What sets an account apart, as small labels: its staff role (管理员, 经理, 集成人员), 已停用, AI or 充值 turned off,
+/// 演示. In a table they stay on one line (the column takes their width); [wrap] lets them flow onto more lines on an
+/// account's page.
 class AccountPills extends StatelessWidget {
   const AccountPills(this.u, {super.key, this.wrap = false});
   final AdminUser u;
@@ -28,7 +29,8 @@ class AccountPills extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final pills = [
-      if (u.admin) Pill(u.adminByConfig ? '管理员（服务器指定）' : '管理员', color: scheme.primary),
+      if (u.role != 'user')
+        Pill(u.adminByConfig ? '管理员（服务器指定）' : roleName(u.role), color: u.admin ? scheme.primary : scheme.secondary),
       if (u.suspended) Pill('已停用', color: scheme.error, icon: Icons.block),
       if (!u.ai) Pill('AI 已关', color: scheme.error),
       if (!u.topUpAllowed) Pill('充值已关', color: scheme.error),
@@ -214,19 +216,21 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                 ),
               ),
               const SizedBox(height: Space.s),
-              SegmentKeys<String>(
-                child: SegmentedButton<String>(
-                  key: const Key('filter-role'),
-                  showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(value: '', label: Text('全部角色')),
-                    ButtonSegment(value: 'user', label: Text('用户')),
-                    ButtonSegment(value: 'admin', label: Text('管理员')),
-                  ],
-                  selected: {query.role ?? ''},
-                  onSelectionChanged: (s) =>
-                      _set((q) => q.copyWith(role: () => s.first.isEmpty ? null : s.first, page: 1)),
-                ),
+              // Five choices (S25) are more than a segmented row holds in the panel: chips, which wrap.
+              Wrap(
+                key: const Key('filter-role'),
+                spacing: Space.s,
+                runSpacing: Space.s,
+                children: [
+                  for (final (value, label) in [('', '全部角色'), for (final e in roleNames.entries) (e.key, e.value)])
+                    ChoiceChip(
+                      key: ValueKey<String>('filter-role-${value.isEmpty ? 'all' : value}'),
+                      label: Text(label),
+                      showCheckmark: false,
+                      selected: (query.role ?? '') == value,
+                      onSelected: (_) => _set((q) => q.copyWith(role: () => value.isEmpty ? null : value, page: 1)),
+                    ),
+                ],
               ),
               const SizedBox(height: Space.s),
               SegmentKeys<String>(

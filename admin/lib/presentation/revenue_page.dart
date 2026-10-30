@@ -124,15 +124,18 @@ class _RevenuePageState extends ConsumerState<RevenuePage> {
                   label: Text(_cumulative ? '收益曲线（累计）图片 PNG' : '收益曲线图片 PNG'),
                 ),
               ),
-              const SizedBox(height: Space.s),
-              wide(
-                OutlinedButton.icon(
-                  key: const Key('export-series-csv'),
-                  onPressed: _saving ? null : _csv,
-                  icon: const Icon(Icons.table_view_outlined),
-                  label: const Text('每日数据 CSV'),
+              // The numbers are the server's export, a role that may take data's (S25); the picture is drawn here.
+              if (ref.watch(sessionProvider)?.can.contains(Can.userData) ?? false) ...[
+                const SizedBox(height: Space.s),
+                wide(
+                  OutlinedButton.icon(
+                    key: const Key('export-series-csv'),
+                    onPressed: _saving ? null : _csv,
+                    icon: const Icon(Icons.table_view_outlined),
+                    label: const Text('每日数据 CSV'),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

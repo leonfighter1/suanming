@@ -7,7 +7,8 @@ import 'package:mingli_app/presentation/layout.dart';
 import '../application/providers.dart';
 import 'messages.dart';
 
-/// 管理员登录 (管理后台, tech plan S22): an account that isn't an admin is turned away.
+/// 管理后台登录 (tech plan S22; the roles, S25): an account without a staff role (admin, manager, integrator) is turned
+/// away.
 class AdminSignInPage extends ConsumerStatefulWidget {
   const AdminSignInPage({super.key});
 
@@ -62,7 +63,7 @@ class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('只有管理员可以登录。', style: theme.textTheme.bodyMedium),
+                    Text('管理员、经理和集成人员可以登录。', style: theme.textTheme.bodyMedium),
                     const SizedBox(height: Space.l),
                     TextField(
                       key: const Key('admin-login'),
