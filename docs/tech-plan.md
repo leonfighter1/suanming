@@ -54,6 +54,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S25 消息模板与分发         | mail and SMS templates, one dispatcher, staff roles         | big    | v14.0.0 + summary | done        |
 | S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
 | S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | done        |
+| S28 重构                   | one home for each thing; the API's routes in modules        | big    | v17.0.0 + summary | in progress |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2509,6 +2510,42 @@ Lessons: rules 25, 27, 43, 49, 58, 61, 64.
 
 Lessons: rules 42, 52, 53, 70, 76.
 
+## S28 重构：一处一家、最小改动 (big → v17.0.0)
+
+**Owner requests (2026-10-30), after v16.0.0:** 「有没有根据skill进行代码重构？没有的画请继续」, then 「prepare tech
+documents to plan the restructuring and refactoring」.
+
+Read as: apply the coding skill to the code that exists.
+
+- Every repeated block gets one home.
+- The API's routes leave `server.ts` for modules of their own.
+- Nothing changes for users: the same API, the same screens, the same words to the model.
+
+The survey (260 repeated blocks; the largest files), the rules for every step, the target homes and the risks are in
+[refactor-plan.md](refactor-plan.md). The work packages, in order:
+
+| WP      | What                                                                                              | Release |
+| ------- | ------------------------------------------------------------------------------------------------- | ------- |
+| WP28.1  | `startApi` for the server tests (30 files start the API by hand)                                  | v16.1.0 |
+| WP28.2  | the app tests' `settle` and `scrollAndTap` in support.dart (27 and 4 copies)                      | v16.1.0 |
+| WP28.3  | the verification statistics' and verify scripts' shared helpers                                   | v16.1.0 |
+| WP28.4  | app: a numbered step, one tile for the cards of the day, the date key, 有所求's listener, repeats | v16.2.0 |
+| WP28.5  | server: `ownedChart`, one get-or-create for the cards of the day, the hold's arithmetic, sums     | v16.2.0 |
+| WP28.6  | the AI mechanics in `src/ai/envelope.ts` (model routing, the guard's verdict, the envelope)       | v16.3.0 |
+| WP28.7  | the user-message builders' closing lines, checked byte for byte                                   | v16.3.0 |
+| WP28.8  | `ApiContext` and the first route module (calendar, places)                                        | v17.0.0 |
+| WP28.9  | the other route groups, one commit each; `server.ts` under 900 lines                              | v17.0.0 |
+| WP28.10 | the 管理后台's panel card built in one place, nothing visible changed                             | v17.0.0 |
+| WP28.11 | records, the scan's counts, the stage summary; pushed                                             | v17.0.0 |
+
+**Every step:**
+
+- Covering tests green before and after; `git diff -w --stat` lists only the step's files.
+- No released prompt or generated file is touched.
+- Users see no change. The README entries say what moved.
+
+Lessons: rules 23, 45, 61, 78, 79, 81; P15.
+
 ## 阶段总结 (stage summaries)
 
 ### S27 每个页面的容器、充值框、跟随时间的外观 (done 2026-10-30: v15.1.0–v16.0.0)
@@ -3290,3 +3327,14 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP27.1    | done                         | —       |
 | WP27.2    | done                         | v15.1.0 |
 | WP27.3    | done                         | v16.0.0 |
+| WP28.1    | in progress                  | v16.1.0 |
+| WP28.2    | planned                      | v16.1.0 |
+| WP28.3    | planned                      | v16.1.0 |
+| WP28.4    | planned                      | v16.2.0 |
+| WP28.5    | planned                      | v16.2.0 |
+| WP28.6    | planned                      | v16.3.0 |
+| WP28.7    | planned                      | v16.3.0 |
+| WP28.8    | planned                      | v17.0.0 |
+| WP28.9    | planned                      | v17.0.0 |
+| WP28.10   | planned                      | v17.0.0 |
+| WP28.11   | planned                      | v17.0.0 |
