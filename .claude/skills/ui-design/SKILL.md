@@ -212,6 +212,23 @@ compact grid, and a panel of its own at the right. The building blocks are in
   exports, 怎么算); 用量 with Tokens (the panel: each model); 活跃 with who is on now; an account with its 积分余额 (the
   panel: permissions, 增加积分, 在所有设备上退出); 用户 is its table, the search and filters in the panel.
 
+## Checklist for a new screen or widget
+
+1. **Colours** from `Theme.of(context).colorScheme` or `ThemeTokens.of(context)`; a drawn object's two colours through
+   `pick` or the theme's `darkness`. A new token goes into both themes and into theme_test's contrast check.
+2. **The page's list** takes `pagePadding(context)` (a dashboard page: `DashboardLayout`); nothing stretches across a
+   wide window.
+3. **Every gap and padding** is a `Space` step or a named use; a corner a `Radii` step; a drawing's own geometry a
+   named constant.
+4. **Text** takes a role of the ramp; long text `ReadingText`; numbers in a column tabular figures.
+5. **Alignment:** one left edge, a mark before wrapping text by `firstLineInset`, a column in a card stretched.
+6. **Light and dark:** look at it in both (a render with the real font, rule 22); nothing changes but colour.
+7. **States** (hover, focus, chosen, disabled) come from the theme and fade (`Motion.fast`); the keyboard-access
+   skill's checklist for focus and keys.
+8. **A dashboard page:** one hero figure, the rest in a `StatGrid`, each change a `Change` against the period before,
+   the page's tools in the panel.
+9. **Run** grid_test and the 管理后台's design_rules_test (or the harness): they fail on a broken rule.
+
 ## Tests that hold the rules
 
 | Test                                | Checks                                                                                                                                                                                                                                                     |

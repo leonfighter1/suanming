@@ -240,6 +240,24 @@ The admin dashboard: every account, the tokens, the money, who is active, and ex
   picks another API.
 - The session lives in the browser tab: closing it signs out. The dashboard is web only; on a phone it puts the pages
   in a bar at the bottom.
+- **The layout (v12.3.0):** on a window 1200 px wide or more, each page has a panel of its own at the right, which
+  scrolls on its own. Each page leads with one big figure and its change against the period before (the same number
+  of days just before it), and the supporting figures sit in a grid. On a narrower window the panel's parts follow
+  the figures.
+- **外观 (v12.1.0):** the ☀ / ☾ / Ⓐ button in the bar picks 跟随系统, 浅色 or 深色. The choice is kept in this browser.
+
+## 外观: light and dark (v12.1.0)
+
+In the app, ☰ → 外观 picks 跟随系统, 浅色 or 深色. The choice is kept on the device like the language, so it survives a
+reload. The page fades into the other theme over 0.3 s, and nothing moves. To try it:
+
+1. Open the app, ☰ → 外观 → 深色: the page fades to dark; ☰ → 外观 shows 深色.
+2. Reload: the app opens dark.
+3. 外观 → 跟随系统: the app follows the system's light or dark. Switching the system (Windows: Settings →
+   Personalisation → Colours) while the app is open fades it over too.
+
+The colours are the tokens in `app/lib/presentation/tokens.dart`, both themes side by side; the rules are in the
+ui-design skill.
 
 ## Keep readings and accounts across restarts: `MINGLI_STORE` (v4.1.0)
 

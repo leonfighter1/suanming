@@ -2,6 +2,12 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (f): S24 WP24.4 — the skill, the records; S24 done, release v13.0.0
+
+- The ui-design skill's checklist for a new screen; docs/web-test.md (外观, the 管理后台's layout); the S24 summary;
+  the README entry. Pushed v12.0.1 to v13.0.0 with their tags after a fresh harness PASS on the final tree (the
+  owner allows pushing finished big updates).
+
 ## 2026-10-30 (e): S24 WP24.3 — the 管理后台, asymmetric; v12.3.0 (local)
 
 - Server: `overview` gained `previous` (the days before, summed alike), tested with hand-worked values on the WP22

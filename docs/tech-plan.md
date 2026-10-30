@@ -2223,11 +2223,52 @@ Read as:
 
 - The ui-design skill completed (the grid, the dashboard rules, the checklist for a new screen), a row in CLAUDE.md's
   table, MODULES rows, docs/web-test.md, the README entry, the stage summary; pushed after a fresh harness PASS.
+- **As built (v13.0.0):** the skill grew a section per release (colour and themes in v12.1.0; grid, spacing, type,
+  radii and alignment in v12.2.0; the dashboard in v12.3.0) and the checklist now. The CLAUDE.md row and the MODULES
+  rows came with the releases that made their modules.
 
 Lessons: rules 3, 7, 22, 33, 43, 46, 49, 50, 52, 58, 64, 70, 72, 74, 75; G11, G12; the keyboard-access and dataviz
 skills.
 
 ## 阶段总结 (stage summaries)
+
+### S24 设计系统与管理后台布局 (done 2026-10-30: v12.1.0–v13.0.0)
+
+1. **Delivered:**
+   - **WP24.1 (v12.1.0):** `ThemeTokens`, both themes' tokens side by side in a `ThemeExtension` that lerps, and
+     `buildTheme` made from them. No colour is picked by brightness any more (五行, 签, the title's mark, the 求签
+     altar, the charts). The theme fades over 300 ms. 外观 is in the app's ☰ menu and the 管理后台's bar. The
+     ui-design skill's first version.
+   - **WP24.2 (v12.2.0):** `WindowClass`, `Grid` and `pagePadding`: every app page is a centred column, the tarot page
+     a wide one. The `Space` scale with named uses, the `Radii` steps, the type ramp, `ReadingText`, `EmptyState` and
+     `firstLineInset`. About 75 off-scale values and 25 one-off line heights replaced, the alignment fixed, and the
+     skill's rules checked over the app and the 管理后台 (`design_rules.dart`).
+   - **WP24.3 (v12.3.0):** the server's `previous`; `DashboardLayout`, `HeroFigure`, `StatGrid` and `StatTile`,
+     `Change`, `Sparkline`, `PanelSection`, `NumberRow` and `Meter`. 概览, 收益, 用量, 活跃, 用户 and the account page
+     laid out on them.
+   - **WP24.4 (v13.0.0):** the skill completed, docs/web-test.md, the records; pushed.
+2. **Numbers:**
+   - **Tests:** server 675 → 676, app 240 → 250, 管理后台 45 → 56.
+   - **Harness:** PASS at every release (v12.1.0 on its second run).
+   - **The rules check:** 75 violations in the app and 2 in the 管理后台 at first; none now.
+3. **Against the plan:**
+   - **The tokens:** `ThemeTokens` is the extension itself (no separate `AppPalette`). `raised` was added for dialogs,
+     and the 八字 trend's 7-slot series moved into the tokens.
+   - **The type ramp** keeps Material's role names. `titleLarge` is 20 (was 22), and line heights grew for Chinese
+     text: body 14 / 22, small 12 / 18.
+   - **The rules** also catch a line height of one's own and the old `Space.page`.
+   - **The dashboard:** `DashboardLayout` gained `narrowAt`, and the panel became a `Material`. 活跃 has no panel, 导出
+     keeps its plain page, and `KpiTile` and `KpiGrid` are gone.
+4. **Mistakes and what they teach:**
+   - **Rule 76:** a component theme's state property that resolves to null crashed every theme change in Flutter's
+     chip lerp. The bug predates S24; the first test that switched the theme half-way found it. Test the change itself,
+     not only each end.
+   - **Rule 77:** a label that holds model text must be able to wrap; the narrower column showed it.
+   - **Rule 23 refined:** clear `app/.dart_tool/flutter_build` before the harness after manual runs.
+   - **Tests and fold-based layout:** several dashboard tests assumed their target was on screen. When a page gains a
+     hero, scroll to what you check (rules 25 and 64).
+5. **Next:** nothing planned. Waiting for the owner, as at S23's end: Phase 4 payments, the mail and SMS providers,
+   the Phase 3 gate, WP7.2, WP7.3 and WP1.8.
 
 ### S23 Found on the way (done 2026-10-30: v12.0.1, small)
 
@@ -2854,4 +2895,4 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP24.1    | done                         | v12.1.0 |
 | WP24.2    | done                         | v12.2.0 |
 | WP24.3    | done                         | v12.3.0 |
-| WP24.4    | planned                      | v13.0.0 |
+| WP24.4    | done                         | v13.0.0 |

@@ -13,6 +13,27 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v13.0.0 (2026-10-30): one design system for the app and the 管理后台
+
+Your request (「对于dashboard 可以采用非对称Dashboard布局…建立统一的浅色和深色主题系统…」), stage S24 of the
+[tech plan](docs/tech-plan.md), complete. Pushed, with v12.0.1 to v12.3.0.
+
+- **What the stage brought** (details in the entries below):
+  - **Light and dark (v12.1.0):** each theme defines its background, card, text and accent, and with them the borders,
+    the states, the 五行 and the chart colours, side by side in one file. 外观 (跟随系统 / 浅色 / 深色) is in the app's ☰
+    menu and the 管理后台's bar. A change of theme fades every colour, border and state over 0.3 s, and nothing moves.
+  - **One grid, spacing, type and alignment (v12.2.0):** every page is a centred column on a wide window, all spacing
+    is on a scale of 4, there is one type ramp from 11 to 48, and the alignment rules hold everywhere. A test fails on
+    any screen that breaks them.
+  - **The 管理后台, asymmetric (v12.3.0):** each page leads with one big figure and its change against the period
+    before, its supporting figures sit in a compact grid, and a panel of its own stands at the right.
+- **For future work:** the ui-design skill (`.claude/skills/ui-design`) holds every rule: the colour tokens, light and
+  dark, the grid, spacing, type, radii, alignment, motion and the dashboard. CLAUDE.md now points to it for any change
+  to a colour, a size, a layout or the theme. docs/web-test.md says how to try 外观 and the new 管理后台.
+- **Verified:**
+  - 676 server tests, 250 app tests and 56 管理后台 tests pass.
+  - The harness passed on the final tree before the push.
+
 ### v12.3.0 (2026-10-30): the 管理后台, asymmetric: a big figure, a compact grid, a panel at the right
 
 You asked for an asymmetric dashboard with big numbers as the visual anchor, the supporting data in a compact grid, and
