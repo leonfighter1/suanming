@@ -41,7 +41,7 @@ import {
   publicReport,
   REMEDY_PRICE,
   reviewSummary,
-} from "../src/api/server.js";
+} from "../src/api/views.js";
 import {
   computeBazi,
   lunarDate,

@@ -21,7 +21,8 @@ import {
   type LLMProvider,
   type Usage,
 } from "../src/ai/index.js";
-import { createApiServer, publicPack } from "../src/api/server.js";
+import { createApiServer } from "../src/api/server.js";
+import { publicPack } from "../src/api/views.js";
 import { InMemoryStore, type Store } from "../src/api/store.js";
 import { AuthService, type UserRecord } from "../src/auth/service.js";
 import { TokenService } from "../src/auth/tokens.js";
