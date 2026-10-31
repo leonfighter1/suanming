@@ -114,6 +114,7 @@ Motion.themeCurve))`. Every colour lerps: the Material scheme and `ThemeTokens` 
 | `Motion.switchSpring`      | spring             | a switch's thumb: a little past its end, settled in about a third of a second |
 | `Motion.roll`, `rollCurve` | 600 ms, decelerate | a number rolling to its new value (`RollingNumber`)                           |
 | `Motion.skeleton`          | 1200 ms            | a skeleton's bars breathing (`Skeleton`)                                      |
+| `Motion.signOut`           | 500 ms             | 登出: 首页 sinks back and fades as the introduction page comes forward (S29)  |
 
 Things that move or grow use `Motion.curve` (ease out). Reduce motion (`MediaQuery.disableAnimations`) jumps.
 
@@ -167,6 +168,9 @@ Window classes are Material's, by the window's width (`WindowClass.of`, `layout.
     今日一卦 or 今日一签 under 东方, 今日一牌 under 西方. Its picture is 44 × 76: the card, the lot's slip (`LotSlip`)
     or the hexagram's lines.
   - The sign-in page puts its banner at the left, as tall as the form at the right (5 of 12 columns).
+  - The introduction page (S29, 「各种服务的类型 … 2x2 grid」) shows the services as 首页 does: the same groups and
+    `CardGrid`, 东方 2 × 2; its 登录 / 注册 spans a phone's column and takes its label's width beyond
+    (`compactButtons`).
   - Phones and tablets keep one column.
 - **Columns** for a layout of parts side by side: `Grid.span(width, n, columns:, gutter:)`. The dashboard's main column
   and panel are 8 : 4 at large widths.
@@ -271,8 +275,12 @@ compact grid, and a panel of its own at the right. The building blocks are in
   panel: permissions, the role, 增加积分, 在所有设备上退出, as far as the caller's role may); 用户 is its table, the
   search and filters in the panel; 消息 (S25) its messages as cards by channel, two to a row (the panel: how they
   leave, 最近发送), and each message's editor beside its preview (the panel, `asideWide`).
-- **By role** (S25): the rail shows only the pages the role may see (an integrator's one page stands alone, without a
-  rail), and a page leaves out what the server would refuse it. The server decides; the dashboard follows.
+- **By role** (S25): the rail shows only the pages the role may see (a role with one page gets it alone, without a
+  rail; an integrator has 消息 and 内容 since S29), and a page leaves out what the server would refuse it. The server
+  decides; the dashboard follows.
+- **内容** (S29): the app's texts in the main column, 30 at a time (再显示 adds more), each opening its editor (a dialog,
+  both languages, the app's own under each field); the search, 已修改 and the images in the panel, before the texts on
+  a narrow screen (`narrowAt: 1`, as 用户).
 - **A mail's preview** is the server's own page in a frame (the web) or its text (elsewhere), light or dark as the
   dashboard is: the mail's colours are `MAIL_PALETTE` (`src/export/render-html.ts`), the app's tokens, held to
   tokens.dart by a test. A sent mail follows the reader's system (`prefers-color-scheme`).

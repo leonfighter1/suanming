@@ -55,8 +55,9 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
 | S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | done        |
 | S28 重构                   | one home for each thing; the API's routes in modules        | big    | v17.0.0 + summary | done        |
-| S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | in progress |
-| S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | in progress |
+| S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | done        |
+| S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | done        |
+| S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | planned     |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2575,14 +2576,14 @@ skill, with the full harness.
 | WP29.2 | the 管理后台's 内容 page: by page and place, edit a text, upload an image; a `content` capability for roles |
 | WP29.3 | the app shows the resources over its built-in texts (ARB), as many as can be, falling back to the built-in  |
 | WP29.4 | the introduction page, signed out: welcome, 加入我们, 登入 / 注册, the services 2 × 2; a service remembered |
-| WP29.5 | sessions on the server: two days after signing in, sign in again                                            |
+| WP29.5 | sessions on the server: two days unused, sign in again (the owner's 「idle time」, 2026-10-31)              |
 | WP29.6 | the sign-out animation (reduce motion: none)                                                                |
 | WP29.7 | records, the stage summary; pushed                                                                          |
 
 - **Roles:** `content` goes to admin and integrator to begin with (S25's roles); the owner can change it.
 - **The pending service:** kept through signing in (not through registering, which goes to 首页).
 
-## S30 交互动效 (big → v19.0.0)
+## S30 交互动效 (big → v18.0.0, with S29)
 
 **Owner request (2026-10-30):** 「UI 改进，对于现在已有的前端各种元素 做以下的所有应该有的元素交互功能」, twelve of them:
 1 按压回弹 (96 %, a spring past 100 % and back), 2 弹性开关, 3 波纹跟手, 4 点赞炸一下 (only 点赞 and 收藏), 5 勾选画出来
@@ -2605,7 +2606,108 @@ The survey (2026-10-30) of what the app has:
 - **Not in the app yet:** 点赞 and 收藏 buttons (4), sliders (6), stacked cards (11) and bottom sheets (12). Each is
   built in when such an element comes, or where the owner names one.
 
+## S31 设置、货币与收据 (big → v19.0.0)
+
+**Owner request (2026-10-31):** 「Move all the configurations into separate files, CMS controlling panel is able to read
+and adjust those values. Extract as much configurations as possible, for instance, identify the users idle time,
+rightnow, 2 days, but we should be able to change it in the dashboard controlling panel. Meanwhile, we can switch the
+AI modal in the panel as well. turn on or off the Modal mocking. checkbox on different accepted currencies by admin.
+have a rate conversions on the currencies. user is able to pick what ever currencies they like - Verify currencies
+from active online's today's currency rate P.S. based on the online api call - always get 5% service charge from the
+conversion. - Generate a purchase receipt for user. user is able to view and print the money spent and points they
+purchased. (need to have an email address.). Admin's adding points shouldn't reflect on the money print. Admin can
+choose the main displayed currencies for dashboard.」 To begin once v18.0.0 is pushed.
+
+| WP     | What                                                                                                       |
+| ------ | ---------------------------------------------------------------------------------------------------------- |
+| WP31.1 | 设置: each setting in a registry (type, range, group, its default from `config/`); changes in the database |
+| WP31.2 | the 管理后台's 设置 page and a `settings` capability (admin): each group's values, changed or put back     |
+| WP31.3 | the settings taken out of the code and .env: the idle limit (2 days), quotas and limits, 积分's prices     |
+| WP31.4 | AI: the model and the mock as settings, admin only, each change logged; .env's values the defaults         |
+| WP31.5 | currencies: the accepted ones (checkboxes); today's rates from an online API; 充值 at the rate plus 5 %    |
+| WP31.6 | receipts: every 充值 a numbered receipt, listed in 我的积分 to view and print; an email address needed     |
+| WP31.7 | the dashboard's currency: the one the 管理后台 shows money in                                              |
+| WP31.8 | records, the stage summary; pushed                                                                         |
+
+- **The AI switches (CLAUDE.md rule 5):** the owner's. The panel offers them to admins at the owner's request; an
+  agent never turns the real model on, and tests run on the mock whatever a setting says.
+- **The online rates:** a request names only currencies, no person's data. A day's rates are kept, the last good ones
+  used while the service can't be reached; tests never call it.
+- **充值 stays simulated** until the owner's Phase 4 payments (rule 9): a receipt is for the simulated purchase. 增加积分
+  by an admin is no purchase and is never on a receipt.
+
 ## 阶段总结 (stage summaries)
+
+### S29 内容管理、介绍页、登录有效期、登出动画 (done 2026-10-31: v18.0.0)
+
+1. **Delivered** (all in v18.0.0, with S30):
+   - **WP29.1, the CMS on the server:** the texts staff may change, read from the app's own message files (734;
+     plural and formatted messages left out), and two images (the banners' art, the introduction page's mark).
+     Staff's changes are kept in the database (migration 013) and the memory store; `GET /v1/content` is for
+     everyone, `/v1/admin/content/*` for the `content` capability (admin, integrator). A change keeps its text's
+     placeholders, no more and no fewer; an image is a PNG, JPEG or WebP of at most 2 MB, checked by its signature.
+   - **WP29.2, 内容 in the 管理后台:** the texts found by their words or key, 30 at a time; a text's editor (both
+     languages, the app's own under each field, its placeholders named, the server's refusal shown); the images put
+     in through the browser's file chooser (`pickFile`, no package) or taken out. Integrators get 消息 and 内容.
+   - **WP29.3, the app:** a generated `ContentLocalizations` (`npm run sync:app`) puts staff's words in front of the
+     app's own, placeholders filled in; `ContentScope` gives a page staff's image. Nothing changes until the changes
+     come, nor when they can't.
+   - **WP29.4, 欢迎:** the introduction page before signing in: the welcome on the banners' art with the app's mark
+     (or staff's logo), the 加入我们 words (the CMS's too), 登录 / 注册, and the services as 首页 groups them. A
+     service picked first opens itself once signed in; signing up goes to 首页.
+   - **WP29.5, sessions:** the refresh tokens in a `SessionStore`, the database's when there is one (migration 014):
+     a restart keeps everyone signed in, and a session ends after two days unused (`MINGLI_SESSION_IDLE_DAYS`).
+   - **WP29.6, 登出:** 首页 sinks back and fades as the introduction page comes forward (500 ms); at once under reduce
+     motion.
+2. **Numbers:**
+   - **Tests:** server 697 → 709, app 272 → 300 (with S30's), the 管理后台 75 → 85.
+   - **The catalog:** 734 texts in two languages, 79 of them with placeholders; 2 images.
+   - **Harness:** PASS for v18.0.0.
+3. **Against the plan:**
+   - **WP29.2:** texts are found by search, not by page and place. Their keys' first words make 150 "areas", too
+     many to list, so the page searches the words staff see.
+   - **WP29.5:** planned as two days after signing in. The owner's message of 2026-10-31 calls it "idle time", so a
+     session ends after two days unused, each refresh starting the two days again.
+   - **WP29.4:** the services follow 首页's groups and `CardGrid`: 东方 2 × 2 on a desktop window, one column on
+     phones and tablets.
+   - Three restructurings came first, as their own commits: the 管理后台's dialog width and its tests' `tapOn` in one
+     home, 首页's pieces made public.
+4. **Mistakes and what they teach:**
+   - **Rule 87:** `AnimatedSwitcher` gives a child its times when the child comes in, so 首页 left with the zero it
+     came with. Printing each frame found it; two guesses before did not (rule 81).
+   - **Rule 88:** two Scaffolds side by side both show a SnackBar under one hero tag. The page leaving turns its
+     heroes and taps off in the frame it starts leaving.
+   - **Rule 89:** a background run's filtered output came back empty. Read the whole output from a file.
+5. **Next:** S31, above: the settings in their own files and the 管理后台 (the idle limit, the AI model and its
+   mock), the currencies (the accepted ones, today's rates plus 5 %, the user's pick), receipts, and the dashboard's
+   currency.
+
+### S30 交互动效 (done 2026-10-31: v18.0.0)
+
+1. **Delivered** (all in v18.0.0, with S29):
+   - **WP30.1 按压回弹:** every button is the app's (`buttons.dart`) and, with tappable cards and button-like
+     `Pressable`s, bounces through `PressBounce`: 96 % pressed, a spring a little past 100 % when let go.
+   - **WP30.2 弹性开关 and 勾选画出来:** `ElasticSwitch` (`AppSwitchTile`) for the four switches, its thumb stretching
+     with its speed; Material's checkbox tick (200 ms, bottom left to top right) kept and pinned by a test.
+   - **WP30.3 波纹跟手:** the theme's `InkSplash`: the ripple spreads from where the finger went down.
+   - **WP30.4 数字滚动:** `RollingNumber` (600 ms, decelerating) for 我的积分, the menu's balance and 25 figures in
+     the 管理后台.
+   - **WP30.5 骨架屏:** `Skeleton.cover` over a page's own build of typical data, `SkeletonText` and `SkeletonBox`
+     in an item's frame. Nothing moves when the data come: 以往记录, 我的积分, the place picker, 深度分析, the remedies,
+     一生运势, 内容审核.
+   - **WP30.6 卡片翻面:** the tarot card's turn, sampled frame by frame: each face shows only while it faces you.
+   - **WP30.7 汉堡变叉:** `MenuMorph`: ☰ and the menu's ✕ from one progress, at the same place.
+   - **The design principles:** the ui-design skill's Interactions section; two design rules keep Material's own
+     buttons and switches out of the screens.
+2. **Numbers:** app tests 272 → 287 before S29's; about 95 buttons in 32 files became the app's; 21 spinners in 12
+   files looked at for skeletons.
+3. **Against the plan:**
+   - 点赞炸一下, 液态滑块, 卡片堆叠 and 底部抽屉 have no element in the app yet. The skill says how each is built when its
+     first element comes.
+   - Of the two "verify" packages, the ripple needed a change (`InkRipple` spreads from the centre); the tick didn't.
+4. **Mistakes:** rule 86 (PowerShell's `Set-Content` wrote a BOM into a Dart file: source files are written with the
+   edit tools only); rule 24 broadened (a second app in one widget test).
+5. **Next:** S29, done with it (above); then S31.
 
 ### S28 重构：一处一家、最小改动 (done 2026-10-30: v16.1.0–v17.0.0)
 

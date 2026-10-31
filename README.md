@@ -13,6 +13,68 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v18.0.0 (2026-10-31): 内容管理, the welcome page, sessions of two days, 登出 and the interactions (S29 and S30 complete)
+
+Your requests: the twelve interactions (「UI 改进 … 做以下的所有应该有的元素交互功能」, S30), then S29: 「create a CMS
+system … store the values of the resources into database … autherize the roles … extract as much text as possible」,
+the introduction page, 「登录者的登录消息存在服务器上，如果距离上次登录超过2天，那就需要重新登录」 and 「增加登出动画」. Both stages
+end with this release, which is pushed.
+
+- **内容管理, the CMS:**
+  - **管理后台 → 内容** (for 管理员 and 集成人员): every text the app shows, 734 of them, in 简体中文 and 繁體中文, and
+    two pictures: the banners' 命理罗盘 and the welcome page's mark.
+  - **To change a text:** search for its words as the app shows them (or its key), click it, change 简体中文, 繁體中文
+    or both, and 保存 (Ctrl+Enter). Each field shows the app's own words under it; ↺ puts them back, and saving the
+    app's own words removes the change. 已修改 in the panel lists only the changed texts.
+  - **Values the app fills in** ({balance} and the like) must stay: the editor names them, and the server refuses a
+    change that drops or adds one, saying why.
+  - **To change a picture:** 上传 (or 换一张) in the panel: a PNG, JPEG or WebP of at most 2 MB; 移除 puts the app's own
+    back.
+  - **In the app:** the changes show the next time the app opens, everything else stays the app's own. Without a
+    network, or with an older server, the app shows its own words and pictures.
+  - Kept in the database (migration 013). The app reads them without signing in, so the welcome and sign-in pages
+    show them too.
+- **欢迎, the welcome page:** what you see before signing in.
+  - 欢迎来到命理大师 on 命理罗盘 with the app's mark (or the logo put in through 内容), the 加入我们 words, and 登录 /
+    注册, which opens the sign-in page.
+  - Then 我们的服务: 东方 (八字排盘, 求签, 算卦, 风水) and 西方 (塔罗), as on 首页, 2 × 2 on a desktop window.
+  - Tapping a service opens the sign-in page; once signed in, that service opens, and ← goes to 首页. Signing up goes
+    to 首页.
+  - The language can be switched at the top. The page's words and logo can be changed in 内容.
+- **Sessions:** kept on the server (migration 014), so restarting the server no longer signs anyone out. A session
+  not used for two days ends, and the app asks to sign in again; an app opened at least every two days stays signed
+  in. `MINGLI_SESSION_IDLE_DAYS` in .env changes the two days (S31 moves it into the 管理后台).
+- **登出:** signing out, from the menu, by deleting the account or by a suspension: 首页 sinks back and fades as the
+  welcome page comes forward, in half a second. With reduce motion on, it changes at once.
+- **The interactions (S30):**
+  - **按压回弹:** every button and tappable card shrinks to 96 % when pressed and springs back a little past its size.
+  - **弹性开关:** a switch's thumb stretches into a capsule as it travels and rests round with a slight rebound.
+  - **波纹跟手:** the ripple spreads from where your finger went down.
+  - **勾选画出来:** a checkbox's tick draws from the bottom left to the top right (Material's own, kept).
+  - **数字滚动:** figures roll to their new values, slower near the end: 我的积分, the menu's balance, the 管理后台's
+    figures.
+  - **骨架屏:** pages show their own frame while their data come, and nothing moves when the data arrive.
+  - **卡片翻面:** a tarot card shows each side only while it faces you.
+  - **汉堡变叉:** ☰ turns into ✕ as the menu opens, and back.
+  - 点赞, 收藏, sliders, stacked cards and bottom sheets aren't in the app yet; each gets its interaction when it
+    comes.
+- **Also:**
+  - 集成人员 see 消息 and 内容, with a rail (a bar on a phone); the role's line says so.
+  - Fixed: a frame of spinner between 首页 and the next page on signing out; ☰ showing ✕ after signing out from the
+    open menu and back in.
+- **Verified:**
+  - **Tests:** server 709, app 300, 管理后台 85.
+  - **Renders:** 内容 at 1440 (light, dark) and 390, its editor refusing a change; 欢迎 at 390 and 1600 (light, dark).
+  - **Harness:** PASS.
+- **Stages S29 and S30 in sum:** the CMS, end to end, with the roles that may use it; the welcome page with the
+  service you picked kept through signing in; sessions on the server ending after two days unused; the sign-out
+  animation; and the eight interactions the app has elements for. Their summaries are in the
+  [tech plan](docs/tech-plan.md).
+- **Next:** S31, your request of today: the settings in their own files, read and changed in the 管理后台 (the two
+  days, the AI model and its mock); the currencies (the accepted ones, today's rates from an online service plus a
+  5 % service charge, the currency each user picks); purchase receipts to view and print; and the 管理后台's
+  currency.
+
 ### v17.0.0 (2026-10-30): 命理罗盘 behind every banner; the API in modules (S28 complete)
 
 Your requests of today: 「Update the banner background using this … luopan.svg for all pages」, and stage S28's
