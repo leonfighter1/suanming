@@ -41,7 +41,7 @@ class ContentText extends StatelessWidget {
 }
 
 /// [nodes] as spans over [base]: what each tag and inline style says, the colours from the theme (light or dark as it
-/// is), a link as a control of its own (Tab reaches it, Enter opens it).
+/// is) or written out, a link as a control of its own (Tab reaches it, Enter opens it).
 List<InlineSpan> richSpans(BuildContext context, List<RichNode> nodes, TextStyle base) {
   final t = ThemeTokens.of(context);
   final spans = <InlineSpan>[];
@@ -136,10 +136,11 @@ List<InlineSpan> richSpans(BuildContext context, List<RichNode> nodes, TextStyle
   return spans;
 }
 
-/// A style's colour (color, background-color): the theme's, `var(--accent)` and the like; null for any other value.
+/// A style's colour (color, background-color): the theme's, `var(--accent)` and the like, or one written out
+/// (`#c0392b`, `rgb(192, 57, 43)`; S34), the same in both themes; null for any other value.
 Color? richColorOf(String value, ThemeTokens t) {
   final token = RegExp(r'^var\(--([a-z-]+)\)$').firstMatch(value)?[1];
-  return token == null ? null : richColor(token, t);
+  return token == null ? richWrittenColor(value) : richColor(token, t);
 }
 
 /// A piece back as HTML, for a link's words.

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/domain/rich_text.dart';
 import 'package:mingli_app/presentation/buttons.dart';
-import 'package:mingli_app/presentation/content_text.dart' show richSpans;
+import 'package:mingli_app/presentation/content_text.dart' show richColorOf, richSpans;
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
+import 'package:mingli_app/presentation/layout.dart';
+import 'package:mingli_app/presentation/theme.dart' show buildTheme;
 import 'package:mingli_app/presentation/tokens.dart';
 
 import '../application/providers.dart';
@@ -428,8 +430,40 @@ class _ContentPageState extends ConsumerState<ContentPage> {
 
 /// What a text that may hold HTML may hold (src/content/rich.ts), in the editor's words.
 const _richHelp = '这段文字可以用 HTML 和 CSS：<b> <i> <u> <s> <small> <br> <p> <ul> <ol> <li> <a href="https://…">；'
-    'style 里可以写 color、background-color（主题色，如 var(--accent)、var(--danger)、var(--accent-soft)，浅色深色都对）、'
+    'style 里可以写 color、background-color（主题色，如 var(--accent)、var(--danger)、var(--accent-soft)，浅色深色都对；'
+    '或写出的颜色，如 #c0392b、rgb(192, 57, 43)，浅色深色都一样，看下面两个预览）、'
     'font-weight、font-style、font-size（11–32px）、text-decoration。';
+
+/// The themes the editor previews a text in (S34), as the app may show it: each with its key's name and its label.
+const _themes = [(Brightness.light, 'light', '浅色'), (Brightness.dark, 'dark', '深色')];
+
+/// Where words in [nodes] would be hard to read (S34): their colour and background less than 4.5 : 1 apart (what
+/// theme_test holds the app's own colours to) in either of [_themes], on the app's card; a warning each, in the
+/// editor's words. A colour written out stays the same in both themes, while the theme's follow it.
+List<String> _contrastWarnings(List<RichNode> nodes) {
+  final out = <String>{};
+  for (final (brightness, _, label) in _themes) {
+    final t = ThemeTokens.forBrightness(brightness);
+    void walk(List<RichNode> nodes, Color fg, Color bg) {
+      for (final e in nodes.whereType<RichElement>()) {
+        final style = styleOf(e.attributes['style']);
+        final colour = switch (style['color']) { final v? => richColorOf(v, t), _ => null };
+        final ground = switch (style['background-color']) { final v? => richColorOf(v, t), _ => null };
+        final (f, b) = (colour ?? fg, ground ?? bg);
+        final ratio = contrastRatio(f, b);
+        if ((colour != null || ground != null) && ratio < 4.5) {
+          final words = wordsOf(e.children);
+          final shown = words.length > 12 ? '${words.substring(0, 12)}…' : words;
+          out.add('「$shown」在$label主题下不易看清：对比度 ${ratio.toStringAsFixed(1)} : 1，至少要 4.5 : 1');
+        }
+        walk(e.children, f, b);
+      }
+    }
+
+    walk(nodes, t.text, t.card);
+  }
+  return out.toList();
+}
 
 /// A place in words: 算卦 › AI 解读按钮 › 语音输入.
 String _placeText(Map<String, String> names, ContentPlace p) => [names[p.page] ?? p.page, ...p.parts].join(' › ');
@@ -622,31 +656,67 @@ class _TextDialogState extends ConsumerState<_TextDialog> {
   }
 
   /// A language's field: Enter moves on (saves in the last), or starts a new line where the app's own has lines. With
-  /// HTML in it (S33), the preview under it, drawn as the app draws it (ContentText's richSpans).
+  /// HTML in it (S33), the preview under it, drawn as the app draws it (ContentText's richSpans): in the light theme and
+  /// the dark side by side (S34; one under the other on a phone), with a warning for words hard to read in either.
   Widget _field(String l) {
     final want = _want(l);
     if (!t.rich || !hasMarkup(want)) return _input(l);
-    final tk = ThemeTokens.of(context);
-    final style = Theme.of(context).textTheme.bodyMedium;
+    final nodes = parseRich(want);
+    final [light, dark] = [for (final theme in _themes) _preview(l, nodes, theme)];
+    final warnings = _contrastWarnings(nodes);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _input(l),
         const SizedBox(height: Space.s),
-        Container(
-          key: ValueKey<String>('text-$l-preview'),
-          padding: const EdgeInsets.all(Space.m),
-          decoration: BoxDecoration(color: tk.inset, borderRadius: BorderRadius.circular(Radii.field)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('预览', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: tk.textSecondary)),
-              const SizedBox(height: Space.xs),
-              Text.rich(TextSpan(children: richSpans(context, parseRich(want), style ?? const TextStyle())), style: style),
-            ],
+        if (WindowClass.ofContext(context) == WindowClass.compact) ...[
+          light,
+          const SizedBox(height: Space.s),
+          dark,
+        ] else
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Expanded(child: light), const SizedBox(width: Space.s), Expanded(child: dark)],
           ),
-        ),
+        if (warnings.isNotEmpty) ...[
+          const SizedBox(height: Space.s),
+          ProblemList(warnings, key: ValueKey<String>('text-$l-contrast'), warning: true),
+        ],
       ],
+    );
+  }
+
+  /// The preview in one of [_themes]: the text on the app's card in that theme, as ContentText draws it there.
+  Widget _preview(String l, List<RichNode> nodes, (Brightness, String, String) theme) {
+    final (brightness, name, label) = theme;
+    return Theme(
+      data: buildTheme(brightness),
+      child: Builder(
+        builder: (context) {
+          final tk = ThemeTokens.of(context);
+          final text = Theme.of(context).textTheme;
+          final style = text.bodyMedium ?? const TextStyle();
+          return Material(
+            key: ValueKey<String>('text-$l-preview-$name'),
+            color: tk.card,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: tk.border),
+              borderRadius: BorderRadius.circular(Radii.field),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(Space.m),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('预览 · $label', style: text.labelMedium?.copyWith(color: tk.textSecondary)),
+                  const SizedBox(height: Space.xs),
+                  Text.rich(TextSpan(children: richSpans(context, nodes, style)), style: style),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

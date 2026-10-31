@@ -68,7 +68,7 @@ import { computeQiuqian } from "../src/engines/qiuqian/index.js";
 import { lotSet } from "../src/engines/qiuqian/lots.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
 import { contentTexts } from "../src/content/catalog.js";
-import { RICH_COLORS, RICH_FONT_SIZE, RICH_TAGS } from "../src/content/rich.js";
+import { RICH_COLORS, RICH_FONT_SIZE, RICH_TAGS, RICH_WRITTEN_COLOR } from "../src/content/rich.js";
 
 const root = new URL("../", import.meta.url);
 export const at = (p: string) => new URL(p, root);
@@ -159,6 +159,18 @@ function contentRich(): string[] {
     ...Object.entries(RICH_COLORS).map(([css, field]) => `      '${css}' => t.${field},`),
     "      _ => null,",
     "    };",
+    "",
+    "/// A colour written out (S34; RICH_WRITTEN_COLOR on the server): `#rgb`, `#rrggbb` or `rgb(r, g, b)`, each part at",
+    "/// most 255; null for any other value.",
+    "Color? richWrittenColor(String value) {",
+    `  final m = RegExp(r'${RICH_WRITTEN_COLOR.source}', caseSensitive: ${!RICH_WRITTEN_COLOR.flags.includes("i")}).firstMatch(value);`,
+    "  if (m == null) return null;",
+    "  final hex = m[1];",
+    "  final parts = hex == null",
+    "      ? [for (final i in [2, 3, 4]) int.parse(m[i]!)]",
+    "      : [for (var i = 0; i < 3; i++) int.parse(hex.length == 3 ? hex[i] * 2 : hex.substring(i * 2, i * 2 + 2), radix: 16)];",
+    "  return parts.any((p) => p > 255) ? null : Color.fromARGB(255, parts[0], parts[1], parts[2]);",
+    "}",
     "",
     "/// A style's font sizes, in px (RICH_FONT_SIZE on the server).",
     `const richFontSizeMin = ${RICH_FONT_SIZE.min.toFixed(1)};`,

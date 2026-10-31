@@ -14,6 +14,8 @@ describe("the subset", () => {
       "<p>一段</p><p>两段</p>",
       "<ul><li>一</li><li>二</li></ul><ol><li>甲</li></ol>",
       '<span style="color: var(--accent); background-color: var(--accent-soft)">主题色</span>',
+      '<span style="color: #c0392b; background-color: #FFF">写出的颜色</span>',
+      '<span style="color: rgb(192, 57, 43); background-color: rgb( 255 ,255,255 )">rgb</span>',
       '<span style="font-weight: 700; font-style: italic; font-size: 18px; text-decoration: underline">样式</span>',
       '<a href="https://example.com">链接</a> 和 <a href="mailto:a@example.com">邮件</a>',
       "余额 {balance} 积分 &amp; &lt;说明&gt; &#21313;",
@@ -25,9 +27,21 @@ describe("the subset", () => {
   it("says what is wrong, in the panel's words", () => {
     expect(richProblem("<script>x</script>")).toMatch(/^不支持的标签：<script>/);
     expect(richProblem("<div>x</div>")).toMatch(/^不支持的标签：<div>/);
-    expect(richProblem('<span style="color: #ff0000">红</span>')).toMatch(/^color 要用主题色/);
-    expect(richProblem('<span style="color: var(--purple)">紫</span>')).toMatch(
-      /^color 要用主题色/,
+    // A colour is the theme's or written out (S34); anything else is refused.
+    for (const bad of [
+      "var(--purple)",
+      "red",
+      "#ff00",
+      "#gg0000",
+      "rgb(256, 0, 0)",
+      "rgba(0, 0, 0, 0.5)",
+    ]) {
+      expect(richProblem(`<span style="color: ${bad}">x</span>`), bad).toMatch(
+        /^color 要用主题色（var\(--text\)、.*）或写出的颜色（#rrggbb、#rgb、rgb\(r, g, b\)，每项 0 到 255）$/,
+      );
+    }
+    expect(richProblem('<span style="background-color: #12345">x</span>')).toMatch(
+      /^background-color 要用主题色/,
     );
     expect(richProblem('<span style="font-size: 64px">大</span>')).toBe(
       "font-size 要在 11px 到 32px 之间",

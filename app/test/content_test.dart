@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart' show zhHans;
 import 'package:mingli_app/domain/rich_text.dart';
+import 'package:mingli_app/generated/content_rich.dart' show richWrittenColor;
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart' show Pressable;
 import 'package:mingli_app/presentation/tokens.dart';
@@ -92,6 +93,26 @@ void main() {
       expect(colour.style?.color, ThemeTokens.of(tester.element(find.byKey(const Key('entry-tarot')))).accent);
       expect(find.text('塔罗'), findsWidgets);
       expect(find.textContaining('<b>'), findsNothing);
+    });
+
+    testWidgets('a colour written out shows as written (S34); a value the server refuses leaves the colour alone', (tester) async {
+      final api = FakeApi()
+        ..content = (
+          texts: const {
+            'homeBaziDesc': '<span style="color: #c0392b">红</span><span style="color: rgb(0, 128, 0)">绿</span>'
+                '<span style="background-color: #FF0">黄</span><span style="color: red">原样</span>',
+          },
+          images: const {},
+        );
+      await tester.pumpWidget(testApp(api, locale: zhHans));
+      await frames(tester, 12);
+      await scrollTo(tester, const Key('entry-bazi'));
+      const all = '红绿黄原样';
+      expect(spanOf(tester, all, '红').style?.color, Color.fromARGB(255, 0xc0, 0x39, 0x2b));
+      expect(spanOf(tester, all, '绿').style?.color, Color.fromARGB(255, 0, 128, 0));
+      expect(spanOf(tester, all, '黄').style?.backgroundColor, Color.fromARGB(255, 255, 255, 0));
+      expect(spanOf(tester, all, '原样').style?.color, isNot(Color.fromARGB(255, 255, 0, 0)));
+      expect([richWrittenColor('rgb(256, 0, 0)'), richWrittenColor('#ff00'), richWrittenColor('#gg0000')], everyElement(isNull));
     });
 
     testWidgets('a link is a control of its own; off the web its address is copied, and a line says so', (tester) async {

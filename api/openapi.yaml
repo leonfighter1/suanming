@@ -1806,8 +1806,9 @@ paths:
         characters by default (设置's content.text_max). 404 for a key the app has no plain text under.
         HTML and CSS (S33): only a text the listing marks `rich` may hold tags (else 400 rich_unsupported), and only
         the subset of src/content/rich.ts: b, strong, i, em, u, s, small, br, p, span, a (http, https or mailto), ul,
-        ol, li; inline style with color and background-color from the theme (var(--accent) …), font-weight,
-        font-style, font-size (11–32 px) and text-decoration (else 400 rich_invalid, its title saying what is wrong).
+        ol, li; inline style with color and background-color from the theme (var(--accent) …) or written out (#rgb,
+        #rrggbb, rgb(r, g, b); S34), font-weight, font-style, font-size (11–32 px) and text-decoration (else 400
+        rich_invalid, its title saying what is wrong).
       requestBody:
         required: true
         content:

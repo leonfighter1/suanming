@@ -31,6 +31,18 @@ Color? richColor(String name, ThemeTokens t) => switch (name) {
       _ => null,
     };
 
+/// A colour written out (S34; RICH_WRITTEN_COLOR on the server): `#rgb`, `#rrggbb` or `rgb(r, g, b)`, each part at
+/// most 255; null for any other value.
+Color? richWrittenColor(String value) {
+  final m = RegExp(r'^#([0-9a-f]{3}|[0-9a-f]{6})$|^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$', caseSensitive: false).firstMatch(value);
+  if (m == null) return null;
+  final hex = m[1];
+  final parts = hex == null
+      ? [for (final i in [2, 3, 4]) int.parse(m[i]!)]
+      : [for (var i = 0; i < 3; i++) int.parse(hex.length == 3 ? hex[i] * 2 : hex.substring(i * 2, i * 2 + 2), radix: 16)];
+  return parts.any((p) => p > 255) ? null : Color.fromARGB(255, parts[0], parts[1], parts[2]);
+}
+
 /// A style's font sizes, in px (RICH_FONT_SIZE on the server).
 const richFontSizeMin = 11.0;
 const richFontSizeMax = 32.0;

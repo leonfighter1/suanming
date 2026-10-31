@@ -5,7 +5,8 @@
  * server refuses a tag, and the app takes any out, so nothing ever shows a raw `<b>`.
  *
  * - Tags: b, strong, i, em, u, s, small, br, p, span, a (href http, https or mailto), ul, ol, li.
- * - Inline CSS (`style="…"`): color and background-color from the theme (`var(--accent)` …, right in light and dark),
+ * - Inline CSS (`style="…"`): color and background-color from the theme (`var(--accent)` …, right in light and dark)
+ *   or written out (`#c0392b`, `rgb(192, 57, 43)`; S34, the same in both: the editor warns where one is hard to read),
  *   font-weight, font-style, font-size (11 to 32 px), text-decoration.
  *
  * The app reads the same lists (`npm run sync:app` → app/lib/generated/content_rich.dart): one source.
@@ -51,6 +52,15 @@ export const RICH_COLORS: Record<string, string> = {
   inset: "inset",
 };
 
+/** A colour written out (S34): `#rgb`, `#rrggbb` or `rgb(r, g, b)`, each part at most 255 (checked beside it). */
+export const RICH_WRITTEN_COLOR =
+  /^#([0-9a-f]{3}|[0-9a-f]{6})$|^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i;
+
+const isWrittenColor = (value: string) => {
+  const m = RICH_WRITTEN_COLOR.exec(value);
+  return !!m && [m[2], m[3], m[4]].every((part) => part === undefined || +part <= 255);
+};
+
 /** A style's font sizes, in px. */
 export const RICH_FONT_SIZE = { min: 11, max: 32 } as const;
 
@@ -66,11 +76,11 @@ function styleProblem(property: string, value: string): string | undefined {
   switch (property) {
     case "color":
     case "background-color":
-      return color && color in RICH_COLORS
+      return (color && color in RICH_COLORS) || isWrittenColor(value)
         ? undefined
-        : `${property} 要用主题色：${Object.keys(RICH_COLORS)
+        : `${property} 要用主题色（${Object.keys(RICH_COLORS)
             .map((c) => `var(--${c})`)
-            .join("、")}`;
+            .join("、")}）或写出的颜色（#rrggbb、#rgb、rgb(r, g, b)，每项 0 到 255）`;
     case "font-weight":
       return /^(?:bold|normal|[1-9]00)$/.test(value)
         ? undefined

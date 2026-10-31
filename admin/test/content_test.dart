@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_admin/data/admin_api.dart';
 import 'package:mingli_app/presentation/buttons.dart';
+import 'package:mingli_app/presentation/tokens.dart';
 
 import '../../app/test/keys.dart';
 import 'support.dart';
@@ -166,10 +167,12 @@ void main() {
     expect(textOf(tester, 'text-rich-help'), startsWith('这段文字可以用 HTML 和 CSS'));
     await typeIn(tester, 'zh-Hans', '<b>粗</b>和<span style="color: var(--accent)">主题色</span>');
     final preview = find.descendant(
-      of: find.byKey(const ValueKey<String>('text-zh-Hans-preview')),
+      of: find.byKey(const ValueKey<String>('text-zh-Hans-preview-light')),
       matching: find.text('粗和主题色', findRichText: true),
     );
     expect(preview, findsOneWidget);
+    // The theme's colours read well in both: no warning.
+    expect(find.byKey(const ValueKey<String>('text-zh-Hans-contrast')), findsNothing);
     TextSpan? bold;
     tester.widget<RichText>(preview).text.visitChildren((s) {
       if (s is TextSpan && s.text == '粗') bold = s;
@@ -187,12 +190,52 @@ void main() {
     expect(f.bodyOf(f.last('/v1/admin/content/texts/sample1/zh-Hans', method: 'PUT')), {'text': '<b>粗</b>体'});
   });
 
+  // S34: a colour written out stays the same in both themes, so the editor shows both and says where it reads badly.
+  testWidgets('a colour written out: previewed on the light card and the dark, warned where it is hard to read, still saved',
+      (tester) async {
+    final f = await openContent(tester);
+    await search(tester, 'sample1');
+    await tapOn(tester, 'text-sample1');
+    const red = '<span style="color: #c0392b">红字</span>';
+    await typeIn(tester, 'zh-Hans', red);
+    for (final (name, card) in [('light', ThemeTokens.light.card), ('dark', ThemeTokens.dark.card)]) {
+      final preview = find.byKey(ValueKey<String>('text-zh-Hans-preview-$name'));
+      expect(tester.widget<Material>(preview).color, card, reason: name);
+      TextSpan? words;
+      tester.widget<RichText>(find.descendant(of: preview, matching: find.text('红字', findRichText: true))).text.visitChildren((s) {
+        if (s is TextSpan && s.text == '红字') words = s;
+        return words == null;
+      });
+      expect(words?.style?.color, Color.fromARGB(255, 0xc0, 0x39, 0x2b), reason: name);
+    }
+    // 5.4 : 1 on the light card, 3.2 : 1 on the dark.
+    final warnings = find.byKey(const ValueKey<String>('text-zh-Hans-contrast'));
+    expect(
+      find.descendant(of: warnings, matching: find.text('「红字」在深色主题下不易看清：对比度 3.2 : 1，至少要 4.5 : 1')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('在浅色主题下'), findsNothing);
+    expect(find.descendant(of: warnings, matching: find.byIcon(Icons.warning_amber_outlined)), findsOneWidget);
+
+    // White on the light card; the light theme's dark text on a written black background: each where it reads badly.
+    await typeIn(tester, 'zh-Hans', '<span style="color: #fff">白字</span><span style="background-color: rgb(0, 0, 0)">黑底</span>');
+    expect(find.text('「白字」在浅色主题下不易看清：对比度 1.0 : 1，至少要 4.5 : 1'), findsOneWidget);
+    expect(find.textContaining('「黑底」在浅色主题下不易看清'), findsOneWidget);
+    expect(find.textContaining('「白字」在深色主题下'), findsNothing);
+    expect(find.textContaining('「黑底」在深色主题下'), findsNothing);
+
+    // A warning doesn't stop 保存.
+    await typeIn(tester, 'zh-Hans', red);
+    await tapOn(tester, 'text-save');
+    expect(f.bodyOf(f.last('/v1/admin/content/texts/sample1/zh-Hans', method: 'PUT')), {'text': red});
+  });
+
   testWidgets('a text the app shows as words: the editor says so, and tags are refused with why', (tester) async {
     await openContent(tester);
     await openText(tester, 'homeTarot');
     expect(textOf(tester, 'text-rich-help'), '这里只显示纯文字：不能用 HTML。');
     await typeIn(tester, 'zh-Hans', '<b>塔罗</b>');
-    expect(find.byKey(const ValueKey<String>('text-zh-Hans-preview')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('text-zh-Hans-preview-light')), findsNothing);
     await tapOn(tester, 'text-save');
     expect(find.text('这段文字在应用里只显示纯文字，不能用 HTML'), findsOneWidget);
   });
