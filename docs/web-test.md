@@ -308,9 +308,17 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
   browser (v22.0.0: one session in the browser, its tabs refreshing it in turn); 退出登录 ends it for the browser, and
   another open tab finds out at its next refresh (its access lasts 15 minutes at most). Unused for 设置's 登录有效期
   (two days by default), or ended by the server, it signs out too.
-- **The menu at the top right (v21.0.0):** the name and role open 内容, 消息, 导出 (as the role may), 外观, 退出登录;
-  the rail keeps 概览 … 设置. An integrator has no rail: both pages are in the menu.
-- **内容 by page (v21.0.0):** each page of the app with its texts and images, opened by the way they are reached;
+- **The menu at the top right (v21.0.0, v23.0.0):** the name and role open 修改页面内容 (内容 before v23.0.0), 消息,
+  导出 and 设置 (as the role may: 设置 is an admin's alone), then 外观, 返回应用 (when the app opened the dashboard) and
+  退出登录; the rail keeps 概览 … 用量. An integrator has no rail: both its pages are in the menu.
+- **维护 (v23.0.0):** as an admin, 设置 → 维护 → 维护中 开 (asked first). In a private window the app's 欢迎 and sign-in
+  pages say 系统维护中 and when (预计 … 到 … 之间可以再登录, three to four hours from now); signing in as a user waits
+  with the same words, while manager/manager signs in as usual and sees the notice on 首页. A user already signed in
+  gets the maintenance page (再看看, 退出登录). 预计结束 → 选时间 sets one time instead; 维护中 关 brings everyone back
+  (the app asks each minute, or at 再看看).
+- **注销 (v23.0.0):** a staff account's 设置 shows 注销账号 greyed, saying it is done in the 管理后台; there, an
+  account's page has 注销账号 for an admin (asked first), never on the admin's own account.
+- **修改页面内容 by page (v21.0.0):** each page of the app with its texts and images, opened by the way they are reached;
   a shared text says where else it shows; 全部文字 and the search list everything. To try HTML: 首页 → 方法入口 →
   塔罗's line, then `<b>抽牌</b>看<span style="color: var(--accent)">爱情</span>`; the editor previews it, and the app
   shows it the next time it opens. A button's or a title's text refuses tags.

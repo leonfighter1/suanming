@@ -96,8 +96,29 @@
 92. In an app widget test that copies anything (Clipboard), start with support.dart's ClipboardWatch(tester) and assert its copied value; without it the copy never completes.
 93. Words a page shows (names, labels, part names) are words: no symbol such as ☰ the fonts may lack; the 管理后台 has no CDN font fallback. Look at a render with the real fonts (rule 3).
 94. Before sharing a session between tabs or devices, check how the server rotates refresh tokens: with single-use tokens every rotation must start from the newest kept token, one at a time under a lock, and keep the new one before releasing it.
+95. Start the harness through the PowerShell tool, never through bash: bash eats the backslashes of check.ps1's path; an exit code 0 with no gate lines means it never ran.
+96. A provider whose failure is a state to show (maintenance) needs its own retry rule; Riverpod 3 retries a failed provider by default, so a switch on AsyncError meets AsyncLoading with the error instead.
+97. After adding ARB keys: flutter gen-l10n first, then npm run sync:app (it builds ContentLocalizations from the generated localizations).
 
 ## Log
+
+### 2026-10-31: New app strings before gen-l10n left ContentLocalizations without them
+- **Symptom:** analyze: Missing concrete implementations of AppLocalizations.maintenanceUntil and the rest in lib/generated/content_l10n.dart
+- **Root cause:** npm run sync:app reads the generated localizations; run before flutter gen-l10n, it did not see the new keys
+- **Fix:** flutter gen-l10n, then npm run sync:app again
+- **Rule:** After adding ARB keys: flutter gen-l10n first, then npm run sync:app (it builds ContentLocalizations from the generated localizations). (Rule 97)
+
+### 2026-10-31: A provider retried by default never showed its error page
+- **Symptom:** During maintenance the signed-in app showed a spinner, not the maintenance page; /v1/me was asked three times
+- **Root cause:** Riverpod 3 retries every failed provider by default: authProvider sat in AsyncLoading with the error, which the AuthGate switch on AsyncError never matched
+- **Fix:** authProvider takes its own retry rule: none for a maintenance answer, ProviderContainer.defaultRetry otherwise
+- **Rule:** A provider whose failure is a state to show (maintenance) needs its own retry rule; Riverpod 3 retries a failed provider by default, so a switch on AsyncError meets AsyncLoading with the error instead. (Rule 96)
+
+### 2026-10-31: The harness started from bash never ran
+- **Symptom:** The background run said the -File argument C:UsersAgentSkillsharness-checkscriptscheck.ps1 does not exist and ended at once with exit 0
+- **Root cause:** Bash took the backslashes out of the Windows path to check.ps1 before powershell saw it
+- **Fix:** Ran the harness through the PowerShell tool (cmd /c powershell ... > file 2>&1) and read HARNESS: PASS from the file
+- **Rule:** Start the harness through the PowerShell tool, never through bash: bash eats the backslashes of check.ps1's path; an exit code 0 with no gate lines means it never ran. (Rule 95)
 
 ### 2026-10-31: A single-use refresh token moved to shared storage signs every tab out
 - **Symptom:** Keeping the dashboard session in localStorage (S34) as it was kept per tab: tab B resumes with r1, then tab A refreshes with its own r1 and the server ends the session for both (the two-tab unit test fails this way)

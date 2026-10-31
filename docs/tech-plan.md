@@ -61,7 +61,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
 | S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
 | S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | done        |
-| S35 应用整理与维护通知     | the app's pages regrouped, 维护通知, the 管理后台's menu    | big    | v23.0.0 + summary | in progress |
+| S35 应用整理与维护通知     | the app's pages regrouped, 维护通知, the 管理后台's menu    | big    | v23.0.0 + summary | done        |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2763,6 +2763,45 @@ Then: review, check, commit and push.
   the facts at the side (4 of 12): `SideColumns` in layout.dart.
 
 ## 阶段总结 (stage summaries)
+
+### S35 应用页面整理、维护通知、后台菜单 (done 2026-10-31: v23.0.0)
+
+1. **Delivered** (all in v23.0.0):
+   - **WP35.1, the menu:** 设置 in the 管理后台's menu, an admin's alone as since v19.0.0; 内容 named 修改页面内容 (in the
+     menu, on its page, and 设置's group of its limits).
+   - **WP35.2, cards and banners:** a stretched card keeps one row of content in its middle (`AppCard(alignment:)`,
+     the methods' cards); every banner at least 300 high (`bannerMinHeight`), its words in its middle.
+   - **WP35.3, one tab:** ☰ → 管理后台 opens in the app's own tab (`openHere`) and hands over the app's address
+     (`adminUrl(app:)`); the dashboard keeps it (`appAddressProvider`, only its own host or this computer:
+     `appAddressFrom`) and offers 返回应用 in its menu and on its sign-in page (`goTo`).
+   - **WP35.4, staff accounts:** the app's 注销 refused to staff (403 `staff_account`; 设置 greys it, saying where);
+     an admin's 注销账号 in the 管理后台 (DELETE /v1/admin/users/{id}, `user_data`), both through one
+     `ApiContext.deleteAccount`.
+   - **WP35.5, 维护:** 设置's 维护 group (`maintenance.on`, `maintenance.until`: a new kind of setting, a time);
+     `maintenanceOf` (the time set, else 3 to 4 hours from the switch, `Settings.changedAt`); GET /v1/status; 503
+     `maintenance` for anyone but staff (`AuthService.admits` for signing in and up, a gate after the caller), a
+     refresh left open; the dashboard's control; the app's `MaintenanceNotifier`, notice and page.
+   - **WP35.6 and WP35.7, regrouped:** `SideColumns` (layout.dart) and `GroupTitle` (moved to design.dart); 八字 in
+     命盘 (the pillars with their dates), 命局 (at the side), 运势 and 解读与报告; 算卦 in 问卦, 起卦, 得卦 and 解读, 起卦
+     之前 at the side.
+2. **Numbers:**
+   - **Tests:** server 754 → 760, app 310 → 317, 管理后台 104 → 108.
+   - **Harness:** PASS for v23.0.0.
+3. **Against the plan:**
+   - **「可以自己定时」 as a time:** 预计结束 is a day and a time picked, or none for the window of three to four hours from
+     the switch, which the panel's own record dates.
+   - **Sessions outlast 维护:** only the calls wait; a refresh goes on, so nobody signs in again afterwards.
+   - **Found in the review, each fixed in its own commit:** a user on a method's page when 维护 began stayed there
+     (fc92f2e: back to the maintenance page); the maintenance page's buttons in a row on a wider window (91f771a).
+   - **The 八字 page builds all its parts at once** (`SideColumns` in place of a lazy list): its AI card asks the
+     balance as the page opens.
+   - **Restructured first,** each its own commit: `namedInConfig` and one `deleteAccount` (2d16d1b), `GroupTitle` in
+     design.dart (0d269cc).
+4. **Mistakes and what they teach:**
+   - **Rule 95:** start the harness through the PowerShell tool; bash eats the backslashes of its path.
+   - **Rule 96:** a provider whose failure is a state to show needs its own retry rule; Riverpod 3 retries by default.
+   - **Rule 97:** after new app strings, `flutter gen-l10n` before `npm run sync:app`.
+5. **Next:** the owner's next request. Open: WP7.2, WP7.3, WP1.8; the Phase 3 gate; Phase 4 waits for it.
 
 ### S34 更多 HTML、自定颜色、后台保持登录 (done 2026-10-31: v22.0.0)
 

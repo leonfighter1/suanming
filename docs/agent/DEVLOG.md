@@ -2,6 +2,19 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-31 (w): S35 — the app's pages regrouped, 维护通知, the 管理后台's menu; release v23.0.0
+
+- The owner's list (the app's pages and the 管理后台), then 维护通知 added mid-way; their word: review, check, commit and
+  push. Planned as S35 (fd8d83c) after v22.0.0 went out: its first harness failed at analyze after the version bump
+  (rule 23), the second passed.
+- Restructured first: `namedInConfig` and one `deleteAccount` (2d16d1b), `GroupTitle` in design.dart (0d269cc).
+- WP35.1 (98c8498) menu; WP35.2 (14f8131) cards and banners, the sign-up tests scrolling past the taller banner;
+  WP35.3 (c00e7a6) one tab; WP35.4 (87ef41d) staff accounts.
+- WP35.5: server (480b70d), dashboard (870c3d7), app (df57ef2). The app's session check sat in Riverpod's default
+  retry, a spinner in place of the maintenance page (rule 96); new strings needed gen-l10n before sync:app (rule 97).
+- WP35.6/35.7 (6e38af0): `SideColumns`; rendered before and after, wide and on a phone.
+- Review: a user mid-way is brought to the maintenance page (fc92f2e); its buttons in a row when wide (91f771a).
+
 ## 2026-10-31 (v): S34 — HTML in more places, written colours, staying signed in; release v22.0.0
 
 - The owner's 「keep going」 on S33's three choices, planned as S34 (8001542).

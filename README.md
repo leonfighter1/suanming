@@ -14,6 +14,70 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v23.0.0 (2026-10-31): the app's pages regrouped, 维护通知, the 管理后台's menu (S35 complete)
+
+Your requests of today, for the app (the shop's pages) and the 管理后台:
+
+- the 管理后台 in the app's own tab, with a way back;
+- the services' cards in their middle;
+- banners at least 300 high;
+- 八字排盘 and 算卦 regrouped, app first;
+- staff accounts deleted only in the 管理后台;
+- a maintenance notice an admin switches on, 3–4 hours by default or a time set;
+- 设置 in the dashboard's menu, an admin's alone;
+- 内容 renamed 修改页面内容.
+
+This release ends S35 and is pushed.
+
+- **The 管理后台 in the app's own tab:** on the web, ☰ → 管理后台 now opens the dashboard in the same tab, signed in
+  as before.
+  - **返回应用:** in the dashboard's menu (and on its sign-in page) it goes back to the app in that tab; the browser's
+    Back works too.
+  - **Only the app:** it goes to an app on the dashboard's own host or on this computer, so nobody's link can send
+    staff elsewhere. Off the web the address is copied, as before.
+- **The services' cards:** on a desktop window two cards share a row and its height; a card's icon, name and line
+  now sit in its middle, not at its top (首页 and 欢迎页).
+- **Banners:** every banner is at least 300 high, its words and icon in the middle (首页, 欢迎页, the sign-in page,
+  each method's page, 八字's chart, the maintenance page).
+- **八字排盘, regrouped** into four groups under headings:
+  - **命盘:** the four pillars, the page's anchor, with the dates they come from (农历对照 is now inside its card);
+  - **命局:** 五行 and 旺衰, 神煞 · 空亡 · 胎元, 刑冲合害;
+  - **运势:** 大运, 流年, 流月;
+  - **解读与报告:** the AI reading, 一生运势报告, 起名.
+  - **On a desktop window,** 命盘, 运势 and 解读 are in the main column (8 of 12) and 命局's compact facts at the
+    right (4 of 12). Before, eleven cards each spanned the whole width. On a phone it is one column: 命盘, 命局, 运势,
+    解读.
+- **算卦, likewise:** 问卦, 起卦, 得卦 and 解读 in the main column, 起卦之前 at the right on a desktop window; on a
+  phone the reminder follows the question.
+- **Staff accounts:** an account with a 管理后台 role (admin, manager, integrator) can no longer be deleted in the app.
+  - **In the app,** 设置 shows 注销账号 greyed, saying it is done in the 管理后台; the server refuses it too.
+  - **In the 管理后台,** an admin deletes an account on its page (注销账号, asked first), staff accounts included;
+    never their own, nor one the server's MINGLI_ADMINS names.
+- **维护通知:** in the 管理后台, 设置 → 维护, first on the page.
+  - **维护中:** an admin's switch, asked first. While it is on, users can't sign in, sign up or use the app; staff
+    work as usual.
+  - **预计结束:** none by default, and users are told three to four hours from when it was switched on (预计 15:00 到
+    16:00 之间可以再登录); or a day and a time picked (预计 15:30 可以再登录). Once past, 很快就可以再登录.
+  - **In the app:** the 欢迎 and sign-in pages show the notice. A signed-in user waits on a page of its own (再看看,
+    退出登录), brought there from wherever they were. When it ends, 首页 comes back by itself (the app asks each
+    minute). Staff see 首页 with the notice and a line that users see it.
+  - **Sessions outlast it:** a refresh goes on, so nobody has to sign in again afterwards.
+- **The 管理后台's menu:**
+  - **设置** moved from the rail into the menu at the top right, after 修改页面内容, 消息 and 导出. It stays an admin's
+    alone (since v19.0.0, and every route checks it): a manager's and an integrator's menus have no 设置.
+  - **内容 is now 修改页面内容,** in the menu and on its page.
+- **Verified:**
+  - **Tests:** server 760, app 317, 管理后台 108.
+  - **Renders:** 首页 at 1280 wide and on a phone; 八字's chart and 算卦 (before and after a cast), wide and on a
+    phone; the maintenance notice and page.
+  - **Review:** two fixes found while reviewing the stage. 维护 begun while a user was on a method's page now brings
+    them to the maintenance page; the maintenance page's buttons sit in a row on a wider window.
+  - **Harness:** PASS.
+- **Stage S35 in sum:** the 管理后台 and the app share one tab. 八字 and 算卦 are grouped and use a desktop's width.
+  Staff accounts are deleted where staff are managed. An admin can take the service down for maintenance and tell
+  users when to come back. Its summary is in the [tech plan](docs/tech-plan.md).
+- **Next:** your next request.
+
 ### v22.0.0 (2026-10-31): HTML in more texts, written colours, the 管理后台 signed in across tabs (S34 complete)
 
 Your word on S33's three choices: keep going.
