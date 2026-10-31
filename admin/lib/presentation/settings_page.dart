@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mingli_app/presentation/buttons.dart';
@@ -8,6 +10,7 @@ import 'package:mingli_app/presentation/tokens.dart';
 import '../application/providers.dart';
 import '../data/admin_api.dart';
 import '../domain/models.dart';
+import 'format.dart';
 import 'messages.dart';
 import 'widgets/common.dart';
 import 'widgets/dashboard.dart';
@@ -20,6 +23,7 @@ const _groups = [
   ('limits', '限额'),
   ('content', '内容'),
   ('currencies', '货币'),
+  ('points', '积分'),
 ];
 
 /// 设置 (tech plan S31; the owner: 「Move all the configurations into separate files, CMS controlling panel is able to
@@ -120,11 +124,12 @@ class _Now extends StatelessWidget {
 /// A number as a field shows it: 2, 0.5.
 String _number(Object? v) => v is num ? (v == v.roundToDouble() ? '${v.toInt()}' : '$v') : '';
 
-/// A setting's value in words: 2 天, 开, 跟随 .env, CNY、HKD.
+/// A setting's value in words: 2 天, 0.5 天, 1,000,000 积分, 开, 跟随 .env, CNY、HKD, 10 元 1,000 积分、20 元 2,200 积分.
 String _say(SettingView s, Object? v) => switch (v) {
       null => '跟随 .env',
       bool b => b ? '开' : '关',
-      num n => '${_number(n)}${s.unit == null ? '' : ' ${s.unit}'}',
+      num n => '${n == n.roundToDouble() ? count(n) : _number(n)}${s.unit == null ? '' : ' ${s.unit}'}',
+      List<Object?> l when s.type == 'packs' => [for (final p in l.cast<Json>()) '${_number(p['yuan'])} 元 ${count(p['points'] as num)} 积分'].join('、'),
       List<Object?> l => l.join('、'),
       _ => '$v',
     };
@@ -245,6 +250,13 @@ class _SettingRowState extends ConsumerState<_SettingRow> {
   }
 
   Widget _control() => switch (s.type) {
+        'packs' => _Packs(
+            s,
+            busy: _busy,
+            onSave: _save,
+            onEdit: () => setState(() => _refused = null),
+            onWrong: (text) => setState(() => _refused = text),
+          ),
         'number' => Row(
             children: [
               SizedBox(
@@ -329,8 +341,156 @@ class _SettingRowState extends ConsumerState<_SettingRow> {
       };
 }
 
+/// 充值套餐 (S32): each pack's 元 and 积分 on a row, one to take out, one more to add, and 保存, which sends them by
+/// price. The server checks them (at least 100 积分 a 元, no two at one price); what it refuses shows under them, as
+/// for any setting.
+class _Packs extends StatefulWidget {
+  const _Packs(this.s, {required this.busy, required this.onSave, required this.onEdit, required this.onWrong});
+  final SettingView s;
+  final bool busy;
+  final Future<void> Function(Object? value) onSave;
+
+  /// A field changed: the row's refusal goes, and 保存 looks again.
+  final VoidCallback onEdit;
+
+  /// A row without numbers, said under the packs.
+  final ValueChanged<String> onWrong;
+
+  @override
+  State<_Packs> createState() => _PacksState();
+}
+
+class _PacksState extends State<_Packs> {
+  late var _rows = _fromValue();
+
+  String get _key => widget.s.key;
+  List<Json> get _value => (widget.s.value as List? ?? const []).cast<Json>();
+
+  List<(TextEditingController, TextEditingController)> _fromValue() => [
+        for (final p in _value)
+          (TextEditingController(text: _number(p['yuan'])), TextEditingController(text: _number(p['points']))),
+      ];
+
+  /// The rows as they are, and as the server has them: 保存 only when they differ.
+  String get _now => [for (final (y, p) in _rows) '${y.text.trim()}:${p.text.trim()}'].join(',');
+  String get _was => [for (final p in _value) '${_number(p['yuan'])}:${_number(p['points'])}'].join(',');
+
+  @override
+  void didUpdateWidget(_Packs old) {
+    super.didUpdateWidget(old);
+    if (jsonEncode(old.s.value) != jsonEncode(widget.s.value)) {
+      _disposeRows();
+      _rows = _fromValue();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeRows();
+    super.dispose();
+  }
+
+  void _disposeRows() {
+    for (final (y, p) in _rows) {
+      y.dispose();
+      p.dispose();
+    }
+  }
+
+  void _remove(int i) {
+    final (y, p) = _rows[i];
+    setState(() => _rows.removeAt(i));
+    y.dispose();
+    p.dispose();
+    widget.onEdit();
+  }
+
+  void _save() {
+    final packs = <Json>[];
+    for (final (y, p) in _rows) {
+      final yuan = num.tryParse(y.text.trim());
+      final points = int.tryParse(p.text.trim());
+      if (yuan == null || points == null) return widget.onWrong('每个套餐都要写元和积分（数字）');
+      packs.add({'yuan': yuan, 'points': points});
+    }
+    packs.sort((a, b) => (a['yuan'] as num).compareTo(b['yuan'] as num));
+    widget.onSave(packs);
+  }
+
+  Widget _field(TextEditingController c, String name, String unit, {bool decimal = false, bool last = false}) => TextField(
+        key: ValueKey<String>('setting-$_key-$name'),
+        controller: c,
+        enabled: !widget.busy,
+        keyboardType: TextInputType.numberWithOptions(decimal: decimal),
+        textInputAction: last ? TextInputAction.done : TextInputAction.next,
+        onChanged: (_) => widget.onEdit(),
+        onSubmitted: last ? (_) => _now == _was ? null : _save() : null,
+        decoration: InputDecoration(suffixText: unit, isDense: true),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final most = widget.s.max;
+    // The row's column stretches its children: aligned, the rows keep to their width.
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _packsWidth),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (i, (yuan, points)) in _rows.indexed) ...[
+              if (i > 0) const SizedBox(height: Space.s),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: _field(yuan, 'yuan-$i', '元', decimal: true)),
+                  const SizedBox(width: Space.s),
+                  Expanded(flex: 3, child: _field(points, 'points-$i', '积分', last: i == _rows.length - 1)),
+                  const SizedBox(width: Space.xs),
+                  AppIconButton(
+                    key: ValueKey<String>('setting-$_key-remove-$i'),
+                    tooltip: '去掉这个套餐',
+                    onPressed: widget.busy || _rows.length == 1 ? null : () => _remove(i),
+                    icon: const Icon(Icons.remove_circle_outline),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: Space.s),
+            Wrap(
+              spacing: Space.s,
+              runSpacing: Space.xs,
+              children: [
+                AppTextButton.icon(
+                  key: ValueKey<String>('setting-$_key-add'),
+                  onPressed: widget.busy || (most != null && _rows.length >= most)
+                      ? null
+                      : () {
+                          setState(() => _rows.add((TextEditingController(), TextEditingController())));
+                          widget.onEdit();
+                        },
+                  icon: const Icon(Icons.add),
+                  label: const Text('添加套餐'),
+                ),
+                AppFilledButton(
+                  key: ValueKey<String>('setting-$_key-save'),
+                  onPressed: widget.busy || _now == _was ? null : _save,
+                  child: const Text('保存'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// The dropdown's entry for an optional choice left unset.
 const _unset = '';
 
 /// A number field's width: a value and its unit.
 const _fieldWidth = 160.0;
+
+/// The packs' rows at most: a price, its 积分 and the button that takes it out.
+const _packsWidth = 400.0;

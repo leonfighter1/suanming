@@ -38,7 +38,7 @@ export interface SettingStore {
 export class SettingError extends Error {}
 
 /** A setting as the panel shows it: what it is, its value now, its default, and when it was changed. */
-export type SettingView = Omit<SettingSpec, "options" | "env"> & {
+export type SettingView = Omit<SettingSpec, "options" | "env" | "fallback"> & {
   options?: readonly string[];
   /** The env variable the default comes from, when it is set. */
   env?: string;
@@ -62,8 +62,13 @@ export class Settings {
   ) {
     for (const spec of SETTINGS as readonly SettingSpec[]) {
       const raw = spec.env && env[spec.env]?.trim();
-      const value = raw ? fromEnv(spec, raw) : (fileValue(file, spec.key) ?? null);
-      const where = raw ? spec.env! : `config/settings.json ${spec.key}`;
+      const inFile = fileValue(file, spec.key);
+      const value = raw ? fromEnv(spec, raw) : (inFile ?? spec.fallback?.value() ?? null);
+      const where = raw
+        ? spec.env!
+        : inFile === undefined && spec.fallback
+          ? spec.fallback.from
+          : `config/settings.json ${spec.key}`;
       const problem = problemOf(spec, value);
       if (problem) throw new Error(`${where}: ${problem} (${String(raw ?? value)})`);
       this.defaults.set(spec.key, { value, ...(raw && { env: spec.env }) });
@@ -82,6 +87,11 @@ export class Settings {
   /** The value in use: the panel's, else the default. */
   value(key: string): unknown {
     return this.changed.has(key) ? this.changed.get(key)!.value : this.defaults.get(key)?.value;
+  }
+
+  /** The panel's value alone; undefined while it has none, so the server's own holds (its 积分 config's packs). */
+  panelValue(key: string): unknown {
+    return this.changed.get(key)?.value;
   }
 
   number(key: NumberKey): number {
@@ -124,6 +134,7 @@ export class Settings {
     const {
       options,
       env: _env,
+      fallback: _fallback,
       ...spec
     } = settingSpec(key) as SettingSpec & { options?: () => readonly string[] };
     const d = this.defaults.get(key)!;

@@ -40,7 +40,9 @@ import {
   chargeFor,
   loadPointsConfig,
   quote,
+  withPacks,
   type ChargeKind,
+  type Pack,
   type PointsCharge,
   type PointsConfig,
   type PointsFor,
@@ -257,7 +259,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   // ---- 积分 (v11.0.0, tech plan S20): every AI request held, then charged what it cost ----
 
-  const pointsConfig = opts.points && (opts.points.config ?? loadPointsConfig());
+  // The packs are the panel's once an admin changes them (设置, S32).
+  const pointsConfig =
+    opts.points &&
+    withPacks(
+      opts.points.config ?? loadPointsConfig(),
+      () => settings.panelValue("points.packs") as Pack[] | undefined,
+    );
   const simulatedTopUp = !!opts.points?.simulateTopUp;
   /** The routing a job started now would get: prices follow the model it names (ACTIVE_AI_MODEL too). */
   const routingNow = () => opts.routing?.() ?? loadRouting();

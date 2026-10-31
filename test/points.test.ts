@@ -38,7 +38,9 @@ import {
   pointsPerUsd,
   pointValueCny,
   quote,
+  withPacks,
   type ChargeKind,
+  type Pack,
   type PointsFor,
   type QuoteFor,
 } from "../src/points/index.js";
@@ -86,6 +88,25 @@ describe("the price of a request (WP20.1)", () => {
     }
     // Rounded up, and a whole number stays whole: 1 积分's worth of dollars is 1 积分.
     expect(pointsFor(config, 1 / pointsPerUsd(config))).toBe(1);
+  });
+
+  it("设置's packs (S32): read at each use, the config's own while the panel has none; the margin follows the best", () => {
+    let panel: Pack[] | undefined;
+    const c = withPacks(config, () => panel);
+    expect(c.packs).toEqual(config.packs);
+    expect(pointsPerUsd(c)).toBe(pointsPerUsd(config));
+    // A pack of 150 积分 a 元: each 积分 is worth less, so a dollar of tokens takes more of them, the margin kept.
+    panel = [
+      { yuan: 10, points: 1000 },
+      { yuan: 100, points: 15_000 },
+    ];
+    expect(c.packs).toEqual(panel);
+    expect(pointValueCny(c)).toBeCloseTo((1 - 0.006 - 0.06) / 150, 9);
+    expect(pointsPerUsd(c)).toBeGreaterThan(pointsPerUsd(config));
+    const usd = 0.352;
+    expect(pointsFor(c, usd) * pointValueCny(c)).toBeGreaterThanOrEqual(usd * 7.3 * 2 - 1e-9);
+    panel = undefined;
+    expect(c.packs).toEqual(config.packs);
   });
 
   it("prices each request from its estimate at Claude Opus 5.5 ($4 / $20 a million), and holds 1.5 times that", () => {

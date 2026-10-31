@@ -9,8 +9,10 @@
 import { readFileSync } from "node:fs";
 import { MODELS } from "../ai/models.js";
 import { CURRENCY_CODES } from "../currency/catalog.js";
+import { loadPointsConfig, packFits, type Pack } from "../points/pricing.js";
 
-export type SettingGroup = "sessions" | "codes" | "ai" | "limits" | "content" | "currencies";
+export type SettingGroup =
+  "sessions" | "codes" | "ai" | "limits" | "content" | "currencies" | "points";
 
 interface Common {
   /** `group.name`, as config/settings.json nests it. */
@@ -21,6 +23,8 @@ interface Common {
   about: string;
   /** An env variable that, when set, is the default instead of the file's (the deployment's). */
   env?: string;
+  /** The default's home when it is not config/settings.json (the packs': config/points.json, S32). */
+  fallback?: { from: string; value: () => unknown };
 }
 
 export type SettingSpec = Common &
@@ -29,6 +33,8 @@ export type SettingSpec = Common &
     | { type: "boolean"; optional?: boolean }
     | { type: "choice"; options: () => readonly string[]; optional?: boolean }
     | { type: "choices"; options: () => readonly string[] }
+    // 充值 packs (S32): 1 to max of them, each its 元 and its 积分.
+    | { type: "packs"; max: number }
   );
 
 export const SETTINGS = [
@@ -275,6 +281,18 @@ export const SETTINGS = [
     label: "管理后台的货币",
     about: "管理后台的金额（充值、成本、毛利）用这个货币显示，按当天的汇率从元换算。",
   },
+  // 积分 (S32 WP32.5): the 充值 packs. Their default stays in config/points.json beside the pricing terms, which the
+  // panel doesn't change; a request's price follows the best pack (pricing.ts pointsPerUsd).
+  {
+    key: "points.packs",
+    group: "points",
+    type: "packs",
+    max: 8,
+    fallback: { from: "config/points.json packs", value: () => loadPointsConfig().packs },
+    label: "充值套餐",
+    about:
+      "用户充值时可以选的套餐：付几元，得几积分，每元至少 100 积分。AI 的积分价格按最划算的套餐算，好保证利润：每元给的积分越多，每次 AI 要的积分也越多。",
+  },
 ] as const satisfies readonly SettingSpec[];
 
 type Spec = (typeof SETTINGS)[number];
@@ -322,6 +340,9 @@ export function fromEnv(spec: SettingSpec, raw: string): unknown {
         .split(",")
         .map((x) => x.trim())
         .filter(Boolean);
+    case "packs":
+      // No env variable names the packs: their text is refused.
+      return raw;
   }
 }
 
@@ -349,6 +370,29 @@ export function problemOf(spec: SettingSpec, value: unknown): string | undefined
         return `只能从这些里选：${options.join("、")}`;
       }
       return new Set(value).size === value.length ? undefined : "不能重复";
+    }
+    case "packs": {
+      if (!Array.isArray(value) || value.length === 0) return "至少要一个套餐";
+      if (value.length > spec.max) return `最多 ${spec.max} 个套餐`;
+      for (const p of value as unknown[]) {
+        if (
+          !p ||
+          typeof p !== "object" ||
+          Object.keys(p).some((k) => k !== "yuan" && k !== "points")
+        )
+          return "每个套餐只写元和积分";
+        const { yuan, points } = p as Partial<Pack>;
+        if (typeof yuan !== "number" || typeof points !== "number") return "每个套餐都要写元和积分";
+        // A price in 分 at most, as 充值 takes it.
+        if (
+          !(yuan >= 0.01 && yuan <= 100_000) ||
+          Math.abs(yuan * 100 - Math.round(yuan * 100)) > 1e-6
+        )
+          return `${yuan} 元：要在 0.01 到 100000 元之间，最多两位小数`;
+        if (!packFits({ yuan, points })) return `${yuan} 元的套餐：积分要是整数，每元至少 100 积分`;
+      }
+      const prices = value.map((p) => (p as Pack).yuan);
+      return new Set(prices).size === prices.length ? undefined : "两个套餐不能同一个价钱";
     }
   }
 }

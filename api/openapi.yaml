@@ -2619,10 +2619,10 @@ components:
           type: string
         group:
           type: string
-          enum: [sessions, codes, ai, limits, content, currencies]
+          enum: [sessions, codes, ai, limits, content, currencies, points]
         type:
           type: string
-          enum: [number, boolean, choice, choices]
+          enum: [number, boolean, choice, choices, packs]
         label:
           type: string
         about:

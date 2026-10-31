@@ -531,6 +531,10 @@ class FakeAdmin {
       'number' when (value as num) < (spec['min'] as num) || value > (spec['max'] as num) =>
         '要在 ${spec['min']} 到 ${spec['max']} 之间',
       'choices' when value is! List || value.isEmpty => '至少选一个',
+      // The server's registry.ts problemOf for packs, its rule in short: 100 积分 a 元 at the least (packFits).
+      'packs' when value is! List || value.isEmpty => '至少要一个套餐',
+      'packs' when (value as List).any((p) => (p['points'] as num) < (p['yuan'] as num) * 100) =>
+        '${value.firstWhere((p) => (p['points'] as num) < (p['yuan'] as num) * 100)['yuan']} 元的套餐：积分要是整数，每元至少 100 积分',
       _ => null,
     };
     if (problem != null) return _problem(400, problem, 'invalid_setting');
@@ -761,6 +765,18 @@ const settingSpecs = <Json>[
     'label': '管理后台的货币',
     'about': '管理后台的金额用这个货币显示。',
     'default': 'CNY',
+  },
+  {
+    'key': 'points.packs',
+    'group': 'points',
+    'type': 'packs',
+    'max': 8,
+    'label': '充值套餐',
+    'about': '用户充值时可以选的套餐。',
+    'default': [
+      {'yuan': 10, 'points': 1000},
+      {'yuan': 20, 'points': 2200},
+    ],
   },
 ];
 

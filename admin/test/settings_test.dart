@@ -21,7 +21,7 @@ Finder inRow(String key, Finder f) => find.descendant(of: find.byKey(ValueKey<St
 void main() {
   testWidgets('every setting by group, with its value, its default and what holds now', (tester) async {
     await openSettings(tester);
-    for (final g in ['sessions', 'ai', 'currencies']) {
+    for (final g in ['sessions', 'ai', 'limits', 'currencies', 'points']) {
       expect(find.byKey(ValueKey<String>('group-$g')), findsOneWidget, reason: g);
     }
     expect(tester.widget<TextField>(find.byKey(const ValueKey<String>('setting-sessions.idle_days-field'))).controller!.text, '2');
@@ -118,6 +118,45 @@ void main() {
     await tapOn(tester, 'grant-submit');
     expect(find.text('积分请填 1 到 500 之间的整数'), findsOneWidget);
     expect(f.to('/v1/admin/users/u-02/points', method: 'POST'), isEmpty);
+  });
+
+  testWidgets('充值套餐 (S32): one changed, one added, one taken out, sent by price; what is wrong said under them', (tester) async {
+    final f = await openSettings(tester);
+    String key(String name) => 'setting-points.packs-$name';
+    Future<void> type(String name, String text) => tester.enterText(find.byKey(ValueKey<String>(key(name))), text);
+    FilledButton save() =>
+        tester.widget<FilledButton>(find.descendant(of: find.byKey(ValueKey<String>(key('save'))), matching: find.byType(FilledButton)));
+    expect(inRow('points.packs', find.text('默认：10 元 1,000 积分、20 元 2,200 积分')), findsOneWidget);
+    expect(save().onPressed, isNull, reason: '保存 waits for a change');
+
+    await type('points-1', '2400');
+    await tapOn(tester, key('add'));
+    await type('yuan-2', '6');
+    await type('points-2', '600');
+    await tapOn(tester, key('remove-0'));
+    await tapOn(tester, key('save'));
+    expect(f.bodyOf(f.last('/v1/admin/settings/points.packs', method: 'PUT')), {
+      'value': [
+        {'yuan': 6, 'points': 600},
+        {'yuan': 20, 'points': 2400},
+      ],
+    });
+    expect(find.byKey(const ValueKey<String>('setting-points.packs-changed')), findsOneWidget);
+    expect(save().onPressed, isNull, reason: 'the rows are the server\'s again');
+
+    // Fewer than 100 积分 a 元: the server's words under the packs, and nothing kept.
+    await type('points-0', '500');
+    await tapOn(tester, key('save'));
+    expect(textOf(tester, key('refused')), '6 元的套餐：积分要是整数，每元至少 100 积分');
+    expect(f.settingValues['points.packs'], [
+      {'yuan': 6, 'points': 600},
+      {'yuan': 20, 'points': 2400},
+    ]);
+    // A row without numbers is said at once and sent nowhere.
+    await type('yuan-0', '');
+    await tapOn(tester, key('save'));
+    expect(textOf(tester, key('refused')), '每个套餐都要写元和积分（数字）');
+    expect(f.to('/v1/admin/settings/points.packs', method: 'PUT'), hasLength(2));
   });
 
   testWidgets('a manager has no 设置', (tester) async {

@@ -260,6 +260,51 @@ describe("充值 in the accepted currencies, with receipts", () => {
     await settings.reset("currencies.dashboard");
     expect((await json("boss", "/v1/admin/settings")).rates).toEqual({ date: TODAY, stale: false });
   });
+
+  it("设置's 充值套餐 (S32 WP32.5): sold from the next request, in every currency; back to config/points.json's", async () => {
+    const put = (value: unknown) =>
+      call("boss", "/v1/admin/settings/points.packs", "PUT", { value });
+    // The owner's terms: at least 100 积分 a 元, and no two packs at one price.
+    for (const bad of [
+      [{ yuan: 6, points: 500 }],
+      [
+        { yuan: 6, points: 600 },
+        { yuan: 6, points: 700 },
+      ],
+      [{ yuan: 6, points: 600, bonus_percent: 0 }],
+      [],
+    ]) {
+      const r = await put(bad);
+      expect([r.status, (await r.json()).code], JSON.stringify(bad)).toEqual([
+        400,
+        "invalid_setting",
+      ]);
+    }
+    const packs = [
+      { yuan: 6, points: 600 },
+      { yuan: 98, points: 12_000 },
+    ];
+    expect((await put(packs)).status).toBe(200);
+    try {
+      const p = await json("buyer", "/v1/points");
+      expect(p.packs).toEqual([
+        { yuan: 6, points: 600, bonus_percent: 0 },
+        { yuan: 98, points: 12_000, bonus_percent: 22 },
+      ]);
+      const hkd = p.currencies.find((c: { code: string }) => c.code === "HKD");
+      expect(hkd.prices.map((x: { yuan: number }) => x.yuan)).toEqual([6, 98]);
+      // A pack taken out can't be bought; a new one can, and its receipt says so.
+      expect((await call("buyer", "/v1/points/top-ups", "POST", { yuan: 10 })).status).toBe(400);
+      const bought = await call("buyer", "/v1/points/top-ups", "POST", { yuan: 98 });
+      expect(bought.status).toBe(201);
+      expect((await bought.json()).receipt.pack).toEqual({ yuan: 98, points: 12_000 });
+    } finally {
+      await call("boss", "/v1/admin/settings/points.packs", "DELETE");
+    }
+    expect((await json("buyer", "/v1/points")).packs.map((x: { yuan: number }) => x.yuan)).toEqual([
+      10, 20, 30, 40, 50,
+    ]);
+  });
 });
 
 describe("the database keeps receipts sealed and numbered, and the last table of rates (rule 78)", () => {

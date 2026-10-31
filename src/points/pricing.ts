@@ -72,6 +72,17 @@ export function loadPointsConfig(
   return JSON.parse(readFileSync(path, "utf8")) as PointsConfig;
 }
 
+/**
+ * [c] with its packs read at each use from [packs] (设置's 充值套餐, S32), its own while that gives none: 充值, the
+ * receipts and every price (the best pack sets them) follow a change from the next request.
+ */
+export function withPacks(c: PointsConfig, packs: () => Pack[] | undefined): PointsConfig {
+  return Object.defineProperty({ ...c }, "packs", {
+    enumerable: true,
+    get: () => packs() ?? c.packs,
+  });
+}
+
 /** What an AI request is, as the ledger says what a charge paid for. */
 export type ChargeKind = "report" | "life_report" | "followup" | "inquiry" | "remedy";
 

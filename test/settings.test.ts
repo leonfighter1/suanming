@@ -8,6 +8,7 @@ import { FailureLimiter, failureLimits } from "../src/auth/limits.js";
 import { DAY_S, InMemorySessionStore, type RefreshRecord } from "../src/auth/tokens.js";
 import { PgStore } from "../src/db/pg-store.js";
 import { MemorySms } from "../src/notify/index.js";
+import { loadPointsConfig } from "../src/points/index.js";
 import { buildAuth, buildProviders, withPanel } from "../src/service/runtime.js";
 import {
   isSettingKey,
@@ -35,6 +36,18 @@ describe("the settings and their defaults", () => {
       for (const name of Object.keys(values as object))
         expect(isSettingKey(`${group}.${name}`)).toBe(true);
     }
+  });
+
+  it("the packs' default is config/points.json's, their one home (S32); the view leaves its loader out", () => {
+    const view = new Settings(undefined, {}).view("points.packs");
+    expect(view).toMatchObject({ type: "packs", max: 8, default: loadPointsConfig().packs });
+    expect(view).not.toHaveProperty("fallback");
+    expect(JSON.parse(JSON.stringify(view)).default).toEqual(loadPointsConfig().packs);
+    const spec = settingSpec("points.packs")!;
+    expect(problemOf(spec, [{ yuan: 9.99, points: 999 }])).toBeUndefined();
+    expect(problemOf(spec, [{ yuan: 9.999, points: 1000 }])).toMatch(/最多两位小数/);
+    expect(problemOf(spec, [{ yuan: 10, points: 999 }])).toMatch(/每元至少 100 积分/);
+    expect(problemOf(spec, Array(9).fill({ yuan: 1, points: 100 }))).toBe("最多 8 个套餐");
   });
 
   it("an env variable a setting names is its default; a mistyped one stops the start, saying which", () => {
