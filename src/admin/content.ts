@@ -1,7 +1,8 @@
 /**
- * 内容管理 (S29) for staff with the content capability (roles.ts: admin and integrator): every text the app shows, by
- * area, with its defaults and any change; a text changed (keeping its placeholders) or put back to its default; an
- * image put in or taken out. The app reads the changes through /v1/content (src/api/routes/content.ts).
+ * 内容管理 (S29) for staff with the content capability (roles.ts: admin and integrator): every text the app shows, with
+ * the pages it shows on (S33, read from the app's code: usage.ts), its defaults and any change; a text changed
+ * (keeping its placeholders) or put back to its default; an image put in or taken out. The app reads the changes
+ * through /v1/content (src/api/routes/content.ts).
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { UserRecord } from "../auth/service.js";
@@ -17,6 +18,8 @@ import {
   placeholdersOf,
   type ContentLocale,
 } from "../content/catalog.js";
+import { PAGES } from "../content/pages.js";
+import { appUsage } from "../content/usage.js";
 import { HttpError, readBody, readJson, send } from "../http/util.js";
 import type { AdminContext } from "./routes.js";
 import { loginOf } from "./stats.js";
@@ -38,13 +41,18 @@ export async function contentAdminRoute(
   if (path === "/v1/admin/content" && req.method === "GET") {
     const changed = await ctx.store.listContentTexts();
     const images = await ctx.store.listContentImages();
+    const texts = contentTexts();
+    // Where each shows (S33): the pages that reach it in the app's code, and the parts on the way.
+    const { places } = appUsage(new Set(texts.map((t) => t.key)));
     send(res, 200, {
       locales: CONTENT_LOCALES,
       // What an image may be, for the dashboard to say before one is picked.
       image_types: CONTENT_IMAGE_TYPES,
       image_max_bytes: limits(ctx).imageBytes,
-      texts: contentTexts().map((t) => ({
+      pages: Object.entries(PAGES).map(([id, name]) => ({ id, name })),
+      texts: texts.map((t) => ({
         ...t,
+        places: places.get(t.key) ?? [],
         changed: Object.fromEntries(
           changed
             .filter((c) => c.key === t.key)
@@ -53,7 +61,11 @@ export async function contentAdminRoute(
       })),
       images: CONTENT_IMAGES.map((i) => {
         const put = images.find((x) => x.key === i.key);
-        return { ...i, ...(put && { url: contentImageUrl(i.key, put.updated_at), updated_at: put.updated_at }) };
+        return {
+          ...i,
+          places: places.get(`image:${i.key}`) ?? [],
+          ...(put && { url: contentImageUrl(i.key, put.updated_at), updated_at: put.updated_at }),
+        };
       }),
     });
     return true;

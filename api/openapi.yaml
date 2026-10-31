@@ -1710,11 +1710,27 @@ paths:
                   image_max_bytes:
                     description: The largest an image may be
                     type: integer
-                  texts:
+                  pages:
+                    description: "The app's pages in the order 内容 lists them (S33): each `…Page` class, and the app around them"
                     type: array
                     items:
                       type: object
+                      required: [id, name]
+                      properties:
+                        id: { type: string, description: "The page's class, e.g. LiuyaoPage" }
+                        name: { type: string, description: "What 内容 calls it, e.g. 算卦" }
+                  texts:
+                    description: "Each with `places`: where it shows (S33), read from the app's code; empty when no page uses it"
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        places:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/ContentPlace"
                   images:
+                    description: "Each with `places`, as a text's"
                     type: array
                     items:
                       type: object
@@ -2610,6 +2626,17 @@ components:
                   available: { type: integer, description: The balance less what running jobs hold }
 
   schemas:
+    ContentPlace:
+      type: object
+      description: "Where a text or an image of 内容 shows (S33): a page, and the named parts on the way to it"
+      required: [page, parts]
+      properties:
+        page: { type: string, description: "The page's class, as `pages` lists it" }
+        parts:
+          type: array
+          description: "e.g. [AI 解读按钮, 解读各部分的名称]; empty when the page shows it itself"
+          items:
+            type: string
     SettingView:
       type: object
       description: A setting as the 管理后台's 设置 page shows it (src/settings/index.ts SettingView)

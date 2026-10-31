@@ -92,6 +92,26 @@ describe("the CMS's API", () => {
     expect(all.images.map((i) => i.key)).toEqual(["banner", "logo"]);
   });
 
+  it("says where each text and image shows: the pages in order, and the parts on the way (S33)", async () => {
+    type Place = { page: string; parts: string[] };
+    const all = (await (await call("integ", "/v1/admin/content")).json()) as {
+      pages: { id: string; name: string }[];
+      texts: { key: string; places: Place[] }[];
+      images: { key: string; places: Place[] }[];
+    };
+    expect(all.pages[0]).toEqual({ id: "MingliApp", name: "整个应用" });
+    expect(all.pages.find((p) => p.id === "LiuyaoPage")?.name).toBe("算卦");
+    expect(all.texts.find((t) => t.key === "introJoin")!.places).toEqual([
+      { page: "IntroPage", parts: [] },
+    ]);
+    // On every method's page, by the AI button.
+    const pages = all.texts.find((t) => t.key === "topicLiuyaoAnswer")!.places.map((p) => p.page);
+    expect(pages).toEqual(expect.arrayContaining(["LiuyaoPage", "TarotPage", "ReportPage"]));
+    expect(all.images.find((i) => i.key === "logo")!.places).toEqual([
+      { page: "IntroPage", parts: ["标志"] },
+    ]);
+  });
+
   it("changes a text in one language for everyone, signed in or not, and puts it back", async () => {
     const put = await call("integ", "/v1/admin/content/texts/homeTarot/zh-Hans", "PUT", {
       text: "  塔罗占卜  ",
