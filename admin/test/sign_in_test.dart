@@ -67,8 +67,9 @@ void main() {
     expect(find.byKey(const Key('admin-me')), findsOneWidget);
   });
 
-  testWidgets('退出登录 ends the session on the server too', (tester) async {
+  testWidgets('退出登录 (in the menu at the top right) ends the session on the server too', (tester) async {
     final f = await pumpAdmin(tester);
+    await openMenu(tester);
     await tester.tap(find.byKey(const Key('sign-out')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('admin-submit')), findsOneWidget);

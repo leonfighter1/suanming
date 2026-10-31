@@ -952,8 +952,25 @@ Finder nav(String label) => find.descendant(
       matching: find.text(label),
     );
 
+/// Opens the page [label]: from the rail or the bar, else from the menu at the top right (S33: 内容, 消息, 导出). On a
+/// phone, a page of the menu goes back first when the page asked for is the bar's.
 Future<void> go(WidgetTester tester, String label) async {
-  await tester.tap(nav(label));
+  if (nav(label).evaluate().isEmpty && find.byKey(const Key('menu-back')).evaluate().isNotEmpty) {
+    await tester.tap(find.byKey(const Key('menu-back')));
+    await tester.pumpAndSettle();
+  }
+  if (nav(label).evaluate().isNotEmpty) {
+    await tester.tap(nav(label));
+  } else {
+    await openMenu(tester);
+    await tester.tap(find.byKey(ValueKey<String>('menu-$label')));
+  }
+  await tester.pumpAndSettle();
+}
+
+/// Opens the menu at the top right (S33): its pages, 外观 and 退出登录.
+Future<void> openMenu(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('admin-menu')));
   await tester.pumpAndSettle();
 }
 

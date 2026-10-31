@@ -28,7 +28,7 @@ building blocks. Every screen change follows the rules below, and the tests at t
 | Long text, empty pages, marks before text | `app/lib/presentation/design.dart` `ReadingText`, `EmptyState`, `firstLineInset`                     |
 | The type ramp                             | `app/lib/presentation/theme.dart` `_ramp` (through `Theme.of(context).textTheme`)                    |
 | Window classes, columns, page padding     | `app/lib/presentation/layout.dart` `WindowClass`, `Grid`, `pagePadding`                              |
-| 外观 (the theme switch)                   | app: `widgets/app_menu.dart` `pickTheme`; dashboard: `admin/lib/presentation/shell.dart` `ThemeMenu` |
+| 外观 (the theme switch)                   | app: `widgets/app_menu.dart` `pickTheme`; dashboard: `admin/lib/presentation/shell.dart` menu → 外观 |
 | The rules as checks                       | `app/test/design_rules.dart` (run by `grid_test.dart` and `admin/test/design_rules_test.dart`)       |
 | Tests                                     | `app/test/theme_test.dart`, `app/test/grid_test.dart`, `admin/test/theme_test.dart`                  |
 

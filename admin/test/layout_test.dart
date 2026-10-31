@@ -48,6 +48,16 @@ void main() {
     expect(csv.top, greaterThan(png.bottom));
   });
 
+  testWidgets('on a phone, a page of the menu takes the bar\'s place, with its name and a way back (S33)', (tester) async {
+    await pumpAdmin(tester, size: phone);
+    await go(tester, '用户');
+    await go(tester, '内容');
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.descendant(of: find.byType(AppBar), matching: find.text('内容')), findsOneWidget);
+    await tapOn(tester, 'menu-back');
+    expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1, reason: 'back to 用户');
+  });
+
   testWidgets('on a phone: a bar under the pages, and every page fits the width', (tester) async {
     await pumpAdmin(tester, size: phone);
     expect(find.byType(NavigationBar), findsOneWidget);
@@ -92,10 +102,12 @@ void main() {
     expect(find.byKey(const Key('users-search')), findsOneWidget);
   });
 
-  testWidgets('Tab reaches 刷新, 退出登录, the period and the chart, whose focus shows', (tester) async {
+  testWidgets('Tab reaches 刷新, the menu (退出登录 in it, S33), the period and the chart, whose focus shows', (tester) async {
     await pumpAdmin(tester);
     final stops = await tabStops(tester);
-    expect(stops, containsAll(['refresh', 'sign-out', 'period', 'chart']));
+    expect(stops, containsAll(['refresh', 'admin-menu', 'period', 'chart']));
+    // The menu's items are no Tab stops of the page: the arrows reach them once it is open.
+    expect(stops, isNot(contains('sign-out')));
     await tabTo(tester, 'chart');
     expect(ringShown(tester, find.byKey(const Key('chart'))), isTrue);
   });

@@ -24,14 +24,19 @@ List<Rect> layoutOf(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('外观 in the bar: 深色 fades the page over, moves nothing, and is kept in the browser', (tester) async {
+  testWidgets('外观 in the menu: 深色 fades the page over, moves nothing, and is kept in the browser', (tester) async {
     final prefs = <String, String>{};
     await pumpAdmin(tester, prefs: prefs);
     final before = layoutOf(tester);
     expect(before.length, greaterThan(50));
+    await openMenu(tester);
     await tester.tap(find.byKey(const Key('theme')));
     await tester.pumpAndSettle();
-    expect(tester.widget<CheckedPopupMenuItem<ThemeMode>>(find.byKey(const Key('theme-system'))).checked, isTrue);
+    // The one in use is ticked.
+    Finder ticked(String mode) =>
+        find.descendant(of: find.byKey(Key('theme-$mode')), matching: find.byIcon(Icons.check));
+    expect(ticked('system'), findsOneWidget);
+    expect(ticked('dark'), findsNothing);
     expect(find.text('浅色'), findsOneWidget);
     await tester.tap(find.byKey(const Key('theme-dark')));
     await tester.pump();
@@ -46,7 +51,8 @@ void main() {
     expect(Theme.of(tester.element(find.byType(OverviewPage))).brightness, Brightness.dark);
     expect(prefs[ThemeModeNotifier.key], 'dark');
     expect(layoutOf(tester), before);
-    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
+    await openMenu(tester);
+    expect(find.descendant(of: find.byKey(const Key('theme')), matching: find.byIcon(Icons.dark_mode_outlined)), findsOneWidget);
   });
 
   testWidgets('the dashboard opens in the theme kept in this browser, the sign-in page too', (tester) async {
@@ -56,15 +62,21 @@ void main() {
     expect(Theme.of(tester.element(find.byType(OverviewPage))).brightness, Brightness.dark);
   });
 
-  testWidgets('from the keyboard: Tab reaches 外观, Enter opens it, the arrows and Enter pick', (tester) async {
+  testWidgets('from the keyboard: Tab reaches the menu, Enter opens it, the arrows reach 外观 and pick', (tester) async {
     final prefs = <String, String>{};
     await pumpAdmin(tester, prefs: prefs);
-    expect(await tabStops(tester), contains('theme'));
-    await tabTo(tester, 'theme');
+    expect(await tabStops(tester), contains('admin-menu'));
+    await tabTo(tester, 'admin-menu');
     await press(tester, LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
+    // ↓ moves into the menu and down to 外观; → opens it; ↓ moves through the choices to 浅色.
+    for (var i = 0; i < 8 && focusedKey() != 'theme'; i++) {
+      await press(tester, LogicalKeyboardKey.arrowDown);
+    }
+    expect(focusedKey(), 'theme');
+    await press(tester, LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('theme-light')), findsOneWidget);
-    // ↓ moves through the choices to 浅色.
     for (var i = 0; i < 3 && focusedKey() != 'theme-light'; i++) {
       await press(tester, LogicalKeyboardKey.arrowDown);
     }

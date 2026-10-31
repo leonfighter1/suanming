@@ -16,6 +16,18 @@ List<String> railLabels(WidgetTester tester) => [
       for (final d in tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations) (d.label as Text).data!,
     ];
 
+/// The pages in the menu at the top right (S33), opened and closed again.
+Future<List<String>> menuLabels(WidgetTester tester) async {
+  await openMenu(tester);
+  final labels = [
+    for (final l in ['内容', '消息', '导出'])
+      if (find.byKey(ValueKey<String>('menu-$l')).evaluate().isNotEmpty) l,
+  ];
+  await press(tester, LogicalKeyboardKey.escape);
+  await tester.pumpAndSettle();
+  return labels;
+}
+
 AppSwitchTile switchOf(WidgetTester tester, String key) => tester.widget<AppSwitchTile>(find.byKey(Key(key)));
 
 Future<void> openAccount(WidgetTester tester, String id, {String? search}) async {
@@ -29,35 +41,43 @@ Future<void> openAccount(WidgetTester tester, String id, {String? search}) async
 }
 
 void main() {
-  testWidgets('an admin: every page, 设置 last', (tester) async {
+  testWidgets('an admin: the numbers and 设置 in the rail; 内容, 消息 and 导出 in the menu at the top right', (tester) async {
     await pumpAdmin(tester);
-    expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量', '导出', '消息', '内容', '设置']);
+    expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量', '设置']);
     expect(find.text('boss · 管理员'), findsOneWidget);
+    expect(await menuLabels(tester), ['内容', '消息', '导出']);
+    // A page of the menu leaves the rail without a choice.
+    await go(tester, '导出');
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, isNull);
+    await go(tester, '用户');
+    expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, 1);
   });
 
   // 内容管理 (S29) is the integrator's too: the words users read, in mails and SMS and in the app.
-  testWidgets('an integrator: 消息 and 内容; nothing else asked for', (tester) async {
+  testWidgets('an integrator: 内容 and 消息, both in the menu, no rail; nothing else asked for', (tester) async {
     final f = FakeAdmin()..role = 'integrator';
     await pumpAdmin(tester, fake: f, size: tall);
-    expect(railLabels(tester), ['消息', '内容']);
-    expect(find.byKey(const Key('message-code_mail')), findsOneWidget);
-    expect(find.text('integ · 集成人员'), findsOneWidget);
-    await go(tester, '内容');
+    expect(find.byType(NavigationRail), findsNothing);
     expect(find.byKey(const ValueKey<String>('text-homeTarot')), findsOneWidget);
+    expect(find.text('integ · 集成人员'), findsOneWidget);
+    expect(await menuLabels(tester), ['内容', '消息']);
+    await go(tester, '消息');
+    expect(find.byKey(const Key('message-code_mail')), findsOneWidget);
     expect(f.to('/v1/admin/overview'), isEmpty);
     expect(f.to('/v1/admin/users'), isEmpty);
 
-    // On a phone, the bar.
+    // On a phone, no bar either: the menu is the way.
     await tester.pumpWidget(const SizedBox());
     await pumpAdmin(tester, fake: f, size: phone);
-    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect([for (final d in bar.destinations) (d as NavigationDestination).label], ['消息', '内容']);
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(await menuLabels(tester), ['内容', '消息']);
   });
 
   testWidgets('a manager: the numbers and the accounts; no 导出, no 消息, no CSV beside the curve', (tester) async {
     final f = FakeAdmin()..role = 'manager';
     await pumpAdmin(tester, fake: f, size: tall);
     expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量']);
+    expect(await menuLabels(tester), isEmpty);
     expect(find.text('mgr · 经理'), findsOneWidget);
     await go(tester, '收益');
     expect(find.byKey(const Key('export-png')), findsOneWidget);

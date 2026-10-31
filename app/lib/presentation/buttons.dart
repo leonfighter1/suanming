@@ -96,8 +96,14 @@ class AppOutlinedButton extends StatelessWidget {
 
 /// [TextButton] and [TextButton.icon], bouncing when pressed.
 class AppTextButton extends StatelessWidget {
-  const AppTextButton({super.key, required this.onPressed, required Widget this.child, this.style, this.autofocus = false})
-      : _kind = _Kind.plain,
+  const AppTextButton({
+    super.key,
+    required this.onPressed,
+    required Widget this.child,
+    this.style,
+    this.autofocus = false,
+    this.focusNode,
+  })  : _kind = _Kind.plain,
         icon = null,
         label = null;
 
@@ -105,7 +111,8 @@ class AppTextButton extends StatelessWidget {
       : _kind = _Kind.icon,
         child = null,
         style = null,
-        autofocus = false;
+        autofocus = false,
+        focusNode = null;
 
   final _Kind _kind;
   final VoidCallback? onPressed;
@@ -115,10 +122,20 @@ class AppTextButton extends StatelessWidget {
   final ButtonStyle? style;
   final bool autofocus;
 
+  /// The button's own focus node, for a menu it opens to move into from the keyboard (MenuAnchor's childFocusNode).
+  final FocusNode? focusNode;
+
   @override
   Widget build(BuildContext context) => PressBounce(
         builder: (states) => _kind == _Kind.plain
-            ? TextButton(onPressed: onPressed, style: style, autofocus: autofocus, statesController: states, child: child!)
+            ? TextButton(
+                onPressed: onPressed,
+                style: style,
+                autofocus: autofocus,
+                focusNode: focusNode,
+                statesController: states,
+                child: child!,
+              )
             : TextButton.icon(onPressed: onPressed, statesController: states, icon: icon, label: label!),
       );
 }
@@ -132,6 +149,7 @@ class AppIconButton extends StatelessWidget {
     this.tooltip,
     this.style,
     this.visualDensity,
+    this.focusNode,
   });
 
   final VoidCallback? onPressed;
@@ -140,6 +158,9 @@ class AppIconButton extends StatelessWidget {
   final ButtonStyle? style;
   final VisualDensity? visualDensity;
 
+  /// As [AppTextButton.focusNode].
+  final FocusNode? focusNode;
+
   @override
   Widget build(BuildContext context) => PressBounce(
         builder: (states) => IconButton(
@@ -147,6 +168,7 @@ class AppIconButton extends StatelessWidget {
           tooltip: tooltip,
           style: style,
           visualDensity: visualDensity,
+          focusNode: focusNode,
           statesController: states,
           icon: icon,
         ),

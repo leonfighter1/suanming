@@ -17,47 +17,133 @@ import 'revenue_page.dart';
 import 'usage_page.dart';
 import 'users_page.dart';
 
-/// A page of the dashboard, and what the role must be able to do to see it ([Can], tech plan S25).
-typedef _Dest = ({String label, IconData icon, IconData selected, String needs, Widget Function() page});
+/// A page of the dashboard, what the role must be able to do to see it ([Can], tech plan S25), and whether it sits in
+/// the menu at the top right rather than the rail (S33).
+typedef _Dest = ({String label, IconData icon, IconData selected, String needs, Widget Function() page, bool inMenu});
 
 final _dests = <_Dest>[
-  (label: '概览', icon: Icons.dashboard_outlined, selected: Icons.dashboard, needs: Can.view, page: OverviewPage.new),
-  (label: '用户', icon: Icons.people_outline, selected: Icons.people, needs: Can.view, page: UsersPage.new),
-  (label: '活跃', icon: Icons.bolt_outlined, selected: Icons.bolt, needs: Can.view, page: ActivePage.new),
-  (label: '收益', icon: Icons.show_chart, selected: Icons.show_chart, needs: Can.view, page: RevenuePage.new),
-  (label: '用量', icon: Icons.memory_outlined, selected: Icons.memory, needs: Can.view, page: UsagePage.new),
-  (label: '导出', icon: Icons.download_outlined, selected: Icons.download, needs: Can.userData, page: ReportsPage.new),
-  (label: '消息', icon: Icons.mail_outline, selected: Icons.mail, needs: Can.messages, page: MessagesPage.new),
-  (label: '内容', icon: Icons.article_outlined, selected: Icons.article, needs: Can.content, page: ContentPage.new),
-  (label: '设置', icon: Icons.tune_outlined, selected: Icons.tune, needs: Can.settings, page: SettingsPage.new),
+  (label: '概览', icon: Icons.dashboard_outlined, selected: Icons.dashboard, needs: Can.view, page: OverviewPage.new, inMenu: false),
+  (label: '用户', icon: Icons.people_outline, selected: Icons.people, needs: Can.view, page: UsersPage.new, inMenu: false),
+  (label: '活跃', icon: Icons.bolt_outlined, selected: Icons.bolt, needs: Can.view, page: ActivePage.new, inMenu: false),
+  (label: '收益', icon: Icons.show_chart, selected: Icons.show_chart, needs: Can.view, page: RevenuePage.new, inMenu: false),
+  (label: '用量', icon: Icons.memory_outlined, selected: Icons.memory, needs: Can.view, page: UsagePage.new, inMenu: false),
+  (label: '设置', icon: Icons.tune_outlined, selected: Icons.tune, needs: Can.settings, page: SettingsPage.new, inMenu: false),
+  // The owner (S33): 「内容页面需要移动到管理员页面右上角，同时管理员右上角应该改成下拉菜单，而且把导出和消息也放进去」.
+  (label: '内容', icon: Icons.article_outlined, selected: Icons.article, needs: Can.content, page: ContentPage.new, inMenu: true),
+  (label: '消息', icon: Icons.mail_outline, selected: Icons.mail, needs: Can.messages, page: MessagesPage.new, inMenu: true),
+  (label: '导出', icon: Icons.download_outlined, selected: Icons.download, needs: Can.userData, page: ReportsPage.new, inMenu: true),
 ];
 
 /// The width from which the pages sit beside a rail rather than above a bar.
 const wideFrom = 840.0;
 
-/// 外观 in the bar (v12.1.0): 跟随系统, 浅色 or 深色, the current one ticked. Enter opens it, the arrows move, Esc closes.
-class ThemeMenu extends ConsumerWidget {
-  const ThemeMenu({super.key});
+/// 外观 (v12.1.0): the system's light or dark, or one of them always, kept in this browser.
+const _themes = [
+  (ThemeMode.system, '跟随系统', Icons.brightness_auto_outlined),
+  (ThemeMode.light, '浅色', Icons.light_mode_outlined),
+  (ThemeMode.dark, '深色', Icons.dark_mode_outlined),
+];
 
-  static const _choices = [(ThemeMode.system, '跟随系统'), (ThemeMode.light, '浅色'), (ThemeMode.dark, '深色')];
+/// The menu at the top right (S33): the pages that live there (内容, 消息, 导出, as far as the role may), 外观 and
+/// 退出登录. Its button is the staff member and the role on a wide screen, an icon on a phone. Enter opens it, the
+/// arrows move, Esc closes.
+class _AdminMenu extends ConsumerStatefulWidget {
+  const _AdminMenu({required this.me, required this.pages, required this.current, required this.onPage, required this.wide});
+  final AdminMe me;
+  final List<_Dest> pages;
+  final String current;
+  final ValueChanged<String> onPage;
+  final bool wide;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AdminMenu> createState() => _AdminMenuState();
+}
+
+class _AdminMenuState extends ConsumerState<_AdminMenu> {
+  /// The button's focus: from it, ↓ moves into the open menu.
+  final _button = FocusNode(debugLabel: 'admin-menu');
+
+  AdminMe get me => widget.me;
+  List<_Dest> get pages => widget.pages;
+  String get current => widget.current;
+  ValueChanged<String> get onPage => widget.onPage;
+  bool get wide => widget.wide;
+
+  @override
+  void dispose() {
+    _button.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final mode = ref.watch(themeModeProvider);
-    return PopupMenuButton<ThemeMode>(
-      key: const Key('theme'),
-      tooltip: '外观：${_choices.firstWhere((c) => c.$1 == mode).$2}',
-      icon: Icon(switch (mode) {
-        ThemeMode.light => Icons.light_mode_outlined,
-        ThemeMode.dark => Icons.dark_mode_outlined,
-        ThemeMode.system => Icons.brightness_auto_outlined,
-      }),
-      initialValue: mode,
-      onSelected: (m) => ref.read(themeModeProvider.notifier).set(m),
-      itemBuilder: (_) => [
-        for (final (m, label) in _choices)
-          CheckedPopupMenuItem(key: Key('theme-${m.name}'), value: m, checked: m == mode, child: Text(label)),
+    final tk = ThemeTokens.of(context);
+    return MenuAnchor(
+      childFocusNode: _button,
+      menuChildren: [
+        for (final d in pages)
+          MenuItemButton(
+            key: ValueKey<String>('menu-${d.label}'),
+            leadingIcon: Icon(d.label == current ? d.selected : d.icon),
+            onPressed: () => onPage(d.label),
+            child: Text(d.label),
+          ),
+        if (pages.isNotEmpty) const Divider(height: Space.s),
+        SubmenuButton(
+          key: const Key('theme'),
+          leadingIcon: Icon(_themes.firstWhere((t) => t.$1 == mode).$3),
+          menuChildren: [
+            for (final (m, label, _) in _themes)
+              MenuItemButton(
+                key: Key('theme-${m.name}'),
+                trailingIcon: m == mode ? const Icon(Icons.check) : null,
+                onPressed: () => ref.read(themeModeProvider.notifier).set(m),
+                child: Text(label),
+              ),
+          ],
+          child: const Text('外观'),
+        ),
+        MenuItemButton(
+          key: const Key('sign-out'),
+          leadingIcon: const Icon(Icons.logout),
+          onPressed: () => ref.read(sessionProvider.notifier).signOut(),
+          child: const Text('退出登录'),
+        ),
       ],
+      builder: (context, controller, _) {
+        void toggle() => controller.isOpen ? controller.close() : controller.open();
+        if (!wide) {
+          return AppIconButton(
+            key: const Key('admin-menu'),
+            focusNode: _button,
+            tooltip: '${me.login} · ${roleName(me.role)}',
+            onPressed: toggle,
+            icon: const Icon(Icons.account_circle_outlined),
+          );
+        }
+        return AppTextButton(
+          key: const Key('admin-menu'),
+          focusNode: _button,
+          onPressed: toggle,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(text: me.login, style: TextStyle(color: tk.text)),
+                    TextSpan(text: ' · ${roleName(me.role)}', style: TextStyle(color: tk.textSecondary)),
+                  ],
+                ),
+                key: const Key('admin-me'),
+              ),
+              const SizedBox(width: Space.xs),
+              Icon(Icons.arrow_drop_down, color: tk.textSecondary),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -74,6 +160,9 @@ class AdminShell extends ConsumerStatefulWidget {
 class _AdminShellState extends ConsumerState<AdminShell> {
   /// The page shown, by its label: it stays when the role changes and the list with it.
   String? _page;
+
+  /// The last page of the rail shown: where a phone goes back to from a page of the menu.
+  String? _railPage;
 
   /// Everything fetched again.
   void _refresh() => ref
@@ -95,41 +184,32 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     final can = me?.can ?? const <String>{};
     final dests = [for (final d in _dests) if (can.contains(d.needs)) d];
     if (dests.isEmpty) return const Scaffold(body: Center(child: Text('你的角色在这里没有可看的页面')));
-    final at = dests.indexWhere((d) => d.label == _page).clamp(0, dests.length - 1);
-    final page = KeyedSubtree(key: ValueKey<String>('page-${dests[at].label}'), child: dests[at].page());
-    void go(int i) => setState(() => _page = dests[i].label);
-    // A rail or a bar takes two pages or more.
-    final nav = dests.length > 1;
+    final rail = [for (final d in dests) if (!d.inMenu) d];
+    final menu = [for (final d in dests) if (d.inMenu) d];
+    final shown = dests.firstWhere((d) => d.label == _page, orElse: () => rail.isEmpty ? menu.first : rail.first);
+    final at = rail.indexOf(shown);
+    final page = KeyedSubtree(key: ValueKey<String>('page-${shown.label}'), child: shown.page());
+    void go(String label) => setState(() {
+          _page = label;
+          if (rail.any((d) => d.label == label)) _railPage = label;
+        });
+    // A rail or a bar takes two pages or more. On a phone a page of the menu takes the bar's place, with a way back.
+    final nav = rail.length > 1;
+    final back = !wide && nav && at < 0;
     return Scaffold(
       appBar: AppBar(
-        title: Text(wide ? '命理大师 管理后台' : '管理后台'),
+        leading: back
+            ? AppIconButton(
+                key: const Key('menu-back'),
+                tooltip: '返回',
+                onPressed: () => go(_railPage ?? rail.first.label),
+                icon: const Icon(Icons.arrow_back),
+              )
+            : null,
+        title: Text(wide ? '命理大师 管理后台' : (at < 0 ? shown.label : '管理后台')),
         actions: [
-          if (wide && me != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Space.s),
-              child: Center(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: me.login),
-                      TextSpan(
-                        text: ' · ${roleName(me.role)}',
-                        style: TextStyle(color: ThemeTokens.of(context).textSecondary),
-                      ),
-                    ],
-                  ),
-                  key: const Key('admin-me'),
-                ),
-              ),
-            ),
-          const ThemeMenu(),
           AppIconButton(key: const Key('refresh'), tooltip: '刷新', onPressed: _refresh, icon: const Icon(Icons.refresh)),
-          AppIconButton(
-            key: const Key('sign-out'),
-            tooltip: '退出登录',
-            onPressed: () => ref.read(sessionProvider.notifier).signOut(),
-            icon: const Icon(Icons.logout),
-          ),
+          if (me != null) _AdminMenu(me: me, pages: menu, current: shown.label, onPage: go, wide: wide),
           const SizedBox(width: Space.s),
         ],
       ),
@@ -137,11 +217,11 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           ? Row(
               children: [
                 NavigationRail(
-                  selectedIndex: at,
+                  selectedIndex: at < 0 ? null : at,
                   labelType: NavigationRailLabelType.all,
-                  onDestinationSelected: go,
+                  onDestinationSelected: (i) => go(rail[i].label),
                   destinations: [
-                    for (final d in dests)
+                    for (final d in rail)
                       NavigationRailDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selected), label: Text(d.label)),
                   ],
                 ),
@@ -150,13 +230,13 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               ],
             )
           : page,
-      bottomNavigationBar: wide || !nav
+      bottomNavigationBar: wide || !nav || back
           ? null
           : NavigationBar(
               selectedIndex: at,
-              onDestinationSelected: go,
+              onDestinationSelected: (i) => go(rail[i].label),
               destinations: [
-                for (final d in dests)
+                for (final d in rail)
                   NavigationDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selected), label: d.label),
               ],
             ),
