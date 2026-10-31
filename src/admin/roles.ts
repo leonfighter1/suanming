@@ -12,7 +12,8 @@ export type StaffRole = (typeof STAFF_ROLES)[number];
  * - view: the dashboard's numbers, the accounts and an account's page;
  * - assign: roles and permissions (停用, AI, 充值);
  * - user_data: what changes or takes a user's data: 增加积分, 在所有设备上退出, the exports;
- * - messages: the mail and SMS templates, their previews, test sends and the dispatch log.
+ * - messages: the mail and SMS templates, their previews, test sends and the dispatch log;
+ * - content: 内容管理 (S29), the app's texts and images.
  */
 export type Capability = "view" | "assign" | "user_data" | "messages" | "content";
 

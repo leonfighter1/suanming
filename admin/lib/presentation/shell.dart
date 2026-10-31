@@ -7,6 +7,7 @@ import 'package:mingli_app/presentation/tokens.dart';
 import '../application/providers.dart';
 import '../domain/models.dart';
 import 'active_page.dart';
+import 'content_page.dart';
 import 'format.dart';
 import 'messages_page.dart';
 import 'overview_page.dart';
@@ -26,6 +27,7 @@ final _dests = <_Dest>[
   (label: '用量', icon: Icons.memory_outlined, selected: Icons.memory, needs: Can.view, page: UsagePage.new),
   (label: '导出', icon: Icons.download_outlined, selected: Icons.download, needs: Can.userData, page: ReportsPage.new),
   (label: '消息', icon: Icons.mail_outline, selected: Icons.mail, needs: Can.messages, page: MessagesPage.new),
+  (label: '内容', icon: Icons.article_outlined, selected: Icons.article, needs: Can.content, page: ContentPage.new),
 ];
 
 /// The width from which the pages sit beside a rail rather than above a bar.
@@ -59,7 +61,7 @@ class ThemeMenu extends ConsumerWidget {
 }
 
 /// The dashboard's pages (管理后台, tech plan S22), those the role may see (S25): a rail beside them on a wide screen, a
-/// bar under them on a phone; a role with one page (an integrator's 消息) gets the page alone.
+/// bar under them on a phone; a role with one page gets the page alone.
 class AdminShell extends ConsumerStatefulWidget {
   const AdminShell({super.key});
 
@@ -80,7 +82,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     ..invalidate(userProvider)
     ..invalidate(activeProvider)
     ..invalidate(messagesProvider)
-    ..invalidate(dispatchLogProvider);
+    ..invalidate(dispatchLogProvider)
+    ..invalidate(contentProvider);
 
   @override
   Widget build(BuildContext context) {

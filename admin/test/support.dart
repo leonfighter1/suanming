@@ -106,6 +106,14 @@ class FakeAdmin {
   /// An admin's wordings, by kind/locale: {subject?, body, updated_at}.
   final custom = <String, Json>{};
 
+  /// 内容管理 (S29): staff's texts, by key/locale ({text, updated_at}), and images, by key ({type, bytes, updated_at}).
+  final contentTexts = <String, Json>{};
+  final contentImages = <String, Json>{};
+
+  /// The file 上传 is given (null: the chooser closed without one), and the types it was asked for.
+  AdminFile? pick;
+  List<String>? pickTypes;
+
   /// The dispatch log, the oldest first.
   final log = <Json>[];
 
@@ -188,7 +196,9 @@ class FakeAdmin {
       });
     }
     // Every route asks for its capability, as the server's capabilityOf does.
-    final needs = path.startsWith('/v1/admin/messages/')
+    final needs = path.startsWith('/v1/admin/content')
+        ? 'content'
+        : path.startsWith('/v1/admin/messages/')
         ? 'messages'
         : path == '/v1/admin/reports' || RegExp(r'^/v1/admin/users/[^/]+/(points|sign-out)$').hasMatch(path)
             ? 'user_data'
@@ -197,6 +207,7 @@ class FakeAdmin {
                 : 'view';
     if (!capabilities[role]!.contains(needs)) return _problem(403, 'the $role role may not do this', 'not_allowed');
     if (path.startsWith('/v1/admin/messages/')) return _messages(r);
+    if (path.startsWith('/v1/admin/content')) return _content(r);
     if (path == '/v1/admin/overview') return _json(overview(days));
     if (path == '/v1/admin/series') return _json({'items': series(days)});
     if (path == '/v1/admin/breakdown') return _json(breakdown(days));
@@ -474,6 +485,70 @@ class FakeAdmin {
 
   String _filled(String s) => s.replaceAllMapped(RegExp(r'\{\{(\w+)\}\}'), (m) => sampleValues[m.group(1)] ?? m.group(0)!);
 
+  /// 内容管理 (S29), as src/admin/content.ts answers.
+  http.Response _content(http.Request r) {
+    final path = r.url.path;
+    if (path == '/v1/admin/content' && r.method == 'GET') {
+      return _json({
+        'locales': ['zh-Hans', 'zh-Hant'],
+        'image_types': imageTypes,
+        'image_max_bytes': imageMaxBytes,
+        'texts': [
+          for (final t in contentCatalog)
+            {
+              ...t,
+              'changed': {for (final l in ['zh-Hans', 'zh-Hant']) l: ?contentTexts['${t['key']}/$l']},
+            },
+        ],
+        'images': [
+          for (final (key, label) in contentImageLabels)
+            {
+              'key': key,
+              'label': label,
+              if (contentImages[key] case final i?) ...{
+                'url': '/v1/content/images/$key?v=${i['updated_at']}',
+                'updated_at': i['updated_at'],
+              },
+            },
+        ],
+      });
+    }
+    final text = RegExp(r'^/v1/admin/content/texts/(\w+)/(zh-Hans|zh-Hant)$').firstMatch(path);
+    if (text != null) {
+      final spec = contentCatalog.where((t) => t['key'] == text[1]).firstOrNull;
+      if (spec == null) return _problem(404, 'no such text', 'unknown_text');
+      final id = '${text[1]}/${text[2]}';
+      if (r.method == 'DELETE') {
+        contentTexts.remove(id);
+        return _json({'key': text[1], 'locale': text[2], 'text': (spec['defaults'] as Json)[text[2]]});
+      }
+      final value = (bodyOf(r)['text'] as String? ?? '').trim();
+      if (value.isEmpty) return _problem(400, 'text is required');
+      String names(Iterable<String> ps) => (ps.toSet().toList()..sort()).join(',');
+      final own = (spec['placeholders'] as List).cast<String>();
+      if (names(RegExp(r'\{(\w+)\}').allMatches(value).map((m) => m[1]!)) != names(own)) {
+        return _problem(400, 'the text must keep its placeholders and add none', 'placeholders_mismatch');
+      }
+      contentTexts[id] = {'text': value, 'updated_at': _iso(testNow)};
+      return _json({'key': text[1], 'locale': text[2], 'text': value, 'updated_at': _iso(testNow)});
+    }
+    final image = RegExp(r'^/v1/admin/content/images/(\w+)$').firstMatch(path);
+    if (image != null) {
+      final key = image[1]!;
+      if (!contentImageLabels.any((i) => i.$1 == key)) return _problem(404, 'no such image', 'unknown_image');
+      if (r.method == 'DELETE') {
+        contentImages.remove(key);
+        return _json({'key': key});
+      }
+      final type = r.headers['content-type'] ?? '';
+      if (!imageTypes.contains(type)) return _problem(415, 'an image is png, jpeg or webp', 'image_type');
+      if (r.bodyBytes.length > imageMaxBytes) return _problem(413, 'request body too large');
+      contentImages[key] = {'type': type, 'bytes': r.bodyBytes.length, 'updated_at': _iso(testNow)};
+      return _json({'key': key, 'url': '/v1/content/images/$key?v=${_iso(testNow)}', 'updated_at': _iso(testNow)});
+    }
+    return _problem(404, 'not found');
+  }
+
   http.Response _messages(http.Request r) {
     final path = r.url.path;
     if (path == '/v1/admin/messages/templates' && r.method == 'GET') {
@@ -562,15 +637,49 @@ class FakeAdmin {
 
 /// What each staff role may do, and the roles it may give (the server's src/admin/roles.ts).
 const capabilities = {
-  'admin': ['view', 'assign', 'user_data', 'messages'],
+  'admin': ['view', 'assign', 'user_data', 'messages', 'content'],
   'manager': ['view', 'assign'],
-  'integrator': ['messages'],
+  'integrator': ['messages', 'content'],
 };
 const assignable = {
   'admin': ['user', 'integrator', 'manager', 'admin'],
   'manager': ['user', 'integrator', 'manager'],
   'integrator': <String>[],
 };
+
+/// 内容管理's images and what an image may be (the server's catalog.ts).
+const contentImageLabels = [('banner', '横幅背景（命理罗盘）'), ('logo', '介绍页标志')];
+const imageTypes = ['image/png', 'image/jpeg', 'image/webp'];
+const imageMaxBytes = 2 * 1024 * 1024;
+
+/// The texts 内容 lists (the server's, from the app's message files): a few of the app's, then enough for 再显示.
+final contentCatalog = <Json>[
+  {
+    'key': 'homeTarot',
+    'area': 'home',
+    'placeholders': <String>[],
+    'defaults': {'zh-Hans': '塔罗占卜', 'zh-Hant': '塔羅占卜'},
+  },
+  {
+    'key': 'pointsBalanceLine',
+    'area': 'points',
+    'placeholders': ['balance'],
+    'defaults': {'zh-Hans': '余额 {balance} 积分', 'zh-Hant': '餘額 {balance} 積分'},
+  },
+  {
+    'key': 'serverUnreachable',
+    'area': 'server',
+    'placeholders': <String>[],
+    'defaults': {'zh-Hans': '连不上服务器。\n请稍后再试。', 'zh-Hant': '連不上伺服器。\n請稍後再試。'},
+  },
+  for (var i = 1; i <= 40; i++)
+    {
+      'key': 'sample$i',
+      'area': 'sample',
+      'placeholders': <String>[],
+      'defaults': {'zh-Hans': '示例文字 $i', 'zh-Hant': '示例文字 $i'},
+    },
+];
 
 /// The values a preview fills in (the server's samples).
 const sampleValues = {'code': '482913', 'minutes': '10', 'title': '八字 AI 解读', 'subtitle': '张三 · 1990-05-01', 'count': '2'};
@@ -674,6 +783,10 @@ Future<FakeAdmin> pumpAdmin(
         httpClientProvider.overrideWithValue(f.client),
         clockProvider.overrideWithValue(() => testNow),
         saveFileProvider.overrideWithValue((file) async => f.saved.add(file)),
+        pickFileProvider.overrideWithValue((types) async {
+          f.pickTypes = types;
+          return f.pick;
+        }),
         prefsProvider.overrideWithValue(Prefs(read: (k) => stored[k], write: (k, v) => stored[k] = v)),
         loginHintProvider.overrideWithValue(loginHint),
       ],

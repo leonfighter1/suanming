@@ -29,27 +29,29 @@ Future<void> openAccount(WidgetTester tester, String id, {String? search}) async
 }
 
 void main() {
-  testWidgets('an admin: every page, 消息 last', (tester) async {
+  testWidgets('an admin: every page, 内容 last', (tester) async {
     await pumpAdmin(tester);
-    expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量', '导出', '消息']);
+    expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量', '导出', '消息', '内容']);
     expect(find.text('boss · 管理员'), findsOneWidget);
   });
 
-  testWidgets('an integrator: 消息 alone, without a rail or a bar; nothing else asked for', (tester) async {
+  // 内容管理 (S29) is the integrator's too: the words users read, in mails and SMS and in the app.
+  testWidgets('an integrator: 消息 and 内容; nothing else asked for', (tester) async {
     final f = FakeAdmin()..role = 'integrator';
     await pumpAdmin(tester, fake: f, size: tall);
-    expect(find.byType(NavigationRail), findsNothing);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(railLabels(tester), ['消息', '内容']);
     expect(find.byKey(const Key('message-code_mail')), findsOneWidget);
     expect(find.text('integ · 集成人员'), findsOneWidget);
+    await go(tester, '内容');
+    expect(find.byKey(const ValueKey<String>('text-homeTarot')), findsOneWidget);
     expect(f.to('/v1/admin/overview'), isEmpty);
     expect(f.to('/v1/admin/users'), isEmpty);
 
-    // On a phone too.
+    // On a phone, the bar.
     await tester.pumpWidget(const SizedBox());
     await pumpAdmin(tester, fake: f, size: phone);
-    expect(find.byType(NavigationBar), findsNothing);
-    expect(find.byKey(const Key('message-code_mail')), findsOneWidget);
+    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect([for (final d in bar.destinations) (d as NavigationDestination).label], ['消息', '内容']);
   });
 
   testWidgets('a manager: the numbers and the accounts; no 导出, no 消息, no CSV beside the curve', (tester) async {

@@ -7,6 +7,7 @@ import '../data/admin_api.dart';
 import '../domain/models.dart';
 import '../platform/download.dart';
 import '../platform/login_hint.dart';
+import '../platform/pick_file.dart';
 import '../platform/prefs.dart';
 
 /// When Riverpod asks again by itself after a failed request: a few times, quickly (0.2, 0.4, 0.8, 1.6 s), when the
@@ -141,6 +142,12 @@ final messagesProvider = FutureProvider.autoDispose<MessageListing>((ref) => ref
 final dispatchLogProvider = FutureProvider.autoDispose<List<DispatchEntry>>(
   (ref) => ref.watch(adminApiProvider).dispatchLog(),
 );
+
+/// 内容 (内容管理, tech plan S29): every text the app shows and the images it takes from here, with staff's changes.
+final contentProvider = FutureProvider.autoDispose<ContentListing>((ref) => ref.watch(adminApiProvider).content());
+
+/// Chooses a file of the given types to send (内容管理's images): the browser's chooser; tests choose their own.
+final pickFileProvider = Provider<Future<AdminFile?> Function(List<String> types)>((ref) => pickFile);
 
 /// What "now" is, for 「5 分钟前」; tests fix it.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);

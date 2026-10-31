@@ -7,12 +7,16 @@ double _d(Object? v) => (v as num?)?.toDouble() ?? 0;
 List<T> _list<T>(Object? v, T Function(Json) f) => [for (final e in (v as List? ?? const [])) f(e as Json)];
 
 /// What a staff role may do (tech plan S25; the server's src/admin/roles.ts): see the numbers and the accounts, give
-/// roles and permissions, change or take a user's data (增加积分, 在所有设备上退出, the exports), and the mail and SMS.
+/// roles and permissions, change or take a user's data (增加积分, 在所有设备上退出, the exports), the mail and SMS, and
+/// the app's texts and images (内容管理, S29).
 abstract final class Can {
   static const view = 'view';
   static const assign = 'assign';
   static const userData = 'user_data';
   static const messages = 'messages';
+  static const content = 'content';
+
+  /// What an admin could do on a server from before roles (and before 内容管理).
   static const all = {view, assign, userData, messages};
 }
 
@@ -681,4 +685,69 @@ class DispatchEntry {
   final bool custom;
   final bool test;
   final String? error;
+}
+
+/// 内容管理 (tech plan S29): a text the app shows, as staff can change it: the placeholders the app fills in ({balance}
+/// …), its own wording in each language, and staff's where they changed it.
+class ContentText {
+  const ContentText({required this.key, required this.placeholders, required this.defaults, this.changed = const {}});
+  factory ContentText.fromJson(Json j) => ContentText(
+        key: j['key'] as String,
+        placeholders: [for (final p in (j['placeholders'] as List? ?? const [])) p as String],
+        defaults: {for (final MapEntry(:key, :value) in (j['defaults'] as Json).entries) key: value as String},
+        changed: {
+          for (final MapEntry(:key, :value) in (j['changed'] as Json? ?? const {}).entries)
+            key: (value as Json)['text'] as String,
+        },
+      );
+
+  /// The app's key for it (homeTarot …).
+  final String key;
+  final List<String> placeholders;
+
+  /// The app's own wording, by language (zh-Hans, zh-Hant).
+  final Map<String, String> defaults;
+
+  /// Staff's wording, by language, where they changed it.
+  final Map<String, String> changed;
+
+  /// What the app shows in [locale]: staff's wording, else its own.
+  String textIn(String locale) => changed[locale] ?? defaults[locale] ?? '';
+}
+
+/// An image the app takes from here (the banners' art, the introduction page's mark), and staff's once one was put in.
+class ContentImage {
+  const ContentImage({required this.key, required this.label, this.url});
+  factory ContentImage.fromJson(Json j) =>
+      ContentImage(key: j['key'] as String, label: j['label'] as String? ?? '', url: j['url'] as String?);
+  final String key;
+  final String label;
+
+  /// Staff's image's address on the server (/v1/content/images/banner?v=…); null while the app shows its own.
+  final String? url;
+}
+
+/// Everything 内容 lists: the languages, what an image may be, the texts and the images.
+class ContentListing {
+  const ContentListing({
+    required this.locales,
+    required this.imageTypes,
+    required this.imageMaxBytes,
+    required this.texts,
+    required this.images,
+  });
+  factory ContentListing.fromJson(Json j) => ContentListing(
+        locales: [for (final l in j['locales'] as List) l as String],
+        imageTypes: [for (final t in (j['image_types'] as List? ?? const [])) t as String],
+        imageMaxBytes: _i(j['image_max_bytes']),
+        texts: _list(j['texts'], ContentText.fromJson),
+        images: _list(j['images'], ContentImage.fromJson),
+      );
+  final List<String> locales;
+
+  /// The types an image may be (image/png …), and its largest size.
+  final List<String> imageTypes;
+  final int imageMaxBytes;
+  final List<ContentText> texts;
+  final List<ContentImage> images;
 }

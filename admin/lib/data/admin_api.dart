@@ -27,7 +27,7 @@ class AdminUnreachable implements Exception {
   String toString() => '连不上服务器：$baseUrl';
 }
 
-/// A file the API made: its bytes, the name it gave it and its type.
+/// A file the API made (its bytes, the name it gave it and its type), or one chosen to send it (内容管理's images).
 class AdminFile {
   const AdminFile(this.bytes, this.name, this.mime);
   final Uint8List bytes;
@@ -152,6 +152,24 @@ class AdminApi {
           DispatchEntry.fromJson(e as Json),
       ];
 
+  // ---- 内容 (内容管理, tech plan S29) ----
+
+  Future<ContentListing> content() async => ContentListing.fromJson(await _authed('GET', '/v1/admin/content'));
+
+  /// Keeps [text] as the app's text [key] in [locale]; refused (placeholders_mismatch) when it drops or adds one of
+  /// the text's placeholders.
+  Future<void> saveText(String key, String locale, String text) =>
+      _authed('PUT', '/v1/admin/content/texts/$key/$locale', {'text': text});
+
+  /// The text back to the app's own in [locale].
+  Future<void> resetText(String key, String locale) => _authed('DELETE', '/v1/admin/content/texts/$key/$locale');
+
+  /// [file] put in as the image [key]: the app shows it from then on.
+  Future<void> putImage(String key, AdminFile file) => _authed('PUT', '/v1/admin/content/images/$key', file);
+
+  /// The image [key] taken out: the app shows its own again.
+  Future<void> removeImage(String key) => _authed('DELETE', '/v1/admin/content/images/$key');
+
   // ---- transport ----
 
   Future<Json> _authed(String method, String path, [Object? body]) =>
@@ -221,6 +239,9 @@ class AdminApi {
       res = switch (method) {
         'GET' => await _http.get(uri, headers: _headers(auth)),
         'PATCH' => await _http.patch(uri, headers: _headers(auth), body: jsonEncode(body)),
+        // A picture (内容管理) goes as it is, under its own type.
+        'PUT' when body is AdminFile =>
+          await _http.put(uri, headers: {..._headers(auth), 'content-type': body.mime}, body: body.bytes),
         'PUT' => await _http.put(uri, headers: _headers(auth), body: jsonEncode(body)),
         'DELETE' => await _http.delete(uri, headers: _headers(auth)),
         _ => await _http.post(uri, headers: _headers(auth), body: jsonEncode(body)),

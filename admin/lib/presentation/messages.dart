@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/admin_api.dart';
 
-/// What went wrong, in plain words (管理后台, tech plan S22; the roles and 消息, S25).
+/// What went wrong, in plain words (管理后台, tech plan S22; the roles and 消息, S25; 内容, S29).
 String problemText(Object e) => switch (e) {
       AdminApiException(code: 'admin_only') => '这个账号没有后台权限',
       AdminApiException(code: 'not_allowed') => '你的角色不能做这件事',
@@ -11,6 +11,9 @@ String problemText(Object e) => switch (e) {
       AdminApiException(code: 'admin_by_config') => '这位管理员由服务器设置（MINGLI_ADMINS）指定，不能在这里取消',
       AdminApiException(code: 'invalid_template', :final problems) when problems.isNotEmpty => problems.join('；'),
       AdminApiException(code: 'delivery_unavailable') => '这台服务器没有发送方式，发不出去',
+      AdminApiException(code: 'placeholders_mismatch') => '要保留原来的占位（{…}），不能加别的',
+      AdminApiException(code: 'image_type') => '图片的格式不对',
+      AdminApiException(status: 413) => '图片太大了',
       AdminApiException(code: 'delivery_failed') => '发送失败：服务器没能交出这条消息',
       AdminApiException(status: 401) => '账号或密码不正确',
       AdminApiException(status: 503) => '服务器上没有中文字体，做不了 PDF：先导出 Word',

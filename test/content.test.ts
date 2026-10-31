@@ -125,10 +125,16 @@ describe("the CMS's API", () => {
   it("lists every text with its defaults by area, and the images", async () => {
     const all = (await (await call("integ", "/v1/admin/content")).json()) as {
       locales: string[];
+      image_types: string[];
+      image_max_bytes: number;
       texts: { key: string; area: string; defaults: Record<string, string>; changed: object }[];
       images: { key: string }[];
     };
     expect(all.locales).toEqual(["zh-Hans", "zh-Hant"]);
+    expect([all.image_types, all.image_max_bytes]).toEqual([
+      ["image/png", "image/jpeg", "image/webp"],
+      2 * 1024 * 1024,
+    ]);
     expect(all.texts.length).toBe(contentTexts().length);
     expect(all.texts.find((t) => t.key === "homeTarot")).toMatchObject({
       area: "home",

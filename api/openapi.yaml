@@ -1632,12 +1632,20 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [locales, texts, images]
+                required: [locales, image_types, image_max_bytes, texts, images]
                 properties:
                   locales:
                     type: array
                     items:
                       type: string
+                  image_types:
+                    description: The types an image may be
+                    type: array
+                    items:
+                      type: string
+                  image_max_bytes:
+                    description: The largest an image may be
+                    type: integer
                   texts:
                     type: array
                     items:

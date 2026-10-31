@@ -16,6 +16,11 @@ String compact(num v) => v >= 1e8
         ? '${(v / 1e4).toStringAsFixed(1)}万'
         : count(v);
 
+/// A file's size: 2 MB, 1.5 MB, 300 KB.
+String fileSize(int bytes) => bytes >= 1 << 20
+    ? '${(bytes / (1 << 20)).toStringAsFixed(bytes % (1 << 20) == 0 ? 0 : 1)} MB'
+    : '${(bytes / 1024).ceil()} KB';
+
 String percent(double? v) => v == null ? '—' : '${(v * 100).toStringAsFixed(1)}%';
 String usd(double v) => '\$${v.toStringAsFixed(2)}';
 
@@ -67,7 +72,7 @@ const roleNames = {'user': '普通用户', 'integrator': '集成人员', 'manage
 /// What each role may do in the dashboard, in a line (the server's src/admin/roles.ts).
 const roleAbout = {
   'user': '不能登录管理后台',
-  'integrator': '只能进入「消息」：编辑邮件和短信、预览、发送测试',
+  'integrator': '只能进入「消息」和「内容」：编辑邮件和短信、预览、发送测试，修改应用里的文字和图片',
   'manager': '查看数据，给账户分配角色和权限；不能增加积分、让账户退出登录或导出数据',
   'admin': '所有页面和操作',
 };

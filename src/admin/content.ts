@@ -36,6 +36,9 @@ export async function contentAdminRoute(
     const images = await ctx.store.listContentImages();
     send(res, 200, {
       locales: CONTENT_LOCALES,
+      // What an image may be, for the dashboard to say before one is picked.
+      image_types: CONTENT_IMAGE_TYPES,
+      image_max_bytes: CONTENT_IMAGE_MAX_BYTES,
       texts: contentTexts().map((t) => ({
         ...t,
         changed: Object.fromEntries(
