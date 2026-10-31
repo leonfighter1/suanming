@@ -61,6 +61,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
 | S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
 | S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | done        |
+| S35 应用整理与维护通知     | the app's pages regrouped, 维护通知, the 管理后台's menu    | big    | v23.0.0 + summary | in progress |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2715,6 +2716,51 @@ as #ff0000, the dashboard signed in across tabs and restarts.
   not refuse, the owner's choice.
 - **The session in the browser** (localStorage, as the 外观 setting): a reload, a new tab or a restart stays signed
   in; 退出登录, two days unused (设置's 登录有效期) or the server ending it signs out.
+
+## S35 应用页面整理、维护通知、后台菜单 (big → v23.0.0)
+
+**Owner request (2026-10-31):** for the app (「SHOP 页面」):
+
+1. 「登录后台后要有办法可以回退到app本身，不需要单独打开新的页面，留在app本体」
+2. 「所有算卦服务的grid必须要vertically align middle」
+3. 「banner需要增加高度，至少有个最低高度，至少300px」
+4. 「八字摆盘现在的UI太挤，尤其是desktop … 重新orgnize，根据我的ui desgin principal，以app为主，重新排版和design」
+5. 「算卦页面也差不多可以重新organize一下」
+6. 「设置页面，如果登录者是admin 或者 manager等等 具备dashboard access user，无法注销账号，只能从后台操作」
+7. 「添加正在维护的通知，admin可以toggle 告知用户何时能够登录 by default 3-4 小时，可以自己定时。这个可以在dashboard中操作」
+
+and for the 管理后台: 「dashboard的设置可以放置在下拉菜单 … 确保有些功能只能admin去改」, 「内容 keyword可以改成修改页面内容」.
+Then: review, check, commit and push.
+
+| WP     | What                                                                                                        |
+| ------ | ----------------------------------------------------------------------------------------------------------- |
+| WP35.1 | the 管理后台's menu: 设置 in it (admin only, as since v19.0.0); 内容 is 修改页面内容                        |
+| WP35.2 | the service cards' content in their middle; the banners at least 300 high                                   |
+| WP35.3 | the 管理后台 in the app's own tab: ☰ → 管理后台 goes there, and the dashboard's 返回应用 comes back        |
+| WP35.4 | staff accounts are deleted in the 管理后台, not the app: the server refuses, 设置 says why; an admin's 注销 |
+| WP35.5 | 维护通知: an admin's switch in 设置, 3–4 hours by default or a time set; users told when to sign in again   |
+| WP35.6 | 八字排盘 regrouped, app first: one column on a phone, the chart and its fortunes beside the facts on a desk |
+| WP35.7 | 算卦 regrouped likewise                                                                                     |
+| WP35.8 | records, the stage summary; pushed                                                                          |
+
+- **设置 in the menu:** it has been the admin's alone since v19.0.0 (the `settings` capability; every route asks for
+  it); in the menu it stays so, and a manager's or an integrator's menu has no 设置.
+- **The service cards:** in a desktop row of two, each card as tall as the taller; its icon, name and line in the
+  card's middle, not at its top (`AppCard`'s content alignment, the top by default).
+- **The banners:** at least 300 high (`bannerMinHeight`), their words in the middle, on every page that has one.
+- **One tab:** on the web ☰ → 管理后台 opens in the app's own tab and hands over the app's address (`&app=`, kept by
+  the dashboard, only the app's own origin or this computer); the dashboard's menu has 返回应用. Off the web the
+  address is copied, as before.
+- **Staff accounts:** the server refuses 注销 to a staff account (403 staff_account); 设置 says it is done in the
+  管理后台; an admin's 注销账号 on an account's page (DELETE /v1/admin/users/:id, `user_data`), never their own or a
+  MINGLI_ADMINS one; the app's own deletion and this one are one function.
+- **维护通知:** 设置's 维护 group: 维护中 (an admin's switch) and 预计结束 (a time, or none: three to four hours from
+  when it was switched on). While on, the server answers anyone but staff with 503 maintenance and the window;
+  signing in, signing up and the app's calls wait; staff sign in and work as usual. GET /v1/status says it to
+  everyone; the app shows it on the sign-in and 欢迎 pages and as a page of its own for a signed-in user.
+- **八字 and 算卦, app first:** grouped under headings (`GroupTitle`, moved to design.dart); on a phone one column in
+  the order a reader needs; on a desktop the chart, its fortunes and the reading in the main column (8 of 12) and
+  the facts at the side (4 of 12): `SideColumns` in layout.dart.
 
 ## 阶段总结 (stage summaries)
 
