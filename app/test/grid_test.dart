@@ -165,14 +165,14 @@ void main() {
     }
 
     // The container: (2560 - 1620) / 2 = 470 beyond it at each side; the content 32 inside it, from 502, 1556 wide.
-    // 算卦's first card in its main column (S35): beside it the gutter and the side's four columns.
+    // 八字's form and 算卦: their first card in the main column (S35), beside it the gutter and the side's four columns.
     final main = 1556.0 - 24 - Grid.span(1556, 4, columns: 12, gutter: 24);
     for (final m in ['bazi', 'tarot', 'qiuqian', 'liuyao', 'fengshui']) {
       await fresh();
       await openEntry(tester, m);
       await frames(tester, 12);
       final card = tester.getRect(find.byType(AppCard).first);
-      expect([card.left, card.width], [502.0, m == 'liuyao' ? main : 1556.0], reason: m);
+      expect([card.left, card.width], [502.0, m == 'bazi' || m == 'liuyao' ? main : 1556.0], reason: m);
     }
     // The place picker, from 八字's form, and 设置: their rows carry their own inset (16), so the list is the
     // container itself, 470 to 2090.
@@ -279,6 +279,31 @@ void main() {
       } else {
         expect(makeup.left, chart.left, reason: 'one column');
         expect([chart.bottom < makeup.top, makeup.bottom < luck.top], [true, true], reason: '命盘, 命局, then 运势');
+      }
+    }
+  });
+
+  // S35 (the owner: 「可以」 to 「桌面上表单放在主栏，「为谁排盘」和说明放到右侧，手机上不变」).
+  testWidgets('八字\'s form: 为谁排盘 and 个人情况 beside the form on a desktop window; on a phone as before', (tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.devicePixelRatio = 1;
+    for (final (size, beside) in [(const Size(1600, 1800), true), (const Size(400, 2400), false)]) {
+      tester.view.physicalSize = size;
+      await tester.pumpWidget(const SizedBox()); // rule 24
+      await tester.pumpWidget(testApp(FakeApi()));
+      await frames(tester, 12);
+      await openEntry(tester, 'bazi');
+      await frames(tester, 12);
+      final who = tester.getRect(find.byKey(const Key('add-person')));
+      final mode = tester.getRect(find.byKey(const Key('form-mode')));
+      final life = tester.getRect(find.byKey(const Key('life-context')));
+      final compute = tester.getRect(find.byKey(const Key('compute-chart')));
+      if (beside) {
+        expect([who.left > mode.right, life.left > mode.right], [true, true], reason: 'both at the side');
+        expect(find.byKey(const Key('life-card')), findsOneWidget);
+      } else {
+        expect(find.byKey(const Key('life-card')), findsNothing, reason: '个人情况 inside the form');
+        expect([mode.bottom < who.top, who.bottom < life.top, life.bottom < compute.top], [true, true, true]);
       }
     }
   });

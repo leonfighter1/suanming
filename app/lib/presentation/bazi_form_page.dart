@@ -104,6 +104,8 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
     final profiles = book?.profiles ?? const <BirthProfile>[];
     final selected = profiles.where((p) => p.id == _profileId).firstOrNull ?? book?.defaultProfile;
     final draft = _draft ?? selected ?? _fallback('');
+    final wide = SideColumns.sideBySide(context);
+    final life = LifeContextFields(value: draft.life, onChanged: (l) => setState(() => _draft = draft.copyWith(life: l)));
 
     // Going back drops this run's edits: ask first. Ctrl+Enter = 排盘.
     return LeaveGuard(
@@ -116,122 +118,132 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
           body: ListView(
             padding: pagePadding(context),
             children: [
-              // 排盘解读 or 一生运势报告: same person, same form.
-              FadeSlideIn(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: Space.l),
-                  child: SegmentKeys(
-                    child: SegmentedButton<bool>(
-                      key: const Key('form-mode'),
-                      showSelectedIcon: false,
-                      segments: [
-                        ButtonSegment(value: false, icon: const Icon(Icons.grid_view_rounded), label: Text(l10n.modeChart)),
-                        ButtonSegment(value: true, icon: const Icon(Icons.auto_stories), label: Text(l10n.lifeEntry)),
-                      ],
-                      selected: {_life},
-                      onSelectionChanged: (s) => setState(() => _life = s.first),
+              // On a desktop window the form in the main column; who it is for, and the optional 个人情况 with what it
+              // is for, at the side (S35; the owner: 「可以」 to 「桌面上表单放在主栏，「为谁排盘」和说明放到右侧，手机上不变」).
+              // On a phone and a tablet as before, 个人情况 inside the form.
+              SideColumns(
+                main: [
+                  // 排盘解读 or 一生运势报告: same person, same form.
+                  FadeSlideIn(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: Space.l),
+                      child: SegmentKeys(
+                        child: SegmentedButton<bool>(
+                          key: const Key('form-mode'),
+                          showSelectedIcon: false,
+                          segments: [
+                            ButtonSegment(value: false, icon: const Icon(Icons.grid_view_rounded), label: Text(l10n.modeChart)),
+                            ButtonSegment(value: true, icon: const Icon(Icons.auto_stories), label: Text(l10n.lifeEntry)),
+                          ],
+                          selected: {_life},
+                          onSelectionChanged: (s) => setState(() => _life = s.first),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              FadeSlideIn(
-                index: 1,
-                child: AppCard(
-                  title: l10n.profileFor,
-                  icon: Icons.people_alt_outlined,
-                  trailing: AppTextButton.icon(
-                    icon: const Icon(Icons.manage_accounts_outlined, size: 18),
-                    label: Text(l10n.profiles),
-                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfilesPage())),
-                  ),
-                  child: profiles.isEmpty
-                      ? AppOutlinedButton.icon(
-                          key: const Key('add-person'),
-                          icon: const Icon(Icons.person_add_alt_1),
-                          label: Text(l10n.addTester),
-                          onPressed: _openDialog,
-                        )
-                      // A picker, not a text box: names are edited in the form below or in the pop-up.
-                      : KeyedSubtree(
-                          key: const Key('profile-picker'),
-                          child: DropdownMenu<String>(
-                            key: ValueKey('profile-picker-$_generation'),
-                            expandedInsets: EdgeInsets.zero,
-                            initialSelection: selected?.id,
-                            requestFocusOnTap: false,
-                            enableFilter: false,
-                            enableSearch: false,
-                            leadingIcon: const Icon(Icons.person_outline),
-                            dropdownMenuEntries: [
-                              for (final p in profiles)
-                                DropdownMenuEntry(
-                                  value: p.id,
-                                  label: p.name,
-                                  trailingIcon: p.id == book?.defaultProfile?.id ? const Icon(Icons.star, size: 16) : null,
-                                ),
-                              DropdownMenuEntry(
-                                value: _addPerson,
-                                label: l10n.addTester,
-                                leadingIcon: Icon(Icons.person_add_alt_1, color: scheme.primary),
-                              ),
-                              if (selected != null)
-                                DropdownMenuEntry(
-                                  value: _editPerson,
-                                  label: l10n.editCurrent(selected.name),
-                                  leadingIcon: Icon(Icons.edit_outlined, color: scheme.primary),
-                                ),
-                            ],
-                            onSelected: (id) {
-                              if (id == _addPerson) {
-                                _openDialog();
-                              } else if (id == _editPerson) {
-                                _openDialog(edit: selected);
-                              } else {
-                                _load(id); // switching person resets this-run edits
-                              }
-                            },
+                  FadeSlideIn(
+                    index: 2,
+                    child: AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (profiles.isNotEmpty) ...[
+                            ContentText(
+                              l10n.profileHint,
+                              contentKey: 'profileHint',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                            const SizedBox(height: Space.m),
+                          ],
+                          // Editable for this run; 编辑资料 in the picker saves it for good.
+                          TextFormField(
+                            key: ValueKey('form-name-$_generation'),
+                            initialValue: draft.name,
+                            decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
+                            onChanged: (v) => setState(() => _draft = draft.copyWith(name: v)),
                           ),
-                        ),
-                ),
-              ),
-              FadeSlideIn(
-                index: 2,
-                child: AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (profiles.isNotEmpty) ...[
-                        ContentText(
-                          l10n.profileHint,
-                          contentKey: 'profileHint',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-                        ),
-                        const SizedBox(height: Space.m),
-                      ],
-                      // Editable for this run; 编辑资料 in the picker saves it for good.
-                      TextFormField(
-                        key: ValueKey('form-name-$_generation'),
-                        initialValue: draft.name,
-                        decoration: InputDecoration(labelText: l10n.name, prefixIcon: const Icon(Icons.badge_outlined)),
-                        onChanged: (v) => setState(() => _draft = draft.copyWith(name: v)),
+                          const SizedBox(height: Space.l),
+                          BirthFields(value: draft, onChanged: (p) => setState(() => _draft = p)),
+                          if (!wide) life,
+                        ],
                       ),
-                      const SizedBox(height: Space.l),
-                      BirthFields(value: draft, onChanged: (p) => setState(() => _draft = p)),
-                      LifeContextFields(value: draft.life, onChanged: (l) => setState(() => _draft = draft.copyWith(life: l))),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              FadeSlideIn(
-                index: 3,
-                child: AppFilledButton.icon(
-                  key: const Key('compute-chart'),
-                  onPressed: _busy ? null : () => _submit(draft),
-                  icon: _busy
-                      ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Icon(_life ? Icons.auto_stories : Icons.auto_awesome),
-                  label: Text(_life ? l10n.lifeGenerate : l10n.compute),
-                ),
+                  FadeSlideIn(
+                    index: 3,
+                    child: AppFilledButton.icon(
+                      key: const Key('compute-chart'),
+                      onPressed: _busy ? null : () => _submit(draft),
+                      icon: _busy
+                          ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                          : Icon(_life ? Icons.auto_stories : Icons.auto_awesome),
+                      label: Text(_life ? l10n.lifeGenerate : l10n.compute),
+                    ),
+                  ),
+                ],
+                side: [
+                  FadeSlideIn(
+                    index: 1,
+                    child: AppCard(
+                      title: l10n.profileFor,
+                      icon: Icons.people_alt_outlined,
+                      trailing: AppTextButton.icon(
+                        icon: const Icon(Icons.manage_accounts_outlined, size: 18),
+                        label: Text(l10n.profiles),
+                        onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfilesPage())),
+                      ),
+                      child: profiles.isEmpty
+                          ? AppOutlinedButton.icon(
+                              key: const Key('add-person'),
+                              icon: const Icon(Icons.person_add_alt_1),
+                              label: Text(l10n.addTester),
+                              onPressed: _openDialog,
+                            )
+                          // A picker, not a text box: names are edited in the form below or in the pop-up.
+                          : KeyedSubtree(
+                              key: const Key('profile-picker'),
+                              child: DropdownMenu<String>(
+                                key: ValueKey('profile-picker-$_generation'),
+                                expandedInsets: EdgeInsets.zero,
+                                initialSelection: selected?.id,
+                                requestFocusOnTap: false,
+                                enableFilter: false,
+                                enableSearch: false,
+                                leadingIcon: const Icon(Icons.person_outline),
+                                dropdownMenuEntries: [
+                                  for (final p in profiles)
+                                    DropdownMenuEntry(
+                                      value: p.id,
+                                      label: p.name,
+                                      trailingIcon: p.id == book?.defaultProfile?.id ? const Icon(Icons.star, size: 16) : null,
+                                    ),
+                                  DropdownMenuEntry(
+                                    value: _addPerson,
+                                    label: l10n.addTester,
+                                    leadingIcon: Icon(Icons.person_add_alt_1, color: scheme.primary),
+                                  ),
+                                  if (selected != null)
+                                    DropdownMenuEntry(
+                                      value: _editPerson,
+                                      label: l10n.editCurrent(selected.name),
+                                      leadingIcon: Icon(Icons.edit_outlined, color: scheme.primary),
+                                    ),
+                                ],
+                                onSelected: (id) {
+                                  if (id == _addPerson) {
+                                    _openDialog();
+                                  } else if (id == _editPerson) {
+                                    _openDialog(edit: selected);
+                                  } else {
+                                    _load(id); // switching person resets this-run edits
+                                  }
+                                },
+                              ),
+                            ),
+                    ),
+                  ),
+                  if (wide) FadeSlideIn(index: 2, child: AppCard(key: const Key('life-card'), child: life)),
+                ],
               ),
             ],
           ),

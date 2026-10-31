@@ -55,30 +55,33 @@ abstract final class Grid {
 /// … 根据我的ui desgin principal，以app为主，重新排版」): [main] at the left, eight of the twelve columns, the page's
 /// anchor and what is read at length; [side] at the right, the other four, compact facts; each column stacks from the
 /// top. On a phone and a tablet one column, the app's own order: [side] after the first [sideAfter] parts of [main].
-/// Tab goes down the main column, then the side.
+/// Each column is a focus group of its own, so Tab goes down the main column, then the side.
 class SideColumns extends StatelessWidget {
   const SideColumns({super.key, required this.main, required this.side, this.sideAfter = 1});
   final List<Widget> main;
   final List<Widget> side;
   final int sideAfter;
 
+  /// Whether the columns sit side by side in [context]'s window (a page that moves a part with them asks).
+  static bool sideBySide(BuildContext context) => WindowClass.ofContext(context) == WindowClass.large;
+
   @override
   Widget build(BuildContext context) {
     final window = WindowClass.ofContext(context);
     Widget column(List<Widget> parts) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: parts);
-    if (window != WindowClass.large) {
+    if (!sideBySide(context)) {
       return column([...main.take(sideAfter), ...side, ...main.skip(sideAfter)]);
     }
     return LayoutBuilder(
       builder: (context, box) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: column(main)),
+          Expanded(child: FocusTraversalGroup(child: column(main))),
           SizedBox(width: window.gutter),
           SizedBox(
             key: const Key('side-column'),
             width: Grid.span(box.maxWidth, 4, columns: window.columns, gutter: window.gutter),
-            child: column(side),
+            child: FocusTraversalGroup(child: column(side)),
           ),
         ],
       ),
