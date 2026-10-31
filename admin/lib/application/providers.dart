@@ -25,10 +25,14 @@ Duration? retryAdmin(int retryCount, Object error) {
 final httpClientProvider = Provider<http.Client?>((ref) => null);
 
 /// What the app's ☰ → 管理后台 hands over in the address, taken off it once read.
-final _handedOver = Provider<Map<String, String>>((ref) => takeAddressParameters(const {'login'}));
+final _handedOver = Provider<Map<String, String>>((ref) => takeAddressParameters(const {'login', 'handoff'}));
 
 /// The login the app's ☰ → 管理后台 hands over (`?login=`, tech plan S25), for the sign-in to fill in. Tests set it.
 final loginHintProvider = Provider<String?>((ref) => ref.watch(_handedOver)['login']);
+
+/// The one-time code the app's ☰ → 管理后台 hands over (`&handoff=`, S33): signed in with it, no second sign-in. Tests
+/// set it.
+final handoffProvider = Provider<String?>((ref) => ref.watch(_handedOver)['handoff']);
 
 /// Where the dashboard keeps its own settings: the browser's storage. Tests put a map here.
 class Prefs {
@@ -38,6 +42,15 @@ class Prefs {
 }
 
 final prefsProvider = Provider<Prefs>((ref) => const Prefs(read: readPref, write: writePref));
+
+/// This tab's own storage (S33; the owner: 「不需要重复登录dashboard 页面了」): the session's refresh token, kept across a
+/// reload and gone with the tab, as the session was before. Tests put a map here.
+final tabPrefsProvider = Provider<Prefs>(
+  (ref) => Prefs(read: (k) => readPref(k, tab: true), write: (k, v) => writePref(k, v, tab: true)),
+);
+
+/// The tab's session's key.
+const sessionKey = 'mingli-admin-session';
 
 /// 外观 (v12.1.0): the system's light or dark, or one of them always, kept in this browser. A change fades the
 /// colours; nothing moves.
@@ -64,6 +77,7 @@ final adminApiProvider = Provider<AdminApi>((ref) {
   // Two statements: in a cascade, the first closure's body would take the second assignment in.
   api.onSignedOut = () => ref.read(sessionProvider.notifier).ended();
   api.onNotAllowed = () => ref.read(sessionProvider.notifier).recheck();
+  api.onSession = (refresh) => ref.read(tabPrefsProvider).write(sessionKey, refresh ?? '');
   return api;
 });
 
@@ -79,6 +93,29 @@ class SessionNotifier extends Notifier<AdminMe?> {
 
   Future<void> signIn(String login, String password) async {
     state = await ref.read(adminApiProvider).signIn(login, password);
+  }
+
+  /// Signed in at the start without asking again (S33; the owner: 「如果当前登录进去的用户有dashboard access，那么不需要
+  /// 重复登录了」): with the app's one-time code, else with this tab's session from before a reload. Neither working
+  /// leaves the sign-in, its login filled in where the app gave it.
+  Future<void> start() async {
+    final api = ref.read(adminApiProvider);
+    final code = ref.read(handoffProvider);
+    if (code != null) {
+      try {
+        state = await api.signInWithCode(code);
+        return;
+      } on Object {
+        // Used or late: this tab's session, if it has one.
+      }
+    }
+    final kept = ref.read(tabPrefsProvider).read(sessionKey);
+    if (kept == null || kept.isEmpty) return;
+    try {
+      state = await api.resume(kept);
+    } on Object {
+      ref.read(tabPrefsProvider).write(sessionKey, '');
+    }
   }
 
   void signOut() {

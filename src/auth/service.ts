@@ -5,7 +5,7 @@
  * each looked up by keyed hash; the values themselves are kept for the account
  * and its mail (encrypted in the PostgreSQL store).
  */
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { LOCALES, type Locale } from "../ai/terms.js";
 import { loadGeoMatrix, resolveRegion } from "../compliance/index.js";
 import {
@@ -160,11 +160,16 @@ export class AuthError extends Error {
       | "email_taken"
       | "password_weak"
       // 管理后台 (v11.2.0): an admin suspended the account.
-      | "account_suspended",
+      | "account_suspended"
+      // ☰ → 管理后台 without a second sign-in (S33): the one-time code was used, was late or never was.
+      | "handoff_invalid",
   ) {
     super(message);
   }
 }
+
+/** A one-time code's life (S33): long enough to open the 管理后台 from the app's menu, no longer. */
+export const HANDOFF_TTL_MS = 2 * 60_000;
 
 export interface AuthDeps {
   pepper: Buffer;
@@ -200,6 +205,34 @@ export class AuthService {
 
   private keyed(text: string) {
     return createHmac("sha256", this.deps.pepper).update(text).digest("hex");
+  }
+
+  /** The one-time codes given out (S33), by their keyed hash: in memory only, so a restart voids them. */
+  private readonly handoffs = new Map<string, { user: string; expires: number }>();
+
+  /**
+   * A one-time code that signs [userId] in elsewhere (S33; the owner: 「如果当前登录进去的用户有dashboard access，那么
+   * 不需要重复登录了」): the app's ☰ → 管理后台 opens the dashboard with it. Two minutes, one use.
+   */
+  handoff(userId: string): { code: string; expires_at: string } {
+    const now = this.now().getTime();
+    for (const [key, h] of this.handoffs) if (h.expires <= now) this.handoffs.delete(key);
+    const code = randomBytes(32).toString("base64url");
+    const expires = now + HANDOFF_TTL_MS;
+    this.handoffs.set(this.keyed(`handoff:${code}`), { user: userId, expires });
+    return { code, expires_at: new Date(expires).toISOString() };
+  }
+
+  /** [code]'s account signed in, with a session of its own; once. 401 handoff_invalid when used, late or unknown. */
+  async redeemHandoff(code: unknown): Promise<TokenPair> {
+    const key = typeof code === "string" && code ? this.keyed(`handoff:${code}`) : undefined;
+    const h = key === undefined ? undefined : this.handoffs.get(key);
+    if (key !== undefined) this.handoffs.delete(key);
+    const user = h && h.expires > this.now().getTime() ? await this.users.get(h.user) : undefined;
+    if (!user)
+      throw new AuthError(401, "the link has expired or was used; sign in", "handoff_invalid");
+    if (user.status === "suspended") throw suspended();
+    return this.deps.tokens.issue(user.id);
   }
 
   emailLookup(email: string) {

@@ -468,6 +468,17 @@ final contentProvider = FutureProvider<ContentView>((ref) async {
   }
 });
 
+/// ☰ → 管理后台 without a second sign-in (S33; the owner: 「如果当前登录进去的用户有dashboard access，那么不需要重复登录了」):
+/// a one-time code, asked for while the menu is open, so a tap opens the dashboard at once (a browser lets a tap open a
+/// tab, not a reply that comes after it). Null where there is none (a server from before, a failed request).
+final adminHandoffProvider = FutureProvider.autoDispose<String?>((ref) async {
+  try {
+    return await ref.watch(apiClientProvider).adminHandoff();
+  } on Object {
+    return null;
+  }
+});
+
 /// 积分 (v11.0.0, S20): the account's balance, packs and latest changes. Off (nothing shown, nothing costs) when the
 /// server has them off, or is one from before them (404).
 final pointsProvider = FutureProvider.autoDispose<PointsView>((ref) async {

@@ -36,9 +36,13 @@ class AppMenu extends ConsumerWidget {
   static Future<void> _openAdmin(BuildContext context, WidgetRef ref, AppUser user) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final url = adminUrl(ref.read(apiClientProvider).baseUrl, user.login);
+    final base = ref.read(apiClientProvider).baseUrl;
+    final url = adminUrl(base, user.login);
+    // Signed in at once with the menu's one-time code (S33); without one, the sign-in with the login filled in.
+    final handoff = ref.read(adminHandoffProvider).value;
     Navigator.of(context).pop();
-    if (await openInNewTab(url)) return;
+    if (await openInNewTab(handoff == null ? url : adminUrl(base, user.login, handoff: handoff))) return;
+    // Off the web the address is copied: without the code, which is for this moment only.
     await Clipboard.setData(ClipboardData(text: url));
     messenger
       ..hideCurrentSnackBar()
@@ -51,6 +55,8 @@ class AppMenu extends ConsumerWidget {
     final user = ref.watch(authProvider).value;
     // 积分 (v11.0.0): asked for again each time the menu opens, so the balance is the latest.
     final points = ref.watch(pointsProvider).value;
+    // 管理后台 (S33): staff's one-time code, asked for while the menu is open, ready for the tap.
+    if (user?.staff != null) ref.watch(adminHandoffProvider);
     final current = ref.watch(settingsProvider).apiLocaleCode;
     final language = appLanguages.firstWhere((l) => l.$1 == current, orElse: () => appLanguages.first).$2;
     return Drawer(
@@ -113,7 +119,7 @@ class AppMenu extends ConsumerWidget {
               onTap: () => _open(context, const ReviewPage()),
             ),
           // 管理后台 (S25; the owner: 如果登陆者具备各项权限…可以在下拉菜单设置中选择进入后台系统): staff only, as the server says
-          // (GET /v1/me's staff). The dashboard opens in a new tab with the login filled in; signing in is its own.
+          // (GET /v1/me's staff). The dashboard opens in a new tab, signed in by a one-time code asked for now (S33).
           if (user?.staff case final staff?)
             ListTile(
               key: const Key('open-admin'),
@@ -384,6 +390,8 @@ String staffName(AppLocalizations l10n, String role) => switch (role) {
       _ => role,
     };
 
-/// The 管理后台 on the API's own address, its sign-in's login filled in (`?login=`, like a login hint; the dashboard
-/// takes it off its address once read).
-String adminUrl(String apiBase, String login) => '$apiBase/admin/?login=${Uri.encodeQueryComponent(login)}';
+/// The 管理后台 on the API's own address, its sign-in's login filled in (`?login=`, like a login hint) and, with a
+/// one-time code (S33), signed in at once (`&handoff=`); the dashboard takes both off its address once read.
+String adminUrl(String apiBase, String login, {String? handoff}) =>
+    '$apiBase/admin/?login=${Uri.encodeQueryComponent(login)}'
+    '${handoff == null ? '' : '&handoff=${Uri.encodeQueryComponent(handoff)}'}';

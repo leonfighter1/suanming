@@ -38,11 +38,25 @@ class AdminApp extends ConsumerWidget {
       );
 }
 
-/// Signed out: sign in; an admin signed in: the dashboard.
-class AdminGate extends ConsumerWidget {
+/// Signed out: sign in; an admin signed in: the dashboard. First, signed in without asking again where it can be
+/// (S33: the app's one-time code, this tab's session), a moment's wait meanwhile.
+class AdminGate extends ConsumerStatefulWidget {
   const AdminGate({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) =>
-      ref.watch(sessionProvider) == null ? const AdminSignInPage() : const AdminShell();
+  ConsumerState<AdminGate> createState() => _AdminGateState();
+}
+
+class _AdminGateState extends ConsumerState<AdminGate> {
+  late final Future<void> _started = ref.read(sessionProvider.notifier).start();
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<void>(
+        future: _started,
+        builder: (context, start) => start.connectionState != ConnectionState.done
+            ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+            : ref.watch(sessionProvider) == null
+                ? const AdminSignInPage()
+                : const AdminShell(),
+      );
 }

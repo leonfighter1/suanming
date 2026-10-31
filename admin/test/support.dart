@@ -170,6 +170,11 @@ class FakeAdmin {
         if (refreshFails) return _problem(401, 'invalid refresh token');
         _access = 'a2';
         return _json({'access_token': 'a2', 'refresh_token': 'r2'});
+      // ☰ → 管理后台's one-time code (S33), as src/auth/service.ts redeemHandoff takes it: 'h-ok' is a fresh one.
+      case '/v1/auth/handoff':
+        if (bodyOf(r)['code'] != 'h-ok') return _problem(401, 'the link has expired or was used; sign in', 'handoff_invalid');
+        _access = 'a1';
+        return _json({'access_token': 'a1', 'refresh_token': 'r1'});
       case '/v1/auth/logout':
         return http.Response('', 204);
     }
@@ -950,9 +955,13 @@ Future<FakeAdmin> pumpAdmin(
   bool signIn = true,
   Map<String, String>? prefs,
   String? loginHint,
+  String? handoff,
+  Map<String, String>? tab,
 }) async {
   final f = fake ?? FakeAdmin();
   final stored = prefs ?? <String, String>{};
+  // This tab's storage (S33): an empty value takes the key away, as the browser's does.
+  final inTab = tab ?? <String, String>{};
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -968,7 +977,11 @@ Future<FakeAdmin> pumpAdmin(
           return f.pick;
         }),
         prefsProvider.overrideWithValue(Prefs(read: (k) => stored[k], write: (k, v) => stored[k] = v)),
+        tabPrefsProvider.overrideWithValue(
+          Prefs(read: (k) => inTab[k], write: (k, v) => v.isEmpty ? inTab.remove(k) : inTab[k] = v),
+        ),
         loginHintProvider.overrideWithValue(loginHint),
+        handoffProvider.overrideWithValue(handoff),
       ],
       child: const AdminApp(),
     ),

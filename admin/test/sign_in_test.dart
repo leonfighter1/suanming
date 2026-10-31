@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_admin/application/providers.dart' show sessionKey;
 
 import '../../app/test/keys.dart';
 import 'support.dart';
@@ -104,5 +105,43 @@ void main() {
     await tester.tap(find.byKey(const Key('refresh')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('admin-submit')), findsOneWidget);
+  });
+
+  // S33 (the owner: 「如果当前登录进去的用户有dashboard access，那么不需要重复登录了」, 「不需要重复登录dashboard 页面了」).
+  testWidgets('from the app\'s ☰ with a one-time code: signed in at once, no sign-in', (tester) async {
+    final f = await pumpAdmin(tester, signIn: false, handoff: 'h-ok');
+    expect(find.byKey(const Key('admin-me')), findsOneWidget);
+    expect(find.byKey(const Key('admin-submit')), findsNothing);
+    expect(f.bodyOf(f.last('/v1/auth/handoff', method: 'POST')), {'code': 'h-ok'});
+  });
+
+  testWidgets('a code used or late: the sign-in, its login filled in from the app', (tester) async {
+    await pumpAdmin(tester, signIn: false, handoff: 'h-old', loginHint: 'mgr');
+    expect(find.byKey(const Key('admin-submit')), findsOneWidget);
+    expect(tester.widget<TextField>(find.byKey(const Key('admin-login'))).controller!.text, 'mgr');
+  });
+
+  testWidgets('a reload keeps this tab signed in; 退出登录 ends it there too', (tester) async {
+    final tab = <String, String>{};
+    await pumpAdmin(tester, tab: tab);
+    expect(tab[sessionKey], 'r1');
+    // A reload: the tab's session again, rotated, without the sign-in (rule 24: the first app gone first).
+    await tester.pumpWidget(const SizedBox());
+    final f = await pumpAdmin(tester, signIn: false, tab: tab);
+    expect(find.byKey(const Key('admin-me')), findsOneWidget);
+    expect(f.bodyOf(f.last('/v1/auth/refresh', method: 'POST')), {'refresh_token': 'r1'});
+    expect(tab[sessionKey], 'r2');
+    await openMenu(tester);
+    await tester.tap(find.byKey(const Key('sign-out')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('admin-submit')), findsOneWidget);
+    expect(tab.containsKey(sessionKey), isFalse);
+  });
+
+  testWidgets('a tab\'s session the server ended: the sign-in, and the tab forgets it', (tester) async {
+    final tab = {sessionKey: 'r-old'};
+    await pumpAdmin(tester, fake: FakeAdmin()..refreshFails = true, signIn: false, tab: tab);
+    expect(find.byKey(const Key('admin-submit')), findsOneWidget);
+    expect(tab.containsKey(sessionKey), isFalse);
   });
 }

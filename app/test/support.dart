@@ -346,6 +346,11 @@ class FakeApi {
     }
     if (suspended) return _problem(403, 'this account has been suspended', 'account_suspended');
     if (req.method == 'GET' && path == '/v1/me') return _json(_me, 200);
+    // ☰ → 管理后台 (S33): staff's one-time code, as src/api/routes/account.ts gives it.
+    if (req.method == 'POST' && path == '/v1/account/handoff') {
+      if (staff == null) return _problem(403, 'only staff open the 管理后台', 'not_staff');
+      return _json({'code': 'handoff-1', 'expires_at': '2026-10-31T08:02:00.000Z'}, 201);
+    }
     // 积分 (v11.0.0): the balance and changes, 充值, a chart's prices.
     if (req.method == 'GET' && path == '/v1/points') {
       if (!pointsOn) return _json({'enabled': false}, 200);

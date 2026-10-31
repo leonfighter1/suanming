@@ -35,8 +35,9 @@ class AdminFile {
   final String mime;
 }
 
-/// The admin API (/v1/admin/*, api/openapi.yaml tag admin). The session lives in memory only: closing the tab signs
-/// the admin out. An expired access token is refreshed once; a refresh that fails signs out.
+/// The admin API (/v1/admin/*, api/openapi.yaml tag admin). The session lives in this tab (S33: its refresh token in
+/// the tab's storage, through [onSession]): a reload keeps it, closing the tab signs the admin out. An expired access
+/// token is refreshed once; a refresh that fails signs out.
 class AdminApi {
   AdminApi({required this.baseUrl, http.Client? client}) : _http = client ?? http.Client();
 
@@ -52,11 +53,25 @@ class AdminApi {
   /// signing in, so the dashboard asks again what it may show.
   void Function()? onNotAllowed;
 
+  /// Told when the session's refresh token changes (signed in, refreshed), null when the session ends (S33).
+  void Function(String? refresh)? onSession;
+
   /// Signs in, then checks the account has a staff role (403 admin_only otherwise, and the session is dropped).
-  Future<AdminMe> signIn(String login, String password) async {
-    final t = await _send('POST', '/v1/auth/login', body: {'login': login, 'password': password});
+  Future<AdminMe> signIn(String login, String password) =>
+      _signedIn(_send('POST', '/v1/auth/login', body: {'login': login, 'password': password}));
+
+  /// Signs in with the one-time code the app's ☰ → 管理后台 handed over (S33): a session of the dashboard's own.
+  Future<AdminMe> signInWithCode(String code) => _signedIn(_send('POST', '/v1/auth/handoff', body: {'code': code}));
+
+  /// This tab's session again after a reload (S33): its refresh token rotated, then checked as a sign-in is.
+  Future<AdminMe> resume(String refresh) =>
+      _signedIn(_send('POST', '/v1/auth/refresh', body: {'refresh_token': refresh}));
+
+  Future<AdminMe> _signedIn(Future<Json> tokens) async {
+    final t = await tokens;
     _access = t['access_token'] as String;
     _refresh = t['refresh_token'] as String;
+    onSession?.call(_refresh);
     try {
       return await me();
     } catch (_) {
@@ -69,6 +84,7 @@ class AdminApi {
     final refresh = _refresh;
     _access = null;
     _refresh = null;
+    onSession?.call(null);
     if (refresh != null) {
       // The server's session ends too; signed out here either way.
       _send('POST', '/v1/auth/logout', body: {'refresh_token': refresh}).ignore();
@@ -233,6 +249,7 @@ class AdminApi {
       final t = await _send('POST', '/v1/auth/refresh', body: {'refresh_token': refresh});
       _access = t['access_token'] as String;
       _refresh = t['refresh_token'] as String;
+      onSession?.call(_refresh);
       return true;
     } on Object {
       return false;

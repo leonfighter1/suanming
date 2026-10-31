@@ -193,6 +193,28 @@ paths:
         "200": { $ref: "#/components/responses/Tokens" }
         "401": { $ref: "#/components/responses/Problem" }
 
+  /v1/auth/handoff:
+    post:
+      tags: [auth]
+      operationId: redeemHandoff
+      summary: Sign in with a one-time code from the app's ☰ → 管理后台 (S33)
+      description: |
+        The code POST /v1/account/handoff gave a staff member: two minutes, one use. The session is the dashboard's
+        own; the app's stays as it was. 401 handoff_invalid when the code was used, is late or was never given.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties: { code: { type: string } }
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+
   /v1/auth/logout:
     post:
       tags: [auth]
@@ -283,6 +305,29 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/User" }
         "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/account/handoff:
+    post:
+      tags: [account]
+      operationId: accountHandoff
+      summary: A one-time code that opens the 管理后台 signed in (S33), for staff
+      description: |
+        The owner: 「如果当前登录进去的用户有dashboard access，那么不需要重复登录了」. The app asks for it when ☰ opens
+        and opens /admin/?handoff=<code>; the dashboard signs in with POST /v1/auth/handoff. Two minutes, one use, kept
+        in memory only. 403 not_staff for an account with no 管理后台 role.
+      responses:
+        "201":
+          description: The code
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [code, expires_at]
+                properties:
+                  code: { type: string }
+                  expires_at: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
 
   /v1/account/username:
     put:

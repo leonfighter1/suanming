@@ -172,6 +172,9 @@ class ApiClient {
 
   Future<AppUser> me() async => AppUser.fromJson(await _authed('GET', '/v1/me'));
 
+  /// A one-time code the 管理后台 signs in with, for staff (S33): two minutes, one use.
+  Future<String> adminHandoff() async => (await _authed('POST', '/v1/account/handoff', const {}))['code'] as String;
+
   // ---- the account's logins (v8.2.0, tech plan WP15.3) ----
 
   Future<AppUser> setUsername(String username) async =>
