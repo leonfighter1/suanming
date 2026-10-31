@@ -107,6 +107,19 @@ Future<void> openFromMenu(WidgetTester tester, String key) async {
   await tester.tap(find.byKey(Key(key)));
 }
 
+/// The reader's settings store that can't be read, as in a private window or without a secure context (one home for
+/// the locale and theme tests' copies, S31).
+class BrokenSettingsStore implements SettingsStore {
+  @override
+  Future<String?> language() => Future.error(StateError('no storage'));
+  @override
+  Future<void> setLanguage(String apiLocale) => Future.error(StateError('no storage'));
+  @override
+  Future<String?> theme() => Future.error(StateError('no storage'));
+  @override
+  Future<void> setTheme(String mode) => Future.error(StateError('no storage'));
+}
+
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
 /// fixtures; reports go pending → [finalReport].
 class FakeApi {

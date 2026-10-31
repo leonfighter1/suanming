@@ -31,18 +31,6 @@ List<Rect> layoutOf(WidgetTester tester) {
   return rects;
 }
 
-/// Storage that can't be read, as in a private window.
-class _BrokenStore implements SettingsStore {
-  @override
-  Future<String?> language() => Future.error(StateError('no storage'));
-  @override
-  Future<void> setLanguage(String apiLocale) => Future.error(StateError('no storage'));
-  @override
-  Future<String?> theme() => Future.error(StateError('no storage'));
-  @override
-  Future<void> setTheme(String mode) => Future.error(StateError('no storage'));
-}
-
 void main() {
   test('each theme defines its colours, and they read: text, muted, accent, states and 五行 at 4.5 : 1 everywhere', () {
     for (final t in [ThemeTokens.light, ThemeTokens.dark]) {
@@ -186,6 +174,6 @@ void main() {
     expect(await startTheme(InMemorySettingsStore()..savedTheme = 'dark'), (mode: ThemeMode.dark, byTime: false));
     expect(await startTheme(InMemorySettingsStore()..savedTheme = 'light'), (mode: ThemeMode.light, byTime: false));
     expect(await startTheme(InMemorySettingsStore()..savedTheme = 'sepia'), byTime);
-    expect(await startTheme(_BrokenStore()), byTime);
+    expect(await startTheme(BrokenSettingsStore()), byTime);
   });
 }

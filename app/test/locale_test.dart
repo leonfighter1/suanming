@@ -9,18 +9,6 @@ import 'package:mingli_app/data/settings_store.dart';
 import 'keys.dart';
 import 'support.dart';
 
-/// Storage that can't be read, as in a private window or without a secure context.
-class _BrokenStore implements SettingsStore {
-  @override
-  Future<String?> language() => Future.error(StateError('no storage'));
-  @override
-  Future<void> setLanguage(String apiLocale) => Future.error(StateError('no storage'));
-  @override
-  Future<String?> theme() => Future.error(StateError('no storage'));
-  @override
-  Future<void> setTheme(String mode) => Future.error(StateError('no storage'));
-}
-
 void main() {
   testWidgets('the app starts in 简体中文, listed first in the language menu', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null));
@@ -86,12 +74,12 @@ void main() {
 
   testWidgets('without a saved language, or without storage, the app starts in 简体中文', (tester) async {
     expect(await startLocale(InMemorySettingsStore()), zhHans);
-    expect(await startLocale(_BrokenStore()), zhHans);
+    expect(await startLocale(BrokenSettingsStore()), zhHans);
     expect(await startLocale(InMemorySettingsStore()..saved = 'zh-Hant'), zhHant);
     // English saved before the owner removed it starts in 简体.
     expect(await startLocale(InMemorySettingsStore()..saved = 'en'), zhHans);
     // Picking a language where it can't be saved still switches it.
-    await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null, settings: _BrokenStore()));
+    await tester.pumpWidget(testApp(FakeApi(email: 'test@mingli.local'), locale: null, settings: BrokenSettingsStore()));
     await frames(tester, 12);
     await openFromMenu(tester, 'language-menu');
     await frames(tester, 12);
