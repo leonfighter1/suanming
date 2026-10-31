@@ -282,9 +282,9 @@ compact grid, and a panel of its own at the right. The building blocks are in
   both languages, the app's own under each field); the search, 已修改 and the images in the panel, before the texts on
   a narrow screen (`narrowAt: 1`, as 用户).
 - **设置** (S31): the settings by group, each group an `AppCard`, each setting its label and line, its control (a number
-  with its unit and 保存, 跟随 .env / 开 / 关, a menu, `FilterChip`s for the accepted currencies), its default and
-  恢复默认; the panel says what answers AI calls and the rates' day (a warning colour when real tokens are spent, or
-  the rates are stale).
+  with its unit and 保存, 跟随 .env / 开 / 关, a menu, `FilterChip`s for the accepted currencies; S32: the packs' rows,
+  元 2 : 积分 3 and the ⊖, at most 400 wide, then 添加套餐 and 保存 last), its default and 恢复默认; the panel says
+  what answers AI calls and the rates' day (a warning colour when real tokens are spent, or the rates are stale).
 - **Money** shows in 设置's dashboard currency (`yuan()` in format.dart, from the session's `MoneyUnit`): one change in
   the formatter, never at the figures.
 - **A mail's preview** is the server's own page in a frame (the web) or its text (elsewhere), light or dark as the

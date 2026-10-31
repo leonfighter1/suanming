@@ -13,6 +13,43 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v20.0.0 (2026-10-31): sign-in, codes, limits, 内容 and the 充值 packs in 设置 (S32 complete)
+
+Your request of S31, carried on: 「Extract as much configurations as possible … we should be able to change it in the
+dashboard controlling panel」. S31 left the captcha thresholds, the 追问 limit and the 积分 packs in the code; this
+release moves them, and the limits beside them, into 管理后台 → 设置: 23 settings in seven groups, 14 of them new. It
+ends S32 and is pushed.
+
+- **管理后台 → 设置** (admins). As before, a change holds from the next request and 恢复默认 puts it back.
+  - **登录:** 登录失败几次后要人机验证 (3), 登录失败几次后暂停登录 (10), and 登录失败的计算时长 (15 分钟), the
+    minutes the failures count over and the longest a pause lasts.
+  - **验证码** (new): 验证码有效期 (10 分钟; the text and the mail say the minutes in use), 可以输错几次 (5), 再次获取
+    的间隔 (60 秒), 每个手机号或邮箱每小时 (5), 每个账户每天 (10).
+  - **限额:** 一封邮件最多带几份记录 (10, at most 20), 每份结果的追问次数 (20), 一次最多增加的积分 (1,000,000). The
+    account page's 增加积分 checks the same number, and says it under the field.
+  - **内容** (new): 一段文字最长几个字 (2000) and 一张图片最大多少 (2 MB), for 内容管理.
+  - **积分** (new): 充值套餐, a row each (元 and 积分, ⊖ to take one out), 添加套餐 and 保存. Each pack gives at least
+    100 积分 a 元, and no two share a price; what the server refuses shows under the rows. A change is on sale from the
+    next request, in every accepted currency, with its receipts. The AI's 积分 prices follow the most generous pack, so
+    the margin holds: a pack that gives more 积分 a 元 makes every AI request cost more 积分. The default stays in
+    `config/points.json`.
+- **What stays out of the panel, and why:** the pricing terms (the margin of at least 50 %, the payment fee, VAT, the
+  dollar rate: your terms and the tax rules); the password's and the questions' lengths (the app checks them as you
+  type, so it would need them from the server first); the 24 months reports are kept (the legal work); the review
+  switch and the region rules (yours); and the server's own workings (the access token's 15 minutes, the online
+  check).
+- **Fixed:** a request whose body was too large (an image over 内容's limit) was refused, but its connection stayed
+  open with the rest unread, and the next request sent on it waited for good. A 413 now closes its connection.
+- **Verified:**
+  - **Tests:** server 738, app 304, 管理后台 93. Each new setting has a test that a change through the panel changes what
+    the server does on the next request.
+  - **Renders:** 设置 at 1440 (light and dark) and 390, with the packs' editor and a refusal under it.
+  - **Harness:** PASS.
+- **Stage S32 in sum:** the limits that were constants in the code are now settings, read where they are used; the
+  packs too, checked by your terms, with every price following them. Its summary is in the
+  [tech plan](docs/tech-plan.md).
+- **Next:** your next request. Real payments still wait for the Phase 3 gate.
+
 ### v19.0.0 (2026-10-31): 设置 in the 管理后台, 充值 in your currency, and receipts (S31 complete)
 
 Your request of today: the settings in their own files and changed in the 管理后台 (the idle time, the AI model and

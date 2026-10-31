@@ -2,6 +2,21 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-31 (t): S32 — the rest of the settings: sign-in, codes, limits, 内容, the packs; release v20.0.0
+
+- The v19.0.0 push checked first: main and the tags v18.0.0 and v19.0.0 on origin, level with the local ones.
+- S32 planned from S31's own summary (b364ccc): the owner's 「Extract as much configurations as possible」 had left the
+  captcha thresholds, the 追问 limit and the packs.
+- WP32.1 (058bbed) and WP32.2 (e674282): `failureLimits` and `codeLimits` read 设置 at each request; the old constants
+  went, the tests read the defaults.
+- WP32.3 (441ae83): 追问, records a mail, 增加积分 at once; `/v1/admin/me` says `grant_max`, the account page reads it
+  from the session and 设置 rechecks the session after changing it.
+- WP32.4 (4d3d044): 内容's text length and image size. Its test hung in the clean-up: timing each request showed a
+  413 had left its connection stuck; fixed on its own (31d1c6c), rule 91.
+- WP32.5 (9467960, after a65d6e8 `packFits`): the packs as a setting, default from config/points.json (`fallback`),
+  live through `withPacks`; the 管理后台's editor. The render showed the rows across the whole card (`maxWidth` inside a
+  stretching column); an `Align` keeps them to 400 (rule 3).
+
 ## 2026-10-31 (s): S31 — 设置, the AI switches, currencies and receipts; release v19.0.0
 
 - v18.0.0 pushed first (892af2e), as the owner asked.

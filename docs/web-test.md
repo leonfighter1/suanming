@@ -157,7 +157,7 @@ Every AI step answers with Claude Opus 5.5 (`config/model_routing.json`, the own
 - To compare models on the evaluation cases: `npm run eval:ai -- --live --model claude-sonnet-5-5`.
   It costs money; each case's cost at list price goes into docs/verification/ai-eval-results.json.
 
-## 设置 in the 管理后台 (v19.0.0)
+## 设置 in the 管理后台 (v19.0.0, v20.0.0)
 
 管理后台 → 设置 (admins) changes what `config/settings.json` and `.env` set, for the whole server from the next request
 on; 恢复默认 puts a setting back.
@@ -168,6 +168,13 @@ on; 恢复默认 puts a setting back.
 - **The others:** 登录有效期 (days unused before signing in again, `MINGLI_SESSION_IDLE_DAYS` its default when set),
   public mode's daily AI caps (`MINGLI_AI_DAILY_PER_USER`, `MINGLI_AI_DAILY_TOTAL`), mails a day per account, the
   accepted currencies, the 换算服务费 (5 %) and the 管理后台's currency.
+- **Since v20.0.0:** 登录's failures before 人机验证 and before a pause, and their minutes; 验证码 (its minutes, tries,
+  the wait for another, how many to one place an hour and to one account a day); 追问 per reading, records a mail and
+  增加积分 at once; 内容's text length and image size. To try one: set 登录失败几次后暂停登录 to 2, sign in wrong twice
+  in the app, and the third try says to wait; 恢复默认 lets it in again.
+- **充值套餐:** a row a pack (元, 积分), 添加套餐, ⊖ to take one out, 保存. A pack gives at least 100 积分 a 元, and no two
+  share a price. 我的积分 sells the new packs at once, in every accepted currency; the AI's 积分 prices follow the most
+  generous pack (more 积分 a 元 there, more 积分 a request), so the margin holds. The default is `config/points.json`'s.
 - **Rates:** today's exchange rates come from open.er-api.com once a day (`MINGLI_RATES_URL` names another address of
   the same shape); the request names only the base currency. While it can't be reached, the last good table answers,
   marked stale; with none, 充值 is offered in 元 alone.

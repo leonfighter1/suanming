@@ -92,8 +92,15 @@
 88. When two pages with Scaffolds share a route (a switch, a cross-fade), turn heroes and taps off on the one leaving from the frame it starts leaving, in wrappers every child gets alike under its own key, so no element is rebuilt.
 89. Never judge a background test run by its exit code or a filtered pipeline: write the full output to a file and read the final summary line (All tests passed / Some tests failed) from it.
 90. Never run the server suite while a Flutter suite (app or admin) runs, nor two Flutter suites at once: run them one after the other; a timeout seen under such load is checked by a run alone before anything is changed (rule 4).
+91. When the server stops reading a request body (413), close the connection (Connection: close) and test that header. A test that hangs after a large upload is a stuck connection, not a slow server: time each request to name the one that waits (rule 81).
 
 ## Log
+
+### 2026-10-31: A 413 left its keep-alive connection stuck
+- **Symptom:** S32's 内容 test hung in its clean-up (a settings DELETE) after a 413 image upload, and the server's close timed out
+- **Root cause:** readBody throws once a body passes its limit and stops reading; the connection stayed open with the rest unread, and the client's next request on it waited behind that body
+- **Fix:** the error handler answers a 413 with Connection: close; the too-large test checks the header
+- **Rule:** When the server stops reading a request body (413), close the connection (Connection: close) and test that header. A test that hangs after a large upload is a stuck connection, not a slow server: time each request to name the one that waits (rule 81). (Rule 91)
 
 ### 2026-10-31: The server suite run beside a Flutter suite: heavy tests time out
 - **Symptom:** Four server tests failed at 5-32 s (PGlite restarts, the 流月 sweep, a 402 before any cap) while the full app suite ran in the background; alone, all 729 passed

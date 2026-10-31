@@ -58,7 +58,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | done        |
 | S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | done        |
 | S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
-| S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | in progress |
+| S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2668,6 +2668,38 @@ was pushed (the owner: 「Continue」).
   groups; harness PASS.
 
 ## 阶段总结 (stage summaries)
+
+### S32 更多设置 (done 2026-10-31: v20.0.0)
+
+1. **Delivered** (all in v20.0.0):
+   - **WP32.1, 登录:** the failures before 人机验证 (3), before a pause (10) and the minutes they count over (15), read
+     at each sign-in (`failureLimits`, the limiter's `limits`).
+   - **WP32.2, 验证码** (a new group): a code's minutes (10), its tries (5), the wait for another (60 s), five an hour to
+     one place and ten a day per account (`codeLimits`); the text and the mail say the minutes in use.
+   - **WP32.3, 限额:** 追问 per reading (20), records a mail (10, at most 20: a request's documents stay within 4 MB),
+     增加积分 at once (1,000,000), which `/v1/admin/me` now says, so the account page checks what the server would.
+   - **WP32.4, 内容** (a new group): a text's length (2000), an image's size (2 MB).
+   - **WP32.5, 积分** (a new group): the 充值 packs, a new kind of setting (`packs`), their default in
+     config/points.json (`fallback`, their one home), checked by the owner's terms (`packFits`) and read at each use
+     (`withPacks`): 充值, the receipts and every price follow; the 管理后台's editor.
+2. **Numbers:**
+   - **Tests:** server 729 → 738, app 304, 管理后台 91 → 93.
+   - **Settings:** 9 → 23, in seven groups. Six constants went (the sign-in and code limits, `FOLLOWUP_LIMIT`,
+     `MAIL_DOCUMENTS`, `GRANT_MAX`, 内容's two).
+   - **Harness:** PASS for v20.0.0.
+3. **Against the plan:**
+   - **Found on the way:** a 413 left its connection open with the body unread, and the next request on it hung; fixed
+     on its own (31d1c6c) with a check of the header.
+   - **Kept out, as planned:** the pricing terms, the password's and the questions' lengths, retention, the review
+     switch and the region rules, and the server's own workings.
+   - **The packs:** the editor sends them by price; the server takes any order and refuses a field it doesn't know, so
+     nothing more reaches the app.
+   - Restructured first, as its own commit: the pack rule in one home (`packFits`, a65d6e8).
+4. **Mistakes and what they teach:**
+   - **Rule 91:** a test hung in its clean-up after a large upload. Timing each request named the one that waited
+     (rule 81), and the cause was the server's, not the test's: a 413 must close its connection.
+5. **Next:** the owner's next request. Open: WP7.2, WP7.3, WP1.8; the Phase 3 gate; Phase 4 (real payments) waits for
+   it.
 
 ### S31 设置、货币与收据 (done 2026-10-31: v19.0.0)
 
