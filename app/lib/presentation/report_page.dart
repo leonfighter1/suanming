@@ -13,6 +13,7 @@ import '../domain/export.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'archive_actions.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'inquiry_page.dart' show InquiryRecap;
 import 'labels.dart';
@@ -403,8 +404,9 @@ class _GeneratingState extends State<_Generating> with SingleTickerProviderState
               : const SizedBox.shrink(),
         ),
         const SizedBox(height: Space.l),
-        Text(
+        ContentText(
           l10n.generatingHint,
+          contentKey: 'generatingHint',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),

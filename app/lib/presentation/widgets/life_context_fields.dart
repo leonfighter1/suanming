@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/life_context.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../place_picker.dart';
 import 'elastic_switch.dart';
@@ -35,7 +36,7 @@ class LifeContextFields extends StatelessWidget {
         expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
         leading: const Icon(Icons.person_search_outlined),
         title: Text(l10n.lifeTitle, style: theme.textTheme.titleSmall),
-        subtitle: Text(l10n.lifeHint, style: theme.textTheme.bodySmall),
+        subtitle: ContentText(l10n.lifeHint, contentKey: 'lifeHint', style: theme.textTheme.bodySmall),
         childrenPadding: const EdgeInsets.only(bottom: Space.m),
         children: [
           AppSwitchTile(

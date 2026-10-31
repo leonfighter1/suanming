@@ -260,7 +260,11 @@ class _PointsPageState extends ConsumerState<PointsPage> {
           icon: Icons.receipt_outlined,
           trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
           onTap: () => push(context, const ReceiptsPage()),
-          child: Text(l10n.receiptsAbout, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+          child: ContentText(
+            l10n.receiptsAbout,
+            contentKey: 'receiptsAbout',
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
         ),
         AppCard(
           key: const Key('points-how'),

@@ -9,6 +9,7 @@ import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/time_zone.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -241,8 +242,9 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
                       if (chart == null && !_asking)
                         Padding(
                           padding: const EdgeInsets.only(bottom: Space.s),
-                          child: Text(
+                          child: ContentText(
                             l10n.liuyaoQuestionMissing,
+                            contentKey: 'liuyaoQuestionMissing',
                             key: const Key('liuyao-question-missing'),
                             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
                           ),
@@ -388,8 +390,9 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         ],
       ),
       if (time == null)
-        Text(
+        ContentText(
           l10n.liuyaoTimeMissing,
+          contentKey: 'liuyaoTimeMissing',
           key: const Key('liuyao-time-missing'),
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
         ),

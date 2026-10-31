@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/places.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -172,7 +173,13 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
               Expanded(child: _list(context, locale)),
               Padding(
                 padding: const EdgeInsets.all(Space.s),
-                child: Center(child: Text(l10n.placeSource, style: Theme.of(context).textTheme.bodySmall)),
+                child: Center(
+                  child: ContentText(
+                    l10n.placeSource,
+                    contentKey: 'placeSource',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ),
             ],
           ),

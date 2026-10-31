@@ -8,6 +8,7 @@ import '../domain/models.dart';
 import '../generated/contract.g.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
@@ -300,8 +301,9 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                       if (!_asking)
                         Padding(
                           padding: const EdgeInsets.only(top: Space.s),
-                          child: Text(
+                          child: ContentText(
                             l10n.tarotQuestionMissing,
+                            contentKey: 'tarotQuestionMissing',
                             key: const Key('tarot-question-missing'),
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),

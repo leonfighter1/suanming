@@ -7,6 +7,7 @@ import '../../data/api_client.dart';
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../buttons.dart';
+import '../content_text.dart';
 import '../design.dart';
 import 'points.dart';
 import 'reading_paragraph.dart';
@@ -200,7 +201,7 @@ class _FollowUpCardState extends ConsumerState<FollowUpCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.followUpIntro, style: ReadingText.small(context)),
+            ContentText(l10n.followUpIntro, contentKey: 'followUpIntro', style: ReadingText.small(context)),
             for (final (i, f) in items.indexed) _Turn(view: f, index: i),
             if (suggestions.isNotEmpty && left > 0 && !waiting) ...[
               const SizedBox(height: Space.m),

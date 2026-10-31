@@ -8,6 +8,7 @@ import '../domain/points.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/printer.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'home_page.dart' show push;
 import 'layout.dart';
@@ -56,7 +57,7 @@ class ReceiptsPage extends ConsumerWidget {
     return ListView(
       padding: pagePadding(context),
       children: [
-        Text(l10n.receiptsAbout, style: ReadingText.small(context)),
+        ContentText(l10n.receiptsAbout, contentKey: 'receiptsAbout', style: ReadingText.small(context)),
         const SizedBox(height: Space.m),
         if (items.isEmpty)
           EmptyState(icon: Icons.receipt_long_outlined, text: l10n.receiptsEmpty, contentKey: 'receiptsEmpty')
@@ -135,8 +136,9 @@ class ReceiptPage extends ConsumerWidget {
                 LifeKeyValues(rows: receiptLines(l10n, receipt)),
                 if (receipt.simulated) ...[
                   const SizedBox(height: Space.m),
-                  Text(
+                  ContentText(
                     l10n.receiptSimulated,
+                    contentKey: 'receiptSimulated',
                     key: const Key('receipt-simulated'),
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),

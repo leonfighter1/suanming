@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../tokens.dart';
 
@@ -71,7 +72,7 @@ class LotCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: Space.s),
-          Text(l10n.qiuqianTextNote, style: theme.textTheme.bodySmall),
+          ContentText(l10n.qiuqianTextNote, contentKey: 'qiuqianTextNote', style: theme.textTheme.bodySmall),
         ],
       ),
     );

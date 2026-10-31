@@ -16,6 +16,7 @@ import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/printer.dart';
 import 'archive_actions.dart' show lifeDocumentOf, shareDocuments;
+import 'content_text.dart';
 import 'design.dart';
 import 'labels.dart';
 import 'layout.dart';
@@ -321,7 +322,12 @@ class _PendingState extends State<_Pending> {
           ),
         ),
         const SizedBox(height: Space.l),
-        Text(l10n.lifeTook, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+        ContentText(
+          l10n.lifeTook,
+          contentKey: 'lifeTook',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }

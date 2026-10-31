@@ -7,6 +7,7 @@ import '../data/api_client.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -158,7 +159,11 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
                         ],
                       ),
                       const SizedBox(height: Space.m),
-                      Text(l10n.qiuqianHowTo, style: Theme.of(context).textTheme.bodyMedium),
+                      ContentText(
+                        l10n.qiuqianHowTo,
+                        contentKey: 'qiuqianHowTo',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                       const SizedBox(height: Space.l),
                       if (chart == null) ...[
                         AppFilledButton.icon(
@@ -170,8 +175,9 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
                         if (!_asking)
                           Padding(
                             padding: const EdgeInsets.only(top: Space.s),
-                            child: Text(
+                            child: ContentText(
                               l10n.qiuqianQuestionMissing,
+                              contentKey: 'qiuqianQuestionMissing',
                               key: const Key('qiuqian-question-missing'),
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),

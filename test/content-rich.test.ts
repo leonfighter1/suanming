@@ -58,7 +58,7 @@ describe("the subset", () => {
     ]).toEqual([false, false, true, true]);
   });
 
-  it("is where the app shows a text as content: the thirteen ContentText names", () => {
+  it("is where the app shows a text as content: every ContentText name", () => {
     const keys = new Set(contentTexts().map((t) => t.key));
     expect([...usageOf(appSources(), keys).rich].sort()).toEqual(
       [
@@ -75,6 +75,35 @@ describe("the subset", () => {
         "historyEmpty",
         "receiptsEmpty",
         "reviewEmpty",
+        // S34: the notes, hints and descriptions shown in a body or reading style.
+        "dayunTapHint",
+        "profileHint",
+        "inquiryAskingNote",
+        "lifeTook",
+        "lifeHint",
+        "liuyaoQuestionMissing",
+        "liuyaoTimeMissing",
+        "placeSource",
+        "receiptsAbout",
+        "receiptSimulated",
+        "qiuqianHowTo",
+        "qiuqianQuestionMissing",
+        "qiuqianTextNote",
+        "generatingHint",
+        "reviewHint",
+        "tarotQuestionMissing",
+        "shichenNote",
+        "outboxNotice",
+        "followUpIntro",
+        "fengshuiNote",
+        "remedyDesc",
+        "tarotSections",
+        "qiuqianSections",
+        "fengshuiSections",
+        "liuyaoSections",
+        "namingSections",
+        "disclaimerShort",
+        "trendTapHint",
       ].sort(),
     );
   });

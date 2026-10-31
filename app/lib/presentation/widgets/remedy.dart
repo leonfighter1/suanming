@@ -11,6 +11,7 @@ import '../../domain/export.dart';
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../platform/printer.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../labels.dart';
 import 'points.dart';
@@ -41,7 +42,7 @@ class RemedyCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.remedyDesc, style: ReadingText.small(context)),
+          ContentText(l10n.remedyDesc, contentKey: 'remedyDesc', style: ReadingText.small(context)),
           const SizedBox(height: Space.s),
           for (final t in topics)
             Padding(

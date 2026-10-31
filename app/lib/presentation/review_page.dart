@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/models.dart' show Json;
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'layout.dart';
 import 'widgets/remedy.dart' show compactButtons;
@@ -57,7 +58,7 @@ class ReviewPage extends ConsumerWidget {
           data: (items) => ListView(
             padding: pagePadding(context),
             children: [
-              Text(l10n.reviewHint, style: Theme.of(context).textTheme.bodySmall),
+              ContentText(l10n.reviewHint, contentKey: 'reviewHint', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: Space.m),
               if (items.isEmpty) EmptyState(icon: Icons.fact_check_outlined, text: l10n.reviewEmpty, contentKey: 'reviewEmpty'),
               for (final it in items) _ReviewTile(item: it),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../content_text.dart';
 import '../design.dart';
 
 /// 风水 (v4.4.0): what to look at in a room, as general principles of space with their everyday reasons,
@@ -59,7 +60,7 @@ class PrinciplesCard extends ConsumerWidget {
                 ],
               ),
             ),
-          Text(l10n.fengshuiNote, style: theme.textTheme.bodySmall),
+          ContentText(l10n.fengshuiNote, contentKey: 'fengshuiNote', style: theme.textTheme.bodySmall),
         ],
       ),
     );

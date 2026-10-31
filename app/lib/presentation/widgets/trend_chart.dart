@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import '../labels.dart';
@@ -146,8 +147,9 @@ class _TrendCardState extends State<TrendCard> {
             _Detail(point: points[sel], byYear: _byYear, keys: keys, label: label, value: _value),
           ],
           const SizedBox(height: Space.s),
-          Text(
+          ContentText(
             l10n.trendTapHint,
+            contentKey: 'trendTapHint',
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: Space.xs),

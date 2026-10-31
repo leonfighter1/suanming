@@ -7,6 +7,7 @@ import '../domain/inquiry.dart';
 import '../generated/contract.g.dart' show inquiryAnswerMax;
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -204,7 +205,11 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: scheme.onTertiaryContainer),
                       ),
                       const SizedBox(height: Space.xs),
-                      Text(l10n.inquiryAskingNote, style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onTertiaryContainer)),
+                      ContentText(
+                        l10n.inquiryAskingNote,
+                        contentKey: 'inquiryAskingNote',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onTertiaryContainer),
+                      ),
                     ],
                   ),
                 ),

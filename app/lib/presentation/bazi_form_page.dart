@@ -7,6 +7,7 @@ import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'life_report_page.dart';
 import 'design.dart';
 import 'keyboard.dart';
@@ -200,8 +201,9 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (profiles.isNotEmpty) ...[
-                        Text(
+                        ContentText(
                           l10n.profileHint,
+                          contentKey: 'profileHint',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                         ),
                         const SizedBox(height: Space.m),

@@ -6,6 +6,7 @@ import '../../application/providers.dart';
 import '../../data/api_client.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../buttons.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import 'remedy.dart' show compactButtons;
@@ -139,8 +140,9 @@ class _ContactDialogState extends ConsumerState<ContactDialog> {
                 // Nothing really left the server yet: the owner picks the providers next (tech plan S15).
                 if (sent.outbox) ...[
                   const SizedBox(height: Space.xs),
-                  Text(
+                  ContentText(
                     l10n.outboxNotice,
+                    contentKey: 'outboxNotice',
                     key: const Key('outbox-notice'),
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),

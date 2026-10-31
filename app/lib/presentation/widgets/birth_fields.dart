@@ -7,6 +7,7 @@ import '../../domain/models.dart';
 import '../../domain/profile.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../buttons.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import '../place_picker.dart';
@@ -299,7 +300,11 @@ class ShichenPicker extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: Space.s),
-        Text(l10n.shichenNote, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+        ContentText(
+          l10n.shichenNote,
+          contentKey: 'shichenNote',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        ),
       ],
     );
   }

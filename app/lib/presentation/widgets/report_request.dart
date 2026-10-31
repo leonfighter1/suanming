@@ -6,6 +6,7 @@ import '../../data/api_client.dart';
 import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../buttons.dart';
+import '../content_text.dart';
 import '../design.dart';
 import '../inquiry_page.dart';
 import '../labels.dart';
@@ -157,15 +158,40 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
           // A tarot reading's sections are fixed (v2.3.0): card by card, the whole spread, the advice;
           // so are a 求籤 reading's (v4.3.0): the poem, the question, the advice.
           if (widget.system == 'tarot')
-            Text(l10n.tarotSections, key: const Key('tarot-sections'), style: Theme.of(context).textTheme.bodyMedium)
+            ContentText(
+              l10n.tarotSections,
+              contentKey: 'tarotSections',
+              key: const Key('tarot-sections'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else if (widget.system == 'qiuqian')
-            Text(l10n.qiuqianSections, key: const Key('qiuqian-sections'), style: Theme.of(context).textTheme.bodyMedium)
+            ContentText(
+              l10n.qiuqianSections,
+              contentKey: 'qiuqianSections',
+              key: const Key('qiuqian-sections'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else if (widget.system == 'fengshui')
-            Text(l10n.fengshuiSections, key: const Key('fengshui-sections'), style: Theme.of(context).textTheme.bodyMedium)
+            ContentText(
+              l10n.fengshuiSections,
+              contentKey: 'fengshuiSections',
+              key: const Key('fengshui-sections'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else if (widget.system == 'liuyao')
-            Text(l10n.liuyaoSections, key: const Key('liuyao-sections'), style: Theme.of(context).textTheme.bodyMedium)
+            ContentText(
+              l10n.liuyaoSections,
+              contentKey: 'liuyaoSections',
+              key: const Key('liuyao-sections'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else if (widget.system == 'naming')
-            Text(l10n.namingSections, key: const Key('naming-sections'), style: Theme.of(context).textTheme.bodyMedium)
+            ContentText(
+              l10n.namingSections,
+              contentKey: 'namingSections',
+              key: const Key('naming-sections'),
+              style: Theme.of(context).textTheme.bodyMedium,
+            )
           else ...[
             Text(l10n.chooseTopics, style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: Space.s),
@@ -213,7 +239,12 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             PriceLine(id: 'inquiry', quote: quote?.inquiry, fee: true),
           ],
           const SizedBox(height: Space.s),
-          Text(l10n.disclaimerShort, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+          ContentText(
+            l10n.disclaimerShort,
+            contentKey: 'disclaimerShort',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     );

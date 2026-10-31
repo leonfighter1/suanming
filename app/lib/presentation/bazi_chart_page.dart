@@ -7,6 +7,7 @@ import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
@@ -442,8 +443,9 @@ class _DayunCardState extends State<_DayunCard> {
           if (open == null && b.dayunYears.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: Space.s),
-              child: Text(
+              child: ContentText(
                 l10n.dayunTapHint,
+                contentKey: 'dayunTapHint',
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
