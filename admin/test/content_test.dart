@@ -13,12 +13,20 @@ import 'support.dart';
 
 const tall = Size(1440, 1800);
 
-/// The 内容 page, wide enough for its panel.
-Future<FakeAdmin> openContent(WidgetTester tester, {FakeAdmin? fake}) async {
+/// The 内容 page, wide enough for its panel: every text in one list, unless [byPage] (S33: the page's own start).
+Future<FakeAdmin> openContent(WidgetTester tester, {FakeAdmin? fake, bool byPage = false}) async {
   final f = await pumpAdmin(tester, fake: fake, size: tall);
   await go(tester, '内容');
+  if (!byPage) {
+    await tester.tap(find.text('全部文字'));
+    await tester.pumpAndSettle();
+  }
   return f;
 }
+
+/// What [key] shows inside the page tile [page].
+Finder inPage(String page, String key) =>
+    find.descendant(of: find.byKey(ValueKey<String>('content-page-$page')), matching: find.byKey(ValueKey<String>(key)));
 
 Future<void> search(WidgetTester tester, String text) async {
   await tester.enterText(find.byKey(const Key('content-search')), text);
@@ -45,6 +53,55 @@ final png = AdminFile(Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10, 0, 0]
 const changedAt = '2026-10-29T12:00:00.000Z';
 
 void main() {
+  // S33 (the owner: 「以页面为基础展开所有当前页面用到的resource，这样integrator能够迅速查找相关的页面进行更改 … 如果有显示是
+  // 共同分享页，那么就展示多个逻辑同时用到的这个页面的方式」).
+  testWidgets('by page: each page opens to its texts by the way in and its images; a shared text says where else',
+      (tester) async {
+    await openContent(tester, byPage: true);
+    expect(textOf(tester, 'content-count'), '5 个页面 · 共 43 条文字');
+    expect(find.byKey(const ValueKey<String>('text-homeTarot')), findsNothing, reason: 'closed until opened');
+    expect(find.text('2 条文字 · 图片：横幅背景（命理罗盘）'), findsOneWidget, reason: '首页 in brief');
+
+    await tapOn(tester, 'content-page-LiuyaoPage');
+    expect(inPage('LiuyaoPage', 'text-sample1'), findsOneWidget);
+    expect(inPage('LiuyaoPage', 'text-sample10'), findsOneWidget);
+    expect(inPage('LiuyaoPage', 'content-page-LiuyaoPage-image-banner'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey<String>('content-page-LiuyaoPage')), matching: find.text('AI 解读按钮')),
+        findsOneWidget);
+    // On 算卦 alone: no line of where else.
+    expect(find.byKey(const ValueKey<String>('text-sample1-where')), findsNothing);
+
+    await tapOn(tester, 'content-page-HomePage');
+    expect(inPage('HomePage', 'text-homeTarot'), findsOneWidget);
+    expect(textOf(tester, 'text-homeTarot-where'), '也用在：欢迎页（登录前）');
+    expect(textOf(tester, 'text-pointsBalanceLine-where'), '也用在：我的积分');
+
+    // The texts no page uses, last: 内容 can change them, the app shows them nowhere.
+    expect(find.text('30 条：应用里找不到它们的用处，改了也不会显示'), findsOneWidget);
+
+    // A text opens its editor from its page.
+    await tester.tap(inPage('HomePage', 'text-homeTarot'));
+    await tester.pumpAndSettle();
+    expect(find.text('修改文字'), findsOneWidget);
+  });
+
+  testWidgets('by page with 已修改: only the pages with a change; a search finds in every text, with its places',
+      (tester) async {
+    final f = FakeAdmin()..contentTexts['sample5/zh-Hant'] = {'text': '改過的', 'updated_at': changedAt};
+    await openContent(tester, fake: f, byPage: true);
+    await tester.tap(find.text('已修改'));
+    await tester.pumpAndSettle();
+    expect(textOf(tester, 'content-count'), '1 个页面 · 共 43 条文字');
+    expect(find.text('1 条文字 · 1 条已修改'), findsOneWidget);
+
+    await tester.tap(find.text('全部'));
+    await tester.pumpAndSettle();
+    await search(tester, 'homeTarot');
+    expect(textOf(tester, 'text-homeTarot-where'), '用在：欢迎页（登录前） › 方法入口；首页 › 方法入口');
+    // The images say where they show.
+    expect(textOf(tester, 'image-banner-where'), '用在：首页 › 横幅；算卦 › 横幅');
+  });
+
   testWidgets('every text the app shows, in both languages with its key, 30 at a time', (tester) async {
     await openContent(tester);
     expect(textOf(tester, 'content-count'), '共 43 条');

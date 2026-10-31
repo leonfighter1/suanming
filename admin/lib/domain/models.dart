@@ -723,7 +723,13 @@ class DispatchEntry {
 /// 内容管理 (tech plan S29): a text the app shows, as staff can change it: the placeholders the app fills in ({balance}
 /// …), its own wording in each language, and staff's where they changed it.
 class ContentText {
-  const ContentText({required this.key, required this.placeholders, required this.defaults, this.changed = const {}});
+  const ContentText({
+    required this.key,
+    required this.placeholders,
+    required this.defaults,
+    this.changed = const {},
+    this.places = const [],
+  });
   factory ContentText.fromJson(Json j) => ContentText(
         key: j['key'] as String,
         placeholders: [for (final p in (j['placeholders'] as List? ?? const [])) p as String],
@@ -732,7 +738,11 @@ class ContentText {
           for (final MapEntry(:key, :value) in (j['changed'] as Json? ?? const {}).entries)
             key: (value as Json)['text'] as String,
         },
+        places: _list(j['places'], ContentPlace.fromJson),
       );
+
+  /// Where it shows (S33): each page and the way there; empty for a text no page uses.
+  final List<ContentPlace> places;
 
   /// The app's key for it (homeTarot …).
   final String key;
@@ -750,17 +760,41 @@ class ContentText {
 
 /// An image the app takes from here (the banners' art, the introduction page's mark), and staff's once one was put in.
 class ContentImage {
-  const ContentImage({required this.key, required this.label, this.url});
-  factory ContentImage.fromJson(Json j) =>
-      ContentImage(key: j['key'] as String, label: j['label'] as String? ?? '', url: j['url'] as String?);
+  const ContentImage({required this.key, required this.label, this.url, this.places = const []});
+  factory ContentImage.fromJson(Json j) => ContentImage(
+        key: j['key'] as String,
+        label: j['label'] as String? ?? '',
+        url: j['url'] as String?,
+        places: _list(j['places'], ContentPlace.fromJson),
+      );
   final String key;
   final String label;
+
+  /// Where it shows (S33), as a text's.
+  final List<ContentPlace> places;
 
   /// Staff's image's address on the server (/v1/content/images/banner?v=…); null while the app shows its own.
   final String? url;
 }
 
-/// Everything 内容 lists: the languages, what an image may be, the texts and the images.
+/// Where a text or an image of 内容 shows (S33): a page, by its id in [ContentListing.pages], and the named parts on the
+/// way to it (empty: the page shows it itself).
+class ContentPlace {
+  const ContentPlace(this.page, this.parts);
+  factory ContentPlace.fromJson(Json j) => ContentPlace(j['page'] as String, [for (final p in j['parts'] as List) p as String]);
+  final String page;
+  final List<String> parts;
+}
+
+/// One of the app's pages as 内容 lists them (S33): its id (the page's class) and its name.
+class ContentAppPage {
+  const ContentAppPage(this.id, this.name);
+  factory ContentAppPage.fromJson(Json j) => ContentAppPage(j['id'] as String, j['name'] as String);
+  final String id;
+  final String name;
+}
+
+/// Everything 内容 lists: the languages, what an image may be, the app's pages, the texts and the images.
 class ContentListing {
   const ContentListing({
     required this.locales,
@@ -768,6 +802,7 @@ class ContentListing {
     required this.imageMaxBytes,
     required this.texts,
     required this.images,
+    this.pages = const [],
   });
   factory ContentListing.fromJson(Json j) => ContentListing(
         locales: [for (final l in j['locales'] as List) l as String],
@@ -775,7 +810,11 @@ class ContentListing {
         imageMaxBytes: _i(j['image_max_bytes']),
         texts: _list(j['texts'], ContentText.fromJson),
         images: _list(j['images'], ContentImage.fromJson),
+        pages: _list(j['pages'], ContentAppPage.fromJson),
       );
+
+  /// The app's pages, in the order 内容 lists them (S33).
+  final List<ContentAppPage> pages;
   final List<String> locales;
 
   /// The types an image may be (image/png …), and its largest size.

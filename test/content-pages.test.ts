@@ -130,7 +130,7 @@ describe("the app's own map", () => {
     // The ☰ menu's texts on 首页, by the menu.
     expect(usage.places.get("adminDashboard")).toContainEqual({
       page: "HomePage",
-      parts: ["☰ 菜单"],
+      parts: ["菜单"],
     });
     // A shared part: the AI button's texts on every method's page.
     const methods = pagesOf("topicTarotCards");

@@ -43,7 +43,7 @@ export const PAGES: Record<string, string> = {
  */
 export const PARTS: Record<string, string> = {
   // On many pages.
-  AppMenu: "☰ 菜单",
+  AppMenu: "菜单",
   "app_menu.dart#_Header": "菜单顶部（账户）",
   pickTheme: "外观",
   ShortcutList: "键盘快捷键",

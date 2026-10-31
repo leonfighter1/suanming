@@ -58,7 +58,8 @@ void main() {
     final f = FakeAdmin()..role = 'integrator';
     await pumpAdmin(tester, fake: f, size: tall);
     expect(find.byType(NavigationRail), findsNothing);
-    expect(find.byKey(const ValueKey<String>('text-homeTarot')), findsOneWidget);
+    // 内容 first, by page (S33).
+    expect(find.byKey(const ValueKey<String>('content-page-HomePage')), findsOneWidget);
     expect(find.text('integ · 集成人员'), findsOneWidget);
     expect(await menuLabels(tester), ['内容', '消息']);
     await go(tester, '消息');

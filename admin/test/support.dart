@@ -550,6 +550,7 @@ class FakeAdmin {
         'locales': ['zh-Hans', 'zh-Hant'],
         'image_types': imageTypes,
         'image_max_bytes': imageMaxBytes,
+        'pages': contentPages,
         'texts': [
           for (final t in contentCatalog)
             {
@@ -562,6 +563,7 @@ class FakeAdmin {
             {
               'key': key,
               'label': label,
+              'places': contentImagePlaces[key],
               if (contentImages[key] case final i?) ...{
                 'url': '/v1/content/images/$key?v=${i['updated_at']}',
                 'updated_at': i['updated_at'],
@@ -785,25 +787,57 @@ const contentImageLabels = [('banner', '横幅背景（命理罗盘）'), ('logo
 const imageTypes = ['image/png', 'image/jpeg', 'image/webp'];
 const imageMaxBytes = 2 * 1024 * 1024;
 
-/// The texts 内容 lists (the server's, from the app's message files): a few of the app's, then enough for 再显示.
+/// The app's pages as 内容 lists them (the server's pages.ts), a few.
+const contentPages = [
+  {'id': 'MingliApp', 'name': '整个应用'},
+  {'id': 'IntroPage', 'name': '欢迎页（登录前）'},
+  {'id': 'HomePage', 'name': '首页'},
+  {'id': 'LiuyaoPage', 'name': '算卦'},
+  {'id': 'PointsPage', 'name': '我的积分'},
+];
+
+/// Where an image shows (the server's usage.ts), by key.
+const contentImagePlaces = {
+  'banner': [
+    {'page': 'HomePage', 'parts': ['横幅']},
+    {'page': 'LiuyaoPage', 'parts': ['横幅']},
+  ],
+  'logo': [
+    {'page': 'IntroPage', 'parts': ['标志']},
+  ],
+};
+
+/// The texts 内容 lists (the server's, from the app's message files) with where each shows (usage.ts): a few of the
+/// app's, one shared by several pages, then enough for 再显示, ten of them on 算卦's AI button and the rest on no page.
 final contentCatalog = <Json>[
   {
     'key': 'homeTarot',
     'area': 'home',
     'placeholders': <String>[],
     'defaults': {'zh-Hans': '塔罗占卜', 'zh-Hant': '塔羅占卜'},
+    'places': [
+      {'page': 'IntroPage', 'parts': ['方法入口']},
+      {'page': 'HomePage', 'parts': ['方法入口']},
+    ],
   },
   {
     'key': 'pointsBalanceLine',
     'area': 'points',
     'placeholders': ['balance'],
     'defaults': {'zh-Hans': '余额 {balance} 积分', 'zh-Hant': '餘額 {balance} 積分'},
+    'places': [
+      {'page': 'HomePage', 'parts': ['菜单']},
+      {'page': 'PointsPage', 'parts': <String>[]},
+    ],
   },
   {
     'key': 'serverUnreachable',
     'area': 'server',
     'placeholders': <String>[],
     'defaults': {'zh-Hans': '连不上服务器。\n请稍后再试。', 'zh-Hant': '連不上伺服器。\n請稍後再試。'},
+    'places': [
+      {'page': 'MingliApp', 'parts': <String>[]},
+    ],
   },
   for (var i = 1; i <= 40; i++)
     {
@@ -811,6 +845,9 @@ final contentCatalog = <Json>[
       'area': 'sample',
       'placeholders': <String>[],
       'defaults': {'zh-Hans': '示例文字 $i', 'zh-Hant': '示例文字 $i'},
+      'places': [
+        if (i <= 10) {'page': 'LiuyaoPage', 'parts': ['AI 解读按钮']},
+      ],
     },
 ];
 

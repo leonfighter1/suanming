@@ -40,6 +40,10 @@ class _ContentPageState extends ConsumerState<ContentPage> {
   bool _changedOnly = false;
   int _shown = _pageSize;
 
+  /// By page (S33: the owner's 「以页面为基础展开所有当前页面用到的resource」), else every text in one list. A search
+  /// finds in every text either way.
+  bool _byPage = true;
+
   /// The image being put in or taken out.
   String? _busyImage;
 
@@ -120,8 +124,12 @@ class _ContentPageState extends ConsumerState<ContentPage> {
       // narrow screen (as 用户's).
       narrowAt: 1,
       main: [
-        const PageHeader('内容', subtitle: '应用里的文字和图片，每种语言一份。改过的存在服务器上，应用下次打开时显示；也可以恢复成应用自带的。'),
-        AsyncView(listing, onRetry: retry, data: _texts),
+        const PageHeader('内容', subtitle: '应用里的文字和图片，按页面列出，每种语言一份。改过的存在服务器上，应用下次打开时显示；也可以恢复成应用自带的。'),
+        AsyncView(
+          listing,
+          onRetry: retry,
+          data: (l) => _byPage && _search.text.trim().isEmpty ? _pages(l) : _texts(l),
+        ),
       ],
       aside: [
         PanelSection(
@@ -136,6 +144,21 @@ class _ContentPageState extends ConsumerState<ContentPage> {
               prefixIcon: Icon(Icons.search),
               labelText: '搜索',
               hintText: '文字，或它的键名',
+            ),
+          ),
+        ),
+        PanelSection(
+          title: '显示',
+          child: SegmentKeys<bool>(
+            child: SegmentedButton<bool>(
+              key: const Key('content-view'),
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(value: true, label: Text('按页面')),
+                ButtonSegment(value: false, label: Text('全部文字')),
+              ],
+              selected: {_byPage},
+              onSelectionChanged: (s) => _refind(() => _byPage = s.first),
             ),
           ),
         ),
@@ -159,9 +182,126 @@ class _ContentPageState extends ConsumerState<ContentPage> {
     );
   }
 
+  /// By page (S33): each of the app's pages with a text or an image, opening to its texts by the way they are reached,
+  /// its images, and for each text the other pages it shows on; last, the texts no page uses.
+  Widget _pages(ContentListing l) {
+    final theme = Theme.of(context);
+    final tk = ThemeTokens.of(context);
+    final names = {for (final p in l.pages) p.id: p.name};
+    bool wanted(ContentText t) => !_changedOnly || t.changed.isNotEmpty;
+    // Each page's texts by the way there, in the order the texts come.
+    final byPage = <String, Map<String, List<ContentText>>>{};
+    for (final t in l.texts.where(wanted)) {
+      for (final p in t.places) {
+        byPage.putIfAbsent(p.page, () => {}).putIfAbsent(p.parts.join(' › '), () => []).add(t);
+      }
+    }
+    // Its images too; with 已修改, those staff put in.
+    final images = <String, List<(ContentImage, ContentPlace)>>{};
+    for (final i in l.images.where((i) => !_changedOnly || i.url != null)) {
+      for (final p in i.places) {
+        images.putIfAbsent(p.page, () => []).add((i, p));
+      }
+    }
+    final unused = [for (final t in l.texts.where(wanted)) if (t.places.isEmpty) t];
+    final shown = [for (final p in l.pages) if (byPage.containsKey(p.id) || images.containsKey(p.id)) p];
+    Widget group(String title) => Padding(
+          padding: const EdgeInsets.fromLTRB(Space.card, Space.m, Space.card, Space.xs),
+          child: Text(title, style: theme.textTheme.titleSmall?.copyWith(color: tk.textSecondary)),
+        );
+    Widget tile({required Key key, required String title, required String subtitle, required List<Widget> children}) =>
+        ExpansionTile(
+          key: key,
+          title: Text(title),
+          subtitle: Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: tk.textSecondary)),
+          shape: const Border(),
+          collapsedShape: const Border(),
+          tilePadding: const EdgeInsets.symmetric(horizontal: Space.card),
+          childrenPadding: const EdgeInsets.only(bottom: Space.s),
+          // One left edge: the headings and rows start where the tile's title does.
+          expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+          expandedAlignment: Alignment.centerLeft,
+          children: children,
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '${shown.length} 个页面 · 共 ${count(l.texts.length)} 条文字',
+          key: const Key('content-count'),
+          style: theme.textTheme.bodySmall?.copyWith(color: tk.textSecondary),
+        ),
+        const SizedBox(height: Space.s),
+        if (shown.isEmpty && unused.isEmpty)
+          Text('没有符合的文字', style: theme.textTheme.bodyMedium)
+        else
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final (i, page) in shown.indexed) ...[
+                  if (i > 0) const Divider(height: 1),
+                  () {
+                    final groups = byPage[page.id] ?? const <String, List<ContentText>>{};
+                    final pictures = images[page.id] ?? const [];
+                    final texts = {for (final g in groups.values) ...g};
+                    final changed = texts.where((t) => t.changed.isNotEmpty).length;
+                    return tile(
+                      key: ValueKey<String>('content-page-${page.id}'),
+                      title: page.name,
+                      subtitle: [
+                        '${count(texts.length)} 条文字',
+                        if (changed > 0) '$changed 条已修改',
+                        if (pictures.isNotEmpty) '图片：${{for (final (i, _) in pictures) i.label}.join('、')}',
+                      ].join(' · '),
+                      children: [
+                        if (pictures.isNotEmpty) ...[
+                          group('图片'),
+                          for (final (image, p) in pictures)
+                            ListTile(
+                              key: ValueKey<String>('content-page-${page.id}-image-${image.key}'),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: Space.card),
+                              leading: Icon(Icons.image_outlined, color: tk.textSecondary),
+                              title: Text(image.label),
+                              subtitle: Text('${_placeText(names, p)} · 在右边「图片」里换'),
+                            ),
+                        ],
+                        // The page's own first, then each way in, in the order they come.
+                        for (final way in [if (groups.containsKey('')) '', ...groups.keys.where((w) => w.isNotEmpty)]) ...[
+                          group(way.isEmpty ? '页面上' : way),
+                          for (final t in groups[way]!)
+                            _TextRow(
+                              t,
+                              locales: l.locales,
+                              where: _alsoOn(names, t.places, page.id),
+                              onTap: () => _edit(l, t),
+                            ),
+                        ],
+                      ],
+                    );
+                  }(),
+                ],
+                if (unused.isNotEmpty) ...[
+                  if (shown.isNotEmpty) const Divider(height: 1),
+                  tile(
+                    key: const Key('content-page-unused'),
+                    title: '没有页面用到的文字',
+                    subtitle: '${count(unused.length)} 条：应用里找不到它们的用处，改了也不会显示',
+                    children: [for (final t in unused) _TextRow(t, locales: l.locales, onTap: () => _edit(l, t))],
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _texts(ContentListing l) {
     final theme = Theme.of(context);
     final tk = ThemeTokens.of(context);
+    final names = {for (final p in l.pages) p.id: p.name};
     final matches = _matches(l);
     final shown = matches.take(_shown).toList();
     return Column(
@@ -185,7 +325,13 @@ class _ContentPageState extends ConsumerState<ContentPage> {
               children: [
                 for (final (i, t) in shown.indexed) ...[
                   if (i > 0) const Divider(height: 1),
-                  _TextRow(t, locales: l.locales, onTap: () => _edit(l, t)),
+                  _TextRow(
+                    t,
+                    locales: l.locales,
+                    // A server from before S33 says nothing of places.
+                    where: l.pages.isEmpty ? null : _where(names, t.places),
+                    onTap: () => _edit(l, t),
+                  ),
                 ],
               ],
             ),
@@ -207,6 +353,7 @@ class _ContentPageState extends ConsumerState<ContentPage> {
     final theme = Theme.of(context);
     final tk = ThemeTokens.of(context);
     final base = ref.watch(adminApiProvider).baseUrl;
+    final names = {for (final p in l.pages) p.id: p.name};
     return PanelSection(
       title: '图片',
       child: Column(
@@ -215,6 +362,12 @@ class _ContentPageState extends ConsumerState<ContentPage> {
           for (final (i, image) in l.images.indexed) ...[
             if (i > 0) const SizedBox(height: Space.l),
             Text(image.label, style: theme.textTheme.titleSmall),
+            if (l.pages.isNotEmpty)
+              Text(
+                _where(names, image.places),
+                key: ValueKey<String>('image-${image.key}-where'),
+                style: theme.textTheme.bodySmall?.copyWith(color: tk.textSecondary),
+              ),
             const SizedBox(height: Space.xs),
             if (image.url == null)
               Text(
@@ -271,13 +424,35 @@ class _ContentPageState extends ConsumerState<ContentPage> {
   }
 }
 
-/// A text in the list: its wording in each language (the first as its title), its key, and 已修改 where staff changed
-/// it. Opens its editor (Enter too).
+/// A place in words: 算卦 › AI 解读按钮 › 语音输入.
+String _placeText(Map<String, String> names, ContentPlace p) => [names[p.page] ?? p.page, ...p.parts].join(' › ');
+
+/// Where a text or an image shows, in a line: its first places and how many in all (S33).
+String _where(Map<String, String> names, List<ContentPlace> places) {
+  if (places.isEmpty) return '应用里没有用到';
+  final first = places.take(3).map((p) => _placeText(names, p)).join('；');
+  return places.length > 3 ? '用在：$first 等 ${places.length} 处' : '用在：$first';
+}
+
+/// The other pages a text shows on besides [page]: a shared one says where else (S33; the owner: 「如果有显示是共同分享
+/// 页，那么就展示多个逻辑同时用到的这个页面的方式」); null when it shows on this page alone.
+String? _alsoOn(Map<String, String> names, List<ContentPlace> places, String page) {
+  final others = {for (final p in places) if (p.page != page) names[p.page] ?? p.page}.toList();
+  if (others.isEmpty) return null;
+  final first = others.take(4).join('、');
+  return others.length > 4 ? '也用在：$first 等 ${others.length} 个页面' : '也用在：$first';
+}
+
+/// A text in the list: its wording in each language (the first as its title), its key, where else it shows (S33), and
+/// 已修改 where staff changed it. Opens its editor (Enter too).
 class _TextRow extends StatelessWidget {
-  const _TextRow(this.t, {required this.locales, required this.onTap});
+  const _TextRow(this.t, {required this.locales, required this.onTap, this.where});
   final ContentText t;
   final List<String> locales;
   final VoidCallback onTap;
+
+  /// Where it shows, or where else, in a line.
+  final String? where;
 
   @override
   Widget build(BuildContext context) {
@@ -294,6 +469,12 @@ class _TextRow extends StatelessWidget {
         children: [
           for (final l in locales.skip(1)) Text(t.textIn(l)),
           Text(t.key, style: theme.textTheme.bodySmall?.copyWith(color: tk.textMuted)),
+          if (where != null)
+            Text(
+              where!,
+              key: ValueKey<String>('text-${t.key}-where'),
+              style: theme.textTheme.bodySmall?.copyWith(color: tk.textSecondary),
+            ),
         ],
       ),
       trailing: t.changed.isEmpty
