@@ -170,7 +170,9 @@ void main() {
     await frames(tester, 10);
 
     final paths = api.requests.map((r) => '${r.method} ${r.url.path}').toList();
-    expect(paths.sublist(paths.length - 3), ['POST /v1/charts', 'POST /v1/auth/refresh', 'POST /v1/charts']);
+    // The three ending with the chart's second try (the chart page then asks for more, its AI card's balance).
+    final last = paths.lastIndexOf('POST /v1/charts');
+    expect(paths.sublist(last - 2, last + 1), ['POST /v1/charts', 'POST /v1/auth/refresh', 'POST /v1/charts']);
     expect(find.text('四柱'), findsOneWidget);
   });
 

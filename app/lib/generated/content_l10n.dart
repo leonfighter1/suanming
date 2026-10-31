@@ -101,6 +101,18 @@ class ContentLocalizations extends AppLocalizations {
   String get fourPillars => _text('fourPillars') ?? _base.fourPillars;
 
   @override
+  String get chartGroupChart => _text('chartGroupChart') ?? _base.chartGroupChart;
+
+  @override
+  String get chartGroupMakeup => _text('chartGroupMakeup') ?? _base.chartGroupMakeup;
+
+  @override
+  String get chartGroupLuck => _text('chartGroupLuck') ?? _base.chartGroupLuck;
+
+  @override
+  String get chartGroupReading => _text('chartGroupReading') ?? _base.chartGroupReading;
+
+  @override
   String get pillarYear => _text('pillarYear') ?? _base.pillarYear;
 
   @override
@@ -1527,6 +1539,18 @@ class ContentLocalizations extends AppLocalizations {
 
   @override
   String get liuyaoRemind => _text('liuyaoRemind') ?? _base.liuyaoRemind;
+
+  @override
+  String get liuyaoGroupAsk => _text('liuyaoGroupAsk') ?? _base.liuyaoGroupAsk;
+
+  @override
+  String get liuyaoGroupCast => _text('liuyaoGroupCast') ?? _base.liuyaoGroupCast;
+
+  @override
+  String get liuyaoGroupResult => _text('liuyaoGroupResult') ?? _base.liuyaoGroupResult;
+
+  @override
+  String get liuyaoGroupReading => _text('liuyaoGroupReading') ?? _base.liuyaoGroupReading;
 
   @override
   String get liuyaoRemindBody => _text('liuyaoRemindBody') ?? _base.liuyaoRemindBody;

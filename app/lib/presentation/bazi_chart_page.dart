@@ -39,38 +39,48 @@ class BaziChartPage extends ConsumerWidget {
     String chars(String s) => s.characters.map(t).join();
     final title = personName.isEmpty ? l10n.homeBazi : l10n.chartOf(personName);
 
-    final sections = <Widget>[
-      HeroBanner(
-        title: title,
-        subtitle: '${l10n.dayMaster} ${b.dayMasterGan}${t(b.dayMasterWuxing)}（${t(b.dayMasterYinYang)}）',
-        trailing: GanZhiText(b.pillars['day']!.ganzhi, size: 34),
-      ),
-      AppCard(
-        title: l10n.fourPillars,
-        icon: Icons.grid_view_rounded,
-        child: _PillarGrid(chart: b, t: t, brief: brief),
-      ),
-      AppCard(
-        key: const Key('lunar-card'),
-        title: l10n.lunarCompare,
-        icon: Icons.nightlight_round,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _KV(l10n.gregorian, b.civilLocal.substring(0, 16).replaceFirst('T', ' ')),
-            _KV(
-              l10n.lunarLabel,
-              '${b.lunar.yearGanzhi}年${chars(b.lunar.monthName)}${b.lunar.dayName} · ${b.pillars['hour']!.zhi}${t('时')}',
-            ),
-            _KV(l10n.zodiac, t(b.lunar.shengxiao)),
-            if (b.lunar.yearGanzhi != b.pillars['year']!.ganzhi)
-              Padding(
-                padding: const EdgeInsets.only(top: Space.s),
-                child: Pill(l10n.lunarYearNote, icon: Icons.info_outline, color: Theme.of(context).colorScheme.tertiary),
+    final banner = HeroBanner(
+      title: title,
+      subtitle: '${l10n.dayMaster} ${b.dayMasterGan}${t(b.dayMasterWuxing)}（${t(b.dayMasterYinYang)}）',
+      trailing: GanZhiText(b.pillars['day']!.ganzhi, size: 34),
+    );
+    // Grouped (S35; the owner: 「八字摆盘现在的UI太挤，尤其是desktop … 不妨考虑重新归类 … 以app为主，重新排版」): 命盘,
+    // 命局, 运势, 解读与报告. On a desktop window the chart, its fortunes and the readings in the main column, 命局's
+    // compact facts at the side; on a phone one column, 命局 after the chart.
+    // 命盘: the four pillars, the page's anchor, with the dates they come from (农历对照, a card of its own before).
+    final pillars = AppCard(
+      title: l10n.fourPillars,
+      icon: Icons.grid_view_rounded,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _PillarGrid(chart: b, t: t, brief: brief),
+          const Divider(height: Space.xl),
+          Column(
+            key: const Key('lunar-card'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.lunarCompare, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: Space.xs),
+              _KV(l10n.gregorian, b.civilLocal.substring(0, 16).replaceFirst('T', ' ')),
+              _KV(
+                l10n.lunarLabel,
+                '${b.lunar.yearGanzhi}年${chars(b.lunar.monthName)}${b.lunar.dayName} · ${b.pillars['hour']!.zhi}${t('时')}',
               ),
-          ],
-        ),
+              _KV(l10n.zodiac, t(b.lunar.shengxiao)),
+              if (b.lunar.yearGanzhi != b.pillars['year']!.ganzhi)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.s),
+                  child: Pill(l10n.lunarYearNote, icon: Icons.info_outline, color: Theme.of(context).colorScheme.tertiary),
+                ),
+            ],
+          ),
+        ],
       ),
+    );
+    // 命局: what the chart is made of, the side column's facts on a desktop window.
+    final side = <Widget>[
+      GroupTitle(key: const Key('chart-group-makeup'), title: l10n.chartGroupMakeup),
       AppCard(
         title: l10n.wuxingWeighted,
         icon: Icons.donut_large,
@@ -147,6 +157,12 @@ class BaziChartPage extends ConsumerWidget {
             ],
           ),
         ),
+    ];
+    // 命盘, then 运势 (大运, 流年, 流月) and 解读与报告: the main column.
+    final main = <Widget>[
+      GroupTitle(key: const Key('chart-group-chart'), title: l10n.chartGroupChart),
+      pillars,
+      GroupTitle(key: const Key('chart-group-luck'), title: l10n.chartGroupLuck),
       _DayunCard(chart: b, t: t, brief: brief),
       AppCard(
         title: l10n.liunian,
@@ -179,6 +195,7 @@ class BaziChartPage extends ConsumerWidget {
             ],
           ),
         ),
+      GroupTitle(key: const Key('chart-group-reading'), title: l10n.chartGroupReading),
       ReportRequest(
         chartId: chart.chartId,
         system: 'bazi',
@@ -219,7 +236,14 @@ class BaziChartPage extends ConsumerWidget {
         appBar: AppBar(title: Text(title)),
         body: ListView(
           padding: pagePadding(context),
-          children: [for (var i = 0; i < sections.length; i++) FadeSlideIn(index: i, child: sections[i])],
+          children: [
+            FadeSlideIn(child: banner),
+            SideColumns(
+              sideAfter: 2,
+              main: [for (final (i, p) in main.indexed) FadeSlideIn(index: i + 1, child: p)],
+              side: [for (final (i, p) in side.indexed) FadeSlideIn(index: i + 1, child: p)],
+            ),
+          ],
         ),
       ),
     );

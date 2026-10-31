@@ -165,12 +165,14 @@ void main() {
     }
 
     // The container: (2560 - 1620) / 2 = 470 beyond it at each side; the content 32 inside it, from 502, 1556 wide.
+    // 算卦's first card in its main column (S35): beside it the gutter and the side's four columns.
+    final main = 1556.0 - 24 - Grid.span(1556, 4, columns: 12, gutter: 24);
     for (final m in ['bazi', 'tarot', 'qiuqian', 'liuyao', 'fengshui']) {
       await fresh();
       await openEntry(tester, m);
       await frames(tester, 12);
       final card = tester.getRect(find.byType(AppCard).first);
-      expect([card.left, card.width], [502.0, 1556.0], reason: m);
+      expect([card.left, card.width], [502.0, m == 'liuyao' ? main : 1556.0], reason: m);
     }
     // The place picker, from 八字's form, and 设置: their rows carry their own inset (16), so the list is the
     // container itself, 470 to 2090.
@@ -252,5 +254,32 @@ void main() {
   test("every screen keeps the design rules: colours, sizes, gaps and corners from the system", () {
     final found = designViolations('lib/presentation');
     expect(found, isEmpty, reason: '\n${found.join('\n')}');
+  });
+
+  // S35 (the owner: 「八字摆盘现在的UI太挤，尤其是desktop … 不妨考虑重新归类 … 以app为主，重新排版」).
+  testWidgets('八字\'s chart in its groups: 命局 beside the chart on a desktop window, after it on a phone', (tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.devicePixelRatio = 1;
+    for (final (size, beside) in [(const Size(1600, 2400), true), (const Size(400, 4400), false)]) {
+      tester.view.physicalSize = size;
+      await tester.pumpWidget(const SizedBox()); // rule 24
+      await tester.pumpWidget(testApp(FakeApi()));
+      await frames(tester, 12);
+      await openEntry(tester, 'bazi');
+      await frames(tester, 12);
+      await scrollTo(tester, const Key('compute-chart'));
+      await tester.tap(find.byKey(const Key('compute-chart')));
+      await frames(tester, 20);
+      final chart = tester.getRect(find.byKey(const Key('chart-group-chart')));
+      final makeup = tester.getRect(find.byKey(const Key('chart-group-makeup')));
+      final luck = tester.getRect(find.byKey(const Key('chart-group-luck')));
+      if (beside) {
+        expect(makeup.top, chart.top, reason: 'level with the chart, at its right');
+        expect(makeup.left, greaterThan(chart.right));
+      } else {
+        expect(makeup.left, chart.left, reason: 'one column');
+        expect([chart.bottom < makeup.top, makeup.bottom < luck.top], [true, true], reason: '命盘, 命局, then 运势');
+      }
+    }
   });
 }

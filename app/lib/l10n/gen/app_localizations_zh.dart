@@ -82,6 +82,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fourPillars => '四柱';
 
   @override
+  String get chartGroupChart => '命盘';
+
+  @override
+  String get chartGroupMakeup => '命局';
+
+  @override
+  String get chartGroupLuck => '运势';
+
+  @override
+  String get chartGroupReading => '解读与报告';
+
+  @override
   String get pillarYear => '年柱';
 
   @override
@@ -1547,6 +1559,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get liuyaoRemind => '起卦之前';
 
   @override
+  String get liuyaoGroupAsk => '问卦';
+
+  @override
+  String get liuyaoGroupCast => '起卦';
+
+  @override
+  String get liuyaoGroupResult => '得卦';
+
+  @override
+  String get liuyaoGroupReading => '解读';
+
+  @override
   String get liuyaoRemindBody => '先静下心，把要问的事想清楚。一次只问一件事，同一件事不要一再重问。';
 
   @override
@@ -2580,6 +2604,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get fourPillars => '四柱';
+
+  @override
+  String get chartGroupChart => '命盤';
+
+  @override
+  String get chartGroupMakeup => '命局';
+
+  @override
+  String get chartGroupLuck => '運勢';
+
+  @override
+  String get chartGroupReading => '解讀與報告';
 
   @override
   String get pillarYear => '年柱';
@@ -4045,6 +4081,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get liuyaoRemind => '起卦之前';
+
+  @override
+  String get liuyaoGroupAsk => '問卦';
+
+  @override
+  String get liuyaoGroupCast => '起卦';
+
+  @override
+  String get liuyaoGroupResult => '得卦';
+
+  @override
+  String get liuyaoGroupReading => '解讀';
 
   @override
   String get liuyaoRemindBody => '先靜下心，把要問的事想清楚。一次只問一件事，同一件事不要一再重問。';

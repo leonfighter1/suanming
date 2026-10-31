@@ -51,6 +51,41 @@ abstract final class Grid {
       (width - gutter * (columns - 1)) / columns * span + gutter * (span - 1);
 }
 
+/// A page's parts in two columns on a desktop window (the large class; S35, the owner: 「八字摆盘现在的UI太挤，尤其是desktop
+/// … 根据我的ui desgin principal，以app为主，重新排版」): [main] at the left, eight of the twelve columns, the page's
+/// anchor and what is read at length; [side] at the right, the other four, compact facts; each column stacks from the
+/// top. On a phone and a tablet one column, the app's own order: [side] after the first [sideAfter] parts of [main].
+/// Tab goes down the main column, then the side.
+class SideColumns extends StatelessWidget {
+  const SideColumns({super.key, required this.main, required this.side, this.sideAfter = 1});
+  final List<Widget> main;
+  final List<Widget> side;
+  final int sideAfter;
+
+  @override
+  Widget build(BuildContext context) {
+    final window = WindowClass.ofContext(context);
+    Widget column(List<Widget> parts) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: parts);
+    if (window != WindowClass.large) {
+      return column([...main.take(sideAfter), ...side, ...main.skip(sideAfter)]);
+    }
+    return LayoutBuilder(
+      builder: (context, box) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: column(main)),
+          SizedBox(width: window.gutter),
+          SizedBox(
+            key: const Key('side-column'),
+            width: Grid.span(box.maxWidth, 4, columns: window.columns, gutter: window.gutter),
+            child: column(side),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A page's padding (the ui-design skill): the app's container ([Grid.container]). The window class's margin at the
 /// sides and, on a window wider than the container, the room beyond it, so the container is centred with the margin
 /// inside it; on a phone and a tablet only the margin (「在tablet和mobile device 可以不用有这限制了」). Without [margin],

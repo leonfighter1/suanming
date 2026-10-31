@@ -241,6 +241,30 @@ abstract class AppLocalizations {
   /// **'四柱'**
   String get fourPillars;
 
+  /// No description provided for @chartGroupChart.
+  ///
+  /// In zh, this message translates to:
+  /// **'命盘'**
+  String get chartGroupChart;
+
+  /// No description provided for @chartGroupMakeup.
+  ///
+  /// In zh, this message translates to:
+  /// **'命局'**
+  String get chartGroupMakeup;
+
+  /// No description provided for @chartGroupLuck.
+  ///
+  /// In zh, this message translates to:
+  /// **'运势'**
+  String get chartGroupLuck;
+
+  /// No description provided for @chartGroupReading.
+  ///
+  /// In zh, this message translates to:
+  /// **'解读与报告'**
+  String get chartGroupReading;
+
   /// No description provided for @pillarYear.
   ///
   /// In zh, this message translates to:
@@ -3024,6 +3048,30 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'起卦之前'**
   String get liuyaoRemind;
+
+  /// No description provided for @liuyaoGroupAsk.
+  ///
+  /// In zh, this message translates to:
+  /// **'问卦'**
+  String get liuyaoGroupAsk;
+
+  /// No description provided for @liuyaoGroupCast.
+  ///
+  /// In zh, this message translates to:
+  /// **'起卦'**
+  String get liuyaoGroupCast;
+
+  /// No description provided for @liuyaoGroupResult.
+  ///
+  /// In zh, this message translates to:
+  /// **'得卦'**
+  String get liuyaoGroupResult;
+
+  /// No description provided for @liuyaoGroupReading.
+  ///
+  /// In zh, this message translates to:
+  /// **'解读'**
+  String get liuyaoGroupReading;
 
   /// No description provided for @liuyaoRemindBody.
   ///

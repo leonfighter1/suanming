@@ -191,119 +191,145 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
               FadeSlideIn(
                 child: HeroBanner(title: l10n.homeLiuyao, subtitle: l10n.homeLiuyaoDesc, icon: Icons.toll_outlined),
               ),
-              FadeSlideIn(
-                index: 1,
-                child: AppCard(
-                  title: l10n.liuyaoQuestion,
-                  icon: Icons.edit_note,
-                  child: TextField(
-                    key: const Key('liuyao-question'),
-                    controller: _question,
-                    enabled: chart == null,
-                    textInputAction: TextInputAction.done,
-                    inputFormatters: [LengthLimitingTextInputFormatter(300)],
-                    decoration: InputDecoration(labelText: l10n.liuyaoQuestion, helperText: l10n.liuyaoQuestionHint),
+              // Grouped as 八字 is (S35; the owner: 「算卦页面也差不多可以重新organize一下」): 问卦, 起卦, 得卦 and 解读 in
+              // the main column, 起卦之前 at the side on a desktop window; on a phone one column, the reminder after the
+              // question.
+              SideColumns(
+                sideAfter: 2,
+                main: [
+                  FadeSlideIn(
+                    index: 1,
+                    child: GroupTitle(key: const Key('liuyao-group-ask'), title: l10n.liuyaoGroupAsk),
                   ),
-                ),
-              ),
-              // The owner: remind the reader before the coins are tossed.
-              FadeSlideIn(
-                index: 2,
-                child: AppCard(
-                  key: const Key('liuyao-remind'),
-                  title: l10n.liuyaoRemind,
-                  icon: Icons.self_improvement,
-                  color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                  child: Text(l10n.liuyaoRemindBody),
-                ),
-              ),
-              FadeSlideIn(
-                index: 3,
-                child: AppCard(
-                  title: l10n.liuyaoMode,
-                  icon: Icons.toll_outlined,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SegmentKeys<String>(
-                        child: SegmentedButton<String>(
-                          key: const Key('liuyao-mode'),
-                          segments: [
-                            ButtonSegment(value: 'auto', label: Text(l10n.liuyaoModeAuto)),
-                            ButtonSegment(value: 'pick', label: Text(l10n.liuyaoModePick)),
-                            ButtonSegment(value: 'manual', label: Text(l10n.liuyaoModeManual)),
-                          ],
-                          selected: {_mode},
-                          showSelectedIcon: false,
-                          onSelectionChanged: chart != null ? null : (s) => setState(() => _mode = s.first),
-                        ),
-                      ),
-                      const SizedBox(height: Space.m),
-                      if (chart == null && !_asking)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: Space.s),
-                          child: ContentText(
-                            l10n.liuyaoQuestionMissing,
-                            contentKey: 'liuyaoQuestionMissing',
-                            key: const Key('liuyao-question-missing'),
-                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
-                          ),
-                        ),
-                      ...switch (_mode) {
-                        'pick' => _pickPanel(l10n, cast, cast_),
-                        'manual' => _manualPanel(l10n, theme, chart != null, cast_),
-                        _ => [
-                            Text(l10n.liuyaoAutoHow),
-                            if (chart == null) ...[
-                              const SizedBox(height: Space.m),
-                              AppFilledButton.icon(
-                                key: const Key('liuyao-toss'),
-                                onPressed: cast_,
-                                icon: const Icon(Icons.toll_outlined),
-                                label: Text(l10n.liuyaoToss),
-                              ),
-                            ],
-                          ],
-                      },
-                    ],
-                  ),
-                ),
-              ),
-              if (cast != null && _mode == 'auto')
-                // Each toss adds a row and moves 擲下一爻 down: the card stays in view (owner, v9.1.0).
-                BringIntoView(
-                  trigger: _shown,
-                  child: FadeSlideIn(
+                  FadeSlideIn(
+                    index: 1,
                     child: AppCard(
-                      key: ValueKey<String>('tosses-${chart!.chartId}'),
-                      child: _Tosses(
-                        chart: cast,
-                        shown: _shown,
-                        onNext: () => setState(() => _shown++),
-                        onSkip: () => setState(() => _shown = 6),
+                      title: l10n.liuyaoQuestion,
+                      icon: Icons.edit_note,
+                      child: TextField(
+                        key: const Key('liuyao-question'),
+                        controller: _question,
+                        enabled: chart == null,
+                        textInputAction: TextInputAction.done,
+                        inputFormatters: [LengthLimitingTextInputFormatter(300)],
+                        decoration: InputDecoration(labelText: l10n.liuyaoQuestion, helperText: l10n.liuyaoQuestionHint),
                       ),
                     ),
                   ),
-                ),
-              if (done) ...[
-                // The hexagram comes into view once the coins that make it have landed or turned.
-                BringIntoView(
-                  delay: switch (_mode) {
-                    'auto' => _tossStagger * 2 + CopperCoin.spin,
-                    'pick' => _revealStagger * 17 + CopperCoin.turn,
-                    _ => Duration.zero,
-                  },
-                  child: FadeSlideIn(child: HexagramCard(key: const Key('hexagram-card'), chart: cast)),
-                ),
-                FadeSlideIn(
-                  child: ReportRequest(
-                    chartId: chart!.chartId,
-                    system: 'liuyao',
-                    title: '${l10n.homeLiuyao} · ${cast.primary.fullName(locale)}',
-                    question: _asked,
+                  FadeSlideIn(
+                    index: 2,
+                    child: GroupTitle(key: const Key('liuyao-group-cast'), title: l10n.liuyaoGroupCast),
                   ),
-                ),
-              ],
+                  FadeSlideIn(
+                    index: 3,
+                    child: AppCard(
+                      title: l10n.liuyaoMode,
+                      icon: Icons.toll_outlined,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SegmentKeys<String>(
+                            child: SegmentedButton<String>(
+                              key: const Key('liuyao-mode'),
+                              segments: [
+                                ButtonSegment(value: 'auto', label: Text(l10n.liuyaoModeAuto)),
+                                ButtonSegment(value: 'pick', label: Text(l10n.liuyaoModePick)),
+                                ButtonSegment(value: 'manual', label: Text(l10n.liuyaoModeManual)),
+                              ],
+                              selected: {_mode},
+                              showSelectedIcon: false,
+                              onSelectionChanged: chart != null ? null : (s) => setState(() => _mode = s.first),
+                            ),
+                          ),
+                          const SizedBox(height: Space.m),
+                          if (chart == null && !_asking)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: Space.s),
+                              child: ContentText(
+                                l10n.liuyaoQuestionMissing,
+                                contentKey: 'liuyaoQuestionMissing',
+                                key: const Key('liuyao-question-missing'),
+                                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                              ),
+                            ),
+                          ...switch (_mode) {
+                            'pick' => _pickPanel(l10n, cast, cast_),
+                            'manual' => _manualPanel(l10n, theme, chart != null, cast_),
+                            _ => [
+                                Text(l10n.liuyaoAutoHow),
+                                if (chart == null) ...[
+                                  const SizedBox(height: Space.m),
+                                  AppFilledButton.icon(
+                                    key: const Key('liuyao-toss'),
+                                    onPressed: cast_,
+                                    icon: const Icon(Icons.toll_outlined),
+                                    label: Text(l10n.liuyaoToss),
+                                  ),
+                                ],
+                              ],
+                          },
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (cast != null && _mode == 'auto')
+                    // Each toss adds a row and moves 擲下一爻 down: the card stays in view (owner, v9.1.0).
+                    BringIntoView(
+                      trigger: _shown,
+                      child: FadeSlideIn(
+                        child: AppCard(
+                          key: ValueKey<String>('tosses-${chart!.chartId}'),
+                          child: _Tosses(
+                            chart: cast,
+                            shown: _shown,
+                            onNext: () => setState(() => _shown++),
+                            onSkip: () => setState(() => _shown = 6),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (done) ...[
+                    FadeSlideIn(
+                      child: GroupTitle(key: const Key('liuyao-group-result'), title: l10n.liuyaoGroupResult),
+                    ),
+                    // The hexagram comes into view once the coins that make it have landed or turned.
+                    BringIntoView(
+                      delay: switch (_mode) {
+                        'auto' => _tossStagger * 2 + CopperCoin.spin,
+                        'pick' => _revealStagger * 17 + CopperCoin.turn,
+                        _ => Duration.zero,
+                      },
+                      child: FadeSlideIn(child: HexagramCard(key: const Key('hexagram-card'), chart: cast)),
+                    ),
+                    FadeSlideIn(
+                      child: GroupTitle(key: const Key('liuyao-group-reading'), title: l10n.liuyaoGroupReading),
+                    ),
+                    FadeSlideIn(
+                      child: ReportRequest(
+                        chartId: chart!.chartId,
+                        system: 'liuyao',
+                        title: '${l10n.homeLiuyao} · ${cast.primary.fullName(locale)}',
+                        question: _asked,
+                      ),
+                    ),
+                  ],
+                ],
+                side: [
+                  // The owner: remind the reader before the coins are tossed (起卦之前, a heading now).
+                  FadeSlideIn(
+                    index: 1,
+                    child: GroupTitle(key: const Key('liuyao-group-before'), title: l10n.liuyaoRemind),
+                  ),
+                  FadeSlideIn(
+                    index: 2,
+                    child: AppCard(
+                      key: const Key('liuyao-remind'),
+                      color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                      child: Text(l10n.liuyaoRemindBody),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

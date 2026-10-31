@@ -174,6 +174,10 @@ Window classes are Material's, by the window's width (`WindowClass.of`, `layout.
     `CardGrid`, 东方 2 × 2; its 登录 / 注册 spans a phone's column and takes its label's width beyond
     (`compactButtons`).
   - Phones and tablets keep one column.
+  - **A page with an anchor and facts** (S35: 八字's chart, 算卦) takes `SideColumns(main:, side:, sideAfter:)`: on a
+    desktop window the anchor, what is read at length and the actions in the main column (8 of 12), compact facts or
+    guidance at the side (4 of 12), each column under its `GroupTitle`; on a phone and a tablet one column in the
+    app's order, the side's parts after the first `sideAfter` of the main's.
 - **Columns** for a layout of parts side by side: `Grid.span(width, n, columns:, gutter:)`. The dashboard's main column
   and panel are 8 : 4 at large widths.
 - **A dialog** keeps its own width (`ConstrainedBox`, 520–640), as Material's dialogs do.
