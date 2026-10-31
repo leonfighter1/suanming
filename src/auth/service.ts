@@ -190,6 +190,11 @@ export interface SignupProfile {
 
 export class AuthService {
   readonly users: UserStore;
+  /**
+   * Who may sign in or sign up now, the account or undefined for a new one; throws to refuse. The server sets it
+   * (S35: during 维护, staff alone).
+   */
+  admits?: (user: UserRecord | undefined) => void;
   private readonly social: SocialVerifier;
   private readonly captcha: CaptchaVerifier;
   private readonly limiter: FailureLimiter;
@@ -292,6 +297,7 @@ export class AuthService {
   async register(
     body: { username?: unknown; email?: unknown; password?: unknown } & SignupProfile,
   ): Promise<TokenPair> {
+    this.admits?.(undefined);
     const given = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
     const rawName = given(body.username);
     const email = given(body.email)?.trim();
@@ -370,6 +376,7 @@ export class AuthService {
     keys.forEach((k) => this.limiter.clear(k));
     // Said only to someone who knows the password.
     if (user.status === "suspended") throw suspended();
+    this.admits?.(user);
     return this.deps.tokens.issue(user.id);
   }
 
@@ -388,6 +395,7 @@ export class AuthService {
       throw new AuthError(401, (e as Error).message);
     }
     const existing = await this.users.bySocial(provider, identity.sub);
+    this.admits?.(existing);
     if (existing) return this.deps.tokens.issue(existing.id);
 
     const { country, locale } = this.profile({

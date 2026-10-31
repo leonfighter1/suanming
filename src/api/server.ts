@@ -21,8 +21,15 @@ import {
 import { SCHEMA_VERSION } from "../chart-fact/index.js";
 import { loadGeoMatrix, loadRuleSet, resolveRegion } from "../compliance/index.js";
 import { AccountError, AccountService } from "../auth/account.js";
-import { AuthError, AuthService, permissionsOf, type AccountPermissions } from "../auth/service.js";
+import {
+  AuthError,
+  AuthService,
+  permissionsOf,
+  type AccountPermissions,
+  type UserRecord,
+} from "../auth/service.js";
 import { adminRoute } from "../admin/routes.js";
+import { namedInConfig, staffRoleOf } from "../admin/roles.js";
 import { usageRows } from "../admin/usage.js";
 import { VerifyError } from "../auth/verify.js";
 import { lifeDocument, localTime, readingDocument } from "../export/report-doc.js";
@@ -52,6 +59,7 @@ import {
 } from "../points/index.js";
 import { InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { Settings } from "../settings/index.js";
+import { maintenanceOf, type Maintenance } from "../settings/maintenance.js";
 import type { RateBook } from "../currency/index.js";
 import { documentName } from "../export/document.js";
 import { renderPdf } from "../export/render-pdf.js";
@@ -189,6 +197,17 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   }
 
   const admins = new Set((opts.admins ?? []).map((a) => a.trim().toLowerCase()).filter(Boolean));
+
+  // ---- 维护 (S35, src/settings/maintenance.ts): anyone but staff waits, told until when ----
+  const startedAt = now();
+  /** The maintenance on now, if any. */
+  const maintenance = () => maintenanceOf(settings, startedAt);
+  /** 503 `maintenance` with its window. */
+  const down = (m: Maintenance) =>
+    new HttpError(503, `down for maintenance until about ${m.ends_by}`, "maintenance", { ...m });
+  /** Staff (admin, manager, integrator) work through it, the 管理后台 above all. */
+  const isStaff = (u: UserRecord | undefined) => !!u && !!staffRoleOf(u, namedInConfig(admins, u));
+
   /** The reviewer's login (its username or its email, v8.2.0) when the caller is a reviewer, else undefined. */
   async function reviewer(c: Caller): Promise<string | undefined> {
     const u = auth ? await auth.users.get(c.user) : undefined;
@@ -358,6 +377,13 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
   const auth = opts.auth;
   if (!opts.devMode && !auth) throw new Error("ApiOptions.auth is required outside devMode");
+  if (auth) {
+    // 维护 (S35): signing in, signing up, a new social account: refused to anyone but staff while it is on.
+    auth.admits = (u) => {
+      const m = maintenance();
+      if (m && !isStaff(u)) throw down(m);
+    };
+  }
   const mail = opts.mail ?? new NoMail();
   const sms = opts.sms ?? new NoSms();
   /** Every message's way out (S25): its template (an admin's wording, else the default), its channel, its note. */
@@ -562,6 +588,11 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       });
     }
 
+    // ---- 维护 (S35): whether the service waits for maintenance, and until when; for everyone ----
+    if (req.method === "GET" && path === "/v1/status") {
+      return send(res, 200, { maintenance: maintenance() ?? null });
+    }
+
     // ---- the calendar and birthplaces: public, stateless (routes/public.ts) ----
     if (publicRoute(req, res, path)) return;
 
@@ -572,6 +603,10 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     if (await authRoute(api, req, res, path)) return;
 
     const c = await caller(req);
+
+    // 维护 (S35): a signed-in caller who isn't staff waits too, told until when.
+    const m = maintenance();
+    if (m && auth && !isStaff(await auth.users.get(c.user))) throw down(m);
 
     // ---- account (routes/account.ts) ----
     if (await accountRoute(api, req, res, path, c)) return;

@@ -12,7 +12,7 @@ import { CURRENCY_CODES } from "../currency/catalog.js";
 import { loadPointsConfig, packFits, type Pack } from "../points/pricing.js";
 
 export type SettingGroup =
-  "sessions" | "codes" | "ai" | "limits" | "content" | "currencies" | "points";
+  "maintenance" | "sessions" | "codes" | "ai" | "limits" | "content" | "currencies" | "points";
 
 interface Common {
   /** `group.name`, as config/settings.json nests it. */
@@ -35,6 +35,8 @@ export type SettingSpec = Common &
     | { type: "choices"; options: () => readonly string[] }
     // 充值 packs (S32): 1 to max of them, each its 元 and its 积分.
     | { type: "packs"; max: number }
+    // A time (S35, 维护's end): an ISO date and time, or none where optional.
+    | { type: "time"; optional?: boolean }
   );
 
 export const SETTINGS = [
@@ -293,6 +295,24 @@ export const SETTINGS = [
     about:
       "用户充值时可以选的套餐：付几元，得几积分，每元至少 100 积分。AI 的积分价格按最划算的套餐算，好保证利润：每元给的积分越多，每次 AI 要的积分也越多。",
   },
+  // 维护 (S35; the owner: 「添加正在维护的通知，admin可以toggle 告知用户何时能够登录 by default 3-4 小时，可以自己定时」):
+  // while it is on, anyone but staff waits, told until when (src/settings/maintenance.ts).
+  {
+    key: "maintenance.on",
+    group: "maintenance",
+    type: "boolean",
+    label: "维护中",
+    about:
+      "打开后，除了后台人员，用户不能登录、注册或使用应用，应用会告诉他们大约什么时候可以再登录。后台人员照常使用。",
+  },
+  {
+    key: "maintenance.until",
+    group: "maintenance",
+    type: "time",
+    optional: true,
+    label: "预计结束",
+    about: "用户看到的可以再登录的时间。不设：从打开维护时起 3 到 4 小时。",
+  },
 ] as const satisfies readonly SettingSpec[];
 
 type Spec = (typeof SETTINGS)[number];
@@ -341,7 +361,8 @@ export function fromEnv(spec: SettingSpec, raw: string): unknown {
         .map((x) => x.trim())
         .filter(Boolean);
     case "packs":
-      // No env variable names the packs: their text is refused.
+    case "time":
+      // No env variable names the packs or a time: their text is refused, or taken as it is.
       return raw;
   }
 }
@@ -394,5 +415,12 @@ export function problemOf(spec: SettingSpec, value: unknown): string | undefined
       const prices = value.map((p) => (p as Pack).yuan);
       return new Set(prices).size === prices.length ? undefined : "两个套餐不能同一个价钱";
     }
+    case "time":
+      if (value === null && spec.optional) return undefined;
+      return typeof value === "string" &&
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value) &&
+        !Number.isNaN(Date.parse(value))
+        ? undefined
+        : "要一个时间（日期和几点几分）";
   }
 }

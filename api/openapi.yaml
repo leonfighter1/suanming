@@ -43,6 +43,36 @@ tags:
     description: Operational endpoints
 
 paths:
+  /v1/status:
+    get:
+      tags: [ops]
+      operationId: getStatus
+      summary: Whether the service waits for maintenance (维护, S35), and until when
+      description: |
+        While 设置's maintenance.on is on, anyone but staff is answered 503 `maintenance` (signing in, signing up, and
+        every call of a signed-in account; a refresh goes on), the problem carrying the same window. The window is
+        设置's maintenance.until where an admin set it, else three to four hours from when it was switched on. Staff
+        (admin, manager, integrator) work as usual.
+      security: []
+      responses:
+        "200":
+          description: The maintenance on now, or null
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [maintenance]
+                properties:
+                  maintenance:
+                    oneOf:
+                      - type: "null"
+                      - type: object
+                        required: [since, ends_from, ends_by]
+                        properties:
+                          since: { type: string, format: date-time }
+                          ends_from: { type: string, format: date-time }
+                          ends_by: { type: string, format: date-time }
+
   /v1/health:
     get:
       tags: [ops]

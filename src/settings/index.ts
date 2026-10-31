@@ -94,6 +94,11 @@ export class Settings {
     return this.changed.get(key)?.value;
   }
 
+  /** When the panel last changed [key] (ISO); undefined while it never has (S35: when 维护 was switched on). */
+  changedAt(key: string): string | undefined {
+    return this.changed.get(key)?.updated_at;
+  }
+
   number(key: NumberKey): number {
     return this.value(key) as number;
   }
