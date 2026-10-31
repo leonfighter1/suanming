@@ -52,7 +52,7 @@ paths:
         While 设置's maintenance.on is on, anyone but staff is answered 503 `maintenance` (signing in, signing up, and
         every call of a signed-in account; a refresh goes on), the problem carrying the same window. The window is
         设置's maintenance.until where an admin set it, else three to four hours from when it was switched on. Staff
-        (admin, manager, integrator) work as usual.
+        (admin, manager, editor) work as usual.
       security: []
       responses:
         "200":
@@ -513,7 +513,7 @@ paths:
       operationId: deleteAccount
       summary: Delete the account and all its data now (PIPEDA / Québec Law 25)
       description: |
-        Not for a staff account (admin, manager, integrator: 403 `staff_account`, S35): an admin deletes it in the
+        Not for a staff account (admin, manager, editor: 403 `staff_account`, S35): an admin deletes it in the
         管理后台 (DELETE /v1/admin/users/{user_id}).
       responses:
         "200":
@@ -978,11 +978,11 @@ paths:
       summary: The signed-in staff member and what their role may do
       description: |
         Since v11.2.0; roles since v13.1.0. Every `/v1/admin/*` route (but 内容审核's reviews) is for staff: an
-        account with the admin, manager or integrator role, or one of the server's MINGLI_ADMINS logins (an admin;
+        account with the admin, manager or editor role, or one of the server's MINGLI_ADMINS logins (an admin;
         403 `admin_only` otherwise). Each route needs a capability of the role (403 `not_allowed` without it):
         view (the numbers and accounts: admin, manager), assign (roles and permissions: admin, manager), user_data
         (增加积分, signing an account out everywhere, the exports: admin), messages (the mail and SMS templates:
-        admin, integrator). Days are the dashboard's time zone's (`tz`, default Asia/Shanghai).
+        admin, editor). Days are the dashboard's time zone's (`tz`, default Asia/Shanghai).
       responses:
         "200":
           description: The staff member
@@ -994,7 +994,7 @@ paths:
                 properties:
                   id: { type: string, format: uuid }
                   login: { type: string }
-                  role: { type: string, enum: [integrator, manager, admin] }
+                  role: { type: string, enum: [editor, manager, admin] }
                   admin_by_config: { type: boolean }
                   can:
                     type: array
@@ -1002,7 +1002,7 @@ paths:
                       { type: string, enum: [view, assign, user_data, messages, content, settings] }
                   assignable_roles:
                     type: array
-                    items: { type: string, enum: [user, integrator, manager, admin] }
+                    items: { type: string, enum: [user, editor, manager, admin] }
                   currency:
                     type: object
                     description: "The currency the dashboard shows money in (设置, S31): 1 元 = rate of it; 元 without a rate"
@@ -1096,11 +1096,7 @@ paths:
       parameters:
         - { name: q, in: query, schema: { type: string } }
         - { name: status, in: query, schema: { type: string, enum: [active, suspended] } }
-        - {
-            name: role,
-            in: query,
-            schema: { type: string, enum: [user, integrator, manager, admin] },
-          }
+        - { name: role, in: query, schema: { type: string, enum: [user, editor, manager, admin] } }
         - { name: demo, in: query, schema: { type: string, enum: [include, exclude, only] } }
         - name: sort
           in: query
@@ -1154,7 +1150,7 @@ paths:
       description: |
         Suspending ends every session at once. Nobody suspends themselves or changes their own role (409
         `admin_self`); an admin named in MINGLI_ADMINS stays one (409 `admin_by_config`). A manager gives user,
-        integrator or manager, never admin, and changes nothing on an admin's account (403 `not_allowed`).
+        editor or manager, never admin, and changes nothing on an admin's account (403 `not_allowed`).
       requestBody:
         required: true
         content:
@@ -1163,7 +1159,7 @@ paths:
               type: object
               properties:
                 status: { type: string, enum: [active, suspended] }
-                role: { type: string, enum: [user, integrator, manager, admin] }
+                role: { type: string, enum: [user, editor, manager, admin] }
                 permissions:
                   type: object
                   properties:
@@ -1314,7 +1310,7 @@ paths:
         with its channel, what it is, its variables (a name, what it holds, a sample; `part` for one on a line of its
         own) and per language the wording in use (an admin's, `custom`, else the default) beside the default. A mail's
         body is a small markup: `# title`, `## heading`, paragraphs, `> note`, `---`, `!! highlight`, `- item`.
-        `delivery` names what sends each channel (the dev outbox, or off: no provider yet). Admins and integrators.
+        `delivery` names what sends each channel (the dev outbox, or off: no provider yet). Admins and editors.
       responses:
         "200":
           description: The messages
@@ -2826,7 +2822,7 @@ components:
           description: admin = 内容审核 reviewer (MINGLI_ADMINS); returned by /v1/me
         staff:
           type: string
-          enum: [integrator, manager, admin]
+          enum: [editor, manager, admin]
           description: >-
             v13.1.0: the account's 管理后台 role, when it has one (an admin named in MINGLI_ADMINS is admin). The
             app's ☰ shows 管理后台 to staff. Returned by /v1/me.
@@ -3486,7 +3482,7 @@ components:
         id: { type: string, format: uuid }
         login: { type: string, description: "The username, else the masked email or phone" }
         country: { type: string }
-        role: { type: string, enum: [user, integrator, manager, admin] }
+        role: { type: string, enum: [user, editor, manager, admin] }
         admin_by_config: { type: boolean }
         status: { type: string, enum: [active, suspended] }
         permissions:

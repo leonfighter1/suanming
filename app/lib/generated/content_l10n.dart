@@ -2354,7 +2354,7 @@ class ContentLocalizations extends AppLocalizations {
   String get staffManager => _text('staffManager') ?? _base.staffManager;
 
   @override
-  String get staffIntegrator => _text('staffIntegrator') ?? _base.staffIntegrator;
+  String get staffEditor => _text('staffEditor') ?? _base.staffEditor;
 
   @override
   String get introWelcome => _text('introWelcome') ?? _base.introWelcome;

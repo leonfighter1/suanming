@@ -1,6 +1,6 @@
 // S25 (v13.1.0): the messages' templates, their mail page in light and dark, the dispatcher, the 消息 API and the
 // 后台 roles (the owner, 2026-10-30: 设计好邮件发送逻辑，让后台用户可以编辑各类发送邮件的前端页面…邮件的preview界面以及发送出去
-// 的邮件也要符合当前app的跟随系统模式; admin, manager, integrator).
+// 的邮件也要符合当前app的跟随系统模式; admin, manager, editor).
 import { randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -318,8 +318,8 @@ describe("the dispatcher", () => {
     };
     await pg.put(u);
     expect((await pg.get(id))!.role).toBe("manager");
-    await pg.put({ ...u, role: "integrator" });
-    expect((await pg.get(id))!.role).toBe("integrator");
+    await pg.put({ ...u, role: "editor" });
+    expect((await pg.get(id))!.role).toBe("editor");
     await pg.close();
   }, 30_000);
 });
@@ -331,7 +331,7 @@ const mail = new MemoryMail();
 const sms = new MemorySms();
 const auth = buildAuth({ digestPepper: PEPPER, drawKey: DRAW_KEY, ephemeral: true } as never, true);
 /**
- * boss: an admin by MINGLI_ADMINS; mgr a manager, integ an integrator (given below); alice, carol and dora users (dora
+ * boss: an admin by MINGLI_ADMINS; mgr a manager, integ an editor (given below); alice, carol and dora users (dora
  * the matrix's target: signed out everywhere there).
  */
 const LOGINS = ["boss", "mgr", "integ", "alice", "carol", "dora"];
@@ -352,7 +352,7 @@ const { start, call, ids } = staffApi(
     now: () => new Date("2026-10-30T04:00:00.000Z"),
   },
   LOGINS,
-  { mgr: "manager", integ: "integrator" },
+  { mgr: "manager", integ: "editor" },
 );
 const json = async (who: string, path: string, method = "GET", body?: unknown) =>
   (await call(who, path, method, body)).json();
@@ -360,20 +360,20 @@ const json = async (who: string, path: string, method = "GET", body?: unknown) =
 describe("the 后台 roles", () => {
   beforeAll(start);
 
-  it("say what each may do: admin everything, a manager the numbers and roles, an integrator the messages", async () => {
+  it("say what each may do: admin everything, a manager the numbers and roles, an editor the messages", async () => {
     expect(await json("boss", "/v1/admin/me")).toMatchObject({
       role: "admin",
       admin_by_config: true,
       can: ["view", "assign", "user_data", "messages", "content", "settings"],
-      assignable_roles: ["user", "integrator", "manager", "admin"],
+      assignable_roles: ["user", "editor", "manager", "admin"],
     });
     expect(await json("mgr", "/v1/admin/me")).toMatchObject({
       role: "manager",
       can: ["view", "assign"],
-      assignable_roles: ["user", "integrator", "manager"],
+      assignable_roles: ["user", "editor", "manager"],
     });
     expect(await json("integ", "/v1/admin/me")).toMatchObject({
-      role: "integrator",
+      role: "editor",
       can: ["messages", "content"],
     });
     const no = await call("alice", "/v1/admin/me");
@@ -412,16 +412,16 @@ describe("the 后台 roles", () => {
     }
   });
 
-  it("a manager gives user, integrator or manager, never admin and never on an admin; nobody changes their own role", async () => {
+  it("a manager gives user, editor or manager, never admin and never on an admin; nobody changes their own role", async () => {
     const patch = (who: string, target: string, body: unknown) =>
       call(who, `/v1/admin/users/${ids[target]}`, "PATCH", body);
-    expect((await patch("mgr", "carol", { role: "integrator" })).status).toBe(200);
-    expect((await json("carol", "/v1/admin/me")).role).toBe("integrator");
+    expect((await patch("mgr", "carol", { role: "editor" })).status).toBe(200);
+    expect((await json("carol", "/v1/admin/me")).role).toBe("editor");
     const toAdmin = await patch("mgr", "carol", { role: "admin" });
     expect([toAdmin.status, (await toAdmin.json()).code]).toEqual([403, "not_allowed"]);
     const onAdmin = await patch("mgr", "boss", { permissions: { ai: false } });
     expect([onAdmin.status, (await onAdmin.json()).code]).toEqual([403, "not_allowed"]);
-    const self = await patch("mgr", "mgr", { role: "integrator" });
+    const self = await patch("mgr", "mgr", { role: "editor" });
     expect([self.status, (await self.json()).code]).toEqual([409, "admin_self"]);
     const bossSelf = await patch("boss", "boss", { role: "manager" });
     expect([bossSelf.status, (await bossSelf.json()).code]).toEqual([409, "admin_self"]);

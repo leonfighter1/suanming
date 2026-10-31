@@ -170,7 +170,7 @@ class FakeApi {
   /// 测算完成后发到邮箱 (v8.2.0, WP15.4).
   bool emailReports = false;
 
-  /// /v1/me's staff role (S25): admin, manager or integrator; none by default.
+  /// /v1/me's staff role (S25): admin, manager or editor; none by default.
   String? staff;
 
   /// 维护 (S35): GET /v1/status's maintenance (since, ends_from, ends_by); while it is set, anyone but [staff] waits

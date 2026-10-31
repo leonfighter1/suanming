@@ -287,7 +287,7 @@ compact grid, and a panel of its own at the right. The building blocks are in
   search and filters in the panel; 消息 (S25) its messages as cards by channel, two to a row (the panel: how they
   leave, 最近发送), and each message's editor beside its preview (the panel, `asideWide`).
 - **By role** (S25): the rail shows only the pages the role may see (a role with one page gets it alone, without a
-  rail; an integrator has 消息 and 内容 since S29), and a page leaves out what the server would refuse it. The server
+  rail; an editor, 网站编辑, has 消息 and 修改页面内容), and a page leaves out what the server would refuse it. The server
   decides; the dashboard follows.
 - **The menu at the top right** (S33): the staff member's name and role open 内容, 消息 and 导出 (as the role may), then
   外观 and 退出登录 (a `MenuAnchor`, its button's focus node its `childFocusNode`, so ↓ moves in). A page of the menu

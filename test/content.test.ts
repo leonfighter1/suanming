@@ -50,13 +50,13 @@ const { start, call } = staffApi(
     now: () => new Date("2026-10-30T12:00:00.000Z"),
   },
   ["boss", "integ", "mgr", "alice"],
-  { integ: "integrator", mgr: "manager" },
+  { integ: "editor", mgr: "manager" },
 );
 
 describe("the CMS's API", () => {
   beforeAll(start);
 
-  it("is for the roles with content: an admin and an integrator; a manager is refused, a user is no staff", async () => {
+  it("is for the roles with content: an admin and an editor; a manager is refused, a user is no staff", async () => {
     expect((await call("boss", "/v1/admin/content")).status).toBe(200);
     expect((await call("integ", "/v1/admin/content")).status).toBe(200);
     const mgr = await call("mgr", "/v1/admin/content");

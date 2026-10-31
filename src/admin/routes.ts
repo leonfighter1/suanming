@@ -75,7 +75,7 @@ export const ADMIN_TZ = "Asia/Shanghai";
 
 const byConfig = (ctx: AdminContext, u: UserRecord) => namedInConfig(ctx.admins, u);
 
-/** The caller and their staff role (admin, manager, integrator: roles.ts), or 403 admin_only. */
+/** The caller and their staff role (admin, manager, editor: roles.ts), or 403 admin_only. */
 async function staffOf(ctx: AdminContext, userId: string): Promise<{ me: UserRecord; role: StaffRole }> {
   const u = await ctx.auth.users.get(userId);
   const role = u && staffRoleOf(u, byConfig(ctx, u));

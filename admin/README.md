@@ -3,7 +3,8 @@
 The admin dashboard (tech plan S22): a Flutter web app, separate from the app in `app/`, for the accounts, AI use and
 money of 命理大师, and the mail and SMS it sends. Staff sign in (tech plan S25): an admin (the admin role, or a login in
 the server's `MINGLI_ADMINS`) sees and does everything; a manager sees the numbers and the accounts and gives roles and
-permissions, but never touches a user's data (no 增加积分, no signing out, no exports); an integrator gets 消息 only.
+permissions, but never touches a user's data (no 增加积分, no signing out, no exports); an editor (网站编辑, the integrator
+before v24.0.0) gets 消息 and 修改页面内容.
 The server decides; each page leaves out what the role may not do.
 
 - **概览**: the period's 充值 revenue, AI cost, gross profit and margin, accounts, active users, tokens and 积分, the

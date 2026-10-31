@@ -755,7 +755,7 @@
   "adminLinkCopied": "已複製管理後台的網址：{url}",
   "staffAdmin": "管理員",
   "staffManager": "經理",
-  "staffIntegrator": "集成人員",
+  "staffEditor": "網站編輯",
   "introWelcome": "歡迎來到命理大師",
   "introJoin": "加入我們：八字、塔羅、求籤、算卦與風水，東西方的智慧在這裡相會。排盤由引擎精確計算，解讀有據可查，僅供參考。",
   "introSignIn": "登入 / 註冊",

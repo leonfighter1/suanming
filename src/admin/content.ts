@@ -1,5 +1,5 @@
 /**
- * 内容管理 (S29) for staff with the content capability (roles.ts: admin and integrator): every text the app shows, with
+ * 内容管理 (S29) for staff with the content capability (roles.ts: admin and editor): every text the app shows, with
  * the pages it shows on (S33, read from the app's code: usage.ts), its defaults and any change; a text changed
  * (keeping its placeholders) or put back to its default; an image put in or taken out. The app reads the changes
  * through /v1/content (src/api/routes/content.ts).

@@ -175,14 +175,14 @@ const { start, call, ids } = staffApi(
     now: () => new Date(AT),
   },
   ["boss", "mgr", "integ", "alice"],
-  { mgr: "manager", integ: "integrator" },
+  { mgr: "manager", integ: "editor" },
 );
 const signIn = (login: string) => call(null, "/v1/auth/login", "POST", { login, password: login });
 
 describe("设置 in the 管理后台", () => {
   beforeAll(start);
 
-  it("is for admins: a manager and an integrator are refused, a user is no staff", async () => {
+  it("is for admins: a manager and an editor are refused, a user is no staff", async () => {
     expect((await call("boss", "/v1/admin/settings")).status).toBe(200);
     for (const who of ["mgr", "integ"]) {
       const r = await call(who, "/v1/admin/settings");

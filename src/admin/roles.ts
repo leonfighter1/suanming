@@ -1,11 +1,12 @@
 /**
  * 后台角色 (tech plan S25; the owner: admin具备超级权限，manager可以进行权限分配，但是不能对用户的数据进行操作。integrator可以进入
- * 后台面板，但是只能对邮件和短信系统进行操作). Each staff role has its capabilities; every admin route asks for one, and the
- * dashboard shows what the caller's role may do (GET /v1/admin/me).
+ * 后台面板，但是只能对邮件和短信系统进行操作; S36: 「把integrator改成editor-》网站编辑」, the integrator is editor). Each staff
+ * role has its capabilities; every admin route asks for one, and the dashboard shows what the caller's role may do
+ * (GET /v1/admin/me).
  */
 import type { AccountRole, UserRecord } from "../auth/service.js";
 
-export const STAFF_ROLES = ["integrator", "manager", "admin"] as const;
+export const STAFF_ROLES = ["editor", "manager", "admin"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 /**
@@ -21,8 +22,8 @@ export type Capability = "view" | "assign" | "user_data" | "messages" | "content
 export const CAPABILITIES: Record<StaffRole, readonly Capability[]> = {
   admin: ["view", "assign", "user_data", "messages", "content", "settings"],
   manager: ["view", "assign"],
-  // 内容管理 (S29) to begin with for admin and integrator, the roles that word what users read; the owner can change it.
-  integrator: ["messages", "content"],
+  // 内容管理 (S29) to begin with for admin and editor, the roles that word what users read; the owner can change it.
+  editor: ["messages", "content"],
 };
 
 /** Whether [u] is named, by its username or its email, in the server's MINGLI_ADMINS ([admins], in lower case). */
@@ -39,9 +40,9 @@ export const can = (role: StaffRole, what: Capability) => CAPABILITIES[role].inc
 
 /** The roles [role] may give, and take: an admin any; a manager any but admin. */
 export function assignableRoles(role: StaffRole): AccountRole[] {
-  if (role === "admin") return ["user", "integrator", "manager", "admin"];
-  if (role === "manager") return ["user", "integrator", "manager"];
+  if (role === "admin") return ["user", "editor", "manager", "admin"];
+  if (role === "manager") return ["user", "editor", "manager"];
   return [];
 }
 
-export const ACCOUNT_ROLES: readonly AccountRole[] = ["user", "integrator", "manager", "admin"];
+export const ACCOUNT_ROLES: readonly AccountRole[] = ["user", "editor", "manager", "admin"];

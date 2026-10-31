@@ -54,14 +54,14 @@ void main() {
     expect(tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex, 1);
   });
 
-  // 内容管理 (S29) is the integrator's too: the words users read, in mails and SMS and in the app.
-  testWidgets('an integrator: 修改页面内容 and 消息, both in the menu, no rail; nothing else asked for', (tester) async {
-    final f = FakeAdmin()..role = 'integrator';
+  // 内容管理 (S29) is the editor's too: the words users read, in mails and SMS and in the app.
+  testWidgets('an editor (网站编辑): 修改页面内容 and 消息, both in the menu, no rail; nothing else asked for', (tester) async {
+    final f = FakeAdmin()..role = 'editor';
     await pumpAdmin(tester, fake: f, size: tall);
     expect(find.byType(NavigationRail), findsNothing);
     // 修改页面内容 first, by page (S33).
     expect(find.byKey(const ValueKey<String>('content-page-HomePage')), findsOneWidget);
-    expect(find.text('integ · 集成人员'), findsOneWidget);
+    expect(find.text('integ · 网站编辑'), findsOneWidget);
     expect(await menuLabels(tester), ['修改页面内容', '消息']);
     await go(tester, '消息');
     expect(find.byKey(const Key('message-code_mail')), findsOneWidget);
@@ -100,7 +100,7 @@ void main() {
     // The roles a manager may give: all but 管理员.
     await tapOn(tester, 'role');
     expect(find.byKey(const Key('role-user')), findsOneWidget);
-    expect(find.byKey(const Key('role-integrator')), findsOneWidget);
+    expect(find.byKey(const Key('role-editor')), findsOneWidget);
     expect(find.byKey(const Key('role-admin')), findsNothing);
     await tapOn(tester, 'role-manager');
     expect(find.text('设 user02 为经理？'), findsOneWidget);

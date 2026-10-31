@@ -105,7 +105,7 @@ class AppUser {
   /// 测算完成后发到邮箱 (v8.2.0, WP15.4): 否 by default.
   final bool emailReports;
 
-  /// 后台角色 (tech plan S25): admin, manager or integrator; null for everyone else. The ☰ shows 管理后台 for it.
+  /// 后台角色 (tech plan S25): admin, manager or editor (网站编辑, S36); null for everyone else. The ☰ shows 管理后台 for it.
   final String? staff;
 
   /// Who is signed in, as the menu header shows it: the username, else the email, else the phone.

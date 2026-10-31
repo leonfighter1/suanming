@@ -66,6 +66,7 @@ const MIGRATIONS = [
   "015_settings",
   "016_exchange_rates",
   "017_receipts",
+  "018_editor_role",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -282,7 +283,7 @@ export class PgStore implements Store, UserStore, SessionStore {
       age_confirmed_at: iso(row.age_confirmed_at),
       created_at: iso(row.created_at),
       // 管理后台 (v11.2.0): plain columns; the defaults stay off the record, as on one made before them.
-      // Any role but the default (S25: integrator and manager besides admin).
+      // Any role but the default (S25: editor, the integrator before S36, and manager besides admin).
       ...(row.role != null && row.role !== "user" && { role: row.role as AccountRole }),
       ...(row.status === "suspended" && { status: "suspended" as const }),
       ...(row.permissions != null && {

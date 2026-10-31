@@ -59,12 +59,12 @@ void main() {
 
   testWidgets('繁體, an email login (encoded), and from the keyboard', (tester) async {
     final clipboard = ClipboardWatch(tester);
-    final api = FakeApi(email: 'boss@example.com')..staff = 'integrator';
+    final api = FakeApi(email: 'boss@example.com')..staff = 'editor';
     await tester.pumpWidget(testApp(api, locale: zhHant));
     await frames(tester, 12);
     await openMenu(tester);
     expect(find.descendant(of: find.byKey(const Key('open-admin')), matching: find.text('管理後台')), findsOneWidget);
-    expect(find.text('以集成人員身份：複製網址，在瀏覽器裡開啟'), findsOneWidget);
+    expect(find.text('以網站編輯身份：複製網址，在瀏覽器裡開啟'), findsOneWidget);
     // Tab reaches it in the menu; Enter opens it.
     await tabTo(tester, 'open-admin');
     await press(tester, LogicalKeyboardKey.enter);

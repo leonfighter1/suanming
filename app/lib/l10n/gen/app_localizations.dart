@@ -4596,11 +4596,11 @@ abstract class AppLocalizations {
   /// **'经理'**
   String get staffManager;
 
-  /// No description provided for @staffIntegrator.
+  /// No description provided for @staffEditor.
   ///
   /// In zh, this message translates to:
-  /// **'集成人员'**
-  String get staffIntegrator;
+  /// **'网站编辑'**
+  String get staffEditor;
 
   /// No description provided for @introWelcome.
   ///

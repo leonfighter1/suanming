@@ -95,7 +95,7 @@ final adminApiProvider = Provider<AdminApi>((ref) {
   return api;
 });
 
-/// The signed-in staff member (admin, manager or integrator: tech plan S25); null until signed in, and again once the
+/// The signed-in staff member (admin, manager or editor: tech plan S25); null until signed in, and again once the
 /// session is over.
 class SessionNotifier extends Notifier<AdminMe?> {
   @override

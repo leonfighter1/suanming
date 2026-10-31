@@ -248,14 +248,14 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
 2. `npm run api`. The console says `管理后台: http://127.0.0.1:8787/admin/ (admins: admin)`; before a build it says
    `not built yet`.
 3. Open **http://127.0.0.1:8787/admin/** and sign in as a staff account: **`admin` / `admin`** (everything),
-   **`manager` / `manager`** or **`integrator` / `integrator`** (v13.1.0). Any other account is turned away
+   **`manager` / `manager`** or **`editor` / `editor`** (v13.1.0; 网站编辑, the integrator before v24.0.0). Any other account is turned away
    (这个账号没有后台权限).
 
 - **The roles (v13.1.0–v13.2.0):** the server decides what each may do; the dashboard shows only that.
   - **admin:** every page and action, and any role on an account's page.
-  - **manager:** 概览, 用户, 活跃, 收益, 用量. On an account: 停用, AI and 充值, and its role (普通用户, 集成人员 or 经理).
+  - **manager:** 概览, 用户, 活跃, 收益, 用量. On an account: 停用, AI and 充值, and its role (普通用户, 网站编辑 or 经理).
     No 增加积分, no 在所有设备上退出, no exports, and nothing on an admin's account.
-  - **integrator:** 消息 only, as the whole page.
+  - **editor (网站编辑):** 消息 and 修改页面内容, both in the menu.
   - The bar shows who is signed in and the role (「boss · 管理员」). A role changed while signed in shows at the next
     refused action (你的角色不能做这件事), and the pages change with it.
 - **Who is an admin:** the logins in `MINGLI_ADMINS` (default `admin`; comma-separated, read at the start) and any
@@ -284,8 +284,8 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
   the figures.
 - **外观 (v12.1.0):** the ☀ / ☾ / Ⓐ button in the bar picks 跟随系统, 浅色 or 深色. The choice is kept in this browser.
 - **消息 (v13.2.0):** every mail and SMS the server sends (验证码邮件, 报告完成邮件, 记录发送邮件, 验证码短信), for admins
-  and integrators. To try it:
-  1. Sign in as `integrator` / `integrator`: 消息 is the whole page.
+  and editors. To try it:
+  1. Sign in as `editor` / `editor`: 消息 is in the menu.
   2. Open 报告完成邮件. Beside the editor, the preview shows the mail's own page with sample values (a sample 八字
      reading), light or dark as the dashboard is: switch 外观 to 深色 and open it again.
   3. Change the body: the preview follows a moment after you stop typing. Click `{{title}}` among the values: it goes
@@ -310,7 +310,7 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
   (two days by default), or ended by the server, it signs out too.
 - **The menu at the top right (v21.0.0, v23.0.0):** the name and role open 修改页面内容 (内容 before v23.0.0), 消息,
   导出 and 设置 (as the role may: 设置 is an admin's alone), then 外观, 返回应用 (when the app opened the dashboard) and
-  退出登录; the rail keeps 概览 … 用量. An integrator has no rail: both its pages are in the menu.
+  退出登录; the rail keeps 概览 … 用量. An editor (网站编辑) has no rail: both its pages are in the menu.
 - **维护 (v23.0.0):** as an admin, 设置 → 维护 → 维护中 开 (asked first). In a private window the app's 欢迎 and sign-in
   pages say 系统维护中 and when (预计 … 到 … 之间可以再登录, three to four hours from now); signing in as a user waits
   with the same words, while manager/manager signs in as usual and sees the notice on 首页. A user already signed in

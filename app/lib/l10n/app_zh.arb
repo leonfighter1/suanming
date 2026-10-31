@@ -1080,7 +1080,7 @@
   "@adminLinkCopied": { "placeholders": { "url": { "type": "String" } } },
   "staffAdmin": "管理员",
   "staffManager": "经理",
-  "staffIntegrator": "集成人员",
+  "staffEditor": "网站编辑",
   "introWelcome": "欢迎来到命理大师",
   "introJoin": "加入我们：八字、塔罗、求签、算卦与风水，东西方的智慧在这里相会。排盘由引擎精确计算，解读有据可查，仅供参考。",
   "introSignIn": "登录 / 注册",

@@ -21,7 +21,7 @@ abstract final class Can {
   static const all = {view, assign, userData, messages};
 }
 
-/// The signed-in staff member: their role (admin, manager or integrator), what it may do and the roles it may give.
+/// The signed-in staff member: their role (admin, manager or editor), what it may do and the roles it may give.
 class AdminMe {
   const AdminMe({
     required this.id,
@@ -54,7 +54,7 @@ class AdminMe {
   /// [Can]'s: what the role may do. The server decides; the dashboard only leaves out what it would refuse.
   final Set<String> can;
 
-  /// The roles this staff member may give an account (user, integrator, manager, admin).
+  /// The roles this staff member may give an account (user, editor, manager, admin).
   final List<String> assignableRoles;
 
   /// The currency the dashboard shows money in (设置, S31).
@@ -366,7 +366,7 @@ class AdminUser {
   final String login;
   final String country;
 
-  /// user, integrator, manager or admin (tech plan S25).
+  /// user, editor, manager or admin (tech plan S25; editor since S36).
   final String role;
   bool get admin => role == 'admin';
   final bool adminByConfig;

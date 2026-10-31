@@ -99,7 +99,7 @@ class FakeAdmin {
   /// The next admin call answers 403 admin_only (the role taken away mid-session).
   bool revokeNext = false;
 
-  /// The signed-in staff member's role (tech plan S25): admin (boss, admin-1), manager (mgr, mgr-1) or integrator
+  /// The signed-in staff member's role (tech plan S25): admin (boss, admin-1), manager (mgr, mgr-1) or editor
   /// (integ, int-1); the last two aren't in the account list. Changing it mid-session is a role changed by another
   /// admin: the server answers by it from then on, as the real one does.
   String role = 'admin';
@@ -197,7 +197,7 @@ class FakeAdmin {
     if (path == '/v1/admin/me') {
       final (id, login) = switch (role) {
         'manager' => ('mgr-1', 'mgr'),
-        'integrator' => ('int-1', 'integ'),
+        'editor' => ('int-1', 'integ'),
         _ => ('admin-1', 'boss'),
       };
       return _json({
@@ -726,12 +726,12 @@ class FakeAdmin {
 const capabilities = {
   'admin': ['view', 'assign', 'user_data', 'messages', 'content', 'settings'],
   'manager': ['view', 'assign'],
-  'integrator': ['messages', 'content'],
+  'editor': ['messages', 'content'],
 };
 const assignable = {
-  'admin': ['user', 'integrator', 'manager', 'admin'],
-  'manager': ['user', 'integrator', 'manager'],
-  'integrator': <String>[],
+  'admin': ['user', 'editor', 'manager', 'admin'],
+  'manager': ['user', 'editor', 'manager'],
+  'editor': <String>[],
 };
 
 /// 设置's settings (the server's src/settings/registry.ts), a few of each kind.

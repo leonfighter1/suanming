@@ -2,7 +2,7 @@
  * 消息 in the 管理后台 (tech plan S25 WP25.2; the owner: 让后台用户可以编辑各类发送邮件的前端页面。同时还有SMS等等): the mail
  * and SMS templates (each message's wording per language, an admin's or the default), a draft's preview with sample
  * values, a test send through the server's dispatcher (the dev outbox: no provider yet), and the latest dispatches.
- * For admins and integrators (roles.ts). A wording is checked before it is kept (markup.ts).
+ * For admins and editors (roles.ts). A wording is checked before it is kept (markup.ts).
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Locale } from "../ai/terms.js";

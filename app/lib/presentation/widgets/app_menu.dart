@@ -388,7 +388,7 @@ class _Header extends StatelessWidget {
 String staffName(AppLocalizations l10n, String role) => switch (role) {
       'admin' => l10n.staffAdmin,
       'manager' => l10n.staffManager,
-      'integrator' => l10n.staffIntegrator,
+      'editor' => l10n.staffEditor,
       _ => role,
     };
 

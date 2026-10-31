@@ -19,7 +19,7 @@ void openAccount(BuildContext context, AdminUser u) => Navigator.of(context).pus
       MaterialPageRoute<void>(builder: (_) => AccountPage(id: u.id, login: u.login)),
     );
 
-/// What sets an account apart, as small labels: its staff role (管理员, 经理, 集成人员), 已停用, AI or 充值 turned off,
+/// What sets an account apart, as small labels: its staff role (管理员, 经理, 网站编辑), 已停用, AI or 充值 turned off,
 /// 演示. In a table they stay on one line (the column takes their width); [wrap] lets them flow onto more lines on an
 /// account's page.
 class AccountPills extends StatelessWidget {

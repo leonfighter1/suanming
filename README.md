@@ -4,7 +4,7 @@ Phase 0 (engines, ChartFact, compliance) and Phase 1 in progress (AI pipeline, v
 **Start here: [docs/SUMMARY.md](docs/SUMMARY.md)** (what each phase delivered).
 Details: [docs/phase-0-gate.md](docs/phase-0-gate.md) · [docs/phase-1-status.md](docs/phase-1-status.md) · [docs/phase-3-gate.md](docs/phase-3-gate.md) · agent instructions in [CLAUDE.md](CLAUDE.md).
 Web test: **https://leonfighter1.github.io/suanming/** ([docs/web-test.md](docs/web-test.md)).
-管理后台 (staff: admin, manager, integrator): `npm run admin:build`, then `npm run api` and **http://127.0.0.1:8787/admin/** ([admin/](admin/README.md)).
+管理后台 (staff: admin, manager, editor 网站编辑): `npm run admin:build`, then `npm run api` and **http://127.0.0.1:8787/admin/** ([admin/](admin/README.md)).
 Everything at once: **`npm run all`** builds the app and the 管理后台 and puts both on one public https address ([docs/web-test.md](docs/web-test.md)).
 
 ## 更新记录 (release notes)

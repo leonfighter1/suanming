@@ -2432,7 +2432,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get staffManager => '经理';
 
   @override
-  String get staffIntegrator => '集成人员';
+  String get staffEditor => '网站编辑';
 
   @override
   String get introWelcome => '欢迎来到命理大师';
@@ -4956,7 +4956,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get staffManager => '經理';
 
   @override
-  String get staffIntegrator => '集成人員';
+  String get staffEditor => '網站編輯';
 
   @override
   String get introWelcome => '歡迎來到命理大師';

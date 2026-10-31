@@ -390,11 +390,11 @@ export const DEV_ACCOUNTS = [
     role: "manager" as const,
   },
   {
-    login: "integrator",
-    password: "integrator",
+    login: "editor",
+    password: "editor",
     country: "HK",
     locale: "zh-Hans" as const,
-    role: "integrator" as const,
+    role: "editor" as const,
   },
 ];
 

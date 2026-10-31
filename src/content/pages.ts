@@ -2,7 +2,7 @@
  * 内容 by page (S33 WP33.2): what the 内容 page calls the app's pages and the parts on the way to a text, by the name
  * of the code that makes them (usage.ts reads where each text is used). A page is every `…Page` class, and the app
  * around them; a new page without a name here fails test/content-pages.test.ts. A part without a name is passed over:
- * the way to a text names only what an integrator would know on screen.
+ * the way to a text names only what an editor (网站编辑) would know on screen.
  */
 
 /** The pages, in the order the 内容 page lists them. */

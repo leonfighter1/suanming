@@ -79,12 +79,12 @@ String entryOf({required String kind, String? forKind, String? system, int? pack
     };
 
 /// The account roles (tech plan S25), as the dashboard names them.
-const roleNames = {'user': '普通用户', 'integrator': '集成人员', 'manager': '经理', 'admin': '管理员'};
+const roleNames = {'user': '普通用户', 'editor': '网站编辑', 'manager': '经理', 'admin': '管理员'};
 
 /// What each role may do in the dashboard, in a line (the server's src/admin/roles.ts).
 const roleAbout = {
   'user': '不能登录管理后台',
-  'integrator': '只能进入「消息」和「内容」：编辑邮件和短信、预览、发送测试，修改应用里的文字和图片',
+  'editor': '只能进入「消息」和「修改页面内容」：编辑邮件和短信、预览、发送测试，修改应用里的文字和图片',
   'manager': '查看数据，给账户分配角色和权限；不能增加积分、让账户退出登录或导出数据',
   'admin': '所有页面和操作',
 };

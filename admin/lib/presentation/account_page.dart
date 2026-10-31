@@ -107,7 +107,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     final (title, body) = switch (role) {
       'admin' => ('设 ${u.login} 为管理员？', '管理员可以做所有事：查看和修改所有账户、增加积分、导出数据、编辑邮件和短信。'),
       'manager' => ('设 ${u.login} 为经理？', '经理可以查看数据，给账户分配角色和权限，但不能增加积分、让账户退出登录或导出数据。'),
-      'integrator' => ('设 ${u.login} 为集成人员？', '集成人员只能进入管理后台的「消息」：编辑邮件和短信、预览、发送测试。'),
+      'editor' => ('设 ${u.login} 为网站编辑？', '网站编辑只能进入管理后台的「消息」和「修改页面内容」：编辑邮件和短信、修改应用里的文字和图片。'),
       _ => ('取消 ${u.login} 的后台角色？', '${u.login} 将不能再登录管理后台。'),
     };
     if (!await _confirm(title, body)) return;

@@ -172,7 +172,7 @@ void main() {
     expect(textOf(tester, 'role-now'), '普通用户');
     await tapOn(tester, 'role');
     // An admin may give every role.
-    for (final r in ['user', 'integrator', 'manager', 'admin']) {
+    for (final r in ['user', 'editor', 'manager', 'admin']) {
       expect(find.byKey(ValueKey<String>('role-$r')), findsOneWidget, reason: r);
     }
     await tapOn(tester, 'role-admin');

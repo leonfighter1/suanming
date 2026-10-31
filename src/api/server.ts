@@ -205,7 +205,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   /** 503 `maintenance` with its window. */
   const down = (m: Maintenance) =>
     new HttpError(503, `down for maintenance until about ${m.ends_by}`, "maintenance", { ...m });
-  /** Staff (admin, manager, integrator) work through it, the 管理后台 above all. */
+  /** Staff (admin, manager, editor) work through it, the 管理后台 above all. */
   const isStaff = (u: UserRecord | undefined) => !!u && !!staffRoleOf(u, namedInConfig(admins, u));
 
   /** The reviewer's login (its username or its email, v8.2.0) when the caller is a reviewer, else undefined. */
