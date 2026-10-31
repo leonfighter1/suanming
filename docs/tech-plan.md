@@ -59,7 +59,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | done        |
 | S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
 | S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
-| S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | in progress |
+| S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2698,6 +2698,42 @@ dashboard access，那么不需要重复登录了」, and 「改完后做完测�
   dashboard takes it off its address at once and keeps its own session.
 
 ## 阶段总结 (stage summaries)
+
+### S33 内容按页面、后台菜单、HTML 与免登录 (done 2026-10-31: v21.0.0)
+
+1. **Delivered** (all in v21.0.0):
+   - **WP33.1, the menu:** the staff member's name at the top right opens 内容, 消息 and 导出 (as the role may), 外观 and
+     退出登录; the rail keeps the numbers and 设置; a page of the menu on a phone takes the bar's place with a way back;
+     from the keyboard through MenuAnchor's childFocusNode (the app's AppTextButton and AppIconButton take a focusNode).
+   - **WP33.2, the page map:** `src/content/usage.ts` reads the app's Dart code (each top-level declaration, the
+     members of the labels extension on their own) and walks from each page to what it reaches, stopping at other
+     pages; `pages.ts` names the pages and the parts. 761 texts: 15 on no page, 320 on more than one.
+   - **WP33.3, 内容 by page:** the pages with their counts and images, opening to their texts by the way in, each
+     saying where else it shows; the texts no page uses last; 全部文字 and the search keep the one list, with places.
+   - **WP33.4, HTML and CSS:** `src/content/rich.ts` (synced to the app as content_rich.dart): the subset, checked in
+     the panel's words; `ContentText` shows it in thirteen texts (欢迎页, the methods' lines, 我的积分's notes, the empty
+     pages); every plain getter takes tags out; the editor previews with the app's own renderer.
+   - **WP33.5, no second sign-in:** a one-time code (two minutes, one use, staff only) from ☰ → 管理后台, asked for
+     while the menu is open; the dashboard keeps its session in the tab across a reload.
+2. **Numbers:**
+   - **Tests:** server 738 → 754, app 304 → 309, 管理后台 93 → 102.
+   - **Harness:** PASS for v21.0.0.
+3. **Against the plan:**
+   - **HTML where the app can show it:** the app is Flutter, so a button, a title or a field takes words; HTML goes
+     where a text is content. The thirteen are the start; a place more is one `ContentText` with its key.
+   - **Colours from the theme only** (`var(--…)`): a written colour would be wrong in one of the two themes, and the
+     contrast checks could not hold.
+   - **The dashboard's session in the tab** (sessionStorage), not the browser: closing the tab still signs out, as
+     S22 chose; the one-time code covers a new tab from the app.
+   - **Restructured first,** each its own commit: `ClipboardWatch` in the app tests' support.dart (4a8c77e),
+     `takeAddressParameters` for what the app hands over (166e9bf).
+   - **The menu part ☰ 菜单 is named 菜单:** the dashboard has no font fallback for ☰.
+4. **Mistakes and what they teach:**
+   - **Rule 92:** a widget test's clipboard call never answers without a mock: start with `ClipboardWatch`.
+   - **Rule 93:** a symbol the fonts lack shows as a box in the dashboard: names are words; a render shows it.
+   - **Rule 3 again:** the renders found the page tiles' headings centred (an ExpansionTile centres its children); the
+     tiles now stretch them to the left edge.
+5. **Next:** the owner's next request. Open: WP7.2, WP7.3, WP1.8; the Phase 3 gate; Phase 4 waits for it.
 
 ### S32 更多设置 (done 2026-10-31: v20.0.0)
 

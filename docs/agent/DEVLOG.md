@@ -2,6 +2,17 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-31 (u): S33 — 内容 by page, the 管理后台's menu, HTML and CSS, no second sign-in; release v21.0.0
+
+- The owner's four asks of the day, planned as S33 (71c86b4), and their word: test, then commit and push.
+- WP33.1 (5f837a1): `_AdminMenu` (MenuAnchor) with 内容, 消息, 导出, 外观, 退出登录; the test helper `go` opens the menu.
+- WP33.2 (bba4c0c): `src/content/usage.ts` + `pages.ts`; the debug run named the parts; a record return type was missed
+  by the declaration pattern until it allowed brackets (shortest prefix).
+- WP33.3 (7cbad95): 内容 by page; the render found the tiles' headings centred (rule 3) and ☰ as a box (rule 93).
+- WP33.4 (83ffffa, after 4a8c77e `ClipboardWatch`): `rich.ts`, `ContentText`, the app's parser; the link test hung
+  on an unmocked clipboard (rule 92); the design rules let content_text.dart set staff's font sizes.
+- WP33.5 (ee04e97, after 166e9bf `takeAddressParameters`): the one-time code, and the tab's session.
+
 ## 2026-10-31 (t): S32 — the rest of the settings: sign-in, codes, limits, 内容, the packs; release v20.0.0
 
 - The v19.0.0 push checked first: main and the tags v18.0.0 and v19.0.0 on origin, level with the local ones.

@@ -93,8 +93,22 @@
 89. Never judge a background test run by its exit code or a filtered pipeline: write the full output to a file and read the final summary line (All tests passed / Some tests failed) from it.
 90. Never run the server suite while a Flutter suite (app or admin) runs, nor two Flutter suites at once: run them one after the other; a timeout seen under such load is checked by a run alone before anything is changed (rule 4).
 91. When the server stops reading a request body (413), close the connection (Connection: close) and test that header. A test that hangs after a large upload is a stuck connection, not a slow server: time each request to name the one that waits (rule 81).
+92. In an app widget test that copies anything (Clipboard), start with support.dart's ClipboardWatch(tester) and assert its copied value; without it the copy never completes.
+93. Words a page shows (names, labels, part names) are words: no symbol such as ☰ the fonts may lack; the 管理后台 has no CDN font fallback. Look at a render with the real fonts (rule 3).
 
 ## Log
+
+### 2026-10-31: A symbol the 管理后台's font lacks showed as a box
+- **Symptom:** The render of 内容 by page showed the part name ☰ 菜单 as an empty box
+- **Root cause:** The dashboard builds without the web resources CDN (--no-web-resources-cdn), so no fallback font fills a glyph its fonts lack; the render's font lacked ☰ too
+- **Fix:** the part is named 菜单, in words
+- **Rule:** Words a page shows (names, labels, part names) are words: no symbol such as ☰ the fonts may lack; the 管理后台 has no CDN font fallback. Look at a render with the real fonts (rule 3). (Rule 93)
+
+### 2026-10-31: A widget test's clipboard call never answered
+- **Symptom:** S33's link test found no 已复制 line after tapping a link: the copy never finished
+- **Root cause:** Clipboard.setData goes through the platform channel, which has no handler in a widget test unless one is set; the await never completes
+- **Fix:** the test sets app/test/support.dart ClipboardWatch (moved there from admin_entry_test.dart) and checks what was copied
+- **Rule:** In an app widget test that copies anything (Clipboard), start with support.dart's ClipboardWatch(tester) and assert its copied value; without it the copy never completes. (Rule 92)
 
 ### 2026-10-31: A 413 left its keep-alive connection stuck
 - **Symptom:** S32's 内容 test hung in its clean-up (a settings DELETE) after a 413 image upload, and the server's close timed out

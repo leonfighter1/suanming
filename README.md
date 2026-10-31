@@ -14,6 +14,54 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v21.0.0 (2026-10-31): 内容 by page, the 管理后台's menu, HTML and CSS, no second sign-in (S33 complete)
+
+Your requests of today:
+
+- 内容 moves to a menu at the 管理后台's top right, with 导出 and 消息;
+- 内容 is laid out by the app's pages, so an integrator sees where a change lands;
+- the changes take HTML and CSS;
+- a staff member signed in to the app opens the 管理后台 without signing in again.
+
+This release ends S33 and is pushed.
+
+- **管理后台 → the menu at the top right:** your name and role (boss · 管理员 ▾) opens it.
+  - **What it holds:** 内容, 消息 and 导出 (as far as the role may), then 外观 and 退出登录.
+  - **The rail** keeps 概览, 用户, 活跃, 收益, 用量 and 设置.
+  - **An integrator's** two pages are both in the menu: no rail, and it opens on 内容.
+  - **On a phone,** a page of the menu takes the bar's place, with its name and ← back.
+  - **From the keyboard:** Tab to the menu, Enter, then the arrows.
+- **内容 by page** (the new start; 全部文字 keeps the one list):
+  - **The pages:** every page of the app in the app's order (整个应用, 欢迎页, 登录 / 注册, 首页, 八字, 塔罗, 求签, 算卦
+    …), each with how many texts it shows, how many are changed, and its images.
+  - **Opened:** its images, then its texts by the way they are reached: 页面上, 菜单, AI 解读按钮 › 深度分析：想了解什么 ›
+    语音输入 ….
+  - **Shared texts:** a text on several pages says where else it shows (也用在：塔罗、求签 …).
+  - **Search:** finds in every text and lists all its places. The images say where they show.
+  - **Last,** the texts no page uses: they show nowhere, whatever you change.
+  - **The map** is read from the app's own code (each page and what it uses), so it follows the app by itself. A new page
+    without a name in the map fails a test.
+- **HTML and CSS** in the texts the app shows as content: 欢迎页's introduction, the five methods' lines on 首页 and
+  欢迎页, 我的积分's notes, and the three empty pages. Their rows say 可用 HTML 和 CSS.
+  - **Tags:** b, strong, i, em, u, s, small, br, p, span, a (links), ul, ol, li.
+  - **Inline CSS:** color and background-color from the theme (var(--accent), var(--danger), var(--accent-soft) …,
+    right in light and dark), font-weight, font-style, font-size (11–32 px), text-decoration.
+  - **The editor** says what a text may hold and previews it as the app draws it. Anything else is refused, saying what
+    is wrong ("color 要用主题色 …").
+  - **Buttons, titles and fields** take words alone: a tag there is refused, and the app never shows a raw <b>.
+  - **A link** is a control of its own: on the web it opens a new tab; in the app off the web its address is copied.
+- **No second sign-in:** a staff member signed in to the app taps ☰ → 管理后台, and the dashboard opens signed in. It
+  uses a one-time code: two minutes, one use. A reload keeps the dashboard signed in in that tab; closing the tab or
+  退出登录 still signs out.
+- **Verified:**
+  - **Tests:** server 754, app 309, 管理后台 102.
+  - **Renders:** the menu (wide, dark, phone), 内容 by page, the editor's preview, and the app's HTML in light and dark.
+  - **Harness:** PASS.
+- **Stage S33 in sum:** the 管理后台 has one menu for what is not numbers. 内容 shows each change in its place, read from
+  the app's code. Texts shown as content take HTML and CSS within the theme. Staff sign in once. Its summary is in the
+  [tech plan](docs/tech-plan.md).
+- **Next:** your next request.
+
 ### v20.0.0 (2026-10-31): sign-in, codes, limits, 内容 and the 充值 packs in 设置 (S32 complete)
 
 Your request of S31, carried on: 「Extract as much configurations as possible … we should be able to change it in the

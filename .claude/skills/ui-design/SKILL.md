@@ -278,9 +278,14 @@ compact grid, and a panel of its own at the right. The building blocks are in
 - **By role** (S25): the rail shows only the pages the role may see (a role with one page gets it alone, without a
   rail; an integrator has 消息 and 内容 since S29), and a page leaves out what the server would refuse it. The server
   decides; the dashboard follows.
+- **The menu at the top right** (S33): the staff member's name and role open 内容, 消息 and 导出 (as the role may), then
+  外观 and 退出登录 (a `MenuAnchor`, its button's focus node its `childFocusNode`, so ↓ moves in). A page of the menu
+  leaves the rail without a choice; on a phone it takes the bar's place, with its name and a way back.
 - **内容** (S29): the app's texts in the main column, 30 at a time (再显示 adds more), each opening its editor (a dialog,
   both languages, the app's own under each field); the search, 已修改 and the images in the panel, before the texts on
-  a narrow screen (`narrowAt: 1`, as 用户).
+  a narrow screen (`narrowAt: 1`, as 用户). By page since S33: an `ExpansionTile` a page (its headings and rows
+  stretched to the tile's left edge), its texts grouped by the way in, each with where else it shows; a text that may
+  hold HTML previews it under its field, drawn by the app's `richSpans`.
 - **设置** (S31): the settings by group, each group an `AppCard`, each setting its label and line, its control (a number
   with its unit and 保存, 跟随 .env / 开 / 关, a menu, `FilterChip`s for the accepted currencies; S32: the packs' rows,
   元 2 : 积分 3 and the ⊖, at most 400 wide, then 添加套餐 and 保存 last), its default and 恢复默认; the panel says

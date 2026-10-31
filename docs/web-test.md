@@ -299,9 +299,16 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
   - No third-party service yet: mail and SMS go to `.outbox/` (the 发送方式 panel says so).
 - **On a wide window (v13.2.0):** every page keeps to one centred container, 1440 px at most, its panel a card beside
   the main column; the bar and the rail stay at the window's edges.
-- **From the app (v13.3.0):** a staff account sees ☰ → 管理后台 in the app. On the web it opens the dashboard in a new
-  tab with the login filled in (the password is still asked; the login leaves the address bar once read). Off the web
-  the address is copied instead.
+- **From the app (v13.3.0, v21.0.0):** a staff account sees ☰ → 管理后台 in the app. On the web it opens the dashboard
+  in a new tab, signed in (v21.0.0: a one-time code asked for as ☰ opens, two minutes, one use; both leave the
+  address bar once read). A code used or late leaves the sign-in, the login filled in. Off the web the address is
+  copied instead, without the code. A reload keeps the dashboard signed in in its tab; closing the tab signs out.
+- **The menu at the top right (v21.0.0):** the name and role open 内容, 消息, 导出 (as the role may), 外观, 退出登录;
+  the rail keeps 概览 … 设置. An integrator has no rail: both pages are in the menu.
+- **内容 by page (v21.0.0):** each page of the app with its texts and images, opened by the way they are reached;
+  a shared text says where else it shows; 全部文字 and the search list everything. To try HTML: 首页 → 方法入口 →
+  塔罗's line, then `<b>抽牌</b>看<span style="color: var(--accent)">爱情</span>`; the editor previews it, and the app
+  shows it the next time it opens. A button's or a title's text refuses tags.
 
 ## 外观: light and dark (v12.1.0)
 
