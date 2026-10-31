@@ -99,8 +99,15 @@
 95. Start the harness through the PowerShell tool, never through bash: bash eats the backslashes of check.ps1's path; an exit code 0 with no gate lines means it never ran.
 96. A provider whose failure is a state to show (maintenance) needs its own retry rule; Riverpod 3 retries a failed provider by default, so a switch on AsyncError meets AsyncLoading with the error instead.
 97. After adding ARB keys: flutter gen-l10n first, then npm run sync:app (it builds ContentLocalizations from the generated localizations).
+98. Lay parts out in columns side by side only with a FocusTraversalGroup round each column; the default reading order zigzags Tab across them.
 
 ## Log
+
+### 2026-10-31: Two columns side by side zigzagged Tab between them
+- **Symptom:** SideColumns said Tab goes down the main column, then the side; under the app's default reading-order traversal it went by rows across both columns
+- **Root cause:** ReadingOrderTraversalPolicy orders by position, row band by row band, so parts of two columns at the same height interleave
+- **Fix:** Each column of SideColumns (and of 设置's two columns) is a FocusTraversalGroup of its own: Tab finishes one column, then the next
+- **Rule:** Lay parts out in columns side by side only with a FocusTraversalGroup round each column; the default reading order zigzags Tab across them. (Rule 98)
 
 ### 2026-10-31: New app strings before gen-l10n left ContentLocalizations without them
 - **Symptom:** analyze: Missing concrete implementations of AppLocalizations.maintenanceUntil and the rest in lib/generated/content_l10n.dart

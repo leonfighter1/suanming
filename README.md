@@ -14,6 +14,46 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v24.0.0 (2026-10-31): 八字's form regrouped, 设置 as a grid, the 管理后台 at 1620, 网站编辑 (S36 complete)
+
+Your requests after v23.0.0:
+
+- 八字's form regrouped as its chart was («可以»);
+- the 管理后台's 设置 as a grid on a wide screen, with less scrolling and sections easy to find;
+- the 管理后台's content up to 1620 on a wider screen;
+- the integrator role renamed editor, 网站编辑.
+
+This release ends S36 and is pushed.
+
+- **八字's form (the page 八字排盘 opens on):**
+  - **On a desktop window,** the mode (排盘解读 / 一生运势报告), the form and 排盘 are in the main column. 为谁排盘 and
+    个人情况（选填）, with what it is for, are at the right.
+  - **On a phone and a tablet** nothing moves.
+  - The note 「以下修改只用于本次排盘」 stays above the fields it speaks of.
+- **The 管理后台's 设置:**
+  - **Two columns** of groups where the page is wide enough (from a window of about 1440), each group placed so the
+    columns come out even; narrower, one column as before.
+  - **跳到:** in the panel at the right, a chip per group (维护, 登录, 验证码, AI …). A tap brings the group into view
+    and puts the keyboard there. The panel stays in view while the groups scroll; on a narrow window it sits under the
+    page's title.
+- **The 管理后台 at 1620:** every page of the dashboard now uses up to 1620 of a wider screen, the app's own width (it
+  stopped at 1440), centred beyond it.
+- **网站编辑:** the integrator role is now editor, named 网站编辑 in the 管理后台 (the role picker, the bar at the top,
+  the question when it is given) and in the app (☰ → 管理后台: 以网站编辑身份…). It may do what it did: 消息 and
+  修改页面内容.
+  - **Accounts that held it** become editors (migration 018); nothing to redo.
+  - **The dev account** is now `editor` / `editor`; an `integrator` account in an existing database signs in as an
+    editor.
+- **Keyboard:** on the two-column pages (八字's chart and form, 算卦, 设置), Tab goes down the left column, then the
+  right, instead of zigzagging between them.
+- **Verified:**
+  - **Tests:** server 760, app 318, 管理后台 109.
+  - **Renders:** 八字's form wide and on a phone; 设置 at 1920 (two columns) and 1440.
+  - **Harness:** PASS.
+- **Stage S36 in sum:** 八字's form and 设置 use a desktop's width, the dashboard is as wide as the app, and the staff
+  role for the site's words is named for what it does. Its summary is in the [tech plan](docs/tech-plan.md).
+- **Next:** your next request.
+
 ### v23.0.0 (2026-10-31): the app's pages regrouped, 维护通知, the 管理后台's menu (S35 complete)
 
 Your requests of today, for the app (the shop's pages) and the 管理后台:

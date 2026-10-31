@@ -62,7 +62,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
 | S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | done        |
 | S35 应用整理与维护通知     | the app's pages regrouped, 维护通知, the 管理后台's menu    | big    | v23.0.0 + summary | done        |
-| S36 表单与后台整理         | 八字's form, 设置's grid, the 1620 container, 网站编辑      | big    | v24.0.0 + summary | in progress |
+| S36 表单与后台整理         | 八字's form, 设置's grid, the 1620 container, 网站编辑      | big    | v24.0.0 + summary | done        |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2778,6 +2778,29 @@ Then: review, check, commit and push.
 | WP36.5 | records, the stage summary; pushed                                                                         |
 
 ## 阶段总结 (stage summaries)
+
+### S36 八字表单、后台设置网格、1620 容器、网站编辑 (done 2026-10-31: v24.0.0)
+
+1. **Delivered** (all in v24.0.0):
+   - **WP36.1, 八字's form:** `SideColumns` as on its chart: the mode, the form and 排盘 in the main column; 为谁排盘
+     and, on a desktop window, 个人情况 at the side (`SideColumns.sideBySide`); phones as before.
+   - **WP36.2, 设置:** two columns of groups from a main column of 880, each group to the shorter; 跳到 in the panel
+     (`JumpTarget`), under the header on a narrow window (`narrowAt: 1`).
+   - **WP36.3, the container:** the dashboard's `pageMax` is the app's `Grid.container`, 1620.
+   - **WP36.4, 网站编辑:** the integrator role is editor; migration 018; the dev account editor/editor.
+2. **Numbers:**
+   - **Tests:** server 760, app 317 → 318, 管理后台 108 → 109.
+   - **Harness:** PASS for v24.0.0.
+3. **Against the plan:**
+   - **What goes to the form's side:** 为谁排盘 and 个人情况 with its explanation; the note 「以下修改只用于本次排盘」 stays
+     above the fields its 以下 points to.
+   - **Two columns from about 1440, not only beyond it:** two columns of about 445 fit every control (the packs'
+     editor is 400), and 1440 is a common desktop width.
+   - **Tab in two columns** (rule 98): each column is a focus group of its own, on every page that has two.
+   - **Restructured first,** its own commit: `JumpTarget` from the reading page's jump list (72be36d).
+4. **Mistakes and what they teach:**
+   - **Rule 98:** columns side by side need a focus group each; the default reading order zigzags Tab across them.
+5. **Next:** the owner's next request. Open: WP7.2, WP7.3, WP1.8; the Phase 3 gate; Phase 4 waits for it.
 
 ### S35 应用页面整理、维护通知、后台菜单 (done 2026-10-31: v23.0.0)
 

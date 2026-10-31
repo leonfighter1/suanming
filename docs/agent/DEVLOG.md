@@ -2,6 +2,15 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-31 (x): S36 — 八字's form, 设置 as a grid, the 1620 container, 网站编辑; release v24.0.0
+
+- After v23.0.0 the owner asked whether 八字排盘 had changed: the chart had (served and fresh), its form had not; the
+  owner said 「可以」 to the form too, then asked for 设置 as a grid, the dashboard at 1620 and 网站编辑. Planned as
+  S36 (35944c8).
+- Restructured first: `JumpTarget` from the reading page's jump list (72be36d).
+- WP36.1 (8d454d6) form, and `SideColumns`' focus groups (rule 98); WP36.2 (34b5d30) 设置, rendered at 1920 and
+  1440 before the threshold came down to 880; WP36.3 (45fc5b4) 1620; WP36.4 (e08422a) editor, migration 018.
+
 ## 2026-10-31 (w): S35 — the app's pages regrouped, 维护通知, the 管理后台's menu; release v23.0.0
 
 - The owner's list (the app's pages and the 管理后台), then 维护通知 added mid-way; their word: review, check, commit and

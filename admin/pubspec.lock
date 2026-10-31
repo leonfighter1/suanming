@@ -355,7 +355,7 @@ packages:
       path: "../app"
       relative: true
     source: path
-    version: "23.0.0+72"
+    version: "24.0.0+73"
   objective_c:
     dependency: transitive
     description:
