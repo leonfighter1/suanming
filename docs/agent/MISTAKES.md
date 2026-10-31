@@ -88,8 +88,29 @@
 84. Rule 24 again (2026-10-30, banner_art_test): a second testApp pumped over a signed-out one kept its state. Read rule 24 before writing a test that starts the app twice.
 85. After moving code out of a file, check the imports it keeps with a strict scan (not a property, key, option field or comment) and remove the unused ones; tsc catches a removal that was needed.
 86. Never rewrite a source file with PowerShell's Set-Content or Out-File; use the Edit tool (or sed in Git Bash), then check git diff shows only the intended lines and the file starts without EF BB BF.
+87. To animate a page leaving an AnimatedSwitcher, give it its reverseDuration when it comes in; changing the duration later does not reach a child already shown. Debug a transition by printing each frame's children and durations, not by guessing (rule 81).
+88. When two pages with Scaffolds share a route (a switch, a cross-fade), turn heroes and taps off on the one leaving from the frame it starts leaving, in wrappers every child gets alike under its own key, so no element is rebuilt.
+89. Never judge a background test run by its exit code or a filtered pipeline: write the full output to a file and read the final summary line (All tests passed / Some tests failed) from it.
 
 ## Log
+
+### 2026-10-31: A background PowerShell run's Select-String output came back empty
+- **Symptom:** Two background flutter test runs reported only [exited with code 0]; one had a failing test, and the exit code was PowerShell's
+- **Root cause:** In a background PowerShell command, MatchInfo objects from Select-String (without a following Select-Object) were not written to the task's output; the exit code is the pipeline's, not flutter's
+- **Fix:** Background and long runs write flutter's output to a file (Out-File -Encoding utf8) and the result is read from the file with grep
+- **Rule:** Never judge a background test run by its exit code or a filtered pipeline: write the full output to a file and read the final summary line (All tests passed / Some tests failed) from it. (Rule 89)
+
+### 2026-10-31: Two Scaffolds side by side both show a SnackBar, with the same hero tag
+- **Symptom:** Deleting the account failed a test: multiple heroes share the tag <SnackBar Hero tag - Text(...)> while 首页 faded out under the introduction page
+- **Root cause:** During the switch both pages' Scaffolds are roots of the ScaffoldMessenger, so the SnackBar shows in each, wrapped in a Hero with one tag; the settings page's pop then looked for heroes in the root route. A HeroMode flag read from the animation's ticks came a frame too late
+- **Fix:** The switch's layoutBuilder wraps every child in the same KeyedSubtree(child.key) > HeroMode > IgnorePointer, with the flags off for a leaving child: off from the frame it starts leaving, and its state kept
+- **Rule:** When two pages with Scaffolds share a route (a switch, a cross-fade), turn heroes and taps off on the one leaving from the frame it starts leaving, in wrappers every child gets alike under its own key, so no element is rebuilt. (Rule 88)
+
+### 2026-10-31: AnimatedSwitcher: a child leaves with the times it came with
+- **Symptom:** The sign-out animation never ran: 首页 vanished the frame the introduction page came, though the switch's duration was 500 ms
+- **Root cause:** AnimatedSwitcher gives each child a controller when it comes in, with the duration and reverseDuration of that moment; leaving reverses that controller. 首页 came in at sign-in with a zero duration
+- **Fix:** AuthGate sets reverseDuration by the page coming in (首页: Motion.signOut, the introduction page: zero) and keys the switch by reduce motion, so the page on show leaves as reduce motion now says (S29 WP29.6)
+- **Rule:** To animate a page leaving an AnimatedSwitcher, give it its reverseDuration when it comes in; changing the duration later does not reach a child already shown. Debug a transition by printing each frame's children and durations, not by guessing (rule 81). (Rule 87)
 
 ### 2026-10-30: PowerShell Set-Content -Encoding UTF8 put a BOM into a Dart file
 - **Symptom:** After a quick swap of one line in app/lib/presentation/theme.dart with Get-Content/Replace/Set-Content -Encoding UTF8, the file began with EF BB BF

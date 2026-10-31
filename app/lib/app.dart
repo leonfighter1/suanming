@@ -49,13 +49,76 @@ class MingliApp extends ConsumerWidget {
 }
 
 /// Signed out → the introduction page (S29), which opens sign-in; signed in → home. Everything else sits behind this.
-class AuthGate extends ConsumerWidget {
+/// 登出 (S29; the owner: 「增加登出动画，如果用户登出」): when the account goes out, 首页 sinks back and fades as the
+/// introduction page comes forward ([Motion.signOut]). Every other change is at once, and so is that one under reduce
+/// motion.
+class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => switch (ref.watch(authProvider)) {
-        AsyncData(:final value) => value == null ? const IntroPage() : const HomePage(),
-        AsyncError() => const IntroPage(),
-        _ => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      };
+  ConsumerState<AuthGate> createState() => _AuthGateState();
+}
+
+/// How far 首页 sinks back as it leaves, and the introduction page comes forward from.
+const _sinkTo = 0.94;
+
+class _AuthGateState extends ConsumerState<AuthGate> {
+  /// The last change was the account going out.
+  bool _out = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final menu = MenuMorph.openedOf(context);
+    ref.listen(authProvider, (before, now) {
+      // Only a change in or out counts: going out reloads the account and answers "out" twice.
+      final wasIn = before?.value != null;
+      if (wasIn == (now.value != null)) return;
+      _out = wasIn;
+      // The menu it went out from leaves with 首页: ☰ again for the next sign-in.
+      if (_out) menu?.call(false);
+    });
+    final page = switch (ref.watch(authProvider)) {
+      AsyncError() => const IntroPage(key: ValueKey('signed-out')),
+      // Data, or the page it had while it asks again (going out reloads it): no spinner between.
+      AsyncValue(hasValue: true, :final value) =>
+        value == null ? const IntroPage(key: ValueKey('signed-out')) : const HomePage(key: ValueKey('signed-in')),
+      _ => const Scaffold(key: ValueKey('loading'), body: Center(child: CircularProgressIndicator())),
+    };
+    final still = MediaQuery.disableAnimationsOf(context);
+    // A page keeps the times it came with: 首页 comes in at once and leaves over [Motion.signOut]; the introduction page
+    // comes in over it after a sign-out, and leaves at once (under the sign-in page). Reduce motion turned on or off
+    // starts the switch afresh, so the page on show leaves as it now should.
+    return AnimatedSwitcher(
+      key: ValueKey(still),
+      duration: _out && !still ? Motion.signOut : Duration.zero,
+      reverseDuration: page is HomePage && !still ? Motion.signOut : Duration.zero,
+      switchInCurve: Motion.curve,
+      switchOutCurve: Motion.curve,
+      layoutBuilder: _layout,
+      transitionBuilder: _sinking,
+      child: page,
+    );
+  }
+
+  /// The page leaving stays under the one coming (as the switch's own layout has it), from that frame on taking no
+  /// taps and flying no heroes: its SnackBar's would meet the coming page's. Both in the same wrappers, under their own
+  /// keys, so the page leaving keeps its state.
+  static Widget _layout(Widget? current, List<Widget> previous) => Stack(
+        alignment: Alignment.center,
+        children: [
+          for (final p in previous) _part(p, shown: false),
+          if (current != null) _part(current, shown: true),
+        ],
+      );
+
+  static Widget _part(Widget child, {required bool shown}) => KeyedSubtree(
+        key: child.key,
+        child: HeroMode(enabled: shown, child: IgnorePointer(ignoring: !shown, child: child)),
+      );
+
+  /// Coming, from a little smaller and clear; leaving, the same way back.
+  static Widget _sinking(Widget child, Animation<double> animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(scale: Tween(begin: _sinkTo, end: 1.0).animate(animation), child: child),
+      );
 }

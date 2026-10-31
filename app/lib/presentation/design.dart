@@ -91,6 +91,10 @@ abstract final class Motion {
 
   /// A skeleton's bars breathing while the data comes ([Skeleton]): one fade out and back.
   static const skeleton = Duration(milliseconds: 1200);
+
+  /// The way out when the account signs out (S29, app.dart's AuthGate): 首页 sinks back and fades as the introduction
+  /// page comes forward.
+  static const signOut = Duration(milliseconds: 500);
 }
 
 /// 骨架屏 (S30; owner, 2026-10-30: 「骨架屏中每个占位条的宽高与真实内容一致；数据到达后在原位置替换，页面布局不发生跳动」): what
