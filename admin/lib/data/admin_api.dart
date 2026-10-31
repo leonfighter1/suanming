@@ -139,6 +139,9 @@ class AdminApi {
 
   Future<void> signOutEverywhere(String id) => _authed('POST', '/v1/admin/users/$id/sign-out', const <String, Object?>{});
 
+  /// 注销 (S35): the account and all its data, now; a staff account is deleted only here.
+  Future<void> deleteUser(String id) => _authed('DELETE', '/v1/admin/users/$id');
+
   Future<Active> active() async => Active.fromJson(await _authed('GET', '/v1/admin/active'));
 
   /// An export: the revenue curve or the accounts as CSV ([kind] series | users), the report as pdf or docx.

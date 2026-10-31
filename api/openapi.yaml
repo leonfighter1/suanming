@@ -482,6 +482,9 @@ paths:
       tags: [account]
       operationId: deleteAccount
       summary: Delete the account and all its data now (PIPEDA / Québec Law 25)
+      description: |
+        Not for a staff account (admin, manager, integrator: 403 `staff_account`, S35): an admin deletes it in the
+        管理后台 (DELETE /v1/admin/users/{user_id}).
       responses:
         "200":
           description: Deletion receipt
@@ -504,6 +507,7 @@ paths:
                         { type: integer, description: 深度分析 conversations (since v10.0.0) }
                   completed_at: { type: string, format: date-time }
         "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
 
   /v1/charts:
     get:
@@ -1142,6 +1146,27 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AdminUser" }
         "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [admin]
+      operationId: adminDeleteUser
+      summary: 注销 an account and all its data now (S35), staff accounts included
+      description: |
+        As the account's own deletion does (DELETE /v1/account), which a staff account can't use (403
+        `staff_account`): its charts, readings and records, its sessions. An admin's alone (user_data); never the
+        caller's own account (409 `admin_self`) nor one named in MINGLI_ADMINS (409 `admin_by_config`).
+      responses:
+        "200":
+          description: What went
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted]
+                properties:
+                  deleted: { type: object, properties: { account: { const: true } } }
         "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "409": { $ref: "#/components/responses/Problem" }

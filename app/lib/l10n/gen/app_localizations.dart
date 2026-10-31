@@ -937,6 +937,12 @@ abstract class AppLocalizations {
   /// **'你的账号、命盘和解读会立即从服务器删除，无法恢复。'**
   String get deleteAccountBody;
 
+  /// No description provided for @deleteAccountStaff.
+  ///
+  /// In zh, this message translates to:
+  /// **'这是管理后台的账号，不能在这里注销：请管理员在管理后台的账户页面注销。'**
+  String get deleteAccountStaff;
+
   /// No description provided for @cancel.
   ///
   /// In zh, this message translates to:

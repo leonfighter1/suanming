@@ -64,6 +64,33 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   Future<bool> _confirm(String title, String body) => confirmAction(context, title, body);
 
+  /// 注销 (S35): the account and its data gone, then back to 用户, its lists asked again.
+  Future<void> _delete(AdminUser u) async {
+    if (_busy || !await _confirm('注销 ${u.login} 的账号？', '账号和它的全部记录（命盘、解读、积分记录）会被删除，它也会在所有设备上退出。不能撤销。')) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      await ref.read(adminApiProvider).deleteUser(widget.id);
+      ref
+        ..invalidate(usersProvider)
+        ..invalidate(overviewProvider)
+        ..invalidate(seriesProvider)
+        ..invalidate(activeProvider);
+      navigator.pop();
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('${u.login} 的账号已注销')));
+    } catch (e) {
+      if (mounted) say(context, problemText(e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _update(Map<String, Object?> change, String done) => _run(() async {
         await ref.read(adminApiProvider).updateUser(widget.id, change);
         return done;
@@ -316,6 +343,27 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           child: _rolePicker(u, me, locked: locked, self: self),
         ),
         if (can.contains(Can.userData)) ..._userData(u),
+        // 注销 (S35): staff accounts are deleted only here; never the admin's own, nor one MINGLI_ADMINS names.
+        if (can.contains(Can.userData) && !self && !u.adminByConfig)
+          PanelSection(
+            title: '注销账号',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('删除这个账户和它的全部记录，不能撤销。管理后台的账号只能在这里注销。', style: theme.textTheme.bodyMedium),
+                const SizedBox(height: Space.m),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppOutlinedButton.icon(
+                    key: const Key('delete-account'),
+                    onPressed: _busy ? null : () => _delete(u),
+                    icon: Icon(Icons.delete_forever, color: t.danger),
+                    label: Text('注销账号', style: TextStyle(color: t.danger)),
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

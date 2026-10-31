@@ -596,6 +596,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
           ai: { serving: opts.aiServing, models: opts.aiModel ?? (() => "") },
         }),
         messages,
+        deleteAccount,
         now,
         log: (m: string) => log(m),
       };

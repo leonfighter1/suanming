@@ -454,6 +454,9 @@ class ContentLocalizations extends AppLocalizations {
   String get deleteAccountBody => _text('deleteAccountBody') ?? _base.deleteAccountBody;
 
   @override
+  String get deleteAccountStaff => _text('deleteAccountStaff') ?? _base.deleteAccountStaff;
+
+  @override
   String get cancel => _text('cancel') ?? _base.cancel;
 
   @override

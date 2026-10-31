@@ -440,6 +440,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteAccountBody => '你的账号、命盘和解读会立即从服务器删除，无法恢复。';
 
   @override
+  String get deleteAccountStaff => '这是管理后台的账号，不能在这里注销：请管理员在管理后台的账户页面注销。';
+
+  @override
   String get cancel => '取消';
 
   @override
@@ -2913,6 +2916,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get deleteAccountBody => '你的帳戶、命盤與解讀會立即從伺服器刪除，無法復原。';
+
+  @override
+  String get deleteAccountStaff => '這是管理後台的帳戶，不能在這裡刪除：請管理員在管理後台的帳戶頁面刪除。';
 
   @override
   String get cancel => '取消';

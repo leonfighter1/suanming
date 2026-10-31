@@ -243,6 +243,30 @@ void main() {
     expect(find.text('user02 已在所有设备上退出'), findsOneWidget);
   });
 
+  // S35 (the owner: 「具备dashboard access user，无法注销账号，只能从后台操作」).
+  testWidgets('注销账号: asked first, then the account is gone and the list shows it; never one\'s own nor a named admin',
+      (tester) async {
+    final f = await pumpAdmin(tester, size: tall);
+    await openUser(tester, 'u-02');
+    await tapOn(tester, 'delete-account');
+    expect(find.text('注销 user02 的账号？'), findsOneWidget);
+    await tapOn(tester, 'confirm-yes');
+    expect(f.to('/v1/admin/users/u-02', method: 'DELETE'), hasLength(1));
+    expect(find.text('user02 的账号已注销'), findsOneWidget);
+    // Back on 用户, without it.
+    expect(find.byKey(const Key('delete-account')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('user-u-02')), findsNothing);
+
+    // The admin's own account, and one MINGLI_ADMINS names, have no 注销.
+    await openUser(tester, 'admin-1', search: 'boss');
+    expect(find.byKey(const Key('delete-account')), findsNothing);
+    // Esc goes back to 用户.
+    await press(tester, LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    await openUser(tester, 'root-1', search: 'root');
+    expect(find.byKey(const Key('delete-account')), findsNothing);
+  });
+
   testWidgets('the server\'s refusal shows as a message', (tester) async {
     final f = await pumpAdmin(tester, size: tall);
     await openUser(tester, 'u-02');

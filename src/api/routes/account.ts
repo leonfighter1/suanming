@@ -127,6 +127,11 @@ export async function accountRoute(
   }
   if (path === "/v1/account" && req.method === "DELETE") {
     if (!auth) throw new HttpError(404, "auth not configured");
+    // A staff account is deleted in the 管理后台, by an admin (S35; the owner: 「如果登录者是admin 或者 manager等等 具备
+    // dashboard access user，无法注销账号，只能从后台操作」).
+    if (staffOf((await auth.users.get(c.user))!)) {
+      throw new HttpError(403, "a staff account is deleted in the 管理后台", "staff_account");
+    }
     // PIPEDA / Québec Law 25: delete the account and everything it owns, now.
     const deleted = await ctx.deleteAccount(c.user);
     send(res, 200, {

@@ -731,3 +731,48 @@ describe("the database store (WP22.1)", () => {
     PG,
   );
 });
+
+// 注销 (S35; the owner: 「如果登录者是admin 或者 manager等等 具备dashboard access user，无法注销账号，只能从后台操作」).
+describe("deleting a staff account: in the 管理后台 only (S35)", () => {
+  const seed = async (login: string) => {
+    await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
+    sessions[login] = await (await signIn(login)).json();
+    ids[login] = (await auth.findLogin("username", login))!.id;
+  };
+
+  it("the app refuses a staff account its own 注销; an admin deletes an account here, with its data", async () => {
+    await seed("carol");
+    await seed("dave");
+    expect(
+      (await call("boss", `/v1/admin/users/${ids.dave}`, "PATCH", { role: "manager" })).status,
+    ).toBe(200);
+    const own = await call("dave", "/v1/account", "DELETE");
+    expect(own.status).toBe(403);
+    expect((await own.json()).code).toBe("staff_account");
+    // 注销 takes a user's data: a manager may not.
+    expect((await call("dave", `/v1/admin/users/${ids.carol}`, "DELETE")).status).toBe(403);
+
+    await json("carol", "/v1/charts", "POST", birth);
+    const gone = await call("boss", `/v1/admin/users/${ids.carol}`, "DELETE");
+    expect(gone.status).toBe(200);
+    expect((await gone.json()).deleted).toMatchObject({ account: true, charts: 1 });
+    expect(await auth.users.get(ids.carol!)).toBeUndefined();
+    expect((await signIn("carol")).status).toBe(401);
+    expect((await call("boss", `/v1/admin/users/${ids.carol}`)).status).toBe(404);
+    // A staff account is deleted here too.
+    expect((await call("boss", `/v1/admin/users/${ids.dave}`, "DELETE")).status).toBe(200);
+    expect(await auth.users.get(ids.dave!)).toBeUndefined();
+  });
+
+  it("never the admin's own account, nor one the server's MINGLI_ADMINS names", async () => {
+    const self = await call("boss", `/v1/admin/users/${ids.boss}`, "DELETE");
+    expect(self.status).toBe(409);
+    expect((await self.json()).code).toBe("admin_self");
+    await call("boss", `/v1/admin/users/${ids.bob}`, "PATCH", { role: "admin" });
+    const named = await call("bob", `/v1/admin/users/${ids.boss}`, "DELETE");
+    expect(named.status).toBe(409);
+    expect((await named.json()).code).toBe("admin_by_config");
+    await call("boss", `/v1/admin/users/${ids.bob}`, "PATCH", { role: "user" });
+    expect(await auth.users.get(ids.boss!)).toBeDefined();
+  });
+});

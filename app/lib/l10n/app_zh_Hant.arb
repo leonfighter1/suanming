@@ -140,6 +140,7 @@
   "deleteAccount": "刪除帳戶與資料",
   "deleteAccountTitle": "要刪除帳戶嗎？",
   "deleteAccountBody": "你的帳戶、命盤與解讀會立即從伺服器刪除，無法復原。",
+  "deleteAccountStaff": "這是管理後台的帳戶，不能在這裡刪除：請管理員在管理後台的帳戶頁面刪除。",
   "cancel": "取消",
   "confirmDelete": "刪除",
   "accountDeleted": "你的帳戶與資料已刪除。",

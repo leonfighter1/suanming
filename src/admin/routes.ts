@@ -64,6 +64,8 @@ export interface AdminContext {
   ai?: { serving: () => string; models: () => string };
   /** The server's dispatcher: the messages' templates, previews, test sends and log (S25). */
   messages?: Dispatcher;
+  /** An account and everything it owns, deleted now (ApiContext.deleteAccount): an admin's 注销 (S35). */
+  deleteAccount?: (userId: string) => Promise<Record<string, number>>;
   now: () => Date;
   log: (msg: string) => void;
 }
@@ -92,6 +94,8 @@ function capabilityOf(path: string, method: string): Capability {
   if (path === "/v1/admin/reports") return "user_data";
   if (/^\/v1\/admin\/users\/[^/]+\/(points|sign-out)$/.test(path)) return "user_data";
   if (/^\/v1\/admin\/users\/[^/]+$/.test(path) && method === "PATCH") return "assign";
+  // 注销 (S35) takes the account's data with it: an admin's alone, as 增加积分 and the exports.
+  if (/^\/v1\/admin\/users\/[^/]+$/.test(path) && method === "DELETE") return "user_data";
   return "view";
 }
 
@@ -385,6 +389,17 @@ export async function adminRoute(
       await ctx.auth.signOutEverywhere(id);
       ctx.log(`admin ${loginOf(me)}: signed ${id.slice(0, 8)} out everywhere`);
       send(res, 200, { signed_out: true });
+      return true;
+    }
+    // 注销 (S35): staff accounts are deleted here, never in the app; never the admin's own, nor a MINGLI_ADMINS one.
+    if (!action && req.method === "DELETE" && ctx.deleteAccount) {
+      if (id === me.id) throw new HttpError(409, "an admin can't delete their own account", "admin_self");
+      if (byConfig(ctx, target)) {
+        throw new HttpError(409, "this admin is named in the server's MINGLI_ADMINS", "admin_by_config");
+      }
+      const deleted = await ctx.deleteAccount(id);
+      ctx.log(`admin ${loginOf(me)}: deleted the account ${id.slice(0, 8)}`);
+      send(res, 200, { deleted: { account: true, ...deleted } });
       return true;
     }
   }

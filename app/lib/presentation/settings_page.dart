@@ -111,7 +111,9 @@ class SettingsPage extends ConsumerWidget {
       navigator.popUntil((r) => r.isFirst);
       messenger.showSnackBar(SnackBar(content: Text(l10n.accountDeleted)));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      // A staff role given since the page opened: the server refuses, and says where (S35).
+      final staff = e is ApiException && e.code == 'staff_account';
+      messenger.showSnackBar(SnackBar(content: Text(staff ? l10n.deleteAccountStaff : '$e')));
     }
   }
 
@@ -198,12 +200,23 @@ class SettingsPage extends ConsumerWidget {
               navigator.popUntil((r) => r.isFirst);
             },
           ),
-          ListTile(
-            key: const Key('delete-account'),
-            leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
-            title: Text(l10n.deleteAccount, style: TextStyle(color: theme.colorScheme.error)),
-            onTap: () => _confirmDelete(context, ref),
-          ),
+          // A staff account is deleted in the 管理后台 (S35; the owner: 「具备dashboard access user，无法注销账号，只能从后台
+          // 操作」): its tile says so, and does nothing.
+          if (user.staff == null)
+            ListTile(
+              key: const Key('delete-account'),
+              leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
+              title: Text(l10n.deleteAccount, style: TextStyle(color: theme.colorScheme.error)),
+              onTap: () => _confirmDelete(context, ref),
+            )
+          else
+            ListTile(
+              key: const Key('delete-account-staff'),
+              enabled: false,
+              leading: const Icon(Icons.delete_forever),
+              title: Text(l10n.deleteAccount),
+              subtitle: Text(l10n.deleteAccountStaff),
+            ),
         ],
       ),
     );

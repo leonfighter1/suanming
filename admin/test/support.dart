@@ -221,7 +221,10 @@ class FakeAdmin {
         ? 'content'
         : path.startsWith('/v1/admin/messages/')
         ? 'messages'
-        : path == '/v1/admin/reports' || RegExp(r'^/v1/admin/users/[^/]+/(points|sign-out)$').hasMatch(path)
+        : path == '/v1/admin/reports' ||
+                RegExp(r'^/v1/admin/users/[^/]+/(points|sign-out)$').hasMatch(path) ||
+                // 注销 (S35) takes the account's data with it.
+                (RegExp(r'^/v1/admin/users/[^/]+$').hasMatch(path) && r.method == 'DELETE')
             ? 'user_data'
             : RegExp(r'^/v1/admin/users/[^/]+$').hasMatch(path) && r.method == 'PATCH'
                 ? 'assign'
@@ -265,6 +268,14 @@ class FakeAdmin {
           return _json({'balance': u['balance'], 'held': 0, 'available': u['balance']}, 201);
         case ('POST', '/sign-out'):
           return _json({'signed_out': true});
+        // 注销 (S35), as src/admin/routes.ts: never the admin's own account, nor one MINGLI_ADMINS names.
+        case ('DELETE', null):
+          if (id == 'admin-1') return _problem(409, "an admin can't delete their own account", 'admin_self');
+          if (u['admin_by_config'] == true) return _problem(409, 'named in MINGLI_ADMINS', 'admin_by_config');
+          users.remove(u);
+          return _json({
+            'deleted': {'account': true, 'charts': 0},
+          });
       }
     }
     return _problem(404, 'not found');

@@ -197,4 +197,20 @@ void main() {
     expect(find.byKey(const Key('intro-sign-in')), findsOneWidget);
     expect(find.text('你的帳戶與資料已刪除。'), findsOneWidget);
   });
+
+  // S35 (the owner: 「如果登录者是admin 或者 manager等等 具备dashboard access user，无法注销账号，只能从后台操作」).
+  testWidgets('a staff account can\'t be deleted here: 设定 says it is done in the 管理后台, and asks nothing', (tester) async {
+    final api = FakeApi()..staff = 'manager';
+    await tester.pumpWidget(testApp(api));
+    await frames(tester, 10);
+    await openFromMenu(tester, 'open-settings');
+    await frames(tester, 10);
+    await scrollTo(tester, const Key('delete-account-staff'));
+    expect(find.byKey(const Key('delete-account')), findsNothing);
+    expect(find.text('這是管理後台的帳戶，不能在這裡刪除：請管理員在管理後台的帳戶頁面刪除。'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('delete-account-staff')), warnIfMissed: false);
+    await frames(tester, 10);
+    expect(find.byKey(const Key('confirm-delete')), findsNothing);
+    expect(api.requests.any((r) => r.method == 'DELETE'), isFalse);
+  });
 }
