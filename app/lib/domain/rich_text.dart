@@ -92,7 +92,10 @@ Map<String, String> styleOf(String? style) => {
 
 /// [html]'s words alone, for a place that shows words (a title, a button): a <br>, a paragraph's or an item's end
 /// is a new line, an item starts with a dot.
-String plainOf(String html) {
+String plainOf(String html) => wordsOf(parseRich(html));
+
+/// [nodes]' words alone, as [plainOf] gives them.
+String wordsOf(List<RichNode> nodes) {
   final out = StringBuffer();
   void walk(List<RichNode> nodes) {
     for (final n in nodes) {
@@ -109,6 +112,6 @@ String plainOf(String html) {
     }
   }
 
-  walk(parseRich(html));
+  walk(nodes);
   return out.toString().trimRight();
 }
