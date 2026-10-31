@@ -2,6 +2,31 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-30 (q): S28 phase D — the API in modules; the banners' art; S28 done, release v17.0.0
+
+- v16.2.0 committed and tagged after its harness PASS (df9ea7a).
+- Phase D, one commit per group, 697 server tests after each:
+  - `routes/public.ts` (stateless), then `views.ts` (so no module imports the server), then `ApiContext` with
+    account;
+  - then 积分, 以往记录, the cards of the day, and leaves first: 破除运势, 一生运势, 深度分析, 追问, charts and
+    readings, 内容审核.
+  - Throwaway movers in the scratchpad (rule 82): cut each block once, lift a closure helper to a module function
+    with `ctx` first and the members it uses destructured, `send; return true`, then prettier and a token check.
+  - A strict unused-import scan after each move (rule 85).
+- `server.ts` 2650 → 659 lines. `/v1/methods` and 算卦's layout moved with the charts (no route between matches).
+- WP28.10: the 管理后台's `_panel`; `dashboard_test` unchanged.
+- WP28.12, the owner's request: 命理罗盘 behind every banner.
+  - `npm run mirror:banner` makes the 1600² WebP from the SVG.
+  - Treatments compared at the banners' three real sizes: the full art with its own night deepest under the words,
+    and a glow.
+  - The words, and the trailing day pillar, take the dark theme's colours. The day pillar's test was checked to fail
+    without that.
+- `sampleBazi` (F10) and `openBaziChart`; the scan 90 → 59.
+- Fixed: ask-first's 每日一牌 test sent 2026-10-29 to a server on the real clock; it broke at 00:00 UTC (the machine is
+  on EDT). Rule 83. Rule 84 folded into 24 (the same mistake again); rule 85 new.
+- The owner's next requests are planned: S29 (CMS, introduction page, 2-day sessions, sign-out animation) and S30 (the
+  twelve interactions; four have no element in the app yet).
+
 ## 2026-10-30 (p): S28 phase C — the AI mechanics in one home; v16.2.0 (local)
 
 - v16.1.0 committed and tagged after its harness PASS (0770f5f).

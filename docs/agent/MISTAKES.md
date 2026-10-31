@@ -25,7 +25,7 @@
 21. Don't rely on flutter test --platform chrome here; if tried, time-box it and end only its own processes (command line contains flutter_tools_chrome_device).
 22. matchesGoldenFile captures at 1x logical pixels whatever tester.view.devicePixelRatio is; to inspect high-DPI detail, render with RenderRepaintBoundary.toImage(pixelRatio:) instead. A dialog lies in the overlay, above the page's first RepaintBoundary: to include it, render the root layer, `(tester.binding.renderViews.first.debugLayer as OffsetLayer).toImage(...)` (v3.2.0).
 23. Flutter deletes lib/l10n/gen as stale when pub get, test or build runs from another path than its last run and that path still exists (the IDE on the real path, a kept junction). Do manual Flutter runs through a junction you remove afterwards; the guard blocks `cmd /c rmdir` on a junction that points at the repo, so when it can't be removed, leave it. Before the harness after manual runs, delete `app/.dart_tool/flutter_build` on the real path (Flutter's record of the last run; rule 74). That helps (v12.1.0: the second run passed) but does not always prevent it: v14.1.0's first harness after a version bump in app/pubspec.yaml still failed at analyze, with both records deleted and the old junction still there. After a pubspec edit or manual runs, if the harness fails at analyze with app_localizations missing, run it once more (v14.1.0 and v15.0.0: each time the first run after the version bump; the rerun passed that gate). Bump the version in app/pubspec.yaml before the last manual Flutter run, not just before the harness: v15.1.0 did, and its first harness run passed.
-24. To start a fresh app within one widget test, pump an empty widget first; pumping testApp again keeps the old Navigator and state.
+24. To start a fresh app within one widget test, pump an empty widget first, or give each start state (signed in or out, another FakeApi) its own testWidgets; pumping testApp again keeps the old Navigator and state. Broken twice: 2026-10-27, and 2026-10-30 in banner_art_test (rule 84).
 25. In a lazily built page, look for widgets in page order (top to bottom) with scrollUntilVisible; to go back up, use a negative delta.
 26. After editing anything sync:app copies (i18n/terms.json, deck.ts, engine output behind fixtures), run npm run sync:app before running app tests.
 27. Pump a frame after scrollUntilVisible or tester.ensureVisible, before the next finder, tap or scroll: both jump without a frame, so the next step sees the old layout (a tap goes to the old position). Use scrollTo() from test/support.dart for each card, or scrollToFinder() for any other finder; since v3.5.0 test_rules_test.dart fails on a scrollUntilVisible anywhere else.
@@ -85,7 +85,7 @@
 81. Start a test server and its sign-ins in the describe whose tests call it (its beforeAll, or a shared start() each such describe calls), never in a top-level beforeAll ahead of slow tests: an idle keep-alive connection meets the server 5 s timeout. A failure seen twice is a cause to find, not a flake: name the test with --reporter=verbose.
 82. Write a code transform as a script file with the Write tool, never inline node -e with nested quotes. Cut a block with its own trailing newline, never a leading one, and write a file only after every replacement in it matched exactly once.
 83. A test that sends a date the server checks against its clock either pins the server's clock (now in testApi's options) or computes the date from the same clock; never a literal date near today.
-84. A test that needs another start state (signed in or out, another FakeApi) gets its own testWidgets; never pump a second testApp over the first in one test.
+84. Rule 24 again (2026-10-30, banner_art_test): a second testApp pumped over a signed-out one kept its state. Read rule 24 before writing a test that starts the app twice.
 85. After moving code out of a file, check the imports it keeps with a strict scan (not a property, key, option field or comment) and remove the unused ones; tsc catches a removal that was needed.
 
 ## Log
@@ -100,7 +100,7 @@
 - **Symptom:** banner_art_test: after pumpWidget(testApp(signedIn: false)), pumpWidget(testApp(FakeApi())) in the same test found no HeroBanner on 首页 (Bad state: No element)
 - **Root cause:** Pumping a new testApp at the same place updates the tree rather than replacing it, so the app's state from the first start (signed out) carried over
 - **Fix:** Each start state (signed out, signed in) in its own testWidgets
-- **Rule:** A test that needs another start state (signed in or out, another FakeApi) gets its own testWidgets; never pump a second testApp over the first in one test. (Rule 84)
+- **Rule:** Rule 24 again, now broadened there: pump an empty widget first, or give each start state its own testWidgets. Read rule 24 before writing a test that starts the app twice. (Rule 84)
 
 ### 2026-10-30: A test hard-coded today's date against the server's real clock
 - **Symptom:** ask-first.test.ts '每日一牌 is the day's card' failed every run from 2026-10-31 00:00 UTC (expected 400 to be 202), after passing all day

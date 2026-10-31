@@ -13,6 +13,45 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v17.0.0 (2026-10-30): 命理罗盘 behind every banner; the API in modules (S28 complete)
+
+Your requests of today: 「Update the banner background using this … luopan.svg for all pages」, and stage S28's
+「有没有根据skill进行代码重构？没有的画请继续」. This release ends S28 and is pushed.
+
+- **The banners' art (what you see):** every banner stands on 命理罗盘, your drawing from JingyaoPaint: 首页, the
+  sign-in page, each method's page (塔罗, 求签, 算卦, 风水) and 八字's chart.
+  - The art covers the banner. Its own night sky lies over the side the words are on, deepest under them, so the
+    title and the line under it read on a phone, on a desktop and beside the sign-in form.
+  - The art is night in both themes, so the banner looks the same in 浅色 and 深色. Its words, the sun or the moon,
+    and 八字's day pillar in its 五行 colours take the dark theme's colours.
+  - **When the art changes:** run `npm run mirror:banner`. It makes the app's picture from luopan.svg (1.4 MB, with
+    glows the app can't draw itself) as a 1600 × 1600 WebP of 270 KB, and rewrites it only when the picture changed.
+- **The API in modules (nothing changes for users):** phase D of [docs/refactor-plan.md](docs/refactor-plan.md).
+  - `src/api/server.ts` went from 2650 lines to 659. It keeps what the routes share (the quotas, the 积分 holds, the
+    background jobs, the Geo-Rule check, the report mail), the order the routes are tried in, CORS and the error
+    answers.
+  - Eleven route modules in `src/api/routes/`, one per group: the calendar and places, sign-in and the account, 积分,
+    以往记录 and documents, the cards of the day, 破除运势, 一生运势报告, 深度分析, 追问, charts and readings, 内容审核.
+  - Each module gets the shared state as one `ApiContext` (`src/api/context.ts`). What a response shows of a record
+    is in `src/api/views.ts`.
+- **Also:**
+  - the 管理后台's side panel is built in one place, with no visible change;
+  - the tests share the standard 八字 chart (`sampleBazi`) and the way to it (`openBaziChart`);
+  - fixed: a test that sent a fixed date to a server on the real clock broke when the day turned (rule 83).
+- **Verified:**
+  - **Tests:** server 697, app 272 (seven new for the banner), 管理后台 75.
+  - **Every moved block** has the same code as before, token for token, apart from the context and its answers; no
+    import left unused.
+  - **Renders** of the banner on 首页, the sign-in page and 塔罗, from 390 to 2560 wide, light and dark.
+  - **Harness:** PASS.
+- **Stage S28 in sum (v16.1.0–v17.0.0):** one home for each thing, by the coding skill. The repeated blocks went from
+  260 to 59: the test servers, the app's shared widgets, the AI pipelines' mechanics and the API's modules. Nothing
+  changed for users but the banner. Its summary is in the [tech plan](docs/tech-plan.md).
+- **Next:** S29, the CMS, the introduction page, two-day sessions and the sign-out animation. Then S30, your twelve
+  interactions: the ones the app has elements for (button bounce, switches, ripple, ticks, rolling numbers,
+  skeletons, the tarot flip, ☰ → ✕). 点赞 and 收藏, sliders, stacked cards and bottom sheets don't exist in the app
+  yet.
+
 ### v16.2.0 (2026-10-30): the AI pipelines share their mechanics (S28 phase C)
 
 Phase C of the refactoring planned in [docs/refactor-plan.md](docs/refactor-plan.md). Nothing changes for users or

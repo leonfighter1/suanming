@@ -54,7 +54,9 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S25 消息模板与分发         | mail and SMS templates, one dispatcher, staff roles         | big    | v14.0.0 + summary | done        |
 | S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
 | S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | done        |
-| S28 重构                   | one home for each thing; the API's routes in modules        | big    | v17.0.0 + summary | in progress |
+| S28 重构                   | one home for each thing; the API's routes in modules        | big    | v17.0.0 + summary | done        |
+| S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | planned     |
+| S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v19.0.0 + summary | planned     |
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
@@ -2537,6 +2539,11 @@ The survey (260 repeated blocks; the largest files), the rules for every step, t
 | WP28.9  | the other route groups, one commit each; `server.ts` under 900 lines                              | v17.0.0 |
 | WP28.10 | the 管理后台's panel card built in one place, nothing visible changed                             | v17.0.0 |
 | WP28.11 | records, the scan's counts, the stage summary; pushed                                             | v17.0.0 |
+| WP28.12 | the banners' art: 命理罗盘 behind every banner (owner, during the stage)                          | v17.0.0 |
+
+**Owner request during the stage (2026-10-30):** 「Update the banner background using this
+C:\AIProjects\JingyaoPaint\local_art\out\fortune\luopan.svg for all pages」. Every `HeroBanner` stands on the art, made
+into the app by `npm run mirror:banner`; the one change users see in this stage (WP28.12).
 
 **Every step:**
 
@@ -2546,7 +2553,93 @@ The survey (260 repeated blocks; the largest files), the rules for every step, t
 
 Lessons: rules 23, 45, 61, 78, 79, 81; P15.
 
+## S29 内容管理、介绍页、登录有效期、登出动画 (big → v18.0.0)
+
+**Owner request (2026-10-30), for after S28:** 「following the same princile of the SKILLS about the coding, do the
+follows: 1. create a CMS system, that can modify the resources of context for different places of the text,
+images. 2. store the values of the resources into database. 3. autherize the roles to be able to update the context
+of the page. 4. extract as much text as possible into the content integration pages.」 Then: an introduction page
+(「欢迎来到命理大师 logo / 加入我们…… / <BUTTON - 登入、注册> - 点击然后进入登录页面 / 下面就是各种服务的类型 … 2x2 grid / 点击业务，
+如果没有登录，那就直接进入登入页面，然后要记录刚刚点击的服务类型，登入后直接进入服务页面，注册的话就不考虑，直接进入主页」);
+「登录者的登录消息存在服务器上，如果距离上次登录超过2天，那就需要重新登录」; 「增加登出动画，如果用户登出」. Done by the coding
+skill, with the full harness.
+
+| WP     | What                                                                                                        |
+| ------ | ----------------------------------------------------------------------------------------------------------- |
+| WP29.1 | content resources (text by locale, images) in the database and the memory store; the app's public read      |
+| WP29.2 | the 管理后台's 内容 page: by page and place, edit a text, upload an image; a `content` capability for roles |
+| WP29.3 | the app shows the resources over its built-in texts (ARB), as many as can be, falling back to the built-in  |
+| WP29.4 | the introduction page, signed out: welcome, 加入我们, 登入 / 注册, the services 2 × 2; a service remembered |
+| WP29.5 | sessions on the server: two days after signing in, sign in again                                            |
+| WP29.6 | the sign-out animation (reduce motion: none)                                                                |
+| WP29.7 | records, the stage summary; pushed                                                                          |
+
+- **Roles:** `content` goes to admin and integrator to begin with (S25's roles); the owner can change it.
+- **The pending service:** kept through signing in (not through registering, which goes to 首页).
+
+## S30 交互动效 (big → v19.0.0)
+
+**Owner request (2026-10-30):** 「UI 改进，对于现在已有的前端各种元素 做以下的所有应该有的元素交互功能」, twelve of them:
+1 按压回弹 (96 %, a spring past 100 % and back), 2 弹性开关, 3 波纹跟手, 4 点赞炸一下 (only 点赞 and 收藏), 5 勾选画出来
+(about 200 ms), 6 液态滑块, 7 数字滚动, 8 骨架屏 (no layout jump), 9 卡片翻面 (back faces hidden), 10 汉堡变叉, 11 卡片
+堆叠, 12 底部抽屉 (half and full).
+
+The survey (2026-10-30) of what the app has:
+
+| WP     | What                                                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------ |
+| WP30.1 | 1: every button and pressable card (about 95 buttons in 32 files) in one shared place; reduce motion   |
+| WP30.2 | 2: the four switches; 5: the two checkboxes (Material's tick already draws in 200 ms: verify and keep) |
+| WP30.3 | 3: the ripple from the touch point (Material's already is: verify, test)                               |
+| WP30.4 | 7: figures that change in place roll to the new value (积分 first)                                     |
+| WP30.5 | 8: skeletons for the loading states (21 spinners in 12 files), the size of what replaces them          |
+| WP30.6 | 9: the tarot card's turn: on Y, each face hidden from behind                                           |
+| WP30.7 | 10: ☰ → ✕ on the menu button (`AnimatedIcons.menu_close`)                                             |
+| WP30.8 | records, the stage summary; pushed                                                                     |
+
+- **Not in the app yet:** 点赞 and 收藏 buttons (4), sliders (6), stacked cards (11) and bottom sheets (12). Each is
+  built in when such an element comes, or where the owner names one.
+
 ## 阶段总结 (stage summaries)
+
+### S28 重构：一处一家、最小改动 (done 2026-10-30: v16.1.0–v17.0.0)
+
+1. **Delivered** (the plan and every step's checks: [refactor-plan.md](refactor-plan.md)):
+   - **Phases A and B (v16.1.0):**
+     - tests and scripts: `testApi` for twenty server test files, the app tests' `frames` and `scrollAndTap`, the
+       verification batteries' and verify scripts' shared parts (WP28.1–28.3);
+     - app and server code: one home each for dates, the numbered badge, the cards of the day's tile, 有所求's
+       listener, a new profile, the export headings, `chartRequest`, `dailyChart`, the 积分 hold and credit rules,
+       the share images' common parts, the 管理后台's period sums (WP28.4–28.5).
+   - **Phase C (v16.2.0):** the AI pipelines' mechanics in `src/ai/envelope.ts`, the user messages' closing lines
+     written once; 69 user messages byte for byte the same (WP28.6–28.7).
+   - **Phase D (v17.0.0):** the API in eleven route modules (`src/api/routes/`), what they share as the `ApiContext`,
+     the responses' views in `views.ts`; `server.ts` from 2650 lines to 659. The 管理后台's panel card in one place
+     (WP28.8–28.10).
+   - **WP28.12 (v17.0.0), the owner's request during the stage:** every banner stands on 命理罗盘, the owner's art,
+     made into the app by `npm run mirror:banner`.
+2. **Numbers:**
+   - **Tests:** server 696 → 697, app 265 → 272 (the banner's art), the 管理后台 75.
+   - **The scan:** repeated blocks 260 → 59.
+   - **Sizes:** `src/api` is 15 files and 3182 lines, the largest `charts.ts` (422); the banner's art is a 270 KB
+     WebP of the 1.4 MB SVG.
+   - **Harness:** PASS at every release.
+3. **Against the plan:**
+   - The route groups moved leaves first (破除运势, 一生运势, 深度分析, 追问, charts and reports, 内容审核), not in the
+     planned order: each module then imports only modules already out, never the server.
+   - `views.ts` came first, unplanned, for the same reason.
+   - F10 (`sampleBazi`), planned in phase A, was done in D; `openBaziChart` was found by the scan at the end.
+   - The banner's art (WP28.12) is the stage's one change users see.
+4. **Mistakes and what they teach:**
+   - **Rule 82:** a code transform goes in a script file written with the Write tool; it writes nothing before every
+     replacement matched once. Broken once here (a heredoc mangled backslashes); the script failed before writing.
+   - **Rule 83:** a test sent a literal date to a server on the real clock; it failed every run once UTC turned
+     (the machine is 4 hours behind UTC). Pin the server's clock, or take the date from the same clock.
+   - **Rule 84:** rule 24 broken a second time (a second `testApp` over the first). Rule 24 now says both ways out.
+   - **Rule 85:** `tsc` here reports no unused import, and a plain search counted an option field as a use. After a
+     move, check the imports with a strict scan.
+5. **Next:** S29 (the CMS, the introduction page, sessions of two days, the sign-out animation), then S30 (the
+   owner's interactions), both below.
 
 ### S27 每个页面的容器、充值框、跟随时间的外观 (done 2026-10-30: v15.1.0–v16.0.0)
 
@@ -3334,7 +3427,8 @@ Written when a stage completes, before its X.0.0 release (dev-workflow skill). M
 | WP28.5    | done                         | v16.1.0 |
 | WP28.6    | done                         | v16.2.0 |
 | WP28.7    | done                         | v16.2.0 |
-| WP28.8    | in progress                  | v17.0.0 |
-| WP28.9    | planned                      | v17.0.0 |
-| WP28.10   | planned                      | v17.0.0 |
-| WP28.11   | planned                      | v17.0.0 |
+| WP28.8    | done                         | v17.0.0 |
+| WP28.9    | done                         | v17.0.0 |
+| WP28.10   | done                         | v17.0.0 |
+| WP28.11   | done                         | v17.0.0 |
+| WP28.12   | done                         | v17.0.0 |

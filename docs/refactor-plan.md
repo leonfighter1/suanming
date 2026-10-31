@@ -236,14 +236,38 @@ No app or server code changes.
 - **WP28.11 Records:** MODULES.md, the scan's counts, the stage summary, the README entry (users see no change).
   Pushed after a fresh harness PASS.
 
+- **Done (v17.0.0):**
+  - `server.ts` from 2650 lines to 659: what the groups share (the quotas, the holds, the jobs, the Geo-Rule check,
+    the report mail, `chartRequest`), handed to each as the `ApiContext` (`context.ts`); the order the groups are
+    tried in; CORS and the problem responses.
+  - Eleven route modules in `src/api/routes/`: public (calendar, places), account (sign-in, the account), points,
+    archive (以往记录, documents), daily (the cards of the day), remedies, life, inquiry, followup, charts (making a
+    chart or a reading, a reading, its share image, the history) and reviews. Each took its group's helpers along,
+    as functions of the context, and passes it on to another group's (追问 reads 破除运势's and 一生运势's
+    ownership checks).
+  - `src/api/views.ts` first: what a response shows of a record, so no module imports the server.
+  - Changed against the plan: the groups moved leaves first (破除运势, 一生运势, 深度分析, 追问, then charts and
+    reports, then 内容审核), so no module ever reached back into the server; `/v1/methods` and 算卦's layout moved
+    with the charts (no route between their two places matches their paths); F10 (`sampleBazi`) done here.
+  - Every move checked: the moved code has the same tokens as the cut, apart from `ctx`, `send; return true` and
+    prettier's spacing; no import left unused (rule 85); 697 server tests after each commit; `api/openapi.yaml`
+    unchanged.
+  - The 管理后台's panel card (`_panel`): `dashboard_test` unchanged.
+  - Tests: `sampleBazi` (F10, five AI tests' chart) and `openBaziChart` (six app tests' steps to 八字's chart).
+
 ## Measures
 
-| Measure (planned → done)   | Now  | After A     | After B    | After C   | After D |
-| -------------------------- | ---- | ----------- | ---------- | --------- | ------- |
-| Repeated blocks (the scan) | 260  | < 110 → 123 | < 80 → 108 | < 80 → 90 | < 80    |
-| `src/api/server.ts` lines  | 2647 | 2647        | 2650       | 2650      | < 900   |
-| Server tests passing       | 696  | 696         | 696        | 696       | 696     |
-| App tests passing          | 265  | 265         | 265        | 265       | 265+    |
+| Measure (planned → done)   | Now  | After A     | After B    | After C   | After D     |
+| -------------------------- | ---- | ----------- | ---------- | --------- | ----------- |
+| Repeated blocks (the scan) | 260  | < 110 → 123 | < 80 → 108 | < 80 → 90 | < 80 → 59   |
+| `src/api/server.ts` lines  | 2647 | 2647        | 2650       | 2650      | < 900 → 659 |
+| Server tests passing       | 696  | 696         | 696        | 696       | 696 → 697   |
+| App tests passing          | 265  | 265         | 265        | 265       | 265+ → 271  |
+
+After D the scan is at 59. Phase D's moves took out few repeats themselves (90 → 86, `sampleBazi` and the panel's
+card); `openBaziChart` took 27 more: the six copies of the steps from 首页 to 八字's chart paired with each other. The
+rest are mostly in tests (servers of other shapes, repeated call lines that are not logic) and the AI pipelines'
+remaining likenesses.
 
 App tests may only grow: a new home can get a test of its own.
 
