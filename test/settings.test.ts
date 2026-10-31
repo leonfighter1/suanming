@@ -4,6 +4,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { beforeAll, describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
+import { FailureLimiter, failureLimits } from "../src/auth/limits.js";
 import { DAY_S, InMemorySessionStore, type RefreshRecord } from "../src/auth/tokens.js";
 import { PgStore } from "../src/db/pg-store.js";
 import { buildAuth, buildProviders, withPanel } from "../src/service/runtime.js";
@@ -213,5 +214,35 @@ describe("设置 in the 管理后台", () => {
     const back = await call("boss", "/v1/admin/settings/sessions.idle_days", "DELETE");
     expect(await back.json()).toMatchObject({ value: 2, default: 2 });
     expect(settings.number("sessions.idle_days")).toBe(2);
+  });
+
+  it("登录: the failures before a pause are the panel's, from the next sign-in (WP32.1)", async () => {
+    await call("boss", "/v1/admin/settings/sessions.lock_after", "PUT", { value: 2 });
+    const wrong = () =>
+      call(null, "/v1/auth/login", "POST", { login: "alice", password: "not her password" });
+    expect((await wrong()).status).toBe(401);
+    expect((await wrong()).status).toBe(401);
+    const paused = await signIn("alice");
+    expect([paused.status, (await paused.json()).code]).toEqual([429, "locked"]);
+    // Back to 10: two failures no longer pause, and the right password clears them.
+    await call("boss", "/v1/admin/settings/sessions.lock_after", "DELETE");
+    expect((await signIn("alice")).status).toBe(200);
+  });
+});
+
+describe("登录's window (WP32.1)", () => {
+  it("is read at each sign-in: a failure older than the panel's minutes no longer counts", async () => {
+    const s = new Settings(undefined, {});
+    let t = 0;
+    const limiter = new FailureLimiter(
+      () => t,
+      () => failureLimits(s),
+    );
+    expect(limiter.limits()).toEqual({ windowMs: 15 * 60_000, captchaAfter: 3, lockAfter: 10 });
+    limiter.fail("k");
+    t = 2 * 60_000;
+    expect(limiter.count("k")).toBe(1);
+    await s.set("sessions.failure_window_minutes", 1, undefined, AT);
+    expect(limiter.count("k")).toBe(0);
   });
 });

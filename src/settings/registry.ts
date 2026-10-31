@@ -44,6 +44,41 @@ export const SETTINGS = [
     about:
       "账户多久没用之后要重新登录；可以是小数（0.5 是 12 小时）。改了以后，下一次登录或刷新起算。",
   },
+  // 登录保护 (S32 WP32.1): failures count per account and per IP, over the window's minutes (src/auth/limits.ts).
+  {
+    key: "sessions.captcha_after",
+    group: "sessions",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 100,
+    unit: "次",
+    label: "登录失败几次后要人机验证",
+    about: "同一个账户或同一个 IP 在计算时长里登录失败这么多次后，再登录要先通过人机验证。",
+  },
+  {
+    key: "sessions.lock_after",
+    group: "sessions",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 1000,
+    unit: "次",
+    label: "登录失败几次后暂停登录",
+    about:
+      "失败这么多次后，这个账户或 IP 暂停登录，等最早的一次失败过了计算时长才能再试。不比上一项多，就不会要人机验证。",
+  },
+  {
+    key: "sessions.failure_window_minutes",
+    group: "sessions",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 1440,
+    unit: "分钟",
+    label: "登录失败的计算时长",
+    about: "登录失败只算最近这么多分钟里的；暂停登录最长也是这么久。",
+  },
   {
     key: "limits.ai_per_user_day",
     group: "limits",

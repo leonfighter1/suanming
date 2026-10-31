@@ -23,7 +23,7 @@ import {
 } from "../ai/index.js";
 import type { Store } from "../api/store.js";
 import { loginKind } from "../auth/identifiers.js";
-import { noCaptcha, TurnstileVerifier } from "../auth/limits.js";
+import { FailureLimiter, failureLimits, noCaptcha, TurnstileVerifier } from "../auth/limits.js";
 import type { PointsLedger } from "../points/index.js";
 import { AuthService, type AccountRole, type UserStore } from "../auth/service.js";
 import { parseKek } from "../db/envelope.js";
@@ -320,6 +320,7 @@ export function buildAuth(
     }),
     social: SocialVerifier.fromEnv(),
     captcha: turnstile ? new TurnstileVerifier(turnstile) : noCaptcha,
+    limiter: new FailureLimiter(undefined, () => failureLimits(settings)),
     ...(users && { users }),
   });
 }

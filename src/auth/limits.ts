@@ -1,18 +1,33 @@
 /**
  * Login protection: per-key failure counting in a sliding window. After
- * CAPTCHA_AFTER failures a captcha is required; after LOCK_AFTER the key is
- * locked for the rest of the window.
+ * captchaAfter failures a captcha is required; after lockAfter the key is
+ * locked for the rest of the window. The three are 设置's (S32 WP32.1).
  */
-export const WINDOW_MS = 15 * 60_000;
-export const CAPTCHA_AFTER = 3;
-export const LOCK_AFTER = 10;
+import { defaultSettings, type Settings } from "../settings/index.js";
+
+export interface FailureLimits {
+  windowMs: number;
+  captchaAfter: number;
+  lockAfter: number;
+}
+
+/** [settings]' limits as they are now: the 管理后台's 登录 group. */
+export const failureLimits = (settings: Settings = defaultSettings()): FailureLimits => ({
+  windowMs: settings.number("sessions.failure_window_minutes") * 60_000,
+  captchaAfter: settings.number("sessions.captcha_after"),
+  lockAfter: settings.number("sessions.lock_after"),
+});
 
 export class FailureLimiter {
   private readonly failures = new Map<string, number[]>();
-  constructor(private readonly now: () => number = Date.now) {}
+  constructor(
+    private readonly now: () => number = Date.now,
+    /** Read at each sign-in, so a change in the 管理后台 holds from the next one. */
+    readonly limits: () => FailureLimits = () => failureLimits(),
+  ) {}
 
   count(key: string): number {
-    const cutoff = this.now() - WINDOW_MS;
+    const cutoff = this.now() - this.limits().windowMs;
     const list = (this.failures.get(key) ?? []).filter((t) => t > cutoff);
     this.failures.set(key, list);
     return list.length;

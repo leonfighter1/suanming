@@ -1,7 +1,10 @@
 {
   "_readme": "设置 (v19.0.0, tech plan S31; the owner 2026-10-31: 「Move all the configurations into separate files, CMS controlling panel is able to read and adjust those values」): the defaults of what the 管理后台's 设置 page changes, by group. Each setting's type, range and words are in src/settings/registry.ts; an env variable it names, when set, is the default instead (the deployment's), and a change made in the panel is kept in the database and wins over both. The 积分 packs and prices stay in config/points.json, the AI routes in config/model_routing.json.",
   "sessions": {
-    "idle_days": 2
+    "idle_days": 2,
+    "captcha_after": 3,
+    "lock_after": 10,
+    "failure_window_minutes": 15
   },
   "ai": {
     "mock": null,

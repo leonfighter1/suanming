@@ -1,17 +1,15 @@
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT, type JWK } from "jose";
 import { describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
-import {
-  CAPTCHA_AFTER,
-  FailureLimiter,
-  LOCK_AFTER,
-  type CaptchaVerifier,
-} from "../src/auth/limits.js";
+import { FailureLimiter, failureLimits, type CaptchaVerifier } from "../src/auth/limits.js";
 import { AuthService } from "../src/auth/service.js";
 import { SocialVerifier } from "../src/auth/social.js";
 import { TokenService } from "../src/auth/tokens.js";
 import { PEPPER } from "./helpers.js";
 import { testApi } from "./api.js";
+
+// The defaults: config/settings.json's 登录 group (S32 WP32.1).
+const { captchaAfter: CAPTCHA_AFTER, lockAfter: LOCK_AFTER } = failureLimits();
 
 // Clock the tests can move forward (token expiry).
 let clock = Date.parse("2026-10-26T00:00:00Z");

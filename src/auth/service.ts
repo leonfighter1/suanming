@@ -18,13 +18,7 @@ import {
   usernameProblem,
   type LoginKind,
 } from "./identifiers.js";
-import {
-  CAPTCHA_AFTER,
-  FailureLimiter,
-  LOCK_AFTER,
-  noCaptcha,
-  type CaptchaVerifier,
-} from "./limits.js";
+import { FailureLimiter, noCaptcha, type CaptchaVerifier } from "./limits.js";
 import { dummyHash, hashPassword, passwordProblem, verifyPassword } from "./passwords.js";
 import { SocialVerifier, type SocialProvider } from "./social.js";
 import { TokenService, type TokenPair } from "./tokens.js";
@@ -320,10 +314,11 @@ export class AuthService {
           ? this.usernameLookup(login)
           : this.keyed(`phone-login:${login.replace(/\D/g, "")}`);
     const keys = [`login:${named}`, `ip:${ip}`];
+    const { captchaAfter, lockAfter } = this.limiter.limits();
     const failures = Math.max(...keys.map((k) => this.limiter.count(k)));
-    if (failures >= LOCK_AFTER)
+    if (failures >= lockAfter)
       throw new AuthError(429, "too many attempts; try again later", "locked");
-    if (failures >= CAPTCHA_AFTER) {
+    if (failures >= captchaAfter) {
       const ok = await this.captcha.verify(
         typeof body.captcha_token === "string" ? body.captcha_token : undefined,
         ip,
