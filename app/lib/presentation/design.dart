@@ -6,6 +6,7 @@ import 'package:flutter/physics.dart' show SpringSimulation;
 import 'package:flutter/rendering.dart'
     show RenderAbstractViewport, RenderCustomPaint, RenderImage, RenderParagraph, RenderProxyBox;
 
+import 'content.dart';
 import 'tokens.dart';
 
 /// The spacing scale (tech plan S24, the ui-design skill): steps of 4 points named by size, then the uses with names of
@@ -730,13 +731,16 @@ class HeroBanner extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     const on = ThemeTokens.dark;
     final radius = BorderRadius.circular(Radii.hero);
+    final staff = ContentScope.imageOf(context, 'banner');
     return Container(
       margin: margin ?? const EdgeInsets.only(bottom: Space.l),
       decoration: BoxDecoration(
         borderRadius: radius,
         // The sky's night until the art is ready.
         color: _artNight,
-        image: const DecorationImage(image: bannerArt, fit: BoxFit.cover),
+        // The art staff put in (内容管理, S29), else the app's own. Staff's that can't load (removed since, no network)
+        // leaves the sky's night, as while art loads.
+        image: DecorationImage(image: staff ?? bannerArt, fit: BoxFit.cover, onError: staff == null ? null : (_, _) {}),
         boxShadow: [
           BoxShadow(color: _artNight.withValues(alpha: 0.18), blurRadius: Space.xl, offset: const Offset(0, Space.s)),
         ],

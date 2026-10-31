@@ -239,6 +239,9 @@ class FakeApi {
     return {'access_token': access, 'refresh_token': 'refresh-$_tokenSerial', 'token_type': 'Bearer', 'expires_in': 900};
   }
 
+  /// 内容管理 (S29): what /v1/content answers (texts and images staff changed); null: 404.
+  ({Map<String, String> texts, Map<String, String> images})? content = (texts: const {}, images: const {});
+
   /// While set, every request waits until it completes: a test sees what a page shows while its data come (S30).
   Completer<void>? hold;
 
@@ -264,6 +267,11 @@ class FakeApi {
           : _json({'date': date, 'lunar': (cal['day'] as Map)['lunar']}, 200);
     }
     // Birthplaces: real server data (places.json; CN trimmed to 廣東).
+    // 内容管理 (S29): what staff changed; null answers 404, as a server from before the CMS would.
+    if (req.method == 'GET' && path == '/v1/content') {
+      final c = content;
+      return c == null ? _json({'title': 'not found'}, 404) : _json({'texts': c.texts, 'images': c.images}, 200);
+    }
     if (req.method == 'GET' && path == '/v1/places') return _json(fixture('places')['index'] as Object, 200);
     if (req.method == 'GET' && path.startsWith('/v1/places/')) {
       final c = (fixture('places')['countries'] as Map)[path.split('/').last.toUpperCase()];

@@ -10,6 +10,7 @@ import '../data/api_client.dart';
 import '../data/profile_store.dart';
 import '../data/settings_store.dart';
 import '../data/token_store.dart';
+import '../domain/content.dart';
 import '../domain/dates.dart';
 import '../domain/inquiry.dart';
 import '../domain/life_report.dart';
@@ -455,6 +456,17 @@ final placeRegionsProvider = FutureProvider.family<List<PlaceRegion>, String>(
 );
 
 final pollIntervalProvider = Provider<Duration>((ref) => AppConfig.pollInterval);
+
+/// 内容管理 (S29): what staff changed of the app's texts and images, in the app's language. Nothing (the app's own)
+/// until it comes, and whenever it can't: a server from before the CMS, no network.
+final contentProvider = FutureProvider<ContentView>((ref) async {
+  final locale = ref.watch(settingsProvider.select((s) => s.apiLocaleCode));
+  try {
+    return await ref.watch(apiClientProvider).content(locale);
+  } catch (_) {
+    return ContentView.none;
+  }
+});
 
 /// 积分 (v11.0.0, S20): the account's balance, packs and latest changes. Off (nothing shown, nothing costs) when the
 /// server has them off, or is one from before them (404).

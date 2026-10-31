@@ -3,7 +3,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'application/providers.dart';
+import 'domain/content.dart';
 import 'l10n/gen/app_localizations.dart';
+import 'presentation/content.dart';
 import 'presentation/design.dart';
 import 'presentation/home_page.dart';
 import 'presentation/keyboard.dart';
@@ -17,6 +19,9 @@ class MingliApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    // 内容管理 (S29): staff's changes in front of the app's texts and images, once they come.
+    final content = ref.watch(contentProvider).value ?? ContentView.none;
+    final server = Uri.parse(ref.watch(apiClientProvider).baseUrl);
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: buildTheme(Brightness.light),
@@ -27,14 +32,17 @@ class MingliApp extends ConsumerWidget {
       themeAnimationStyle: const AnimationStyle(duration: Motion.theme, curve: Motion.themeCurve),
       locale: settings.locale,
       supportedLocales: supportedAppLocales,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
+      localizationsDelegates: [
+        ContentDelegate(content.texts),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       // App-wide keys around the Navigator: Esc = back one level, Ctrl+/ = list.
-      builder: (_, navigator) => MenuMorph(child: KeyboardShell(child: navigator!)),
+      builder: (_, navigator) => ContentScope(
+        images: {for (final MapEntry(:key, :value) in content.images.entries) key: server.resolve(value).toString()},
+        child: MenuMorph(child: KeyboardShell(child: navigator!)),
+      ),
       home: const AuthGate(),
     );
   }

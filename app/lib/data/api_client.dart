@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../domain/content.dart';
 import '../domain/dates.dart';
 import '../domain/document.dart';
 import '../domain/inquiry.dart';
@@ -292,6 +293,11 @@ class ApiClient {
     final j = await _authed('GET', '/v1/life-reports');
     return (j['items'] as List).cast<Json>().map(LifeReportView.fromJson).toList();
   }
+
+  // ---- 内容管理 (S29, public) ----
+
+  /// What staff changed of the app's texts and images in [locale] (zh-Hans, zh-Hant).
+  Future<ContentView> content(String locale) async => ContentView.fromJson(await _send('GET', '/v1/content?locale=$locale'));
 
   // ---- birthplaces (public) ----
 
