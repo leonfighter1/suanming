@@ -6,6 +6,7 @@ import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../buttons.dart';
 import '../design.dart';
+import '../keyboard.dart' show JumpTarget;
 import '../labels.dart';
 import '../layout.dart';
 import 'follow_up.dart';
@@ -52,21 +53,18 @@ class _FourLayerReportState extends State<FourLayerReport> {
       });
 
   /// Where the jump list goes (v3.4.0): each topic section, then 行动建议, then (v9.3.0) 八字's 总结.
-  late final _targets = [for (var i = 0; i <= widget.layers.interpretation.length + 1; i++) GlobalKey()];
+  late final _targets = [for (var i = 0; i <= widget.layers.interpretation.length + 1; i++) JumpTarget()];
 
   /// The 总结's place in [_targets].
   int get _conclusionTarget => widget.layers.interpretation.length + 1;
-
-  /// Focus for a target once jumped to, so Tab goes on from there; Tab itself passes them by.
-  late final _targetFocus = [for (final _ in _targets) FocusNode(skipTraversal: true)];
 
   /// 追问 (v7.0.0): the card after the reading, and the floating button that brings it up.
   final _followUp = FollowUpTarget();
 
   @override
   void dispose() {
-    for (final f in _targetFocus) {
-      f.dispose();
+    for (final t in _targets) {
+      t.dispose();
     }
     _followUp.dispose();
     super.dispose();
@@ -82,10 +80,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
       });
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final target = _targets[n].currentContext;
-      if (!mounted || target == null) return;
-      Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
-      _targetFocus[n].requestFocus();
+      if (mounted) _targets[n].jump();
     });
   }
 
@@ -97,8 +92,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
     final layers = widget.layers;
     final body = ReadingText.body(context);
     var i = 0;
-    Widget target(int n, Widget child) =>
-        Focus(focusNode: _targetFocus[n], child: KeyedSubtree(key: _targets[n], child: child));
+    Widget target(int n, Widget child) => _targets[n].wrap(child);
 
     // 追问 needs the report: a reading page has it, a preview doesn't.
     final followUp = widget.reportId != null;

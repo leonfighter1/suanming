@@ -475,3 +475,23 @@ class _KeyRow extends StatelessWidget {
     );
   }
 }
+
+/// A part of a long page that a jump list brings into view (v3.4.0's reading page; S35 the 管理后台's 设置): wrap the
+/// part with [wrap], and [jump] scrolls it into view and moves the focus to it, so Tab goes on from there. Tab itself
+/// passes it by. Dispose of it with its page.
+class JumpTarget {
+  final _key = GlobalKey();
+  final _focus = FocusNode(skipTraversal: true);
+
+  Widget wrap(Widget child) => Focus(focusNode: _focus, child: KeyedSubtree(key: _key, child: child));
+
+  /// Into view and focused; nothing while the part isn't built.
+  void jump() {
+    final target = _key.currentContext;
+    if (target == null) return;
+    Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
+    _focus.requestFocus();
+  }
+
+  void dispose() => _focus.dispose();
+}
