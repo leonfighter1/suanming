@@ -13,13 +13,6 @@ import 'support.dart';
 
 const tall = Size(1440, 1400);
 
-Future<void> tapOn(WidgetTester tester, String key) async {
-  await tester.ensureVisible(find.byKey(Key(key)));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(Key(key)));
-  await tester.pumpAndSettle();
-}
-
 /// The 消息 page, then [kind]'s editor.
 Future<void> openEditor(WidgetTester tester, String kind) async {
   if (find.byKey(Key('message-$kind')).evaluate().isEmpty) await go(tester, '消息');

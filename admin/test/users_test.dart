@@ -14,13 +14,6 @@ const tall = Size(1280, 1800);
 
 Map<String, String> lastQuery(FakeAdmin f) => f.last('/v1/admin/users').url.queryParameters;
 
-Future<void> tapOn(WidgetTester tester, String key) async {
-  await tester.ensureVisible(find.byKey(Key(key)));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(Key(key)));
-  await tester.pumpAndSettle();
-}
-
 Future<void> openUser(WidgetTester tester, String id, {String? search}) async {
   if (find.byKey(const Key('users-search')).evaluate().isEmpty) await go(tester, '用户');
   if (search != null) {

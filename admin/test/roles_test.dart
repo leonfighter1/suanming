@@ -12,13 +12,6 @@ import 'support.dart';
 
 const tall = Size(1440, 1800);
 
-Future<void> tapOn(WidgetTester tester, String key) async {
-  await tester.ensureVisible(find.byKey(Key(key)));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byKey(Key(key)));
-  await tester.pumpAndSettle();
-}
-
 List<String> railLabels(WidgetTester tester) => [
       for (final d in tester.widget<NavigationRail>(find.byType(NavigationRail)).destinations) (d.label as Text).data!,
     ];

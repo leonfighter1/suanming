@@ -692,6 +692,14 @@ Future<void> signInAs(WidgetTester tester, {String login = 'boss', String passwo
   await tester.pumpAndSettle();
 }
 
+/// Taps the control keyed [key], brought into view first, and lets what it does settle.
+Future<void> tapOn(WidgetTester tester, String key) async {
+  await tester.ensureVisible(find.byKey(Key(key)));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(Key(key)));
+  await tester.pumpAndSettle();
+}
+
 /// A page's entry in the rail (wide) or the bar (phone).
 Finder nav(String label) => find.descendant(
       of: find.byWidgetPredicate((w) => w is NavigationRail || w is NavigationBar),
