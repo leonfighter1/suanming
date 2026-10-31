@@ -7,6 +7,7 @@
 import { Dispatcher, MemoryTemplates } from "../notify/dispatch.js";
 import { DeliveryUnavailable, type MailTransport } from "../notify/mail.js";
 import type { SmsTransport } from "../notify/sms.js";
+import type { Settings } from "../settings/index.js";
 import {
   EMAIL_RE,
   emailKey,
@@ -22,7 +23,7 @@ import {
   type AuthService,
   type UserRecord,
 } from "./service.js";
-import { CODE_TTL_MS, Verifications, type ContactKind } from "./verify.js";
+import { codeLimits, Verifications, type ContactKind } from "./verify.js";
 
 export type AccountErrorCode =
   | "invalid"
@@ -52,8 +53,6 @@ export interface CodeSent {
   delivery: string;
 }
 
-const MINUTES = CODE_TTL_MS / 60_000;
-
 export class AccountService {
   readonly verifications: Verifications;
   /** How codes leave: the templates and the transports (S25). */
@@ -67,11 +66,17 @@ export class AccountService {
       /** The server's dispatcher; without one, the default wordings over [mail] and [sms]. */
       messages?: Dispatcher;
       verifications?: Verifications;
+      /** The server's 设置: the codes' limits (S32 WP32.2); without them, the defaults. */
+      settings?: Settings;
       now?: () => Date;
     },
   ) {
     this.verifications =
-      d.verifications ?? new Verifications(() => (d.now?.() ?? new Date()).getTime());
+      d.verifications ??
+      new Verifications(
+        () => (d.now?.() ?? new Date()).getTime(),
+        () => codeLimits(d.settings),
+      );
     this.messages =
       d.messages ??
       new Dispatcher({
@@ -181,7 +186,7 @@ export class AccountService {
       await this.messages.send(kind === "email" ? "code_mail" : "code_sms", {
         to: value,
         locale: u.locale,
-        vars: { code, minutes: String(MINUTES) },
+        vars: { code, minutes: String(this.verifications.limits().ttlMs / 60_000) },
       });
     } catch (e) {
       if (e instanceof DeliveryUnavailable) {

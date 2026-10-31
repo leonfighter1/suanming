@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { MODELS } from "../ai/models.js";
 import { CURRENCY_CODES } from "../currency/catalog.js";
 
-export type SettingGroup = "sessions" | "ai" | "limits" | "currencies";
+export type SettingGroup = "sessions" | "codes" | "ai" | "limits" | "currencies";
 
 interface Common {
   /** `group.name`, as config/settings.json nests it. */
@@ -78,6 +78,62 @@ export const SETTINGS = [
     unit: "分钟",
     label: "登录失败的计算时长",
     about: "登录失败只算最近这么多分钟里的；暂停登录最长也是这么久。",
+  },
+  // 验证码 (S32 WP32.2): the codes that bind a phone or verify an email (src/auth/verify.ts).
+  {
+    key: "codes.minutes",
+    group: "codes",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 1440,
+    unit: "分钟",
+    label: "验证码有效期",
+    about: "发到手机或邮箱的验证码多久内有效；短信和邮件里写的分钟数也跟着它。",
+  },
+  {
+    key: "codes.tries",
+    group: "codes",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 20,
+    unit: "次",
+    label: "验证码可以输错几次",
+    about: "输错这么多次，这个验证码就作废，要重新获取。",
+  },
+  {
+    key: "codes.resend_seconds",
+    group: "codes",
+    type: "number",
+    integer: true,
+    min: 0,
+    max: 3600,
+    unit: "秒",
+    label: "再次获取验证码的间隔",
+    about: "同一个账户要同一种验证码（短信或邮件），两次之间至少隔这么久；0 是不用等。",
+  },
+  {
+    key: "codes.per_destination_hour",
+    group: "codes",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 100,
+    unit: "个",
+    label: "每个手机号或邮箱每小时的验证码",
+    about: "一个小时里，最多给同一个手机号或邮箱发这么多个验证码。",
+  },
+  {
+    key: "codes.per_account_day",
+    group: "codes",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 1000,
+    unit: "个",
+    label: "每个账户每天的验证码",
+    about: "一个账户 24 小时里最多要这么多个验证码，短信和邮件合计。",
   },
   {
     key: "limits.ai_per_user_day",

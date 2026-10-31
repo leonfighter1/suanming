@@ -2612,7 +2612,7 @@ components:
           type: string
         group:
           type: string
-          enum: [sessions, ai, limits, currencies]
+          enum: [sessions, codes, ai, limits, currencies]
         type:
           type: string
           enum: [number, boolean, choice, choices]

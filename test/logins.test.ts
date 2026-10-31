@@ -15,18 +15,19 @@ import {
 import { FailureLimiter, noCaptcha } from "../src/auth/limits.js";
 import { AuthService, InMemoryUserStore } from "../src/auth/service.js";
 import { TokenService } from "../src/auth/tokens.js";
-import {
-  CODE_TRIES,
-  CODE_TTL_MS,
-  PER_ACCOUNT_PER_DAY,
-  PER_DESTINATION_PER_HOUR,
-  RESEND_AFTER_MS,
-  Verifications,
-  VerifyError,
-} from "../src/auth/verify.js";
+import { codeLimits, Verifications, VerifyError } from "../src/auth/verify.js";
 import { MemoryMail, MemorySms, NoMail, NoSms } from "../src/notify/index.js";
 import { PEPPER } from "./helpers.js";
 import { testApi } from "./api.js";
+
+// The defaults: config/settings.json's 验证码 group (S32 WP32.2).
+const {
+  ttlMs: CODE_TTL_MS,
+  tries: CODE_TRIES,
+  resendMs: RESEND_AFTER_MS,
+  perDestinationPerHour: PER_DESTINATION_PER_HOUR,
+  perAccountPerDay: PER_ACCOUNT_PER_DAY,
+} = codeLimits();
 
 describe("telling a login apart", () => {
   it("an @ makes an email, digits a phone, anything else a username", () => {

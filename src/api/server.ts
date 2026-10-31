@@ -355,7 +355,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   /** Every message's way out (S25): its template (an admin's wording, else the default), its channel, its note. */
   const messages = new Dispatcher({ mail, sms, templates: store, now });
   /** The account's own logins and settings (v8.2.0). */
-  const account = auth && new AccountService({ auth, mail, sms, messages, now });
+  const account = auth && new AccountService({ auth, mail, sms, messages, settings, now });
   const delivery = () => ({ mail: mail.name, sms: sms.name });
 
   async function caller(req: IncomingMessage): Promise<Caller> {

@@ -6,6 +6,13 @@
     "lock_after": 10,
     "failure_window_minutes": 15
   },
+  "codes": {
+    "minutes": 10,
+    "tries": 5,
+    "resend_seconds": 60,
+    "per_destination_hour": 5,
+    "per_account_day": 10
+  },
   "ai": {
     "mock": null,
     "model": null

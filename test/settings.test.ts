@@ -7,6 +7,7 @@ import { InMemoryStore } from "../src/api/store.js";
 import { FailureLimiter, failureLimits } from "../src/auth/limits.js";
 import { DAY_S, InMemorySessionStore, type RefreshRecord } from "../src/auth/tokens.js";
 import { PgStore } from "../src/db/pg-store.js";
+import { MemorySms } from "../src/notify/index.js";
 import { buildAuth, buildProviders, withPanel } from "../src/service/runtime.js";
 import {
   isSettingKey,
@@ -141,6 +142,7 @@ class Sessions extends InMemorySessionStore {
 const store = new InMemoryStore();
 const settings = new Settings(store, {});
 const sessions = new Sessions();
+const sms = new MemorySms();
 const auth = buildAuth(
   { digestPepper: PEPPER, drawKey: DRAW_KEY, ephemeral: true } as never,
   true,
@@ -153,6 +155,7 @@ const { start, call } = staffApi(
     auth,
     store,
     settings,
+    sms,
     admins: ["boss"],
     aiServing: () => "mock",
     aiModel: () => "claude-opus-5-5",
@@ -227,6 +230,22 @@ describe("设置 in the 管理后台", () => {
     // Back to 10: two failures no longer pause, and the right password clears them.
     await call("boss", "/v1/admin/settings/sessions.lock_after", "DELETE");
     expect((await signIn("alice")).status).toBe(200);
+  });
+
+  it("验证码: how long a code lasts, as the message says, and the wait for another are the panel's (WP32.2)", async () => {
+    const ask = () => call("alice", "/v1/account/phone", "POST", { phone: "+85291234567" });
+    await call("boss", "/v1/admin/settings/codes.minutes", "PUT", { value: 3 });
+    const first = await ask();
+    expect(first.status).toBe(202);
+    expect(Date.parse((await first.json()).expires_at) - Date.parse(AT)).toBe(3 * 60_000);
+    expect(sms.sent.at(-1)!.text).toContain("3 分钟内有效");
+    // A minute's wait by default; none once the panel says 0.
+    const again = await ask();
+    expect([again.status, (await again.json()).code]).toEqual([429, "wait"]);
+    await call("boss", "/v1/admin/settings/codes.resend_seconds", "PUT", { value: 0 });
+    expect((await ask()).status).toBe(202);
+    for (const key of ["codes.minutes", "codes.resend_seconds"])
+      await call("boss", `/v1/admin/settings/${key}`, "DELETE");
   });
 });
 
