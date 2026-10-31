@@ -79,7 +79,13 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       // The menu it went out from leaves with 首页: ☰ again for the next sign-in.
       if (_out) menu?.call(false);
     });
-    // 维护 (S35): an account that isn't staff waits on a page of its own; staff work as usual.
+    // 维护 (S35): an account that isn't staff waits on a page of its own; staff work as usual. When it begins while
+    // such an account is on a page over 首页, back to the first page, where its own page waits.
+    ref.listen(maintenanceProvider, (before, now) {
+      if (before != null || now == null) return;
+      final user = ref.read(authProvider).value;
+      if (user != null && user.staff == null) Navigator.of(context).popUntil((r) => r.isFirst);
+    });
     final down = ref.watch(maintenanceProvider);
     final page = switch (ref.watch(authProvider)) {
       AsyncError(:final error) when error is ApiException && error.isMaintenance =>

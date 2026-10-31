@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
+import 'package:mingli_app/presentation/bazi_form_page.dart' show BaziFormPage;
 
 import 'keys.dart';
 import 'support.dart';
@@ -46,6 +47,22 @@ void main() {
     await frames(tester, 12);
     expect(find.byKey(const Key('maintenance-banner')), findsNothing);
     expect(find.byKey(const Key('entry-bazi')), findsOneWidget);
+  });
+
+  testWidgets('begun while a user is on a page over 首页: back to the first page, where the maintenance page waits',
+      (tester) async {
+    final api = FakeApi();
+    await tester.pumpWidget(testApp(api, overrides: [clock]));
+    await frames(tester, 12);
+    await tester.tap(find.byKey(const Key('entry-bazi')));
+    await frames(tester, 12);
+    expect(find.byType(BaziFormPage), findsOneWidget);
+
+    api.maintenance = window();
+    await scrollAndTap(tester, find.byKey(const Key('compute-chart')), after: true);
+    expect(find.byType(BaziFormPage), findsNothing);
+    expect(find.byKey(const Key('maintenance-banner')), findsOneWidget);
+    expect(find.text(said), findsOneWidget);
   });
 
   testWidgets('staff work as usual: 首页, told what users see', (tester) async {
