@@ -7,6 +7,7 @@ import '../data/api_client.dart';
 import '../domain/points.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'home_page.dart' show push;
 import 'labels.dart';
@@ -194,7 +195,13 @@ class _PointsPageState extends ConsumerState<PointsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(p.simulated ? l10n.pointsTopUpSimulated : l10n.pointsTopUpUnavailable, style: theme.textTheme.bodyMedium),
+              p.simulated
+                  ? ContentText(l10n.pointsTopUpSimulated, contentKey: 'pointsTopUpSimulated', style: theme.textTheme.bodyMedium)
+                  : ContentText(
+                      l10n.pointsTopUpUnavailable,
+                      contentKey: 'pointsTopUpUnavailable',
+                      style: theme.textTheme.bodyMedium,
+                    ),
               if (offers.length > 1) ...[
                 const SizedBox(height: Space.m),
                 Wrap(
@@ -259,7 +266,7 @@ class _PointsPageState extends ConsumerState<PointsPage> {
           key: const Key('points-how'),
           title: l10n.pointsHowTitle,
           icon: Icons.info_outline,
-          child: Text(l10n.pointsHow, style: ReadingText.small(context)),
+          child: ContentText(l10n.pointsHow, contentKey: 'pointsHow', style: ReadingText.small(context)),
         ),
         AppCard(
           key: const Key('points-entries'),

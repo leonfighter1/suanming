@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_form_page.dart';
+import 'content_text.dart';
 import 'daily_card.dart';
 import 'daily_east.dart';
 import 'design.dart';
@@ -144,12 +145,21 @@ class MethodEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final page = methodPage(system);
+    // Each line may hold staff's HTML (S33): its key written out.
     final (icon, title, subtitle) = switch (system) {
-      'bazi' => (Icons.grid_view_rounded, l10n.homeBazi, l10n.homeBaziDesc),
-      'tarot' => (Icons.style_rounded, l10n.homeTarot, l10n.homeTarotDesc),
-      'fengshui' => (Icons.explore_outlined, l10n.homeFengshui, l10n.homeFengshuiDesc),
-      'qiuqian' => (Icons.temple_buddhist_outlined, l10n.homeQiuqian, l10n.homeQiuqianDesc),
-      _ => (Icons.toll_outlined, l10n.homeLiuyao, l10n.homeLiuyaoDesc),
+      'bazi' => (Icons.grid_view_rounded, l10n.homeBazi, ContentText(l10n.homeBaziDesc, contentKey: 'homeBaziDesc')),
+      'tarot' => (Icons.style_rounded, l10n.homeTarot, ContentText(l10n.homeTarotDesc, contentKey: 'homeTarotDesc')),
+      'fengshui' => (
+          Icons.explore_outlined,
+          l10n.homeFengshui,
+          ContentText(l10n.homeFengshuiDesc, contentKey: 'homeFengshuiDesc'),
+        ),
+      'qiuqian' => (
+          Icons.temple_buddhist_outlined,
+          l10n.homeQiuqian,
+          ContentText(l10n.homeQiuqianDesc, contentKey: 'homeQiuqianDesc'),
+        ),
+      _ => (Icons.toll_outlined, l10n.homeLiuyao, ContentText(l10n.homeLiuyaoDesc, contentKey: 'homeLiuyaoDesc')),
     };
     if (page == null) return const SizedBox.shrink();
     return _Entry(icon: icon, title: title, subtitle: subtitle, onTap: onTap ?? () => push(context, page));
@@ -160,7 +170,9 @@ class _Entry extends StatelessWidget {
   const _Entry({required this.icon, required this.title, required this.subtitle, required this.onTap});
   final IconData icon;
   final String title;
-  final String subtitle;
+
+  /// Its line, in the card's line style.
+  final Widget subtitle;
   final VoidCallback onTap;
 
   @override
@@ -183,7 +195,10 @@ class _Entry extends StatelessWidget {
               children: [
                 Text(title, style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: Space.xs),
-                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                DefaultTextStyle.merge(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                  child: subtitle,
+                ),
               ],
             ),
           ),

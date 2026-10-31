@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/domain/rich_text.dart';
 import 'package:mingli_app/presentation/buttons.dart';
+import 'package:mingli_app/presentation/content_text.dart' show richSpans;
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/tokens.dart';
@@ -424,6 +426,11 @@ class _ContentPageState extends ConsumerState<ContentPage> {
   }
 }
 
+/// What a text that may hold HTML may hold (src/content/rich.ts), in the editor's words.
+const _richHelp = '这段文字可以用 HTML 和 CSS：<b> <i> <u> <s> <small> <br> <p> <ul> <ol> <li> <a href="https://…">；'
+    'style 里可以写 color、background-color（主题色，如 var(--accent)、var(--danger)、var(--accent-soft)，浅色深色都对）、'
+    'font-weight、font-style、font-size（11–32px）、text-decoration。';
+
 /// A place in words: 算卦 › AI 解读按钮 › 语音输入.
 String _placeText(Map<String, String> names, ContentPlace p) => [names[p.page] ?? p.page, ...p.parts].join(' › ');
 
@@ -468,7 +475,7 @@ class _TextRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final l in locales.skip(1)) Text(t.textIn(l)),
-          Text(t.key, style: theme.textTheme.bodySmall?.copyWith(color: tk.textMuted)),
+          Text(t.rich ? '${t.key} · 可用 HTML 和 CSS' : t.key, style: theme.textTheme.bodySmall?.copyWith(color: tk.textMuted)),
           if (where != null)
             Text(
               where!,
@@ -545,10 +552,16 @@ class _TextDialogState extends ConsumerState<_TextDialog> {
           }
           _stored[l] = want;
         } on AdminApiException catch (e) {
-          if (e.code != 'placeholders_mismatch') rethrow;
-          _refused[l] = t.placeholders.isEmpty
-              ? '这段文字没有 {…} 占位，不能加'
-              : '要保留 ${t.placeholders.map((p) => '{$p}').join(' ')}，不能加别的';
+          if (e.code == 'placeholders_mismatch') {
+            _refused[l] = t.placeholders.isEmpty
+                ? '这段文字没有 {…} 占位，不能加'
+                : '要保留 ${t.placeholders.map((p) => '{$p}').join(' ')}，不能加别的';
+          } else if (e.code == 'rich_unsupported' || e.code == 'rich_invalid') {
+            // HTML (S33): the server says what is wrong, in the panel's words.
+            _refused[l] = e.title;
+          } else {
+            rethrow;
+          }
         }
       }
       if (mounted && _refused.isEmpty) Navigator.pop(context, true);
@@ -588,6 +601,12 @@ class _TextDialogState extends ConsumerState<_TextDialog> {
                       style: caption?.copyWith(color: tk.textSecondary),
                     ),
                   ],
+                  const SizedBox(height: Space.xs),
+                  Text(
+                    t.rich ? _richHelp : '这里只显示纯文字：不能用 HTML。',
+                    key: const Key('text-rich-help'),
+                    style: caption?.copyWith(color: tk.textSecondary),
+                  ),
                   for (final l in widget.locales) ...[const SizedBox(height: Space.l), _field(l)],
                 ],
               ),
@@ -602,8 +621,36 @@ class _TextDialogState extends ConsumerState<_TextDialog> {
     );
   }
 
-  /// A language's field: Enter moves on (saves in the last), or starts a new line where the app's own has lines.
+  /// A language's field: Enter moves on (saves in the last), or starts a new line where the app's own has lines. With
+  /// HTML in it (S33), the preview under it, drawn as the app draws it (ContentText's richSpans).
   Widget _field(String l) {
+    final want = _want(l);
+    if (!t.rich || !hasMarkup(want)) return _input(l);
+    final tk = ThemeTokens.of(context);
+    final style = Theme.of(context).textTheme.bodyMedium;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _input(l),
+        const SizedBox(height: Space.s),
+        Container(
+          key: ValueKey<String>('text-$l-preview'),
+          padding: const EdgeInsets.all(Space.m),
+          decoration: BoxDecoration(color: tk.inset, borderRadius: BorderRadius.circular(Radii.field)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('预览', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: tk.textSecondary)),
+              const SizedBox(height: Space.xs),
+              Text.rich(TextSpan(children: richSpans(context, parseRich(want), style ?? const TextStyle())), style: style),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _input(String l) {
     final own = t.defaults[l] ?? '';
     final c = _fields[l]!;
     final asOwn = _want(l) == own;

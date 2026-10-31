@@ -112,6 +112,38 @@ describe("the CMS's API", () => {
     ]);
   });
 
+  it("takes HTML and CSS where the app shows the text as content, and words alone elsewhere (S33)", async () => {
+    const put = (key: string, text: string) =>
+      call("integ", `/v1/admin/content/texts/${key}/zh-Hans`, "PUT", { text });
+    const all = (await (await call("integ", "/v1/admin/content")).json()) as {
+      texts: { key: string; rich?: boolean }[];
+    };
+    expect(all.texts.find((t) => t.key === "homeBaziDesc")?.rich).toBe(true);
+    expect(all.texts.find((t) => t.key === "homeBazi")?.rich).toBeUndefined();
+    try {
+      const html = '<b>八字</b>，看<span style="color: var(--accent)">一生</span>';
+      expect((await put("homeBaziDesc", html)).status).toBe(200);
+      expect(
+        ((await (await call(null, "/v1/content?locale=zh-Hans")).json()) as { texts: object })
+          .texts,
+      ).toMatchObject({ homeBaziDesc: html });
+      const bad = await put("homeBaziDesc", '<span style="color: red">红</span>');
+      expect(bad.status).toBe(400);
+      expect(await bad.json()).toMatchObject({
+        code: "rich_invalid",
+        title: expect.stringMatching(/^color 要用主题色/),
+      });
+      // A title takes words alone.
+      const title = await put("homeBazi", "<b>八字</b>");
+      expect([title.status, ((await title.json()) as { code: string }).code]).toEqual([
+        400,
+        "rich_unsupported",
+      ]);
+    } finally {
+      await call("integ", "/v1/admin/content/texts/homeBaziDesc/zh-Hans", "DELETE");
+    }
+  });
+
   it("changes a text in one language for everyone, signed in or not, and puts it back", async () => {
     const put = await call("integ", "/v1/admin/content/texts/homeTarot/zh-Hans", "PUT", {
       text: "  塔罗占卜  ",

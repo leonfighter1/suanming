@@ -5,6 +5,7 @@ import '../application/providers.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
 import 'content.dart';
+import 'content_text.dart';
 import 'design.dart';
 import 'home_page.dart';
 import 'layout.dart';
@@ -46,6 +47,7 @@ class IntroPage extends ConsumerWidget {
               key: const Key('intro-banner'),
               title: l10n.introWelcome,
               subtitle: l10n.introJoin,
+              contentKey: 'introJoin',
               trailing: const IntroLogo(),
             ),
           ),
@@ -64,8 +66,9 @@ class IntroPage extends ConsumerWidget {
           fadeIn(
             Padding(
               padding: const EdgeInsets.only(bottom: Space.l),
-              child: Text(
+              child: ContentText(
                 l10n.introServicesHint,
+                contentKey: 'introServicesHint',
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),

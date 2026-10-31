@@ -40,7 +40,8 @@ final designRules = [
   DesignRule(
     'font size',
     RegExp(r'fontSize:'),
-    allowed: {'theme.dart', 'copper_coin.dart', 'qiuqian_stage.dart', 'tarot_spread.dart'},
+    // content_text.dart draws staff's HTML (S33): its sizes are their CSS's, within the subset's 11–32 px.
+    allowed: {'theme.dart', 'copper_coin.dart', 'qiuqian_stage.dart', 'tarot_spread.dart', 'content_text.dart'},
     why: 'use a role of the type ramp (textTheme)',
   ),
   DesignRule(

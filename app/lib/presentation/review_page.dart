@@ -59,7 +59,7 @@ class ReviewPage extends ConsumerWidget {
             children: [
               Text(l10n.reviewHint, style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: Space.m),
-              if (items.isEmpty) EmptyState(icon: Icons.fact_check_outlined, text: l10n.reviewEmpty),
+              if (items.isEmpty) EmptyState(icon: Icons.fact_check_outlined, text: l10n.reviewEmpty, contentKey: 'reviewEmpty'),
               for (final it in items) _ReviewTile(item: it),
             ],
           ),

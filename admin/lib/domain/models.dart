@@ -729,6 +729,7 @@ class ContentText {
     required this.defaults,
     this.changed = const {},
     this.places = const [],
+    this.rich = false,
   });
   factory ContentText.fromJson(Json j) => ContentText(
         key: j['key'] as String,
@@ -739,10 +740,14 @@ class ContentText {
             key: (value as Json)['text'] as String,
         },
         places: _list(j['places'], ContentPlace.fromJson),
+        rich: j['rich'] == true,
       );
 
   /// Where it shows (S33): each page and the way there; empty for a text no page uses.
   final List<ContentPlace> places;
+
+  /// Whether it may hold HTML and CSS (S33): the app shows it as content (ContentText).
+  final bool rich;
 
   /// The app's key for it (homeTarot …).
   final String key;

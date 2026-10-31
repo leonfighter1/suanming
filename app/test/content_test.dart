@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart' show zhHans;
+import 'package:mingli_app/domain/rich_text.dart';
 import 'package:mingli_app/presentation/design.dart';
+import 'package:mingli_app/presentation/keyboard.dart' show Pressable;
+import 'package:mingli_app/presentation/tokens.dart';
 
 import 'keys.dart';
 import 'support.dart';
@@ -46,6 +49,75 @@ void main() {
     final art = artOf(tester);
     expect(art, isA<NetworkImage>());
     expect((art! as NetworkImage).url, endsWith('/v1/content/images/banner?v=1'));
+  });
+
+  // HTML and CSS (S33 WP33.4; the owner: 「同时可以让当前的改动支持HTML和CSS，不仅仅只是resource」).
+  group('HTML and CSS', () {
+    test('read tolerantly, and as words where a place takes words alone', () {
+      expect(plainOf('<b>八字</b>排盘<br>看<span style="color: var(--accent)">命</span>'), '八字排盘\n看命');
+      expect(plainOf('<ul><li>一</li><li>二</li></ul>后'), '• 一\n• 二\n后');
+      expect(plainOf('&lt;b&gt; &amp; <p>段</p>'), '<b> & 段');
+      expect(plainOf('<b>没有关上'), '没有关上');
+      expect(plainOf('<marquee>不认识的</marquee>标签'), '不认识的标签');
+      expect([hasMarkup('a < b'), hasMarkup('<b>x</b>'), hasMarkup('&amp;')], [false, true, true]);
+    });
+
+    /// [text]'s span inside the rich text that holds it.
+    TextSpan spanOf(WidgetTester tester, String all, String text) {
+      final rich = tester.widget<RichText>(find.text(all, findRichText: true).first);
+      TextSpan? found;
+      rich.text.visitChildren((s) {
+        if (s is TextSpan && s.text == text) found = s;
+        return found == null;
+      });
+      return found!;
+    }
+
+    testWidgets('a description staff wrote in HTML shows bold and in the theme\'s colour; a title keeps words', (tester) async {
+      final api = FakeApi()
+        ..content = (
+          texts: const {
+            'homeTarotDesc': '<b>抽牌</b>看<span style="color: var(--accent)">爱情</span>',
+            // A title takes words alone (the server would refuse this): the tags never show.
+            'homeTarot': '<b>塔罗</b>',
+          },
+          images: const {},
+        );
+      await tester.pumpWidget(testApp(api, locale: zhHans));
+      await frames(tester, 12);
+      await scrollTo(tester, const Key('entry-tarot'));
+      final bold = spanOf(tester, '抽牌看爱情', '抽牌');
+      expect(bold.style?.fontWeight, FontWeight.w700);
+      final colour = spanOf(tester, '抽牌看爱情', '爱情');
+      expect(colour.style?.color, ThemeTokens.of(tester.element(find.byKey(const Key('entry-tarot')))).accent);
+      expect(find.text('塔罗'), findsWidgets);
+      expect(find.textContaining('<b>'), findsNothing);
+    });
+
+    testWidgets('a link is a control of its own; off the web its address is copied, and a line says so', (tester) async {
+      final clipboard = ClipboardWatch(tester);
+      final api = FakeApi()
+        ..content = (texts: const {'homeLiuyaoDesc': '摇卦，<a href="https://example.com/x">看说明</a>'}, images: const {});
+      await tester.pumpWidget(testApp(api, locale: zhHans));
+      await frames(tester, 12);
+      await scrollTo(tester, const Key('entry-liuyao'));
+      final link = find.descendant(of: find.byKey(const Key('entry-liuyao')), matching: find.byType(Pressable));
+      expect(link, findsOneWidget);
+      await tester.tap(link);
+      await frames(tester, 6);
+      expect(clipboard.copied, 'https://example.com/x');
+      expect(find.text('已复制：https://example.com/x'), findsOneWidget);
+      // The link opened, not the card: still 首页.
+      expect(find.byKey(const Key('entry-liuyao')), findsOneWidget);
+    });
+
+    testWidgets('on the banner\'s dark art, staff\'s colours are the dark theme\'s, whatever the app\'s', (tester) async {
+      final api = FakeApi()
+        ..content = (texts: const {'introJoin': '加入<span style="color: var(--accent)">我们</span>'}, images: const {});
+      await tester.pumpWidget(testApp(api, signedIn: false, locale: zhHans));
+      await frames(tester, 12);
+      expect(spanOf(tester, '加入我们', '我们').style?.color, ThemeTokens.dark.accent);
+    });
   });
 
   testWidgets('a server from before the CMS (404): the app\'s own texts and art', (tester) async {

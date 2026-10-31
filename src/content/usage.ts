@@ -243,7 +243,9 @@ export function usageOf(
     }
     for (const m of code.matchAll(/ContentScope\.imageOf\(\s*\w+\s*,\s*'(\w+)'/g))
       d.images.add(m[1]!);
-    for (const m of code.matchAll(/ContentText\([^;]*?contentKey:\s*'(\w+)'/g)) d.rich.add(m[1]!);
+    // A text shown through ContentText names its key so (or hands it on so, as EmptyState and HeroBanner do).
+    for (const m of code.matchAll(/\bcontentKey:\s*'(\w+)'/g))
+      if (keys.has(m[1]!)) d.rich.add(m[1]!);
     for (const w of new Set(code.match(/[A-Za-z_$][\w$]*/g))) {
       if (w === d.name) continue;
       for (const other of byName.get(w) ?? []) {

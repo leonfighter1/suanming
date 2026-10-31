@@ -381,7 +381,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           data: (_) => records.isEmpty
               ? ListView(
                   padding: pagePadding(context),
-                  children: [EmptyState(icon: Icons.history_toggle_off, text: l10n.historyEmpty)],
+                  children: [EmptyState(icon: Icons.history_toggle_off, text: l10n.historyEmpty, contentKey: 'historyEmpty')],
                 )
               : ListView(
                   padding: pagePadding(context),

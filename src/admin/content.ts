@@ -19,6 +19,7 @@ import {
   type ContentLocale,
 } from "../content/catalog.js";
 import { PAGES } from "../content/pages.js";
+import { hasMarkup, richProblem } from "../content/rich.js";
 import { appUsage } from "../content/usage.js";
 import { HttpError, readBody, readJson, send } from "../http/util.js";
 import type { AdminContext } from "./routes.js";
@@ -42,8 +43,9 @@ export async function contentAdminRoute(
     const changed = await ctx.store.listContentTexts();
     const images = await ctx.store.listContentImages();
     const texts = contentTexts();
-    // Where each shows (S33): the pages that reach it in the app's code, and the parts on the way.
-    const { places } = appUsage(new Set(texts.map((t) => t.key)));
+    // Where each shows (S33): the pages that reach it in the app's code, and the parts on the way; and the texts that
+    // may hold HTML (shown through ContentText).
+    const { places, rich } = appUsage(new Set(texts.map((t) => t.key)));
     send(res, 200, {
       locales: CONTENT_LOCALES,
       // What an image may be, for the dashboard to say before one is picked.
@@ -53,6 +55,7 @@ export async function contentAdminRoute(
       texts: texts.map((t) => ({
         ...t,
         places: places.get(t.key) ?? [],
+        ...(rich.has(t.key) && { rich: true }),
         changed: Object.fromEntries(
           changed
             .filter((c) => c.key === t.key)
@@ -94,6 +97,15 @@ export async function contentAdminRoute(
           "placeholders_mismatch",
           { placeholders: known.placeholders },
         );
+      }
+      // HTML and CSS (S33) where the app shows the text as content; elsewhere words alone.
+      if (hasMarkup(value)) {
+        const keys = new Set(contentTexts().map((t) => t.key));
+        if (!appUsage(keys).rich.has(key)) {
+          throw new HttpError(400, "这段文字在应用里只显示纯文字，不能用 HTML", "rich_unsupported");
+        }
+        const problem = richProblem(value);
+        if (problem) throw new HttpError(400, problem, "rich_invalid");
       }
       const at = ctx.now().toISOString();
       await ctx.store.putContentText({ key, locale, text: value, updated_at: at, updated_by: me.id });

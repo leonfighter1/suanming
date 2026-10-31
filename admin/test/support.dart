@@ -9,6 +9,7 @@ import 'package:http/testing.dart';
 import 'package:mingli_admin/app.dart';
 import 'package:mingli_admin/application/providers.dart';
 import 'package:mingli_admin/data/admin_api.dart';
+import 'package:mingli_app/generated/content_rich.dart' show richTags;
 
 /// The dashboard's tests: a fake admin API (the server's shapes, api/openapi.yaml tag admin) behind a MockClient, a
 /// fixed "now", and the saved exports kept instead of downloaded.
@@ -588,6 +589,13 @@ class FakeAdmin {
       if (names(RegExp(r'\{(\w+)\}').allMatches(value).map((m) => m[1]!)) != names(own)) {
         return _problem(400, 'the text must keep its placeholders and add none', 'placeholders_mismatch');
       }
+      // HTML (S33), as src/admin/content.ts and src/content/rich.ts richProblem refuse it, in short: tags only where
+      // the text is rich, and no tag outside the subset.
+      if (RegExp(r'</?[A-Za-z]').hasMatch(value)) {
+        if (spec['rich'] != true) return _problem(400, '这段文字在应用里只显示纯文字，不能用 HTML', 'rich_unsupported');
+        final tag = RegExp(r'</?([A-Za-z]+)').allMatches(value).map((m) => m[1]!).where((t) => !richTags.contains(t)).firstOrNull;
+        if (tag != null) return _problem(400, '不支持的标签：<$tag>', 'rich_invalid');
+      }
       contentTexts[id] = {'text': value, 'updated_at': _iso(testNow)};
       return _json({'key': text[1], 'locale': text[2], 'text': value, 'updated_at': _iso(testNow)});
     }
@@ -848,6 +856,8 @@ final contentCatalog = <Json>[
       'places': [
         if (i <= 10) {'page': 'LiuyaoPage', 'parts': ['AI 解读按钮']},
       ],
+      // The first may hold HTML (the app shows it through ContentText, S33).
+      if (i == 1) 'rich': true,
     },
 ];
 

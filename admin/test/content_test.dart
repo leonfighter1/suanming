@@ -156,6 +156,47 @@ void main() {
     expect(find.text('塔罗占卜·新'), findsOneWidget);
   });
 
+  // S33 (the owner: 「同时可以让当前的改动支持HTML和CSS，不仅仅只是resource」).
+  testWidgets('a text the app shows as content takes HTML: the editor says what, previews it as the app draws it',
+      (tester) async {
+    final f = await openContent(tester);
+    await search(tester, 'sample1');
+    expect(find.text('sample1 · 可用 HTML 和 CSS'), findsOneWidget);
+    await tapOn(tester, 'text-sample1');
+    expect(textOf(tester, 'text-rich-help'), startsWith('这段文字可以用 HTML 和 CSS'));
+    await typeIn(tester, 'zh-Hans', '<b>粗</b>和<span style="color: var(--accent)">主题色</span>');
+    final preview = find.descendant(
+      of: find.byKey(const ValueKey<String>('text-zh-Hans-preview')),
+      matching: find.text('粗和主题色', findRichText: true),
+    );
+    expect(preview, findsOneWidget);
+    TextSpan? bold;
+    tester.widget<RichText>(preview).text.visitChildren((s) {
+      if (s is TextSpan && s.text == '粗') bold = s;
+      return bold == null;
+    });
+    expect(bold?.style?.fontWeight, FontWeight.w700);
+
+    // Outside the subset: the server's words under the field, and nothing kept.
+    await typeIn(tester, 'zh-Hans', '<marquee>动</marquee>');
+    await tapOn(tester, 'text-save');
+    expect(find.text('不支持的标签：<marquee>'), findsOneWidget);
+    expect(f.contentTexts['sample1/zh-Hans'], isNull);
+    await typeIn(tester, 'zh-Hans', '<b>粗</b>体');
+    await tapOn(tester, 'text-save');
+    expect(f.bodyOf(f.last('/v1/admin/content/texts/sample1/zh-Hans', method: 'PUT')), {'text': '<b>粗</b>体'});
+  });
+
+  testWidgets('a text the app shows as words: the editor says so, and tags are refused with why', (tester) async {
+    await openContent(tester);
+    await openText(tester, 'homeTarot');
+    expect(textOf(tester, 'text-rich-help'), '这里只显示纯文字：不能用 HTML。');
+    await typeIn(tester, 'zh-Hans', '<b>塔罗</b>');
+    expect(find.byKey(const ValueKey<String>('text-zh-Hans-preview')), findsNothing);
+    await tapOn(tester, 'text-save');
+    expect(find.text('这段文字在应用里只显示纯文字，不能用 HTML'), findsOneWidget);
+  });
+
   testWidgets('a text keeps its placeholders: the editor names them, and a wording without is refused and why',
       (tester) async {
     final f = await openContent(tester);

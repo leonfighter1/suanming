@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart'
     show RenderAbstractViewport, RenderCustomPaint, RenderImage, RenderParagraph, RenderProxyBox;
 
 import 'content.dart';
+import 'content_text.dart';
 import 'tokens.dart';
 
 /// The spacing scale (tech plan S24, the ui-design skill): steps of 4 points named by size, then the uses with names of
@@ -721,11 +722,15 @@ class HeroBanner extends StatelessWidget {
     this.icon,
     this.trailing,
     this.margin,
+    this.contentKey,
   });
   final String title;
   final String? subtitle;
   final IconData? icon;
   final Widget? trailing;
+
+  /// The subtitle's key in 内容, written out: it may then hold HTML (ContentText, S33).
+  final String? contentKey;
 
   /// The room round it: by default the gap below; none beside the form on a wide sign-in page (S26).
   final EdgeInsets? margin;
@@ -774,10 +779,26 @@ class HeroBanner extends StatelessWidget {
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: Space.s),
-                      Text(
-                        subtitle!,
-                        style: text.bodyMedium?.copyWith(color: on.text.withValues(alpha: 0.85), shadows: _onArt),
-                      ),
+                      if (contentKey == null)
+                        Text(
+                          subtitle!,
+                          style: text.bodyMedium?.copyWith(color: on.text.withValues(alpha: 0.85), shadows: _onArt),
+                        )
+                      else
+                        // Staff's colours as on the dark art: the dark theme's, whatever the app's.
+                        Theme(
+                          data: Theme.of(context).copyWith(
+                            extensions: [
+                              ...Theme.of(context).extensions.values.where((e) => e is! ThemeTokens),
+                              ThemeTokens.dark,
+                            ],
+                          ),
+                          child: ContentText(
+                            subtitle!,
+                            contentKey: contentKey!,
+                            style: text.bodyMedium?.copyWith(color: on.text.withValues(alpha: 0.85), shadows: _onArt),
+                          ),
+                        ),
                     ],
                   ],
                 ),
@@ -866,21 +887,28 @@ double firstLineInset(TextStyle? style, double size) {
 
 /// A page with nothing to show yet (the ui-design skill): its icon, the message under it, centred, with room above.
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.icon, required this.text});
+  const EmptyState({super.key, required this.icon, required this.text, this.contentKey});
   final IconData icon;
   final String text;
+
+  /// [text]'s key in 内容, written out: it may then hold HTML (ContentText, S33).
+  final String? contentKey;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final t = ThemeTokens.of(context);
+    final style = theme.textTheme.bodyMedium?.copyWith(color: t.textSecondary);
     return Padding(
       padding: const EdgeInsets.only(top: Space.empty),
       child: Column(
         children: [
           Icon(icon, size: Space.xxxl, color: t.textMuted),
           const SizedBox(height: Space.l),
-          Text(text, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium?.copyWith(color: t.textSecondary)),
+          if (contentKey == null)
+            Text(text, textAlign: TextAlign.center, style: style)
+          else
+            ContentText(text, contentKey: contentKey!, textAlign: TextAlign.center, style: style),
         ],
       ),
     );

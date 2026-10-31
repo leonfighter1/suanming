@@ -59,7 +59,7 @@ class ReceiptsPage extends ConsumerWidget {
         Text(l10n.receiptsAbout, style: ReadingText.small(context)),
         const SizedBox(height: Space.m),
         if (items.isEmpty)
-          EmptyState(icon: Icons.receipt_long_outlined, text: l10n.receiptsEmpty)
+          EmptyState(icon: Icons.receipt_long_outlined, text: l10n.receiptsEmpty, contentKey: 'receiptsEmpty')
         else
           for (final r in items)
             AppCard(
