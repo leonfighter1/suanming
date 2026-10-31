@@ -1,12 +1,13 @@
 /**
- * npm run public  → the app on a public https URL, for testing from anywhere.
+ * npm run all (or npm run public) → every site on a public https URL, for testing from anywhere.
  *
- *   1. builds the web app with API_BASE_URL=origin (app and API share the URL);
- *   2. starts the API in --public mode on 127.0.0.1:8787 (serves the app too);
- *   3. opens a Cloudflare quick tunnel to it and prints https://….trycloudflare.com.
+ *   1. builds the web app with API_BASE_URL=origin (app and API share the URL) into app/build/public;
+ *   2. builds the 管理后台 for /admin/ (npm run admin:build);
+ *   3. starts the API in --public mode on 127.0.0.1:8787 (serves both);
+ *   4. opens a Cloudflare quick tunnel to it and prints https://….trycloudflare.com and its /admin/.
  *
  * Runs on this computer: testers reach it while this command runs. The URL changes
- * each time. Flags: --skip-build (reuse app/build/web). See docs/web-test.md.
+ * each time. Flags: --skip-build (reuse the last builds). See docs/web-test.md.
  */
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
@@ -32,9 +33,25 @@ function buildWeb() {
   const run = (args: string[]) =>
     execFileSync(flutter, args, { cwd: appDir, stdio: "inherit", shell: win });
   console.log("building the web app (API_BASE_URL=origin)…");
-  run(["build", "web", "--release", "--dart-define=API_BASE_URL=origin"]);
+  // Its own folder: the harness builds app/build/web for 127.0.0.1, which testers elsewhere can't reach (rule 74).
+  run([
+    "build",
+    "web",
+    "--release",
+    "--dart-define=API_BASE_URL=origin",
+    "--output",
+    join(appDir, "build", "public"),
+  ]);
   // Building through a second path deletes committed gen-l10n output (global rule 17).
   if (junction) run(["gen-l10n"]);
+}
+
+/** The 管理后台 for /admin/, by its own script (npm run admin:build): its junction, its folder, its checks. */
+function buildAdmin() {
+  execFileSync(process.execPath, ["--import", "tsx", join(root, "scripts", "admin-build.ts")], {
+    cwd: root,
+    stdio: "inherit",
+  });
 }
 
 async function cloudflared(): Promise<string> {
@@ -77,7 +94,10 @@ function stopAll(code = 0) {
 process.on("SIGINT", () => stopAll());
 process.on("SIGTERM", () => stopAll());
 
-if (!process.argv.includes("--skip-build")) buildWeb();
+if (!process.argv.includes("--skip-build")) {
+  buildWeb();
+  buildAdmin();
+}
 
 const api = spawn(
   process.execPath,
@@ -130,6 +150,8 @@ function startTunnel() {
       const at = new Date().toLocaleTimeString();
       console.log("\n================================================================");
       console.log(`  Public test URL${runs > 1 ? " (NEW: the tunnel restarted)" : ""}: ${m[0]}`);
+      if (existsSync(join(root, "admin", "build", "served", "index.html")))
+        console.log(`  管理后台 (staff: admin / admin): ${m[0]}/admin/`);
       console.log(`  since ${at}. Open it on any phone or computer. Keep this window running.`);
       console.log("  Ctrl+C stops the API and the tunnel.");
       console.log("================================================================\n");

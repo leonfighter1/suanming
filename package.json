@@ -34,6 +34,7 @@
     "api:lan": "tsx scripts/api-server.ts --lan",
     "api:public": "tsx scripts/api-server.ts --public",
     "public": "tsx scripts/public.ts",
+    "all": "tsx scripts/public.ts",
     "build:yijing": "tsx scripts/build-yijing.ts",
     "check:zhouyi": "tsx scripts/check-zhouyi.ts",
     "build:tarot-keywords": "tsx scripts/build-tarot-keywords.ts",

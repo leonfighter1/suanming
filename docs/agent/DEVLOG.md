@@ -16,6 +16,10 @@ Newest first. One entry per working session, key points only.
 - WP32.5 (9467960, after a65d6e8 `packFits`): the packs as a setting, default from config/points.json (`fallback`),
   live through `withPacks`; the 管理后台's editor. The render showed the rows across the whole card (`maxWidth` inside a
   stretching column); an `Align` keeps them to 400 (rule 3).
+- After v20.0.0, the owner: 「a universal command, to build all and publish all sites」. `npm run all` (= `npm run
+  public`, which now also builds the 管理后台, and builds the app into `app/build/public`: the harness's `build/web`
+  calls 127.0.0.1, so `--skip-build` after a harness run served a broken app). Checked without the tunnel: public mode
+  on port 8899 (memory store) served `/`, `/admin/` and their scripts; stopped by its port. Tooling: no version.
 
 ## 2026-10-31 (s): S31 — 设置, the AI switches, currencies and receipts; release v19.0.0
 

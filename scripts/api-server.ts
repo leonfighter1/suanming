@@ -50,7 +50,8 @@ const secrets = loadSecrets();
 const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? (lan ? "0.0.0.0" : "127.0.0.1");
 const loopbackOnly = !pub && (host === "127.0.0.1" || host === "localhost");
-const staticDir = fileURLToPath(new URL("../app/build/web/", import.meta.url));
+// The web app npm run public builds for the same origin (the harness's own build is app/build/web).
+const staticDir = fileURLToPath(new URL("../app/build/public/", import.meta.url));
 // The 管理后台 (S22), once built (npm run admin:build): served at /admin/. MINGLI_ADMIN_DIR names another build;
 // off serves none.
 const adminEnv = process.env.MINGLI_ADMIN_DIR;

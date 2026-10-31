@@ -34,18 +34,25 @@ Private Network Access preflight, so the https page may call the local http API.
 Safari blocks this mixed content; for phones see below.
 To allow other origins: `MINGLI_CORS_ORIGINS=https://a.example,https://b.example npm run api`.
 
-## Public test URL from this computer: `npm run public`
+## Every site on a public URL from this computer: `npm run all`
 
 ```
-npm run public            # --skip-build to reuse app/build/web
+npm run all               # the same as npm run public; --skip-build to reuse the last builds
 ```
 
-1. Builds the web app with `API_BASE_URL=origin`.
-2. Starts the API in `--public` mode on 127.0.0.1:8787. It also serves the app, so app
-   and API share one https origin (no CORS, no mixed content).
-3. Opens a Cloudflare quick tunnel and prints `https://….trycloudflare.com`. Anyone can
+The one command for everything (owner, 2026-10-31: 「a universal command, to build all and publish all sites」):
+
+1. Builds the web app with `API_BASE_URL=origin` into `app/build/public` (its own folder: the harness's
+   `app/build/web` calls 127.0.0.1, which nobody else can reach).
+2. Builds the 管理后台 for `/admin/` (`npm run admin:build`).
+3. Starts the API in `--public` mode on 127.0.0.1:8787. It serves the app at `/` and the 管理后台 at `/admin/`, so
+   both and the API share one https origin (no CORS, no mixed content).
+4. Opens a Cloudflare quick tunnel and prints `https://….trycloudflare.com` and its `/admin/`. Anyone can
    open it on any network. It works while the command runs; the URL changes each run.
-   The first run downloads the official `cloudflared` release into `.cache/bin`.
+
+The GitHub Pages copy of the app (above) is not part of it: Pages rebuilds itself from GitHub's `main` on each push
+that touches `app/` (or by hand: Actions → pages → Run workflow).
+The first run downloads the official `cloudflared` release into `.cache/bin`.
 
 Staying up:
 
