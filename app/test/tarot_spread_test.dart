@@ -233,6 +233,33 @@ void main() {
     expect(r[7]!.bottom - r[10]!.top, closeTo(103 * (4 * 12 / 7 + 0.3), 0.01));
   });
 
+  testWidgets('卡片翻面 (S30): a card turns about its Y axis, each side drawn only while it faces you', (tester) async {
+    await drawAt(tester, const Size(1000, 2000));
+    final card = find.byKey(const Key('tarot-card-1'));
+    // The turn's own transform: the one with depth (the card's press bounce has none).
+    Matrix4 turn() => tester
+        .widgetList<Transform>(find.descendant(of: card, matching: find.byType(Transform)))
+        .firstWhere((t) => t.transform.entry(3, 2) != 0)
+        .transform;
+    final art = find.descendant(of: card, matching: find.byType(Image));
+    await tester.tap(card);
+    var back = 0, face = 0;
+    for (var t = 0; t < 640; t += 20) {
+      await tester.pump(const Duration(milliseconds: 20));
+      final facing = turn().entry(0, 0); // the cosine of the turn: above 0 the back is towards you
+      if (facing > 0.01) {
+        expect(art, findsNothing, reason: 'the face never shows from behind ($facing)');
+        back++;
+      } else if (facing < -0.01) {
+        expect(art, findsOneWidget);
+        // Turned back by half a turn inside, so the art reads the right way round, not mirrored.
+        expect(find.ancestor(of: art, matching: find.byType(Transform)).evaluate().length, greaterThan(1));
+        face++;
+      }
+    }
+    expect([back, face].every((n) => n > 0), isTrue, reason: 'saw both sides: $back back, $face face');
+  });
+
   testWidgets('cards turn in dealing order; a turned card opens large with its meaning', (tester) async {
     await drawAt(tester, const Size(1000, 2000)); // three cards of 208: they turn where they lie
     final semantics = tester.ensureSemantics();
