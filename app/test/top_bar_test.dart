@@ -140,8 +140,9 @@ void main() {
       await press(tester, LogicalKeyboardKey.tab);
       stops.add(focusedKey());
     }
-    // Round the menu's items and back to the first: nothing behind the menu takes the focus.
+    // Round the menu's items and back to the first, its close button (S30): nothing behind the menu takes the focus.
     expect(stops, [
+      'menu-close',
       'menu-history',
       'open-profiles',
       'language-menu',
@@ -149,8 +150,7 @@ void main() {
       'open-settings',
       'open-shortcuts',
       'menu-sign-out',
-      'menu-history',
-      'open-profiles',
+      'menu-close',
     ]);
     await press(tester, LogicalKeyboardKey.escape);
     await frames(tester, 12);

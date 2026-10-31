@@ -9,6 +9,7 @@ import 'presentation/home_page.dart';
 import 'presentation/keyboard.dart';
 import 'presentation/sign_in_page.dart';
 import 'presentation/theme.dart';
+import 'presentation/widgets/app_menu.dart';
 
 class MingliApp extends ConsumerWidget {
   const MingliApp({super.key});
@@ -33,7 +34,7 @@ class MingliApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       // App-wide keys around the Navigator: Esc = back one level, Ctrl+/ = list.
-      builder: (_, navigator) => KeyboardShell(child: navigator!),
+      builder: (_, navigator) => MenuMorph(child: KeyboardShell(child: navigator!)),
       home: const AuthGate(),
     );
   }

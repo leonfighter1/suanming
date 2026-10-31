@@ -12,6 +12,7 @@ import 'package:mingli_app/presentation/theme.dart';
 import 'package:mingli_app/presentation/widgets/elastic_switch.dart';
 
 import 'keys.dart';
+import 'support.dart';
 
 Widget host(Widget child, {bool still = false}) => MaterialApp(
       theme: buildTheme(Brightness.light),
@@ -152,6 +153,29 @@ void main() {
     // Near the button's left end, far from its centre: Material 3's own ripple would have drifted towards the centre.
     expect(ink, paints..circle(x: 24, y: 12));
     await press.up();
+  });
+
+  testWidgets('☰ → ✕: the lines turn into a cross as the menu slides in, at the same place, and back as it goes',
+      (tester) async {
+    await tester.pumpWidget(testApp(FakeApi()));
+    await frames(tester, 10);
+    double turn(String key) => tester
+        .widget<AnimatedIcon>(find.descendant(of: find.byKey(Key(key)), matching: find.byType(AnimatedIcon)))
+        .progress
+        .value;
+    expect(turn('open-menu'), 0);
+    final lines = tester.getCenter(find.byKey(const Key('open-menu')));
+    await tester.tap(find.byKey(const Key('open-menu')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(turn('open-menu'), inExclusiveRange(0.0, 1.0), reason: 'turning as the menu slides');
+    await frames(tester, 10);
+    expect(turn('menu-close'), 1);
+    expect(tester.getCenter(find.byKey(const Key('menu-close'))), offsetMoreOrLessEquals(lines, epsilon: 0.5));
+    await tester.tap(find.byKey(const Key('menu-close')));
+    await frames(tester, 10);
+    expect(find.byKey(const Key('app-menu')), findsNothing);
+    expect(turn('open-menu'), 0);
   });
 
   group('弹性开关', () {

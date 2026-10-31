@@ -153,8 +153,65 @@ class AppMenu extends ConsumerWidget {
   }
 }
 
+/// ☰ → ✕ (S30; owner, 2026-10-30: 「菜单按钮的三条横线在打开时变形为叉号：上下两条旋转交叉，中间一条淡出；关闭时反向变回」):
+/// the menu's state as a progress from ☰ (0) to ✕ (1), run over [Motion.medium] as the menu slides in or out. A
+/// Scaffold with the menu gives [openedOf] as its onEndDrawerChanged; [MenuButton] and the menu's own close button
+/// draw the progress with Material's menu_close icon (the outer lines turn into a cross, the middle one fades), at the
+/// same place, so the ☰ the menu slides over is the ✕ it shows. Reduce motion: it jumps. One for the app, above its
+/// pages (app.dart).
+class MenuMorph extends StatefulWidget {
+  const MenuMorph({super.key, required this.child});
+  final Widget child;
+
+  /// The menu's progress from ☰ to ✕; ☰ outside a MenuMorph.
+  static Animation<double> of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_MenuState>()?.progress ?? kAlwaysDismissedAnimation;
+
+  /// What a Scaffold with the menu calls as the menu opens (true) and closes (false).
+  static ValueChanged<bool>? openedOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_MenuState>()?.opened;
+
+  @override
+  State<MenuMorph> createState() => _MenuMorphState();
+}
+
+class _MenuMorphState extends State<MenuMorph> with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(vsync: this, duration: Motion.medium);
+  late final _progress = CurvedAnimation(parent: _controller, curve: Motion.themeCurve);
+
+  @override
+  void dispose() {
+    _progress.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _opened(bool open) {
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _controller.value = open ? 1 : 0;
+    } else if (open) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => _MenuState(progress: _progress, opened: _opened, child: widget.child);
+}
+
+class _MenuState extends InheritedWidget {
+  const _MenuState({required this.progress, required this.opened, required super.child});
+  final Animation<double> progress;
+  final ValueChanged<bool> opened;
+
+  @override
+  bool updateShouldNotify(_MenuState old) => old.progress != progress || old.opened != opened;
+}
+
 /// ☰ on the right of the home bar (owner, v9.1.0: 「需要添加外框，更加明显」): framed in 赭红 on a light tint, so it
 /// reads as the way into the menu. While it has the keyboard focus the theme's focus outline takes the frame's place.
+/// It turns into ✕ as the menu opens ([MenuMorph]).
 class MenuButton extends StatelessWidget {
   const MenuButton({super.key, required this.onPressed});
   final VoidCallback onPressed;
@@ -167,7 +224,7 @@ class MenuButton extends StatelessWidget {
     return AppIconButton(
       key: const Key('open-menu'),
       tooltip: l10n.menu,
-      icon: const Icon(Icons.menu),
+      icon: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: MenuMorph.of(context)),
       onPressed: onPressed,
       style: IconButton.styleFrom(
         foregroundColor: scheme.primary,
@@ -257,46 +314,63 @@ class _Header extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return Container(
-      padding: EdgeInsets.fromLTRB(Space.l, MediaQuery.paddingOf(context).top + Space.xl, Space.l, Space.l),
-      margin: const EdgeInsets.only(bottom: Space.s),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [scheme.primary, Color.lerp(scheme.primary, scheme.tertiary, 0.6)!],
+    // The menu's close button where ☰ was in the bar (S30): centred in the bar's height, as far from the right.
+    // The words leave it room.
+    return Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.fromLTRB(Space.l, MediaQuery.paddingOf(context).top + Space.xl, Space.xxxl + Space.m, Space.l),
+          margin: const EdgeInsets.only(bottom: Space.s),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [scheme.primary, Color.lerp(scheme.primary, scheme.tertiary, 0.6)!],
+            ),
+          ),
+          child: Row(
+            children: [
+              // The app icon (npm run build:icons), the same as on the phone's home screen.
+              ExcludeSemantics(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(Radii.field),
+                  child: Image.asset('assets/icon/app_icon.png', key: const Key('menu-icon'), width: 56, height: 56),
+                ),
+              ),
+              const SizedBox(width: Space.l),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.appTitle, style: text.titleLarge?.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w600)),
+                    if (account != null) ...[
+                      const SizedBox(height: Space.xs),
+                      Text(
+                        account!,
+                        key: const Key('menu-account'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodyMedium?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.85)),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          // The app icon (npm run build:icons), the same as on the phone's home screen.
-          ExcludeSemantics(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(Radii.field),
-              child: Image.asset('assets/icon/app_icon.png', key: const Key('menu-icon'), width: 56, height: 56),
-            ),
+        Positioned(
+          top: MediaQuery.paddingOf(context).top + (kToolbarHeight - kMinInteractiveDimension) / 2,
+          right: Space.m,
+          child: AppIconButton(
+            key: const Key('menu-close'),
+            tooltip: l10n.close,
+            onPressed: () => Navigator.of(context).pop(),
+            style: IconButton.styleFrom(foregroundColor: scheme.onPrimary),
+            icon: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: MenuMorph.of(context)),
           ),
-          const SizedBox(width: Space.l),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.appTitle, style: text.titleLarge?.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w600)),
-                if (account != null) ...[
-                  const SizedBox(height: Space.xs),
-                  Text(
-                    account!,
-                    key: const Key('menu-account'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: text.bodyMedium?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.85)),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

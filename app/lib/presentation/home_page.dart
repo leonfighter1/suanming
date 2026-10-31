@@ -57,6 +57,8 @@ class HomePage extends ConsumerWidget {
       // from that side, with 历史记录, 个人资料, 语言, 设置 and the rest. This replaces the 2026-10-27 bar, which had
       // each of them as its own button, and the v8.1.0 one, with ☰ on the left and 历史记录 beside the title.
       endDrawer: const AppMenu(),
+      // ☰ turns into ✕ as the menu slides in, and back as it goes (S30).
+      onEndDrawerChanged: MenuMorph.openedOf(context),
       appBar: AppBar(
         title: const AppTitle(),
         actions: [
