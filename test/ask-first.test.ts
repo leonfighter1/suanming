@@ -158,7 +158,9 @@ describe("the reading answers the question the draw was asked", () => {
 
   it("每日一牌 is the day's card, dealt without a draw: it is read without a question", async () => {
     const u = "daily";
-    const { chart_id } = await get("/v1/tarot/daily?date=2026-10-29", u);
+    // This server keeps the real clock, and a card is dealt only for its today (within a day, by UTC).
+    const today = new Date().toISOString().slice(0, 10);
+    const { chart_id } = await get(`/v1/tarot/daily?date=${today}`, u);
     expect((await post("/v1/reports", { chart_id, locale: "zh-Hans" }, u)).status).toBe(202);
     await api.drain();
   });

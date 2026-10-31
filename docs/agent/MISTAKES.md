@@ -84,8 +84,29 @@
 80. Write a test of what a server check reports from the check itself (read it, e.g. templateProblems reads subject and body), and when a fake mirrors it, cite the server function it mirrors.
 81. Start a test server and its sign-ins in the describe whose tests call it (its beforeAll, or a shared start() each such describe calls), never in a top-level beforeAll ahead of slow tests: an idle keep-alive connection meets the server 5 s timeout. A failure seen twice is a cause to find, not a flake: name the test with --reporter=verbose.
 82. Write a code transform as a script file with the Write tool, never inline node -e with nested quotes. Cut a block with its own trailing newline, never a leading one, and write a file only after every replacement in it matched exactly once.
+83. A test that sends a date the server checks against its clock either pins the server's clock (now in testApi's options) or computes the date from the same clock; never a literal date near today.
+84. A test that needs another start state (signed in or out, another FakeApi) gets its own testWidgets; never pump a second testApp over the first in one test.
+85. After moving code out of a file, check the imports it keeps with a strict scan (not a property, key, option field or comment) and remove the unused ones; tsc catches a removal that was needed.
 
 ## Log
+
+### 2026-10-30: Moved code left imports that only looked used
+- **Symptom:** After moving the route groups out of server.ts, it still imported preloadRemedies; the import check called it used, and tsc says nothing
+- **Root cause:** tsc here has no noUnusedLocals, and a plain name search counted the ApiOptions field preloadRemedies?: boolean (and x.name properties, comments) as uses
+- **Fix:** A strict check: comments and strings stripped, a property, an object key or an option field not counted, a spread counted; then removed the import and ran tsc
+- **Rule:** After moving code out of a file, check the imports it keeps with a strict scan (not a property, key, option field or comment) and remove the unused ones; tsc catches a removal that was needed. (Rule 85)
+
+### 2026-10-30: A second testApp pumped over a signed-out one kept its state
+- **Symptom:** banner_art_test: after pumpWidget(testApp(signedIn: false)), pumpWidget(testApp(FakeApi())) in the same test found no HeroBanner on 首页 (Bad state: No element)
+- **Root cause:** Pumping a new testApp at the same place updates the tree rather than replacing it, so the app's state from the first start (signed out) carried over
+- **Fix:** Each start state (signed out, signed in) in its own testWidgets
+- **Rule:** A test that needs another start state (signed in or out, another FakeApi) gets its own testWidgets; never pump a second testApp over the first in one test. (Rule 84)
+
+### 2026-10-30: A test hard-coded today's date against the server's real clock
+- **Symptom:** ask-first.test.ts '每日一牌 is the day's card' failed every run from 2026-10-31 00:00 UTC (expected 400 to be 202), after passing all day
+- **Root cause:** It asked for /v1/tarot/daily?date=2026-10-29 from a test server with the real clock; dailyDate allows only a day either side of the server's UTC today, so the date expired when UTC turned (the machine is on EDT, 4 hours behind it)
+- **Fix:** The test asks for the server's own UTC today; the other daily tests pin the server's clock (now: () => NOW)
+- **Rule:** A test that sends a date the server checks against its clock either pins the server's clock (now in testApi's options) or computes the date from the same clock; never a literal date near today. (Rule 83)
 
 ### 2026-10-30: Code transforms broke on shell escaping and on cutting a block with its leading newline
 - **Symptom:** S28: an inline node -e transform with nested quotes lost a template literal and a backslash twice; another cut each block together with the newline before it, which glued the line above to the line below and made the next match fail.
