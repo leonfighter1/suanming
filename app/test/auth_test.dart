@@ -19,22 +19,20 @@ void main() {
     expect(find.text('登入'), findsWidgets);
     expect(find.byKey(const Key('entry-bazi')), findsNothing);
 
-    await tester.tap(find.byKey(const Key('auth-toggle')));
-    await frames(tester, 10);
+    await scrollAndTap(tester, find.byKey(const Key('auth-toggle')), after: true);
     // Sign-up (v8.2.0): a username, the email optional.
     await tester.enterText(find.byKey(const Key('email')), 'new@example.com');
     await tester.enterText(find.byKey(const Key('password')), 'long enough pw');
-    await tester.tap(find.byKey(const Key('age-confirm')));
-    await frames(tester, 10);
+    await scrollAndTap(tester, find.byKey(const Key('age-confirm')), after: true);
     // Submit stays disabled until there is a username and the age gate is confirmed.
     expect(tester.widget<AppFilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
+    // Back up to the username, above the taller banner's fold (S35; rule 25).
+    await scrollToFinder(tester, find.byKey(const Key('username')), delta: -300);
     await tester.enterText(find.byKey(const Key('username')), 'new_user');
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('age-confirm')));
-    await frames(tester, 10);
+    await scrollAndTap(tester, find.byKey(const Key('age-confirm')), after: true);
     expect(tester.widget<AppFilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
-    await tester.tap(find.byKey(const Key('age-confirm')));
-    await frames(tester, 10);
+    await scrollAndTap(tester, find.byKey(const Key('age-confirm')), after: true);
     // The sign-up form runs past a short window (v12.2.0's type ramp: helper lines of 18).
     await scrollTo(tester, const Key('auth-submit'));
     await tester.tap(find.byKey(const Key('auth-submit')));
@@ -121,12 +119,10 @@ void main() {
     await tester.pumpWidget(testApp(api, signedIn: false));
     await frames(tester, 10);
     await openSignIn(tester);
-    await tester.tap(find.byKey(const Key('auth-toggle')));
-    await frames(tester, 10);
+    await scrollAndTap(tester, find.byKey(const Key('auth-toggle')), after: true);
     await tester.enterText(find.byKey(const Key('username')), 'taken');
     await tester.enterText(find.byKey(const Key('password')), 'long enough pw');
-    await tester.tap(find.byKey(const Key('age-confirm')));
-    await frames(tester, 10);
+    await scrollAndTap(tester, find.byKey(const Key('age-confirm')), after: true);
     await scrollTo(tester, const Key('auth-submit'));
     await tester.tap(find.byKey(const Key('auth-submit')));
     await frames(tester, 10);

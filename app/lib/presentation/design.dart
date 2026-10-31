@@ -442,6 +442,7 @@ class AppCard extends StatefulWidget {
     this.padding = const EdgeInsets.all(Space.card),
     this.onTap,
     this.onLongPress,
+    this.alignment = MainAxisAlignment.start,
   });
 
   final Widget child;
@@ -451,6 +452,11 @@ class AppCard extends StatefulWidget {
   final Color? color;
   final EdgeInsets padding;
   final VoidCallback? onTap;
+
+  /// Where its content sits when the card is made taller than it (a row of [CardGrid] takes its tallest card's
+  /// height): at the top, or in the middle for a card of one row (首页's methods, S35: 「所有算卦服务的grid必须要vertically
+  /// align middle」).
+  final MainAxisAlignment alignment;
 
   /// A long press (v8.0.0: starts selecting in 以往记录).
   final VoidCallback? onLongPress;
@@ -505,6 +511,7 @@ class _AppCardState extends State<AppCard> {
                   alignment: Alignment.topCenter,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: widget.alignment,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (widget.title != null) ...[
@@ -712,6 +719,10 @@ const _artNight = Color(0xFF090C15);
 /// The words' glow on the art, against its brightest parts (the gold rings).
 const _onArt = [Shadow(color: _artNight, blurRadius: 12)];
 
+/// A banner's least height (owner, 2026-10-31: 「banner需要增加高度，至少有个最低高度，至少300px」): its words and icon in
+/// its middle.
+const bannerMinHeight = 300.0;
+
 /// The header at the top of the main screens: a title, a line under it and an icon, on 命理罗盘 ([bannerArt]). The art is
 /// dark in both themes, so its words and icon take the dark theme's text colours.
 class HeroBanner extends StatelessWidget {
@@ -743,6 +754,7 @@ class HeroBanner extends StatelessWidget {
     final staff = ContentScope.imageOf(context, 'banner');
     return Container(
       margin: margin ?? const EdgeInsets.only(bottom: Space.l),
+      constraints: const BoxConstraints(minHeight: bannerMinHeight),
       decoration: BoxDecoration(
         borderRadius: radius,
         // The sky's night until the art is ready.

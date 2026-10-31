@@ -177,6 +177,8 @@ Window classes are Material's, by the window's width (`WindowClass.of`, `layout.
 - **Columns** for a layout of parts side by side: `Grid.span(width, n, columns:, gutter:)`. The dashboard's main column
   and panel are 8 : 4 at large widths.
 - **A dialog** keeps its own width (`ConstrainedBox`, 520–640), as Material's dialogs do.
+- **A banner** (`HeroBanner`) is at least `bannerMinHeight` (300) high on every window, its words and icon in its
+  middle (owner, S35: 「banner需要增加高度，至少有个最低高度，至少300px」).
 
 ## Spacing
 
@@ -244,6 +246,9 @@ takes a smaller step than its parent.
 7. **The app bar is the window's,** across its full width; the content below it keeps to its column.
 8. **A column inside a panel or card stretches** (`CrossAxisAlignment.stretch`): a Column's default centres its
    children, which pulls short lines off the left edge.
+9. **A card made taller than its content** (a desktop row of `CardGrid` takes its tallest card's height) keeps a
+   content of one row in its middle: `AppCard(alignment: MainAxisAlignment.center)`, 首页's and 欢迎页's methods (owner,
+   S35: 「所有算卦服务的grid必须要vertically align middle」). A card with a title keeps it at the top.
 
 ## The dashboard
 

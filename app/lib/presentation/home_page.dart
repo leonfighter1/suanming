@@ -180,6 +180,8 @@ class _Entry extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return AppCard(
       onTap: onTap,
+      // Beside a taller card in a desktop row, its icon, name and line keep to the card's middle (S35).
+      alignment: MainAxisAlignment.center,
       child: Row(
         children: [
           Container(
