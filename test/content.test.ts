@@ -192,9 +192,16 @@ describe("the CMS's API", () => {
       ).status,
     ).toBe(400);
     const big = Buffer.concat([PNG, Buffer.alloc(2 * 1024 * 1024)]);
-    expect(
-      (await call("integ", "/v1/admin/content/images/banner", "PUT", big, "image/png")).status,
-    ).toBe(413);
+    const tooLarge = await call(
+      "integ",
+      "/v1/admin/content/images/banner",
+      "PUT",
+      big,
+      "image/png",
+    );
+    expect(tooLarge.status).toBe(413);
+    // The rest of the body is left unread: the connection closes, so no later request waits behind it.
+    expect(tooLarge.headers.get("connection")).toBe("close");
     expect(
       (await call("integ", "/v1/admin/content/images/poster", "PUT", PNG, "image/png")).status,
     ).toBe(404);

@@ -645,6 +645,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
       await handle(req, res);
     } catch (e) {
       if (e instanceof HttpError) {
+        // A body too large is left unread on the connection, which the next request would wait behind: close it.
+        if (e.status === 413) res.setHeader("connection", "close");
         return problem(res, e.status, e.message, undefined, {
           ...(e.code && { code: e.code }),
           ...e.extra,
