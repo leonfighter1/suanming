@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 
 /// 麦克风 (v10.0.0, S19 WP19.3; the owner: 对于打字不方便的用户可以增加麦克风输入): a mic button for a text field. It types
 /// what the user says into [controller], after what is there already, as the browser hears it; a second press stops.
@@ -70,7 +71,7 @@ class _VoiceInputButtonState extends ConsumerState<VoiceInputButton> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    return IconButton(
+    return AppIconButton(
       key: ValueKey<String>('mic-${widget.id}'),
       tooltip: _listening ? l10n.micStop : l10n.micStart,
       onPressed: _toggle,

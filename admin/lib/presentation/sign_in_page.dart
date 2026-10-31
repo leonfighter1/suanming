@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/layout.dart';
@@ -91,7 +92,7 @@ class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
                       Text(_error!, key: const Key('admin-error'), style: TextStyle(color: theme.colorScheme.error)),
                     ],
                     const SizedBox(height: Space.l),
-                    FilledButton(
+                    AppFilledButton(
                       key: const Key('admin-submit'),
                       onPressed: _busy ? null : _submit,
                       child: _busy

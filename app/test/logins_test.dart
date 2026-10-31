@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 
 import 'keys.dart';
 import 'support.dart';
@@ -70,7 +71,7 @@ void main() {
     // 绑定 waits for six digits.
     await tester.enterText(find.byKey(const Key('contact-code')), '12');
     await frames(tester, 10);
-    expect(tester.widget<FilledButton>(find.byKey(const Key('contact-confirm'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('contact-confirm'))).onPressed, isNull);
     await tester.enterText(find.byKey(const Key('contact-code')), '000000');
     await frames(tester, 10);
     await tester.tap(find.byKey(const Key('contact-confirm')));

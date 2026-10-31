@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -157,7 +158,7 @@ class _FengshuiPageState extends ConsumerState<FengshuiPage> {
                       ),
                     ),
                     const SizedBox(height: Space.l),
-                    FilledButton.icon(
+                    AppFilledButton.icon(
                       key: const Key('look-room'),
                       onPressed: _busy ? null : _look,
                       icon: const Icon(Icons.explore_outlined),

@@ -5,6 +5,7 @@ import '../../application/providers.dart';
 import '../../data/api_client.dart';
 import '../../domain/points.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../points_page.dart';
 import 'remedy.dart' show compactButtons;
@@ -54,8 +55,8 @@ Future<bool> showPointsShort(BuildContext context, Object error) async {
         title: Text(l10n.pointsShortTitle),
         content: Text(l10n.pointsShortBody(need, available), key: const Key('points-short-body')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
-          FilledButton(
+          AppTextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          AppFilledButton(
             key: const Key('points-go-top-up'),
             autofocus: true,
             onPressed: () => Navigator.pop(ctx, true),

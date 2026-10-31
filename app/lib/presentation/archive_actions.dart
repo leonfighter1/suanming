@@ -1,3 +1,4 @@
+import 'buttons.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -196,9 +197,9 @@ Future<bool> confirmDelete(BuildContext context, int count) async {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextButton(key: const Key('delete-cancel'), onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+              AppTextButton(key: const Key('delete-cancel'), onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
               const SizedBox(width: Space.s),
-              FilledButton(
+              AppFilledButton(
                 key: const Key('delete-confirm'),
                 style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                 onPressed: () => Navigator.pop(context, true),
@@ -258,9 +259,9 @@ Future<String?> chooseFiling(BuildContext context, {required List<String> names,
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+              AppTextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
               const SizedBox(width: Space.s),
-              FilledButton(
+              AppFilledButton(
                 key: const Key('file-save'),
                 onPressed: () => typed.text.trim().isEmpty ? null : Navigator.pop(context, typed.text.trim()),
                 child: Text(l10n.save),

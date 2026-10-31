@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/tokens.dart';
@@ -401,7 +402,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               // The panel's main action spans its column.
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: AppFilledButton.icon(
                   key: const Key('grant-submit'),
                   onPressed: _busy ? null : () => _grant(u),
                   icon: const Icon(Icons.add),
@@ -420,7 +421,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               const SizedBox(height: Space.m),
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton.icon(
+                child: AppOutlinedButton.icon(
                   key: const Key('sign-out-everywhere'),
                   onPressed: _busy ? null : () => _signOutEverywhere(u),
                   icon: const Icon(Icons.logout),

@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
@@ -197,7 +198,7 @@ class BaziChartPage extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(top: Space.s),
           child: Center(
-            child: TextButton.icon(
+            child: AppTextButton.icon(
               key: const Key('open-naming'),
               icon: const Icon(Icons.badge_outlined),
               label: Text(l10n.namingFromChart),
@@ -335,7 +336,7 @@ class _PillarGridState extends State<_PillarGrid> {
         ),
         Align(
           alignment: Alignment.centerRight,
-          child: TextButton.icon(
+          child: AppTextButton.icon(
             key: const Key('pillar-more'),
             onPressed: () => setState(() => _more = !_more),
             icon: Icon(_more ? Icons.expand_less : Icons.expand_more),

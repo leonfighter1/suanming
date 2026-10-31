@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -98,7 +99,7 @@ class _NamingPageState extends ConsumerState<NamingPage> {
                     ],
                   ),
                   const SizedBox(height: Space.l),
-                  FilledButton.icon(
+                  AppFilledButton.icon(
                     key: const Key('naming-suggest'),
                     onPressed: _busy || !_valid ? null : _suggest,
                     icon: const Icon(Icons.badge_outlined),

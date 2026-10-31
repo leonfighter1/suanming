@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../data/api_client.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -160,7 +161,7 @@ class _QiuqianPageState extends ConsumerState<QiuqianPage> {
                       Text(l10n.qiuqianHowTo, style: Theme.of(context).textTheme.bodyMedium),
                       const SizedBox(height: Space.l),
                       if (chart == null) ...[
-                        FilledButton.icon(
+                        AppFilledButton.icon(
                           key: const Key('draw-lot'),
                           onPressed: canDraw ? _draw : null,
                           icon: const Icon(Icons.temple_buddhist_outlined),
@@ -336,14 +337,14 @@ class _Rounds extends ConsumerWidget {
         if (!finished) ...[
           const SizedBox(height: Space.m),
           if (!shaking && !tossing)
-            FilledButton.icon(
+            AppFilledButton.icon(
               key: Key(thrown ? 'shake-again' : 'throw-blocks'),
               autofocus: true,
               onPressed: thrown ? onAgain : onThrow,
               icon: Icon(thrown ? Icons.replay : Icons.back_hand_outlined),
               label: Text(thrown ? l10n.qiuqianAgain : l10n.qiuqianThrow),
             ),
-          TextButton(key: const Key('skip-rounds'), onPressed: onSkip, child: Text(l10n.qiuqianSkip)),
+          AppTextButton(key: const Key('skip-rounds'), onPressed: onSkip, child: Text(l10n.qiuqianSkip)),
         ],
       ],
     );

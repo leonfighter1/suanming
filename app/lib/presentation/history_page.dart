@@ -11,6 +11,7 @@ import '../domain/models.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'archive_actions.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart' show SegmentKeys;
 import 'layout.dart';
@@ -273,12 +274,12 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     return Scaffold(
       appBar: AppBar(
         leading: _selecting
-            ? IconButton(key: const Key('archive-select-done'), tooltip: l10n.close, icon: const Icon(Icons.close), onPressed: _stopSelecting)
+            ? AppIconButton(key: const Key('archive-select-done'), tooltip: l10n.close, icon: const Icon(Icons.close), onPressed: _stopSelecting)
             : null,
         title: Text(_selecting ? l10n.archiveSelected(chosen.length) : l10n.history),
         actions: [
           if (_selecting)
-            TextButton(
+            AppTextButton(
               key: const Key('archive-select-all'),
               onPressed: () => setState(() => _selected
                 ..clear()
@@ -286,7 +287,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               child: Text(l10n.archiveSelectAll),
             )
           else if (records.isNotEmpty)
-            IconButton(
+            AppIconButton(
               key: const Key('archive-select'),
               tooltip: l10n.archiveSelect,
               icon: const Icon(Icons.checklist_rtl),
@@ -386,7 +387,7 @@ class _BarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: TextButton(
+        child: AppTextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(
             minimumSize: const Size(0, 52),
@@ -455,7 +456,7 @@ class RecentHistory extends ConsumerWidget {
                   child: Row(
                     children: [
                       Expanded(child: Text(l10n.recent, style: Theme.of(context).textTheme.titleMedium)),
-                      TextButton(
+                      AppTextButton(
                         onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HistoryPage())),
                         child: Text(l10n.viewAll),
                       ),

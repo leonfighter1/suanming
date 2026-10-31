@@ -1,3 +1,4 @@
+import 'buttons.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -169,7 +170,7 @@ class ReportPage extends ConsumerWidget {
             key: const ValueKey('error'),
             icon: Icons.error_outline,
             text: '${l10n.errorTitle}\n$e',
-            action: TextButton(onPressed: () => ref.invalidate(reportProvider(reportId)), child: Text(l10n.retry)),
+            action: AppTextButton(onPressed: () => ref.invalidate(reportProvider(reportId)), child: Text(l10n.retry)),
           ),
           data: (r) => switch (r.status) {
             'pending' => _Generating(key: const ValueKey('pending'), report: r),

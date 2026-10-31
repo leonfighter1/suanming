@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -230,12 +231,12 @@ class _SignInPageState extends ConsumerState<SignInPage> {
             child: Text(_error!, key: const Key('auth-error'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         const SizedBox(height: Space.l),
-        FilledButton(
+        AppFilledButton(
           key: const Key('auth-submit'),
           onPressed: canSubmit ? _submit : null,
           child: Text(_register ? l10n.createAccount : l10n.signIn),
         ),
-        TextButton(
+        AppTextButton(
           key: const Key('auth-toggle'),
           onPressed: () => setState(() {
             _register = !_register;
@@ -245,8 +246,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         ),
         const Divider(height: Space.xxl),
         // Needs the sign_in_with_apple / google_sign_in SDKs and console setup (client ids).
-        OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.apple), label: Text('${l10n.appleSignIn} · ${l10n.comingSoon}')),
+        AppOutlinedButton.icon(onPressed: null, icon: const Icon(Icons.apple), label: Text('${l10n.appleSignIn} · ${l10n.comingSoon}')),
         const SizedBox(height: Space.s),
-        OutlinedButton.icon(onPressed: null, icon: const Icon(Icons.g_mobiledata), label: Text('${l10n.googleSignIn} · ${l10n.comingSoon}')),
+        AppOutlinedButton.icon(onPressed: null, icon: const Icon(Icons.g_mobiledata), label: Text('${l10n.googleSignIn} · ${l10n.comingSoon}')),
       ];
 }

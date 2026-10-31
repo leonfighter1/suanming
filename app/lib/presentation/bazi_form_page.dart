@@ -6,6 +6,7 @@ import '../domain/dates.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bazi_chart_page.dart';
+import 'buttons.dart';
 import 'life_report_page.dart';
 import 'design.dart';
 import 'keyboard.dart';
@@ -137,13 +138,13 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
                 child: AppCard(
                   title: l10n.profileFor,
                   icon: Icons.people_alt_outlined,
-                  trailing: TextButton.icon(
+                  trailing: AppTextButton.icon(
                     icon: const Icon(Icons.manage_accounts_outlined, size: 18),
                     label: Text(l10n.profiles),
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProfilesPage())),
                   ),
                   child: profiles.isEmpty
-                      ? OutlinedButton.icon(
+                      ? AppOutlinedButton.icon(
                           key: const Key('add-person'),
                           icon: const Icon(Icons.person_add_alt_1),
                           label: Text(l10n.addTester),
@@ -221,7 +222,7 @@ class _BaziFormPageState extends ConsumerState<BaziFormPage> {
               ),
               FadeSlideIn(
                 index: 3,
-                child: FilledButton.icon(
+                child: AppFilledButton.icon(
                   key: const Key('compute-chart'),
                   onPressed: _busy ? null : () => _submit(draft),
                   icon: _busy

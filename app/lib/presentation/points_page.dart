@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../application/providers.dart';
 import '../domain/points.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'labels.dart';
 import 'layout.dart';
@@ -170,7 +171,7 @@ class _PackButton extends StatelessWidget {
     final theme = Theme.of(context);
     return SizedBox(
       width: _packWidth,
-      child: OutlinedButton(
+      child: AppOutlinedButton(
         key: ValueKey<String>('points-pack-${pack.yuan}'),
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: Space.m, vertical: Space.s)),

@@ -33,7 +33,7 @@ Future<void> _openNaming(WidgetTester tester, FakeApi api, {Locale locale = zhHa
   await frames(tester, 10);
 }
 
-bool _enabled(WidgetTester tester) => tester.widget<ButtonStyleButton>(find.byKey(const Key('naming-suggest'))).enabled;
+bool _enabled(WidgetTester tester) => buttonEnabled(tester, const Key('naming-suggest'));
 
 /// chart_naming with its 字义库 reviewed or not, whatever the synced fixture says (the owner's review flips it).
 Map<String, dynamic> _chart({required bool reviewed}) {

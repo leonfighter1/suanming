@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../keyboard.dart';
 
@@ -18,7 +19,7 @@ Future<void> showTermTip(BuildContext context, String title, String tip) => show
         title: Text(title),
         content: Text(tip),
         // A TextButton sizes to its label (the theme widens only filled and outlined ones, rule 7).
-        actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(AppLocalizations.of(context).close))],
+        actions: [AppTextButton(onPressed: () => Navigator.of(context).pop(), child: Text(AppLocalizations.of(context).close))],
       ),
     );
 
@@ -92,7 +93,7 @@ class TermTipButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tip = _tipOf(ref, term);
     if (tip.isEmpty) return const SizedBox.shrink();
-    return IconButton(
+    return AppIconButton(
       key: Key('tip-$term'),
       tooltip: AppLocalizations.of(context).termTipAbout(title),
       visualDensity: VisualDensity.compact,

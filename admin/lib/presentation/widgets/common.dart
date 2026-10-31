@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/layout.dart';
@@ -124,7 +125,7 @@ class Problem extends StatelessWidget {
           const SizedBox(height: Space.s),
           Text(text, key: const Key('problem'), textAlign: TextAlign.center),
           const SizedBox(height: Space.m),
-          OutlinedButton.icon(
+          AppOutlinedButton.icon(
             key: const Key('retry'),
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
@@ -261,8 +262,8 @@ Future<bool> confirmAction(BuildContext context, String title, String body) asyn
         title: Text(title),
         content: Text(body),
         actions: [
-          TextButton(key: const Key('confirm-no'), onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
-          FilledButton(
+          AppTextButton(key: const Key('confirm-no'), onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
+          AppFilledButton(
             key: const Key('confirm-yes'),
             autofocus: true,
             onPressed: () => Navigator.pop(c, true),

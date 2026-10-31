@@ -206,6 +206,7 @@ void main() {
       "final j = textTheme.displayLarge;",
       "final k = Space.page;",
       "final l = textTheme.bodyLarge?.copyWith(height: 1.8);",
+      "final m = FilledButton.icon(onPressed: go, label: x);",
     ].join('\n'));
     File('${dir.path}/good.dart').writeAsStringSync([
       '// Color(0xFF000000) in a comment is fine',
@@ -219,6 +220,8 @@ void main() {
       'final h = pagePadding(context);',
       'final i = ReadingText.body(context);',
       'final j = Container(height: 12);',
+      'final k = FilledButton.styleFrom(minimumSize: Size.zero);',
+      'final l = AppFilledButton(onPressed: go, child: x);',
     ].join('\n'));
     final found = designViolations(dir.path);
     expect(found.where((v) => v.contains('good.dart')), isEmpty);
@@ -238,6 +241,7 @@ void main() {
       'role off the type ramp',
       'fixed page padding',
       'line height off the ramp',
+      "Material's own button",
     ]);
   });
 

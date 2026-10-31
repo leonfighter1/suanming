@@ -6,6 +6,7 @@ import '../../application/providers.dart';
 import '../../data/api_client.dart';
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import 'points.dart';
 import 'reading_paragraph.dart';
@@ -107,7 +108,7 @@ class FollowUpButton extends StatelessWidget {
         ),
       ),
     ),
-    child: FloatingActionButton.extended(
+    child: AppFab.extended(
       key: const Key('followup-fab'),
       heroTag: null,
       onPressed: target.open,
@@ -250,7 +251,7 @@ class _FollowUpCardState extends ConsumerState<FollowUpCard> {
                   alignment: Alignment.centerRight,
                   child: compactButtons(
                     context,
-                    FilledButton.icon(
+                    AppFilledButton.icon(
                       key: const Key('followup-send'),
                       onPressed: canAsk ? () => _ask(_question.text) : null,
                       icon: _sending

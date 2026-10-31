@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers.dart';
 import '../../data/api_client.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import 'remedy.dart' show compactButtons;
@@ -174,12 +175,12 @@ class _ContactDialogState extends ConsumerState<ContactDialog> {
               spacing: Space.s,
               runSpacing: Space.s,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+                AppTextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
                 if (sent == null)
-                  FilledButton(key: const Key('contact-send'), onPressed: _busy ? null : _send, child: Text(l10n.sendCode))
+                  AppFilledButton(key: const Key('contact-send'), onPressed: _busy ? null : _send, child: Text(l10n.sendCode))
                 else ...[
-                  TextButton(key: const Key('contact-resend'), onPressed: _busy ? null : _send, child: Text(l10n.resendCode)),
-                  FilledButton(
+                  AppTextButton(key: const Key('contact-resend'), onPressed: _busy ? null : _send, child: Text(l10n.resendCode)),
+                  AppFilledButton(
                     key: const Key('contact-confirm'),
                     onPressed: canConfirm ? _confirm : null,
                     child: Text(_phone ? l10n.confirmBind : l10n.confirmVerify),
@@ -270,9 +271,9 @@ class _UsernameDialogState extends ConsumerState<_UsernameDialog> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+                AppTextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
                 const SizedBox(width: Space.s),
-                FilledButton(key: const Key('username-save'), onPressed: canSave ? _save : null, child: Text(l10n.save)),
+                AppFilledButton(key: const Key('username-save'), onPressed: canSave ? _save : null, child: Text(l10n.save)),
               ],
             ),
           ),

@@ -6,6 +6,7 @@ import '../../application/providers.dart';
 import '../../domain/models.dart';
 import '../../domain/profile.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import '../place_picker.dart';
@@ -45,7 +46,7 @@ class BirthFields extends ConsumerWidget {
           duration: const Duration(milliseconds: 250),
           child: lunarMode
               ? LunarDatePicker(key: const ValueKey('lunar'), value: value, onChanged: onChanged)
-              : OutlinedButton.icon(
+              : AppOutlinedButton.icon(
                   key: const ValueKey('gregorian'),
                   icon: const Icon(Icons.calendar_today, size: 18),
                   label: Text(DateFormat('yyyy-MM-dd').format(d)),
@@ -95,7 +96,7 @@ class BirthFields extends ConsumerWidget {
           duration: const Duration(milliseconds: 250),
           child: shichenMode
               ? ShichenPicker(key: const ValueKey('shichen'), value: value, onChanged: onChanged)
-              : OutlinedButton.icon(
+              : AppOutlinedButton.icon(
                   key: const ValueKey('exact'),
                   icon: const Icon(Icons.schedule, size: 18),
                   label: Text(TimeOfDay.fromDateTime(d).format(context)),

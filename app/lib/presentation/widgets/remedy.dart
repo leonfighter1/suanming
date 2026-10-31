@@ -1,3 +1,4 @@
+import '../buttons.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -106,13 +107,13 @@ class RemedyButton extends ConsumerWidget {
     final button = compactButtons(
       context,
       bought && !compact
-          ? FilledButton.tonalIcon(
+          ? AppFilledButton.tonalIcon(
               key: Key('remedy-open-$topic'),
               onPressed: onPressed,
               icon: const Icon(Icons.description_outlined),
               label: Text(label),
             )
-          : OutlinedButton.icon(
+          : AppOutlinedButton.icon(
               key: Key(compact ? 'remedy-inline-$topic' : 'remedy-buy-$topic'),
               onPressed: onPressed,
               icon: Icon(bought ? Icons.description_outlined : Icons.lock_open_outlined),
@@ -159,9 +160,9 @@ Future<void> openRemedy(
                 : l10n.remedyConfirmPoints(topicLabel, list.points!.points),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+            AppTextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
             // Default action: pay (TODO Phase 4: real store purchase).
-            FilledButton(
+            AppFilledButton(
               key: const Key('remedy-pay'),
               autofocus: true,
               onPressed: () => Navigator.pop(ctx, true),
@@ -224,7 +225,7 @@ class RemedyDialog extends ConsumerWidget {
                     Icon(Icons.auto_fix_high, color: scheme.primary),
                     const SizedBox(width: Space.s),
                     Expanded(child: Text(title, style: theme.textTheme.titleLarge)),
-                    IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                    AppIconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                   ],
                 ),
               ),
@@ -375,7 +376,7 @@ class _Actions extends StatelessWidget {
         spacing: Space.s,
         runSpacing: Space.s,
         children: [
-          OutlinedButton.icon(
+          AppOutlinedButton.icon(
             key: const Key('remedy-save'),
             icon: const Icon(Icons.download_outlined),
             label: Text(l10n.remedySave),
@@ -387,13 +388,13 @@ class _Actions extends StatelessWidget {
               ),
             ),
           ),
-          OutlinedButton.icon(
+          AppOutlinedButton.icon(
             key: const Key('remedy-send'),
             icon: const Icon(Icons.send_outlined),
             label: Text(l10n.remedySend),
             onPressed: () => SharePlus.instance.share(ShareParams(text: md(), subject: title)),
           ),
-          OutlinedButton.icon(
+          AppOutlinedButton.icon(
             key: const Key('remedy-print'),
             icon: const Icon(Icons.print_outlined),
             label: Text(l10n.remedyPrint),
@@ -415,7 +416,7 @@ class _Actions extends StatelessWidget {
               if (!await printHtml(html)) await SharePlus.instance.share(ShareParams(text: md(), subject: title));
             },
           ),
-          FilledButton.tonalIcon(
+          AppFilledButton.tonalIcon(
             key: const Key('remedy-copy'),
             icon: const Icon(Icons.copy_all_outlined),
             label: Text(l10n.copyAll),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart' show SpringSimulation;
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 
 import 'tokens.dart';
@@ -69,6 +70,13 @@ abstract final class Motion {
 
   /// A change of theme: every colour, border and state fades from one theme to the other.
   static const themeCurve = Curves.easeInOut;
+
+  /// A press going in ([PressBounce]): quick, so a tap shows it whole.
+  static const press = Duration(milliseconds: 100);
+
+  /// A press let go ([PressBounce]): underdamped, so it passes 100 % once (about 1.4 % over) and settles in about half a
+  /// second.
+  static const pressSpring = SpringDescription(mass: 1, stiffness: 500, damping: 14);
 }
 
 /// Anything lying face down, a tarot card's back or a covered coin (v6.1.0): navy, with a gold edge and gold marks.
@@ -131,9 +139,81 @@ class FocusRingState extends State<FocusRing> {
   }
 }
 
+/// 按压回弹 (S30; owner, 2026-10-30: 「按钮按下时缩小到 96%；松手时用弹簧动画先放大到略超过原尺寸，再回到 100%」): what
+/// [builder] builds shrinks to [pressedScale] while the [WidgetStatesController] it is handed says pressed, then springs
+/// back past 100 % ([Motion.pressSpring]) and settles. A quick tap still shrinks all the way before it springs back.
+/// Give the controller to a button's or an InkWell's `statesController` (the app's buttons, [AppCard]), or set its
+/// pressed state from the gestures ([Pressable]). Reduce motion: it stays at 100 %.
+class PressBounce extends StatefulWidget {
+  const PressBounce({super.key, required this.builder});
+
+  /// The size while pressed.
+  static const pressedScale = 0.96;
+
+  final Widget Function(WidgetStatesController states) builder;
+
+  @override
+  State<PressBounce> createState() => _PressBounceState();
+}
+
+class _PressBounceState extends State<PressBounce> with SingleTickerProviderStateMixin {
+  final _states = WidgetStatesController();
+  late final _scale = AnimationController.unbounded(vsync: this, value: 1);
+  bool _pressed = false;
+  bool _still = false;
+  TickerFuture? _pressIn;
+
+  @override
+  void initState() {
+    super.initState();
+    _states.addListener(_changed);
+  }
+
+  @override
+  void dispose() {
+    _states.dispose();
+    _scale.dispose();
+    super.dispose();
+  }
+
+  void _changed() {
+    final pressed = _states.value.contains(WidgetState.pressed);
+    if (pressed == _pressed) return;
+    _pressed = pressed;
+    if (_still) return;
+    if (pressed) {
+      _pressIn = _scale.animateTo(PressBounce.pressedScale, duration: Motion.press, curve: Motion.curve);
+      return;
+    }
+    // The press goes all the way in first, so a tap shows the whole bounce.
+    final pressIn = _pressIn;
+    _pressIn = null;
+    if (pressIn != null && _scale.isAnimating) {
+      pressIn.whenCompleteOrCancel(() {
+        if (mounted && !_pressed) _springBack();
+      });
+    } else {
+      _springBack();
+    }
+  }
+
+  void _springBack() {
+    _scale.animateWith(SpringSimulation(Motion.pressSpring, _scale.value, 1, _scale.velocity)).whenComplete(() {
+      // The spring stops within its tolerance: end exactly at 100 %, so nothing is left a hair small.
+      if (mounted && !_pressed) _scale.value = 1;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return ScaleTransition(scale: _scale, child: widget.builder(_states));
+  }
+}
+
 /// The one card style: soft surface, hairline border, generous padding, an
 /// optional header row. Content size changes animate. A tappable card shows
-/// the focus ring while it has keyboard focus.
+/// the focus ring while it has keyboard focus, and bounces when pressed ([PressBounce]).
 class AppCard extends StatefulWidget {
   const AppCard({
     super.key,
@@ -182,47 +262,50 @@ class _AppCardState extends State<AppCard> {
     final scheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: Space.m),
-      child: FocusRing(
-        focused: _focused,
-        radius: Radii.card,
-        child: Material(
-          color: widget.color ?? scheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(Radii.card),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            focusNode: _node,
-            onTap: widget.onTap,
-            onLongPress: widget.onLongPress,
-            onFocusChange: (_) => setState(() => _focused = _node.hasPrimaryFocus),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Radii.card),
-                border: Border.all(color: ThemeTokens.of(context).border),
-              ),
-              padding: widget.padding,
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.topCenter,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (widget.title != null) ...[
-                      Row(
-                        children: [
-                          if (widget.icon != null) ...[
-                            Icon(widget.icon, size: 20, color: scheme.primary),
-                            const SizedBox(width: Space.s),
+      child: PressBounce(
+        builder: (states) => FocusRing(
+          focused: _focused,
+          radius: Radii.card,
+          child: Material(
+            color: widget.color ?? scheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(Radii.card),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              focusNode: _node,
+              statesController: states,
+              onTap: widget.onTap,
+              onLongPress: widget.onLongPress,
+              onFocusChange: (_) => setState(() => _focused = _node.hasPrimaryFocus),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Radii.card),
+                  border: Border.all(color: ThemeTokens.of(context).border),
+                ),
+                padding: widget.padding,
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.title != null) ...[
+                        Row(
+                          children: [
+                            if (widget.icon != null) ...[
+                              Icon(widget.icon, size: 20, color: scheme.primary),
+                              const SizedBox(width: Space.s),
+                            ],
+                            Expanded(child: Text(widget.title!, style: theme.textTheme.titleMedium)),
+                            ?widget.trailing,
                           ],
-                          Expanded(child: Text(widget.title!, style: theme.textTheme.titleMedium)),
-                          ?widget.trailing,
-                        ],
-                      ),
-                      const SizedBox(height: Space.m),
+                        ),
+                        const SizedBox(height: Space.m),
+                      ],
+                      widget.child,
                     ],
-                    widget.child,
-                  ],
+                  ),
                 ),
               ),
             ),

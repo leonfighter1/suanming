@@ -1,0 +1,138 @@
+// S30 (owner, 2026-10-30): the interactions, each where the app has the element. 按压回弹: a button shrinks to 96 %
+// while pressed, and when let go springs past 100 % and settles (PressBounce, buttons.dart).
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_app/presentation/buttons.dart';
+import 'package:mingli_app/presentation/design.dart';
+import 'package:mingli_app/presentation/keyboard.dart';
+import 'package:mingli_app/presentation/theme.dart';
+
+Widget host(Widget child, {bool still = false}) => MaterialApp(
+      theme: buildTheme(Brightness.light),
+      home: Builder(
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: still),
+          child: Scaffold(body: Center(child: SizedBox(width: 240, child: child))),
+        ),
+      ),
+    );
+
+/// The press scale of what [key] names (its PressBounce's).
+double scaleOf(WidgetTester tester, Key key) => tester
+    .widget<ScaleTransition>(find.descendant(of: find.byKey(key), matching: find.byType(ScaleTransition)).first)
+    .scale
+    .value;
+
+/// The scale frame by frame for [ms] milliseconds.
+Future<List<double>> track(WidgetTester tester, Key key, {int ms = 1000}) async {
+  final seen = <double>[];
+  for (var t = 0; t < ms; t += 16) {
+    await tester.pump(const Duration(milliseconds: 16));
+    seen.add(scaleOf(tester, key));
+  }
+  return seen;
+}
+
+void main() {
+  const k = Key('b');
+
+  testWidgets('按压回弹: held, a button shrinks to 96 %; let go, it springs past 100 % and comes to rest at 100 %',
+      (tester) async {
+    await tester.pumpWidget(host(AppFilledButton(key: k, onPressed: () {}, child: const Text('排盘'))));
+    final press = await tester.startGesture(tester.getCenter(find.byKey(k)));
+    await tester.pump(const Duration(milliseconds: 200)); // the tap's press timeout: now it is pressed
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(scaleOf(tester, k), closeTo(PressBounce.pressedScale, 1e-3));
+    await press.up();
+    final seen = await track(tester, k);
+    expect(seen.reduce((a, b) => a > b ? a : b), greaterThan(1.005), reason: 'it passes 100 %');
+    expect(seen.reduce((a, b) => a > b ? a : b), lessThan(1.03), reason: 'only a little');
+    expect(seen.last, 1.0);
+  });
+
+  testWidgets('a quick tap still shrinks all the way, then springs back', (tester) async {
+    var pressed = 0;
+    await tester.pumpWidget(host(AppTextButton(key: k, onPressed: () => pressed++, child: const Text('取消'))));
+    await tester.tap(find.byKey(k));
+    final seen = await track(tester, k);
+    expect(pressed, 1);
+    expect(seen.reduce((a, b) => a < b ? a : b), closeTo(PressBounce.pressedScale, 2e-3));
+    expect(seen.reduce((a, b) => a > b ? a : b), greaterThan(1.005));
+    expect(seen.last, 1.0);
+  });
+
+  testWidgets('reduce motion, or a button that is off: no bounce', (tester) async {
+    await tester.pumpWidget(host(AppFilledButton(key: k, onPressed: () {}, child: const Text('排盘')), still: true));
+    await tester.tap(find.byKey(k));
+    expect((await track(tester, k, ms: 400)).every((s) => s == 1.0), isTrue, reason: 'reduce motion');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(host(const AppFilledButton(key: k, onPressed: null, child: Text('排盘'))));
+    await tester.tap(find.byKey(k), warnIfMissed: false);
+    expect((await track(tester, k, ms: 400)).every((s) => s == 1.0), isTrue, reason: 'disabled');
+  });
+
+  testWidgets('every kind of the app\'s buttons bounces, and so do a tappable card and the floating button',
+      (tester) async {
+    final targets = <Key, Widget>{
+      const Key('filled-icon'): AppFilledButton.icon(
+        key: const Key('filled-icon'),
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        label: const Text('新增'),
+      ),
+      const Key('tonal'): AppFilledButton.tonalIcon(
+        key: const Key('tonal'),
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        label: const Text('新增'),
+      ),
+      const Key('outlined'): AppOutlinedButton(key: const Key('outlined'), onPressed: () {}, child: const Text('重算')),
+      const Key('outlined-icon'): AppOutlinedButton.icon(
+        key: const Key('outlined-icon'),
+        onPressed: () {},
+        icon: const Icon(Icons.refresh),
+        label: const Text('重算'),
+      ),
+      const Key('text-icon'): AppTextButton.icon(
+        key: const Key('text-icon'),
+        onPressed: () {},
+        icon: const Icon(Icons.close),
+        label: const Text('关闭'),
+      ),
+      const Key('icon'): AppIconButton(key: const Key('icon'), onPressed: () {}, icon: const Icon(Icons.menu)),
+      const Key('card'): AppCard(key: const Key('card'), onTap: () {}, child: const Text('八字排盘')),
+      const Key('fab'): AppFab.extended(
+        key: const Key('fab'),
+        onPressed: () {},
+        icon: const Icon(Icons.forum),
+        label: const Text('追问'),
+      ),
+    };
+    for (final MapEntry(key: key, value: widget) in targets.entries) {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(host(widget));
+      await tester.tap(find.byKey(key));
+      final seen = await track(tester, key);
+      expect(seen.reduce((a, b) => a < b ? a : b), closeTo(PressBounce.pressedScale, 2e-3), reason: '$key');
+      expect(seen.last, 1.0, reason: '$key');
+    }
+  });
+
+  testWidgets('a card without a tap, and a chart that takes the tap\'s position, stay still', (tester) async {
+    await tester.pumpWidget(host(const AppCard(key: k, child: Text('命盘事实'))));
+    await tester.tap(find.byKey(k));
+    expect((await track(tester, k, ms: 400)).every((s) => s == 1.0), isTrue, reason: 'a plain card');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(host(Pressable(key: k, onTapDown: (_) {}, child: const SizedBox(height: 80))));
+    await tester.tap(find.byKey(k));
+    expect(find.descendant(of: find.byKey(k), matching: find.byType(ScaleTransition)), findsNothing, reason: 'a chart');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(host(Pressable(key: k, onPressed: () {}, child: const SizedBox(height: 80))));
+    await tester.tap(find.byKey(k));
+    final seen = await track(tester, k);
+    expect(seen.reduce((a, b) => a < b ? a : b), closeTo(PressBounce.pressedScale, 2e-3), reason: 'a button');
+  });
+}

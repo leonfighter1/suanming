@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_admin/presentation/message_editor_page.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 
 import '../../app/test/keys.dart';
 import 'support.dart';
@@ -88,7 +89,7 @@ void main() {
     expect(textOf(tester, 'preview-subject'), '命理大师验证码：482913');
     // Off the web the mail's text stands in for its page.
     expect(find.descendant(of: find.byKey(const Key('mail-text')), matching: find.textContaining('!! 482913')), findsOneWidget);
-    expect(tester.widget<FilledButton>(find.byKey(const Key('template-save'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('template-save'))).onPressed, isNull);
 
     final asked = f.to('/v1/admin/messages/preview', method: 'POST').length;
     await tester.enterText(find.byKey(const Key('template-body')), '你的码：{{code}}');
@@ -106,7 +107,7 @@ void main() {
     expect(f.bodyOf(put), {'subject': '命理大师验证码：{{code}}', 'body': '你的码：{{code}}'});
     expect(find.text('已保存简体中文的内容'), findsOneWidget);
     expect(textOf(tester, 'wording-state'), startsWith('简体中文：已修改'));
-    expect(tester.widget<FilledButton>(find.byKey(const Key('template-save'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('template-save'))).onPressed, isNull);
 
     // Nothing unsaved: Esc goes straight back, and the list marks the language.
     await press(tester, LogicalKeyboardKey.escape);
@@ -137,7 +138,7 @@ void main() {
     expect(controllerOf(tester, 'template-subject').text, '命理大师验证码：{{code}}');
     expect(textOf(tester, 'wording-state'), '简体中文：默认内容');
     expect(find.text('已恢复简体中文的默认内容'), findsOneWidget);
-    expect(tester.widget<OutlinedButton>(find.byKey(const Key('template-reset'))).onPressed, isNull);
+    expect(tester.widget<AppOutlinedButton>(find.byKey(const Key('template-reset'))).onPressed, isNull);
   });
 
   testWidgets('a value goes in where the cursor is; a part on a line of its own, in the body only', (tester) async {
@@ -174,14 +175,14 @@ void main() {
     await typeIn(tester, 'template-body', '你好 {{who}}');
     expect(find.descendant(of: find.byKey(const Key('template-problems')), matching: find.text('没有 {{who}} 这个变量')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('template-problems')), matching: find.text('需要用到 {{code}}')), findsOneWidget);
-    expect(tester.widget<FilledButton>(find.byKey(const Key('template-save'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('template-save'))).onPressed, isNull);
     await press(tester, LogicalKeyboardKey.enter, control: true);
     await tester.pumpAndSettle();
     expect(f.to('/v1/admin/messages/templates/code_mail/zh-Hans', method: 'PUT'), isEmpty);
 
     await typeIn(tester, 'template-body', '你好 {{code}}');
     expect(find.byKey(const Key('template-problems')), findsNothing);
-    expect(tester.widget<FilledButton>(find.byKey(const Key('template-save'))).onPressed, isNotNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('template-save'))).onPressed, isNotNull);
   });
 
   testWidgets('another language asks about unsaved edits first; its own wording, previewed', (tester) async {

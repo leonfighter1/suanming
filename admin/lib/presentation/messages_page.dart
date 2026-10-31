@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/layout.dart';
 import 'package:mingli_app/presentation/tokens.dart';
@@ -181,7 +182,7 @@ class DispatchLog extends ConsumerWidget {
     final log = ref.watch(dispatchLogProvider);
     return PanelSection(
       title: '最近发送',
-      trailing: IconButton(
+      trailing: AppIconButton(
         key: const Key('log-refresh'),
         tooltip: '刷新最近发送',
         visualDensity: VisualDensity.compact,

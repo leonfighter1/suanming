@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart' show Space, focusOutline;
 
 import 'keys.dart';
@@ -35,7 +36,7 @@ void main() {
     expect(tester.getRect(bar).right - button.right, lessThanOrEqualTo(Space.m + 4), reason: 'at the right end: $button');
 
     // Framed in the theme's 赭红, 1.5 px; the focus outline takes its place while it has the keyboard focus.
-    final style = tester.widget<IconButton>(find.byKey(const Key('open-menu'))).style!;
+    final style = tester.widget<AppIconButton>(find.byKey(const Key('open-menu'))).style!;
     final scheme = Theme.of(tester.element(bar)).colorScheme;
     final frame = style.side!.resolve(const <WidgetState>{})!;
     expect((frame.width, frame.color), (1.5, scheme.primary));

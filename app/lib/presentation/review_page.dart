@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../application/providers.dart';
 import '../domain/models.dart' show Json;
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'layout.dart';
 import 'widgets/remedy.dart' show compactButtons;
@@ -251,13 +252,13 @@ class _ReviewDetailPageState extends ConsumerState<ReviewDetailPage> {
                   runSpacing: Space.s,
                   alignment: WrapAlignment.end,
                   children: [
-                    OutlinedButton.icon(
+                    AppOutlinedButton.icon(
                       key: const Key('review-reject'),
                       onPressed: _busy ? null : () => _decide(false),
                       icon: const Icon(Icons.close),
                       label: Text(l10n.reviewReject),
                     ),
-                    FilledButton.icon(
+                    AppFilledButton.icon(
                       key: const Key('review-approve'),
                       onPressed: _busy || blocked || texts.isEmpty ? null : () => _decide(true),
                       icon: const Icon(Icons.check),

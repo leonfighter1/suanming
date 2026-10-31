@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'layout.dart';
 import 'sign_in_page.dart';
@@ -63,9 +64,9 @@ class SettingsPage extends ConsumerWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+                AppTextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
                 const SizedBox(width: Space.s),
-                FilledButton(key: const Key('confirm-remove'), onPressed: () => Navigator.pop(ctx, true), child: Text(action)),
+                AppFilledButton(key: const Key('confirm-remove'), onPressed: () => Navigator.pop(ctx, true), child: Text(action)),
               ],
             ),
           ),
@@ -91,8 +92,8 @@ class SettingsPage extends ConsumerWidget {
         title: Text(l10n.deleteAccountTitle),
         content: Text(l10n.deleteAccountBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
-          FilledButton(
+          AppTextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          AppFilledButton(
             key: const Key('confirm-delete'),
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             onPressed: () => Navigator.pop(ctx, true),
@@ -146,7 +147,7 @@ class SettingsPage extends ConsumerWidget {
             ),
             trailing: user.email == null
                 ? const Icon(Icons.add)
-                : IconButton(
+                : AppIconButton(
                     key: const Key('remove-email'),
                     tooltip: l10n.removeEmail,
                     icon: const Icon(Icons.delete_outline),
@@ -165,7 +166,7 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(user.phone ?? l10n.phoneUnbound),
             trailing: user.phone == null
                 ? const Icon(Icons.chevron_right)
-                : IconButton(
+                : AppIconButton(
                     key: const Key('unbind-phone'),
                     tooltip: l10n.unbindPhone,
                     icon: const Icon(Icons.link_off),

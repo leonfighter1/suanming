@@ -7,6 +7,7 @@ import '../data/api_client.dart';
 import '../domain/models.dart';
 import '../generated/contract.g.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'labels.dart';
@@ -138,7 +139,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
             title: Text(l10n.homeTarot),
             actions: [
               // 牌义图鉴: all 78 cards with their art and keywords (v2.7.0).
-              IconButton(
+              AppIconButton(
                 key: const Key('open-glossary'),
                 tooltip: l10n.tarotGlossary,
                 icon: const Icon(Icons.menu_book_outlined),
@@ -290,7 +291,7 @@ class _TarotPageState extends ConsumerState<TarotPage> {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const SizedBox(height: Space.l),
-                      FilledButton.icon(
+                      AppFilledButton.icon(
                         key: const Key('draw'),
                         onPressed: _busy || !_asking ? null : _start,
                         icon: const Icon(Icons.style),

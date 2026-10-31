@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import '../../domain/models.dart';
 import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../labels.dart';
 import '../layout.dart';
@@ -229,7 +230,7 @@ class _FourLayerReportState extends State<FourLayerReport> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton.icon(
+                AppTextButton.icon(
                   key: const Key('expand-all'),
                   onPressed: _toggleAll,
                   icon: Icon(_allOpen ? Icons.unfold_less : Icons.unfold_more, size: 18),

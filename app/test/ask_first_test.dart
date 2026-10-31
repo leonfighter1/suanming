@@ -22,7 +22,7 @@ Future<FakeApi> open(WidgetTester tester, String system) async {
   return api;
 }
 
-bool enabled(WidgetTester tester, String key) => tester.widget<ButtonStyleButton>(find.byKey(Key(key))).enabled;
+bool enabled(WidgetTester tester, String key) => buttonEnabled(tester, Key(key));
 
 Iterable<Map<String, dynamic>> draws(FakeApi api) => api.requests
     .where((r) => r.method == 'POST' && r.url.path == '/v1/charts')

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../application/providers.dart';
 import '../domain/profile.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -24,7 +25,7 @@ class ProfilesPage extends ConsumerWidget {
     final profiles = book?.profiles ?? const <BirthProfile>[];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profiles)),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppFab.extended(
         key: const Key('add-profile'),
         icon: const Icon(Icons.person_add_alt_1),
         label: Text(l10n.addProfile),
@@ -85,7 +86,7 @@ class ProfilesPage extends ConsumerWidget {
                             ),
                           ),
                           if (!isDefault)
-                            IconButton(
+                            AppIconButton(
                               tooltip: l10n.setDefault,
                               icon: const Icon(Icons.star_outline),
                               onPressed: () => ref.read(profilesProvider.notifier).setDefault(p.id),
@@ -147,7 +148,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             title: Text(widget.profile == null ? l10n.addProfile : l10n.editProfile),
             actions: [
               if (widget.profile != null)
-                IconButton(
+                AppIconButton(
                   tooltip: l10n.deleteProfile,
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () async {
@@ -177,7 +178,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                   ],
                 ),
               ),
-              FilledButton.icon(
+              AppFilledButton.icon(
                 key: const Key('save-profile'),
                 onPressed: _name.text.trim().isEmpty ? null : _save,
                 icon: const Icon(Icons.check),
@@ -256,7 +257,7 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                     Icon(widget.profile == null ? Icons.person_add_alt_1 : Icons.edit_outlined, color: theme.colorScheme.primary),
                     const SizedBox(width: Space.s),
                     Expanded(child: Text(widget.profile == null ? l10n.addTester : l10n.editProfile, style: theme.textTheme.titleLarge)),
-                    IconButton(tooltip: l10n.cancel, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                    AppIconButton(tooltip: l10n.cancel, onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                   ]),
                 ),
                 Flexible(
@@ -281,9 +282,9 @@ class _ProfileDialogState extends ConsumerState<ProfileDialog> {
                   child: compactButtons(
                     context,
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+                      AppTextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
                       const SizedBox(width: Space.s),
-                      FilledButton.icon(
+                      AppFilledButton.icon(
                         key: const Key('dialog-save-profile'),
                         onPressed: _busy || _name.text.trim().isEmpty ? null : _save,
                         icon: const Icon(Icons.check),

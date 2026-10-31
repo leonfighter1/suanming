@@ -1,3 +1,4 @@
+import 'buttons.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -137,7 +138,7 @@ class LifeReportPage extends ConsumerWidget {
                 PopupMenuItem(key: const Key('life-download-zip'), value: 'zip', child: Text(l10n.lifeDownload)),
               ],
             ),
-            IconButton(
+            AppIconButton(
               key: const Key('life-print'),
               tooltip: l10n.lifePrint,
               icon: const Icon(Icons.print_outlined),
@@ -146,7 +147,7 @@ class LifeReportPage extends ConsumerWidget {
                 if (!await printHtml(html)) await SharePlus.instance.share(ShareParams(text: md, subject: l10n.lifeReportOf(header!.name)));
               },
             ),
-            IconButton(
+            AppIconButton(
               key: const Key('life-copy'),
               tooltip: l10n.copyAll,
               icon: const Icon(Icons.copy_all_outlined),
@@ -543,7 +544,7 @@ class _LifeReportButtonState extends ConsumerState<LifeReportButton> {
       children: [
         compactButtons(
           context,
-          FilledButton.tonalIcon(
+          AppFilledButton.tonalIcon(
             key: const Key('life-generate'),
             onPressed: _busy
                 ? null

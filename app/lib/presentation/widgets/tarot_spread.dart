@@ -1,3 +1,4 @@
+import '../buttons.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -648,7 +649,7 @@ class _CardDialogState extends State<_CardDialog> {
           ],
         ),
         actions: [
-          TextButton(
+          AppTextButton(
             key: const Key('tarot-card-view-close'),
             autofocus: _revealed,
             onPressed: () => Navigator.of(context).pop(),

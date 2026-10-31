@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/tokens.dart';
 
@@ -116,8 +117,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               ),
             ),
           const ThemeMenu(),
-          IconButton(key: const Key('refresh'), tooltip: '刷新', onPressed: _refresh, icon: const Icon(Icons.refresh)),
-          IconButton(
+          AppIconButton(key: const Key('refresh'), tooltip: '刷新', onPressed: _refresh, icon: const Icon(Icons.refresh)),
+          AppIconButton(
             key: const Key('sign-out'),
             tooltip: '退出登录',
             onPressed: () => ref.read(sessionProvider.notifier).signOut(),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../domain/terms.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -133,7 +134,7 @@ class _CardMeaning extends StatelessWidget {
         ],
       ),
       // A TextButton sizes to its label (the theme widens only filled and outlined ones, rule 7).
-      actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.close))],
+      actions: [AppTextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.close))],
     );
   }
 }

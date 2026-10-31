@@ -64,6 +64,14 @@ Future<void> openEntry(WidgetTester tester, String system) async {
   await tester.tap(find.byKey(Key('entry-$system')));
 }
 
+/// Whether the button keyed [key] can be pressed. The key is the app's button's (S30, buttons.dart); the Material
+/// button that says so is inside it.
+bool buttonEnabled(WidgetTester tester, Key key) => tester
+    .widget<ButtonStyleButton>(
+      find.descendant(of: find.byKey(key), matching: find.byWidgetPredicate((w) => w is ButtonStyleButton)),
+    )
+    .enabled;
+
 /// From 首页 to 八字's chart: 八字排盘, then 排盘 with the form as it opens (S28: six tests had a copy).
 Future<void> openBaziChart(WidgetTester tester) async {
   await tester.tap(find.byKey(const Key('entry-bazi')));

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import 'tarot_spread.dart';
@@ -80,7 +81,7 @@ class _TarotRitualStepsState extends State<TarotRitualSteps> {
             const SizedBox(height: Space.m),
             _stack(64, turn: _shuffling ? 0.04 : 0),
             const SizedBox(height: Space.m),
-            FilledButton.icon(
+            AppFilledButton.icon(
               key: const Key('ritual-shuffle'),
               onPressed: _shuffling ? null : _shuffle,
               icon: const Icon(Icons.shuffle),
@@ -158,7 +159,7 @@ class _TarotRitualStepsState extends State<TarotRitualSteps> {
             AnimatedSwitcher(duration: const Duration(milliseconds: 250), child: KeyedSubtree(key: ValueKey(_step), child: step)),
             const SizedBox(height: Space.s),
             Center(
-              child: TextButton(key: const Key('ritual-skip'), onPressed: widget.onSkip, child: Text(l10n.ritualSkip)),
+              child: AppTextButton(key: const Key('ritual-skip'), onPressed: widget.onSkip, child: Text(l10n.ritualSkip)),
             ),
             Text(l10n.ritualNote, textAlign: TextAlign.center, style: text.bodySmall),
           ],

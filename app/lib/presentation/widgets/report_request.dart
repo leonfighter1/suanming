@@ -5,6 +5,7 @@ import '../../application/providers.dart';
 import '../../data/api_client.dart';
 import '../../generated/contract.g.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../inquiry_page.dart';
 import '../labels.dart';
@@ -182,7 +183,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
             ),
           ],
           const SizedBox(height: Space.l),
-          FilledButton.icon(
+          AppFilledButton.icon(
             key: const Key('generate-report'),
             onPressed: _busy || _selected.isEmpty ? null : _generate,
             icon: _busy
@@ -195,7 +196,7 @@ class _ReportRequestState extends ConsumerState<ReportRequest> {
           // 深度分析 (v10.0.0): the master asks about the user's situation first, for the methods that have it.
           if (inquirySystems.contains(widget.system)) ...[
             const SizedBox(height: Space.s),
-            OutlinedButton.icon(
+            AppOutlinedButton.icon(
               key: const Key('inquiry-start'),
               onPressed: _busy || _selected.isEmpty ? null : _inquire,
               icon: const Icon(Icons.record_voice_over_outlined),

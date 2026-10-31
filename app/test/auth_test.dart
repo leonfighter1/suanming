@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/data/token_store.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 
 import 'keys.dart';
 import 'support.dart';
@@ -24,12 +25,12 @@ void main() {
     await tester.tap(find.byKey(const Key('age-confirm')));
     await frames(tester, 10);
     // Submit stays disabled until there is a username and the age gate is confirmed.
-    expect(tester.widget<FilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
     await tester.enterText(find.byKey(const Key('username')), 'new_user');
     await frames(tester, 10);
     await tester.tap(find.byKey(const Key('age-confirm')));
     await frames(tester, 10);
-    expect(tester.widget<FilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('auth-submit'))).onPressed, isNull);
     await tester.tap(find.byKey(const Key('age-confirm')));
     await frames(tester, 10);
     // The sign-up form runs past a short window (v12.2.0's type ramp: helper lines of 18).

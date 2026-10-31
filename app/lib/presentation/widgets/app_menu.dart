@@ -7,6 +7,7 @@ import '../../application/providers.dart';
 import '../../data/api_client.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../platform/open_link.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../history_page.dart';
 import '../keyboard.dart';
@@ -163,7 +164,7 @@ class MenuButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final frame = BorderSide(color: scheme.primary, width: 1.5);
-    return IconButton(
+    return AppIconButton(
       key: const Key('open-menu'),
       tooltip: l10n.menu,
       icon: const Icon(Icons.menu),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 
 import '../../app/test/keys.dart';
 import 'support.dart';
@@ -47,14 +48,14 @@ void main() {
     expect(inTable('AI 已关'), findsOneWidget);
     expect(inTable('演示'), findsNWidgets(23));
     expect(find.byKey(const Key('page-prev')), findsOneWidget);
-    expect(tester.widget<IconButton>(find.byKey(const Key('page-prev'))).onPressed, isNull);
+    expect(tester.widget<AppIconButton>(find.byKey(const Key('page-prev'))).onPressed, isNull);
 
     await tapOn(tester, 'page-next');
     expect(lastQuery(f)['page'], '2');
     expect(textOf(tester, 'users-page'), '第 2 / 2 页 · 共 30 个');
     expect(find.byKey(const Key('user-root-1')), findsOneWidget);
     expect(inTable('管理员（服务器指定）'), findsOneWidget);
-    expect(tester.widget<IconButton>(find.byKey(const Key('page-next'))).onPressed, isNull);
+    expect(tester.widget<AppIconButton>(find.byKey(const Key('page-next'))).onPressed, isNull);
   });
 
   testWidgets('the search waits for a pause in the typing; Enter searches at once', (tester) async {

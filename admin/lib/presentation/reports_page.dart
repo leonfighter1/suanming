@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 
 import '../application/providers.dart';
@@ -34,7 +35,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   }
 
   Widget _button(String what, String label, IconData icon, {required String format, String kind = 'series'}) =>
-      FilledButton.tonalIcon(
+      AppFilledButton.tonalIcon(
         key: Key('export-$what'),
         onPressed: _running == null ? () => _export(what, format: format, kind: kind) : null,
         icon: _running == what

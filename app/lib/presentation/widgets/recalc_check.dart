@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../application/providers.dart';
 import '../../domain/models.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../labels.dart';
 import '../life_report_page.dart';
 import '../report_page.dart';
@@ -98,8 +99,8 @@ Future<bool> confirmRecalc(
               : l10n.recalcBody(who, date, method),
         ),
         actions: [
-          TextButton(key: const Key('recalc-view'), onPressed: () => Navigator.of(ctx).pop('view'), child: Text(l10n.recalcView)),
-          FilledButton(key: const Key('recalc-again'), onPressed: () => Navigator.of(ctx).pop('again'), child: Text(l10n.recalcAgain)),
+          AppTextButton(key: const Key('recalc-view'), onPressed: () => Navigator.of(ctx).pop('view'), child: Text(l10n.recalcView)),
+          AppFilledButton(key: const Key('recalc-again'), onPressed: () => Navigator.of(ctx).pop('again'), child: Text(l10n.recalcAgain)),
         ],
       ),
     ),

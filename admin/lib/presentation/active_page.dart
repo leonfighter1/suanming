@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 
 import '../application/providers.dart';
@@ -100,7 +101,7 @@ class _Accounts extends StatelessWidget {
             DataRow(
               cells: [
                 DataCell(
-                  TextButton(
+                  AppTextButton(
                     key: Key('active-$list-${u.id}'),
                     onPressed: () => openAccount(context, u),
                     child: Text(u.login),

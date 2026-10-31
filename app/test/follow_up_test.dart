@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
 import 'package:mingli_app/data/profile_store.dart';
 import 'package:mingli_app/domain/models.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 
 import 'keys.dart';
 import 'reading_page_test.dart' show openTarotReading;
@@ -137,7 +138,7 @@ void main() {
     await frames(tester, 12);
     await frames(tester, 12);
     await scrollTo(tester, const Key('followup-send'));
-    expect(tester.widget<FilledButton>(find.byKey(const Key('followup-send'))).onPressed, isNull);
+    expect(tester.widget<AppFilledButton>(find.byKey(const Key('followup-send'))).onPressed, isNull);
     expect(tester.widget<TextField>(find.byKey(const Key('followup-field'))).enabled, isFalse);
     expect(find.text('这次结果的追问次数已用完'), findsOneWidget);
   });

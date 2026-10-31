@@ -30,7 +30,7 @@ Future<FakeApi> _open(WidgetTester tester, [FakeApi? fake]) async {
 Map<String, dynamic> _castBody(FakeApi api) =>
     jsonDecode(api.requests.lastWhere((r) => r.url.path == '/v1/charts' && r.method == 'POST').body) as Map<String, dynamic>;
 
-bool _enabled(WidgetTester tester, String key) => tester.widget<ButtonStyleButton>(find.byKey(Key(key))).enabled;
+bool _enabled(WidgetTester tester, String key) => buttonEnabled(tester, Key(key));
 
 Future<void> _mode(WidgetTester tester, String label) async {
   await tester.tap(find.descendant(of: find.byKey(const Key('liuyao-mode')), matching: find.text(label)));

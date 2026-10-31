@@ -86,6 +86,13 @@ final designRules = [
     RegExp(r'Space\.page\b'),
     why: "use pagePadding(context): the window class's margins and a centred column",
   ),
+  DesignRule(
+    "Material's own button",
+    RegExp(r'\b(FilledButton|OutlinedButton|TextButton|IconButton|ElevatedButton)(\.(icon|tonal|tonalIcon))?\(|'
+        r'\bFloatingActionButton(\.extended)?\('),
+    allowed: {'buttons.dart'},
+    why: "use the app's buttons (AppFilledButton …, buttons.dart): every button bounces when pressed (S30)",
+  ),
 ];
 
 /// Every rule broken in the Dart files under [dir], as `file:line: rule: the line`; comments are skipped.

@@ -8,6 +8,7 @@ import '../domain/dates.dart';
 import '../domain/models.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../platform/time_zone.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -253,7 +254,7 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
                             Text(l10n.liuyaoAutoHow),
                             if (chart == null) ...[
                               const SizedBox(height: Space.m),
-                              FilledButton.icon(
+                              AppFilledButton.icon(
                                 key: const Key('liuyao-toss'),
                                 onPressed: cast_,
                                 icon: const Icon(Icons.toll_outlined),
@@ -312,7 +313,7 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         Text(l10n.liuyaoPickHow),
         const SizedBox(height: Space.m),
         if (_layoutId == null)
-          FilledButton.icon(
+          AppFilledButton.icon(
             key: const Key('liuyao-lay-out'),
             // Laying the coins out begins the cast: it waits for the question too.
             onPressed: _busy || !_asking ? null : _layOut,
@@ -335,13 +336,13 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
                 Text(l10n.liuyaoPicked(_picks.length), key: const Key('liuyao-picked')),
                 if (cast == null) ...[
                   const SizedBox(height: Space.m),
-                  FilledButton.icon(
+                  AppFilledButton.icon(
                     key: const Key('liuyao-reveal'),
                     onPressed: reveal,
                     icon: const Icon(Icons.visibility_outlined),
                     label: Text(l10n.liuyaoReveal),
                   ),
-                  TextButton(
+                  AppTextButton(
                     key: const Key('liuyao-pick-again'),
                     onPressed: _picks.isEmpty ? null : () => setState(_picks.clear),
                     child: Text(l10n.liuyaoPickAgain),
@@ -368,13 +369,13 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         runSpacing: Space.s,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          OutlinedButton.icon(
+          AppOutlinedButton.icon(
             key: const Key('liuyao-time'),
             onPressed: cast ? null : _pickTime,
             icon: const Icon(Icons.schedule),
             label: Text(time == null ? l10n.liuyaoTimePick : localMinute(time).replaceFirst('T', ' ')),
           ),
-          TextButton(
+          AppTextButton(
             key: const Key('liuyao-time-now'),
             onPressed: cast
                 ? null
@@ -436,7 +437,7 @@ class _LiuyaoPageState extends ConsumerState<LiuyaoPage> {
         ),
       if (!cast) ...[
         const SizedBox(height: Space.m),
-        FilledButton.icon(
+        AppFilledButton.icon(
           key: const Key('liuyao-cast'),
           onPressed: submit,
           icon: const Icon(Icons.toll_outlined),
@@ -508,14 +509,14 @@ class _Tosses extends StatelessWidget {
           ),
         if (shown < 6) ...[
           const SizedBox(height: Space.m),
-          FilledButton.icon(
+          AppFilledButton.icon(
             key: const Key('liuyao-next'),
             autofocus: true,
             onPressed: onNext,
             icon: const Icon(Icons.toll_outlined),
             label: Text(l10n.liuyaoTossNext),
           ),
-          TextButton(key: const Key('liuyao-skip'), onPressed: onSkip, child: Text(l10n.liuyaoSkip)),
+          AppTextButton(key: const Key('liuyao-skip'), onPressed: onSkip, child: Text(l10n.liuyaoSkip)),
         ],
       ],
     );

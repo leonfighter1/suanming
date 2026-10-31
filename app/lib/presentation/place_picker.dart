@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import '../domain/places.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -58,7 +59,7 @@ class PlaceField extends ConsumerWidget {
           labelText: label ?? l10n.city,
           prefixIcon: const Icon(Icons.place_outlined),
           suffixIcon: v != null && onClear != null
-              ? IconButton(icon: const Icon(Icons.close), onPressed: onClear, tooltip: l10n.lifeNotSet)
+              ? AppIconButton(icon: const Icon(Icons.close), onPressed: onClear, tooltip: l10n.lifeNotSet)
               : const Icon(Icons.chevron_right),
           helperText: v != null && showDetail ? l10n.placeDetail(v.timezone, v.longitude.toStringAsFixed(2)) : null,
         ),

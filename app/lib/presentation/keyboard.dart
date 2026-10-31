@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
@@ -248,12 +249,12 @@ Future<bool> confirmLeave(BuildContext context, {LeaveKind kind = LeaveKind.read
         title: Text(reading ? l10n.leaveReadingTitle : l10n.leaveEditsTitle),
         content: Text(message ?? (reading ? l10n.leaveReadingBody : l10n.leaveEditsBody)),
         actions: [
-          TextButton(
+          AppTextButton(
             key: const Key('leave-stay'),
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(reading ? l10n.leaveReadingStay : l10n.leaveEditsStay),
           ),
-          FilledButton(
+          AppFilledButton(
             key: const Key('leave-go'),
             autofocus: true,
             onPressed: () => Navigator.pop(ctx, true),
@@ -310,6 +311,15 @@ class _PressableState extends State<Pressable> {
   Widget build(BuildContext context) {
     final press = widget.onPressed;
     final tappable = press != null || widget.onTapDown != null;
+    // A button-like target bounces when pressed (S30); one that takes the tap's position (a chart) doesn't.
+    Widget target(WidgetStatesController? states) => GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: press,
+          onTapDown: states == null ? widget.onTapDown : (_) => states.update(WidgetState.pressed, true),
+          onTapUp: states == null ? null : (_) => states.update(WidgetState.pressed, false),
+          onTapCancel: states == null ? null : () => states.update(WidgetState.pressed, false),
+          child: FocusRing(focused: _focused, radius: widget.radius, child: widget.child),
+        );
     return Semantics(
       button: press != null,
       label: widget.label,
@@ -324,12 +334,7 @@ class _PressableState extends State<Pressable> {
           if (press != null) ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => press()),
           if (press != null) ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: (_) => press()),
         },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: press,
-          onTapDown: widget.onTapDown,
-          child: FocusRing(focused: _focused, radius: widget.radius, child: widget.child),
-        ),
+        child: press != null && widget.onTapDown == null ? PressBounce(builder: target) : target(null),
       ),
     );
   }
@@ -425,7 +430,7 @@ class ShortcutList extends StatelessWidget {
           ),
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close))],
+      actions: [AppTextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.close))],
     );
   }
 }

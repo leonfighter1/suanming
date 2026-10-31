@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../generated/contract.g.dart' show inquiryGoalMin;
 import '../../l10n/gen/app_localizations.dart';
+import '../buttons.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import 'remedy.dart' show compactButtons;
@@ -74,8 +75,8 @@ class _GoalDialogState extends ConsumerState<_GoalDialog> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
-            FilledButton(key: const Key('inquiry-goal-start'), onPressed: _start, child: Text(l10n.inquiryGoalStart)),
+            AppTextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
+            AppFilledButton(key: const Key('inquiry-goal-start'), onPressed: _start, child: Text(l10n.inquiryGoalStart)),
           ],
         ),
       ),

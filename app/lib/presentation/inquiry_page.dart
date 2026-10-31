@@ -6,6 +6,7 @@ import '../data/api_client.dart';
 import '../domain/inquiry.dart';
 import '../generated/contract.g.dart' show inquiryAnswerMax;
 import '../l10n/gen/app_localizations.dart';
+import 'buttons.dart';
 import 'design.dart';
 import 'keyboard.dart';
 import 'layout.dart';
@@ -266,12 +267,12 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
                     spacing: Space.s,
                     runSpacing: Space.s,
                     children: [
-                      TextButton(
+                      AppTextButton(
                         key: const Key('inquiry-skip'),
                         onPressed: _starting ? null : _read,
                         child: Text(l10n.inquirySkip),
                       ),
-                      FilledButton.icon(
+                      AppFilledButton.icon(
                         key: const Key('inquiry-send'),
                         onPressed: _sending ? null : () => _send(view),
                         icon: _sending
@@ -307,7 +308,7 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
                     ),
                   ],
                   const SizedBox(height: Space.l),
-                  FilledButton.icon(
+                  AppFilledButton.icon(
                     key: const Key('inquiry-start-reading'),
                     onPressed: _starting ? null : _read,
                     icon: _starting
@@ -329,7 +330,7 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
               children: [
                 Text(l10n.inquiryFailed),
                 const SizedBox(height: Space.m),
-                FilledButton(key: const Key('inquiry-retry'), onPressed: () => _restart(view), child: Text(l10n.inquiryRetry)),
+                AppFilledButton(key: const Key('inquiry-retry'), onPressed: () => _restart(view), child: Text(l10n.inquiryRetry)),
               ],
             ),
           ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/tokens.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
@@ -137,7 +138,7 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                       DataRow(
                         cells: [
                           DataCell(
-                            TextButton(
+                            AppTextButton(
                               key: Key('user-${u.id}'),
                               onPressed: () => openAccount(context, u),
                               child: Text(u.login),
@@ -165,13 +166,13 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
-                    IconButton(
+                    AppIconButton(
                       key: const Key('page-prev'),
                       tooltip: '上一页',
                       onPressed: p.page > 1 ? () => _set((q) => q.copyWith(page: p.page - 1)) : null,
                       icon: const Icon(Icons.chevron_left),
                     ),
-                    IconButton(
+                    AppIconButton(
                       key: const Key('page-next'),
                       tooltip: '下一页',
                       onPressed: p.page < p.pages ? () => _set((q) => q.copyWith(page: p.page + 1)) : null,

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 
@@ -117,7 +118,7 @@ class _RevenuePageState extends ConsumerState<RevenuePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               wide(
-                OutlinedButton.icon(
+                AppOutlinedButton.icon(
                   key: const Key('export-png'),
                   onPressed: _saving || days.isEmpty ? null : () => _png(days),
                   icon: const Icon(Icons.image_outlined),
@@ -128,7 +129,7 @@ class _RevenuePageState extends ConsumerState<RevenuePage> {
               if (ref.watch(sessionProvider)?.can.contains(Can.userData) ?? false) ...[
                 const SizedBox(height: Space.s),
                 wide(
-                  OutlinedButton.icon(
+                  AppOutlinedButton.icon(
                     key: const Key('export-series-csv'),
                     onPressed: _saving ? null : _csv,
                     icon: const Icon(Icons.table_view_outlined),

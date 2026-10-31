@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/layout.dart';
@@ -309,7 +310,7 @@ class _MessageEditorPageState extends ConsumerState<MessageEditorPage> {
     final problems = _refused.isNotEmpty ? _refused : (_preview?.problems ?? const <String>[]);
     final saved = _saved;
     final phone = WindowClass.ofContext(context) == WindowClass.compact;
-    final save = FilledButton(
+    final save = AppFilledButton(
       key: const Key('template-save'),
       onPressed: _canSave ? _save : null,
       child: const Text('保存'),
@@ -401,17 +402,17 @@ class _MessageEditorPageState extends ConsumerState<MessageEditorPage> {
           spacing: Space.s,
           runSpacing: Space.s,
           children: [
-            TextButton(
+            AppTextButton(
               key: const Key('template-revert'),
               onPressed: _busy || !_dirty ? null : _revert,
               child: const Text('撤销修改'),
             ),
-            OutlinedButton(
+            AppOutlinedButton(
               key: const Key('template-reset'),
               onPressed: _busy || !saved.custom ? null : _reset,
               child: const Text('恢复默认'),
             ),
-            OutlinedButton.icon(
+            AppOutlinedButton.icon(
               key: const Key('template-test'),
               onPressed: _busy ? null : _test,
               icon: const Icon(Icons.send_outlined),
@@ -640,8 +641,8 @@ class _TestDialogState extends State<_TestDialog> {
             ),
           ),
           actions: [
-            TextButton(key: const Key('test-cancel'), onPressed: () => Navigator.pop(context), child: const Text('取消')),
-            FilledButton(key: const Key('test-send'), onPressed: _send, child: const Text('发送')),
+            AppTextButton(key: const Key('test-cancel'), onPressed: () => Navigator.pop(context), child: const Text('取消')),
+            AppFilledButton(key: const Key('test-send'), onPressed: _send, child: const Text('发送')),
           ],
         ),
       );
