@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/application/providers.dart';
 import 'package:mingli_app/presentation/buttons.dart';
+import 'package:mingli_app/presentation/widgets/elastic_switch.dart';
 
 import 'keys.dart';
 import 'support.dart';
@@ -174,7 +175,7 @@ void main() {
   });
 
   // 测算完成后发到邮箱 (v9.0.0, WP15.4; the owner: 默认为否，改为是后自动发送).
-  SwitchListTile reportsSwitch(WidgetTester tester) => tester.widget<SwitchListTile>(find.byKey(const Key('email-reports')));
+  AppSwitchTile reportsSwitch(WidgetTester tester) => tester.widget<AppSwitchTile>(find.byKey(const Key('email-reports')));
 
   testWidgets('报告: 否 by default; the switch waits for a verified email; the outbox is named', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(email: 'me@example.com'), locale: zhHans));

@@ -9,6 +9,7 @@ import 'design.dart';
 import 'layout.dart';
 import 'sign_in_page.dart';
 import 'widgets/contact_dialog.dart';
+import 'widgets/elastic_switch.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
 /// A group's heading in 设置 (账号与登录, 报告), read out as a heading.
@@ -249,7 +250,7 @@ class _EmailReportsTileState extends ConsumerState<_EmailReportsTile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SwitchListTile(
+        AppSwitchTile(
           key: const Key('email-reports'),
           value: user.emailReports,
           onChanged: ready && !_busy ? _set : null,

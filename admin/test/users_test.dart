@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/presentation/buttons.dart';
+import 'package:mingli_app/presentation/widgets/elastic_switch.dart';
 
 import '../../app/test/keys.dart';
 import 'support.dart';
@@ -30,7 +31,7 @@ Future<void> openUser(WidgetTester tester, String id, {String? search}) async {
   await tapOn(tester, 'user-$id');
 }
 
-SwitchListTile switchOf(WidgetTester tester, String key) => tester.widget<SwitchListTile>(find.byKey(Key(key)));
+AppSwitchTile switchOf(WidgetTester tester, String key) => tester.widget<AppSwitchTile>(find.byKey(Key(key)));
 
 Finder inTable(String text) => find.descendant(of: find.byType(DataTable), matching: find.text(text));
 

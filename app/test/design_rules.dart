@@ -93,6 +93,12 @@ final designRules = [
     allowed: {'buttons.dart'},
     why: "use the app's buttons (AppFilledButton …, buttons.dart): every button bounces when pressed (S30)",
   ),
+  DesignRule(
+    "Material's own switch",
+    RegExp(r'\b(SwitchListTile|Switch)(\.adaptive)?\('),
+    allowed: {'elastic_switch.dart'},
+    why: "use AppSwitchTile (widgets/elastic_switch.dart): the switch's thumb stretches as it travels (S30)",
+  ),
 ];
 
 /// Every rule broken in the Dart files under [dir], as `file:line: rule: the line`; comments are skipped.

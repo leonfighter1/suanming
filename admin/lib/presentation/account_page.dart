@@ -5,6 +5,7 @@ import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/tokens.dart';
+import 'package:mingli_app/presentation/widgets/elastic_switch.dart';
 
 import '../application/providers.dart';
 import '../domain/models.dart';
@@ -276,7 +277,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     style: note,
                   ),
                 ),
-              SwitchListTile(
+              AppSwitchTile(
                 key: const Key('switch-suspended'),
                 contentPadding: EdgeInsets.zero,
                 title: const Text('停用账户'),
@@ -284,7 +285,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 value: u.suspended,
                 onChanged: _busy || self || locked ? null : (v) => _suspend(u, v),
               ),
-              SwitchListTile(
+              AppSwitchTile(
                 key: const Key('switch-ai'),
                 contentPadding: EdgeInsets.zero,
                 title: const Text('可以用 AI'),
@@ -296,7 +297,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                           'permissions': {'ai': v},
                         }, v ? '已允许 ${u.login} 用 AI' : '已关闭 ${u.login} 的 AI'),
               ),
-              SwitchListTile(
+              AppSwitchTile(
                 key: const Key('switch-topup'),
                 contentPadding: EdgeInsets.zero,
                 title: const Text('可以充值'),

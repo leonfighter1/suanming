@@ -4,6 +4,7 @@ import '../../domain/life_context.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../design.dart';
 import '../place_picker.dart';
+import 'elastic_switch.dart';
 
 /// 個人情況（選填）: residence, relationship, children, work, family and the user's
 /// question. Shared by the profile editor and the 八字 form.
@@ -37,7 +38,7 @@ class LifeContextFields extends StatelessWidget {
         subtitle: Text(l10n.lifeHint, style: theme.textTheme.bodySmall),
         childrenPadding: const EdgeInsets.only(bottom: Space.m),
         children: [
-          SwitchListTile(
+          AppSwitchTile(
             key: const Key('life-use-name'),
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.lifeUseName),

@@ -10,6 +10,7 @@ import '../buttons.dart';
 import '../design.dart';
 import '../keyboard.dart';
 import '../place_picker.dart';
+import 'elastic_switch.dart';
 
 /// Birth date/time, place, gender and 真太陽時 — shared by the profile editor
 /// and the 八字 form. Shows the 農曆 equivalent of the chosen date live.
@@ -127,13 +128,13 @@ class BirthFields extends ConsumerWidget {
             onSelectionChanged: (s) => onChanged(value.copyWith(gender: s.first)),
           ),
         ),
-        SwitchListTile(
+        AppSwitchTile(
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.trueSolarTime),
           value: value.trueSolarTime,
           onChanged: (v) => onChanged(value.copyWith(trueSolarTime: v)),
         ),
-        SwitchListTile(
+        AppSwitchTile(
           key: const Key('zi-next-day'),
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.ziNextDay),

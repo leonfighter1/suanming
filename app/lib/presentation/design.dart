@@ -77,6 +77,10 @@ abstract final class Motion {
   /// A press let go ([PressBounce]): underdamped, so it passes 100 % once (about 1.4 % over) and settles in about half a
   /// second.
   static const pressSpring = SpringDescription(mass: 1, stiffness: 500, damping: 14);
+
+  /// A switch's thumb travelling ([ElasticSwitch]): it overshoots its end by about a tenth of the way, then settles in
+  /// about a third of a second.
+  static const switchSpring = SpringDescription(mass: 1, stiffness: 400, damping: 22);
 }
 
 /// Anything lying face down, a tarot card's back or a covered coin (v6.1.0): navy, with a gold edge and gold marks.

@@ -1,11 +1,17 @@
 // S30 (owner, 2026-10-30): the interactions, each where the app has the element. 按压回弹: a button shrinks to 96 %
 // while pressed, and when let go springs past 100 % and settles (PressBounce, buttons.dart).
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/theme.dart';
+import 'package:mingli_app/presentation/widgets/elastic_switch.dart';
+
+import 'keys.dart';
 
 Widget host(Widget child, {bool still = false}) => MaterialApp(
       theme: buildTheme(Brightness.light),
@@ -134,5 +140,63 @@ void main() {
     await tester.tap(find.byKey(k));
     final seen = await track(tester, k);
     expect(seen.reduce((a, b) => a < b ? a : b), closeTo(PressBounce.pressedScale, 2e-3), reason: 'a button');
+  });
+
+  group('弹性开关', () {
+    Widget tile({bool still = false, required ValueChanged<bool> changed, required bool Function() on}) => host(
+          StatefulBuilder(
+            builder: (context, set) => AppSwitchTile(
+              key: k,
+              value: on(),
+              onChanged: (v) => set(() => changed(v)),
+              title: const Text('真太阳时'),
+            ),
+          ),
+          still: still,
+        );
+    ElasticPainter painter(WidgetTester tester) => tester
+        .widget<CustomPaint>(find.descendant(of: find.byType(ElasticSwitch), matching: find.byType(CustomPaint)))
+        .painter! as ElasticPainter;
+
+    testWidgets('the thumb stretches into a capsule on its way and comes to rest round, after a slight rebound',
+        (tester) async {
+      var on = false;
+      await tester.pumpWidget(tile(changed: (v) => on = v, on: () => on));
+      await tester.tap(find.byKey(k));
+      final positions = <double>[];
+      final stretches = <double>[];
+      for (var t = 0; t < 800; t += 16) {
+        await tester.pump(const Duration(milliseconds: 16));
+        positions.add(painter(tester).position);
+        stretches.add(ElasticPainter.stretchAt(painter(tester).speed));
+      }
+      expect(on, isTrue);
+      expect(stretches.reduce(math.max), greaterThan(1.3), reason: 'a capsule on its way');
+      expect(positions.reduce(math.max), inExclusiveRange(1.0, 1.2), reason: 'a slight rebound past the end');
+      expect(positions.last, 1.0);
+      expect(stretches.last, 1.0, reason: 'round at rest');
+    });
+
+    testWidgets('reduce motion: it jumps, round', (tester) async {
+      var on = false;
+      await tester.pumpWidget(tile(still: true, changed: (v) => on = v, on: () => on));
+      await tester.tap(find.byKey(k));
+      await tester.pump();
+      expect([painter(tester).position, ElasticPainter.stretchAt(painter(tester).speed)], [1.0, 1.0]);
+    });
+
+    testWidgets('its row is one control: one Tab stop, Space and Enter toggle it, and it reads as on or off',
+        (tester) async {
+      var on = false;
+      await tester.pumpWidget(tile(changed: (v) => on = v, on: () => on));
+      expect(await tabStops(tester), ['b']);
+      await tabTo(tester, 'b');
+      await press(tester, LogicalKeyboardKey.space);
+      expect(on, isTrue);
+      await frames(tester, 10);
+      expect(tester.getSemantics(find.byKey(k)), isSemantics(hasToggledState: true, isToggled: true));
+      await press(tester, LogicalKeyboardKey.enter);
+      expect(on, isFalse);
+    });
   });
 }
