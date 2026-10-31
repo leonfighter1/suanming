@@ -3,10 +3,7 @@
 // 的邮件也要符合当前app的跟随系统模式; admin, manager, integrator).
 import { randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { beforeAll, describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import type { UserRecord } from "../src/auth/service.js";
 import { PgStore } from "../src/db/pg-store.js";
@@ -29,6 +26,7 @@ import {
   variablesIn,
 } from "../src/notify/index.js";
 import { buildAuth } from "../src/service/runtime.js";
+import { staffApi } from "./api.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
 
 const CODE_VARS = { code: "482913", minutes: "10" };
@@ -328,29 +326,10 @@ describe("the dispatcher", () => {
 
 // ---- the API ----
 
-const secrets = { digestPepper: PEPPER, drawKey: DRAW_KEY };
-const mock = new MockProvider();
 const store = new InMemoryStore();
 const mail = new MemoryMail();
 const sms = new MemorySms();
-const auth = buildAuth({ ...secrets, ephemeral: true } as never, true);
-const api = createApiServer({
-  secrets,
-  providers: { deepseek: mock, anthropic: mock },
-  auth,
-  store,
-  mail,
-  sms,
-  devMode: true,
-  devHeaders: false,
-  review: false,
-  admins: ["boss"],
-  now: () => new Date("2026-10-30T04:00:00.000Z"),
-  log: () => {},
-});
-let base = "";
-const sessions: Record<string, { access_token: string }> = {};
-const ids: Record<string, string> = {};
+const auth = buildAuth({ digestPepper: PEPPER, drawKey: DRAW_KEY, ephemeral: true } as never, true);
 /**
  * boss: an admin by MINGLI_ADMINS; mgr a manager, integ an integrator (given below); alice, carol and dora users (dora
  * the matrix's target: signed out everywhere there).
@@ -362,42 +341,19 @@ const LOGINS = ["boss", "mgr", "integ", "alice", "carol", "dora"];
  * Started at the top of the file, the sign-ins' connections sat idle through the PGlite test above for seconds, and
  * the first call after it reused one as the server's 5 s keep-alive closed it: ECONNRESET under the full suite.
  */
-let started: Promise<void> | undefined;
-const start = () =>
-  (started ??= (async () => {
-    for (const login of LOGINS) {
-      await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
-    }
-    for (const [login, role] of [
-      ["mgr", "manager"],
-      ["integ", "integrator"],
-    ] as const) {
-      const u = (await auth.findLogin("username", login))!;
-      await auth.users.put({ ...u, role });
-    }
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-    for (const login of LOGINS) {
-      const res = await fetch(base + "/v1/auth/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ login, password: login }),
-      });
-      sessions[login] = await res.json();
-      ids[login] = (await auth.findLogin("username", login))!.id;
-    }
-  })());
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
-
-const call = (who: string, path: string, method = "GET", body?: unknown) =>
-  fetch(base + path, {
-    method,
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${sessions[who]!.access_token}`,
-    },
-    ...(body !== undefined && { body: JSON.stringify(body) }),
-  });
+const { start, call, ids } = staffApi(
+  {
+    auth,
+    store,
+    mail,
+    sms,
+    review: false,
+    admins: ["boss"],
+    now: () => new Date("2026-10-30T04:00:00.000Z"),
+  },
+  LOGINS,
+  { mgr: "manager", integ: "integrator" },
+);
 const json = async (who: string, path: string, method = "GET", body?: unknown) =>
   (await call(who, path, method, body)).json();
 

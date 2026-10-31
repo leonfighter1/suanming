@@ -2,14 +2,12 @@
 // the text, images; store the values of the resources into database; autherize the roles to be able to update the
 // context of the page; extract as much text as possible into the content integration pages」).
 import { randomBytes } from "node:crypto";
-import type { AddressInfo } from "node:net";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MockProvider } from "../src/ai/index.js";
-import { createApiServer } from "../src/api/server.js";
+import { beforeAll, describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import { contentTexts, looksLike, placeholdersOf } from "../src/content/catalog.js";
 import { PgStore } from "../src/db/pg-store.js";
 import { buildAuth } from "../src/service/runtime.js";
+import { staffApi } from "./api.js";
 import { DRAW_KEY, PEPPER } from "./helpers.js";
 
 /** The smallest PNG there is: one transparent pixel. */
@@ -42,67 +40,18 @@ describe("what staff can change", () => {
   });
 });
 
-const secrets = { digestPepper: PEPPER, drawKey: DRAW_KEY };
-const mock = new MockProvider();
-const auth = buildAuth({ ...secrets, ephemeral: true } as never, true);
-const api = createApiServer({
-  secrets,
-  providers: { deepseek: mock, anthropic: mock },
-  auth,
-  store: new InMemoryStore(),
-  devMode: true,
-  devHeaders: false,
-  admins: ["boss"],
-  now: () => new Date("2026-10-30T12:00:00.000Z"),
-  log: () => {},
-});
-let base = "";
-const tokens: Record<string, string> = {};
-
+const auth = buildAuth({ digestPepper: PEPPER, drawKey: DRAW_KEY, ephemeral: true } as never, true);
 // The server and its sign-ins start right before the tests that call it (rule 81).
-let started: Promise<void> | undefined;
-const start = () =>
-  (started ??= (async () => {
-    for (const login of ["boss", "integ", "mgr", "alice"]) {
-      await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
-    }
-    for (const [login, role] of [
-      ["integ", "integrator"],
-      ["mgr", "manager"],
-    ] as const) {
-      const u = (await auth.findLogin("username", login))!;
-      await auth.users.put({ ...u, role });
-    }
-    await new Promise<void>((r) => api.listen(0, "127.0.0.1", r));
-    base = `http://127.0.0.1:${(api.address() as AddressInfo).port}`;
-    for (const login of ["boss", "integ", "mgr", "alice"]) {
-      const res = await fetch(base + "/v1/auth/login", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ login, password: login }),
-      });
-      tokens[login] = ((await res.json()) as { access_token: string }).access_token;
-    }
-  })());
-afterAll(() => new Promise<void>((r) => api.close(() => r())));
-
-const call = (
-  who: string | null,
-  path: string,
-  method = "GET",
-  body?: unknown,
-  type = "application/json",
-) =>
-  fetch(base + path, {
-    method,
-    headers: {
-      "content-type": type,
-      ...(who && { authorization: `Bearer ${tokens[who]}` }),
-    },
-    ...(body !== undefined && {
-      body: Buffer.isBuffer(body) ? new Uint8Array(body) : JSON.stringify(body),
-    }),
-  });
+const { start, call } = staffApi(
+  {
+    auth,
+    store: new InMemoryStore(),
+    admins: ["boss"],
+    now: () => new Date("2026-10-30T12:00:00.000Z"),
+  },
+  ["boss", "integ", "mgr", "alice"],
+  { integ: "integrator", mgr: "manager" },
+);
 
 describe("the CMS's API", () => {
   beforeAll(start);
