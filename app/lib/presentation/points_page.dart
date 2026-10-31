@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../application/providers.dart';
+import '../data/api_client.dart';
 import '../domain/points.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
 import 'design.dart';
+import 'home_page.dart' show push;
 import 'labels.dart';
 import 'layout.dart';
+import 'receipts_page.dart';
+import 'settings_page.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
 /// What 我的积分 shows while its figures come (骨架屏, S30): typical figures (the packs of config/points.json, a first
@@ -49,7 +53,8 @@ String pointsWhat(AppLocalizations l10n, PointsEntryView e) {
 
 /// 我的积分 (v11.0.0, S20): what is available and what running requests hold, 充值 (simulated until real payments
 /// come), how charging works, and every change. The packs are the owner's: 10元 = 1000 积分, more per 元 in the
-/// larger ones.
+/// larger ones. 货币 and 收据 (S31): 充值 in the currency the reader picks among the accepted ones (today's rate plus the
+/// service charge), each with a receipt to view and print.
 class PointsPage extends ConsumerStatefulWidget {
   const PointsPage({super.key});
 
@@ -61,22 +66,64 @@ class _PointsPageState extends ConsumerState<PointsPage> {
   /// The pack being added, while its request runs.
   int? _adding;
 
-  Future<void> _topUp(PointsPack pack) async {
+  Future<void> _topUp(PointsPack pack, CurrencyOffer? currency) async {
     if (_adding != null) return;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _adding = pack.yuan);
     try {
-      await ref.read(apiClientProvider).topUp(pack.yuan);
+      final receipt = await ref.read(apiClientProvider).topUp(pack.yuan, currency: currency?.code);
       ref.invalidate(pointsProvider);
+      ref.invalidate(receiptsProvider);
       messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(SnackBar(content: Text(l10n.pointsToppedUp(pack.points))));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.pointsToppedUp(pack.points)),
+          action: SnackBarAction(
+            key: const Key('points-view-receipt'),
+            label: l10n.pointsViewReceipt,
+            onPressed: () => push(context, ReceiptPage(receipt: receipt)),
+          ),
+        ),
+      );
     } catch (e) {
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(SnackBar(content: Text('${l10n.errorTitle}: $e')));
+      if (e is ApiException && e.code == 'email_required') {
+        // The receipt carries the account's email (the owner: 「need to have an email address」).
+        if (mounted) await _askForEmail();
+      } else {
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(SnackBar(content: Text('${l10n.errorTitle}: $e')));
+      }
     } finally {
       if (mounted) setState(() => _adding = null);
     }
+  }
+
+  /// No email on the account: why one is needed, and the way to 设置 to add it.
+  Future<void> _askForEmail() async {
+    final l10n = AppLocalizations.of(context);
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (c) => compactButtons(
+        c,
+        AlertDialog(
+          key: const Key('points-email-needed'),
+          icon: const Icon(Icons.mail_outline),
+          title: Text(l10n.pointsEmailNeededTitle),
+          content: Text(l10n.pointsEmailNeededBody),
+          actions: [
+            AppTextButton(onPressed: () => Navigator.pop(c, false), child: Text(l10n.cancel)),
+            AppFilledButton(
+              key: const Key('points-go-settings'),
+              autofocus: true,
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(l10n.pointsGoToSettings),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (go == true && mounted) push(context, const SettingsPage());
   }
 
   @override
@@ -100,6 +147,11 @@ class _PointsPageState extends ConsumerState<PointsPage> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    // 货币 (S31): the one the reader picked, if still offered; else the first offered (none from an older server).
+    final picked = ref.watch(currencyPickProvider).value;
+    final offers = p.currencies;
+    final currency = offers.where((c) => c.code == picked).firstOrNull ?? offers.firstOrNull;
+    final locale = ref.watch(settingsProvider.select((s) => s.apiLocaleCode));
     return ListView(
       padding: pagePadding(context),
       children: [
@@ -143,17 +195,65 @@ class _PointsPageState extends ConsumerState<PointsPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(p.simulated ? l10n.pointsTopUpSimulated : l10n.pointsTopUpUnavailable, style: theme.textTheme.bodyMedium),
+              if (offers.length > 1) ...[
+                const SizedBox(height: Space.m),
+                Wrap(
+                  key: const Key('points-currencies'),
+                  spacing: Space.s,
+                  runSpacing: Space.s,
+                  children: [
+                    for (final c in offers)
+                      ChoiceChip(
+                        key: ValueKey<String>('points-currency-${c.code}'),
+                        label: Text('${c.code} ${c.name(locale)}'),
+                        showCheckmark: false,
+                        selected: c.code == currency?.code,
+                        onSelected: (_) => ref.read(currencyPickProvider.notifier).pick(c.code),
+                      ),
+                  ],
+                ),
+              ],
+              if (currency != null && !currency.yuan && p.ratesDate != null) ...[
+                const SizedBox(height: Space.s),
+                Text(
+                  (p.ratesStale ? l10n.pointsRatesStale : l10n.pointsRatesNote)(
+                    p.ratesDate!,
+                    currency.serviceChargePercent == currency.serviceChargePercent.roundToDouble()
+                        ? '${currency.serviceChargePercent.toInt()}'
+                        : '${currency.serviceChargePercent}',
+                  ),
+                  key: const Key('points-rates'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
               const SizedBox(height: Space.m),
               compactButtons(
                 context,
                 Wrap(
                   spacing: Space.s,
                   runSpacing: Space.s,
-                  children: [for (final pack in p.packs) _PackButton(pack: pack, busy: _adding == pack.yuan, onPressed: p.simulated && _adding == null ? () => _topUp(pack) : null)],
+                  children: [
+                    for (final pack in p.packs)
+                      _PackButton(
+                        pack: pack,
+                        currency: currency,
+                        busy: _adding == pack.yuan,
+                        onPressed: p.simulated && _adding == null ? () => _topUp(pack, currency) : null,
+                      ),
+                  ],
                 ),
               ),
             ],
           ),
+        ),
+        // 收据 (S31): every 充值's receipt, to view and print.
+        AppCard(
+          key: const Key('points-receipts'),
+          title: l10n.receiptsTitle,
+          icon: Icons.receipt_outlined,
+          trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
+          onTap: () => push(context, const ReceiptsPage()),
+          child: Text(l10n.receiptsAbout, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
         ),
         AppCard(
           key: const Key('points-how'),
@@ -178,10 +278,11 @@ class _PointsPageState extends ConsumerState<PointsPage> {
 /// line, 6250 积分, and three to a row on a 360 phone.
 const _packWidth = 88.0;
 
-/// One pack: what it costs, the 积分 it brings and its bonus.
+/// One pack: what it costs (in the picked currency, S31), the 积分 it brings and its bonus.
 class _PackButton extends StatelessWidget {
-  const _PackButton({required this.pack, required this.busy, required this.onPressed});
+  const _PackButton({required this.pack, required this.currency, required this.busy, required this.onPressed});
   final PointsPack pack;
+  final CurrencyOffer? currency;
   final bool busy;
   final VoidCallback? onPressed;
 
@@ -205,7 +306,15 @@ class _PackButton extends StatelessWidget {
             children: [
               busy
                   ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(l10n.pointsPackYuan(pack.yuan), style: theme.textTheme.titleMedium),
+                  // A price in another currency (HK$11.42) is wider than 「10 元」: it shrinks to the box, which keeps the
+                  // owner's one size for every pack.
+                  : FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        currency == null || currency!.yuan ? l10n.pointsPackYuan(pack.yuan) : currency!.price(pack.yuan),
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
               Text(l10n.pointsPackPoints(pack.points), style: theme.textTheme.bodySmall),
               Text(
                 pack.bonusPercent > 0 ? l10n.pointsPackBonus(pack.bonusPercent) : '',

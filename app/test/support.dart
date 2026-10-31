@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' show pow;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,6 +119,24 @@ class BrokenSettingsStore implements SettingsStore {
   Future<String?> theme() => Future.error(StateError('no storage'));
   @override
   Future<void> setTheme(String mode) => Future.error(StateError('no storage'));
+  @override
+  Future<String?> currency() => Future.error(StateError('no storage'));
+  @override
+  Future<void> setCurrency(String code) => Future.error(StateError('no storage'));
+}
+
+/// 货币 (S31): what 充值 offers, as GET /v1/points lists it: 元, 港币 and 新台币 at test rates, 5 % on the converted ones,
+/// each price rounded up to the currency's smallest unit (the server's priceIn).
+const fakeCurrencies = [
+  (code: 'CNY', hans: '人民币', hant: '人民幣', symbol: '¥', decimals: 2, rate: 1.0, charge: 0),
+  (code: 'HKD', hans: '港币', hant: '港幣', symbol: r'HK$', decimals: 2, rate: 1.0876, charge: 5),
+  (code: 'TWD', hans: '新台币', hant: '新臺幣', symbol: r'NT$', decimals: 0, rate: 4.4918, charge: 5),
+];
+
+double fakePrice(int yuan, ({String code, String hans, String hant, String symbol, int decimals, double rate, int charge}) c) {
+  if (c.code == 'CNY') return yuan.toDouble();
+  final unit = pow(10, c.decimals);
+  return (yuan * c.rate * (1 + c.charge / 100) * unit - 1e-6).ceil() / unit;
 }
 
 /// A fake v1 API. Authenticated routes require `Bearer <access>`; charts come from
@@ -229,6 +248,9 @@ class FakeApi {
   /// once (the server holds it, then charges what it cost); with less than that available it answers 402
   /// points_short. 充值 is simulated unless [pointsTopUp] says otherwise.
   bool pointsOn = false;
+
+  /// 收据 (S31): one per top-up, the newest first.
+  final receipts = <Map<String, dynamic>>[];
   int pointsBalance = 0;
   String pointsTopUp = 'simulated';
   final pointsEntries = <Map<String, dynamic>>[];
@@ -338,11 +360,28 @@ class FakeApi {
         ],
         'entries': pointsEntries,
         'holds': const [],
+        'currencies': [
+          for (final c in fakeCurrencies)
+            {
+              'code': c.code,
+              'names': {'zh-Hans': c.hans, 'zh-Hant': c.hant},
+              'symbol': c.symbol,
+              'decimals': c.decimals,
+              'rate': c.rate,
+              'service_charge_percent': c.charge,
+              'prices': [for (final y in const [10, 20, 30, 40, 50]) {'yuan': y, 'amount': fakePrice(y, c)}],
+            },
+        ],
+        'rates': {'date': '2026-10-29', 'stale': false},
       }, 200);
     }
     if (req.method == 'POST' && path == '/v1/points/top-ups') {
       if (!pointsOn) return _problem(404, 'points are off', 'points_off');
-      final yuan = (jsonDecode(req.body) as Map)['yuan'] as int;
+      final body = jsonDecode(req.body) as Map;
+      final yuan = body['yuan'] as int;
+      final c = fakeCurrencies.firstWhere((x) => x.code == (body['currency'] as String? ?? 'CNY'));
+      // The receipt carries the account's email (S31).
+      if (accountEmail == null) return _problem(409, 'an email address is needed first', 'email_required');
       final points = const {10: 1000, 20: 2200, 30: 3450, 40: 4800, 50: 6250}[yuan]!;
       pointsBalance += points;
       final entry = <String, dynamic>{
@@ -354,7 +393,27 @@ class FakeApi {
         'pack': {'yuan': yuan, 'points': points},
       };
       pointsEntries.insert(0, entry);
-      return _json({'entry': entry, 'balance': pointsBalance, 'held': 0, 'available': pointsBalance}, 201);
+      final receipt = {
+        'id': '5e5e5e5e-0000-4000-8000-${receipts.length.toString().padLeft(12, '0')}',
+        'number': 'MLDS-2026-${(receipts.length + 1).toString().padLeft(6, '0')}',
+        'entry_id': entry['id'],
+        'created_at': entry['created_at'],
+        'email': accountEmail,
+        'pack': {'yuan': yuan, 'points': points},
+        'currency': c.code,
+        'amount': fakePrice(yuan, c),
+        'rate': c.rate,
+        if (c.code != 'CNY') 'rates_date': '2026-10-29',
+        'service_charge_percent': c.charge,
+        'simulated': true,
+        'symbol': c.symbol,
+        'decimals': c.decimals,
+      };
+      receipts.insert(0, receipt);
+      return _json({'entry': entry, 'balance': pointsBalance, 'held': 0, 'available': pointsBalance, 'receipt': receipt}, 201);
+    }
+    if (req.method == 'GET' && path == '/v1/receipts') {
+      return _json({'items': receipts}, 200);
     }
     final quote = RegExp(r'^/v1/charts/([^/]+)/quote$').firstMatch(path);
     if (req.method == 'GET' && quote != null) {

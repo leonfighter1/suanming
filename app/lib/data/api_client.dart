@@ -366,8 +366,16 @@ class ApiClient {
   /// server has 积分 off.
   Future<PointsView> points() async => PointsView.fromJson(await _authed('GET', '/v1/points'));
 
-  /// 充值 one pack by its price in 元 (simulated in development: no payment).
-  Future<void> topUp(int yuan) => _authed('POST', '/v1/points/top-ups', {'yuan': yuan});
+  /// 充值 one pack by its price in 元, paid in [currency] (S31; 元 by default), simulated in development (no
+  /// payment); its receipt.
+  Future<ReceiptView> topUp(int yuan, {String? currency}) async => ReceiptView.fromJson(
+        (await _authed('POST', '/v1/points/top-ups', {'yuan': yuan, 'currency': ?currency}))['receipt'] as Json,
+      );
+
+  /// 收据 (S31): the account's, newest first.
+  Future<List<ReceiptView>> receipts() async => [
+        for (final r in (await _authed('GET', '/v1/receipts'))['items'] as List) ReceiptView.fromJson(r as Json),
+      ];
 
   /// What each AI request on a chart costs now; [topics] the reading would be asked for (default all).
   Future<ChartQuote> chartQuote(String chartId, {List<String>? topics}) async => ChartQuote.fromJson(

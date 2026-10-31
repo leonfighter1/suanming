@@ -108,6 +108,9 @@ class PointsView {
     this.topUp = 'unavailable',
     this.packs = const [],
     this.entries = const [],
+    this.currencies = const [],
+    this.ratesDate,
+    this.ratesStale = false,
   });
   factory PointsView.fromJson(Json j) => j['enabled'] != true
       ? off
@@ -119,6 +122,9 @@ class PointsView {
           topUp: j['top_up'] as String? ?? 'unavailable',
           packs: [for (final p in (j['packs'] as List? ?? const [])) PointsPack.fromJson(p as Json)],
           entries: [for (final e in (j['entries'] as List? ?? const [])) PointsEntryView.fromJson(e as Json)],
+          currencies: [for (final c in (j['currencies'] as List? ?? const [])) CurrencyOffer.fromJson(c as Json)],
+          ratesDate: (j['rates'] as Json?)?['date'] as String?,
+          ratesStale: (j['rates'] as Json?)?['stale'] == true,
         );
 
   static const off = PointsView(enabled: false);
@@ -133,4 +139,107 @@ class PointsView {
   bool get simulated => topUp == 'simulated';
   final List<PointsPack> packs;
   final List<PointsEntryView> entries;
+
+  /// 货币 (S31): the accepted currencies 充值 can price today (none from a server before them: 元 alone).
+  final List<CurrencyOffer> currencies;
+
+  /// The day of the rates they were priced by; stale while the server can't reach its rates service.
+  final String? ratesDate;
+  final bool ratesStale;
+}
+
+/// Money in a currency as written: HK$12.35, NT$52.
+String moneyIn(String symbol, int decimals, num amount) => '$symbol${amount.toStringAsFixed(decimals)}';
+
+/// An accepted currency as 充值 offers it today (S31): its names, symbol and decimals, its rate (1 元 = rate of it), the
+/// service charge it takes, and each pack's price in it.
+class CurrencyOffer {
+  const CurrencyOffer({
+    required this.code,
+    required this.names,
+    required this.symbol,
+    required this.decimals,
+    required this.rate,
+    required this.serviceChargePercent,
+    required this.prices,
+  });
+  factory CurrencyOffer.fromJson(Json j) => CurrencyOffer(
+        code: j['code'] as String,
+        names: {for (final MapEntry(:key, :value) in (j['names'] as Json? ?? const {}).entries) key: value as String},
+        symbol: j['symbol'] as String,
+        decimals: (j['decimals'] as num).toInt(),
+        rate: (j['rate'] as num).toDouble(),
+        serviceChargePercent: (j['service_charge_percent'] as num? ?? 0).toDouble(),
+        prices: {
+          for (final p in (j['prices'] as List? ?? const []))
+            ((p as Json)['yuan'] as num).toInt(): (p['amount'] as num).toDouble(),
+        },
+      );
+  final String code;
+  final Map<String, String> names;
+  final String symbol;
+  final int decimals;
+  final double rate;
+  final double serviceChargePercent;
+
+  /// Each pack's price in it, by the pack's 元.
+  final Map<int, double> prices;
+
+  bool get yuan => code == 'CNY';
+  String name(String apiLocale) => names[apiLocale] ?? code;
+  String price(int packYuan) => moneyIn(symbol, decimals, prices[packYuan] ?? packYuan);
+}
+
+/// 收据 (S31): a 充值's receipt: its number, when, the account's email, the pack and its 积分, what was paid in which
+/// currency at which rate and service charge; simulated until real payments.
+class ReceiptView {
+  const ReceiptView({
+    required this.id,
+    required this.number,
+    required this.createdAt,
+    required this.email,
+    required this.packYuan,
+    required this.points,
+    required this.currency,
+    required this.amount,
+    required this.rate,
+    this.ratesDate,
+    required this.serviceChargePercent,
+    required this.simulated,
+    required this.symbol,
+    required this.decimals,
+  });
+  factory ReceiptView.fromJson(Json j) => ReceiptView(
+        id: j['id'] as String,
+        number: j['number'] as String,
+        createdAt: DateTime.parse(j['created_at'] as String),
+        email: j['email'] as String? ?? '',
+        packYuan: ((j['pack'] as Json)['yuan'] as num).toInt(),
+        points: ((j['pack'] as Json)['points'] as num).toInt(),
+        currency: j['currency'] as String,
+        amount: (j['amount'] as num).toDouble(),
+        rate: (j['rate'] as num).toDouble(),
+        ratesDate: j['rates_date'] as String?,
+        serviceChargePercent: (j['service_charge_percent'] as num? ?? 0).toDouble(),
+        simulated: j['simulated'] == true,
+        symbol: j['symbol'] as String? ?? j['currency'] as String,
+        decimals: (j['decimals'] as num? ?? 2).toInt(),
+      );
+  final String id;
+  final String number;
+  final DateTime createdAt;
+  final String email;
+  final int packYuan;
+  final int points;
+  final String currency;
+  final double amount;
+  final double rate;
+  final String? ratesDate;
+  final double serviceChargePercent;
+  final bool simulated;
+  final String symbol;
+  final int decimals;
+
+  /// What was paid, as written: HK$12.35.
+  String get paid => moneyIn(symbol, decimals, amount);
 }

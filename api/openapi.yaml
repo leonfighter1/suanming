@@ -3467,6 +3467,8 @@ components:
         service_charge_percent: { type: number }
         simulated:
           { type: boolean, description: "No payment was taken: 充值 is simulated until Phase 4" }
+        symbol: { type: string, description: "How the amount is written: HK$, NT$ …" }
+        decimals: { type: integer }
 
     PointsFor:
       description: What a charge or a hold is for

@@ -10,6 +10,10 @@ abstract class SettingsStore {
   /// The theme last picked ('system', 'light', 'dark'), or null.
   Future<String?> theme();
   Future<void> setTheme(String mode);
+
+  /// The currency last picked for 充值 (S31: 'HKD' …), or null.
+  Future<String?> currency();
+  Future<void> setCurrency(String code);
 }
 
 class SecureSettingsStore implements SettingsStore {
@@ -17,6 +21,7 @@ class SecureSettingsStore implements SettingsStore {
   final FlutterSecureStorage _s;
   static const _key = 'settings:language';
   static const _themeKey = 'settings:theme';
+  static const _currencyKey = 'settings:currency';
 
   @override
   Future<String?> language() => _s.read(key: _key);
@@ -26,11 +31,16 @@ class SecureSettingsStore implements SettingsStore {
   Future<String?> theme() => _s.read(key: _themeKey);
   @override
   Future<void> setTheme(String mode) => _s.write(key: _themeKey, value: mode);
+  @override
+  Future<String?> currency() => _s.read(key: _currencyKey);
+  @override
+  Future<void> setCurrency(String code) => _s.write(key: _currencyKey, value: code);
 }
 
 class InMemorySettingsStore implements SettingsStore {
   String? saved;
   String? savedTheme;
+  String? savedCurrency;
   @override
   Future<String?> language() async => saved;
   @override
@@ -39,4 +49,8 @@ class InMemorySettingsStore implements SettingsStore {
   Future<String?> theme() async => savedTheme;
   @override
   Future<void> setTheme(String mode) async => savedTheme = mode;
+  @override
+  Future<String?> currency() async => savedCurrency;
+  @override
+  Future<void> setCurrency(String code) async => savedCurrency = code;
 }

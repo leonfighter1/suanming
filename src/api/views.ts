@@ -5,6 +5,7 @@
  */
 import { INQUIRY_MAX_QUESTIONS } from "../ai/index.js";
 import type { ChartFact } from "../chart-fact/index.js";
+import { currencyOf } from "../currency/catalog.js";
 import { HttpError } from "../http/util.js";
 import type { PointsEntry } from "../points/index.js";
 import type { Receipt } from "../receipts/index.js";
@@ -135,7 +136,11 @@ export function publicInquiry(r: InquiryRecord) {
  * product catalogue and verify the purchase receipt before generating.
  */
 /** A receipt as its owner sees it (S31): everything but whose it is. */
-export const publicReceipt = ({ owner: _o, ...r }: Receipt) => r;
+export const publicReceipt = ({ owner: _o, ...r }: Receipt) => {
+  // How its amount is written, from the catalog (a currency no longer accepted still has its symbol).
+  const c = currencyOf(r.currency);
+  return { ...r, symbol: c?.symbol ?? r.currency, decimals: c?.decimals ?? 2 };
+};
 
 export const REMEDY_PRICE = { amount: 18, currency: "HKD" } as const;
 

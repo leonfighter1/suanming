@@ -2307,4 +2307,76 @@ class ContentLocalizations extends AppLocalizations {
 
   @override
   String get introServicesHint => _text('introServicesHint') ?? _base.introServicesHint;
+
+  @override
+  String pointsRatesNote(String date, String percent) =>
+      _text('pointsRatesNote', {'date': date, 'percent': percent}) ?? _base.pointsRatesNote(date, percent);
+
+  @override
+  String pointsRatesStale(String date, String percent) =>
+      _text('pointsRatesStale', {'date': date, 'percent': percent}) ?? _base.pointsRatesStale(date, percent);
+
+  @override
+  String get pointsViewReceipt => _text('pointsViewReceipt') ?? _base.pointsViewReceipt;
+
+  @override
+  String get pointsEmailNeededTitle => _text('pointsEmailNeededTitle') ?? _base.pointsEmailNeededTitle;
+
+  @override
+  String get pointsEmailNeededBody => _text('pointsEmailNeededBody') ?? _base.pointsEmailNeededBody;
+
+  @override
+  String get pointsGoToSettings => _text('pointsGoToSettings') ?? _base.pointsGoToSettings;
+
+  @override
+  String get receiptsTitle => _text('receiptsTitle') ?? _base.receiptsTitle;
+
+  @override
+  String get receiptsAbout => _text('receiptsAbout') ?? _base.receiptsAbout;
+
+  @override
+  String get receiptsEmpty => _text('receiptsEmpty') ?? _base.receiptsEmpty;
+
+  @override
+  String receiptTitle(String number) =>
+      _text('receiptTitle', {'number': number}) ?? _base.receiptTitle(number);
+
+  @override
+  String get receiptNumber => _text('receiptNumber') ?? _base.receiptNumber;
+
+  @override
+  String get receiptDate => _text('receiptDate') ?? _base.receiptDate;
+
+  @override
+  String get receiptEmail => _text('receiptEmail') ?? _base.receiptEmail;
+
+  @override
+  String get receiptPack => _text('receiptPack') ?? _base.receiptPack;
+
+  @override
+  String receiptPackLine(int yuan, int points) =>
+      _text('receiptPackLine', {'yuan': yuan, 'points': points}) ?? _base.receiptPackLine(yuan, points);
+
+  @override
+  String get receiptPaid => _text('receiptPaid') ?? _base.receiptPaid;
+
+  @override
+  String get receiptRate => _text('receiptRate') ?? _base.receiptRate;
+
+  @override
+  String receiptRateLine(String rate, String currency) =>
+      _text('receiptRateLine', {'rate': rate, 'currency': currency}) ?? _base.receiptRateLine(rate, currency);
+
+  @override
+  String get receiptCharge => _text('receiptCharge') ?? _base.receiptCharge;
+
+  @override
+  String receiptChargeLine(String percent) =>
+      _text('receiptChargeLine', {'percent': percent}) ?? _base.receiptChargeLine(percent);
+
+  @override
+  String get receiptSimulated => _text('receiptSimulated') ?? _base.receiptSimulated;
+
+  @override
+  String get receiptPrint => _text('receiptPrint') ?? _base.receiptPrint;
 }

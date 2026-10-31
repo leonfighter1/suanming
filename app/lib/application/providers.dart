@@ -479,6 +479,23 @@ final pointsProvider = FutureProvider.autoDispose<PointsView>((ref) async {
   }
 });
 
+/// 货币 (S31): the currency the reader picked for 充值, kept on this device; null until they pick one (充值 then offers
+/// the first the server accepts).
+class CurrencyPick extends AsyncNotifier<String?> {
+  @override
+  Future<String?> build() => ref.read(settingsStoreProvider).currency().catchError((Object _) => null);
+
+  void pick(String code) {
+    state = AsyncData(code);
+    unawaited(ref.read(settingsStoreProvider).setCurrency(code).catchError((Object _) {}));
+  }
+}
+
+final currencyPickProvider = AsyncNotifierProvider<CurrencyPick, String?>(CurrencyPick.new);
+
+/// 收据 (S31): the account's receipts, newest first.
+final receiptsProvider = FutureProvider.autoDispose<List<ReceiptView>>((ref) => ref.watch(apiClientProvider).receipts());
+
 /// The [chartQuoteProvider] key for a chart and the topics a reading would be asked for (default all).
 String quoteKey(String chartId, [Iterable<String>? topics]) => topics == null ? chartId : '$chartId|${topics.join(',')}';
 

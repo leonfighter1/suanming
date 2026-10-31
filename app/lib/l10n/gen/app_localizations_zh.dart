@@ -2400,6 +2400,84 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get introServicesHint => '点一项服务：登录后直接进入';
+
+  @override
+  String pointsRatesNote(String date, String percent) {
+    return '按 $date 的汇率换算，另加 $percent% 换算服务费';
+  }
+
+  @override
+  String pointsRatesStale(String date, String percent) {
+    return '汇率服务暂时无法连接，用的是 $date 的汇率，另加 $percent% 换算服务费';
+  }
+
+  @override
+  String get pointsViewReceipt => '查看收据';
+
+  @override
+  String get pointsEmailNeededTitle => '先填写邮箱';
+
+  @override
+  String get pointsEmailNeededBody => '充值的收据上会写你的邮箱。请先在“设置”里填写邮箱，再来充值。';
+
+  @override
+  String get pointsGoToSettings => '去设置';
+
+  @override
+  String get receiptsTitle => '收据';
+
+  @override
+  String get receiptsAbout => '每次充值的收据：付了多少、用的汇率和服务费、得到多少积分，可以打印。';
+
+  @override
+  String get receiptsEmpty => '还没有收据：充值后会有。';
+
+  @override
+  String receiptTitle(String number) {
+    return '收据 $number';
+  }
+
+  @override
+  String get receiptNumber => '收据编号';
+
+  @override
+  String get receiptDate => '日期';
+
+  @override
+  String get receiptEmail => '邮箱';
+
+  @override
+  String get receiptPack => '充值';
+
+  @override
+  String receiptPackLine(int yuan, int points) {
+    return '$yuan 元档，$points 积分';
+  }
+
+  @override
+  String get receiptPaid => '支付';
+
+  @override
+  String get receiptRate => '汇率';
+
+  @override
+  String receiptRateLine(String rate, String currency) {
+    return '1 元 = $rate $currency';
+  }
+
+  @override
+  String get receiptCharge => '换算服务费';
+
+  @override
+  String receiptChargeLine(String percent) {
+    return '$percent%，已含在支付金额里';
+  }
+
+  @override
+  String get receiptSimulated => '模拟充值：没有实际收款。';
+
+  @override
+  String get receiptPrint => '打印';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4797,4 +4875,82 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get introServicesHint => '點一項服務：登入後直接進入';
+
+  @override
+  String pointsRatesNote(String date, String percent) {
+    return '按 $date 的匯率換算，另加 $percent% 換算服務費';
+  }
+
+  @override
+  String pointsRatesStale(String date, String percent) {
+    return '匯率服務暫時連不上，用的是 $date 的匯率，另加 $percent% 換算服務費';
+  }
+
+  @override
+  String get pointsViewReceipt => '查看收據';
+
+  @override
+  String get pointsEmailNeededTitle => '先填寫電子郵件';
+
+  @override
+  String get pointsEmailNeededBody => '充值的收據上會寫你的電子郵件。請先在「設定」裡填寫電子郵件，再來充值。';
+
+  @override
+  String get pointsGoToSettings => '去設定';
+
+  @override
+  String get receiptsTitle => '收據';
+
+  @override
+  String get receiptsAbout => '每次充值的收據：付了多少、用的匯率和服務費、得到多少積分，可以列印。';
+
+  @override
+  String get receiptsEmpty => '還沒有收據：充值後會有。';
+
+  @override
+  String receiptTitle(String number) {
+    return '收據 $number';
+  }
+
+  @override
+  String get receiptNumber => '收據編號';
+
+  @override
+  String get receiptDate => '日期';
+
+  @override
+  String get receiptEmail => '電子郵件';
+
+  @override
+  String get receiptPack => '充值';
+
+  @override
+  String receiptPackLine(int yuan, int points) {
+    return '$yuan 元檔，$points 積分';
+  }
+
+  @override
+  String get receiptPaid => '支付';
+
+  @override
+  String get receiptRate => '匯率';
+
+  @override
+  String receiptRateLine(String rate, String currency) {
+    return '1 元 = $rate $currency';
+  }
+
+  @override
+  String get receiptCharge => '換算服務費';
+
+  @override
+  String receiptChargeLine(String percent) {
+    return '$percent%，已含在支付金額裡';
+  }
+
+  @override
+  String get receiptSimulated => '模擬充值：沒有實際收款。';
+
+  @override
+  String get receiptPrint => '列印';
 }

@@ -91,8 +91,15 @@
 87. To animate a page leaving an AnimatedSwitcher, give it its reverseDuration when it comes in; changing the duration later does not reach a child already shown. Debug a transition by printing each frame's children and durations, not by guessing (rule 81).
 88. When two pages with Scaffolds share a route (a switch, a cross-fade), turn heroes and taps off on the one leaving from the frame it starts leaving, in wrappers every child gets alike under its own key, so no element is rebuilt.
 89. Never judge a background test run by its exit code or a filtered pipeline: write the full output to a file and read the final summary line (All tests passed / Some tests failed) from it.
+90. Never run the server suite while a Flutter suite (app or admin) runs, nor two Flutter suites at once: run them one after the other; a timeout seen under such load is checked by a run alone before anything is changed (rule 4).
 
 ## Log
+
+### 2026-10-31: The server suite run beside a Flutter suite: heavy tests time out
+- **Symptom:** Four server tests failed at 5-32 s (PGlite restarts, the 流月 sweep, a 402 before any cap) while the full app suite ran in the background; alone, all 729 passed
+- **Root cause:** Both suites at once on this machine: the Flutter test runner and vitest's workers took the CPU, and the heaviest tests passed their timeouts
+- **Fix:** Ran the server suite again once the app suite had finished: 729 passed
+- **Rule:** Never run the server suite while a Flutter suite (app or admin) runs, nor two Flutter suites at once: run them one after the other; a timeout seen under such load is checked by a run alone before anything is changed (rule 4). (Rule 90)
 
 ### 2026-10-31: A background PowerShell run's Select-String output came back empty
 - **Symptom:** Two background flutter test runs reported only [exited with code 0]; one had a failing test, and the exit code was PowerShell's

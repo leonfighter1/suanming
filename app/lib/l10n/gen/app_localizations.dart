@@ -4541,6 +4541,138 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'点一项服务：登录后直接进入'**
   String get introServicesHint;
+
+  /// No description provided for @pointsRatesNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'按 {date} 的汇率换算，另加 {percent}% 换算服务费'**
+  String pointsRatesNote(String date, String percent);
+
+  /// No description provided for @pointsRatesStale.
+  ///
+  /// In zh, this message translates to:
+  /// **'汇率服务暂时无法连接，用的是 {date} 的汇率，另加 {percent}% 换算服务费'**
+  String pointsRatesStale(String date, String percent);
+
+  /// No description provided for @pointsViewReceipt.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看收据'**
+  String get pointsViewReceipt;
+
+  /// No description provided for @pointsEmailNeededTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'先填写邮箱'**
+  String get pointsEmailNeededTitle;
+
+  /// No description provided for @pointsEmailNeededBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'充值的收据上会写你的邮箱。请先在“设置”里填写邮箱，再来充值。'**
+  String get pointsEmailNeededBody;
+
+  /// No description provided for @pointsGoToSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'去设置'**
+  String get pointsGoToSettings;
+
+  /// No description provided for @receiptsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'收据'**
+  String get receiptsTitle;
+
+  /// No description provided for @receiptsAbout.
+  ///
+  /// In zh, this message translates to:
+  /// **'每次充值的收据：付了多少、用的汇率和服务费、得到多少积分，可以打印。'**
+  String get receiptsAbout;
+
+  /// No description provided for @receiptsEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有收据：充值后会有。'**
+  String get receiptsEmpty;
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'收据 {number}'**
+  String receiptTitle(String number);
+
+  /// No description provided for @receiptNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'收据编号'**
+  String get receiptNumber;
+
+  /// No description provided for @receiptDate.
+  ///
+  /// In zh, this message translates to:
+  /// **'日期'**
+  String get receiptDate;
+
+  /// No description provided for @receiptEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱'**
+  String get receiptEmail;
+
+  /// No description provided for @receiptPack.
+  ///
+  /// In zh, this message translates to:
+  /// **'充值'**
+  String get receiptPack;
+
+  /// No description provided for @receiptPackLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'{yuan} 元档，{points} 积分'**
+  String receiptPackLine(int yuan, int points);
+
+  /// No description provided for @receiptPaid.
+  ///
+  /// In zh, this message translates to:
+  /// **'支付'**
+  String get receiptPaid;
+
+  /// No description provided for @receiptRate.
+  ///
+  /// In zh, this message translates to:
+  /// **'汇率'**
+  String get receiptRate;
+
+  /// No description provided for @receiptRateLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'1 元 = {rate} {currency}'**
+  String receiptRateLine(String rate, String currency);
+
+  /// No description provided for @receiptCharge.
+  ///
+  /// In zh, this message translates to:
+  /// **'换算服务费'**
+  String get receiptCharge;
+
+  /// No description provided for @receiptChargeLine.
+  ///
+  /// In zh, this message translates to:
+  /// **'{percent}%，已含在支付金额里'**
+  String receiptChargeLine(String percent);
+
+  /// No description provided for @receiptSimulated.
+  ///
+  /// In zh, this message translates to:
+  /// **'模拟充值：没有实际收款。'**
+  String get receiptSimulated;
+
+  /// No description provided for @receiptPrint.
+  ///
+  /// In zh, this message translates to:
+  /// **'打印'**
+  String get receiptPrint;
 }
 
 class _AppLocalizationsDelegate
