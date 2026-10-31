@@ -59,6 +59,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | done        |
 | S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
 | S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
+| S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | in progress |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2666,6 +2667,35 @@ was pushed (the owner: 「Continue」).
 - **Acceptance:** each new setting has its default in config/settings.json, fits its range, and a change through
   `/v1/admin/settings` changes what the server does on the next request (a test per WP); the 设置 page shows the new
   groups; harness PASS.
+
+## S33 内容按页面、后台菜单、HTML 与免登录 (big → v21.0.0)
+
+**Owner request (2026-10-31):** 「内容页面需要移动到管理员页面右上角，同时管理员右上角应该改成下拉菜单，而且把导出和消息也
+放进去。」「现在内容的确已经全部展开了，可是缺乏当前内容与页面绑定，也就是说我们无法知道当前的更改与哪个页面的哪个操作相关。
+要求，以页面为基础展开所有当前页面用到的resource，这样integrator能够迅速查找相关的页面进行更改。比如 登录页，如果是服务页面
+里的内容，那么就显示算卦->。。。。如果有显示是共同分享页，那么就展示多个逻辑同时用到的这个页面的方式，但是最终目的就是要明白
+自己改动的地方到底改在哪里。同时可以让当前的改动支持HTML和CSS，不仅仅只是resource」; then 「如果当前登录进去的用户有
+dashboard access，那么不需要重复登录了」, and 「改完后做完测试，就可以直接commit 和push 不用等」.
+
+| WP     | What                                                                                                          |
+| ------ | ------------------------------------------------------------------------------------------------------------- |
+| WP33.1 | the 管理后台's menu: 内容, 消息 and 导出 in a dropdown at the top right, with 外观 and 退出登录               |
+| WP33.2 | the page map: where each text and image is used, read from the app's code, by page and part                   |
+| WP33.3 | 内容 by page: every page's resources by part, each with all its places; a shared one says where else it shows |
+| WP33.4 | HTML and CSS: a safe subset for the texts the app shows as content; checked, rendered, previewed              |
+| WP33.5 | no second sign-in: ☰ → 管理后台 hands the dashboard a one-time code that signs it in                         |
+| WP33.6 | records, the stage summary; pushed when the tests pass (the owner's word)                                     |
+
+- **The page map is read from the code, not kept by hand:** the server reads the app's Dart files (as it reads its
+  message files): each top-level class and function, the texts (`l10n.<key>`) and images it uses, and what it uses;
+  from each page (a `…Page` class) everything it reaches, stopping at other pages. A part's name comes from a table
+  (`src/content/pages.ts`); a page without a name fails a test.
+- **HTML and CSS where the app can show them:** buttons, titles, labels and fields take plain words. The texts shown
+  as content (descriptions, notes, introductions) render a safe subset: tags such as `<b>`, `<i>`, `<br>`, `<p>`,
+  lists and links, inline `style` with the theme's colours (`var(--accent)` …, right in light and dark) and sizes. The
+  server refuses anything else, saying what; elsewhere a tag is refused too, so nothing shows a raw `<b>`.
+- **The one-time code:** 2 minutes, one use, for staff only, kept in memory like the verification codes; the
+  dashboard takes it off its address at once and keeps its own session.
 
 ## 阶段总结 (stage summaries)
 
