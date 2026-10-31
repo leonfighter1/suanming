@@ -457,6 +457,26 @@ class ContentLocalizations extends AppLocalizations {
   String get deleteAccountStaff => _text('deleteAccountStaff') ?? _base.deleteAccountStaff;
 
   @override
+  String get maintenanceTitle => _text('maintenanceTitle') ?? _base.maintenanceTitle;
+
+  @override
+  String maintenanceWindow(String from, String to) =>
+      _text('maintenanceWindow', {'from': from, 'to': to}) ?? _base.maintenanceWindow(from, to);
+
+  @override
+  String maintenanceUntil(String time) =>
+      _text('maintenanceUntil', {'time': time}) ?? _base.maintenanceUntil(time);
+
+  @override
+  String get maintenanceSoon => _text('maintenanceSoon') ?? _base.maintenanceSoon;
+
+  @override
+  String get maintenanceStaff => _text('maintenanceStaff') ?? _base.maintenanceStaff;
+
+  @override
+  String get maintenanceCheck => _text('maintenanceCheck') ?? _base.maintenanceCheck;
+
+  @override
   String get cancel => _text('cancel') ?? _base.cancel;
 
   @override

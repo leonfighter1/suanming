@@ -12,6 +12,7 @@ import 'fengshui_page.dart';
 import 'history_page.dart';
 import 'layout.dart';
 import 'liuyao_page.dart';
+import 'maintenance.dart';
 import 'profiles_page.dart';
 import 'qiuqian_page.dart';
 import 'tarot_page.dart';
@@ -89,6 +90,8 @@ class HomePage extends ConsumerWidget {
               icon: sunOrMoon(ref.watch(nightProvider)),
             ),
           ),
+          // 维护 (S35): only staff reach 首页 while it is on; told what users see.
+          const MaintenanceNotice(staff: true),
           if (book != null && me == null)
             FadeSlideIn(
               index: 1,

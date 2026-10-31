@@ -154,6 +154,51 @@ final apiClientProvider = Provider<ApiClient>(
   ),
 );
 
+/// 维护 (S35; the owner: 「添加正在维护的通知，admin可以toggle 告知用户何时能够登录」): the maintenance the server says is on,
+/// from GET /v1/status at the start and from any call it answers 503 maintenance (the client's [ApiClient.onMaintenance],
+/// set here); null while there is none. While it is on it is asked again every [maintenanceCheckEvery]; when it ends,
+/// the account is asked again (its first call may have waited).
+class MaintenanceNotifier extends Notifier<Maintenance?> {
+  Timer? _again;
+
+  @override
+  Maintenance? build() {
+    ref.watch(apiClientProvider).onMaintenance = seen;
+    ref.onDispose(() => _again?.cancel());
+    check();
+    return null;
+  }
+
+  /// Asked again; a server that can't say (unreachable, from before) leaves it as it was.
+  Future<void> check() async {
+    try {
+      final m = await ref.read(apiClientProvider).status();
+      m == null ? _ended() : seen(m);
+    } on Object {
+      // Nothing to change.
+    }
+  }
+
+  /// The server says it is on.
+  void seen(Maintenance m) {
+    state = m;
+    _again ??= Timer.periodic(maintenanceCheckEvery, (_) => check());
+  }
+
+  void _ended() {
+    if (state == null) return;
+    state = null;
+    _again?.cancel();
+    _again = null;
+    ref.invalidate(authProvider);
+  }
+}
+
+final maintenanceProvider = NotifierProvider<MaintenanceNotifier, Maintenance?>(MaintenanceNotifier.new);
+
+/// How often the app asks whether 维护 is over while it is on.
+const maintenanceCheckEvery = Duration(minutes: 1);
+
 /// The signed-in user, or null when signed out.
 class AuthNotifier extends AsyncNotifier<AppUser?> {
   ApiClient get _api => ref.read(apiClientProvider);
@@ -213,7 +258,12 @@ class AuthNotifier extends AsyncNotifier<AppUser?> {
   }
 }
 
-final authProvider = AsyncNotifierProvider<AuthNotifier, AppUser?>(AuthNotifier.new);
+final authProvider = AsyncNotifierProvider<AuthNotifier, AppUser?>(
+  AuthNotifier.new,
+  // 维护 (S35): not asked again while it lasts (the maintenance page shows); its end asks (MaintenanceNotifier).
+  retry: (count, error) =>
+      error is ApiException && error.isMaintenance ? null : ProviderContainer.defaultRetry(count, error),
+);
 
 /// 设置 → 报告 (v9.0.0): the account's settings and what delivers mail on the server, read when 设置 opens.
 final accountSettingsProvider = FutureProvider.autoDispose<AccountSettings>(

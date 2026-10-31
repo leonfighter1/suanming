@@ -10,6 +10,7 @@ export const PAGES: Record<string, string> = {
   MingliApp: "整个应用",
   IntroPage: "欢迎页（登录前）",
   SignInPage: "登录 / 注册",
+  MaintenancePage: "维护中（登录后）",
   HomePage: "首页",
   BaziFormPage: "八字 · 填资料",
   BaziChartPage: "八字 · 命盘",

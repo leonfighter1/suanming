@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'application/providers.dart';
+import 'data/api_client.dart';
 import 'domain/content.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'presentation/content.dart';
@@ -10,6 +11,7 @@ import 'presentation/design.dart';
 import 'presentation/home_page.dart';
 import 'presentation/intro_page.dart';
 import 'presentation/keyboard.dart';
+import 'presentation/maintenance.dart';
 import 'presentation/theme.dart';
 import 'presentation/widgets/app_menu.dart';
 
@@ -77,11 +79,18 @@ class _AuthGateState extends ConsumerState<AuthGate> {
       // The menu it went out from leaves with 首页: ☰ again for the next sign-in.
       if (_out) menu?.call(false);
     });
+    // 维护 (S35): an account that isn't staff waits on a page of its own; staff work as usual.
+    final down = ref.watch(maintenanceProvider);
     final page = switch (ref.watch(authProvider)) {
+      AsyncError(:final error) when error is ApiException && error.isMaintenance =>
+        const MaintenancePage(key: ValueKey('maintenance')),
       AsyncError() => const IntroPage(key: ValueKey('signed-out')),
       // Data, or the page it had while it asks again (going out reloads it): no spinner between.
-      AsyncValue(hasValue: true, :final value) =>
-        value == null ? const IntroPage(key: ValueKey('signed-out')) : const HomePage(key: ValueKey('signed-in')),
+      AsyncValue(hasValue: true, :final value) => value == null
+          ? const IntroPage(key: ValueKey('signed-out'))
+          : down != null && value.staff == null
+              ? const MaintenancePage(key: ValueKey('maintenance'))
+              : const HomePage(key: ValueKey('signed-in')),
       _ => const Scaffold(key: ValueKey('loading'), body: Center(child: CircularProgressIndicator())),
     };
     final still = MediaQuery.disableAnimationsOf(context);

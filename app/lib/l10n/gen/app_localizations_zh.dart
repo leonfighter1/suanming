@@ -440,7 +440,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteAccountBody => '你的账号、命盘和解读会立即从服务器删除，无法恢复。';
 
   @override
-  String get deleteAccountStaff => '这是管理后台的账号，不能在这里注销：请管理员在管理后台的账户页面注销。';
+  String get deleteAccountStaff => '这是管理后台的账号，不能在这里注销：请管理员在管理后台的账号页面注销。';
+
+  @override
+  String get maintenanceTitle => '系统维护中';
+
+  @override
+  String maintenanceWindow(String from, String to) {
+    return '预计 $from 到 $to 之间可以再登录。';
+  }
+
+  @override
+  String maintenanceUntil(String time) {
+    return '预计 $time 可以再登录。';
+  }
+
+  @override
+  String get maintenanceSoon => '很快就可以再登录，请稍后再试。';
+
+  @override
+  String get maintenanceStaff => '你是后台人员，可以照常使用；用户现在看到的是这条通知。';
+
+  @override
+  String get maintenanceCheck => '再看看';
 
   @override
   String get cancel => '取消';
@@ -2919,6 +2941,28 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get deleteAccountStaff => '這是管理後台的帳戶，不能在這裡刪除：請管理員在管理後台的帳戶頁面刪除。';
+
+  @override
+  String get maintenanceTitle => '系統維護中';
+
+  @override
+  String maintenanceWindow(String from, String to) {
+    return '預計 $from 到 $to 之間可以再登入。';
+  }
+
+  @override
+  String maintenanceUntil(String time) {
+    return '預計 $time 可以再登入。';
+  }
+
+  @override
+  String get maintenanceSoon => '很快就可以再登入，請稍後再試。';
+
+  @override
+  String get maintenanceStaff => '你是後台人員，可以照常使用；使用者現在看到的是這則通知。';
+
+  @override
+  String get maintenanceCheck => '再看看';
 
   @override
   String get cancel => '取消';

@@ -173,6 +173,10 @@ class FakeApi {
   /// /v1/me's staff role (S25): admin, manager or integrator; none by default.
   String? staff;
 
+  /// 维护 (S35): GET /v1/status's maintenance (since, ends_from, ends_by); while it is set, anyone but [staff] waits
+  /// (503 maintenance), as src/api/server.ts answers.
+  Map<String, Object?>? maintenance;
+
   /// GET /v1/east/daily (S26): the day's 东方 draw, 'qiuqian' (a 签) or 'liuyao' (a 卦); null, neither is served.
   String? eastDaily = 'qiuqian';
 
@@ -318,6 +322,12 @@ class FakeApi {
     if (req.method == 'GET' && path.startsWith('/v1/places/')) {
       final c = (fixture('places')['countries'] as Map)[path.split('/').last.toUpperCase()];
       return c == null ? _json({'title': 'not found', 'status': 404}, 404) : _json(c as Object, 200);
+    }
+    // 维护 (S35): said to everyone; while it is on, anyone but staff waits, a refresh and signing out aside.
+    if (req.method == 'GET' && path == '/v1/status') return _json({'maintenance': maintenance}, 200);
+    final down = maintenance;
+    if (down != null && staff == null && path != '/v1/auth/refresh' && path != '/v1/auth/logout') {
+      return _json({'title': 'down for maintenance', 'status': 503, 'code': 'maintenance', ...down}, 503);
     }
     switch ((req.method, path)) {
       case ('POST', '/v1/auth/register'):

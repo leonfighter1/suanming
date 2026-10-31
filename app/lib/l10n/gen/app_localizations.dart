@@ -940,8 +940,44 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountStaff.
   ///
   /// In zh, this message translates to:
-  /// **'这是管理后台的账号，不能在这里注销：请管理员在管理后台的账户页面注销。'**
+  /// **'这是管理后台的账号，不能在这里注销：请管理员在管理后台的账号页面注销。'**
   String get deleteAccountStaff;
+
+  /// No description provided for @maintenanceTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统维护中'**
+  String get maintenanceTitle;
+
+  /// No description provided for @maintenanceWindow.
+  ///
+  /// In zh, this message translates to:
+  /// **'预计 {from} 到 {to} 之间可以再登录。'**
+  String maintenanceWindow(String from, String to);
+
+  /// No description provided for @maintenanceUntil.
+  ///
+  /// In zh, this message translates to:
+  /// **'预计 {time} 可以再登录。'**
+  String maintenanceUntil(String time);
+
+  /// No description provided for @maintenanceSoon.
+  ///
+  /// In zh, this message translates to:
+  /// **'很快就可以再登录，请稍后再试。'**
+  String get maintenanceSoon;
+
+  /// No description provided for @maintenanceStaff.
+  ///
+  /// In zh, this message translates to:
+  /// **'你是后台人员，可以照常使用；用户现在看到的是这条通知。'**
+  String get maintenanceStaff;
+
+  /// No description provided for @maintenanceCheck.
+  ///
+  /// In zh, this message translates to:
+  /// **'再看看'**
+  String get maintenanceCheck;
 
   /// No description provided for @cancel.
   ///

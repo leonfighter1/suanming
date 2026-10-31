@@ -41,8 +41,25 @@ class ApiException implements Exception {
   /// 积分不足 (v11.0.0): the request costs more than the account has available.
   bool get isPointsShort => status == 402 && code == 'points_short';
 
+  /// 维护 (S35): the service waits for maintenance; [problem] carries when it ends ([Maintenance]).
+  bool get isMaintenance => status == 503 && code == 'maintenance';
+
   @override
   String toString() => detail ?? title;
+}
+
+/// 维护 (S35; the owner: 「添加正在维护的通知 … 告知用户何时能够登录」): the service waits since [since], expected to end
+/// between [endsFrom] and [endsBy] (one time where an admin set it; three to four hours from the switch otherwise).
+class Maintenance {
+  const Maintenance({required this.since, required this.endsFrom, required this.endsBy});
+  factory Maintenance.fromJson(Json j) => Maintenance(
+        since: DateTime.parse(j['since'] as String),
+        endsFrom: DateTime.parse(j['ends_from'] as String),
+        endsBy: DateTime.parse(j['ends_by'] as String),
+      );
+  final DateTime since;
+  final DateTime endsFrom;
+  final DateTime endsBy;
 }
 
 class AppUser {
@@ -127,6 +144,9 @@ class ApiClient {
   final String baseUrl;
   final TokenStore tokens;
   final void Function()? onSignedOut;
+
+  /// Told when the server answers 维护 (S35): anyone but staff waits until it ends.
+  void Function(Maintenance)? onMaintenance;
   final http.Client _http;
   Future<bool>? _refreshing;
 
@@ -198,6 +218,13 @@ class ApiClient {
   }
 
   // ---- charts & reports ----
+
+  /// 维护 (S35): whether the service waits now, and until when; null when it doesn't, or the server is from before.
+  Future<Maintenance?> status() async {
+    final j = await _send('GET', '/v1/status');
+    final m = j['maintenance'];
+    return m is Json ? Maintenance.fromJson(m) : null;
+  }
 
   /// The methods the account's region offers, in its entry order (GET /v1/methods, v4.3.0):
   /// 求籤 first in Taiwan and Hong Kong.
@@ -480,11 +507,13 @@ class ApiClient {
     return res.bodyBytes;
   }
 
-  /// The RFC 7807 problem in an error response.
+  /// The RFC 7807 problem in an error response. A 维护 answer (S35) is told to [onMaintenance] as well.
   ApiException _problem(http.Response res) {
     try {
       final p = jsonDecode(utf8.decode(res.bodyBytes)) as Json;
-      return ApiException(res.statusCode, p['title'] as String? ?? 'Error', p['detail'] as String?, p['code'] as String?, p);
+      final e = ApiException(res.statusCode, p['title'] as String? ?? 'Error', p['detail'] as String?, p['code'] as String?, p);
+      if (e.isMaintenance) onMaintenance?.call(Maintenance.fromJson(p));
+      return e;
     } on FormatException {
       return ApiException(res.statusCode, 'HTTP ${res.statusCode}');
     }

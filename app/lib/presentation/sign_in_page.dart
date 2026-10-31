@@ -9,6 +9,7 @@ import 'design.dart';
 import 'home_page.dart';
 import 'keyboard.dart';
 import 'layout.dart';
+import 'maintenance.dart';
 import 'widgets/language_menu.dart';
 
 /// Regions offered at sign-up (geo_rule_matrix: served regions). The server
@@ -67,6 +68,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         'password_weak' => l10n.passwordWeak,
         // 管理后台 (v11.2.0): an admin suspended the account.
         'account_suspended' => l10n.accountSuspended,
+        // 维护 (S35): when they may sign in again.
+        'maintenance' => maintenanceLine(l10n, Maintenance.fromJson(e.problem), ref.read(clockProvider)()),
         _ when e.status == 429 => l10n.captchaRequired,
         _ when e.status == 401 && !_register => l10n.loginFailed,
         _ => e.toString(),
@@ -168,6 +171,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   /// The fields and buttons: signing in, or signing up.
   List<Widget> _form(AppLocalizations l10n, String locale, bool canSubmit) => [
+        // 维护 (S35): when users may sign in again, while it is on (staff sign in as usual).
+        const MaintenanceNotice(),
         if (_register) ...[
           TextField(
             key: const Key('username'),

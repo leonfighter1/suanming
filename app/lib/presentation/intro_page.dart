@@ -9,6 +9,7 @@ import 'content_text.dart';
 import 'design.dart';
 import 'home_page.dart';
 import 'layout.dart';
+import 'maintenance.dart';
 import 'sign_in_page.dart';
 import 'widgets/app_title.dart';
 import 'widgets/language_menu.dart';
@@ -51,6 +52,8 @@ class IntroPage extends ConsumerWidget {
               trailing: const IntroLogo(),
             ),
           ),
+          // 维护 (S35): when users may sign in again, while it is on.
+          const MaintenanceNotice(),
           // The page's one action: across the column on a phone, its label's width beyond.
           fadeIn(
             WindowClass.ofContext(context) == WindowClass.compact
