@@ -84,14 +84,16 @@ const MAIN_STEP: Record<ChargeKind, AgentName> = {
   remedy: "remedy",
 };
 
+/** A pack the owner's terms allow: a price above 0, whole 积分, at least 100 of them per 元 (10元 = 1000 积分). */
+export const packFits = (p: Pack) =>
+  p.yuan > 0 && Number.isInteger(p.points) && p.points >= p.yuan * 100;
+
 /** What is wrong with a config: a pack, the pricing terms, a method without an estimate. */
 export function checkPointsConfig(c: PointsConfig, systems: readonly ChartSystem[]): string[] {
   const problems: string[] = [];
   if (!c.packs.length) problems.push("no packs");
   for (const p of c.packs) {
-    if (!(p.yuan > 0) || !Number.isInteger(p.points) || p.points < p.yuan * 100) {
-      problems.push(`pack ${p.yuan} 元: ${p.points} 积分 is less than 100 per 元`);
-    }
+    if (!packFits(p)) problems.push(`pack ${p.yuan} 元: ${p.points} 积分 is less than 100 per 元`);
   }
   const { margin, payment_fee, vat, usd_cny, reference_model } = c.pricing;
   if (!(margin > 0 && margin < 1)) problems.push(`margin ${margin} must be between 0 and 1`);
