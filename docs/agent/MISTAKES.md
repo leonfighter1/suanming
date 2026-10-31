@@ -95,8 +95,15 @@
 91. When the server stops reading a request body (413), close the connection (Connection: close) and test that header. A test that hangs after a large upload is a stuck connection, not a slow server: time each request to name the one that waits (rule 81).
 92. In an app widget test that copies anything (Clipboard), start with support.dart's ClipboardWatch(tester) and assert its copied value; without it the copy never completes.
 93. Words a page shows (names, labels, part names) are words: no symbol such as ☰ the fonts may lack; the 管理后台 has no CDN font fallback. Look at a render with the real fonts (rule 3).
+94. Before sharing a session between tabs or devices, check how the server rotates refresh tokens: with single-use tokens every rotation must start from the newest kept token, one at a time under a lock, and keep the new one before releasing it.
 
 ## Log
+
+### 2026-10-31: A single-use refresh token moved to shared storage signs every tab out
+- **Symptom:** Keeping the dashboard session in localStorage (S34) as it was kept per tab: tab B resumes with r1, then tab A refreshes with its own r1 and the server ends the session for both (the two-tab unit test fails this way)
+- **Root cause:** The server takes each refresh token once and drops the whole family on a second use (src/auth/tokens.ts rotate), while each tab held its own copy in memory
+- **Fix:** Every rotation runs one tab at a time (Web Locks, admin platform/session_lock.dart) from the newest token kept (AdminApi.keptSession) and keeps the new one before the lock goes; unit test: two tabs share the session
+- **Rule:** Before sharing a session between tabs or devices, check how the server rotates refresh tokens: with single-use tokens every rotation must start from the newest kept token, one at a time under a lock, and keep the new one before releasing it. (Rule 94)
 
 ### 2026-10-31: A symbol the 管理后台's font lacks showed as a box
 - **Symptom:** The render of 内容 by page showed the part name ☰ 菜单 as an empty box

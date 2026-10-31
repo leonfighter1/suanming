@@ -2,6 +2,18 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-31 (v): S34 — HTML in more places, written colours, staying signed in; release v22.0.0
+
+- The owner's 「keep going」 on S33's three choices, planned as S34 (8001542).
+- WP34.1 (1b04123, after f20b032 `contrastRatio`): the 29 calls by a script; a second one wrapped only the lines the
+  first wrote (an S33 line past 120 stayed as it was).
+- WP34.2 (7c852d9, after fff299c `richColorOf`, 5a2cf69 `ProblemList`, 7a4e3d2 `wordsOf`): `RICH_WRITTEN_COLOR` synced
+  as `richWrittenColor`; the editor's two previews and warnings, looked at wide and on a phone.
+- WP34.3 (f2e69d3): the session in localStorage. The server's single-use refresh tokens meant the tabs take turns
+  under a Web Lock from the newest kept (rule 94); the two-tab unit test fails without it. The admin's web build
+  (Wasm dry run too) compiles the interop.
+- The owner's next list arrived during the release: S35.
+
 ## 2026-10-31 (u): S33 — 内容 by page, the 管理后台's menu, HTML and CSS, no second sign-in; release v21.0.0
 
 - The owner's four asks of the day, planned as S33 (71c86b4), and their word: test, then commit and push.

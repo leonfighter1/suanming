@@ -14,6 +14,45 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v22.0.0 (2026-10-31): HTML in more texts, written colours, the 管理后台 signed in across tabs (S34 complete)
+
+Your word on S33's three choices: keep going.
+
+- HTML in more places;
+- written colours such as #ff0000;
+- the 管理后台 staying signed in across tabs and restarts.
+
+This release ends S34 and is pushed.
+
+- **HTML and CSS in 28 more texts** (41 in all): the notes, hints and descriptions the app shows as content.
+  - **Where:** 八字's 大运 hint and its profile and 时辰 notes; the notes on 塔罗, 求签 and 算卦 when the question is
+    missing; each method's sections line before its AI reading, and the disclaimer under it; 求签's how-to and its note
+    on the text; 风水's note; 深度分析's note; 追问's introduction; 破除运势's description; the trend chart's hint; the
+    notes on 我的积分 and the receipts; the place picker's source; 一生运势's wait and its hint; 审核's hint; the note on
+    sending in 联系方式.
+  - **In 内容,** their rows say 可用 HTML 和 CSS, as the first thirteen do.
+- **Written colours:** color and background-color take `#c0392b`, `#c00` or `rgb(192, 57, 43)` beside the theme's
+  (`var(--accent)` …).
+  - **The same in light and dark:** a written colour doesn't follow the theme, so 内容's editor now previews a text on
+    the app's card in both, side by side (one under the other on a phone).
+  - **A warning, not a refusal:** where words would read under 4.5 : 1 in either theme, the editor says so under the
+    previews (「一生」在深色主题下不易看清：对比度 3.2 : 1，至少要 4.5 : 1), and 保存 still works. The theme's colours
+    are checked too, where one is used against its role (a soft fill as words).
+  - **Anything else** (a name such as red, `rgba(…)`, a part above 255) is refused, saying what is allowed.
+- **The 管理后台 stays signed in** across a reload, a new tab and a restart of the browser, until 退出登录, 设置's
+  登录有效期 unused (two days by default), or the server ending it.
+  - **How:** the session is kept in the browser, where 外观 is. Its tabs share it and take turns to refresh it, since
+    the server takes each refresh token once.
+  - **退出登录** ends it for the browser; another open tab finds out at its next refresh (15 minutes at most).
+- **Verified:**
+  - **Tests:** server 754, app 310, 管理后台 104. A new test has two tabs share one session against a server that ends
+    it when a refresh token comes twice; without the turns it fails.
+  - **Renders:** the editor's two previews and its warning, wide and on a phone.
+  - **Harness:** PASS.
+- **Stage S34 in sum:** 内容 reaches every note and description, staff may write their own colours and see them in both
+  themes, and staff sign in to the 管理后台 once per browser. Its summary is in the [tech plan](docs/tech-plan.md).
+- **Next:** S35, your requests for the app's pages and the 管理后台's menu.
+
 ### v21.0.0 (2026-10-31): 内容 by page, the 管理后台's menu, HTML and CSS, no second sign-in (S33 complete)
 
 Your requests of today:

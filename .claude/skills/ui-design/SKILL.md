@@ -59,6 +59,8 @@ code may use either; prefer the token's name where Material has no role.
 
 Contrast is a test (`theme_test.dart`): every text colour, the accent, the states and the 五行 are at least 4.5 : 1 on
 background, card, raised and inset in both themes, and each "on" colour on its fill. A new token gets a row there.
+Staff's own colours in 内容's HTML (S34) meet the same bar where they are written: the editor previews a text in both
+themes and warns below 4.5 : 1 (`contrastRatio` in tokens.dart).
 
 ### Rules
 

@@ -60,7 +60,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
 | S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
 | S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
-| S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | in progress |
+| S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | done        |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2717,6 +2717,32 @@ as #ff0000, the dashboard signed in across tabs and restarts.
   in; 退出登录, two days unused (设置's 登录有效期) or the server ending it signs out.
 
 ## 阶段总结 (stage summaries)
+
+### S34 更多 HTML、自定颜色、后台保持登录 (done 2026-10-31: v22.0.0)
+
+1. **Delivered** (all in v22.0.0):
+   - **WP34.1, HTML in more places:** every `Text(l10n.…)` the app shows in a body or reading style (29 calls, 28
+     texts) is a `ContentText`: the notes, hints and descriptions, each method's sections line, the disclaimer. 41
+     texts in all take HTML.
+   - **WP34.2, written colours:** `#rgb`, `#rrggbb` and `rgb(r, g, b)` beside the theme's (`RICH_WRITTEN_COLOR`,
+     synced to the app as `richWrittenColor`). The editor previews a text on the app's card in light and dark, side by
+     side (stacked on a phone), and warns where words read under 4.5 : 1 in either; it does not refuse.
+   - **WP34.3, staying signed in:** the session's refresh token in the browser's localStorage, so a reload, a new tab
+     or a restart keeps the 管理后台 signed in; its tabs rotate it one at a time from the newest kept.
+2. **Numbers:**
+   - **Tests:** server 754, app 309 → 310, 管理后台 102 → 104.
+   - **Harness:** PASS for v22.0.0.
+3. **Against the plan:**
+   - **Staying signed in was more than a change of storage:** the server takes each refresh token once and ends the
+     session on a second use, so the tabs share one session and take turns to refresh it (the Web Locks API), each
+     from the newest token kept. 退出登录 ends it for the browser; another open tab finds out at its next refresh.
+   - **The warning reads the theme's colours too,** where one is used against its role (a soft fill as words).
+   - **Restructured first,** each its own commit: `contrastRatio` in tokens.dart (f20b032), `richColorOf` (fff299c),
+     `ProblemList` (5a2cf69), `wordsOf` (7a4e3d2).
+4. **Mistakes and what they teach:**
+   - **Rule 94:** a single-use refresh token moved to storage the tabs share would sign every tab out. Check how the
+     server rotates before sharing a session; then rotate under a lock, from the newest token kept.
+5. **Next:** S35, the owner's requests of the same day for the app's pages and the 管理后台's menu.
 
 ### S33 内容按页面、后台菜单、HTML 与免登录 (done 2026-10-31: v21.0.0)
 
