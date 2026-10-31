@@ -76,7 +76,7 @@ const aiQuota = {
 // Readings and accounts: in memory, or kept in the encrypted database (MINGLI_STORE=pglite, S5).
 const persistence = await openStore(secrets);
 const store = persistence.store ?? new InMemoryStore();
-const auth = buildAuth(secrets, true, persistence.users);
+const auth = buildAuth(secrets, true, persistence.users, persistence.sessions);
 await seedDevAccounts(auth, true);
 // 积分 (S20): on unless MINGLI_POINTS=off. 充值 is simulated here (development): no payment, the pack's 积分 arrive.
 const points = pointsOn(process.env) ? loadPointsConfig() : undefined;

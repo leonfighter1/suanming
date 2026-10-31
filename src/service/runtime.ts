@@ -29,7 +29,7 @@ import { AuthService, type AccountRole, type UserStore } from "../auth/service.j
 import { parseKek } from "../db/envelope.js";
 import { PgStore } from "../db/pg-store.js";
 import { SocialVerifier } from "../auth/social.js";
-import { TokenService } from "../auth/tokens.js";
+import { SESSION_IDLE_S, TokenService, type SessionStore } from "../auth/tokens.js";
 import type { EngineSecrets } from "./charts.js";
 
 function hexSecret(name: string): Buffer | undefined {
@@ -278,19 +278,38 @@ export function buildAuth(
   secrets: EngineSecrets,
   devMode: boolean,
   users?: UserStore,
+  sessions?: SessionStore,
 ): AuthService {
   const jwt = hexSecret("MINGLI_JWT_SECRET");
   if (!jwt && !devMode) throw new Error("MINGLI_JWT_SECRET is required outside dev mode");
+  const idle = sessionIdleSeconds();
   const turnstile = process.env.MINGLI_TURNSTILE_SECRET;
   if (!turnstile && !devMode)
     throw new Error("MINGLI_TURNSTILE_SECRET is required outside dev mode");
   return new AuthService({
     pepper: secrets.digestPepper,
-    tokens: new TokenService(jwt ?? randomBytes(32)),
+    tokens: new TokenService(jwt ?? randomBytes(32), undefined, {
+      ...(sessions && { sessions }),
+      idleSeconds: () => idle,
+    }),
     social: SocialVerifier.fromEnv(),
     captcha: turnstile ? new TurnstileVerifier(turnstile) : noCaptcha,
     ...(users && { users }),
   });
+}
+
+/**
+ * How long a session may go unused before signing in again (S29): MINGLI_SESSION_IDLE_DAYS, a fraction allowed;
+ * the owner's 2 days by default.
+ */
+export function sessionIdleSeconds(): number {
+  const raw = process.env.MINGLI_SESSION_IDLE_DAYS?.trim();
+  if (!raw) return SESSION_IDLE_S;
+  const days = Number(raw);
+  if (!Number.isFinite(days) || days <= 0) {
+    throw new Error(`MINGLI_SESSION_IDLE_DAYS must be a positive number of days, not ${raw}`);
+  }
+  return Math.round(days * 24 * 3600);
 }
 
 /** Where readings and accounts are kept: in memory (the default), or the encrypted database. */
@@ -298,6 +317,8 @@ export interface Persistence {
   /** Undefined: the API's in-memory store. */
   store?: Store;
   users?: UserStore;
+  /** Undefined: the sessions in memory (S29). */
+  sessions?: SessionStore;
   /** The folder of the database, when there is one. */
   dataDir?: string;
   close(): Promise<void>;
@@ -327,7 +348,7 @@ export async function openStore(
     kek: parseKek(process.env.MINGLI_DATA_KEY),
     pepper: secrets.digestPepper,
   });
-  return { store: pg, users: pg, dataDir, close: () => pg.close() };
+  return { store: pg, users: pg, sessions: pg, dataDir, close: () => pg.close() };
 }
 
 /**

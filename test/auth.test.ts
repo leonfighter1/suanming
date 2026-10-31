@@ -167,6 +167,19 @@ describe("tokens", () => {
     expect((await authed(t.access_token, "/v1/me")).status).toBe(401);
   });
 
+  it("a session ends after two days unused; one in use goes on (S29)", async () => {
+    const day = 24 * 3600_000;
+    const t1 = await (await register("idle@example.com")).json();
+    clock += 1.5 * day;
+    const t2 = await (await post("/v1/auth/refresh", { refresh_token: t1.refresh_token })).json();
+    // Each refresh starts the two days again.
+    clock += 1.5 * day;
+    const t3 = await (await post("/v1/auth/refresh", { refresh_token: t2.refresh_token })).json();
+    expect(t3.refresh_token).toBeTruthy();
+    clock += 2 * day + 60_000;
+    expect((await post("/v1/auth/refresh", { refresh_token: t3.refresh_token })).status).toBe(401);
+  });
+
   it("logout revokes the refresh token", async () => {
     const t = await (await register("i@example.com")).json();
     expect((await post("/v1/auth/logout", { refresh_token: t.refresh_token })).status).toBe(204);

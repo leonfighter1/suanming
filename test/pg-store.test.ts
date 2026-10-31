@@ -344,6 +344,34 @@ describe.each(kinds)("the store contract, %s", (_name, make) => {
 
 describe("the database store", () => {
   it(
+    "keeps the sessions across a restart (S29); reuse still ends one, and so does deleting the account",
+    async () => {
+      const dataDir = folder();
+      const owner = randomUUID();
+      const first = await PgStore.open({ dataDir, kek: KEK, pepper: PEPPER });
+      await first.put(user(owner, "session@example.com"));
+      const t1 = await new TokenService(randomBytes(32), undefined, { sessions: first }).issue(
+        owner,
+      );
+      await first.close();
+
+      // Another process: another JWT secret, the same sessions.
+      const again = await PgStore.open({ dataDir, kek: KEK, pepper: PEPPER });
+      const tokens = new TokenService(randomBytes(32), undefined, { sessions: again });
+      const { userId, tokens: t2 } = await tokens.rotate(t1.refresh_token);
+      expect(userId).toBe(owner);
+      await expect(tokens.rotate(t1.refresh_token)).rejects.toThrow(/reuse/);
+      await expect(tokens.rotate(t2.refresh_token)).rejects.toThrow(/invalid/);
+
+      const t3 = await tokens.issue(owner);
+      await again.delete(owner);
+      await expect(tokens.rotate(t3.refresh_token)).rejects.toThrow(/invalid/);
+      await again.close();
+    },
+    PG,
+  );
+
+  it(
     "survives a restart with its key, and refuses another key",
     async () => {
       const dataDir = folder();

@@ -35,7 +35,7 @@ export async function authRoute(
         send(res, 200, await auth.refresh(body.refresh_token));
         return true;
       case "/v1/auth/logout":
-        auth.logout(body.refresh_token);
+        await auth.logout(body.refresh_token);
         res.writeHead(204);
         res.end();
         return true;

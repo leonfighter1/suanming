@@ -41,6 +41,7 @@ import type {
 import { creditEntry, newHold } from "../points/index.js";
 import type { ContentLocale } from "../content/catalog.js";
 import type { ContentImageRecord, ContentTextRecord } from "../content/store.js";
+import type { RefreshRecord, SessionStore } from "../auth/tokens.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
@@ -58,6 +59,7 @@ const MIGRATIONS = [
   "011_admin",
   "012_messages",
   "013_content",
+  "014_sessions",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -79,6 +81,12 @@ export interface PgStoreOptions {
 type Db = PGlite | Transaction;
 type Row = Record<string, unknown>;
 const iso = (v: unknown) => (v as Date).toISOString();
+const refreshOf = (r: Row): RefreshRecord => ({
+  userId: r.user_id as string,
+  family: r.family as string,
+  expiresAt: (r.expires_at as Date).getTime(),
+  used: r.used === true,
+});
 
 const ENTRY_COLUMNS =
   "id, user_id, kind, points, balance, for_kind, for_id, system, basis, usd, pack_yuan, pack_points, reason, note, created_at";
@@ -165,7 +173,7 @@ interface SealedIds {
   settings?: UserRecord["settings"];
 }
 
-export class PgStore implements Store, UserStore {
+export class PgStore implements Store, UserStore, SessionStore {
   /** Unwrapped data keys, in memory only. */
   private readonly keys = new Map<string, Buffer>();
 
@@ -830,6 +838,39 @@ export class PgStore implements Store, UserStore {
     ]);
     return (r.affectedRows ?? 0) > 0;
   }
+  // ---- sessions (v18.0.0, S29): the refresh tokens by their SHA-256, so a restart keeps everyone signed in ----
+
+  async putRefresh(hash: string, r: RefreshRecord, now: number) {
+    await this.db.query("DELETE FROM sessions WHERE expires_at < $1", [
+      new Date(now).toISOString(),
+    ]);
+    await this.db.query(
+      "INSERT INTO sessions (hash, user_id, family, expires_at, used) VALUES ($1, $2, $3, $4, $5)",
+      [hash, r.userId, r.family, new Date(r.expiresAt).toISOString(), r.used],
+    );
+  }
+
+  async useRefresh(hash: string) {
+    return this.db.transaction(async (tx) => {
+      const r = (await tx.query<Row>("SELECT * FROM sessions WHERE hash = $1", [hash])).rows[0];
+      if (r && !r.used) await tx.query("UPDATE sessions SET used = true WHERE hash = $1", [hash]);
+      return r && refreshOf(r);
+    });
+  }
+
+  async getRefresh(hash: string) {
+    const r = (await this.db.query<Row>("SELECT * FROM sessions WHERE hash = $1", [hash])).rows[0];
+    return r && refreshOf(r);
+  }
+
+  async dropFamily(family: string) {
+    await this.db.query("DELETE FROM sessions WHERE family = $1", [family]);
+  }
+
+  async dropUser(userId: string) {
+    await this.db.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
+  }
+
   // ---- 内容管理 (v18.0.0, S29): staff's changes to the app's texts and images, plain ----
 
   async listContentTexts() {

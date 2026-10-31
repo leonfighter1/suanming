@@ -394,19 +394,19 @@ export class AuthService {
     const user = await this.users.get(rotated.userId);
     if (!user) throw new AuthError(401, "user deleted");
     if (user.status === "suspended") {
-      this.deps.tokens.revokeUser(user.id);
+      await this.deps.tokens.revokeUser(user.id);
       throw suspended();
     }
     return rotated.tokens;
   }
 
   /** 管理后台 (v11.2.0): ends every session of an account; its access tokens lapse within their 15 minutes. */
-  signOutEverywhere(userId: string) {
-    this.deps.tokens.revokeUser(userId);
+  async signOutEverywhere(userId: string) {
+    await this.deps.tokens.revokeUser(userId);
   }
 
-  logout(refreshToken: unknown) {
-    if (typeof refreshToken === "string") this.deps.tokens.revoke(refreshToken);
+  async logout(refreshToken: unknown) {
+    if (typeof refreshToken === "string") await this.deps.tokens.revoke(refreshToken);
   }
 
   /** Bearer token → user, or throws 401. */
@@ -466,7 +466,7 @@ export class AuthService {
 
   /** Remove the account and revoke every session. Caller purges owned data first. */
   async deleteAccount(userId: string) {
-    this.deps.tokens.revokeUser(userId);
+    await this.deps.tokens.revokeUser(userId);
     await this.users.delete(userId);
   }
 }

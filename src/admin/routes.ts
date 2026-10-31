@@ -307,7 +307,7 @@ export async function adminRoute(
       await ctx.auth.users.put(next);
       // A suspension ends every session at once.
       if (next.status === "suspended" && target.status !== "suspended") {
-        ctx.auth.signOutEverywhere(id);
+        await ctx.auth.signOutEverywhere(id);
       }
       ctx.log(
         `admin ${loginOf(me)}: account ${id.slice(0, 8)} ${changed.join(", ") || "unchanged"}`,
@@ -347,7 +347,7 @@ export async function adminRoute(
       return true;
     }
     if (action === "/sign-out" && req.method === "POST") {
-      ctx.auth.signOutEverywhere(id);
+      await ctx.auth.signOutEverywhere(id);
       ctx.log(`admin ${loginOf(me)}: signed ${id.slice(0, 8)} out everywhere`);
       send(res, 200, { signed_out: true });
       return true;
