@@ -956,12 +956,9 @@ Future<FakeAdmin> pumpAdmin(
   Map<String, String>? prefs,
   String? loginHint,
   String? handoff,
-  Map<String, String>? tab,
 }) async {
   final f = fake ?? FakeAdmin();
   final stored = prefs ?? <String, String>{};
-  // This tab's storage (S33): an empty value takes the key away, as the browser's does.
-  final inTab = tab ?? <String, String>{};
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -976,9 +973,9 @@ Future<FakeAdmin> pumpAdmin(
           f.pickTypes = types;
           return f.pick;
         }),
-        prefsProvider.overrideWithValue(Prefs(read: (k) => stored[k], write: (k, v) => stored[k] = v)),
-        tabPrefsProvider.overrideWithValue(
-          Prefs(read: (k) => inTab[k], write: (k, v) => v.isEmpty ? inTab.remove(k) : inTab[k] = v),
+        // The browser's storage: an empty value takes the key away, as the browser's does.
+        prefsProvider.overrideWithValue(
+          Prefs(read: (k) => stored[k], write: (k, v) => v.isEmpty ? stored.remove(k) : stored[k] = v),
         ),
         loginHintProvider.overrideWithValue(loginHint),
         handoffProvider.overrideWithValue(handoff),

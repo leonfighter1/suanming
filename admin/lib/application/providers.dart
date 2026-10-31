@@ -10,6 +10,7 @@ import '../platform/login_hint.dart';
 import '../platform/pick_file.dart';
 import '../presentation/format.dart' show moneyUnit;
 import '../platform/prefs.dart';
+import '../platform/session_lock.dart';
 
 /// When Riverpod asks again by itself after a failed request: a few times, quickly (0.2, 0.4, 0.8, 1.6 s), when the
 /// server erred or couldn't be reached; never when it said no (4xx, the session over), which asking again won't
@@ -43,13 +44,8 @@ class Prefs {
 
 final prefsProvider = Provider<Prefs>((ref) => const Prefs(read: readPref, write: writePref));
 
-/// This tab's own storage (S33; the owner: 「不需要重复登录dashboard 页面了」): the session's refresh token, kept across a
-/// reload and gone with the tab, as the session was before. Tests put a map here.
-final tabPrefsProvider = Provider<Prefs>(
-  (ref) => Prefs(read: (k) => readPref(k, tab: true), write: (k, v) => writePref(k, v, tab: true)),
-);
-
-/// The tab's session's key.
+/// The session's key in this browser's storage, and the name of the lock its tabs take turns under (S34; the owner:
+/// 「不需要重复登录dashboard 页面了」): its refresh token, shared by the dashboard's tabs and kept across a restart.
 const sessionKey = 'mingli-admin-session';
 
 /// 外观 (v12.1.0): the system's light or dark, or one of them always, kept in this browser. A change fades the
@@ -77,7 +73,9 @@ final adminApiProvider = Provider<AdminApi>((ref) {
   // Two statements: in a cascade, the first closure's body would take the second assignment in.
   api.onSignedOut = () => ref.read(sessionProvider.notifier).ended();
   api.onNotAllowed = () => ref.read(sessionProvider.notifier).recheck();
-  api.onSession = (refresh) => ref.read(tabPrefsProvider).write(sessionKey, refresh ?? '');
+  api.onSession = (refresh) => ref.read(prefsProvider).write(sessionKey, refresh ?? '');
+  api.keptSession = () => ref.read(prefsProvider).read(sessionKey);
+  api.oneAtATime = (rotate) => oneAtATime(sessionKey, rotate);
   return api;
 });
 
@@ -96,8 +94,8 @@ class SessionNotifier extends Notifier<AdminMe?> {
   }
 
   /// Signed in at the start without asking again (S33; the owner: 「如果当前登录进去的用户有dashboard access，那么不需要
-  /// 重复登录了」): with the app's one-time code, else with this tab's session from before a reload. Neither working
-  /// leaves the sign-in, its login filled in where the app gave it.
+  /// 重复登录了」): with the app's one-time code, else with this browser's session (from before a reload, another tab's,
+  /// from before a restart: S34). Neither working leaves the sign-in, its login filled in where the app gave it.
   Future<void> start() async {
     final api = ref.read(adminApiProvider);
     final code = ref.read(handoffProvider);
@@ -106,15 +104,15 @@ class SessionNotifier extends Notifier<AdminMe?> {
         state = await api.signInWithCode(code);
         return;
       } on Object {
-        // Used or late: this tab's session, if it has one.
+        // Used or late: this browser's session, if it has one.
       }
     }
-    final kept = ref.read(tabPrefsProvider).read(sessionKey);
+    final kept = ref.read(prefsProvider).read(sessionKey);
     if (kept == null || kept.isEmpty) return;
     try {
       state = await api.resume(kept);
     } on Object {
-      ref.read(tabPrefsProvider).write(sessionKey, '');
+      ref.read(prefsProvider).write(sessionKey, '');
     }
   }
 

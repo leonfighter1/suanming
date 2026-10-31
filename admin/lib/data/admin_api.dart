@@ -35,9 +35,10 @@ class AdminFile {
   final String mime;
 }
 
-/// The admin API (/v1/admin/*, api/openapi.yaml tag admin). The session lives in this tab (S33: its refresh token in
-/// the tab's storage, through [onSession]): a reload keeps it, closing the tab signs the admin out. An expired access
-/// token is refreshed once; a refresh that fails signs out.
+/// The admin API (/v1/admin/*, api/openapi.yaml tag admin). The session lives in this browser (S34: its refresh token
+/// kept through [onSession] and read back through [keptSession]): the dashboard's tabs share it, and a reload or a
+/// restart keeps it, until 退出登录 or the server ends it. An expired access token is refreshed once; a refresh that
+/// fails signs out.
 class AdminApi {
   AdminApi({required this.baseUrl, http.Client? client}) : _http = client ?? http.Client();
 
@@ -56,6 +57,13 @@ class AdminApi {
   /// Told when the session's refresh token changes (signed in, refreshed), null when the session ends (S33).
   void Function(String? refresh)? onSession;
 
+  /// The session's refresh token as this browser keeps it now (S34): another tab may have rotated it since.
+  String? Function()? keptSession;
+
+  /// Runs a rotation of the session one tab at a time (S34: the server takes each refresh token once, and a second use
+  /// ends the session for every tab); by itself unless told otherwise.
+  Future<Json> Function(Future<Json> Function() rotate) oneAtATime = (rotate) => rotate();
+
   /// Signs in, then checks the account has a staff role (403 admin_only otherwise, and the session is dropped).
   Future<AdminMe> signIn(String login, String password) =>
       _signedIn(_send('POST', '/v1/auth/login', body: {'login': login, 'password': password}));
@@ -63,9 +71,20 @@ class AdminApi {
   /// Signs in with the one-time code the app's ☰ → 管理后台 handed over (S33): a session of the dashboard's own.
   Future<AdminMe> signInWithCode(String code) => _signedIn(_send('POST', '/v1/auth/handoff', body: {'code': code}));
 
-  /// This tab's session again after a reload (S33): its refresh token rotated, then checked as a sign-in is.
-  Future<AdminMe> resume(String refresh) =>
-      _signedIn(_send('POST', '/v1/auth/refresh', body: {'refresh_token': refresh}));
+  /// This browser's session again (S33 a reload; S34 another tab, a restart): rotated, then checked as a sign-in is.
+  Future<AdminMe> resume(String refresh) => _signedIn(_rotate(refresh));
+
+  /// The session's refresh token rotated, one tab at a time, from the newest one kept ([fallback] where none is), and
+  /// the new one kept before the next tab's turn (S34).
+  Future<Json> _rotate(String? fallback) => oneAtATime(() async {
+        final refresh = keptSession?.call() ?? fallback;
+        if (refresh == null) throw const AdminApiException(401, '请先登录');
+        final t = await _send('POST', '/v1/auth/refresh', body: {'refresh_token': refresh});
+        _access = t['access_token'] as String;
+        _refresh = t['refresh_token'] as String;
+        onSession?.call(_refresh);
+        return t;
+      });
 
   Future<AdminMe> _signedIn(Future<Json> tokens) async {
     final t = await tokens;
@@ -243,13 +262,9 @@ class AdminApi {
   Future<bool> _refreshed() => _refreshing ??= _refreshOnce().whenComplete(() => _refreshing = null);
 
   Future<bool> _refreshOnce() async {
-    final refresh = _refresh;
-    if (refresh == null) return false;
+    if (_refresh == null) return false;
     try {
-      final t = await _send('POST', '/v1/auth/refresh', body: {'refresh_token': refresh});
-      _access = t['access_token'] as String;
-      _refresh = t['refresh_token'] as String;
-      onSession?.call(_refresh);
+      await _rotate(_refresh);
       return true;
     } on Object {
       return false;

@@ -302,7 +302,10 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
 - **From the app (v13.3.0, v21.0.0):** a staff account sees ☰ → 管理后台 in the app. On the web it opens the dashboard
   in a new tab, signed in (v21.0.0: a one-time code asked for as ☰ opens, two minutes, one use; both leave the
   address bar once read). A code used or late leaves the sign-in, the login filled in. Off the web the address is
-  copied instead, without the code. A reload keeps the dashboard signed in in its tab; closing the tab signs out.
+  copied instead, without the code. The dashboard stays signed in across a reload, another tab and a restart of the
+  browser (v22.0.0: one session in the browser, its tabs refreshing it in turn); 退出登录 ends it for the browser, and
+  another open tab finds out at its next refresh (its access lasts 15 minutes at most). Unused for 设置's 登录有效期
+  (two days by default), or ended by the server, it signs out too.
 - **The menu at the top right (v21.0.0):** the name and role open 内容, 消息, 导出 (as the role may), 外观, 退出登录;
   the rail keeps 概览 … 设置. An integrator has no rail: both pages are in the menu.
 - **内容 by page (v21.0.0):** each page of the app with its texts and images, opened by the way they are reached;

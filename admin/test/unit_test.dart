@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:mingli_admin/application/providers.dart';
 import 'package:mingli_admin/config.dart';
 import 'package:mingli_admin/data/admin_api.dart';
@@ -107,5 +111,54 @@ void main() {
     expect([u.admin, u.adminByConfig, u.suspended, u.ai, u.topUpAllowed, u.demo], [true, true, true, false, true, false]);
     expect(u.lastSeenAt, isNull);
     expect(u.topup, 10.0);
+  });
+
+  // S34: the dashboard's tabs share one session, and the server (src/auth/tokens.ts rotate) takes each refresh token
+  // once: a second use ends the session for every tab.
+  test('two tabs share the session: each refresh takes the newest refresh token kept, never one already used', () async {
+    var last = 0;
+    final used = <String>{};
+    final live = <String>{};
+    var ended = false;
+    http.Response answer(Object body, [int status = 200]) =>
+        http.Response(jsonEncode(body), status, headers: {'content-type': 'application/json'});
+    Json tokens() {
+      last++;
+      live.add('a$last');
+      return {'access_token': 'a$last', 'refresh_token': 'r$last'};
+    }
+
+    final server = MockClient((r) async {
+      switch (r.url.path) {
+        case '/v1/auth/login':
+          return answer(tokens());
+        case '/v1/auth/refresh':
+          final t = (jsonDecode(r.body) as Map)['refresh_token'] as String;
+          if (used.contains(t)) ended = true;
+          if (ended || t != 'r$last') return answer({'title': 'invalid refresh token', 'status': 401}, 401);
+          used.add(t);
+          return answer(tokens());
+        default:
+          final access = r.headers['authorization']?.replaceFirst('Bearer ', '');
+          if (ended || !live.contains(access)) return answer({'title': 'unauthorized', 'status': 401}, 401);
+          return answer({'id': 'admin-1', 'login': 'boss'});
+      }
+    });
+    final browser = <String, String>{};
+    AdminApi tab() => AdminApi(baseUrl: 'http://server', client: server)
+      ..onSession = ((r) => r == null ? browser.remove(sessionKey) : browser[sessionKey] = r)
+      ..keptSession = (() => browser[sessionKey]);
+
+    final a = tab();
+    await a.signIn('boss', 'secret1');
+    final b = tab();
+    await b.resume(browser[sessionKey]!);
+    // Both access tokens run out: a's refresh takes r2, b's, not its own r1 (used), and b's then a's.
+    live.clear();
+    expect((await a.me()).login, 'boss');
+    expect([ended, browser[sessionKey]], [false, 'r3']);
+    live.clear();
+    expect((await b.me()).login, 'boss');
+    expect([ended, browser[sessionKey]], [false, 'r4']);
   });
 }

@@ -121,27 +121,30 @@ void main() {
     expect(tester.widget<TextField>(find.byKey(const Key('admin-login'))).controller!.text, 'mgr');
   });
 
-  testWidgets('a reload keeps this tab signed in; 退出登录 ends it there too', (tester) async {
-    final tab = <String, String>{};
-    await pumpAdmin(tester, tab: tab);
-    expect(tab[sessionKey], 'r1');
-    // A reload: the tab's session again, rotated, without the sign-in (rule 24: the first app gone first).
+  // S34: the session is the browser's, shared by its tabs and kept across a restart, until 退出登录.
+  testWidgets('a reload, another tab or a restart keeps the dashboard signed in; 退出登录 ends it in the browser',
+      (tester) async {
+    final browser = <String, String>{};
+    await pumpAdmin(tester, prefs: browser);
+    expect(browser[sessionKey], 'r1');
+    // A reload, another tab or the browser started again: its session, rotated, without the sign-in (rule 24: the
+    // first app gone first).
     await tester.pumpWidget(const SizedBox());
-    final f = await pumpAdmin(tester, signIn: false, tab: tab);
+    final f = await pumpAdmin(tester, signIn: false, prefs: browser);
     expect(find.byKey(const Key('admin-me')), findsOneWidget);
     expect(f.bodyOf(f.last('/v1/auth/refresh', method: 'POST')), {'refresh_token': 'r1'});
-    expect(tab[sessionKey], 'r2');
+    expect(browser[sessionKey], 'r2');
     await openMenu(tester);
     await tester.tap(find.byKey(const Key('sign-out')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('admin-submit')), findsOneWidget);
-    expect(tab.containsKey(sessionKey), isFalse);
+    expect(browser.containsKey(sessionKey), isFalse);
   });
 
-  testWidgets('a tab\'s session the server ended: the sign-in, and the tab forgets it', (tester) async {
-    final tab = {sessionKey: 'r-old'};
-    await pumpAdmin(tester, fake: FakeAdmin()..refreshFails = true, signIn: false, tab: tab);
+  testWidgets('a session the server ended: the sign-in, and the browser forgets it', (tester) async {
+    final browser = {sessionKey: 'r-old'};
+    await pumpAdmin(tester, fake: FakeAdmin()..refreshFails = true, signIn: false, prefs: browser);
     expect(find.byKey(const Key('admin-submit')), findsOneWidget);
-    expect(tab.containsKey(sessionKey), isFalse);
+    expect(browser.containsKey(sessionKey), isFalse);
   });
 }
