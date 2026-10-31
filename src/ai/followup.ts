@@ -49,8 +49,6 @@ import {
   type TarotFocus,
 } from "./types.js";
 
-/** Follow-ups per reading (each takes one from the daily AI caps). */
-export const FOLLOWUP_LIMIT = 20;
 /** A question's length, in characters. */
 export const FOLLOWUP_QUESTION_MAX = 200;
 /** How many earlier 追问 the model reads with a new one: the last six. */

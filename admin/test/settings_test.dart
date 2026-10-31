@@ -104,6 +104,22 @@ void main() {
     expect(find.textContaining('¥'), findsNothing);
   });
 
+  testWidgets('增加积分\'s most (S32): changed here, the session asks again and the account page follows it', (tester) async {
+    final f = await openSettings(tester);
+    await tester.enterText(find.byKey(const ValueKey<String>('setting-limits.grant_max-field')), '500');
+    await tapOn(tester, 'setting-limits.grant_max-save');
+    expect(f.bodyOf(f.last('/v1/admin/settings/limits.grant_max', method: 'PUT')), {'value': 500});
+    expect(f.to('/v1/admin/me'), hasLength(2), reason: 'the session asked again, for 增加积分\'s most');
+
+    await go(tester, '用户');
+    await tapOn(tester, 'user-u-02');
+    expect(find.text('1 到 500'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('grant-points')), '501');
+    await tapOn(tester, 'grant-submit');
+    expect(find.text('积分请填 1 到 500 之间的整数'), findsOneWidget);
+    expect(f.to('/v1/admin/users/u-02/points', method: 'POST'), isEmpty);
+  });
+
   testWidgets('a manager has no 设置', (tester) async {
     await pumpAdmin(tester, fake: FakeAdmin()..role = 'manager', size: tall);
     expect(find.text('设置'), findsNothing);

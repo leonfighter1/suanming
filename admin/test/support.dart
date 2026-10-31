@@ -201,6 +201,8 @@ class FakeAdmin {
         // The dashboard's currency (设置, S31) at a test rate.
         if (settingValues['currencies.dashboard'] == 'HKD')
           'currency': {'code': 'HKD', 'symbol': 'HK\$', 'decimals': 2, 'rate': 1.1, 'rates_date': '2026-10-29'},
+        // 增加积分's most (设置, S32).
+        'grant_max': settingValues['limits.grant_max'] ?? 1000000,
       });
     }
     // Every route asks for its capability, as the server's capabilityOf does.
@@ -710,6 +712,18 @@ const settingSpecs = <Json>[
     'label': '登录有效期',
     'about': '账户多久没用之后要重新登录。',
     'default': 2,
+  },
+  {
+    'key': 'limits.grant_max',
+    'group': 'limits',
+    'type': 'number',
+    'integer': true,
+    'min': 1,
+    'max': 100000000,
+    'unit': '积分',
+    'label': '一次最多增加的积分',
+    'about': '管理后台给一个账户增加积分时，一次最多加这么多。',
+    'default': 1000000,
   },
   {
     'key': 'ai.mock',

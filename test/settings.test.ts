@@ -150,7 +150,7 @@ const auth = buildAuth(
   sessions,
   settings,
 );
-const { start, call } = staffApi(
+const { start, call, ids } = staffApi(
   {
     auth,
     store,
@@ -246,6 +246,18 @@ describe("设置 in the 管理后台", () => {
     expect((await ask()).status).toBe(202);
     for (const key of ["codes.minutes", "codes.resend_seconds"])
       await call("boss", `/v1/admin/settings/${key}`, "DELETE");
+  });
+
+  it("限额: 增加积分's most at once is the panel's, and /v1/admin/me says it (WP32.3)", async () => {
+    const grant = (points: number) =>
+      call("boss", `/v1/admin/users/${ids.alice}/points`, "POST", { points });
+    expect((await (await call("boss", "/v1/admin/me")).json()).grant_max).toBe(1_000_000);
+    await call("boss", "/v1/admin/settings/limits.grant_max", "PUT", { value: 500 });
+    expect((await (await call("mgr", "/v1/admin/me")).json()).grant_max).toBe(500);
+    expect((await grant(501)).status).toBe(400);
+    expect((await grant(500)).status).toBe(201);
+    await call("boss", "/v1/admin/settings/limits.grant_max", "DELETE");
+    expect((await grant(501)).status).toBe(201);
   });
 });
 

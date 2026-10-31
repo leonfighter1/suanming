@@ -26,7 +26,6 @@ export {
   type LifeTopic,
 } from "./life.js";
 export {
-  FOLLOWUP_LIMIT,
   FOLLOWUP_QUESTION_MAX,
   FOLLOWUP_THREAD,
   followUpAvailable,

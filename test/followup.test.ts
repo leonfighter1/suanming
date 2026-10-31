@@ -3,7 +3,6 @@
 import type { AddressInfo } from "node:net";
 import { describe, expect, it } from "vitest";
 import {
-  FOLLOWUP_LIMIT,
   FollowUpInputError,
   GeoRefusedError,
   generateFollowUp,
@@ -19,6 +18,7 @@ import { createApiServer } from "../src/api/server.js";
 import { computeBazi } from "../src/engines/bazi/index.js";
 import { DECK } from "../src/engines/tarot/deck.js";
 import { computeTarot } from "../src/engines/tarot/index.js";
+import { Settings } from "../src/settings/index.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 import { testApi } from "./api.js";
 
@@ -280,9 +280,11 @@ describe("追问, the pipeline (WP13.2)", () => {
 
 const mock = new MockProvider();
 let base = "";
+const settings = new Settings(undefined, {});
 const api = testApi(
   {
     providers: { deepseek: mock, anthropic: mock },
+    settings,
   },
   (b) => (base = b),
 );
@@ -336,7 +338,7 @@ describe("追问, the API (WP13.2)", () => {
     await post(`/v1/reports/${report_id}/followups`, { question: "第二个问题" }, "fu-a");
     await api.drain();
     const list = await (await get(`/v1/reports/${report_id}/followups`, "fu-a")).json();
-    expect(list.limit).toBe(FOLLOWUP_LIMIT);
+    expect(list.limit).toBe(20);
     expect(list.items.map((f: { question: string }) => f.question)).toEqual([
       "我适合什么工作？",
       "第二个问题",
@@ -396,16 +398,25 @@ describe("追问, the API (WP13.2)", () => {
     await new Promise<void>((r) => s.close(() => r()));
   });
 
-  it("answers up to the limit, then says so", async () => {
+  it("answers up to the limit, then says so; the limit is 设置's, read at each question (S32)", async () => {
     const { report_id } = await passedReport("fu-d");
     const path = `/v1/reports/${report_id}/followups`;
-    for (let i = 1; i <= FOLLOWUP_LIMIT; i++) {
-      expect((await post(path, { question: `第${i}问` }, "fu-d")).status).toBe(202);
-      await api.drain();
+    await settings.set("limits.followups_per_reading", 3, undefined, new Date().toISOString());
+    try {
+      for (let i = 1; i <= 3; i++) {
+        expect((await post(path, { question: `第${i}问` }, "fu-d")).status).toBe(202);
+        await api.drain();
+      }
+      const full = await post(path, { question: "再问" }, "fu-d");
+      expect(full.status).toBe(409);
+      expect((await full.json()).code).toBe("followup_limit");
+      expect((await (await get(path, "fu-d")).json()).limit).toBe(3);
+    } finally {
+      await settings.reset("limits.followups_per_reading");
     }
-    const full = await post(path, { question: "再问" }, "fu-d");
-    expect(full.status).toBe(409);
-    expect((await full.json()).code).toBe("followup_limit");
+    // Back to 20: the reading may be asked again.
+    expect((await post(path, { question: "第四问" }, "fu-d")).status).toBe(202);
+    await api.drain();
   });
 
   it("each 追问 takes one from the daily AI caps", async () => {

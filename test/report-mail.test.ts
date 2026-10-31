@@ -3,7 +3,6 @@
 import type { AddressInfo } from "node:net";
 import { describe, expect, it } from "vitest";
 import { generateLifeReport, generateReport, MockProvider } from "../src/ai/index.js";
-import { MAIL_DOCUMENTS } from "../src/api/routes/archive.js";
 import { createApiServer } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import { noCaptcha } from "../src/auth/limits.js";
@@ -495,9 +494,12 @@ describe("发到邮箱: chosen records, to the account's own verified email", ()
     expect(m.attachments![0]!.content.subarray(0, 2).toString("latin1")).toBe("PK");
     expect(m.text).toContain("· 徐梅 的命盘");
 
-    const many = Array.from({ length: MAIL_DOCUMENTS + 1 }, (_, i) => ({
-      document: doc(`记录 ${i}`),
-    }));
+    const many = Array.from(
+      { length: settings.number("limits.documents_per_mail") + 1 },
+      (_, i) => ({
+        document: doc(`记录 ${i}`),
+      }),
+    );
     const tooMany = await call(
       "POST",
       "/v1/documents/email",
@@ -532,6 +534,27 @@ describe("发到邮箱: chosen records, to the account's own verified email", ()
       expect([again.status, again.body.code]).toEqual([429, "too_many"]);
     } finally {
       await settings.reset("limits.mail_per_user_day");
+    }
+  });
+
+  it("设置's records a mail (S32): with limits.documents_per_mail at 2, three are refused and two go", async () => {
+    await settings.set("limits.documents_per_mail", 2, undefined, now().toISOString());
+    try {
+      const token = await account("two_docs", { email: "two@example.com" });
+      const send = (n: number) =>
+        call(
+          "POST",
+          "/v1/documents/email",
+          {
+            format: "docx",
+            documents: Array.from({ length: n }, (_, i) => ({ document: doc(`记录 ${i}`) })),
+          },
+          token,
+        );
+      expect((await send(3)).status).toBe(400);
+      expect((await send(2)).status).toBe(202);
+    } finally {
+      await settings.reset("limits.documents_per_mail");
     }
   });
 

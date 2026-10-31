@@ -5,7 +5,6 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
-  FOLLOWUP_LIMIT,
   FOLLOWUP_QUESTION_MAX,
   followUpAvailable,
   generateFollowUp,
@@ -109,7 +108,8 @@ async function runFollowUpJob(
 
 /**
  * 追问 (v7.0.0, S13): one question on a passed reading or 一生运势报告, answered in the background from that reading
- * alone. One at a time, up to FOLLOWUP_LIMIT per reading; each takes one from the daily AI caps.
+ * alone. One at a time, up to 设置's limits.followups_per_reading per reading (S32); each takes one from the daily AI
+ * caps.
  */
 async function createFollowUp(
   ctx: ApiContext,
@@ -134,10 +134,11 @@ async function createFollowUp(
   if (earlier.some((f) => f.status === "pending")) {
     throw new HttpError(409, "the previous follow-up is still being answered", "followup_pending");
   }
-  if (earlier.filter((f) => f.status !== "failed").length >= FOLLOWUP_LIMIT) {
+  const limit = ctx.settings.number("limits.followups_per_reading");
+  if (earlier.filter((f) => f.status !== "failed").length >= limit) {
     throw new HttpError(
       409,
-      `this reading has had its ${FOLLOWUP_LIMIT} follow-up questions`,
+      `this reading has had its ${limit} follow-up questions`,
       "followup_limit",
     );
   }
@@ -205,7 +206,8 @@ export async function followUpRoute(
         system,
         parent: fq[1] === "reports" ? "report" : "life_report",
       });
-    send(res, 200, { limit: FOLLOWUP_LIMIT, items, ...(price && { price }) });
+    const limit = ctx.settings.number("limits.followups_per_reading");
+    send(res, 200, { limit, items, ...(price && { price }) });
     return true;
   }
   const fo = /^\/v1\/followups\/([^/]+)$/.exec(path);

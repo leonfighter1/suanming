@@ -170,6 +170,41 @@ export const SETTINGS = [
     label: "每个账户每天发到邮箱的次数",
     about: "报告和以往记录发到邮箱，一个账户一天最多几封；0 是不发。",
   },
+  // S32 WP32.3: the limits beside the daily ones.
+  {
+    key: "limits.documents_per_mail",
+    group: "limits",
+    type: "number",
+    integer: true,
+    // A message's request holds at most 4 MB of documents (archive.ts), and providers limit a mail's size.
+    min: 1,
+    max: 20,
+    unit: "份",
+    label: "一封邮件最多带几份记录",
+    about: "以往记录发到邮箱时，一封邮件最多附几份。",
+  },
+  {
+    key: "limits.followups_per_reading",
+    group: "limits",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 1000,
+    unit: "次",
+    label: "每份结果的追问次数",
+    about: "一份解读或一生运势报告最多可以追问几次；答不出来的不算。",
+  },
+  {
+    key: "limits.grant_max",
+    group: "limits",
+    type: "number",
+    integer: true,
+    min: 1,
+    max: 100_000_000,
+    unit: "积分",
+    label: "一次最多增加的积分",
+    about: "管理后台给一个账户增加积分时，一次最多加这么多。",
+  },
   // The owner's AI switches (CLAUDE.md rule 5): unset, .env's, read live (src/service/runtime.ts withPanel).
   {
     key: "ai.mock",

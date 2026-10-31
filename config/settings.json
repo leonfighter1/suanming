@@ -20,7 +20,10 @@
   "limits": {
     "ai_per_user_day": 10,
     "ai_total_day": 100,
-    "mail_per_user_day": 20
+    "mail_per_user_day": 20,
+    "documents_per_mail": 10,
+    "followups_per_reading": 20,
+    "grant_max": 1000000
   },
   "currencies": {
     "accepted": ["CNY", "HKD", "TWD", "SGD", "MYR", "USD"],

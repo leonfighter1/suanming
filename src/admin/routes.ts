@@ -69,7 +69,6 @@ export interface AdminContext {
 
 /** Whose calendar a day is, unless a request names a time zone: the owner's markets are all at UTC+8. */
 export const ADMIN_TZ = "Asia/Shanghai";
-export const GRANT_MAX = 1_000_000;
 
 const byConfig = (ctx: AdminContext, u: UserRecord) =>
   [u.username, u.email].some((n) => !!n && ctx.admins.has(n.toLowerCase()));
@@ -190,6 +189,8 @@ export async function adminRoute(
       can: CAPABILITIES[role],
       assignable_roles: assignableRoles(role),
       currency: await dashboardCurrency(ctx),
+      // 增加积分's most at once (设置, S32), so the account page checks what the server would.
+      grant_max: ctx.settings.number("limits.grant_max"),
     });
     return true;
   }
@@ -356,8 +357,9 @@ export async function adminRoute(
     if (action === "/points" && req.method === "POST") {
       const body = (await readJson(req)) as Record<string, unknown>;
       const points = body.points;
-      if (!Number.isInteger(points) || (points as number) < 1 || (points as number) > GRANT_MAX) {
-        throw new HttpError(400, `points must be a whole number from 1 to ${GRANT_MAX}`);
+      const most = ctx.settings.number("limits.grant_max");
+      if (!Number.isInteger(points) || (points as number) < 1 || (points as number) > most) {
+        throw new HttpError(400, `points must be a whole number from 1 to ${most}`);
       }
       const note =
         typeof body.note === "string" && body.note.trim()

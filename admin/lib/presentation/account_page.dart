@@ -16,9 +16,6 @@ import 'widgets/common.dart';
 import 'widgets/dashboard.dart';
 import 'widgets/tables.dart';
 
-/// The most an admin grants at once (the server's GRANT_MAX).
-const grantMax = 1000000;
-
 /// One account (管理后台, tech plan S22; laid out in S24 WP24.3): its numbers, its 积分 ledger, its latest AI jobs and
 /// what each kind of job cost; in the panel, as far as the role may (S25): suspending it and its permissions, its role, and
 /// for an admin 增加积分 and signing it out everywhere.
@@ -90,11 +87,14 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     await _update({'role': role}, role == 'user' ? '已取消 ${u.login} 的后台角色' : '${u.login} 已是${roleName(role)}');
   }
 
+  /// 增加积分's most at once: the server's (设置, S32), as the session says; the page watches the session.
+  int get _grantMax => ref.read(sessionProvider)?.grantMax ?? AdminMe.grantMaxBefore;
+
   Future<void> _grant(AdminUser u) async {
     if (_busy) return;
     final n = int.tryParse(_points.text.trim());
-    if (n == null || n < 1 || n > grantMax) {
-      say(context, '积分请填 1 到 ${count(grantMax)} 之间的整数');
+    if (n == null || n < 1 || n > _grantMax) {
+      say(context, '积分请填 1 到 ${count(_grantMax)} 之间的整数');
       return;
     }
     final note = _note.text.trim();
@@ -376,7 +376,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 textInputAction: TextInputAction.next,
-                decoration: InputDecoration(labelText: '积分', helperText: '1 到 ${count(grantMax)}'),
+                decoration: InputDecoration(labelText: '积分', helperText: '1 到 ${count(_grantMax)}'),
               ),
               const SizedBox(height: Space.s),
               Wrap(

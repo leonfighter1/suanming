@@ -31,6 +31,7 @@ class AdminMe {
     this.can = Can.all,
     this.assignableRoles = const [],
     this.currency = MoneyUnit.yuan,
+    this.grantMax = grantMaxBefore,
   });
   factory AdminMe.fromJson(Json j) => AdminMe(
         id: j['id'] as String,
@@ -41,6 +42,7 @@ class AdminMe {
         can: j['can'] == null ? Can.all : {for (final c in j['can'] as List) c as String},
         assignableRoles: [for (final r in (j['assignable_roles'] as List? ?? const [])) r as String],
         currency: j['currency'] == null ? MoneyUnit.yuan : MoneyUnit.fromJson(j['currency'] as Json),
+        grantMax: (j['grant_max'] as num?)?.toInt() ?? grantMaxBefore,
       );
   final String id;
   final String login;
@@ -57,6 +59,12 @@ class AdminMe {
 
   /// The currency the dashboard shows money in (设置, S31).
   final MoneyUnit currency;
+
+  /// The most 积分 one 增加积分 may add (设置's limits.grant_max, S32).
+  final int grantMax;
+
+  /// What a server before S32 took at most.
+  static const grantMaxBefore = 1000000;
 }
 
 /// The currency the dashboard shows money in (设置's currencies.dashboard, S31): its symbol and decimals, and today's

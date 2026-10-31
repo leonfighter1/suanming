@@ -231,8 +231,8 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     aiUse.set(`${day}:u:${user}`, mine + 1);
     aiUse.set(`${day}:all`, all + 1);
   }
-  /** 发到邮箱 messages sent today per account (UTC day), each with at most MAIL_DOCUMENTS records: a provider charges
-   * for each. */
+  /** 发到邮箱 messages sent today per account (UTC day), each with at most limits.documents_per_mail records: a
+   * provider charges for each. */
   const mailUse = new Map<string, number>();
   function takeMailQuota(user: string) {
     const day = now().toISOString().slice(0, 10);

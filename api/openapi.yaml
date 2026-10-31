@@ -934,6 +934,9 @@ paths:
                       decimals: { type: integer }
                       rate: { type: number }
                       rates_date: { type: string, format: date }
+                  grant_max:
+                    type: integer
+                    description: "The most 积分 one 增加积分 may add (设置's limits.grant_max, S32)"
         "401": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
 
@@ -1113,7 +1116,10 @@ paths:
               type: object
               required: [points]
               properties:
-                points: { type: integer, minimum: 1, maximum: 1000000 }
+                points:
+                  type: integer
+                  minimum: 1
+                  description: "At most 设置's limits.grant_max (S32; 1,000,000 by default), as /v1/admin/me says"
                 note: { type: string, maxLength: 200 }
       responses:
         "201":
@@ -2100,9 +2106,10 @@ paths:
       operationId: emailDocuments
       summary: 发到邮箱 — mail chosen records, as Word or PDF, to the account's verified email (v9.0.0)
       description: |
-        The documents are the ones `POST /v1/documents` takes, 1 to 10 of them, built by the app. All are rendered in
-        one format and attached to one message, to the account's own verified email only. Nothing is kept. At most
-        20 such messages a day per account (429 `too_many`).
+        The documents are the ones `POST /v1/documents` takes, 1 to 10 of them by default (设置's
+        limits.documents_per_mail, S32), built by the app. All are rendered in one format and attached to one message,
+        to the account's own verified email only. Nothing is kept. At most 20 such messages a day per account by
+        default (limits.mail_per_user_day; 429 `too_many`).
       requestBody:
         required: true
         content:

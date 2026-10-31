@@ -20,9 +20,6 @@ import { changePerson, InputError, UUID_RE } from "../../service/charts.js";
 import { shareFont } from "../../share/font.js";
 import type { ApiContext, Caller } from "../context.js";
 
-/** 发到邮箱 (v9.0.0): at most this many records in one message. */
-export const MAIL_DOCUMENTS = 10;
-
 /** A record deleted, a chart's person, records as documents; false for any other path. */
 export async function archiveRoute(
   ctx: ApiContext,
@@ -106,8 +103,10 @@ export async function archiveRoute(
     const format = body.format === "pdf" || body.format === "docx" ? body.format : undefined;
     if (!format) throw new InputError("format must be pdf or docx");
     const list = body.documents;
-    if (!Array.isArray(list) || list.length < 1 || list.length > MAIL_DOCUMENTS) {
-      throw new InputError(`documents must hold 1 to ${MAIL_DOCUMENTS} documents`);
+    // At most this many records in one message (设置, S32).
+    const most = ctx.settings.number("limits.documents_per_mail");
+    if (!Array.isArray(list) || list.length < 1 || list.length > most) {
+      throw new InputError(`documents must hold 1 to ${most} documents`);
     }
     const owner = (await auth.users.get(c.user))!;
     if (!owner.email || !owner.email_verified_at) {
