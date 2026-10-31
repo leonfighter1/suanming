@@ -3,7 +3,7 @@
  * caller; then the caller's account: /v1/me, the logins and settings (v8.2.0), and deleting the account.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { staffRoleOf } from "../../admin/roles.js";
+import { namedInConfig, staffRoleOf } from "../../admin/roles.js";
 import { publicUser, type UserRecord } from "../../auth/service.js";
 import type { ContactKind } from "../../auth/verify.js";
 import { HttpError, readJson, send } from "../../http/util.js";
@@ -57,13 +57,9 @@ export async function accountRoute(
   path: string,
   c: Caller,
 ): Promise<boolean> {
-  const { opts, store, now, auth, account, admins, idempotency, delivery, reviewer } = ctx;
+  const { opts, now, auth, account, admins, delivery, reviewer } = ctx;
   /** 后台角色 (S25): what the account is in the 管理后台, if anything (named in MINGLI_ADMINS, or given a role). */
-  const staffOf = (u: UserRecord) =>
-    staffRoleOf(
-      u,
-      [u.username, u.email].some((n) => !!n && admins.has(n.toLowerCase())),
-    );
+  const staffOf = (u: UserRecord) => staffRoleOf(u, namedInConfig(admins, u));
   /** The caller's account as /v1/me shows it. */
   const me = async () => {
     const u = (await auth!.users.get(c.user))!;
@@ -132,10 +128,7 @@ export async function accountRoute(
   if (path === "/v1/account" && req.method === "DELETE") {
     if (!auth) throw new HttpError(404, "auth not configured");
     // PIPEDA / Québec Law 25: delete the account and everything it owns, now.
-    const deleted = await store.deleteOwnerData(c.user);
-    account?.forget(c.user);
-    await auth.deleteAccount(c.user);
-    for (const k of idempotency.keys()) if (k.startsWith(`${c.user}:`)) idempotency.delete(k);
+    const deleted = await ctx.deleteAccount(c.user);
     send(res, 200, {
       deleted: { account: true, ...deleted },
       completed_at: now().toISOString(),

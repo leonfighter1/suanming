@@ -21,6 +21,7 @@ import {
   assignableRoles,
   can,
   CAPABILITIES,
+  namedInConfig,
   staffRoleOf,
   type Capability,
   type StaffRole,
@@ -70,8 +71,7 @@ export interface AdminContext {
 /** Whose calendar a day is, unless a request names a time zone: the owner's markets are all at UTC+8. */
 export const ADMIN_TZ = "Asia/Shanghai";
 
-const byConfig = (ctx: AdminContext, u: UserRecord) =>
-  [u.username, u.email].some((n) => !!n && ctx.admins.has(n.toLowerCase()));
+const byConfig = (ctx: AdminContext, u: UserRecord) => namedInConfig(ctx.admins, u);
 
 /** The caller and their staff role (admin, manager, integrator: roles.ts), or 403 admin_only. */
 async function staffOf(ctx: AdminContext, userId: string): Promise<{ me: UserRecord; role: StaffRole }> {

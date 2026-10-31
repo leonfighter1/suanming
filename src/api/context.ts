@@ -105,4 +105,9 @@ export interface ApiContext {
   ) => Promise<{ body: Record<string, unknown>; chart: ChartRecord }>;
   /** 测算完成后发到邮箱 (v9.0.0): a passed reading or 一生运势报告 to its owner's verified email, when they asked. */
   mailWhenDone: (kind: "report" | "life_report", id: string) => Promise<void>;
+  /**
+   * PIPEDA / Québec Law 25: an account and everything it owns deleted now, its sessions ended; what went, by kind. The
+   * app's 注销账号 and an admin's in the 管理后台 (S35) both run it.
+   */
+  deleteAccount: (userId: string) => ReturnType<Store["deleteOwnerData"]>;
 }

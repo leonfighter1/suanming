@@ -25,6 +25,10 @@ export const CAPABILITIES: Record<StaffRole, readonly Capability[]> = {
   integrator: ["messages", "content"],
 };
 
+/** Whether [u] is named, by its username or its email, in the server's MINGLI_ADMINS ([admins], in lower case). */
+export const namedInConfig = (admins: ReadonlySet<string>, u: UserRecord) =>
+  [u.username, u.email].some((n) => !!n && admins.has(n.toLowerCase()));
+
 /** The staff role of [u]: an admin by the server's MINGLI_ADMINS ([byConfig]) whatever the record says. */
 export function staffRoleOf(u: UserRecord, byConfig: boolean): StaffRole | undefined {
   if (byConfig) return "admin";

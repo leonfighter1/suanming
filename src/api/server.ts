@@ -395,6 +395,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     }
   }
 
+  /** An account and everything it owns, deleted now (context.ts). */
+  async function deleteAccount(userId: string) {
+    if (!auth) throw new HttpError(404, "auth not configured");
+    const deleted = await store.deleteOwnerData(userId);
+    account?.forget(userId);
+    await auth.deleteAccount(userId);
+    for (const k of idempotency.keys()) if (k.startsWith(`${userId}:`)) idempotency.delete(k);
+    return deleted;
+  }
+
   /**
    * 测算完成后发到邮箱 (v9.0.0, tech plan WP15.4): a reading or a 一生运势报告 that passed goes to its owner's verified
    * email, when the owner turned the setting on (否 by default). Never a held, blocked or failed one: a released one
@@ -505,6 +515,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     chartRequest,
     mailWhenDone,
     routingNow,
+    deleteAccount,
   };
 
   async function handle(req: IncomingMessage, res: ServerResponse) {
