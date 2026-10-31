@@ -157,6 +157,22 @@ Every AI step answers with Claude Opus 5.5 (`config/model_routing.json`, the own
 - To compare models on the evaluation cases: `npm run eval:ai -- --live --model claude-sonnet-5-5`.
   It costs money; each case's cost at list price goes into docs/verification/ai-eval-results.json.
 
+## 设置 in the 管理后台 (v19.0.0)
+
+管理后台 → 设置 (admins) changes what `config/settings.json` and `.env` set, for the whole server from the next request
+on; 恢复默认 puts a setting back.
+
+- **AI 模拟 and AI 模型:** 跟随 .env (the default) leaves `IS_AI_MOCK` and `ACTIVE_AI_MODEL` above in charge. 开 / 关
+  or a model chosen here wins over `.env` until it is put back. Turning the mock off asks first: the real model spends
+  tokens. The panel shows what answers now.
+- **The others:** 登录有效期 (days unused before signing in again, `MINGLI_SESSION_IDLE_DAYS` its default when set),
+  public mode's daily AI caps (`MINGLI_AI_DAILY_PER_USER`, `MINGLI_AI_DAILY_TOTAL`), mails a day per account, the
+  accepted currencies, the 换算服务费 (5 %) and the 管理后台's currency.
+- **Rates:** today's exchange rates come from open.er-api.com once a day (`MINGLI_RATES_URL` names another address of
+  the same shape); the request names only the base currency. While it can't be reached, the last good table answers,
+  marked stale; with none, 充值 is offered in 元 alone.
+- **充值 needs an email address** on the account: the receipt carries it. Each 充值 has a receipt in 我的积分 → 收据.
+
 ## 八字's AI reading (v9.3.0)
 
 On 八字排盘 the button under the chart says 用AI做更精确解读. The engine's own reading stays as it was: the 命盘事实

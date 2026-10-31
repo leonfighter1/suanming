@@ -2,6 +2,21 @@
 
 Newest first. One entry per working session, key points only.
 
+## 2026-10-31 (s): S31 — 设置, the AI switches, currencies and receipts; release v19.0.0
+
+- v18.0.0 pushed first (892af2e), as the owner asked.
+- WP31.1/31.3 (06a98a9): `src/settings` registry + `Settings`; `config/settings.json`; migration 015; the idle limit,
+  the AI caps and the mails a day read from it. Restructured first: `staffApi` (ea4b3f9).
+- WP31.4 (de1bd79): `withPanel`: unset follows .env live; the suite's `MINGLI_AI_PROVIDER=mock` wins over both; no test
+  builds a real provider. CLAUDE.md rule 5 updated.
+- WP31.5–31.7 server (a517b58): currency catalog, `RateBook` (open.er-api.com, once a day, backoff, last good table in
+  the store), `priceIn` (rounded up), receipts sealed (migration 017); a live start on port 8897 (memory store)
+  fetched real rates, then stopped by its port (rule 69).
+- WP31.2/31.7 admin (92027f6): 设置 page; money through `yuan()` in the session's `MoneyUnit` (one change, 27 figures).
+- App (07bc4d2): currency chips, receipts list and page with print via `shareProvider`. Restructured first:
+  `BrokenSettingsStore` (ca40fbc). The render showed the packs' prices cut short; fixed with a `FittedBox` (rule 3).
+- Rule 90: never the server suite beside a Flutter suite.
+
 ## 2026-10-31 (r): S29 — the CMS, 欢迎, sessions, 登出; S29 and S30 done, release v18.0.0
 
 - S30 first (the owner's order), its WPs committed one by one; the design principles in the ui-design skill.

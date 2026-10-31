@@ -57,7 +57,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S28 重构                   | one home for each thing; the API's routes in modules        | big    | v17.0.0 + summary | done        |
 | S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | done        |
 | S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | done        |
-| S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | planned     |
+| S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2616,7 +2616,7 @@ have a rate conversions on the currencies. user is able to pick what ever curren
 from active online's today's currency rate P.S. based on the online api call - always get 5% service charge from the
 conversion. - Generate a purchase receipt for user. user is able to view and print the money spent and points they
 purchased. (need to have an email address.). Admin's adding points shouldn't reflect on the money print. Admin can
-choose the main displayed currencies for dashboard.」 To begin once v18.0.0 is pushed.
+choose the main displayed currencies for dashboard.」 Begun once v18.0.0 was pushed; done as v19.0.0.
 
 | WP     | What                                                                                                       |
 | ------ | ---------------------------------------------------------------------------------------------------------- |
@@ -2637,6 +2637,44 @@ choose the main displayed currencies for dashboard.」 To begin once v18.0.0 is 
   by an admin is no purchase and is never on a receipt.
 
 ## 阶段总结 (stage summaries)
+
+### S31 设置、货币与收据 (done 2026-10-31: v19.0.0)
+
+1. **Delivered** (all in v19.0.0):
+   - **WP31.1, 设置:** a registry of what the 管理后台 may change (`src/settings`): each setting's group, type, range
+     and words; its default in `config/settings.json`, or the env variable it names when set; the panel's change kept
+     in the database (migration 015) and the memory store, winning over both, read live. A default that doesn't fit
+     stops the start, naming it.
+   - **WP31.2, the 设置 page** for admins (the `settings` capability): the settings by group, each with its control,
+     its default and 恢复默认; the panel says what answers AI calls and the rates' day.
+   - **WP31.3, taken out of the code and .env:** the idle limit (2 days), public mode's daily AI caps, the mails a day.
+   - **WP31.4, the AI switches:** the mock and the model as settings (`withPanel`): unset, .env's, live; an admin's
+     choice wins until put back. Turning the mock off asks first. CLAUDE.md rule 5 says so.
+   - **WP31.5, 货币:** the accepted currencies (checkboxes), today's rates from open.er-api.com once a day (the last good
+     table kept, migration 016), each pack priced at the rate plus 5 % (rounded up); the app's chips, the device keeps
+     the pick.
+   - **WP31.6, 收据:** each 充值 makes one (migration 017, sealed, MLDS-<year>-<seq>), needing an email on the account;
+     listed, viewed and printed in the app. An admin's 增加积分 makes none.
+   - **WP31.7, the dashboard's currency:** /v1/admin/me names it at today's rate; every money figure follows it.
+2. **Numbers:**
+   - **Tests:** server 709 → 729, app 300 → 304, 管理后台 85 → 91.
+   - **Settings:** 9, in four groups; 12 currencies in the catalog, 6 accepted to begin with.
+   - **Harness:** PASS for v19.0.0.
+3. **Against the plan:**
+   - **WP31.3:** 积分's packs and prices stay in `config/points.json`: they are checked at start against the models'
+     prices, and the panel changing them needs the same check first. Next candidates: the follow-up limit, the
+     captcha thresholds.
+   - **WP31.6:** a top-up needs an email on the account, verified or not (the owner's words: 「need to have an email
+     address」); a dev account seeded with an email login has one unverified.
+   - **WP31.5:** a currency the rates service doesn't price today is left out of the offer rather than refused late.
+   - Three restructurings came first, as their own commits: the 管理后台 tests' staff start-up (`staffApi`), the
+     app tests' unreadable settings store, and the dialog-width and `tapOn` homes from S29.
+4. **Mistakes and what they teach:**
+   - **Rule 90:** the server suite run beside the Flutter suite: four heavy tests timed out; alone, all passed.
+   - **Rule 3 again:** the packs cut 「HK$11.42」 short in the real font while the tests' font fit; the render found
+     it, and the price now shrinks to its box.
+5. **Next:** the owner's next request. Open: WP7.2, WP7.3, WP1.8; the Phase 3 gate; Phase 4 (real payments) waits for
+   it, and the receipts are ready for it.
 
 ### S29 内容管理、介绍页、登录有效期、登出动画 (done 2026-10-31: v18.0.0)
 

@@ -13,6 +13,43 @@ how it was verified. Big updates (X.0.0) end a stage of the [tech plan](docs/tec
 medium (X.Y.0) and small (X.Y.Z) ones are listed here as they are made. The rules:
 [.claude/skills/dev-workflow/SKILL.md](.claude/skills/dev-workflow/SKILL.md).
 
+### v19.0.0 (2026-10-31): 设置 in the 管理后台, 充值 in your currency, and receipts (S31 complete)
+
+Your request of today: the settings in their own files and changed in the 管理后台 (the idle time, the AI model and
+its mock), the accepted currencies with today's rates and a 5 % service charge, purchase receipts, and the dashboard's
+currency. This release ends S31 and is pushed.
+
+- **管理后台 → 设置** (admins): every setting by group, each with its own control, its default and 恢复默认. A change
+  holds on the server from the next request on.
+  - **登录:** 登录有效期, the days a session may go unused (2).
+  - **AI:** AI 模拟 (跟随 .env / 开 / 关) and AI 模型 (跟随 .env, or one of the usable models). A choice here wins over
+    .env until put back. Turning the mock off asks first: the real model spends tokens. The panel shows what answers
+    now.
+  - **限额:** public mode's daily AI caps, the mails a day per account.
+  - **货币:** 收的货币 (checkboxes), 换算服务费 (5 %), 管理后台的货币.
+  - The defaults are in `config/settings.json` (an env variable a setting names wins when set); a mistyped one stops
+    the server at start, saying which.
+- **充值 in your currency** (我的积分): pick 人民币, 港币, 新台币 … (the ones the admin accepts); each pack shows its price
+  in it at today's rate plus the 5 % service charge, rounded up to the currency's smallest unit, with the day of the
+  rates under them. The app remembers your pick.
+  - The rates come from open.er-api.com once a day (no personal data in the request). While it can't be reached, the
+    last good rates are used and the page says so.
+- **Receipts:** every 充值 has one: 我的积分 → 收据, or 查看收据 right after a top-up. It shows its number
+  (MLDS-2026-000001), the date, your email, the pack and its 积分, what you paid at which rate and charge, and that
+  充值 is still simulated. 打印 prints it (the browser's print; the share sheet elsewhere).
+  - **An email address is needed** to top up: the receipt carries it. Without one, the app says so and offers 设置.
+  - An admin's 增加积分 is no purchase: no receipt.
+- **The 管理后台's money** shows in the currency chosen in 设置, at today's rate.
+- **Verified:**
+  - **Tests:** server 729, app 304, 管理后台 91.
+  - **A live start** on a spare port: today's rates fetched (10 元 = HK$12.35 at 1.1761 + 5 %), the settings listed.
+  - **Renders:** 设置 at 1440 and 390; 我的积分 in 港币 and a receipt at 390.
+  - **Harness:** PASS.
+- **Stage S31 in sum:** what was fixed in code and .env is now a setting the 管理后台 changes, the AI switches among
+  them (still yours: no agent turns the real model on); 充值 in the accepted currencies at today's rates with a
+  receipt for each. Its summary is in the [tech plan](docs/tech-plan.md).
+- **Next:** your next request. Real payments wait for the Phase 3 gate; the receipts are ready for them.
+
 ### v18.0.0 (2026-10-31): 内容管理, the welcome page, sessions of two days, 登出 and the interactions (S29 and S30 complete)
 
 Your requests: the twelve interactions (「UI 改进 … 做以下的所有应该有的元素交互功能」, S30), then S29: 「create a CMS

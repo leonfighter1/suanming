@@ -281,6 +281,12 @@ compact grid, and a panel of its own at the right. The building blocks are in
 - **内容** (S29): the app's texts in the main column, 30 at a time (再显示 adds more), each opening its editor (a dialog,
   both languages, the app's own under each field); the search, 已修改 and the images in the panel, before the texts on
   a narrow screen (`narrowAt: 1`, as 用户).
+- **设置** (S31): the settings by group, each group an `AppCard`, each setting its label and line, its control (a number
+  with its unit and 保存, 跟随 .env / 开 / 关, a menu, `FilterChip`s for the accepted currencies), its default and
+  恢复默认; the panel says what answers AI calls and the rates' day (a warning colour when real tokens are spent, or
+  the rates are stale).
+- **Money** shows in 设置's dashboard currency (`yuan()` in format.dart, from the session's `MoneyUnit`): one change in
+  the formatter, never at the figures.
 - **A mail's preview** is the server's own page in a frame (the web) or its text (elsewhere), light or dark as the
   dashboard is: the mail's colours are `MAIL_PALETTE` (`src/export/render-html.ts`), the app's tokens, held to
   tokens.dart by a test. A sent mail follows the reader's system (`prefers-color-scheme`).
