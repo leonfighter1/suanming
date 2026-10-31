@@ -1,19 +1,13 @@
 // S4 WP4.1 (v3.1.0): 五行 colours that read on the app's cards, light and dark, and the pillar
 // grid's detail rows folded under 更多.
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/presentation/theme.dart';
+import 'package:mingli_app/presentation/tokens.dart' show contrastRatio;
 
 import 'keys.dart';
 import 'support.dart';
-
-/// WCAG 2 contrast ratio of two colours.
-double contrast(Color a, Color b) {
-  final (x, y) = (a.computeLuminance(), b.computeLuminance());
-  return (max(x, y) + 0.05) / (min(x, y) + 0.05);
-}
 
 void main() {
   test('every 五行 colour reads as small text (4.5 : 1) on the cards, in light and in dark', () {
@@ -27,7 +21,7 @@ void main() {
           ('card', scheme.surfaceContainerLow),
           ('inset', scheme.surfaceContainerHighest),
         ]) {
-          expect(contrast(colour, background), greaterThanOrEqualTo(4.5), reason: '$element on $name, $brightness');
+          expect(contrastRatio(colour, background), greaterThanOrEqualTo(4.5), reason: '$element on $name, $brightness');
         }
       }
     }

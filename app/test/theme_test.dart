@@ -1,6 +1,5 @@
 // S24 WP24.1 (v12.1.0): one theme system, light and dark, made from ThemeTokens (owner, 2026-10-30: 「建立统一的浅色和
 // 深色主题系统，分别定义背景，卡片，文字和强调色，切换主题时保持布局和组件结构不变，让颜色，边框和状态自然过渡」).
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,12 +11,6 @@ import 'package:mingli_app/presentation/tokens.dart';
 
 import 'keys.dart';
 import 'support.dart';
-
-/// WCAG 2 contrast ratio of two colours.
-double contrast(Color a, Color b) {
-  final (x, y) = (a.computeLuminance(), b.computeLuminance());
-  return (max(x, y) + 0.05) / (min(x, y) + 0.05);
-}
 
 /// Every box on screen and where it is: what a change of theme must leave alone.
 List<Rect> layoutOf(WidgetTester tester) {
@@ -48,7 +41,7 @@ void main() {
       };
       for (final MapEntry(key: ink, value: fg) in inks.entries) {
         for (final MapEntry(key: surface, value: bg) in surfaces.entries) {
-          expect(contrast(fg, bg), greaterThanOrEqualTo(4.5), reason: '$ink on $surface, ${t.brightness}');
+          expect(contrastRatio(fg, bg), greaterThanOrEqualTo(4.5), reason: '$ink on $surface, ${t.brightness}');
         }
       }
       for (final (name, fg, bg) in [
@@ -62,11 +55,11 @@ void main() {
         ('info on its fill', t.info, t.infoSoft),
         ('on inverse', t.onInverse, t.inverse),
       ]) {
-        expect(contrast(fg, bg), greaterThanOrEqualTo(4.5), reason: '$name, ${t.brightness}');
+        expect(contrastRatio(fg, bg), greaterThanOrEqualTo(4.5), reason: '$name, ${t.brightness}');
       }
       // A card stands off the page by its hairline; a field's outline is stronger than a hairline.
-      expect(contrast(t.border, t.card), greaterThan(1.2), reason: '${t.brightness}');
-      expect(contrast(t.borderStrong, t.card), greaterThan(contrast(t.border, t.card)), reason: '${t.brightness}');
+      expect(contrastRatio(t.border, t.card), greaterThan(1.2), reason: '${t.brightness}');
+      expect(contrastRatio(t.borderStrong, t.card), greaterThan(contrastRatio(t.border, t.card)), reason: '${t.brightness}');
       expect(t.series, hasLength(7));
     }
   });

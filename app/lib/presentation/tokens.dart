@@ -1,3 +1,4 @@
+import 'dart:math' show max, min;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
@@ -273,4 +274,11 @@ class ThemeTokens extends ThemeExtension<ThemeTokens> {
       series: [for (var i = 0; i < series.length; i++) c(series[i], other.series[i])],
     );
   }
+}
+
+/// WCAG 2 contrast ratio of two colours: the tests hold the tokens to 4.5 : 1, and 内容's editor warns below it for a
+/// colour staff wrote out (S34).
+double contrastRatio(Color a, Color b) {
+  final (x, y) = (a.computeLuminance(), b.computeLuminance());
+  return (max(x, y) + 0.05) / (min(x, y) + 0.05);
 }
