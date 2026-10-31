@@ -19,7 +19,11 @@ export async function settingsAdminRoute(
   me: UserRecord,
 ): Promise<boolean> {
   if (path === "/v1/admin/settings" && req.method === "GET") {
-    send(res, 200, { settings: ctx.settings.list() });
+    send(res, 200, {
+      settings: ctx.settings.list(),
+      // What the AI switches make of it now: .env's or the panel's (withPanel).
+      ...(ctx.ai && { ai: { serving: ctx.ai.serving(), models: ctx.ai.models() } }),
+    });
     return true;
   }
   const m = /^\/v1\/admin\/settings\/([a-z_]+\.[a-z_]+)$/.exec(path);

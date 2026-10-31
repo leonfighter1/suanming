@@ -56,6 +56,8 @@ export interface AdminContext {
   admins: Set<string>;
   /** 设置 (S31): every setting's value now, and the panel's changes. */
   settings: Settings;
+  /** What answers AI calls now (a provider, or mock) and its model(s), for 设置's AI group. */
+  ai?: { serving: () => string; models: () => string };
   /** The server's dispatcher: the messages' templates, previews, test sends and log (S25). */
   messages?: Dispatcher;
   now: () => Date;

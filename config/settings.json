@@ -3,6 +3,10 @@
   "sessions": {
     "idle_days": 2
   },
+  "ai": {
+    "mock": null,
+    "model": null
+  },
   "limits": {
     "ai_per_user_day": 10,
     "ai_total_day": 100,

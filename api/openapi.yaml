@@ -1784,6 +1784,15 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/SettingView"
+                  ai:
+                    type: object
+                    description: What answers AI calls now, after .env and the panel's AI switches
+                    properties:
+                      serving:
+                        type: string
+                        description: A provider's name, or mock
+                      models:
+                        type: string
         "403": { $ref: "#/components/responses/Problem" }
 
   /v1/admin/settings/{key}:

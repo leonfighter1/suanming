@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { InMemoryStore } from "../src/api/store.js";
 import { DAY_S, InMemorySessionStore, type RefreshRecord } from "../src/auth/tokens.js";
 import { PgStore } from "../src/db/pg-store.js";
-import { buildAuth } from "../src/service/runtime.js";
+import { buildAuth, buildProviders, withPanel } from "../src/service/runtime.js";
 import {
   isSettingKey,
   loadSettingsFile,
@@ -91,6 +91,43 @@ describe("the settings and their defaults", () => {
   }, 30_000);
 });
 
+describe("the AI switches in 设置 (WP31.4; the owner's, CLAUDE.md rule 5)", () => {
+  // Without the suite's MINGLI_AI_PROVIDER=mock the switch alone decides; no provider is built or called here.
+  const dotEnv = {
+    mode: () => ({ mock: true, reason: "IS_AI_MOCK=TRUE" }),
+    choice: () => ({}),
+  };
+
+  it("unset, .env's; an admin's choice wins; the test suite's mock wins over both", async () => {
+    const s = new Settings(undefined, {});
+    const p = withPanel(s, dotEnv, {});
+    expect(p.mode()).toEqual({ mock: true, reason: "IS_AI_MOCK=TRUE" });
+    await s.set("ai.mock", false, undefined, AT);
+    expect(p.mode()).toEqual({ mock: false });
+    await s.set("ai.mock", true, undefined, AT);
+    expect(p.mode()).toEqual({ mock: true, reason: "设置: AI 模拟" });
+    await s.set("ai.mock", false, undefined, AT);
+    expect(withPanel(s, dotEnv, { MINGLI_AI_PROVIDER: "mock" }).mode().mock).toBe(true);
+    await s.reset("ai.mock");
+    expect(p.mode()).toEqual({ mock: true, reason: "IS_AI_MOCK=TRUE" });
+  });
+
+  it("the model: every route on the admin's choice, through the routing (rule 66); unset, .env's", async () => {
+    const s = new Settings(undefined, {});
+    const p = withPanel(s, dotEnv, {});
+    const providers = buildProviders(p.mode, p.choice);
+    const models = () =>
+      new Set(Object.values(providers.routing().routes).map((r) => r.default.model));
+    expect(models()).toEqual(new Set(["claude-opus-5-5"]));
+    await s.set("ai.model", "claude-sonnet-5-5", undefined, AT);
+    expect(models()).toEqual(new Set(["claude-sonnet-5-5"]));
+    expect(providers.models()).toBe("claude-sonnet-5-5");
+    await expect(s.set("ai.model", "gpt-9", undefined, AT)).rejects.toThrow("要是其中一个");
+    await s.reset("ai.model");
+    expect(models()).toEqual(new Set(["claude-opus-5-5"]));
+  });
+});
+
 /** The sessions, as the server keeps them: the last refresh token given. */
 class Sessions extends InMemorySessionStore {
   last?: RefreshRecord;
@@ -111,7 +148,15 @@ const auth = buildAuth(
   settings,
 );
 const { start, call } = staffApi(
-  { auth, store, settings, admins: ["boss"], now: () => new Date(AT) },
+  {
+    auth,
+    store,
+    settings,
+    admins: ["boss"],
+    aiServing: () => "mock",
+    aiModel: () => "claude-opus-5-5",
+    now: () => new Date(AT),
+  },
   ["boss", "mgr", "integ", "alice"],
   { mgr: "manager", integ: "integrator" },
 );
@@ -130,9 +175,15 @@ describe("设置 in the 管理后台", () => {
     expect([r.status, (await r.json()).code]).toEqual([403, "admin_only"]);
   });
 
-  it("lists every setting with its value, its default and its words", async () => {
-    const { settings: all } = await (await call("boss", "/v1/admin/settings")).json();
+  it("lists every setting with its value, its default and its words, and what answers AI calls now", async () => {
+    const { settings: all, ai } = await (await call("boss", "/v1/admin/settings")).json();
+    expect(ai).toEqual({ serving: "mock", models: "claude-opus-5-5" });
     expect(all.map((s: { key: string }) => s.key)).toEqual(SETTINGS.map((s) => s.key));
+    expect(all.find((s: { key: string }) => s.key === "ai.mock")).toMatchObject({
+      type: "boolean",
+      optional: true,
+      value: null,
+    });
     expect(all[0]).toMatchObject({
       key: "sessions.idle_days",
       group: "sessions",

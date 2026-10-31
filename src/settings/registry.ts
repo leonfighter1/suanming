@@ -7,6 +7,7 @@
  * (src/settings/index.ts).
  */
 import { readFileSync } from "node:fs";
+import { MODELS } from "../ai/models.js";
 
 export type SettingGroup = "sessions" | "ai" | "limits" | "currencies";
 
@@ -24,7 +25,7 @@ interface Common {
 export type SettingSpec = Common &
   (
     | { type: "number"; min: number; max: number; integer?: boolean; unit?: string }
-    | { type: "boolean" }
+    | { type: "boolean"; optional?: boolean }
     | { type: "choice"; options: () => readonly string[]; optional?: boolean }
     | { type: "choices"; options: () => readonly string[] }
   );
@@ -76,6 +77,26 @@ export const SETTINGS = [
     unit: "封",
     label: "每个账户每天发到邮箱的次数",
     about: "报告和以往记录发到邮箱，一个账户一天最多几封；0 是不发。",
+  },
+  // The owner's AI switches (CLAUDE.md rule 5): unset, .env's, read live (src/service/runtime.ts withPanel).
+  {
+    key: "ai.mock",
+    group: "ai",
+    type: "boolean",
+    optional: true,
+    label: "AI 模拟",
+    about:
+      "开：每一步 AI 都用模拟的示范回答（标着“示范”），不花 token；关：用真实模型。不选就跟随 .env 的 IS_AI_MOCK。",
+  },
+  {
+    key: "ai.model",
+    group: "ai",
+    type: "choice",
+    options: () => MODELS.map((m) => m.id),
+    optional: true,
+    label: "AI 模型",
+    about:
+      "每一步 AI 都用这个模型，价格跟着它算。不选就跟随 .env 的 ACTIVE_AI_MODEL，没有的话按 config/model_routing.json。",
   },
 ] as const satisfies readonly SettingSpec[];
 
@@ -135,6 +156,7 @@ export function problemOf(spec: SettingSpec, value: unknown): string | undefined
       return undefined;
     }
     case "boolean":
+      if (value === null && spec.optional) return undefined;
       return typeof value === "boolean" ? undefined : "要开或关";
     case "choice":
       if (value === null && spec.optional) return undefined;

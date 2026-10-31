@@ -568,6 +568,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         config: pointsConfig ?? loadPointsConfig(),
         admins,
         settings,
+        ...(opts.aiServing && {
+          ai: { serving: opts.aiServing, models: opts.aiModel ?? (() => "") },
+        }),
         messages,
         now,
         log: (m: string) => log(m),

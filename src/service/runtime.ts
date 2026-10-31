@@ -155,6 +155,30 @@ export function watchAi(
   return { mode: () => current().mode, choice: () => current().choice };
 }
 
+/**
+ * The AI switch and the model with 设置's choices (S31; the owner: 「we can switch the AI modal in the panel as well.
+ * turn on or off the Modal mocking」): an admin's choice in the 管理后台 wins; unset, .env's ([ai], read live).
+ * MINGLI_AI_PROVIDER=mock in [env] (the test suite) wins over both: no real provider is built there.
+ */
+export function withPanel(
+  settings: Settings,
+  ai: { mode: () => AiMode; choice: () => ModelChoice },
+  env: Record<string, string | undefined> = process.env,
+): { mode: () => AiMode; choice: () => ModelChoice } {
+  return {
+    mode: () => {
+      const mock = settings.value("ai.mock");
+      if (env.MINGLI_AI_PROVIDER === "mock" || mock === null) return ai.mode();
+      return mock ? { mock: true, reason: "设置: AI 模拟" } : { mock: false };
+    },
+    choice: () => {
+      const id = settings.value("ai.model");
+      const model = typeof id === "string" ? modelInfo(id) : undefined;
+      return model ? { model } : ai.choice();
+    },
+  };
+}
+
 /** A real provider that hands each call to the mock while the AI switch says so. */
 export class SwitchedProvider implements LLMProvider {
   constructor(

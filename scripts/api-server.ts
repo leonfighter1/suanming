@@ -27,6 +27,7 @@ import {
   pointsOn,
   seedDevAccounts,
   watchAi,
+  withPanel,
 } from "../src/service/runtime.js";
 
 // The shell's own variables, from before .env: they win over the file.
@@ -45,14 +46,6 @@ const lan = process.argv.includes("--lan");
  */
 const pub = process.argv.includes("--public");
 const secrets = loadSecrets();
-/**
- * The AI switch (IS_AI_MOCK / IS_AI_MODEL) and the model choice (ACTIVE_AI_MODEL) in .env, re-read when the file
- * changes. A change applies from the next AI call, with no restart (the public URL stays).
- */
-const ai = watchAi(".env", shellEnv, () => console.log(`AI switched: ${describeAi(providers)}`));
-const providers = buildProviders(ai.mode, ai.choice);
-// Notice a saved .env within a second, so the console confirms the change.
-watchFile(".env", { persistent: false, interval: 1000 }, () => providers.mode());
 const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? (lan ? "0.0.0.0" : "127.0.0.1");
 const loopbackOnly = !pub && (host === "127.0.0.1" || host === "localhost");
@@ -75,6 +68,16 @@ const store = persistence.store ?? new InMemoryStore();
 // 设置 (S31): config/settings.json and .env, with what the 管理后台's 设置 page changed (kept in the store).
 const settings = await new Settings(store).load();
 const auth = buildAuth(secrets, true, persistence.users, persistence.sessions, settings);
+/**
+ * The AI switch (IS_AI_MOCK / IS_AI_MODEL) and the model choice (ACTIVE_AI_MODEL) in .env, re-read when the file
+ * changes, under what an admin chose in 设置 (S31). A change applies from the next AI call, with no restart (the
+ * public URL stays).
+ */
+const ai = watchAi(".env", shellEnv, () => console.log(`AI switched: ${describeAi(providers)}`));
+const panel = withPanel(settings, ai);
+const providers = buildProviders(panel.mode, panel.choice);
+// Notice a saved .env within a second, so the console confirms the change.
+watchFile(".env", { persistent: false, interval: 1000 }, () => providers.mode());
 // Public mode's AI caps, read from 设置 at each job: a change in the 管理后台 holds from the next one.
 const aiQuota = {
   get perUserPerDay() {

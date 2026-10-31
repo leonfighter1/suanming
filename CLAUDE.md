@@ -51,7 +51,9 @@ Records:
 5. **Secrets only in `.env`** (git-ignored) or the secrets manager. Tests force
    the mock AI provider and never spend money. **The owner's AI switch:**
    `IS_AI_MOCK=TRUE` in `.env` keeps every AI step on the mock to save tokens
-   (docs/web-test.md). Never flip or bypass it; only the owner turns the real model on.
+   (docs/web-test.md). Since v19.0.0 (owner, 2026-10-31) an admin can also choose the mock
+   and the model in the 管理后台's 设置; that choice wins over `.env` until it is put back.
+   Never flip or bypass either; only the owner turns the real model on.
 6. Write files that contain backslashes with the Write/Edit tool, not shell heredocs.
 7. Flutter/Dart tooling needs an ASCII path on this machine. harness-check
    handles it; for manual runs use a junction.
