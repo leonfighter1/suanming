@@ -16,6 +16,7 @@ import type {
   Quote,
   QuoteFor,
 } from "../points/index.js";
+import type { Settings } from "../settings/index.js";
 import type { ApiOptions } from "./server.js";
 import type { ChartRecord, Store } from "./store.js";
 
@@ -45,7 +46,9 @@ export interface ApiContext {
   mail: MailTransport;
   /** Every message's way out (S25): its template, its channel, its note. */
   messages: Dispatcher;
-  /** Counts a 发到邮箱 message against the account's day; 429 `too_many` past MAIL_PER_DAY. */
+  /** 设置 (S31): every setting's value now (config/settings.json, .env, the 管理后台's changes). */
+  settings: Settings;
+  /** Counts a 发到邮箱 message against the account's day; 429 `too_many` past 设置's limits.mail_per_user_day. */
   takeMailQuota: (user: string) => void;
   /** The reviewer's login when the caller is a reviewer, else undefined. */
   reviewer: (c: Caller) => Promise<string | undefined>;

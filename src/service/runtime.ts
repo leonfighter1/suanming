@@ -29,7 +29,8 @@ import { AuthService, type AccountRole, type UserStore } from "../auth/service.j
 import { parseKek } from "../db/envelope.js";
 import { PgStore } from "../db/pg-store.js";
 import { SocialVerifier } from "../auth/social.js";
-import { SESSION_IDLE_S, TokenService, type SessionStore } from "../auth/tokens.js";
+import { DAY_S, TokenService, type SessionStore } from "../auth/tokens.js";
+import { defaultSettings, type Settings } from "../settings/index.js";
 import type { EngineSecrets } from "./charts.js";
 
 function hexSecret(name: string): Buffer | undefined {
@@ -279,10 +280,10 @@ export function buildAuth(
   devMode: boolean,
   users?: UserStore,
   sessions?: SessionStore,
+  settings: Settings = defaultSettings(),
 ): AuthService {
   const jwt = hexSecret("MINGLI_JWT_SECRET");
   if (!jwt && !devMode) throw new Error("MINGLI_JWT_SECRET is required outside dev mode");
-  const idle = sessionIdleSeconds();
   const turnstile = process.env.MINGLI_TURNSTILE_SECRET;
   if (!turnstile && !devMode)
     throw new Error("MINGLI_TURNSTILE_SECRET is required outside dev mode");
@@ -290,26 +291,13 @@ export function buildAuth(
     pepper: secrets.digestPepper,
     tokens: new TokenService(jwt ?? randomBytes(32), undefined, {
       ...(sessions && { sessions }),
-      idleSeconds: () => idle,
+      // 设置 (S31): read at each sign-in and refresh, so a change in the 管理后台 holds from the next one.
+      idleSeconds: () => settings.number("sessions.idle_days") * DAY_S,
     }),
     social: SocialVerifier.fromEnv(),
     captcha: turnstile ? new TurnstileVerifier(turnstile) : noCaptcha,
     ...(users && { users }),
   });
-}
-
-/**
- * How long a session may go unused before signing in again (S29): MINGLI_SESSION_IDLE_DAYS, a fraction allowed;
- * the owner's 2 days by default.
- */
-export function sessionIdleSeconds(): number {
-  const raw = process.env.MINGLI_SESSION_IDLE_DAYS?.trim();
-  if (!raw) return SESSION_IDLE_S;
-  const days = Number(raw);
-  if (!Number.isFinite(days) || days <= 0) {
-    throw new Error(`MINGLI_SESSION_IDLE_DAYS must be a positive number of days, not ${raw}`);
-  }
-  return Math.round(days * 24 * 3600);
 }
 
 /** Where readings and accounts are kept: in memory (the default), or the encrypted database. */

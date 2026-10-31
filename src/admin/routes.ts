@@ -14,6 +14,7 @@ import {
 } from "../auth/service.js";
 import type { Dispatcher } from "../notify/dispatch.js";
 import { contentAdminRoute } from "./content.js";
+import { settingsAdminRoute } from "./settings.js";
 import { messagesRoute } from "./messages.js";
 import {
   ACCOUNT_ROLES,
@@ -29,6 +30,7 @@ import { renderDocx } from "../export/render-docx.js";
 import { renderPdf } from "../export/render-pdf.js";
 import { HttpError, readJson, send } from "../http/util.js";
 import type { PointsConfig, PointsEntry } from "../points/index.js";
+import type { Settings } from "../settings/index.js";
 import { shareFont } from "../share/font.js";
 import { reportDoc, seriesCsv, usersCsv } from "./report.js";
 import {
@@ -52,6 +54,8 @@ export interface AdminContext {
   config: PointsConfig;
   /** MINGLI_ADMINS, lower case: admins whatever their record says. */
   admins: Set<string>;
+  /** 设置 (S31): every setting's value now, and the panel's changes. */
+  settings: Settings;
   /** The server's dispatcher: the messages' templates, previews, test sends and log (S25). */
   messages?: Dispatcher;
   now: () => Date;
@@ -80,6 +84,7 @@ async function staffOf(ctx: AdminContext, userId: string): Promise<{ me: UserRec
 function capabilityOf(path: string, method: string): Capability {
   if (path.startsWith("/v1/admin/messages/")) return "messages";
   if (path === "/v1/admin/content" || path.startsWith("/v1/admin/content/")) return "content";
+  if (path === "/v1/admin/settings" || path.startsWith("/v1/admin/settings/")) return "settings";
   if (path === "/v1/admin/reports") return "user_data";
   if (/^\/v1\/admin\/users\/[^/]+\/(points|sign-out)$/.test(path)) return "user_data";
   if (/^\/v1\/admin\/users\/[^/]+$/.test(path) && method === "PATCH") return "assign";
@@ -169,6 +174,10 @@ export async function adminRoute(
   }
   if (path === "/v1/admin/content" || path.startsWith("/v1/admin/content/")) {
     if (await contentAdminRoute(ctx, req, res, path, me)) return true;
+    throw new HttpError(404, "not found");
+  }
+  if (path === "/v1/admin/settings" || path.startsWith("/v1/admin/settings/")) {
+    if (await settingsAdminRoute(ctx, req, res, path, me)) return true;
     throw new HttpError(404, "not found");
   }
   if (path.startsWith("/v1/admin/messages/")) {

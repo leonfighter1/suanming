@@ -42,6 +42,7 @@ import { creditEntry, newHold } from "../points/index.js";
 import type { ContentLocale } from "../content/catalog.js";
 import type { ContentImageRecord, ContentTextRecord } from "../content/store.js";
 import type { RefreshRecord, SessionStore } from "../auth/tokens.js";
+import type { SettingRecord } from "../settings/index.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
@@ -60,6 +61,7 @@ const MIGRATIONS = [
   "012_messages",
   "013_content",
   "014_sessions",
+  "015_settings",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -869,6 +871,32 @@ export class PgStore implements Store, UserStore, SessionStore {
 
   async dropUser(userId: string) {
     await this.db.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
+  }
+
+  // ---- 设置 (v19.0.0, S31): what the 管理后台's 设置 page changed, plain ----
+
+  async listSettings() {
+    const rows = await this.db.query<Row>("SELECT * FROM settings ORDER BY key");
+    return rows.rows.map((r): SettingRecord => ({
+      key: r.key as string,
+      value: r.value,
+      updated_at: iso(r.updated_at),
+      ...(r.updated_by != null && { updated_by: r.updated_by as string }),
+    }));
+  }
+
+  async putSetting(s: SettingRecord) {
+    await this.db.query(
+      `INSERT INTO settings (key, value, updated_at, updated_by) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at,
+         updated_by = EXCLUDED.updated_by`,
+      [s.key, JSON.stringify(s.value), s.updated_at, s.updated_by ?? null],
+    );
+  }
+
+  async deleteSetting(key: string) {
+    const r = await this.db.query("DELETE FROM settings WHERE key = $1", [key]);
+    return (r.affectedRows ?? 0) > 0;
   }
 
   // ---- 内容管理 (v18.0.0, S29): staff's changes to the app's texts and images, plain ----

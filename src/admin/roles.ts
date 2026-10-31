@@ -13,12 +13,13 @@ export type StaffRole = (typeof STAFF_ROLES)[number];
  * - assign: roles and permissions (停用, AI, 充值);
  * - user_data: what changes or takes a user's data: 增加积分, 在所有设备上退出, the exports;
  * - messages: the mail and SMS templates, their previews, test sends and the dispatch log;
- * - content: 内容管理 (S29), the app's texts and images.
+ * - content: 内容管理 (S29), the app's texts and images;
+ * - settings: 设置 (S31), what config/settings.json and .env set, the AI switches among them.
  */
-export type Capability = "view" | "assign" | "user_data" | "messages" | "content";
+export type Capability = "view" | "assign" | "user_data" | "messages" | "content" | "settings";
 
 export const CAPABILITIES: Record<StaffRole, readonly Capability[]> = {
-  admin: ["view", "assign", "user_data", "messages", "content"],
+  admin: ["view", "assign", "user_data", "messages", "content", "settings"],
   manager: ["view", "assign"],
   // 内容管理 (S29) to begin with for admin and integrator, the roles that word what users read; the owner can change it.
   integrator: ["messages", "content"],

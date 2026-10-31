@@ -37,6 +37,8 @@ tags:
     description: 以往记录 — documents (Word / PDF), deleting a record, filing it under a person (v8.0.0)
   - name: content
     description: 内容管理 — the app's texts and images as staff changed them, for everyone (v18.0.0)
+  - name: settings
+    description: 设置 — what config/settings.json and .env set, changed in the 管理后台 by admins (v19.0.0)
   - name: ops
     description: Operational endpoints
 
@@ -1764,6 +1766,74 @@ paths:
                 type: object
         "403": { $ref: "#/components/responses/Problem" }
 
+  /v1/admin/settings:
+    get:
+      tags: [settings]
+      operationId: adminListSettings
+      summary: Every setting, with its value now, its default and when it was changed (settings capability)
+      responses:
+        "200":
+          description: The settings, in the registry's order
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [settings]
+                properties:
+                  settings:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SettingView"
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/settings/{key}:
+    parameters:
+      - name: key
+        in: path
+        required: true
+        description: The setting's group and name, e.g. sessions.idle_days
+        schema:
+          type: string
+    put:
+      tags: [settings]
+      operationId: adminSaveSetting
+      summary: Change a setting, for the whole server, from the next request on
+      description: |
+        The value must fit the setting (a number in its range, a choice among its options): 400 invalid_setting with
+        what is wrong, in the panel's words. 404 unknown_setting for a key no setting has.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: {}
+      responses:
+        "200":
+          description: The setting now
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingView"
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [settings]
+      operationId: adminResetSetting
+      summary: Put a setting back to its default (config/settings.json, or the env variable it names)
+      responses:
+        "200":
+          description: The setting now
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingView"
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
   /v1/places:
     get:
       tags: [charts]
@@ -2468,6 +2538,48 @@ components:
                   available: { type: integer, description: The balance less what running jobs hold }
 
   schemas:
+    SettingView:
+      type: object
+      description: A setting as the 管理后台's 设置 page shows it (src/settings/index.ts SettingView)
+      required: [key, group, type, label, about, value, default]
+      properties:
+        key:
+          type: string
+        group:
+          type: string
+          enum: [sessions, ai, limits, currencies]
+        type:
+          type: string
+          enum: [number, boolean, choice, choices]
+        label:
+          type: string
+        about:
+          type: string
+        unit:
+          type: string
+        min:
+          type: number
+        max:
+          type: number
+        integer:
+          type: boolean
+        optional:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: string
+        env:
+          type: string
+          description: The env variable the default comes from, when it is set
+        value: {}
+        default: {}
+        changed:
+          type: object
+          properties:
+            updated_at:
+              type: string
+              format: date-time
     SignupProfile:
       type: object
       properties:

@@ -364,7 +364,7 @@ describe("the 后台 roles", () => {
     expect(await json("boss", "/v1/admin/me")).toMatchObject({
       role: "admin",
       admin_by_config: true,
-      can: ["view", "assign", "user_data", "messages", "content"],
+      can: ["view", "assign", "user_data", "messages", "content", "settings"],
       assignable_roles: ["user", "integrator", "manager", "admin"],
     });
     expect(await json("mgr", "/v1/admin/me")).toMatchObject({

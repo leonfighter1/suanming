@@ -14,6 +14,7 @@ import { adminDemoOn, seedAdminDemo } from "../src/admin/demo.js";
 import { createApiServer } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import { notifyFromEnv } from "../src/notify/index.js";
+import { Settings } from "../src/settings/index.js";
 import { loadPointsConfig } from "../src/points/index.js";
 import {
   buildAuth,
@@ -68,15 +69,21 @@ if (pub && !existsSync(staticDir)) {
   console.error(`--public needs the built web app in ${staticDir} (npm run public builds it)`);
   process.exit(2);
 }
-const aiQuota = {
-  perUserPerDay: Number(process.env.MINGLI_AI_DAILY_PER_USER ?? 10),
-  totalPerDay: Number(process.env.MINGLI_AI_DAILY_TOTAL ?? 100),
-};
-
 // Readings and accounts: in memory, or kept in the encrypted database (MINGLI_STORE=pglite, S5).
 const persistence = await openStore(secrets);
 const store = persistence.store ?? new InMemoryStore();
-const auth = buildAuth(secrets, true, persistence.users, persistence.sessions);
+// 设置 (S31): config/settings.json and .env, with what the 管理后台's 设置 page changed (kept in the store).
+const settings = await new Settings(store).load();
+const auth = buildAuth(secrets, true, persistence.users, persistence.sessions, settings);
+// Public mode's AI caps, read from 设置 at each job: a change in the 管理后台 holds from the next one.
+const aiQuota = {
+  get perUserPerDay() {
+    return settings.number("limits.ai_per_user_day");
+  },
+  get totalPerDay() {
+    return settings.number("limits.ai_total_day");
+  },
+};
 await seedDevAccounts(auth, true);
 // 积分 (S20): on unless MINGLI_POINTS=off. 充值 is simulated here (development): no payment, the pack's 积分 arrive.
 const points = pointsOn(process.env) ? loadPointsConfig() : undefined;
@@ -102,6 +109,7 @@ const server = createApiServer({
   // The database keeps records only for accounts: no X-Dev-User shortcut with it.
   devHeaders: loopbackOnly && !persistence.store,
   store,
+  settings,
   ...(points && { points: { config: points, simulateTopUp: true } }),
   // Content review is paused by owner decision (2026-10-26) until the legal &
   // obligations work: MINGLI_REVIEW=on turns holds, the guard and 内容审核 back on.

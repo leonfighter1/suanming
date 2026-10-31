@@ -14,6 +14,7 @@ import type { Doc } from "../src/export/document.js";
 import { renderHtml, renderText } from "../src/export/render-html.js";
 import { lifeDocument, localTime, readingDocument } from "../src/export/report-doc.js";
 import { buildMime, MemoryMail, MemorySms, type MailMessage } from "../src/notify/index.js";
+import { Settings } from "../src/settings/index.js";
 import { shareFont } from "../src/share/font.js";
 import { DRAW_KEY, FIXED_NOW, PEPPER } from "./helpers.js";
 import { testApi } from "./api.js";
@@ -286,11 +287,14 @@ const held = {
   },
 };
 const guarded = new MockProvider();
+// 设置 (S31): the defaults, changed by a test and put back.
+const settings = new Settings(undefined, {});
 let base = "";
 const api = testApi(
   {
     providers: providers(guarded),
     store: new InMemoryStore(),
+    settings,
     auth,
     mail,
     sms: new MemorySms(),
@@ -510,6 +514,25 @@ describe("发到邮箱: chosen records, to the account's own verified email", ()
       unverified,
     );
     expect([refused.status, refused.body.code]).toEqual([409, "email_unverified"]);
+  });
+
+  it("设置's mails a day (S31): with limits.mail_per_user_day at 1, the day's second is refused", async () => {
+    await settings.set("limits.mail_per_user_day", 1, undefined, now().toISOString());
+    try {
+      const token = await account("one_mail", { email: "one@example.com" });
+      const send = () =>
+        call(
+          "POST",
+          "/v1/documents/email",
+          { format: "docx", documents: [{ document: doc("塔罗") }] },
+          token,
+        );
+      expect((await send()).status).toBe(202);
+      const again = await send();
+      expect([again.status, again.body.code]).toEqual([429, "too_many"]);
+    } finally {
+      await settings.reset("limits.mail_per_user_day");
+    }
   });
 
   it("a server without mail says so (503) and renders nothing", async () => {

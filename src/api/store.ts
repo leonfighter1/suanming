@@ -21,6 +21,7 @@ import type { MessageKind } from "../notify/templates.js";
 import type { TemplateRecord, TemplateStore } from "../notify/dispatch.js";
 import type { ContentLocale } from "../content/catalog.js";
 import type { ContentImageRecord, ContentStore, ContentTextRecord } from "../content/store.js";
+import type { SettingRecord, SettingStore } from "../settings/index.js";
 import {
   InMemoryLedger,
   type PointsCharge,
@@ -208,7 +209,7 @@ export interface FollowUpRecord {
  * The records, and since v11.0.0 (S20) each account's 积分 (src/points/ledger.ts); since v13.1.0 (S25) the admins'
  * wordings of the messages (src/notify/dispatch.ts).
  */
-export interface Store extends PointsLedger, TemplateStore, ContentStore {
+export interface Store extends PointsLedger, TemplateStore, ContentStore, SettingStore {
   putChart(c: ChartRecord): Promise<void>;
   getChart(id: string): Promise<ChartRecord | undefined>;
   putReport(r: ReportRecord): Promise<void>;
@@ -342,6 +343,16 @@ export class InMemoryStore implements Store {
   }
   async deleteContentImage(key: string) {
     return this.contentImages.delete(key);
+  }
+  private settings = new Map<string, SettingRecord>();
+  async listSettings() {
+    return [...this.settings.values()].map((r) => structuredClone(r));
+  }
+  async putSetting(r: SettingRecord) {
+    this.settings.set(r.key, structuredClone(r));
+  }
+  async deleteSetting(key: string) {
+    return this.settings.delete(key);
   }
   async putInquiry(i: InquiryRecord) {
     this.inquiries.set(i.id, structuredClone(i));

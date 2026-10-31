@@ -49,6 +49,7 @@ import {
   type QuoteFor,
 } from "../points/index.js";
 import { InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
+import { Settings } from "../settings/index.js";
 import { documentName } from "../export/document.js";
 import { renderPdf } from "../export/render-pdf.js";
 import { shareFont } from "../share/font.js";
@@ -74,9 +75,6 @@ import {
 } from "./store.js";
 
 export const API_VERSION = "0.2.0";
-
-/** 发到邮箱 (v9.0.0): messages a day per account (each with at most MAIL_DOCUMENTS records: routes/archive.ts). */
-export const MAIL_PER_DAY = 20;
 
 /** 管理后台 (v11.2.0): how often an account's last activity is written. */
 export const SEEN_EVERY_MS = 5 * 60_000;
@@ -154,12 +152,15 @@ export interface ApiOptions {
    * is free, as before. `simulateTopUp`: 充值 adds a pack's 积分 without payment (development, until Phase 4).
    */
   points?: { config?: PointsConfig; simulateTopUp?: boolean };
+  /** 设置 (S31): the settings, with the 管理后台's changes loaded. Default: the defaults, kept in [store]. */
+  settings?: Settings;
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
 
 export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<void> } {
   const store = opts.store ?? new InMemoryStore();
+  const settings = opts.settings ?? new Settings(store);
   const now = opts.now ?? (() => new Date());
   const log = opts.log ?? ((m, e) => console.error(m, e ?? ""));
   const jobs = new Set<Promise<void>>();
@@ -227,18 +228,16 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     aiUse.set(`${day}:u:${user}`, mine + 1);
     aiUse.set(`${day}:all`, all + 1);
   }
-  /** 发到邮箱 messages sent today per account (UTC day): a provider charges for each. */
+  /** 发到邮箱 messages sent today per account (UTC day), each with at most MAIL_DOCUMENTS records: a provider charges
+   * for each. */
   const mailUse = new Map<string, number>();
   function takeMailQuota(user: string) {
     const day = now().toISOString().slice(0, 10);
     for (const k of [...mailUse.keys()]) if (!k.startsWith(day)) mailUse.delete(k);
     const used = mailUse.get(`${day}:${user}`) ?? 0;
-    if (used >= MAIL_PER_DAY) {
-      throw new HttpError(
-        429,
-        `at most ${MAIL_PER_DAY} mails a day; try again tomorrow`,
-        "too_many",
-      );
+    const most = settings.number("limits.mail_per_user_day");
+    if (used >= most) {
+      throw new HttpError(429, `at most ${most} mails a day; try again tomorrow`, "too_many");
     }
     mailUse.set(`${day}:${user}`, used + 1);
   }
@@ -467,6 +466,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
   const api: ApiContext = {
     opts,
     store,
+    settings,
     now,
     log,
     auth,
@@ -567,6 +567,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         auth,
         config: pointsConfig ?? loadPointsConfig(),
         admins,
+        settings,
         messages,
         now,
         log: (m: string) => log(m),

@@ -5,14 +5,15 @@
  *
  * Sessions (S29; the owner: 「登录者的登录消息存在服务器上，如果距离上次登录超过2天，那就需要重新登录」): the refresh
  * tokens live in a SessionStore, the database's when there is one, so a restart keeps everyone signed in. Each lasts
- * the idle limit (2 days by default) and every refresh gives a new one, so a session ends after that long unused.
+ * the idle limit (设置's sessions.idle_days, 2 days by default) and every refresh gives a new one, so a session ends
+ * after that long unused.
  */
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { jwtVerify, SignJWT } from "jose";
+import { defaultSettings } from "../settings/index.js";
 
 export const ACCESS_TTL_S = 15 * 60;
-/** How long a session may go unused before its owner signs in again: the owner's 2 days. */
-export const SESSION_IDLE_S = 2 * 24 * 3600;
+export const DAY_S = 24 * 3600;
 const ISSUER = "mingli";
 const AUDIENCE = "mingli-app";
 
@@ -68,7 +69,7 @@ export class InMemorySessionStore implements SessionStore {
 export interface TokenOptions {
   /** Where the refresh tokens are kept: in memory by default. */
   sessions?: SessionStore;
-  /** How long a session may go unused, in seconds, read at each sign-in and refresh: [SESSION_IDLE_S] by default. */
+  /** How long a session may go unused, in seconds, read at each sign-in and refresh: 设置's default by default. */
   idleSeconds?: () => number;
 }
 
@@ -92,7 +93,8 @@ export class TokenService {
   ) {
     if (secret.length < 32) throw new Error("JWT secret must be >= 32 bytes");
     this.sessions = o.sessions ?? new InMemorySessionStore();
-    this.idleSeconds = o.idleSeconds ?? (() => SESSION_IDLE_S);
+    this.idleSeconds =
+      o.idleSeconds ?? (() => defaultSettings().number("sessions.idle_days") * DAY_S);
   }
 
   private sha(t: string) {
