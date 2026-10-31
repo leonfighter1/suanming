@@ -2384,6 +2384,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get staffIntegrator => '集成人员';
+
+  @override
+  String get introWelcome => '欢迎来到命理大师';
+
+  @override
+  String get introJoin =>
+      '加入我们：八字、塔罗、求签、算卦与风水，东西方的智慧在这里相会。排盘由引擎精确计算，解读有据可查，仅供参考。';
+
+  @override
+  String get introSignIn => '登录 / 注册';
+
+  @override
+  String get introServices => '我们的服务';
+
+  @override
+  String get introServicesHint => '点一项服务：登录后直接进入';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4765,4 +4781,20 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get staffIntegrator => '集成人員';
+
+  @override
+  String get introWelcome => '歡迎來到命理大師';
+
+  @override
+  String get introJoin =>
+      '加入我們：八字、塔羅、求籤、算卦與風水，東西方的智慧在這裡相會。排盤由引擎精確計算，解讀有據可查，僅供參考。';
+
+  @override
+  String get introSignIn => '登入 / 註冊';
+
+  @override
+  String get introServices => '我們的服務';
+
+  @override
+  String get introServicesHint => '點一項服務：登入後直接進入';
 }

@@ -125,6 +125,7 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(testApp(FakeApi(), signedIn: false));
       await frames(tester, 12);
+      await openSignIn(tester);
       final banner = tester.getRect(find.byKey(const Key('auth-banner')));
       final login = tester.getRect(find.byKey(const Key('login')));
       // The form's last control: Google, coming soon.

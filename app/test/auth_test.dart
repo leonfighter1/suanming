@@ -9,11 +9,13 @@ import 'keys.dart';
 import 'support.dart';
 
 void main() {
-  testWidgets('signed out → sign-in page; registering lands on home', (tester) async {
+  testWidgets('signed out → the introduction page, then sign-in (S29); registering lands on home', (tester) async {
     final api = FakeApi();
     final tokens = InMemoryTokenStore();
     await tester.pumpWidget(testApp(api, tokens: tokens));
     await frames(tester, 10);
+    expect(find.byKey(const Key('intro-sign-in')), findsOneWidget);
+    await openSignIn(tester);
     expect(find.text('登入'), findsWidgets);
     expect(find.byKey(const Key('entry-bazi')), findsNothing);
 
@@ -54,6 +56,7 @@ void main() {
   testWidgets('a wrong password says so in the reader\'s language and stays signed out', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(), signedIn: false));
     await frames(tester, 10);
+    await openSignIn(tester);
     await tester.enterText(find.byKey(const Key('login')), 'me@example.com');
     await tester.enterText(find.byKey(const Key('password')), 'wrong pw here');
     await tester.tap(find.byKey(const Key('auth-submit')));
@@ -67,6 +70,7 @@ void main() {
     final api = FakeApi()..suspended = true;
     await tester.pumpWidget(testApp(api, signedIn: false));
     await frames(tester, 10);
+    await openSignIn(tester);
     await tester.enterText(find.byKey(const Key('login')), 'me@example.com');
     await tester.enterText(find.byKey(const Key('password')), 'long enough pw');
     await tester.tap(find.byKey(const Key('auth-submit')));
@@ -91,13 +95,15 @@ void main() {
       await frames(tester, 10);
     }
     expect(await tokens.read(), isNull);
-    expect(find.byKey(const Key('auth-submit')), findsOneWidget);
+    // Out, at the introduction page (S29).
+    expect(find.byKey(const Key('intro-sign-in')), findsOneWidget);
   });
 
   testWidgets('signing in sends what was typed as the login: a username, an email or a phone (v8.2.0)', (tester) async {
     final api = FakeApi();
     await tester.pumpWidget(testApp(api, signedIn: false));
     await frames(tester, 10);
+    await openSignIn(tester);
     // The field says what it takes, and that a phone must be bound first.
     expect(find.text('用戶名稱 / 電子郵件 / 手機號碼'), findsOneWidget);
     expect(find.text('手機號碼要先在「設定」裡綁定'), findsOneWidget);
@@ -114,6 +120,7 @@ void main() {
     final api = FakeApi();
     await tester.pumpWidget(testApp(api, signedIn: false));
     await frames(tester, 10);
+    await openSignIn(tester);
     await tester.tap(find.byKey(const Key('auth-toggle')));
     await frames(tester, 10);
     await tester.enterText(find.byKey(const Key('username')), 'taken');
@@ -143,6 +150,7 @@ void main() {
   testWidgets('an unreachable server explains the address instead of a raw ClientException', (tester) async {
     await tester.pumpWidget(testApp(FakeApi()..offline = true, signedIn: false));
     await frames(tester, 10);
+    await openSignIn(tester);
     await tester.enterText(find.byKey(const Key('login')), 'xumei');
     await tester.enterText(find.byKey(const Key('password')), 'xumei');
     await tester.tap(find.byKey(const Key('auth-submit')));
@@ -170,7 +178,7 @@ void main() {
     expect(find.text('四柱'), findsOneWidget);
   });
 
-  testWidgets('deleting the account calls the API and returns to sign-in', (tester) async {
+  testWidgets('deleting the account calls the API and returns to the introduction page', (tester) async {
     final api = FakeApi();
     final tokens = InMemoryTokenStore(Tokens(api.access, 'refresh-0'));
     await tester.pumpWidget(testApp(api, tokens: tokens));
@@ -190,7 +198,7 @@ void main() {
 
     expect(api.requests.any((r) => r.method == 'DELETE' && r.url.path == '/v1/account'), isTrue);
     expect(await tokens.read(), isNull);
-    expect(find.byKey(const Key('auth-submit')), findsOneWidget);
+    expect(find.byKey(const Key('intro-sign-in')), findsOneWidget);
     expect(find.text('你的帳戶與資料已刪除。'), findsOneWidget);
   });
 }

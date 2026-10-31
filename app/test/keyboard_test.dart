@@ -31,6 +31,7 @@ void main() {
     testWidgets('sign-in: Enter in 邮箱 goes to 密码, Enter in 密码 signs in', (tester) async {
       await tester.pumpWidget(testApp(FakeApi(), signedIn: false, locale: zhHans));
       await frames(tester);
+      await openSignIn(tester);
       await tester.enterText(find.byKey(const Key('login')), 'me@example.com');
       await tester.testTextInput.receiveAction(TextInputAction.next);
       await frames(tester);
@@ -44,6 +45,7 @@ void main() {
     testWidgets('sign-in: Ctrl+Enter signs in from any field', (tester) async {
       await tester.pumpWidget(testApp(FakeApi(), signedIn: false, locale: zhHans));
       await frames(tester);
+      await openSignIn(tester);
       await tester.enterText(find.byKey(const Key('password')), 'long enough pw');
       await tester.enterText(find.byKey(const Key('login')), 'me@example.com');
       await press(tester, LogicalKeyboardKey.enter, control: true);

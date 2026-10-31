@@ -17,9 +17,11 @@ ImageProvider? artOf(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('the sign-in page stands on 命理罗盘', (tester) async {
+  testWidgets('the introduction and sign-in pages stand on 命理罗盘', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(), signedIn: false));
     await frames(tester, 12);
+    expect(artOf(tester), bannerArt, reason: 'the introduction page');
+    await openSignIn(tester);
     expect(artOf(tester), bannerArt);
   });
 

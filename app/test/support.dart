@@ -65,6 +65,12 @@ Future<void> openEntry(WidgetTester tester, String system) async {
   await tester.tap(find.byKey(Key('entry-$system')));
 }
 
+/// The sign-in page, opened from the introduction page a signed-out start shows (S29).
+Future<void> openSignIn(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('intro-sign-in')));
+  await frames(tester, 10);
+}
+
 /// Whether the button keyed [key] can be pressed. The key is the app's button's (S30, buttons.dart); the Material
 /// button that says so is inside it.
 bool buttonEnabled(WidgetTester tester, Key key) => tester

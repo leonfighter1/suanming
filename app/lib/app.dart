@@ -8,8 +8,8 @@ import 'l10n/gen/app_localizations.dart';
 import 'presentation/content.dart';
 import 'presentation/design.dart';
 import 'presentation/home_page.dart';
+import 'presentation/intro_page.dart';
 import 'presentation/keyboard.dart';
-import 'presentation/sign_in_page.dart';
 import 'presentation/theme.dart';
 import 'presentation/widgets/app_menu.dart';
 
@@ -48,14 +48,14 @@ class MingliApp extends ConsumerWidget {
   }
 }
 
-/// Signed out → sign-in; signed in → home. Everything else sits behind this.
+/// Signed out → the introduction page (S29), which opens sign-in; signed in → home. Everything else sits behind this.
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => switch (ref.watch(authProvider)) {
-        AsyncData(:final value) => value == null ? const SignInPage() : const HomePage(),
-        AsyncError() => const SignInPage(),
+        AsyncData(:final value) => value == null ? const IntroPage() : const HomePage(),
+        AsyncError() => const IntroPage(),
         _ => const Scaffold(body: Center(child: CircularProgressIndicator())),
       };
 }

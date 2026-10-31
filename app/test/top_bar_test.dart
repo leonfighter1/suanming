@@ -124,7 +124,8 @@ void main() {
     await frames(tester, 12);
     await openFromMenu(tester, 'menu-sign-out');
     await frames(tester, 12);
-    expect(find.byKey(const Key('auth-submit')), findsOneWidget);
+    // Back at the introduction page (S29).
+    expect(find.byKey(const Key('intro-sign-in')), findsOneWidget);
   });
 
   testWidgets('from the keyboard: Tab reaches ☰, Enter opens the menu, Tab stays in it, Esc closes it', (tester) async {
@@ -165,6 +166,7 @@ void main() {
   testWidgets('signed out, the sign-in bar has 语言 too', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(), signedIn: false, locale: zhHans));
     await frames(tester, 12);
+    await openSignIn(tester);
     final submit = find.byKey(const Key('auth-submit'));
     expect(find.descendant(of: submit, matching: find.text('登录')), findsOneWidget);
 

@@ -4511,6 +4511,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'集成人员'**
   String get staffIntegrator;
+
+  /// No description provided for @introWelcome.
+  ///
+  /// In zh, this message translates to:
+  /// **'欢迎来到命理大师'**
+  String get introWelcome;
+
+  /// No description provided for @introJoin.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入我们：八字、塔罗、求签、算卦与风水，东西方的智慧在这里相会。排盘由引擎精确计算，解读有据可查，仅供参考。'**
+  String get introJoin;
+
+  /// No description provided for @introSignIn.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录 / 注册'**
+  String get introSignIn;
+
+  /// No description provided for @introServices.
+  ///
+  /// In zh, this message translates to:
+  /// **'我们的服务'**
+  String get introServices;
+
+  /// No description provided for @introServicesHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点一项服务：登录后直接进入'**
+  String get introServicesHint;
 }
 
 class _AppLocalizationsDelegate

@@ -2292,4 +2292,19 @@ class ContentLocalizations extends AppLocalizations {
 
   @override
   String get staffIntegrator => _text('staffIntegrator') ?? _base.staffIntegrator;
+
+  @override
+  String get introWelcome => _text('introWelcome') ?? _base.introWelcome;
+
+  @override
+  String get introJoin => _text('introJoin') ?? _base.introJoin;
+
+  @override
+  String get introSignIn => _text('introSignIn') ?? _base.introSignIn;
+
+  @override
+  String get introServices => _text('introServices') ?? _base.introServices;
+
+  @override
+  String get introServicesHint => _text('introServicesHint') ?? _base.introServicesHint;
 }

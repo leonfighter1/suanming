@@ -6,6 +6,7 @@ import '../data/api_client.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'buttons.dart';
 import 'design.dart';
+import 'home_page.dart';
 import 'keyboard.dart';
 import 'layout.dart';
 import 'widgets/language_menu.dart';
@@ -23,8 +24,12 @@ const signupRegions = {
   'GB': {'zh-Hant': '英國', 'zh-Hans': '英国', 'en': 'United Kingdom'},
 };
 
+/// Signing in or up, opened from the introduction page (S29).
 class SignInPage extends ConsumerStatefulWidget {
-  const SignInPage({super.key});
+  const SignInPage({super.key, this.service});
+
+  /// The service picked on the introduction page: opened once signed in; signing up goes to 首页 alone.
+  final String? service;
 
   @override
   ConsumerState<SignInPage> createState() => _SignInPageState();
@@ -86,6 +91,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         );
       } else {
         await auth.login(_login.text.trim(), _password.text);
+      }
+      // In (S29): back to the gate, 首页 now, and on to the service picked before signing in.
+      if (!mounted) return;
+      final navigator = Navigator.of(context);
+      final page = _register ? null : methodPage(widget.service ?? '');
+      if (page == null) {
+        navigator.popUntil((r) => r.isFirst);
+      } else {
+        navigator.pushAndRemoveUntil(MaterialPageRoute<void>(builder: (_) => page), (r) => r.isFirst);
       }
     } on ApiException catch (e) {
       setState(() => _error = _message(l10n, e));
