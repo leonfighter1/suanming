@@ -7,8 +7,8 @@
  *   npm run verify:bazi -- 20000   # more random cases
  * Exit code 1 if any case is an unexplained mismatch ("error").
  */
-import { mkdirSync, writeFileSync } from "node:fs";
 import { compareOne, edgeCases, randomCases, summarize } from "../test/oracle/compare.js";
+import { writeResults } from "./verify-run.js";
 
 const n = Number(process.argv[2] ?? 5000);
 const started = Date.now();
@@ -32,11 +32,7 @@ const result = {
   boundary_examples: all.filter((r) => r.status === "boundary").slice(0, 10),
   seconds: Math.round((Date.now() - started) / 1000),
 };
-mkdirSync(new URL("../docs/verification/", import.meta.url), { recursive: true });
-writeFileSync(
-  new URL("../docs/verification/bazi-results.json", import.meta.url),
-  JSON.stringify(result, null, 2) + "\n",
-);
+writeResults("bazi", result);
 console.log(
   JSON.stringify({
     random: result.random,

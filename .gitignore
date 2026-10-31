@@ -14,3 +14,7 @@ report.json
 # Made by the IDE (VS Code's CMake extension configuring app/windows): not part of the project.
 /.vscode/
 /build/
+# Claude Code's own files on one machine: its task lock and a person's local settings. The skills in .claude/skills
+# are the project's and stay tracked.
+/.claude/scheduled_tasks.lock
+/.claude/settings.local.json
