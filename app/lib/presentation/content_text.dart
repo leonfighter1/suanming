@@ -66,8 +66,7 @@ List<InlineSpan> richSpans(BuildContext context, List<RichNode> nodes, TextStyle
       _ => s,
     };
     for (final MapEntry(:key, :value) in styleOf(attributes['style']).entries) {
-      final token = RegExp(r'^var\(--([a-z-]+)\)$').firstMatch(value)?[1];
-      final color = token == null ? null : richColor(token, t);
+      final color = richColorOf(value, t);
       final px = double.tryParse(RegExp(r'^(\d+(?:\.\d+)?)px$').firstMatch(value)?[1] ?? '');
       final weight = value == 'bold' ? 700 : (value == 'normal' ? 400 : int.tryParse(value));
       out = switch (key) {
@@ -135,6 +134,12 @@ List<InlineSpan> richSpans(BuildContext context, List<RichNode> nodes, TextStyle
     spans.removeLast();
   }
   return spans;
+}
+
+/// A style's colour (color, background-color): the theme's, `var(--accent)` and the like; null for any other value.
+Color? richColorOf(String value, ThemeTokens t) {
+  final token = RegExp(r'^var\(--([a-z-]+)\)$').firstMatch(value)?[1];
+  return token == null ? null : richColor(token, t);
 }
 
 /// A piece back as HTML, for a link's words.
