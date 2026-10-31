@@ -15,19 +15,6 @@ Future<void> openMenu(WidgetTester tester) async {
   await frames(tester, 12);
 }
 
-/// What the app puts on the clipboard (the platform's Clipboard.setData), the latest in [copied].
-class ClipboardWatch {
-  ClipboardWatch(WidgetTester tester) {
-    final messenger = tester.binding.defaultBinaryMessenger;
-    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-      if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
-      return null;
-    });
-    addTearDown(() => messenger.setMockMethodCallHandler(SystemChannels.platform, null));
-  }
-  String? copied;
-}
-
 void main() {
   testWidgets('without a staff role there is no 管理后台 in the menu', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(), locale: zhHans));

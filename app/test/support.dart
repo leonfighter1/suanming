@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' show pow;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -892,4 +893,17 @@ Widget testApp(
     ],
     child: const MingliApp(),
   );
+}
+
+/// What the app puts on the clipboard (the platform's Clipboard.setData), the latest in [copied].
+class ClipboardWatch {
+  ClipboardWatch(WidgetTester tester) {
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(SystemChannels.platform, null));
+  }
+  String? copied;
 }
