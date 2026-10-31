@@ -70,6 +70,8 @@ flutter:
     - assets/i18n/
     # Card art, one WebP per card id: made by `npm run mirror:tarot`, never edited by hand.
     - assets/tarot/
+    # The banners' art, 命理罗盘: made by `npm run mirror:banner`, never edited by hand.
+    - assets/art/
     # The app icon for the menu header: made by `npm run build:icons`, as every platform's icon is.
     - assets/icon/app_icon.png
 

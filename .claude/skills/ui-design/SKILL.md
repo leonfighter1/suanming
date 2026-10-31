@@ -87,6 +87,11 @@ background, card, raised and inset in both themes, and each "on" colour on its f
     浅色」).
   - The app's banner (首页, the sign-in page) shows the time of day, whatever 外观 is: `sunOrMoon` gives the sun by
     day and the moon at night.
+  - Every banner (`HeroBanner`: 首页, the sign-in page, each method's page, 八字's chart) stands on 命理罗盘
+    (`bannerArt`; owner, 2026-10-30: 「Update the banner background using this … luopan.svg for all pages」), the
+    owner's art from JingyaoPaint, made into `app/assets/art` by `npm run mirror:banner`. The art is night in both
+    themes, so the banner doesn't change with 外观: its words take the dark theme's text colours, over the art's own
+    night laid deepest under them, and what a page puts on it (`trailing`, 八字's day pillar) reads the dark tokens.
 - **The change fades:** `MaterialApp(themeAnimationStyle: AnimationStyle(duration: Motion.theme, curve:
 Motion.themeCurve))`. Every colour lerps: the Material scheme and `ThemeTokens` (a `ThemeExtension`). The tests switch
   the theme and check colours half-way, the 五行 and the chart series too.
@@ -269,6 +274,7 @@ compact grid, and a panel of its own at the right. The building blocks are in
 | `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                                                                                                                                                                                                       |
 | `admin/test/dashboard_test.dart`    | the container at 2560 (1440, centred, one left edge for every page); the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter |
 | `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                                                                                   |
+| `app/test/banner_art_test.dart`     | every banner on 命理罗盘 (the sign-in page, 首页, each method); its words, and 八字's day pillar, in the dark theme's colours in either theme                                                                                                                                                                           |
 | `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                                                                                        |
 | `app/test/grid_test.dart`           | window classes; the type ramp; 首页 at 390 to 2560 (the 1620 container, 2 × 2, 1 × 1, titles on the cards' edge); the sign-in page; every page at 2560; rules                                                                                                                                                           |
 | `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own                                                              |

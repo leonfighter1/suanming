@@ -398,11 +398,22 @@ class _RevealScroll extends DrivenScrollActivity {
   bool get shouldIgnorePointer => false;
 }
 
-/// Large gradient header used at the top of the main screens.
 /// The time of day on the app's banner (S27; owner, 2026-10-30: 「Theme加上太阳和月亮到banner上去，表示时间」): the moon at
 /// night (19:00 to 06:00, `nightProvider`), the sun by day.
 IconData sunOrMoon(bool night) => night ? Icons.nightlight_round : Icons.wb_sunny_rounded;
 
+/// The banners' art (owner, 2026-10-30: 「Update the banner background using this … luopan.svg for all pages」): 命理罗盘,
+/// drawn in JingyaoPaint and made into the app's by `npm run mirror:banner`.
+const bannerArt = AssetImage('assets/art/luopan.webp');
+
+/// The night of the art's own sky, laid over the side the banner's words are on so they read on any part of it.
+const _artNight = Color(0xFF090C15);
+
+/// The words' glow on the art, against its brightest parts (the gold rings).
+const _onArt = [Shadow(color: _artNight, blurRadius: 12)];
+
+/// The header at the top of the main screens: a title, a line under it and an icon, on 命理罗盘 ([bannerArt]). The art is
+/// dark in both themes, so its words and icon take the dark theme's text colours.
 class HeroBanner extends StatelessWidget {
   const HeroBanner({
     super.key,
@@ -422,41 +433,60 @@ class HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    const on = ThemeTokens.dark;
+    final radius = BorderRadius.circular(Radii.hero);
     return Container(
       margin: margin ?? const EdgeInsets.only(bottom: Space.l),
-      padding: const EdgeInsets.all(Space.xl),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Radii.hero),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [scheme.primary, Color.lerp(scheme.primary, scheme.tertiary, 0.6)!],
-        ),
+        borderRadius: radius,
+        // The sky's night until the art is ready.
+        color: _artNight,
+        image: const DecorationImage(image: bannerArt, fit: BoxFit.cover),
         boxShadow: [
-          BoxShadow(color: scheme.primary.withValues(alpha: 0.18), blurRadius: Space.xl, offset: const Offset(0, Space.s)),
+          BoxShadow(color: _artNight.withValues(alpha: 0.18), blurRadius: Space.xl, offset: const Offset(0, Space.s)),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            // Its own height, so a banner made taller than its text (beside a form) holds the text in its middle.
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: text.headlineSmall?.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w600)),
-                if (subtitle != null) ...[
-                  const SizedBox(height: Space.s),
-                  Text(subtitle!, style: text.bodyMedium?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.85))),
-                ],
-              ],
-            ),
+      child: DecoratedBox(
+        // The sky's night, deepest under the words, thinning towards the icon.
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          gradient: LinearGradient(
+            colors: [for (final a in const [0.94, 0.7, 0.15]) _artNight.withValues(alpha: a)],
+            stops: const [0, 0.45, 1],
           ),
-          if (icon != null) Icon(icon, size: 48, color: scheme.onPrimary.withValues(alpha: 0.9)),
-          ?trailing,
-        ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(Space.xl),
+          child: Row(
+            children: [
+              Expanded(
+                // Its own height, so a banner made taller than its text (beside a form) holds the text in its middle.
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: text.headlineSmall?.copyWith(color: on.text, fontWeight: FontWeight.w600, shadows: _onArt),
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: Space.s),
+                      Text(
+                        subtitle!,
+                        style: text.bodyMedium?.copyWith(color: on.text.withValues(alpha: 0.85), shadows: _onArt),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (icon != null) Icon(icon, size: 48, color: on.text.withValues(alpha: 0.9)),
+              // What a page puts on the art (八字's day pillar in its 五行 colours) reads the dark theme's tokens.
+              if (trailing != null)
+                Theme(data: Theme.of(context).copyWith(extensions: const [ThemeTokens.dark]), child: trailing!),
+            ],
+          ),
+        ),
       ),
     );
   }
