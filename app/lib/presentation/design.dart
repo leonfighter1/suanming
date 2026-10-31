@@ -540,6 +540,32 @@ class _AppCardState extends State<AppCard> {
   }
 }
 
+/// A group's name above its cards, read out as a heading: 首页's 东方 and 西方 (owner, v6.1.0); 八字's and 算卦's groups
+/// (S35).
+class GroupTitle extends StatelessWidget {
+  const GroupTitle({super.key, required this.title});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    // On the cards' left edge (the ui-design skill's alignment rule).
+    return Padding(
+      padding: const EdgeInsets.only(top: Space.s, bottom: Space.m),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Fade + slide-up entrance, optionally delayed for a staggered list.
 class FadeSlideIn extends StatefulWidget {
   const FadeSlideIn({super.key, required this.child, this.index = 0});

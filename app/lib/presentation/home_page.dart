@@ -112,31 +112,6 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// A group's name above its methods on the home page: 东方, 西方 (owner, v6.1.0). Read out as a heading.
-class GroupTitle extends StatelessWidget {
-  const GroupTitle({super.key, required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // On the cards' left edge (the ui-design skill's alignment rule).
-    return Padding(
-      padding: const EdgeInsets.only(top: Space.s, bottom: Space.m),
-      child: Semantics(
-        header: true,
-        child: Text(
-          title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// A method's card on 首页 (keyed `entry-<method>`): its icon, name and line, opening its page; [onTap] does something
 /// else instead (the introduction page's: signing in first, S29).
 class MethodEntry extends StatelessWidget {
