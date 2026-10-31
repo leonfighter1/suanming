@@ -22,8 +22,18 @@ void push(BuildContext context, Widget page) =>
 
 /// The home page's two groups (owner, v6.1.0): 东方, 八字 · 算卦 · 风水 · 求签, and 西方, 塔罗 for now. A new
 /// method joins one of them here. Inside a group the methods keep the region's order.
-const _east = {'bazi', 'qiuqian', 'liuyao', 'fengshui'};
-const _west = {'tarot'};
+const eastMethods = {'bazi', 'qiuqian', 'liuyao', 'fengshui'};
+const westMethods = {'tarot'};
+
+/// The page a method opens on: its card's, and the service picked before signing in (S29); null for none.
+Widget? methodPage(String system) => switch (system) {
+      'bazi' => const BaziFormPage(),
+      'tarot' => const TarotPage(),
+      'fengshui' => const FengshuiPage(),
+      'qiuqian' => const QiuqianPage(),
+      'liuyao' => const LiuyaoPage(),
+      _ => null,
+    };
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -43,12 +53,12 @@ class HomePage extends ConsumerWidget {
     // of the day: 今日一卦 or 今日一签 under 东方 (S26), 今日一牌 under 西方.
     final groups = <Widget>[
       for (final (key, title, members, daily) in [
-        ('east', l10n.homeEast, _east, const EastDailyCard()),
-        ('west', l10n.homeWest, _west, const DailyCard()),
+        ('east', l10n.homeEast, eastMethods, const EastDailyCard()),
+        ('west', l10n.homeWest, westMethods, const DailyCard()),
       ])
         if (methods.any(members.contains)) ...[
-          fadeIn(_GroupTitle(key: Key('group-$key'), title: title)),
-          CardGrid(children: [for (final system in methods.where(members.contains)) fadeIn(_entry(context, l10n, system))]),
+          fadeIn(GroupTitle(key: Key('group-$key'), title: title)),
+          CardGrid(children: [for (final system in methods.where(members.contains)) fadeIn(MethodEntry(system))]),
           fadeIn(daily),
         ],
     ];
@@ -96,50 +106,11 @@ class HomePage extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _entry(BuildContext context, AppLocalizations l10n, String system) => switch (system) {
-        'bazi' => _Entry(
-            key: const Key('entry-bazi'),
-            icon: Icons.grid_view_rounded,
-            title: l10n.homeBazi,
-            subtitle: l10n.homeBaziDesc,
-            onTap: () => push(context, const BaziFormPage()),
-          ),
-        'tarot' => _Entry(
-            key: const Key('entry-tarot'),
-            icon: Icons.style_rounded,
-            title: l10n.homeTarot,
-            subtitle: l10n.homeTarotDesc,
-            onTap: () => push(context, const TarotPage()),
-          ),
-        'fengshui' => _Entry(
-            key: const Key('entry-fengshui'),
-            icon: Icons.explore_outlined,
-            title: l10n.homeFengshui,
-            subtitle: l10n.homeFengshuiDesc,
-            onTap: () => push(context, const FengshuiPage()),
-          ),
-        'qiuqian' => _Entry(
-            key: const Key('entry-qiuqian'),
-            icon: Icons.temple_buddhist_outlined,
-            title: l10n.homeQiuqian,
-            subtitle: l10n.homeQiuqianDesc,
-            onTap: () => push(context, const QiuqianPage()),
-          ),
-        'liuyao' => _Entry(
-            key: const Key('entry-liuyao'),
-            icon: Icons.toll_outlined,
-            title: l10n.homeLiuyao,
-            subtitle: l10n.homeLiuyaoDesc,
-            onTap: () => push(context, const LiuyaoPage()),
-          ),
-        _ => const SizedBox.shrink(),
-      };
 }
 
 /// A group's name above its methods on the home page: 东方, 西方 (owner, v6.1.0). Read out as a heading.
-class _GroupTitle extends StatelessWidget {
-  const _GroupTitle({super.key, required this.title});
+class GroupTitle extends StatelessWidget {
+  const GroupTitle({super.key, required this.title});
   final String title;
 
   @override
@@ -162,8 +133,31 @@ class _GroupTitle extends StatelessWidget {
   }
 }
 
+/// A method's card on 首页 (keyed `entry-<method>`): its icon, name and line, opening its page; [onTap] does something
+/// else instead (the introduction page's: signing in first, S29).
+class MethodEntry extends StatelessWidget {
+  MethodEntry(this.system, {Key? key, this.onTap}) : super(key: key ?? Key('entry-$system'));
+  final String system;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final page = methodPage(system);
+    final (icon, title, subtitle) = switch (system) {
+      'bazi' => (Icons.grid_view_rounded, l10n.homeBazi, l10n.homeBaziDesc),
+      'tarot' => (Icons.style_rounded, l10n.homeTarot, l10n.homeTarotDesc),
+      'fengshui' => (Icons.explore_outlined, l10n.homeFengshui, l10n.homeFengshuiDesc),
+      'qiuqian' => (Icons.temple_buddhist_outlined, l10n.homeQiuqian, l10n.homeQiuqianDesc),
+      _ => (Icons.toll_outlined, l10n.homeLiuyao, l10n.homeLiuyaoDesc),
+    };
+    if (page == null) return const SizedBox.shrink();
+    return _Entry(icon: icon, title: title, subtitle: subtitle, onTap: onTap ?? () => push(context, page));
+  }
+}
+
 class _Entry extends StatelessWidget {
-  const _Entry({super.key, required this.icon, required this.title, required this.subtitle, required this.onTap});
+  const _Entry({required this.icon, required this.title, required this.subtitle, required this.onTap});
   final IconData icon;
   final String title;
   final String subtitle;
