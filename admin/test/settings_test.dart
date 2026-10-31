@@ -159,8 +159,10 @@ void main() {
     expect(f.to('/v1/admin/settings/points.packs', method: 'PUT'), hasLength(2));
   });
 
-  testWidgets('a manager has no 设置', (tester) async {
+  testWidgets('a manager has no 设置, in the menu or anywhere (S35: it is in the menu, an admin\'s alone)', (tester) async {
     await pumpAdmin(tester, fake: FakeAdmin()..role = 'manager', size: tall);
+    await openMenu(tester);
+    expect(find.byKey(const ValueKey<String>('menu-设置')), findsNothing);
     expect(find.text('设置'), findsNothing);
   });
 }

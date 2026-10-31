@@ -21,7 +21,7 @@ const _groups = [
   ('codes', '验证码'),
   ('ai', 'AI'),
   ('limits', '限额'),
-  ('content', '内容'),
+  ('content', '修改页面内容'),
   ('currencies', '货币'),
   ('points', '积分'),
 ];

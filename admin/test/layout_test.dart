@@ -51,9 +51,9 @@ void main() {
   testWidgets('on a phone, a page of the menu takes the bar\'s place, with its name and a way back (S33)', (tester) async {
     await pumpAdmin(tester, size: phone);
     await go(tester, '用户');
-    await go(tester, '内容');
+    await go(tester, '修改页面内容');
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.descendant(of: find.byType(AppBar), matching: find.text('内容')), findsOneWidget);
+    expect(find.descendant(of: find.byType(AppBar), matching: find.text('修改页面内容')), findsOneWidget);
     await tapOn(tester, 'menu-back');
     expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 1, reason: 'back to 用户');
   });

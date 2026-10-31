@@ -17,7 +17,7 @@ const tall = Size(1440, 1800);
 /// The 内容 page, wide enough for its panel: every text in one list, unless [byPage] (S33: the page's own start).
 Future<FakeAdmin> openContent(WidgetTester tester, {FakeAdmin? fake, bool byPage = false}) async {
   final f = await pumpAdmin(tester, fake: fake, size: tall);
-  await go(tester, '内容');
+  await go(tester, '修改页面内容');
   if (!byPage) {
     await tester.tap(find.text('全部文字'));
     await tester.pumpAndSettle();

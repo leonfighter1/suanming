@@ -27,11 +27,13 @@ final _dests = <_Dest>[
   (label: '活跃', icon: Icons.bolt_outlined, selected: Icons.bolt, needs: Can.view, page: ActivePage.new, inMenu: false),
   (label: '收益', icon: Icons.show_chart, selected: Icons.show_chart, needs: Can.view, page: RevenuePage.new, inMenu: false),
   (label: '用量', icon: Icons.memory_outlined, selected: Icons.memory, needs: Can.view, page: UsagePage.new, inMenu: false),
-  (label: '设置', icon: Icons.tune_outlined, selected: Icons.tune, needs: Can.settings, page: SettingsPage.new, inMenu: false),
-  // The owner (S33): 「内容页面需要移动到管理员页面右上角，同时管理员右上角应该改成下拉菜单，而且把导出和消息也放进去」.
-  (label: '内容', icon: Icons.article_outlined, selected: Icons.article, needs: Can.content, page: ContentPage.new, inMenu: true),
+  // The owner (S33): 「内容页面需要移动到管理员页面右上角，同时管理员右上角应该改成下拉菜单，而且把导出和消息也放进去」; (S35)
+  // 「内容 keyword可以改成修改页面内容」, 「dashboard的设置可以放置在下拉菜单 … 确保有些功能只能admin去改」: 设置 asks for the
+  // settings capability, an admin's alone.
+  (label: '修改页面内容', icon: Icons.article_outlined, selected: Icons.article, needs: Can.content, page: ContentPage.new, inMenu: true),
   (label: '消息', icon: Icons.mail_outline, selected: Icons.mail, needs: Can.messages, page: MessagesPage.new, inMenu: true),
   (label: '导出', icon: Icons.download_outlined, selected: Icons.download, needs: Can.userData, page: ReportsPage.new, inMenu: true),
+  (label: '设置', icon: Icons.tune_outlined, selected: Icons.tune, needs: Can.settings, page: SettingsPage.new, inMenu: true),
 ];
 
 /// The width from which the pages sit beside a rail rather than above a bar.
@@ -44,9 +46,9 @@ const _themes = [
   (ThemeMode.dark, '深色', Icons.dark_mode_outlined),
 ];
 
-/// The menu at the top right (S33): the pages that live there (内容, 消息, 导出, as far as the role may), 外观 and
-/// 退出登录. Its button is the staff member and the role on a wide screen, an icon on a phone. Enter opens it, the
-/// arrows move, Esc closes.
+/// The menu at the top right (S33): the pages that live there (修改页面内容, 消息, 导出, 设置, as far as the role may),
+/// 外观 and 退出登录. Its button is the staff member and the role on a wide screen, an icon on a phone. Enter opens it,
+/// the arrows move, Esc closes.
 class _AdminMenu extends ConsumerStatefulWidget {
   const _AdminMenu({required this.me, required this.pages, required this.current, required this.onPage, required this.wide});
   final AdminMe me;

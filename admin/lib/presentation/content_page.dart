@@ -128,7 +128,7 @@ class _ContentPageState extends ConsumerState<ContentPage> {
       // narrow screen (as 用户's).
       narrowAt: 1,
       main: [
-        const PageHeader('内容', subtitle: '应用里的文字和图片，按页面列出，每种语言一份。改过的存在服务器上，应用下次打开时显示；也可以恢复成应用自带的。'),
+        const PageHeader('修改页面内容', subtitle: '应用里的文字和图片，按页面列出，每种语言一份。改过的存在服务器上，应用下次打开时显示；也可以恢复成应用自带的。'),
         AsyncView(
           listing,
           onRetry: retry,
