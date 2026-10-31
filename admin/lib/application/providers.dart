@@ -24,9 +24,11 @@ Duration? retryAdmin(int retryCount, Object error) {
 /// The HTTP client the API talks through; null for the default one. Tests put a fake server here.
 final httpClientProvider = Provider<http.Client?>((ref) => null);
 
-/// The login the app's ☰ → 管理后台 hands over (`?login=`, tech plan S25), for the sign-in to fill in; taken off the
-/// address once read. Tests set it.
-final loginHintProvider = Provider<String?>((ref) => takeLoginHint());
+/// What the app's ☰ → 管理后台 hands over in the address, taken off it once read.
+final _handedOver = Provider<Map<String, String>>((ref) => takeAddressParameters(const {'login'}));
+
+/// The login the app's ☰ → 管理后台 hands over (`?login=`, tech plan S25), for the sign-in to fill in. Tests set it.
+final loginHintProvider = Provider<String?>((ref) => ref.watch(_handedOver)['login']);
 
 /// Where the dashboard keeps its own settings: the browser's storage. Tests put a map here.
 class Prefs {
