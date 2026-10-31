@@ -14,11 +14,7 @@ Future<FakeApi> openChart(WidgetTester tester, {ProfileStore? profiles}) async {
   final api = FakeApi();
   await tester.pumpWidget(testApp(api, profiles: profiles));
   await frames(tester, 10);
-  await tester.tap(find.byKey(const Key('entry-bazi')));
-  await frames(tester, 10);
-  await scrollTo(tester, const Key('compute-chart'));
-  await tester.tap(find.byKey(const Key('compute-chart')));
-  await frames(tester, 10);
+  await openBaziChart(tester);
   return api;
 }
 

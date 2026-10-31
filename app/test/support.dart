@@ -64,6 +64,15 @@ Future<void> openEntry(WidgetTester tester, String system) async {
   await tester.tap(find.byKey(Key('entry-$system')));
 }
 
+/// From 首页 to 八字's chart: 八字排盘, then 排盘 with the form as it opens (S28: six tests had a copy).
+Future<void> openBaziChart(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('entry-bazi')));
+  await frames(tester, 10);
+  await scrollTo(tester, const Key('compute-chart'));
+  await tester.tap(find.byKey(const Key('compute-chart')));
+  await frames(tester, 10);
+}
+
 /// 塔罗, 求签 and 算卦 are drawn only for a question (v11.1.0, the owner: 必须要有所求才能去求): types [question] into
 /// the page's question field ([field]: `tarot-question`, `qiuqian-question` or `liuyao-question`), then pumps, so
 /// the draw button is enabled before the next tap (rule 19).

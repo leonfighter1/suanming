@@ -42,11 +42,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(testApp(FakeApi()));
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('entry-bazi')));
-    await frames(tester, 10);
-    await scrollTo(tester, const Key('compute-chart'));
-    await tester.tap(find.byKey(const Key('compute-chart')));
-    await frames(tester, 10);
+    await openBaziChart(tester);
 
     final grid = find.byKey(const Key('pillar-grid'));
     int rows() => (tester.widget<Table>(grid).children).length;

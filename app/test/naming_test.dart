@@ -22,11 +22,7 @@ Future<void> _openChart(WidgetTester tester, FakeApi api, {Locale locale = zhHan
   addTearDown(tester.view.reset);
   await tester.pumpWidget(testApp(api, locale: locale));
   await frames(tester, 10);
-  await tester.tap(find.byKey(const Key('entry-bazi')));
-  await frames(tester, 10);
-  await scrollTo(tester, const Key('compute-chart'));
-  await tester.tap(find.byKey(const Key('compute-chart')));
-  await frames(tester, 10);
+  await openBaziChart(tester);
 }
 
 /// … then 為這個命盤起名.

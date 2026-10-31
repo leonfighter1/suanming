@@ -21,11 +21,7 @@ Future<void> openReading(WidgetTester tester) async {
   addTearDown(tester.view.reset);
   await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0)));
   await frames(tester, 10);
-  await tester.tap(find.byKey(const Key('entry-bazi')));
-  await frames(tester, 10);
-  await scrollTo(tester, const Key('compute-chart'));
-  await tester.tap(find.byKey(const Key('compute-chart')));
-  await frames(tester, 10);
+  await openBaziChart(tester);
   await scrollTo(tester, const Key('generate-report'));
   await tester.tap(find.byKey(const Key('generate-report')));
   await frames(tester, 20);
@@ -200,11 +196,7 @@ void main() {
   testWidgets('the 八字 page asks the AI for its own reading: 用AI做更精確解讀 (v9.3.0)', (tester) async {
     await tester.pumpWidget(testApp(FakeApi(pendingPolls: 0)));
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('entry-bazi')));
-    await frames(tester, 10);
-    await scrollTo(tester, const Key('compute-chart'));
-    await tester.tap(find.byKey(const Key('compute-chart')));
-    await frames(tester, 10);
+    await openBaziChart(tester);
     await scrollTo(tester, const Key('generate-report'));
     expect(find.descendant(of: find.byKey(const Key('generate-report')), matching: find.text('用AI做更精確解讀')),
         findsOneWidget);

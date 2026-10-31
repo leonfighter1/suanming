@@ -38,11 +38,7 @@ void main() {
   testWidgets("八字's day pillar on the art takes the dark theme's 五行 colours, in the light theme too", (tester) async {
     await tester.pumpWidget(testApp(FakeApi()));
     await frames(tester, 10);
-    await tester.tap(find.byKey(const Key('entry-bazi')));
-    await frames(tester, 10);
-    await scrollTo(tester, const Key('compute-chart'));
-    await tester.tap(find.byKey(const Key('compute-chart')));
-    await frames(tester, 10);
+    await openBaziChart(tester);
     expect(artOf(tester), bannerArt);
     final pillar = find.descendant(of: find.byType(HeroBanner), matching: find.byType(GanZhiText));
     final colours = <String, Color?>{};
