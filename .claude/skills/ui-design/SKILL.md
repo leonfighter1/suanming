@@ -103,14 +103,42 @@ Motion.themeCurve))`. Every colour lerps: the Material scheme and `ThemeTokens` 
 
 ## Motion
 
-| Token           | Value  | For                                                 |
-| --------------- | ------ | --------------------------------------------------- |
-| `Motion.fast`   | 150 ms | a state: hover, focus, a choice                     |
-| `Motion.medium` | 250 ms | a size: a card that grows                           |
-| `Motion.theme`  | 300 ms | light ↔ dark (`Motion.themeCurve`, ease in and out) |
-| `Motion.enter`  | 420 ms | an entrance (`FadeSlideIn`)                         |
+| Token                      | Value              | For                                                                           |
+| -------------------------- | ------------------ | ----------------------------------------------------------------------------- |
+| `Motion.fast`              | 150 ms             | a state: hover, focus, a choice                                               |
+| `Motion.medium`            | 250 ms             | a size: a card that grows                                                     |
+| `Motion.theme`             | 300 ms             | light ↔ dark (`Motion.themeCurve`, ease in and out)                           |
+| `Motion.enter`             | 420 ms             | an entrance (`FadeSlideIn`)                                                   |
+| `Motion.press`             | 100 ms             | a press going in (`PressBounce`, to 96 %)                                     |
+| `Motion.pressSpring`       | spring             | a press let go: about 1.4 % past 100 %, settled in about half a second        |
+| `Motion.switchSpring`      | spring             | a switch's thumb: a little past its end, settled in about a third of a second |
+| `Motion.roll`, `rollCurve` | 600 ms, decelerate | a number rolling to its new value (`RollingNumber`)                           |
+| `Motion.skeleton`          | 1200 ms            | a skeleton's bars breathing (`Skeleton`)                                      |
 
 Things that move or grow use `Motion.curve` (ease out). Reduce motion (`MediaQuery.disableAnimations`) jumps.
+
+## Interactions (S30)
+
+The owner's twelve (2026-10-30: 「对于现在已有的前端各种元素 做以下的所有应该有的元素交互功能」), each where the app has the
+element, each from one building block, each still under reduce motion. A new screen gets them by using the blocks.
+
+| #   | Interaction | How                                                                                                                                                                                                                                                                                                                   |
+| --- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 按压回弹    | `PressBounce`: 96 % while pressed, a spring past 100 % when let go, even on a quick tap. Every button is the app's (`buttons.dart`: `AppFilledButton`, `AppOutlinedButton`, `AppTextButton`, `AppIconButton`, `AppFab`); a tappable `AppCard` and a button-like `Pressable` bounce too, a chart (`onTapDown`) doesn't |
+| 2   | 弹性开关    | `AppSwitchTile` with `ElasticSwitch` (`widgets/elastic_switch.dart`): the thumb stretches with its speed, up to a 1.6× capsule, and rests round after a slight rebound; the row is the control                                                                                                                        |
+| 3   | 波纹跟手    | the theme's `splashFactory: InkSplash.splashFactory`: the ripple stays centred where the finger went down                                                                                                                                                                                                             |
+| 4   | 点赞炸一下  | only for 点赞 and 收藏 buttons; the app has none yet: build it in with the first one                                                                                                                                                                                                                                  |
+| 5   | 勾选画出来  | Material's `Checkbox` (and `CheckboxListTile`) draws its tick from the bottom left to the top right in 200 ms: keep Material's                                                                                                                                                                                        |
+| 6   | 液态滑块    | no slider yet: a slider's fill, thumb and value move on one duration and curve                                                                                                                                                                                                                                        |
+| 7   | 数字滚动    | `RollingNumber<T>`: from the old value to the new on `Motion.roll` / `rollCurve`; its first value at once; screen readers get the end value. 我的积分, the menu, the 管理后台's figures (`HeroFigure` / `StatTile` `number:` + `format:`)                                                                             |
+| 8   | 骨架屏      | `Skeleton.cover` over the page's own build of typical data (every text, icon and picture under a bar of its size), or `SkeletonText` / `SkeletonBox` in the item's own frame; nothing moves when the data come                                                                                                        |
+| 9   | 卡片翻面    | the tarot card turns about Y and draws each side only while it faces the viewer, the face turned back half a turn (`tarot_spread.dart`); 算卦's coins the same                                                                                                                                                        |
+| 10  | 汉堡变叉    | `MenuMorph` (once, app.dart): ☰ and the menu's close button draw `AnimatedIcons.menu_close` from one progress, at the same place                                                                                                                                                                                     |
+| 11  | 卡片堆叠    | no stacked cards yet: lower cards offset down and smaller, the top one swiped away                                                                                                                                                                                                                                    |
+| 12  | 底部抽屉    | no bottom sheet yet: half and full stops, closed when dragged down past half                                                                                                                                                                                                                                          |
+
+`design_rules.dart` keeps Material's own buttons and switches out of the screens ("Material's own button",
+"Material's own switch"): use the app's.
 
 ## The grid
 
@@ -265,6 +293,8 @@ compact grid, and a panel of its own at the right. The building blocks are in
 8. **A dashboard page:** one hero figure, the rest in a `StatGrid`, each change a `Change` against the period before,
    the page's tools in the panel.
 9. **Run** grid_test and the 管理后台's design_rules_test (or the harness): they fail on a broken rule.
+10. **Interactions:** buttons from `buttons.dart`, switches as `AppSwitchTile`, changing figures as `RollingNumber`, a
+    loading state as a skeleton of the page's own frame (the table above).
 
 ## Tests that hold the rules
 
@@ -275,6 +305,7 @@ compact grid, and a panel of its own at the right. The building blocks are in
 | `admin/test/dashboard_test.dart`    | the container at 2560 (1440, centred, one left edge for every page); the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter |
 | `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                                                                                   |
 | `app/test/banner_art_test.dart`     | every banner on 命理罗盘 (the sign-in page, 首页, each method); its words, and 八字's day pillar, in the dark theme's colours in either theme                                                                                                                                                                           |
+| `app/test/interactions_test.dart`   | the twelve interactions: the press and its spring, the switch's stretch and keys, the ripple's place, the rolling numbers, the skeletons' places (以往记录, 我的积分), ☰ → ✕                                                                                                                                           |
 | `app/test/wuxing_colours_test.dart` | the 五行 on page, card and inset                                                                                                                                                                                                                                                                                        |
 | `app/test/grid_test.dart`           | window classes; the type ramp; 首页 at 390 to 2560 (the 1620 container, 2 × 2, 1 × 1, titles on the cards' edge); the sign-in page; every page at 2560; rules                                                                                                                                                           |
 | `app/test/design_rules.dart`        | over `lib/presentation` (app) and `lib` (dashboard): no raw or named colour, brightness check, font size, number in `EdgeInsets` or as a gap, `Space`/`Radii` plus a number, number as a corner, role off the ramp, `Space.page`, line height of one's own                                                              |

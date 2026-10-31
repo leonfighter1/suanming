@@ -43,6 +43,7 @@ Where things are:
 | A chart or anything that needs the tap position         | `Pressable(onTapDown:, keys: {←, →, Home, End})` (see `trend_chart.dart`)                            |
 | A horizontal strip that scrolls                         | `Pressable(keys:)` around it plus a `ScrollController` (see `_Timeline` in `bazi_chart_page.dart`)   |
 | Items in a strip that open something                    | a `Pressable` per item, inside the strip's (the 大运: Tab reaches each, Enter opens, ←/→ scroll)     |
+| A setting turned on or off                              | `AppSwitchTile` (S30): the row is one Tab stop, Enter and Space toggle it                            |
 | A single-choice `SegmentedButton`                       | wrap it: `SegmentKeys(child: SegmentedButton<T>(...))`                                               |
 | The focus look                                          | buttons and chips: the theme; cards: `AppCard` (built in); custom: `Pressable` or `FocusRing`        |
 | A picker that should open ready for typing              | `keyboardInUse` (the last input was a key): date/time pickers open in input mode, search autofocuses |
