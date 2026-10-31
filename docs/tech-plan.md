@@ -62,6 +62,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
 | S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | done        |
 | S35 应用整理与维护通知     | the app's pages regrouped, 维护通知, the 管理后台's menu    | big    | v23.0.0 + summary | done        |
+| S36 表单与后台整理         | 八字's form, 设置's grid, the 1620 container, 网站编辑      | big    | v24.0.0 + summary | in progress |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2761,6 +2762,20 @@ Then: review, check, commit and push.
 - **八字 and 算卦, app first:** grouped under headings (`GroupTitle`, moved to design.dart); on a phone one column in
   the order a reader needs; on a desktop the chart, its fortunes and the reading in the main column (8 of 12) and
   the facts at the side (4 of 12): `SideColumns` in layout.dart.
+
+## S36 八字表单、后台设置网格、1620 容器、网站编辑 (big → v24.0.0)
+
+**Owner requests (2026-10-31), after v23.0.0:** 「可以」 to regrouping 八字's form as its chart was; 「大师后台设置页面，在超大
+屏幕时，该grid 布局，目的：减少下滑试时间去查找。 UI friendly，更精准locate sections」; 「对1620px以上的屏幕，后台管理的content也要
+加大置1620px」; 「另外，把integrator改成editor-》网站编辑」.
+
+| WP     | What                                                                                                       |
+| ------ | ---------------------------------------------------------------------------------------------------------- |
+| WP36.1 | 八字's form: the form in the main column, 为谁排盘 and 个人情况 at the side on a desktop; phones as before |
+| WP36.2 | 设置 on a wide window: its groups in two columns, and a jump list to each group                            |
+| WP36.3 | the 管理后台's container 1620, the app's own                                                               |
+| WP36.4 | the integrator role is editor, 网站编辑 (a stored integrator read as editor)                               |
+| WP36.5 | records, the stage summary; pushed                                                                         |
 
 ## 阶段总结 (stage summaries)
 
