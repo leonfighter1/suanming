@@ -551,6 +551,7 @@ class FakeAdmin {
       'number' when (value as num) < (spec['min'] as num) || value > (spec['max'] as num) =>
         '要在 ${spec['min']} 到 ${spec['max']} 之间',
       'choices' when value is! List || value.isEmpty => '至少选一个',
+      'time' when value is! String || DateTime.tryParse(value) == null => '要一个时间（日期和几点几分）',
       // The server's registry.ts problemOf for packs, its rule in short: 100 积分 a 元 at the least (packFits).
       'packs' when value is! List || value.isEmpty => '至少要一个套餐',
       'packs' when (value as List).any((p) => (p['points'] as num) < (p['yuan'] as num) * 100) =>
@@ -735,6 +736,24 @@ const assignable = {
 
 /// 设置's settings (the server's src/settings/registry.ts), a few of each kind.
 const settingSpecs = <Json>[
+  // 维护 (S35).
+  {
+    'key': 'maintenance.on',
+    'group': 'maintenance',
+    'type': 'boolean',
+    'label': '维护中',
+    'about': '打开后，除了后台人员，用户不能登录、注册或使用应用。',
+    'default': false,
+  },
+  {
+    'key': 'maintenance.until',
+    'group': 'maintenance',
+    'type': 'time',
+    'optional': true,
+    'label': '预计结束',
+    'about': '用户看到的可以再登录的时间。不设：从打开维护时起 3 到 4 小时。',
+    'default': null,
+  },
   {
     'key': 'sessions.idle_days',
     'group': 'sessions',

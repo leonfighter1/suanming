@@ -17,6 +17,8 @@ import 'widgets/dashboard.dart';
 
 /// The groups, in the page's order, with their names.
 const _groups = [
+  // 维护 (S35) first: the switch an admin reaches for in a hurry.
+  ('maintenance', '维护'),
   ('sessions', '登录'),
   ('codes', '验证码'),
   ('ai', 'AI'),
@@ -126,6 +128,9 @@ String _number(Object? v) => v is num ? (v == v.roundToDouble() ? '${v.toInt()}'
 
 /// A setting's value in words: 2 天, 0.5 天, 1,000,000 积分, 开, 跟随 .env, CNY、HKD, 10 元 1,000 积分、20 元 2,200 积分.
 String _say(SettingView s, Object? v) => switch (v) {
+      // A time (S35, 维护's end): none is the window users are told by default.
+      null when s.type == 'time' => '不设（从打开维护时起 3 到 4 小时）',
+      String t when s.type == 'time' => localTime(DateTime.parse(t)),
       null => '跟随 .env',
       bool b => b ? '开' : '关',
       num n => '${n == n.roundToDouble() ? count(n) : _number(n)}${s.unit == null ? '' : ' ${s.unit}'}',
@@ -186,13 +191,40 @@ class _SettingRowState extends ConsumerState<_SettingRow> {
   }
 
   Future<void> _save(Object? value) async {
-    // Off the mock: the real model, which spends tokens (CLAUDE.md rule 5: the owner's switch).
-    if (s.key == 'ai.mock' && value == false &&
-        !await confirmAction(context, '关掉 AI 模拟？', '之后每一步 AI 都用真实模型，会花 token，并按实际用量收积分。')) {
-      return;
-    }
+    // Asked first: off the mock, the real model, which spends tokens (CLAUDE.md rule 5: the owner's switch); 维护 on
+    // (S35), everyone but staff waits from that moment.
+    final ask = switch ((s.key, value)) {
+      ('ai.mock', false) => ('关掉 AI 模拟？', '之后每一步 AI 都用真实模型，会花 token，并按实际用量收积分。'),
+      ('maintenance.on', true) => ('打开维护？', '除了后台人员，用户都不能登录、注册或使用应用，直到你关掉；应用会告诉他们大约什么时候可以再登录。'),
+      _ => null,
+    };
+    if (ask != null && !await confirmAction(context, ask.$1, ask.$2)) return;
     if (!mounted) return;
     await _change((api) => api.saveSetting(s.key, value), '已保存「${s.label}」');
+  }
+
+  /// A time (S35, 维护's end): the day, then the hour and minute (typed where the keyboard is in use), from the one set
+  /// or four hours from now; sent in UTC.
+  Future<void> _pickTime() async {
+    final now = ref.read(clockProvider)();
+    final today = DateTime(now.year, now.month, now.day);
+    final set = s.value is String ? DateTime.tryParse(s.value as String)?.toLocal() : null;
+    final start = set == null || set.isBefore(today) ? now.add(const Duration(hours: 4)) : set;
+    final day = await showDatePicker(
+      context: context,
+      initialDate: start,
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 60)),
+      initialEntryMode: keyboardInUse ? DatePickerEntryMode.input : DatePickerEntryMode.calendar,
+    );
+    if (day == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(start),
+      initialEntryMode: keyboardInUse ? TimePickerEntryMode.input : TimePickerEntryMode.dial,
+    );
+    if (time == null || !mounted) return;
+    await _save(DateTime(day.year, day.month, day.day, time.hour, time.minute).toUtc().toIso8601String());
   }
 
   void _saveNumber() {
@@ -250,6 +282,15 @@ class _SettingRowState extends ConsumerState<_SettingRow> {
   }
 
   Widget _control() => switch (s.type) {
+        'time' => Align(
+            alignment: Alignment.centerLeft,
+            child: AppOutlinedButton.icon(
+              key: ValueKey<String>('setting-${s.key}-pick'),
+              onPressed: _busy ? null : _pickTime,
+              icon: const Icon(Icons.schedule),
+              label: Text(s.value is String ? _say(s, s.value) : '选时间'),
+            ),
+          ),
         'packs' => _Packs(
             s,
             busy: _busy,

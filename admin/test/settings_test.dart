@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mingli_admin/presentation/format.dart' show localTime;
 
 import 'support.dart';
 
@@ -29,6 +30,32 @@ void main() {
     expect(inRow('ai.mock', find.text('默认：跟随 .env')), findsOneWidget);
     expect(textOf(tester, 'now-ai'), '模拟：示范回答，不花 token');
     expect(textOf(tester, 'now-rates'), '2026-10-29 的，每天更新');
+  });
+
+  // S35 (the owner: 「添加正在维护的通知，admin可以toggle 告知用户何时能够登录 by default 3-4 小时，可以自己定时。这个可以在
+  // dashboard中操作」).
+  testWidgets('维护: its switch asks first; its end, none by default (3 to 4 hours), is a day and a time picked', (tester) async {
+    final f = await openSettings(tester);
+    expect(find.byKey(const ValueKey<String>('group-maintenance')), findsOneWidget);
+    expect(inRow('maintenance.until', find.text('默认：不设（从打开维护时起 3 到 4 小时）')), findsOneWidget);
+
+    await tester.tap(inRow('maintenance.on', find.text('开')));
+    await tester.pumpAndSettle();
+    expect(find.text('打开维护？'), findsOneWidget);
+    await tapOn(tester, 'confirm-yes');
+    expect(f.bodyOf(f.last('/v1/admin/settings/maintenance.on', method: 'PUT')), {'value': true});
+
+    // Four hours from now, picked as it is offered: the day, then the time.
+    await tapOn(tester, 'setting-maintenance.until-pick');
+    final ok = MaterialLocalizations.of(tester.element(find.byType(DatePickerDialog))).okButtonLabel;
+    await tester.tap(find.text(ok));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(ok));
+    await tester.pumpAndSettle();
+    final t = testNow.add(const Duration(hours: 4));
+    final at = DateTime(t.year, t.month, t.day, t.hour, t.minute);
+    expect(f.bodyOf(f.last('/v1/admin/settings/maintenance.until', method: 'PUT')), {'value': at.toUtc().toIso8601String()});
+    expect(inRow('maintenance.until', find.text(localTime(at))), findsOneWidget);
   });
 
   testWidgets('a number kept with 保存; out of range, the server\'s words under it; 恢复默认 puts it back', (tester) async {
