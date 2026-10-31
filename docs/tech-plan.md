@@ -55,8 +55,13 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S26 宽屏布局与今日一卦     | the app's container, 首页 2 × 2; 今日一卦 / 今日一签        | big    | v15.0.0 + summary | done        |
 | S27 容器、充值框、外观     | every page in the container; 充值 boxes; 跟随时间           | big    | v16.0.0 + summary | done        |
 | S28 重构                   | one home for each thing; the API's routes in modules        | big    | v17.0.0 + summary | done        |
-| S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | planned     |
-| S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v19.0.0 + summary | planned     |
+| S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | in progress |
+| S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | in progress |
+
+**Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
+CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
+work packages go first, then the design principles (the ui-design skill), then S29's; one harness when both are done,
+and one release, v18.0.0, with both summaries.
 
 Inside a big stage, finished work packages go out as medium (X.Y.0) or small (X.Y.Z) releases; the stage's last
 release is its X.0.0, with the stage summary below.
