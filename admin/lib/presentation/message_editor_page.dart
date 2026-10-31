@@ -28,9 +28,6 @@ const previewDelay = Duration(milliseconds: 400);
 /// The mail page's height in the preview: about a phone's screen.
 const _frameHeight = 640.0;
 
-/// A dialog's width (the ui-design skill: 520 to 640).
-const _dialogWidth = 520.0;
-
 /// A draft, as the preview was asked for it: the language, the dashboard's light or dark, the subject and the body.
 typedef _Draft = ({String locale, String scheme, String subject, String body});
 
@@ -615,7 +612,7 @@ class _TestDialogState extends State<_TestDialog> {
         child: AlertDialog(
           title: Text(widget.mail ? '发送测试邮件' : '发送测试短信'),
           content: SizedBox(
-            width: _dialogWidth,
+            width: dialogWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

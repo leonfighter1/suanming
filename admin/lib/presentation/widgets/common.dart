@@ -254,6 +254,9 @@ class Fact extends StatelessWidget {
   }
 }
 
+/// A dialog's width (the ui-design skill: 520 to 640).
+const dialogWidth = 520.0;
+
 /// Asks before an action: [title], [body], 取消 and 确定. Enter confirms, Esc cancels; true when confirmed.
 Future<bool> confirmAction(BuildContext context, String title, String body) async =>
     await showDialog<bool>(
