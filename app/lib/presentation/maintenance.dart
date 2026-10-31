@@ -10,6 +10,7 @@ import 'design.dart';
 import 'layout.dart';
 import 'tokens.dart';
 import 'widgets/app_title.dart';
+import 'widgets/remedy.dart' show compactButtons;
 
 /// When users may sign in again (维护, S35), in words: the time an admin set, or the window of three to four hours; a
 /// time past is "soon". A time on another day carries its date.
@@ -80,6 +81,17 @@ class MaintenancePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final m = ref.watch(maintenanceProvider);
+    final check = AppFilledButton.icon(
+      key: const Key('maintenance-check'),
+      onPressed: () => ref.read(maintenanceProvider.notifier).check(),
+      icon: const Icon(Icons.refresh),
+      label: Text(l10n.maintenanceCheck),
+    );
+    final signOut = AppTextButton(
+      key: const Key('maintenance-sign-out'),
+      onPressed: () => ref.read(authProvider.notifier).signOut(),
+      child: Text(l10n.signOut),
+    );
     return Scaffold(
       appBar: AppBar(title: const AppTitle()),
       body: ListView(
@@ -91,23 +103,20 @@ class MaintenancePage extends ConsumerWidget {
             subtitle: m == null ? null : maintenanceLine(l10n, m, ref.watch(clockProvider)()),
             icon: Icons.construction_outlined,
           ),
-          Wrap(
-            spacing: Space.s,
-            runSpacing: Space.s,
-            children: [
-              AppFilledButton.icon(
-                key: const Key('maintenance-check'),
-                onPressed: () => ref.read(maintenanceProvider.notifier).check(),
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n.maintenanceCheck),
+          // On a phone the main button spans the column; wider, both size to their labels in a row, the main one
+          // last (the ui-design skill).
+          if (WindowClass.ofContext(context) == WindowClass.compact) ...[
+            check,
+            const SizedBox(height: Space.s),
+            signOut,
+          ] else
+            Align(
+              alignment: Alignment.centerLeft,
+              child: compactButtons(
+                context,
+                Row(mainAxisSize: MainAxisSize.min, children: [signOut, const SizedBox(width: Space.s), check]),
               ),
-              AppTextButton(
-                key: const Key('maintenance-sign-out'),
-                onPressed: () => ref.read(authProvider.notifier).signOut(),
-                child: Text(l10n.signOut),
-              ),
-            ],
-          ),
+            ),
         ],
       ),
     );
