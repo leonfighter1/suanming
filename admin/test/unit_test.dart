@@ -113,6 +113,16 @@ void main() {
     expect(u.topup, 10.0);
   });
 
+  test('返回应用 goes only to an app on the page\'s own host or on this computer (S35)', () {
+    final page = Uri.parse('https://mingli.example/admin/');
+    expect(appAddressFrom('https://mingli.example/', page), 'https://mingli.example/');
+    expect(appAddressFrom('http://localhost:5555/', page), 'http://localhost:5555/');
+    expect(appAddressFrom('http://127.0.0.1:8787/', page), 'http://127.0.0.1:8787/');
+    expect(appAddressFrom('https://elsewhere.example/', page), isNull);
+    expect(appAddressFrom('javascript:alert(1)', page), isNull);
+    expect(appAddressFrom(null, page), isNull);
+  });
+
   // S34: the dashboard's tabs share one session, and the server (src/auth/tokens.ts rotate) takes each refresh token
   // once: a second use ends the session for every tab.
   test('two tabs share the session: each refresh takes the newest refresh token kept, never one already used', () async {

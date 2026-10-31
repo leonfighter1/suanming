@@ -299,9 +299,11 @@ sends (v13.2.0). It is a web app of its own (`admin/`), served by the API beside
   - No third-party service yet: mail and SMS go to `.outbox/` (the 发送方式 panel says so).
 - **On a wide window (v13.2.0):** every page keeps to one centred container, 1440 px at most, its panel a card beside
   the main column; the bar and the rail stay at the window's edges.
-- **From the app (v13.3.0, v21.0.0):** a staff account sees ☰ → 管理后台 in the app. On the web it opens the dashboard
-  in a new tab, signed in (v21.0.0: a one-time code asked for as ☰ opens, two minutes, one use; both leave the
-  address bar once read). A code used or late leaves the sign-in, the login filled in. Off the web the address is
+- **From the app (v13.3.0, v21.0.0, v23.0.0):** a staff account sees ☰ → 管理后台 in the app. On the web it opens the
+  dashboard in the app's own tab, signed in (v21.0.0: a one-time code asked for as ☰ opens, two minutes, one use;
+  v23.0.0: the same tab, the app's address handed over too; all leave the address bar once read). The dashboard's
+  menu, and its sign-in page, then have 返回应用: the app again in that tab (only an app on the dashboard's own host
+  or on this computer). A code used or late leaves the sign-in, the login filled in. Off the web the address is
   copied instead, without the code. The dashboard stays signed in across a reload, another tab and a restart of the
   browser (v22.0.0: one session in the browser, its tabs refreshing it in turn); 退出登录 ends it for the browser, and
   another open tab finds out at its next refresh (its access lasts 15 minutes at most). Unused for 设置's 登录有效期

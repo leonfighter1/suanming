@@ -15,3 +15,6 @@ Map<String, String> takeAddressParameters(Set<String> names) {
   web.window.history.replaceState(null, '', '${here.path}$query$fragment');
   return taken;
 }
+
+/// Web: this tab to [url] (S35: 返回应用, the app again where it handed over).
+void goTo(String url) => web.window.location.assign(url);

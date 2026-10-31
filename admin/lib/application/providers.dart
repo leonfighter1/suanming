@@ -26,7 +26,7 @@ Duration? retryAdmin(int retryCount, Object error) {
 final httpClientProvider = Provider<http.Client?>((ref) => null);
 
 /// What the app's ☰ → 管理后台 hands over in the address, taken off it once read.
-final _handedOver = Provider<Map<String, String>>((ref) => takeAddressParameters(const {'login', 'handoff'}));
+final _handedOver = Provider<Map<String, String>>((ref) => takeAddressParameters(const {'login', 'handoff', 'app'}));
 
 /// The login the app's ☰ → 管理后台 hands over (`?login=`, tech plan S25), for the sign-in to fill in. Tests set it.
 final loginHintProvider = Provider<String?>((ref) => ref.watch(_handedOver)['login']);
@@ -43,6 +43,22 @@ class Prefs {
 }
 
 final prefsProvider = Provider<Prefs>((ref) => const Prefs(read: readPref, write: writePref));
+
+/// The app's address for 返回应用 (S35; the owner: 「登录后台后要有办法可以回退到app本身，不需要单独打开新的页面，留在app
+/// 本体」): what its ☰ → 管理后台 handed over (`&app=`), kept in this browser for a reload; null where none came. Tests
+/// set it.
+final appAddressProvider = Provider<String?>((ref) {
+  final prefs = ref.watch(prefsProvider);
+  final given = appAddressFrom(ref.watch(_handedOver)['app']);
+  if (given != null) prefs.write(appAddressKey, given);
+  return given ?? appAddressFrom(prefs.read(appAddressKey));
+});
+
+/// Where [appAddressProvider] keeps the app's address.
+const appAddressKey = 'mingli-admin-app';
+
+/// Leaves the dashboard for an address in this tab (返回应用). Tests put a recorder here.
+final goToProvider = Provider<void Function(String url)>((ref) => goTo);
 
 /// The session's key in this browser's storage, and the name of the lock its tabs take turns under (S34; the owner:
 /// 「不需要重复登录dashboard 页面了」): its refresh token, shared by the dashboard's tabs and kept across a restart.

@@ -50,6 +50,11 @@ void main() {
   test('on the web the address carries the one-time code, and the dashboard signs in with it (S33)', () {
     expect(adminUrl('http://api.test', 'mgr', handoff: 'a-b_c'), 'http://api.test/admin/?login=mgr&handoff=a-b_c');
     expect(adminUrl('http://api.test', 'mgr'), 'http://api.test/admin/?login=mgr');
+    // And the app's own address, for the dashboard's 返回应用 in the same tab (S35).
+    expect(
+      adminUrl('http://api.test', 'mgr', handoff: 'h', app: 'http://localhost:5555/'),
+      'http://api.test/admin/?login=mgr&handoff=h&app=http%3A%2F%2Flocalhost%3A5555%2F',
+    );
   });
 
   testWidgets('繁體, an email login (encoded), and from the keyboard', (tester) async {

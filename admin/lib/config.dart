@@ -9,3 +9,12 @@ String adminApiBase([Uri? page]) {
   if ((uri.scheme == 'http' || uri.scheme == 'https') && uri.path.startsWith('/admin')) return uri.origin;
   return 'http://127.0.0.1:8787';
 }
+
+/// The app's address for 返回应用 (S35): [given] (what the app's ☰ → 管理后台 handed over, or kept since) when it is an
+/// http(s) address on the page's own host or on this computer; else null, so nobody's link sends staff elsewhere.
+String? appAddressFrom(String? given, [Uri? page]) {
+  final app = given == null ? null : Uri.tryParse(given);
+  if (app == null || (app.scheme != 'http' && app.scheme != 'https') || app.host.isEmpty) return null;
+  const local = {'localhost', '127.0.0.1', '::1'};
+  return app.host == (page ?? Uri.base).host || local.contains(app.host) ? app.toString() : null;
+}

@@ -84,6 +84,9 @@ class FakeAdmin {
   final users = <Json>[];
   final saved = <AdminFile>[];
 
+  /// Where the dashboard sent its tab (返回应用, S35).
+  final wentTo = <String>[];
+
   /// Who signs in, and how the server answers.
   String password = 'secret1';
   bool admin = true;
@@ -956,6 +959,7 @@ Future<FakeAdmin> pumpAdmin(
   Map<String, String>? prefs,
   String? loginHint,
   String? handoff,
+  String? app,
 }) async {
   final f = fake ?? FakeAdmin();
   final stored = prefs ?? <String, String>{};
@@ -979,6 +983,8 @@ Future<FakeAdmin> pumpAdmin(
         ),
         loginHintProvider.overrideWithValue(loginHint),
         handoffProvider.overrideWithValue(handoff),
+        appAddressProvider.overrideWithValue(app),
+        goToProvider.overrideWithValue(f.wentTo.add),
       ],
       child: const AdminApp(),
     ),

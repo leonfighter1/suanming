@@ -106,6 +106,14 @@ class _AdminMenuState extends ConsumerState<_AdminMenu> {
           ],
           child: const Text('外观'),
         ),
+        // 返回应用 (S35): the app again in this tab, where it handed over its address.
+        if (ref.watch(appAddressProvider) case final app?)
+          MenuItemButton(
+            key: const Key('back-to-app'),
+            leadingIcon: const Icon(Icons.arrow_back),
+            onPressed: () => ref.read(goToProvider)(app),
+            child: const Text('返回应用'),
+          ),
         MenuItemButton(
           key: const Key('sign-out'),
           leadingIcon: const Icon(Icons.logout),

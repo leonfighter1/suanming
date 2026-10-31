@@ -121,6 +121,26 @@ void main() {
     expect(tester.widget<TextField>(find.byKey(const Key('admin-login'))).controller!.text, 'mgr');
   });
 
+  // S35 (the owner: 「登录后台后要有办法可以回退到app本身，不需要单独打开新的页面，留在app本体」).
+  testWidgets('返回应用: in the menu and on the sign-in page, the app again in this tab; none without its address',
+      (tester) async {
+    var f = await pumpAdmin(tester, app: 'http://127.0.0.1:8787/');
+    await openMenu(tester);
+    await tester.tap(find.byKey(const Key('back-to-app')));
+    await tester.pumpAndSettle();
+    expect(f.wentTo, ['http://127.0.0.1:8787/']);
+
+    await tester.pumpWidget(const SizedBox());
+    f = await pumpAdmin(tester, signIn: false, app: 'http://127.0.0.1:8787/');
+    await tapOn(tester, 'sign-in-back-to-app');
+    expect(f.wentTo, ['http://127.0.0.1:8787/']);
+
+    await tester.pumpWidget(const SizedBox());
+    await pumpAdmin(tester);
+    await openMenu(tester);
+    expect(find.byKey(const Key('back-to-app')), findsNothing);
+  });
+
   // S34: the session is the browser's, shared by its tabs and kept across a restart, until 退出登录.
   testWidgets('a reload, another tab or a restart keeps the dashboard signed in; 退出登录 ends it in the browser',
       (tester) async {

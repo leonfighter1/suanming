@@ -99,6 +99,16 @@ class _AdminSignInPageState extends ConsumerState<AdminSignInPage> {
                           ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Text('登录'),
                     ),
+                    // 返回应用 (S35): here too, for a code used or late.
+                    if (ref.watch(appAddressProvider) case final app?) ...[
+                      const SizedBox(height: Space.s),
+                      AppTextButton.icon(
+                        key: const Key('sign-in-back-to-app'),
+                        onPressed: () => ref.read(goToProvider)(app),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('返回应用'),
+                      ),
+                    ],
                   ],
                 ),
               ),

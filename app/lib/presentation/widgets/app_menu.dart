@@ -31,8 +31,9 @@ class AppMenu extends ConsumerWidget {
     navigator.push(MaterialPageRoute<void>(builder: (_) => page));
   }
 
-  /// Closes the menu and opens the 管理后台 in a new tab, straight from the tap so the browser takes it as the user's
-  /// own. Where there is no tab to open (the app off the web), its address goes on the clipboard and a line says so.
+  /// Closes the menu and opens the 管理后台 in this tab (S35; the owner: 「不需要单独打开新的页面，留在app本体」), handing
+  /// over the app's own address for the dashboard's 返回应用. Where there is no tab (the app off the web), its address
+  /// goes on the clipboard and a line says so.
   static Future<void> _openAdmin(BuildContext context, WidgetRef ref, AppUser user) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -40,8 +41,9 @@ class AppMenu extends ConsumerWidget {
     final url = adminUrl(base, user.login);
     // Signed in at once with the menu's one-time code (S33); without one, the sign-in with the login filled in.
     final handoff = ref.read(adminHandoffProvider).value;
+    final app = kIsWeb ? '${Uri.base.origin}${Uri.base.path}' : null;
     Navigator.of(context).pop();
-    if (await openInNewTab(handoff == null ? url : adminUrl(base, user.login, handoff: handoff))) return;
+    if (await openHere(adminUrl(base, user.login, handoff: handoff, app: app))) return;
     // Off the web the address is copied: without the code, which is for this moment only.
     await Clipboard.setData(ClipboardData(text: url));
     messenger
@@ -391,7 +393,9 @@ String staffName(AppLocalizations l10n, String role) => switch (role) {
     };
 
 /// The 管理后台 on the API's own address, its sign-in's login filled in (`?login=`, like a login hint) and, with a
-/// one-time code (S33), signed in at once (`&handoff=`); the dashboard takes both off its address once read.
-String adminUrl(String apiBase, String login, {String? handoff}) =>
+/// one-time code (S33), signed in at once (`&handoff=`); with the app's own address (S35), a way back to it
+/// (`&app=`). The dashboard takes them off its address once read.
+String adminUrl(String apiBase, String login, {String? handoff, String? app}) =>
     '$apiBase/admin/?login=${Uri.encodeQueryComponent(login)}'
-    '${handoff == null ? '' : '&handoff=${Uri.encodeQueryComponent(handoff)}'}';
+    '${handoff == null ? '' : '&handoff=${Uri.encodeQueryComponent(handoff)}'}'
+    '${app == null ? '' : '&app=${Uri.encodeQueryComponent(app)}'}';
