@@ -1,12 +1,24 @@
 import 'package:intl/intl.dart';
 
+import '../domain/models.dart' show MoneyUnit;
+
 // How the dashboard writes its numbers and names (管理后台, tech plan S22): 简体, money in 元.
 
 final _yuan = NumberFormat('#,##0.00');
 final _count = NumberFormat('#,##0');
 
-/// Money in 元: ¥1,234.50, a loss -¥14.97.
-String yuan(num v) => v < 0 ? '-¥${_yuan.format(-v)}' : '¥${_yuan.format(v)}';
+/// The currency money shows in (设置's currencies.dashboard, S31): the signed-in session's, 元 without one.
+MoneyUnit moneyUnit = MoneyUnit.yuan;
+
+final _whole = NumberFormat('#,##0');
+
+/// Money (the server's 元) in the dashboard's currency at today's rate: ¥1,234.50, a loss -¥14.97, HK$1,342.66.
+String yuan(num v) {
+  final u = moneyUnit;
+  final x = v * u.rate;
+  final f = u.decimals == 0 ? _whole : _yuan;
+  return x < 0 ? '-${u.symbol}${f.format(-x)}' : '${u.symbol}${f.format(x)}';
+}
 String count(num v) => _count.format(v);
 
 /// A large count short: 1.2万, 3.4亿.

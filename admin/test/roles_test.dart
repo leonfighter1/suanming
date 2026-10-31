@@ -29,9 +29,9 @@ Future<void> openAccount(WidgetTester tester, String id, {String? search}) async
 }
 
 void main() {
-  testWidgets('an admin: every page, 内容 last', (tester) async {
+  testWidgets('an admin: every page, 设置 last', (tester) async {
     await pumpAdmin(tester);
-    expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量', '导出', '消息', '内容']);
+    expect(railLabels(tester), ['概览', '用户', '活跃', '收益', '用量', '导出', '消息', '内容', '设置']);
     expect(find.text('boss · 管理员'), findsOneWidget);
   });
 

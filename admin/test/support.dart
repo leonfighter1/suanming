@@ -114,6 +114,11 @@ class FakeAdmin {
   AdminFile? pick;
   List<String>? pickTypes;
 
+  /// 设置 (S31): what the panel changed, by key; what answers AI calls; the rates' day (null: none yet).
+  final settingValues = <String, Object?>{};
+  String aiServing = 'mock';
+  String? ratesDate = '2026-10-29';
+
   /// The dispatch log, the oldest first.
   final log = <Json>[];
 
@@ -193,10 +198,15 @@ class FakeAdmin {
         'admin_by_config': false,
         'can': capabilities[role],
         'assignable_roles': assignable[role],
+        // The dashboard's currency (设置, S31) at a test rate.
+        if (settingValues['currencies.dashboard'] == 'HKD')
+          'currency': {'code': 'HKD', 'symbol': 'HK\$', 'decimals': 2, 'rate': 1.1, 'rates_date': '2026-10-29'},
       });
     }
     // Every route asks for its capability, as the server's capabilityOf does.
-    final needs = path.startsWith('/v1/admin/content')
+    final needs = path.startsWith('/v1/admin/settings')
+        ? 'settings'
+        : path.startsWith('/v1/admin/content')
         ? 'content'
         : path.startsWith('/v1/admin/messages/')
         ? 'messages'
@@ -208,6 +218,7 @@ class FakeAdmin {
     if (!capabilities[role]!.contains(needs)) return _problem(403, 'the $role role may not do this', 'not_allowed');
     if (path.startsWith('/v1/admin/messages/')) return _messages(r);
     if (path.startsWith('/v1/admin/content')) return _content(r);
+    if (path.startsWith('/v1/admin/settings')) return _settings(r);
     if (path == '/v1/admin/overview') return _json(overview(days));
     if (path == '/v1/admin/series') return _json({'items': series(days)});
     if (path == '/v1/admin/breakdown') return _json(breakdown(days));
@@ -485,6 +496,46 @@ class FakeAdmin {
 
   String _filled(String s) => s.replaceAllMapped(RegExp(r'\{\{(\w+)\}\}'), (m) => sampleValues[m.group(1)] ?? m.group(0)!);
 
+  Json _settingView(Json spec) {
+    final key = spec['key'] as String;
+    final changed = settingValues.containsKey(key);
+    return {
+      ...spec,
+      'value': changed ? settingValues[key] : spec['default'],
+      if (changed) 'changed': {'updated_at': _iso(testNow)},
+    };
+  }
+
+  /// 设置 (S31), as src/admin/settings.ts answers; a value checked as the registry's problemOf checks it.
+  http.Response _settings(http.Request r) {
+    final path = r.url.path;
+    if (path == '/v1/admin/settings' && r.method == 'GET') {
+      return _json({
+        'settings': [for (final spec in settingSpecs) _settingView(spec)],
+        'ai': {'serving': aiServing, 'models': 'claude-opus-5-5'},
+        if (ratesDate != null) 'rates': {'date': ratesDate, 'stale': false},
+      });
+    }
+    final key = path.substring('/v1/admin/settings/'.length);
+    final spec = settingSpecs.where((x) => x['key'] == key).firstOrNull;
+    if (spec == null) return _problem(404, 'no such setting', 'unknown_setting');
+    if (r.method == 'DELETE') {
+      settingValues.remove(key);
+      return _json(_settingView(spec));
+    }
+    final value = bodyOf(r)['value'];
+    final problem = switch (spec['type']) {
+      'number' when value is! num => '要一个数字',
+      'number' when (value as num) < (spec['min'] as num) || value > (spec['max'] as num) =>
+        '要在 ${spec['min']} 到 ${spec['max']} 之间',
+      'choices' when value is! List || value.isEmpty => '至少选一个',
+      _ => null,
+    };
+    if (problem != null) return _problem(400, problem, 'invalid_setting');
+    settingValues[key] = value;
+    return _json(_settingView(spec));
+  }
+
   /// 内容管理 (S29), as src/admin/content.ts answers.
   http.Response _content(http.Request r) {
     final path = r.url.path;
@@ -637,7 +688,7 @@ class FakeAdmin {
 
 /// What each staff role may do, and the roles it may give (the server's src/admin/roles.ts).
 const capabilities = {
-  'admin': ['view', 'assign', 'user_data', 'messages', 'content'],
+  'admin': ['view', 'assign', 'user_data', 'messages', 'content', 'settings'],
   'manager': ['view', 'assign'],
   'integrator': ['messages', 'content'],
 };
@@ -646,6 +697,58 @@ const assignable = {
   'manager': ['user', 'integrator', 'manager'],
   'integrator': <String>[],
 };
+
+/// 设置's settings (the server's src/settings/registry.ts), a few of each kind.
+const settingSpecs = <Json>[
+  {
+    'key': 'sessions.idle_days',
+    'group': 'sessions',
+    'type': 'number',
+    'min': 0.01,
+    'max': 365,
+    'unit': '天',
+    'label': '登录有效期',
+    'about': '账户多久没用之后要重新登录。',
+    'default': 2,
+  },
+  {
+    'key': 'ai.mock',
+    'group': 'ai',
+    'type': 'boolean',
+    'optional': true,
+    'label': 'AI 模拟',
+    'about': '开：示范回答，不花 token；关：真实模型。不选就跟随 .env 的 IS_AI_MOCK。',
+    'default': null,
+  },
+  {
+    'key': 'ai.model',
+    'group': 'ai',
+    'type': 'choice',
+    'optional': true,
+    'options': ['claude-opus-5-5', 'claude-sonnet-5-5'],
+    'label': 'AI 模型',
+    'about': '每一步 AI 都用这个模型。',
+    'default': null,
+  },
+  {
+    'key': 'currencies.accepted',
+    'group': 'currencies',
+    'type': 'choices',
+    'options': ['CNY', 'HKD', 'TWD', 'USD'],
+    'label': '收的货币',
+    'about': '用户充值时可以选的货币。',
+    'default': ['CNY', 'HKD'],
+  },
+  {
+    'key': 'currencies.dashboard',
+    'group': 'currencies',
+    'type': 'choice',
+    'options': ['CNY', 'HKD', 'TWD', 'USD'],
+    'label': '管理后台的货币',
+    'about': '管理后台的金额用这个货币显示。',
+    'default': 'CNY',
+  },
+];
 
 /// 内容管理's images and what an image may be (the server's catalog.ts).
 const contentImageLabels = [('banner', '横幅背景（命理罗盘）'), ('logo', '介绍页标志')];

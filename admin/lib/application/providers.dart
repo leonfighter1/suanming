@@ -8,6 +8,7 @@ import '../domain/models.dart';
 import '../platform/download.dart';
 import '../platform/login_hint.dart';
 import '../platform/pick_file.dart';
+import '../presentation/format.dart' show moneyUnit;
 import '../platform/prefs.dart';
 
 /// When Riverpod asks again by itself after a failed request: a few times, quickly (0.2, 0.4, 0.8, 1.6 s), when the
@@ -68,7 +69,11 @@ final adminApiProvider = Provider<AdminApi>((ref) {
 /// session is over.
 class SessionNotifier extends Notifier<AdminMe?> {
   @override
-  AdminMe? build() => null;
+  AdminMe? build() {
+    // 设置 (S31): money in the signed-in session's currency, 元 without one.
+    listenSelf((_, me) => moneyUnit = me?.currency ?? MoneyUnit.yuan);
+    return null;
+  }
 
   Future<void> signIn(String login, String password) async {
     state = await ref.read(adminApiProvider).signIn(login, password);
@@ -145,6 +150,9 @@ final dispatchLogProvider = FutureProvider.autoDispose<List<DispatchEntry>>(
 
 /// 内容 (内容管理, tech plan S29): every text the app shows and the images it takes from here, with staff's changes.
 final contentProvider = FutureProvider.autoDispose<ContentListing>((ref) => ref.watch(adminApiProvider).content());
+
+/// 设置 (tech plan S31): every setting with its value, its default and words, what answers AI calls, the rates' day.
+final settingsProvider = FutureProvider.autoDispose<SettingsListing>((ref) => ref.watch(adminApiProvider).settings());
 
 /// Chooses a file of the given types to send (内容管理's images): the browser's chooser; tests choose their own.
 final pickFileProvider = Provider<Future<AdminFile?> Function(List<String> types)>((ref) => pickFile);

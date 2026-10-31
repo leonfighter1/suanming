@@ -170,6 +170,18 @@ class AdminApi {
   /// The image [key] taken out: the app shows its own again.
   Future<void> removeImage(String key) => _authed('DELETE', '/v1/admin/content/images/$key');
 
+  // ---- 设置 (tech plan S31) ----
+
+  Future<SettingsListing> settings() async => SettingsListing.fromJson(await _authed('GET', '/v1/admin/settings'));
+
+  /// Keeps [value] as [key]'s; refused (invalid_setting) with what is wrong when it doesn't fit.
+  Future<SettingView> saveSetting(String key, Object? value) async =>
+      SettingView.fromJson(await _authed('PUT', '/v1/admin/settings/$key', {'value': value}));
+
+  /// [key] back to its default.
+  Future<SettingView> resetSetting(String key) async =>
+      SettingView.fromJson(await _authed('DELETE', '/v1/admin/settings/$key'));
+
   // ---- transport ----
 
   Future<Json> _authed(String method, String path, [Object? body]) =>

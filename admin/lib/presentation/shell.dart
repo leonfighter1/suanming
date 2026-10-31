@@ -11,6 +11,7 @@ import 'content_page.dart';
 import 'format.dart';
 import 'messages_page.dart';
 import 'overview_page.dart';
+import 'settings_page.dart';
 import 'reports_page.dart';
 import 'revenue_page.dart';
 import 'usage_page.dart';
@@ -28,6 +29,7 @@ final _dests = <_Dest>[
   (label: '导出', icon: Icons.download_outlined, selected: Icons.download, needs: Can.userData, page: ReportsPage.new),
   (label: '消息', icon: Icons.mail_outline, selected: Icons.mail, needs: Can.messages, page: MessagesPage.new),
   (label: '内容', icon: Icons.article_outlined, selected: Icons.article, needs: Can.content, page: ContentPage.new),
+  (label: '设置', icon: Icons.tune_outlined, selected: Icons.tune, needs: Can.settings, page: SettingsPage.new),
 ];
 
 /// The width from which the pages sit beside a rail rather than above a bar.
@@ -83,7 +85,8 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     ..invalidate(activeProvider)
     ..invalidate(messagesProvider)
     ..invalidate(dispatchLogProvider)
-    ..invalidate(contentProvider);
+    ..invalidate(contentProvider)
+    ..invalidate(settingsProvider);
 
   @override
   Widget build(BuildContext context) {

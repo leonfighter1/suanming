@@ -15,6 +15,7 @@ abstract final class Can {
   static const userData = 'user_data';
   static const messages = 'messages';
   static const content = 'content';
+  static const settings = 'settings';
 
   /// What an admin could do on a server from before roles (and before 内容管理).
   static const all = {view, assign, userData, messages};
@@ -29,6 +30,7 @@ class AdminMe {
     this.role = 'admin',
     this.can = Can.all,
     this.assignableRoles = const [],
+    this.currency = MoneyUnit.yuan,
   });
   factory AdminMe.fromJson(Json j) => AdminMe(
         id: j['id'] as String,
@@ -38,6 +40,7 @@ class AdminMe {
         role: j['role'] as String? ?? 'admin',
         can: j['can'] == null ? Can.all : {for (final c in j['can'] as List) c as String},
         assignableRoles: [for (final r in (j['assignable_roles'] as List? ?? const [])) r as String],
+        currency: j['currency'] == null ? MoneyUnit.yuan : MoneyUnit.fromJson(j['currency'] as Json),
       );
   final String id;
   final String login;
@@ -51,6 +54,28 @@ class AdminMe {
 
   /// The roles this staff member may give an account (user, integrator, manager, admin).
   final List<String> assignableRoles;
+
+  /// The currency the dashboard shows money in (设置, S31).
+  final MoneyUnit currency;
+}
+
+/// The currency the dashboard shows money in (设置's currencies.dashboard, S31): its symbol and decimals, and today's
+/// rate from the server's 元 (1 元 = rate of it).
+class MoneyUnit {
+  const MoneyUnit({required this.code, required this.symbol, required this.decimals, required this.rate, this.ratesDate});
+  factory MoneyUnit.fromJson(Json j) => MoneyUnit(
+        code: j['code'] as String,
+        symbol: j['symbol'] as String,
+        decimals: _i(j['decimals']),
+        rate: _d(j['rate']),
+        ratesDate: j['rates_date'] as String?,
+      );
+  static const yuan = MoneyUnit(code: 'CNY', symbol: '¥', decimals: 2, rate: 1);
+  final String code;
+  final String symbol;
+  final int decimals;
+  final double rate;
+  final String? ratesDate;
 }
 
 /// 充值 (what was paid), its net after the payment fee and VAT, the AI cost, gross profit and its margin.
@@ -750,4 +775,91 @@ class ContentListing {
   final int imageMaxBytes;
   final List<ContentText> texts;
   final List<ContentImage> images;
+}
+
+/// 设置 (tech plan S31): a setting as the 管理后台 shows it: what it is, its range or choices, its value now, its default
+/// (and the env variable it comes from, when set), and when the panel changed it.
+class SettingView {
+  const SettingView({
+    required this.key,
+    required this.group,
+    required this.type,
+    required this.label,
+    required this.about,
+    this.unit,
+    this.min,
+    this.max,
+    this.integer = false,
+    this.optional = false,
+    this.options = const [],
+    this.env,
+    this.value,
+    this.defaultValue,
+    this.changedAt,
+  });
+  factory SettingView.fromJson(Json j) => SettingView(
+        key: j['key'] as String,
+        group: j['group'] as String,
+        type: j['type'] as String,
+        label: j['label'] as String,
+        about: j['about'] as String? ?? '',
+        unit: j['unit'] as String?,
+        min: (j['min'] as num?)?.toDouble(),
+        max: (j['max'] as num?)?.toDouble(),
+        integer: j['integer'] == true,
+        optional: j['optional'] == true,
+        options: [for (final o in (j['options'] as List? ?? const [])) o as String],
+        env: j['env'] as String?,
+        value: j['value'],
+        defaultValue: j['default'],
+        changedAt: j['changed'] == null ? null : DateTime.parse((j['changed'] as Json)['updated_at'] as String),
+      );
+
+  /// group.name (sessions.idle_days …).
+  final String key;
+
+  /// sessions, ai, limits or currencies.
+  final String group;
+
+  /// number, boolean, choice or choices.
+  final String type;
+  final String label;
+  final String about;
+  final String? unit;
+  final double? min;
+  final double? max;
+  final bool integer;
+
+  /// May be unset (null): the AI switches, which then follow .env.
+  final bool optional;
+  final List<String> options;
+  final String? env;
+  final Object? value;
+  final Object? defaultValue;
+  final DateTime? changedAt;
+
+  bool get changed => changedAt != null;
+}
+
+/// Every setting, what answers AI calls now, and which day's rates 充值 uses.
+class SettingsListing {
+  const SettingsListing({required this.settings, this.serving, this.models, this.ratesDate, this.ratesStale = false});
+  factory SettingsListing.fromJson(Json j) {
+    final ai = j['ai'] as Json?;
+    final rates = j['rates'] as Json?;
+    return SettingsListing(
+      settings: _list(j['settings'], SettingView.fromJson),
+      serving: ai?['serving'] as String?,
+      models: ai?['models'] as String?,
+      ratesDate: rates?['date'] as String?,
+      ratesStale: rates?['stale'] == true,
+    );
+  }
+  final List<SettingView> settings;
+
+  /// A provider's name, or mock.
+  final String? serving;
+  final String? models;
+  final String? ratesDate;
+  final bool ratesStale;
 }
