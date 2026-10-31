@@ -142,6 +142,18 @@ void main() {
     expect(seen.reduce((a, b) => a < b ? a : b), closeTo(PressBounce.pressedScale, 2e-3), reason: 'a button');
   });
 
+  testWidgets('波纹跟手: the ripple grows from where the finger went down and stays centred there', (tester) async {
+    await tester.pumpWidget(host(AppFilledButton(key: k, onPressed: () {}, child: const Text('排盘'))));
+    final well = find.descendant(of: find.byKey(k), matching: find.byType(InkWell));
+    final ink = Material.of(tester.element(well)) as RenderBox;
+    final press = await tester.startGesture(tester.getTopLeft(well) + const Offset(24, 12));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
+    // Near the button's left end, far from its centre: Material 3's own ripple would have drifted towards the centre.
+    expect(ink, paints..circle(x: 24, y: 12));
+    await press.up();
+  });
+
   group('弹性开关', () {
     Widget tile({bool still = false, required ValueChanged<bool> changed, required bool Function() on}) => host(
           StatefulBuilder(

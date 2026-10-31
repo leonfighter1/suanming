@@ -82,6 +82,9 @@ ThemeData buildTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
+    // 波纹跟手 (S30; owner, 2026-10-30: 「从手指按下的位置生成圆形波纹向外扩散，而不是从按钮中心开始」): the splash keeps its
+    // centre where the finger went down as it spreads. Material 3's own ripple drifts to the centre on the way.
+    splashFactory: InkSplash.splashFactory,
     textTheme: _ramp,
     extensions: [t],
     scaffoldBackgroundColor: t.background,

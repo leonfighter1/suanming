@@ -87,8 +87,15 @@
 83. A test that sends a date the server checks against its clock either pins the server's clock (now in testApi's options) or computes the date from the same clock; never a literal date near today.
 84. Rule 24 again (2026-10-30, banner_art_test): a second testApp pumped over a signed-out one kept its state. Read rule 24 before writing a test that starts the app twice.
 85. After moving code out of a file, check the imports it keeps with a strict scan (not a property, key, option field or comment) and remove the unused ones; tsc catches a removal that was needed.
+86. Never rewrite a source file with PowerShell's Set-Content or Out-File; use the Edit tool (or sed in Git Bash), then check git diff shows only the intended lines and the file starts without EF BB BF.
 
 ## Log
+
+### 2026-10-30: PowerShell Set-Content -Encoding UTF8 put a BOM into a Dart file
+- **Symptom:** After a quick swap of one line in app/lib/presentation/theme.dart with Get-Content/Replace/Set-Content -Encoding UTF8, the file began with EF BB BF
+- **Root cause:** Windows PowerShell 5.1 writes UTF-8 with a byte-order mark; the repository's files have none, so every such write changes the file's first bytes
+- **Fix:** Swapped the line back with sed, removed the BOM, and checked the first bytes and git diff (only the intended lines)
+- **Rule:** Never rewrite a source file with PowerShell's Set-Content or Out-File; use the Edit tool (or sed in Git Bash), then check git diff shows only the intended lines and the file starts without EF BB BF. (Rule 86)
 
 ### 2026-10-30: Moved code left imports that only looked used
 - **Symptom:** After moving the route groups out of server.ts, it still imported preloadRemedies; the import check called it used, and tsc says nothing
