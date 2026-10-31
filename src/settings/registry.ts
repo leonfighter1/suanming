@@ -8,6 +8,7 @@
  */
 import { readFileSync } from "node:fs";
 import { MODELS } from "../ai/models.js";
+import { CURRENCY_CODES } from "../currency/catalog.js";
 
 export type SettingGroup = "sessions" | "ai" | "limits" | "currencies";
 
@@ -98,11 +99,41 @@ export const SETTINGS = [
     about:
       "每一步 AI 都用这个模型，价格跟着它算。不选就跟随 .env 的 ACTIVE_AI_MODEL，没有的话按 config/model_routing.json。",
   },
+  // 货币 (WP31.5, WP31.7; the owner: 「checkbox on different accepted currencies by admin」, 「always get 5% service
+  // charge from the conversion」, 「Admin can choose the main displayed currencies for dashboard」).
+  {
+    key: "currencies.accepted",
+    group: "currencies",
+    type: "choices",
+    options: () => CURRENCY_CODES,
+    label: "收的货币",
+    about: "用户充值时可以选的货币。元以外的，按当天的汇率换算，再加换算服务费。",
+  },
+  {
+    key: "currencies.service_charge_percent",
+    group: "currencies",
+    type: "number",
+    min: 0,
+    max: 50,
+    unit: "%",
+    label: "换算服务费",
+    about: "用元以外的货币充值时，在按当天汇率换算的价钱上加收的百分比。",
+  },
+  {
+    key: "currencies.dashboard",
+    group: "currencies",
+    type: "choice",
+    options: () => CURRENCY_CODES,
+    label: "管理后台的货币",
+    about: "管理后台的金额（充值、成本、毛利）用这个货币显示，按当天的汇率从元换算。",
+  },
 ] as const satisfies readonly SettingSpec[];
 
 type Spec = (typeof SETTINGS)[number];
 export type SettingKey = Spec["key"];
 export type NumberKey = Extract<Spec, { type: "number" }>["key"];
+export type ChoiceKey = Extract<Spec, { type: "choice" }>["key"];
+export type ChoicesKey = Extract<Spec, { type: "choices" }>["key"];
 
 export const settingSpec = (key: string): SettingSpec | undefined =>
   (SETTINGS as readonly SettingSpec[]).find((s) => s.key === key);

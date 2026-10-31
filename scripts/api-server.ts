@@ -15,6 +15,7 @@ import { createApiServer } from "../src/api/server.js";
 import { InMemoryStore } from "../src/api/store.js";
 import { notifyFromEnv } from "../src/notify/index.js";
 import { Settings } from "../src/settings/index.js";
+import { OpenErApi, RateBook } from "../src/currency/index.js";
 import { loadPointsConfig } from "../src/points/index.js";
 import {
   buildAuth,
@@ -78,6 +79,14 @@ const panel = withPanel(settings, ai);
 const providers = buildProviders(panel.mode, panel.choice);
 // Notice a saved .env within a second, so the console confirms the change.
 watchFile(".env", { persistent: false, interval: 1000 }, () => providers.mode());
+// 货币 (S31): today's exchange rates from the online service (no person's data in the request), the last good table
+// kept in the store for a start without it.
+const rates = new RateBook(
+  new OpenErApi(),
+  () => new Date(),
+  store,
+  (m) => console.log(m),
+);
 // Public mode's AI caps, read from 设置 at each job: a change in the 管理后台 holds from the next one.
 const aiQuota = {
   get perUserPerDay() {
@@ -113,6 +122,7 @@ const server = createApiServer({
   devHeaders: loopbackOnly && !persistence.store,
   store,
   settings,
+  rates,
   ...(points && { points: { config: points, simulateTopUp: true } }),
   // Content review is paused by owner decision (2026-10-26) until the legal &
   // obligations work: MINGLI_REVIEW=on turns holds, the guard and 内容审核 back on.
@@ -149,6 +159,16 @@ server.listen(port, host, () => {
     console.log("  X-Dev-User shortcut is off (reachable from other machines); sign in instead.");
   }
   console.log(`AI: ${describeAi(providers)}`);
+  // Today's rates fetched now, so the first 我的积分 doesn't wait for them.
+  void rates
+    .today()
+    .then((r) =>
+      console.log(
+        r
+          ? `rates: ${r.date} (open.er-api.com); 充值 in ${settings.choices("currencies.accepted").join(", ")}`
+          : "rates: none yet (the service didn't answer); 充值 in 元 alone",
+      ),
+    );
   // Anything in config/model_routing.json that src/ai/models.ts doesn't allow, said before a reading fails on it.
   for (const problem of checkRouting(loadRouting())) console.log(`  routing: ${problem}`);
   console.log(

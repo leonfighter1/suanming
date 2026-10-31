@@ -22,6 +22,8 @@ import type { TemplateRecord, TemplateStore } from "../notify/dispatch.js";
 import type { ContentLocale } from "../content/catalog.js";
 import type { ContentImageRecord, ContentStore, ContentTextRecord } from "../content/store.js";
 import type { SettingRecord, SettingStore } from "../settings/index.js";
+import type { Rates, RatesStore } from "../currency/rates.js";
+import { receiptNumber, type Receipt, type ReceiptStore } from "../receipts/index.js";
 import {
   InMemoryLedger,
   type PointsCharge,
@@ -209,7 +211,8 @@ export interface FollowUpRecord {
  * The records, and since v11.0.0 (S20) each account's 积分 (src/points/ledger.ts); since v13.1.0 (S25) the admins'
  * wordings of the messages (src/notify/dispatch.ts).
  */
-export interface Store extends PointsLedger, TemplateStore, ContentStore, SettingStore {
+export interface Store
+  extends PointsLedger, TemplateStore, ContentStore, SettingStore, RatesStore, ReceiptStore {
   putChart(c: ChartRecord): Promise<void>;
   getChart(id: string): Promise<ChartRecord | undefined>;
   putReport(r: ReportRecord): Promise<void>;
@@ -354,6 +357,34 @@ export class InMemoryStore implements Store {
   async deleteSetting(key: string) {
     return this.settings.delete(key);
   }
+  private rates?: Rates;
+  async getRates() {
+    return this.rates && structuredClone(this.rates);
+  }
+  async putRates(r: Rates) {
+    this.rates = structuredClone(r);
+  }
+  private receipts = new Map<string, Receipt>();
+  private receiptSeq = 0;
+  async putReceipt(r: Omit<Receipt, "number">) {
+    const receipt = {
+      ...structuredClone(r),
+      number: receiptNumber(++this.receiptSeq, r.created_at),
+    };
+    this.receipts.set(r.id, receipt);
+    return structuredClone(receipt);
+  }
+  async listReceipts(owner: string, limit: number) {
+    return [...this.receipts.values()]
+      .filter((r) => r.owner === owner)
+      .reverse()
+      .slice(0, limit)
+      .map((r) => structuredClone(r));
+  }
+  async getReceipt(id: string) {
+    const r = this.receipts.get(id);
+    return r && structuredClone(r);
+  }
   async putInquiry(i: InquiryRecord) {
     this.inquiries.set(i.id, structuredClone(i));
   }
@@ -494,6 +525,8 @@ export class InMemoryStore implements Store {
     for (const [id, i] of this.inquiries)
       if (i.owner === owner && this.inquiries.delete(id)) inquiries++;
     const points = this.ledger.deleteOwner(owner);
+    // Receipts go with the account, as the database's do (ON DELETE CASCADE).
+    for (const [id, r] of this.receipts) if (r.owner === owner) this.receipts.delete(id);
     for (const r of this.usage) if (r.owner === owner) delete r.owner;
     return { charts, reports, remedies, life_reports, followups, inquiries, points };
   }

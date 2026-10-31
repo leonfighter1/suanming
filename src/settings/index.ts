@@ -10,6 +10,8 @@ import {
   problemOf,
   settingSpec,
   SETTINGS,
+  type ChoiceKey,
+  type ChoicesKey,
   type NumberKey,
   type SettingSpec,
   type SettingsFile,
@@ -84,6 +86,15 @@ export class Settings {
 
   number(key: NumberKey): number {
     return this.value(key) as number;
+  }
+
+  /** A choice's value; null when an optional one is unset. */
+  choice(key: ChoiceKey): string | null {
+    return this.value(key) as string | null;
+  }
+
+  choices(key: ChoicesKey): string[] {
+    return this.value(key) as string[];
   }
 
   /** Keeps [value] as [key]'s, from the panel; SettingError when it isn't a setting or doesn't fit. */

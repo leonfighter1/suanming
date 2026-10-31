@@ -388,6 +388,12 @@ beforeAll(async () => {
   for (const login of LOGINS) {
     await auth.seedDevUser({ login, password: login, country: "HK", locale: "zh-Hans" });
   }
+  // 充值 needs an email address on the account (S31): its receipt carries it.
+  for (const login of ["alice", "bob"]) {
+    const u = (await auth.findLogin("username", login))!;
+    const email = `${login}@example.com`;
+    await auth.users.put({ ...u, email, email_lookup: auth.emailLookup(email) });
+  }
   for (const login of LOGINS) {
     sessions[login] = await (await signIn(login)).json();
     ids[login] = (await auth.findLogin("username", login))!.id;

@@ -50,6 +50,7 @@ import {
 } from "../points/index.js";
 import { InputError, UUID_RE, type EngineSecrets } from "../service/charts.js";
 import { Settings } from "../settings/index.js";
+import type { RateBook } from "../currency/index.js";
 import { documentName } from "../export/document.js";
 import { renderPdf } from "../export/render-pdf.js";
 import { shareFont } from "../share/font.js";
@@ -154,6 +155,8 @@ export interface ApiOptions {
   points?: { config?: PointsConfig; simulateTopUp?: boolean };
   /** 设置 (S31): the settings, with the 管理后台's changes loaded. Default: the defaults, kept in [store]. */
   settings?: Settings;
+  /** 货币 (S31): today's exchange rates. Absent: 充值 is offered in 元 alone (and no test reaches the network). */
+  rates?: RateBook;
   now?: () => Date;
   log?: (msg: string, err?: unknown) => void;
 }
@@ -467,6 +470,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
     opts,
     store,
     settings,
+    rates: opts.rates,
     now,
     log,
     auth,
@@ -568,6 +572,7 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
         config: pointsConfig ?? loadPointsConfig(),
         admins,
         settings,
+        rates: opts.rates,
         ...(opts.aiServing && {
           ai: { serving: opts.aiServing, models: opts.aiModel ?? (() => "") },
         }),

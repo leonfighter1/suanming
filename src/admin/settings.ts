@@ -10,6 +10,11 @@ import { isSettingKey, SettingError } from "../settings/index.js";
 import type { AdminContext } from "./routes.js";
 import { loginOf } from "./stats.js";
 
+async function ratesNow(ctx: AdminContext) {
+  const table = await ctx.rates?.today();
+  return table ? { rates: { date: table.date, stale: ctx.rates!.stale(table) } } : {};
+}
+
 /** The settings' routes; false for any other path. */
 export async function settingsAdminRoute(
   ctx: AdminContext,
@@ -23,6 +28,8 @@ export async function settingsAdminRoute(
       settings: ctx.settings.list(),
       // What the AI switches make of it now: .env's or the panel's (withPanel).
       ...(ctx.ai && { ai: { serving: ctx.ai.serving(), models: ctx.ai.models() } }),
+      // Which day's rates 充值 uses now (S31); none: the service never answered, 元 alone is offered.
+      ...(await ratesNow(ctx)),
     });
     return true;
   }

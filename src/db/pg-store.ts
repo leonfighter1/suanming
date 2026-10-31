@@ -43,6 +43,8 @@ import type { ContentLocale } from "../content/catalog.js";
 import type { ContentImageRecord, ContentTextRecord } from "../content/store.js";
 import type { RefreshRecord, SessionStore } from "../auth/tokens.js";
 import type { SettingRecord } from "../settings/index.js";
+import type { Rates } from "../currency/rates.js";
+import { receiptNumber, type Receipt } from "../receipts/index.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
@@ -62,6 +64,8 @@ const MIGRATIONS = [
   "013_content",
   "014_sessions",
   "015_settings",
+  "016_exchange_rates",
+  "017_receipts",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -873,6 +877,58 @@ export class PgStore implements Store, UserStore, SessionStore {
     await this.db.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
   }
 
+  // ---- 汇率 (v19.0.0, S31): the last good table, plain ----
+
+  async getRates() {
+    const r = (await this.db.query<Row>("SELECT body FROM exchange_rates WHERE base = 'CNY'"))
+      .rows[0];
+    return r?.body as Rates | undefined;
+  }
+
+  async putRates(r: Rates) {
+    await this.db.query(
+      `INSERT INTO exchange_rates (base, body, fetched_at) VALUES ($1, $2, $3)
+       ON CONFLICT (base) DO UPDATE SET body = EXCLUDED.body, fetched_at = EXCLUDED.fetched_at`,
+      [r.base, JSON.stringify(r), r.fetched_at],
+    );
+  }
+
+  // ---- 收据 (v19.0.0, S31): sealed like every body; the number from the row's seq ----
+
+  async putReceipt(r: Omit<Receipt, "number">) {
+    const body = sealJson(await this.dek(r.owner), r, `receipts:${r.id}`);
+    const row = (
+      await this.db.query<{ seq: number | string }>(
+        "INSERT INTO receipts (id, user_id, entry_id, body_ciphertext, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING seq",
+        [r.id, r.owner, r.entry_id, body, r.created_at],
+      )
+    ).rows[0]!;
+    return { ...r, number: receiptNumber(Number(row.seq), r.created_at) };
+  }
+
+  private async receipt(row: Row): Promise<Receipt> {
+    const r = await this.open<Omit<Receipt, "number">>("receipts", row);
+    return { ...r, number: receiptNumber(Number(row.seq), r.created_at) };
+  }
+
+  async listReceipts(owner: string, limit: number) {
+    const rows = await this.db.query<Row>(
+      "SELECT id, user_id, body_ciphertext, seq FROM receipts WHERE user_id = $1 ORDER BY created_at DESC, seq DESC LIMIT $2",
+      [owner, limit],
+    );
+    return Promise.all(rows.rows.map((r) => this.receipt(r)));
+  }
+
+  async getReceipt(id: string) {
+    const row = (
+      await this.db.query<Row>(
+        "SELECT id, user_id, body_ciphertext, seq FROM receipts WHERE id = $1",
+        [id],
+      )
+    ).rows[0];
+    return row && this.receipt(row);
+  }
+
   // ---- 设置 (v19.0.0, S31): what the 管理后台's 设置 page changed, plain ----
 
   async listSettings() {
@@ -1070,4 +1126,5 @@ const TABLES = [
   "points_holds",
   "ai_usage",
   "deletion_requests",
+  "receipts",
 ] as const;

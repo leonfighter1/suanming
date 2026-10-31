@@ -11,5 +11,10 @@
     "ai_per_user_day": 10,
     "ai_total_day": 100,
     "mail_per_user_day": 20
+  },
+  "currencies": {
+    "accepted": ["CNY", "HKD", "TWD", "SGD", "MYR", "USD"],
+    "service_charge_percent": 5,
+    "dashboard": "CNY"
   }
 }

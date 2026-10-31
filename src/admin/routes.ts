@@ -31,6 +31,7 @@ import { renderPdf } from "../export/render-pdf.js";
 import { HttpError, readJson, send } from "../http/util.js";
 import type { PointsConfig, PointsEntry } from "../points/index.js";
 import type { Settings } from "../settings/index.js";
+import { currencyOf, type RateBook } from "../currency/index.js";
 import { shareFont } from "../share/font.js";
 import { reportDoc, seriesCsv, usersCsv } from "./report.js";
 import {
@@ -56,6 +57,8 @@ export interface AdminContext {
   admins: Set<string>;
   /** 设置 (S31): every setting's value now, and the panel's changes. */
   settings: Settings;
+  /** 货币 (S31): today's exchange rates, for the dashboard's currency and 设置's currencies. */
+  rates?: RateBook;
   /** What answers AI calls now (a provider, or mock) and its model(s), for 设置's AI group. */
   ai?: { serving: () => string; models: () => string };
   /** The server's dispatcher: the messages' templates, previews, test sends and log (S25). */
@@ -146,6 +149,24 @@ function file(res: ServerResponse, name: string, type: string, body: Buffer | st
   res.end(bytes);
 }
 
+/**
+ * The currency the dashboard shows money in (S31; the owner: 「Admin can choose the main displayed currencies for
+ * dashboard」): 设置's currencies.dashboard at today's rate (1 元 = rate of it); 元 while there is no rate for it.
+ */
+async function dashboardCurrency(ctx: AdminContext) {
+  const code = ctx.settings.choice("currencies.dashboard") ?? "CNY";
+  const table = code === "CNY" ? undefined : await ctx.rates?.today();
+  const rate = code === "CNY" ? 1 : table?.rates[code];
+  const c = rate ? currencyOf(code)! : currencyOf("CNY")!;
+  return {
+    code: c.code,
+    symbol: c.symbol,
+    decimals: c.decimals,
+    rate: rate ?? 1,
+    ...(table && rate && { rates_date: table.date }),
+  };
+}
+
 /** Handles `/v1/admin/*` (but not reviews); false when the path is someone else's. */
 export async function adminRoute(
   ctx: AdminContext,
@@ -168,6 +189,7 @@ export async function adminRoute(
       admin_by_config: byConfig(ctx, me),
       can: CAPABILITIES[role],
       assignable_roles: assignableRoles(role),
+      currency: await dashboardCurrency(ctx),
     });
     return true;
   }

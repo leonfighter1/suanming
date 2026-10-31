@@ -791,6 +791,11 @@ paths:
               required: [yuan]
               properties:
                 yuan: { type: integer, description: "A pack's price in 元: 10, 20, 30, 40 or 50" }
+                currency:
+                  {
+                    type: string,
+                    description: "One of today's accepted currencies (S31); 元 when absent",
+                  }
       responses:
         "201":
           description: Added
@@ -798,17 +803,57 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [entry, balance, held, available]
+                required: [entry, balance, held, available, receipt]
                 properties:
                   entry: { $ref: "#/components/schemas/PointsEntry" }
                   balance: { type: integer }
                   held: { type: integer }
                   available: { type: integer }
+                  receipt: { $ref: "#/components/schemas/Receipt" }
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
         "501": { $ref: "#/components/responses/Problem" }
+
+  /v1/receipts:
+    get:
+      tags: [points]
+      operationId: listReceipts
+      summary: The account's receipts, newest first (S31)
+      description: |
+        One per 充值: what was paid, in which currency at which rate and service charge, the 积分 it brought, and the
+        account's email. An admin's 增加积分 makes none. 充值 is simulated until Phase 4: each says so.
+      responses:
+        "200":
+          description: Up to 100
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Receipt" }
+        "401": { $ref: "#/components/responses/Problem" }
+
+  /v1/receipts/{receipt_id}:
+    parameters:
+      - { name: receipt_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [points]
+      operationId: getReceipt
+      summary: One of the account's receipts, to view and print
+      responses:
+        "200":
+          description: The receipt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Receipt" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
 
   /v1/charts/{chart_id}/quote:
     parameters:
@@ -874,10 +919,21 @@ paths:
                   admin_by_config: { type: boolean }
                   can:
                     type: array
-                    items: { type: string, enum: [view, assign, user_data, messages] }
+                    items:
+                      { type: string, enum: [view, assign, user_data, messages, content, settings] }
                   assignable_roles:
                     type: array
                     items: { type: string, enum: [user, integrator, manager, admin] }
+                  currency:
+                    type: object
+                    description: "The currency the dashboard shows money in (设置, S31): 1 元 = rate of it; 元 without a rate"
+                    required: [code, symbol, decimals, rate]
+                    properties:
+                      code: { type: string }
+                      symbol: { type: string }
+                      decimals: { type: integer }
+                      rate: { type: number }
+                      rates_date: { type: string, format: date }
         "401": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
 
@@ -3336,6 +3392,33 @@ components:
               yuan: { type: integer }
               points: { type: integer }
               bonus_percent: { type: integer, description: "Over 100 积分 a 元: 20元 = 2200 is 10" }
+        currencies:
+          type: array
+          description: "The accepted currencies 充值 can price today (S31), each pack's price in them"
+          items:
+            type: object
+            required: [code, names, symbol, decimals, rate, service_charge_percent, prices]
+            properties:
+              code: { type: string }
+              names: { type: object, additionalProperties: { type: string } }
+              symbol: { type: string }
+              decimals: { type: integer }
+              rate: { type: number, description: "1 元 = rate of it" }
+              service_charge_percent: { type: number }
+              prices:
+                type: array
+                items:
+                  type: object
+                  required: [yuan, amount]
+                  properties:
+                    yuan: { type: integer }
+                    amount: { type: number }
+        rates:
+          type: object
+          description: "The day of the table it priced them by; stale while the service can't be reached"
+          properties:
+            date: { type: string, format: date }
+            stale: { type: boolean }
         entries:
           type: array
           items: { $ref: "#/components/schemas/PointsEntry" }
@@ -3348,6 +3431,42 @@ components:
               points: { type: integer }
               for: { $ref: "#/components/schemas/PointsFor" }
               created_at: { type: string, format: date-time }
+
+    Receipt:
+      description: A 充值's receipt (S31)
+      type: object
+      required:
+        [
+          id,
+          number,
+          entry_id,
+          created_at,
+          email,
+          pack,
+          currency,
+          amount,
+          rate,
+          service_charge_percent,
+          simulated,
+        ]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, description: "MLDS-<year>-<sequence>" }
+        entry_id: { type: string, format: uuid }
+        created_at: { type: string, format: date-time }
+        email: { type: string }
+        pack:
+          type: object
+          properties:
+            yuan: { type: integer }
+            points: { type: integer }
+        currency: { type: string }
+        amount: { type: number }
+        rate: { type: number, description: "1 元 = rate of the currency (1 for 元)" }
+        rates_date: { type: string, format: date }
+        service_charge_percent: { type: number }
+        simulated:
+          { type: boolean, description: "No payment was taken: 充值 is simulated until Phase 4" }
 
     PointsFor:
       description: What a charge or a hold is for
