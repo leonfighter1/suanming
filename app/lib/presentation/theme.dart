@@ -161,6 +161,9 @@ class GanZhiText extends StatelessWidget {
               TextSpan(text: ch, style: TextStyle(color: wuxingColorOf(context, ch))),
           ],
         ),
-        style: TextStyle(fontSize: size, fontWeight: FontWeight.w600),
+        style: styleFor(size),
       );
+
+  /// Its words' style at [size]: a skeleton's bar for 干支 takes it too (S30).
+  static TextStyle styleFor(double size) => TextStyle(fontSize: size, fontWeight: FontWeight.w600);
 }

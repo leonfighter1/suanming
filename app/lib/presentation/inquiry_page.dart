@@ -160,12 +160,23 @@ class _InquiryPageState extends ConsumerState<InquiryPage> {
                   child: Text('${l10n.errorTitle}\n$e', textAlign: TextAlign.center),
                 ),
               ),
-            _ => const Center(child: CircularProgressIndicator()),
+            // 骨架屏 (S30): the page as it will be, a typical conversation under bars of its size.
+            _ => Skeleton.cover(label: l10n.loading, child: _body(context, _typicalInquiry)),
           },
         ),
       ),
     );
   }
+
+  /// What the page shows while the conversation comes (骨架屏, S30): a typical one, as bars.
+  static const _typicalInquiry = InquiryView(
+    id: 'typical',
+    chartId: 'typical',
+    status: 'asking',
+    goal: '想知道今年事业该往哪个方向走',
+    maxQuestions: 6,
+    turns: [InquiryTurnView(say: '你的命盘里官星透出，事业心重。', question: '你现在的工作，和你想做的事一致吗？')],
+  );
 
   Widget _body(BuildContext context, InquiryView view) {
     final l10n = AppLocalizations.of(context);

@@ -20,6 +20,7 @@ import 'design.dart';
 import 'labels.dart';
 import 'layout.dart';
 import 'life_export.dart';
+import 'theme.dart';
 import 'tokens.dart';
 import 'widgets/follow_up.dart';
 import 'widgets/life_blocks.dart';
@@ -176,7 +177,33 @@ class LifeReportPage extends ConsumerWidget {
             chart: chart,
             hant: hant,
           ),
-          LifeReportView(status: 'passed') => const Center(key: ValueKey('life-loading'), child: CircularProgressIndicator()),
+          // 骨架屏 (S30): the report's header card and its first section as bars while its chart comes.
+          LifeReportView(status: 'passed') => Skeleton(
+            key: const ValueKey('life-loading'),
+            label: l10n.loading,
+            child: ListView(
+              padding: pagePadding(context),
+              children: [
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SkeletonText(l10n.lifeEntry, style: Theme.of(context).textTheme.titleLarge),
+                      const SizedBox(height: Space.s),
+                      SkeletonText('庚午 己卯 己卯 辛未', style: GanZhiText.styleFor(20)),
+                    ],
+                  ),
+                ),
+                AppCard(
+                  child: SkeletonText(
+                    '一生的格局与性情、事业、财运、婚姻、健康与大运流年，逐段写来，每段先说结论，再说缘由与怎么做。',
+                    style: ReadingText.body(context),
+                    maxLines: null,
+                  ),
+                ),
+              ],
+            ),
+          ),
           LifeReportView(status: 'failed') => _Message(key: const ValueKey('life-failed'), text: l10n.statusFailed),
           _ => _Message(key: const ValueKey('life-held'), text: l10n.statusReview),
         },

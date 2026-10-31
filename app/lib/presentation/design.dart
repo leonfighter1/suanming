@@ -3,7 +3,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart' show SpringSimulation;
-import 'package:flutter/rendering.dart' show RenderAbstractViewport;
+import 'package:flutter/rendering.dart'
+    show RenderAbstractViewport, RenderCustomPaint, RenderImage, RenderParagraph, RenderProxyBox;
 
 import 'tokens.dart';
 
@@ -86,6 +87,178 @@ abstract final class Motion {
   /// new value, until it stops there.
   static const roll = Duration(milliseconds: 600);
   static const rollCurve = Curves.decelerate;
+
+  /// A skeleton's bars breathing while the data comes ([Skeleton]): one fade out and back.
+  static const skeleton = Duration(milliseconds: 1200);
+}
+
+/// 骨架屏 (S30; owner, 2026-10-30: 「骨架屏中每个占位条的宽高与真实内容一致；数据到达后在原位置替换，页面布局不发生跳动」): what
+/// a page shows while its data comes. The page builds its own frame (its fixed parts, cards and paddings, as when the data
+/// is there) with a [SkeletonText] or [SkeletonBox] where each text, icon or picture will be, inside a Skeleton, which
+/// lets the bars breathe ([Motion.skeleton]; reduce motion: still) and hides them from screen readers, which hear
+/// [label] instead.
+class Skeleton extends StatefulWidget {
+  const Skeleton({super.key, required this.child, required this.label});
+
+  /// The page's own build of typical data (the same widgets, so every size is theirs) drawn as a skeleton: laid out as
+  /// it is, every line of text, icon and picture covered by a bar of its size ([SkeletonCover]), nothing in it to tap,
+  /// focus or read.
+  Skeleton.cover({super.key, required this.label, required Widget child})
+      : child = IgnorePointer(child: ExcludeFocus(child: SkeletonCover(child: child)));
+
+  final Widget child;
+  final String label;
+
+  @override
+  State<Skeleton> createState() => _SkeletonState();
+}
+
+class _SkeletonState extends State<Skeleton> with SingleTickerProviderStateMixin {
+  late final _breath = AnimationController(vsync: this, duration: Motion.skeleton);
+  late final _opacity = Tween<double>(begin: 1, end: 0.55).animate(CurvedAnimation(parent: _breath, curve: Curves.easeInOut));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _breath.stop();
+    } else if (!_breath.isAnimating) {
+      _breath.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        label: widget.label,
+        child: ExcludeSemantics(child: FadeTransition(opacity: _opacity, child: widget.child)),
+      );
+}
+
+/// A bar standing for text in [style] (the page's style merged in): the room [sample], a typical text of what will
+/// come, takes there, with a bar the height of the letters on each of its lines. Like the text that replaces it, it is
+/// one line, or with [maxLines] other than 1 it wraps at the width it is given, a bar per line as long as that line.
+/// The text takes the same room, so nothing moves.
+class SkeletonText extends StatelessWidget {
+  const SkeletonText(this.sample, {super.key, this.style, this.maxLines = 1});
+  final String sample;
+  final TextStyle? style;
+  final int? maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = DefaultTextStyle.of(context).style.merge(style);
+    final scaler = MediaQuery.textScalerOf(context);
+    final letters = scaler.scale(text.fontSize ?? 14);
+    Widget bars(double maxWidth) {
+      final painter = TextPainter(
+        text: TextSpan(text: sample, style: text),
+        textDirection: Directionality.of(context),
+        textScaler: scaler,
+        maxLines: maxLines,
+      )..layout(maxWidth: maxWidth);
+      final lines = painter.computeLineMetrics();
+      final size = painter.size;
+      painter.dispose();
+      return SizedBox.fromSize(
+        size: size,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in lines)
+              SizedBox(
+                height: line.height,
+                child: Center(child: SkeletonBox(width: line.width, height: letters)),
+              ),
+          ],
+        ),
+      );
+    }
+
+    // One line needs no width to wrap at (and so works where sizes are measured first, as in IntrinsicHeight).
+    return maxLines == 1 ? bars(double.infinity) : LayoutBuilder(builder: (context, box) => bars(box.maxWidth));
+  }
+}
+
+/// A bar standing for an icon or a picture of a known size. Its colour is the hairline's, seen on a card and on a tile
+/// inside one alike.
+class SkeletonBox extends StatelessWidget {
+  const SkeletonBox({super.key, required this.width, required this.height, this.radius = Radii.xs});
+  final double width;
+  final double height;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: ThemeTokens.of(context).border,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      );
+}
+
+/// Lays [child] out as it is and paints it with every line of text (icons are text too), picture and drawing covered
+/// by a bar of its size in the hairline's colour, within its own bounds ([Skeleton.cover]).
+class SkeletonCover extends SingleChildRenderObjectWidget {
+  const SkeletonCover({super.key, required Widget super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSkeletonCover(ThemeTokens.of(context).border);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) =>
+      (renderObject as _RenderSkeletonCover).color = ThemeTokens.of(context).border;
+}
+
+class _RenderSkeletonCover extends RenderProxyBox {
+  _RenderSkeletonCover(this._color);
+  Color _color;
+  set color(Color value) {
+    if (value == _color) return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    final canvas = context.canvas;
+    final bar = Paint()..color = _color;
+    canvas.save();
+    canvas.clipRect(offset & size);
+    void cover(Rect rect) => canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.shift(offset), const Radius.circular(Radii.xs)),
+          bar,
+        );
+    void visit(RenderObject node) {
+      if (node is RenderBox && node.hasSize) {
+        final at = node.localToGlobal(Offset.zero, ancestor: this);
+        if (node is RenderParagraph) {
+          final length = node.text.toPlainText().length;
+          for (final line in node.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: length))) {
+            cover(line.toRect().shift(at));
+          }
+          return;
+        }
+        if (node is RenderImage || node is RenderCustomPaint) {
+          cover(at & node.size);
+          return;
+        }
+      }
+      node.visitChildren(visit);
+    }
+
+    final child = this.child;
+    if (child != null) visit(child);
+    canvas.restore();
+  }
 }
 
 /// 数字滚动 (S30; owner, 2026-10-30: 「数字从旧值滚动到新值，使用减速曲线，接近目标值时逐渐变慢后停下」): [value] shown through

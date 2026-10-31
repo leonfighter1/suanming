@@ -90,11 +90,8 @@ class RemedyButton extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final l = list ?? ref.watch(remediesProvider(reportId)).value;
     if (l == null) {
-      return const SizedBox(
-        height: 40,
-        width: 40,
-        child: Padding(padding: EdgeInsets.all(Space.m), child: CircularProgressIndicator(strokeWidth: 2)),
-      );
+      // 骨架屏 (S30): a bar the size of the button that will be here.
+      return Skeleton(label: l10n.loading, child: const SkeletonBox(width: 132, height: 40, radius: Radii.field));
     }
     final plan = l.items.where((r) => r.topic == topic && r.status != 'failed').firstOrNull;
     final bought = plan != null && !plan.locked;

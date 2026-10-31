@@ -11,6 +11,23 @@ import 'labels.dart';
 import 'layout.dart';
 import 'widgets/remedy.dart' show compactButtons;
 
+/// What 我的积分 shows while its figures come (骨架屏, S30): typical figures (the packs of config/points.json, a first
+/// grant), drawn as bars by [Skeleton.cover], so the page that replaces them takes the same room.
+final _typical = PointsView(
+  enabled: true,
+  balance: 10000,
+  available: 10000,
+  topUp: 'simulated',
+  packs: const [
+    PointsPack(yuan: 10, points: 1000, bonusPercent: 0),
+    PointsPack(yuan: 20, points: 2200, bonusPercent: 10),
+    PointsPack(yuan: 30, points: 3450, bonusPercent: 15),
+    PointsPack(yuan: 40, points: 4800, bonusPercent: 20),
+    PointsPack(yuan: 50, points: 6250, bonusPercent: 25),
+  ],
+  entries: [PointsEntryView(id: 'typical', kind: 'grant', points: 10000, balance: 10000, createdAt: DateTime(2026, 10, 30))],
+);
+
 /// What a 积分 change was, as the page lists it: the request a charge paid for, a top-up's pack, a grant.
 String pointsWhat(AppLocalizations l10n, PointsEntryView e) {
   String method(String? s) => s == 'bazi' ? l10n.pointsBazi : l10n.methodLabel(s ?? '');
@@ -73,7 +90,8 @@ class _PointsPageState extends ConsumerState<PointsPage> {
         AsyncValue(error: final e?) => Center(
             child: Padding(padding: pagePadding(context), child: Text('${l10n.errorTitle}\n$e', textAlign: TextAlign.center)),
           ),
-        _ => const Center(child: CircularProgressIndicator()),
+        // 骨架屏 (S30): the page as it will be, its typical figures under bars of their size.
+        _ => Skeleton.cover(label: l10n.loading, child: _body(context, _typical)),
       },
     );
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -238,8 +239,12 @@ class FakeApi {
     return {'access_token': access, 'refresh_token': 'refresh-$_tokenSerial', 'token_type': 'Bearer', 'expires_in': 900};
   }
 
+  /// While set, every request waits until it completes: a test sees what a page shows while its data come (S30).
+  Completer<void>? hold;
+
   late final client = MockClient((req) async {
     requests.add(req);
+    if (hold != null) await hold!.future;
     if (offline) throw http.ClientException('Load failed', req.url);
     final path = req.url.path;
     // Calendar data generated from the real server functions (calendar.json).

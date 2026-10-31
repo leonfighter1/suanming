@@ -527,6 +527,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get analyzing => 'AI 正在深度分析中';
 
   @override
+  String get loading => '正在加载';
+
+  @override
   String get stageNarrative => '深度解读命盘';
 
   @override
@@ -2903,6 +2906,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get analyzing => 'AI 正在深度分析中';
+
+  @override
+  String get loading => '正在載入';
 
   @override
   String get stageNarrative => '深度解讀命盤';

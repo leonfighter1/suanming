@@ -1111,6 +1111,12 @@ abstract class AppLocalizations {
   /// **'AI 正在深度分析中'**
   String get analyzing;
 
+  /// No description provided for @loading.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在加载'**
+  String get loading;
+
   /// No description provided for @stageNarrative.
   ///
   /// In zh, this message translates to:

@@ -220,13 +220,15 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           : HistoryTile(item: r.reading!, trailing: trailing, onTap: onTap, onLongPress: onLongPress);
     }
 
-    Widget header(String text, {required Key key, int? count, bool big = false}) => Padding(
+    // A group's heading; with [skeleton], bars of its words' size while the records come (S30).
+    Widget header(String text, {required Key key, int? count, bool big = false, bool skeleton = false}) => Padding(
           key: key,
           padding: EdgeInsets.fromLTRB(Space.xs, big ? Space.l : Space.s, Space.xs, Space.s),
           child: Row(
             children: [
-              Text(
+              _words(
                 text,
+                skeleton: skeleton,
                 style: (big ? theme.textTheme.titleLarge : theme.textTheme.titleSmall)?.copyWith(
                   color: big ? scheme.primary : scheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -234,7 +236,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               ),
               if (count != null) ...[
                 const SizedBox(width: Space.s),
-                Text(l10n.archiveCount(count), style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                _words(
+                  l10n.archiveCount(count),
+                  skeleton: skeleton,
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                ),
               ],
             ],
           ),
@@ -270,6 +276,19 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
         children.addAll(m.records.map(tile));
       }
     }
+
+    // By time or by person: in its place whether the records are there yet or not (S30).
+    final viewSwitch = SegmentKeys(
+      child: SegmentedButton<bool>(
+        key: const Key('archive-view'),
+        segments: [
+          ButtonSegment(value: false, icon: const Icon(Icons.calendar_month_outlined), label: Text(l10n.archiveByTime)),
+          ButtonSegment(value: true, icon: const Icon(Icons.people_outline), label: Text(l10n.archiveByPerson)),
+        ],
+        selected: {_byPerson},
+        onSelectionChanged: (s) => setState(() => _byPerson = s.first),
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -344,7 +363,20 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           return ref.refresh(historyProvider.future);
         },
         child: history.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          // 骨架屏 (S30): the page as it will be, a year, a month and the first records as bars of their size.
+          loading: () => Skeleton(
+            label: l10n.loading,
+            child: ListView(
+              key: const Key('history-skeleton'),
+              padding: pagePadding(context),
+              children: [
+                viewSwitch,
+                header(l10n.archiveYear(2026), key: const ValueKey<String>('skeleton-year'), big: true, skeleton: true),
+                header(l10n.archiveMonth(10), key: const ValueKey<String>('skeleton-month'), count: 3, skeleton: true),
+                for (var i = 0; i < 3; i++) const _HistoryTileSkeleton(),
+              ],
+            ),
+          ),
           error: (e, _) => ListView(padding: pagePadding(context), children: [Text('$e')]),
           data: (_) => records.isEmpty
               ? ListView(
@@ -354,22 +386,56 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               : ListView(
                   padding: pagePadding(context),
                   children: [
-                    SegmentKeys(
-                      child: SegmentedButton<bool>(
-                        key: const Key('archive-view'),
-                        segments: [
-                          ButtonSegment(value: false, icon: const Icon(Icons.calendar_month_outlined), label: Text(l10n.archiveByTime)),
-                          ButtonSegment(value: true, icon: const Icon(Icons.people_outline), label: Text(l10n.archiveByPerson)),
-                        ],
-                        selected: {_byPerson},
-                        onSelectionChanged: (s) => setState(() => _byPerson = s.first),
-                      ),
-                    ),
+                    viewSwitch,
                     if (_busy) const Padding(padding: EdgeInsets.only(top: Space.s), child: LinearProgressIndicator()),
                     ...children,
                   ],
                 ),
         ),
+      ),
+    );
+  }
+}
+
+/// A text, or while the records come a bar of its size (骨架屏, S30).
+Widget _words(String text, {TextStyle? style, bool skeleton = false}) =>
+    skeleton ? SkeletonText(text, style: style) : Text(text, style: style);
+
+/// A record while 以往记录 loads (骨架屏, S30): [HistoryTile]'s frame, its card, padding, icon and two lines, with bars
+/// the size of a 八字 record's title and pillars.
+class _HistoryTileSkeleton extends StatelessWidget {
+  const _HistoryTileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final icon = IconTheme.of(context).size ?? Space.xl;
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(Space.l, Space.l, Space.xs, Space.l),
+      child: Row(
+        children: [
+          SkeletonBox(width: icon, height: icon),
+          const SizedBox(width: Space.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonText(l10n.homeBazi, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: Space.xs),
+                SkeletonText('庚午 己卯 己卯 辛未', style: GanZhiText.styleFor(15)),
+                const SizedBox(height: Space.xs),
+                SkeletonText('2026-10-30 18:00', style: Theme.of(context).textTheme.bodySmall, maxLines: null),
+              ],
+            ),
+          ),
+          // Its status pill: the pill's padding round a bar of the status's size.
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.s, vertical: Space.xs),
+            child: SkeletonText(l10n.aiReport, style: Theme.of(context).textTheme.labelSmall),
+          ),
+          // Its ⋮ menu: a button's width round an icon.
+          SizedBox(width: kMinInteractiveDimension, child: Center(child: SkeletonBox(width: icon, height: icon))),
+        ],
       ),
     );
   }

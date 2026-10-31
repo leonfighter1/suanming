@@ -33,7 +33,26 @@ class ReviewPage extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(reviewsProvider.future),
         child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          // 骨架屏 (S30): cards of bars while the held items come.
+          loading: () => Skeleton(
+            label: l10n.loading,
+            child: ListView(
+              padding: pagePadding(context),
+              children: [
+                for (var i = 0; i < 3; i++)
+                  AppCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonText(l10n.reviewTitle, style: Theme.of(context).textTheme.titleSmall),
+                        const SizedBox(height: Space.xs),
+                        SkeletonText('2026-10-30 18:00 · rules R12', style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
           error: (e, _) => ListView(padding: pagePadding(context), children: [Text('${l10n.errorTitle}\n$e')]),
           data: (items) => ListView(
             padding: pagePadding(context),
@@ -153,7 +172,28 @@ class _ReviewDetailPageState extends ConsumerState<ReviewDetailPage> {
         future: _load,
         builder: (context, snap) {
           if (snap.hasError) return Center(child: Text('${l10n.errorTitle}\n${snap.error}'));
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+          // 骨架屏 (S30): cards of bars while the item comes.
+          if (!snap.hasData) {
+            return Skeleton(
+              label: l10n.loading,
+              child: ListView(
+                padding: pagePadding(context),
+                children: [
+                  for (var i = 0; i < 3; i++)
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SkeletonText(l10n.reviewTitle, style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: Space.xs),
+                          SkeletonText('2026-10-30 18:00 · rules R12', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }
           final d = snap.data!;
           final blocked = d['status'] == 'blocked';
           final hits = ((d['rule_hits'] as List?) ?? const []).cast<Json>();

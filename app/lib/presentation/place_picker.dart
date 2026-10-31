@@ -185,7 +185,11 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
     final l10n = AppLocalizations.of(context);
     Widget empty() => Center(child: Text(l10n.placeNone));
     Widget loading(AsyncValue<Object?> v, Widget Function() data) => v.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          // 骨架屏 (S30): rows as they will be, typical places under bars of their size.
+          loading: () => Skeleton.cover(
+            label: l10n.loading,
+            child: ListView(children: [for (final n in _typicalPlaces) _tile(n, locale, onTap: () {})]),
+          ),
           error: (e, _) => Center(child: Text('${l10n.errorTitle}\n$e', textAlign: TextAlign.center)),
           data: (_) => data(),
         );
@@ -270,6 +274,18 @@ class _PlacePickerPageState extends ConsumerState<PlacePickerPage> {
       if (first != null) Navigator.of(context).pop(BirthPlace.pick(_country!, _region!, first));
     }
   }
+
+  /// What the lists show while their places come (骨架屏, S30): typical names, as bars.
+  static const _typicalPlaces = [
+    PlaceNames('中國', '中国', 'China'),
+    PlaceNames('香港', '香港', 'Hong Kong'),
+    PlaceNames('台灣', '台湾', 'Taiwan'),
+    PlaceNames('新加坡', '新加坡', 'Singapore'),
+    PlaceNames('美國', '美国', 'United States'),
+    PlaceNames('加拿大', '加拿大', 'Canada'),
+    PlaceNames('英國', '英国', 'United Kingdom'),
+    PlaceNames('澳洲', '澳大利亚', 'Australia'),
+  ];
 
   Widget _tile(PlaceNames n, String locale, {String? key, String? subtitle, String? trailing, required VoidCallback onTap}) {
     final main = n.of(locale);

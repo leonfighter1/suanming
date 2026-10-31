@@ -1,12 +1,18 @@
 // S30 (owner, 2026-10-30): the interactions, each where the app has the element. 按压回弹: a button shrinks to 96 %
 // while pressed, and when let go springs past 100 % and settles (PressBounce, buttons.dart).
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mingli_app/presentation/buttons.dart';
+import 'package:mingli_app/application/providers.dart';
+import 'package:mingli_app/domain/points.dart';
 import 'package:mingli_app/presentation/design.dart';
+import 'package:mingli_app/presentation/history_page.dart';
+import 'package:mingli_app/presentation/home_page.dart';
+import 'package:mingli_app/presentation/points_page.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/theme.dart';
 import 'package:mingli_app/presentation/widgets/elastic_switch.dart';
@@ -176,6 +182,73 @@ void main() {
     await frames(tester, 10);
     expect(find.byKey(const Key('app-menu')), findsNothing);
     expect(turn('open-menu'), 0);
+  });
+
+  group('骨架屏', () {
+    testWidgets('以往记录: the page as it will be while the records come, then each in its bar\'s place', (tester) async {
+      tester.view.physicalSize = const Size(400, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final api = FakeApi();
+      await tester.pumpWidget(testApp(api));
+      await frames(tester, 10);
+      api.hold = Completer<void>();
+      await tester.tap(find.byKey(const Key('open-menu')));
+      await frames(tester, 10);
+      await tester.tap(find.byKey(const Key('menu-history')));
+      await frames(tester, 10);
+      final skeleton = find.byKey(const Key('history-skeleton'));
+      expect(skeleton, findsOneWidget);
+      final view = tester.getRect(find.byKey(const Key('archive-view')));
+      final year = tester.getRect(find.byKey(const ValueKey<String>('skeleton-year')));
+      final card = tester.getRect(find.descendant(of: skeleton, matching: find.byType(AppCard)).first);
+
+      api.hold!.complete();
+      api.hold = null;
+      await frames(tester, 10);
+      expect(skeleton, findsNothing);
+      expect(tester.getRect(find.byKey(const Key('archive-view'))), view, reason: 'the switch stays');
+      final realYear = find.byWidgetPredicate((w) => w.key is ValueKey<String> && (w.key! as ValueKey<String>).value.startsWith('archive-year-'));
+      expect(tester.getRect(realYear.first).topLeft, year.topLeft, reason: 'the year where its bar was');
+      final first = find.byType(HistoryTile).first;
+      final real = tester.getRect(find.descendant(of: first, matching: find.byType(AppCard)).first);
+      expect([real.left, real.top, real.width], [card.left, card.top, card.width], reason: 'the first record where its bar was');
+      if (tester.widget<HistoryTile>(first).item.system == 'bazi') expect(real.height, closeTo(card.height, 0.5));
+    });
+
+    testWidgets('我的积分: the page as it will be while its figures come, then each card where its bars were',
+        (tester) async {
+      tester.view.physicalSize = const Size(400, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final figures = Completer<PointsView>();
+      await tester.pumpWidget(testApp(FakeApi(), overrides: [pointsProvider.overrideWith((ref) => figures.future)]));
+      await frames(tester, 10);
+      Navigator.of(tester.element(find.byType(HomePage))).push(MaterialPageRoute<void>(builder: (_) => const PointsPage()));
+      await frames(tester, 10);
+      expect(find.byType(Skeleton), findsOneWidget);
+      final cards = [for (final k in ['points-balance', 'points-top-up']) tester.getRect(find.byKey(Key(k)))];
+
+      figures.complete(
+        PointsView(
+          enabled: true,
+          balance: 8800,
+          available: 8800,
+          topUp: 'simulated',
+          packs: const [
+            PointsPack(yuan: 10, points: 1000, bonusPercent: 0),
+            PointsPack(yuan: 20, points: 2200, bonusPercent: 10),
+            PointsPack(yuan: 30, points: 3450, bonusPercent: 15),
+            PointsPack(yuan: 40, points: 4800, bonusPercent: 20),
+            PointsPack(yuan: 50, points: 6250, bonusPercent: 25),
+          ],
+          entries: [PointsEntryView(id: 'e1', kind: 'grant', points: 8800, balance: 8800, createdAt: DateTime(2026, 10, 29))],
+        ),
+      );
+      await frames(tester, 10);
+      expect(find.byType(Skeleton), findsNothing);
+      expect([for (final k in ['points-balance', 'points-top-up']) tester.getRect(find.byKey(Key(k)))], cards);
+    });
   });
 
   group('数字滚动', () {
