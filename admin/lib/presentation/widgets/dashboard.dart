@@ -22,9 +22,10 @@ const asideWidth = 360.0;
 const asideWide = 480.0;
 
 /// The dashboard's container (owner, 2026-10-30: 「for wider screen user, make sure have a container to limit the size
-/// of it」): every page, its main column and its panel together, at most this wide and centred on a wider window, the
-/// window's margin inside it. The bar and the rail stay the window's.
-const pageMax = 1440.0;
+/// of it」; 2026-10-31: 「对1620px以上的屏幕，后台管理的content也要加大置1620px」): the app's own, 1620; every page, its main
+/// column and its panel together, at most this wide and centred on a wider window, the window's margin inside it. The
+/// bar and the rail stay the window's.
+const pageMax = Grid.container;
 
 /// The room at each side of the container on a page [width] wide: none until the page is wider than [pageMax].
 double containerSide(double width) => math.max(0, (width - pageMax) / 2);

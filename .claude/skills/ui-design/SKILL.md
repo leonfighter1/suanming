@@ -163,7 +163,7 @@ Window classes are Material's, by the window's width (`WindowClass.of`, `layout.
     container only.
   - The list keeps its scrollbar at the window's edge. The tarot cards keep their full size (owner v1.1.x), with
     more room.
-  - The 管理后台 keeps its own container, 1440 (「管理员界面就不用改了」).
+  - The 管理后台 takes the same 1620 (S36: 「对1620px以上的屏幕，后台管理的content也要加大置1620px」; it kept 1440 before).
 - **Columns on a desktop window** (the large class; 「在超大屏幕布局时可以采用2X2布局。如果只有一个那就采用1x1」):
   - `CardGrid` sets cards two to a row with a gutter between; a card alone in its row spans it. On 首页, 东方's four
     methods are 2 × 2 and 西方's one is 1 × 1. Each group's card of the day follows its methods across the container:
@@ -261,7 +261,7 @@ compact grid, and a panel of its own at the right. The building blocks are in
 `admin/lib/presentation/widgets/dashboard.dart`; the rules come from the dataviz skill.
 
 - **The container** (owner, 2026-10-30: 「for wider screen user, make sure have a container to limit the size of it」):
-  every page, its main column and its panel together, is at most `pageMax` (1440) wide and centred in what the rail
+  every page, its main column and its panel together, is at most `pageMax` (1620, the app's `Grid.container`) wide and centred in what the rail
   leaves, the window class's margin inside it (`containerSide`). `PageBody` (a page without a panel: 活跃, 导出) keeps
   to the same container, so every page has one left edge. The app bar and the rail stay the window's.
 - **`DashboardLayout(main:, aside:, narrowAt:, panelWidth:)`:** in the container, the main column and, once the
@@ -332,7 +332,7 @@ compact grid, and a panel of its own at the right. The building blocks are in
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/test/theme_test.dart`          | token contrast; Material's roles are the tokens; same layout in both themes; 外觀 fades, half-way colours, kept on the device; start-up theme                                                                                                                                                                           |
 | `admin/test/theme_test.dart`        | the bar's 外观: half-way colours, same layout, kept in the browser; Tab, Enter, ↓                                                                                                                                                                                                                                       |
-| `admin/test/dashboard_test.dart`    | the container at 2560 (1440, centred, one left edge for every page); the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter |
+| `admin/test/dashboard_test.dart`    | the container at 2560 (1620, centred, one left edge for every page); the panel at the right at 1440, its own scroll both ways, after the column at 1024; the hero at 48 or more; four figures to a row; 用户's filters and an account's actions in the panel (before the table on a phone); Tab to who is online, Enter |
 | `admin/test/pages_test.dart`        | every figure and its change against the period before: sign, arrow, colour, 较前 N 天                                                                                                                                                                                                                                   |
 | `app/test/banner_art_test.dart`     | every banner on 命理罗盘 (the sign-in page, 首页, each method); its words, and 八字's day pillar, in the dark theme's colours in either theme                                                                                                                                                                           |
 | `app/test/interactions_test.dart`   | the twelve interactions: the press and its spring, the switch's stretch and keys, the ripple's place, the rolling numbers, the skeletons' places (以往记录, 我的积分), ☰ → ✕                                                                                                                                           |
