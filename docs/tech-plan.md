@@ -60,6 +60,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
 | S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | done        |
 | S33 内容按页面与后台菜单   | 内容 by page, the menu, HTML and CSS, no second sign-in     | big    | v21.0.0 + summary | done        |
+| S34 更多 HTML 与保持登录   | HTML in more places, written colours, staying signed in     | big    | v22.0.0 + summary | in progress |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2696,6 +2697,24 @@ dashboard access，那么不需要重复登录了」, and 「改完后做完测�
   server refuses anything else, saying what; elsewhere a tag is refused too, so nothing shows a raw `<b>`.
 - **The one-time code:** 2 minutes, one use, for staff only, kept in memory like the verification codes; the
   dashboard takes it off its address at once and keeps its own session.
+
+## S34 更多 HTML、自定颜色、后台保持登录 (big → v22.0.0)
+
+**Owner request (2026-10-31):** 「keep going」 with S33's three choices pasted: HTML in more places, written colours such
+as #ff0000, the dashboard signed in across tabs and restarts.
+
+| WP     | What                                                                                                           |
+| ------ | -------------------------------------------------------------------------------------------------------------- |
+| WP34.1 | HTML in more places: every text the app shows as content (notes, hints, introductions, sections)               |
+| WP34.2 | written colours (`#rgb`, `#rrggbb`, `rgb(…)`) beside the theme's; the editor previews light and dark and warns |
+| WP34.3 | the 管理后台 stays signed in across tabs and restarts: the session in the browser, still ended by 退出登录     |
+| WP34.4 | records, the stage summary; pushed                                                                             |
+
+- **Written colours, with their cost said:** a colour written out stays the same in light and dark, so it may be hard
+  to read in one of them. The editor shows both and warns below a contrast of 4.5 : 1 (the app's own bar); it does
+  not refuse, the owner's choice.
+- **The session in the browser** (localStorage, as the 外观 setting): a reload, a new tab or a restart stays signed
+  in; 退出登录, two days unused (设置's 登录有效期) or the server ending it signs out.
 
 ## 阶段总结 (stage summaries)
 
