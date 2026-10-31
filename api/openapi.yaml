@@ -35,6 +35,8 @@ tags:
     description: 管理后台 — accounts, AI use, money, active users, exports; admins only (v11.2.0)
   - name: archive
     description: 以往记录 — documents (Word / PDF), deleting a record, filing it under a person (v8.0.0)
+  - name: content
+    description: 内容管理 — the app's texts and images as staff changed them, for everyone (v18.0.0)
   - name: ops
     description: Operational endpoints
 
@@ -1560,6 +1562,199 @@ paths:
         "200": { $ref: "#/components/responses/Deleted" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/content:
+    get:
+      tags: [content]
+      operationId: getContent
+      summary: What staff changed of the app's texts and images in a language (public)
+      description: |
+        Only the changes. Each text under the app's message key; each image put in, at an address of its version.
+        The app shows its own text or picture for everything else.
+      security: []
+      parameters:
+        - name: locale
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [zh-Hans, zh-Hant]
+      responses:
+        "200":
+          description: The changed texts and the images put in
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [texts, images]
+                properties:
+                  texts:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  images:
+                    type: object
+                    additionalProperties:
+                      type: string
+        "400": { $ref: "#/components/responses/Problem" }
+
+  /v1/content/images/{key}:
+    get:
+      tags: [content]
+      operationId: getContentImage
+      summary: An image staff put in (public; kept for good at the address of its version)
+      security: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [banner, logo]
+      responses:
+        "200":
+          description: The picture
+          content:
+            image/png: {}
+            image/jpeg: {}
+            image/webp: {}
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/content:
+    get:
+      tags: [content]
+      operationId: adminListContent
+      summary: Every text the app shows by area, with its defaults and changes, and the images (content capability)
+      responses:
+        "200":
+          description: The texts and the images
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [locales, texts, images]
+                properties:
+                  locales:
+                    type: array
+                    items:
+                      type: string
+                  texts:
+                    type: array
+                    items:
+                      type: object
+                  images:
+                    type: array
+                    items:
+                      type: object
+        "403": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/content/texts/{key}/{locale}:
+    parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: locale
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [zh-Hans, zh-Hant]
+    put:
+      tags: [content]
+      operationId: adminSaveContentText
+      summary: Change a text in a language, for everyone
+      description: |
+        The text must keep the default's placeholders and add none (400 placeholders_mismatch). At most 2000
+        characters. 404 for a key the app has no plain text under.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+      responses:
+        "200":
+          description: The text in use now
+          content:
+            application/json:
+              schema:
+                type: object
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [content]
+      operationId: adminRevertContentText
+      summary: Put a text back to the app's own
+      responses:
+        "200":
+          description: The default now in use
+          content:
+            application/json:
+              schema:
+                type: object
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+
+  /v1/admin/content/images/{key}:
+    parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [banner, logo]
+    put:
+      tags: [content]
+      operationId: adminSaveContentImage
+      summary: Put an image in (PNG, JPEG or WebP, up to 2 MB)
+      description: |
+        The body is the picture itself, its type in the content-type header; its first bytes must be that type's.
+        415 for another type, 413 past 2 MB.
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/webp:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Where it is served now
+          content:
+            application/json:
+              schema:
+                type: object
+        "400": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "413": { $ref: "#/components/responses/Problem" }
+        "415": { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [content]
+      operationId: adminDeleteContentImage
+      summary: Take an image out; the app shows its own
+      responses:
+        "200":
+          description: Taken out
+          content:
+            application/json:
+              schema:
+                type: object
+        "403": { $ref: "#/components/responses/Problem" }
 
   /v1/places:
     get:

@@ -13,6 +13,7 @@ import {
   type UserRecord,
 } from "../auth/service.js";
 import type { Dispatcher } from "../notify/dispatch.js";
+import { contentAdminRoute } from "./content.js";
 import { messagesRoute } from "./messages.js";
 import {
   ACCOUNT_ROLES,
@@ -78,6 +79,7 @@ async function staffOf(ctx: AdminContext, userId: string): Promise<{ me: UserRec
  */
 function capabilityOf(path: string, method: string): Capability {
   if (path.startsWith("/v1/admin/messages/")) return "messages";
+  if (path === "/v1/admin/content" || path.startsWith("/v1/admin/content/")) return "content";
   if (path === "/v1/admin/reports") return "user_data";
   if (/^\/v1\/admin\/users\/[^/]+\/(points|sign-out)$/.test(path)) return "user_data";
   if (/^\/v1\/admin\/users\/[^/]+$/.test(path) && method === "PATCH") return "assign";
@@ -164,6 +166,10 @@ export async function adminRoute(
   }
   if (!can(role, capabilityOf(path, req.method ?? "GET"))) {
     throw new HttpError(403, `the ${role} role may not do this`, "not_allowed");
+  }
+  if (path === "/v1/admin/content" || path.startsWith("/v1/admin/content/")) {
+    if (await contentAdminRoute(ctx, req, res, path, me)) return true;
+    throw new HttpError(404, "not found");
   }
   if (path.startsWith("/v1/admin/messages/")) {
     if (!ctx.messages) throw new HttpError(404, "messages are not set up on this server");

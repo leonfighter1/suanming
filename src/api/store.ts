@@ -19,6 +19,8 @@ import type { ChartPerson } from "../service/charts.js";
 import type { UsageRow } from "../admin/usage.js";
 import type { MessageKind } from "../notify/templates.js";
 import type { TemplateRecord, TemplateStore } from "../notify/dispatch.js";
+import type { ContentLocale } from "../content/catalog.js";
+import type { ContentImageRecord, ContentStore, ContentTextRecord } from "../content/store.js";
 import {
   InMemoryLedger,
   type PointsCharge,
@@ -206,7 +208,7 @@ export interface FollowUpRecord {
  * The records, and since v11.0.0 (S20) each account's 积分 (src/points/ledger.ts); since v13.1.0 (S25) the admins'
  * wordings of the messages (src/notify/dispatch.ts).
  */
-export interface Store extends PointsLedger, TemplateStore {
+export interface Store extends PointsLedger, TemplateStore, ContentStore {
   putChart(c: ChartRecord): Promise<void>;
   getChart(id: string): Promise<ChartRecord | undefined>;
   putReport(r: ReportRecord): Promise<void>;
@@ -316,6 +318,30 @@ export class InMemoryStore implements Store {
   }
   async deleteMessageTemplate(kind: MessageKind, locale: Locale) {
     return this.templates.delete(`${kind}/${locale}`);
+  }
+  private contentTexts = new Map<string, ContentTextRecord>();
+  private contentImages = new Map<string, ContentImageRecord>();
+  async listContentTexts() {
+    return [...this.contentTexts.values()].map((t) => structuredClone(t));
+  }
+  async putContentText(t: ContentTextRecord) {
+    this.contentTexts.set(`${t.key}/${t.locale}`, structuredClone(t));
+  }
+  async deleteContentText(key: string, locale: ContentLocale) {
+    return this.contentTexts.delete(`${key}/${locale}`);
+  }
+  async listContentImages() {
+    return [...this.contentImages.values()].map(({ data: _d, ...info }) => ({ ...info }));
+  }
+  async getContentImage(key: string) {
+    const i = this.contentImages.get(key);
+    return i && { ...i, data: Buffer.from(i.data) };
+  }
+  async putContentImage(i: ContentImageRecord) {
+    this.contentImages.set(i.key, { ...i, data: Buffer.from(i.data) });
+  }
+  async deleteContentImage(key: string) {
+    return this.contentImages.delete(key);
   }
   async putInquiry(i: InquiryRecord) {
     this.inquiries.set(i.id, structuredClone(i));

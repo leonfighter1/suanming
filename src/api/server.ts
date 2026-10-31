@@ -56,6 +56,7 @@ import type { ApiContext, Caller } from "./context.js";
 import { authRoute, accountRoute } from "./routes/account.js";
 import { archiveRoute } from "./routes/archive.js";
 import { chartsRoute } from "./routes/charts.js";
+import { contentRoute } from "./routes/content.js";
 import { dailyRoute } from "./routes/daily.js";
 import { followUpRoute } from "./routes/followup.js";
 import { inquiryRoute } from "./routes/inquiry.js";
@@ -540,6 +541,9 @@ export function createApiServer(opts: ApiOptions): Server & { drain(): Promise<v
 
     // ---- the calendar and birthplaces: public, stateless (routes/public.ts) ----
     if (publicRoute(req, res, path)) return;
+
+    // ---- 内容管理 (S29): what staff changed of the app's texts and images, for everyone (routes/content.ts) ----
+    if (await contentRoute(api, req, res, path)) return;
 
     // ---- auth (no caller yet; routes/account.ts) ----
     if (await authRoute(api, req, res, path)) return;

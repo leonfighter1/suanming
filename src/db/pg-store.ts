@@ -39,6 +39,8 @@ import type {
   PointsHold,
 } from "../points/index.js";
 import { creditEntry, newHold } from "../points/index.js";
+import type { ContentLocale } from "../content/catalog.js";
+import type { ContentImageRecord, ContentTextRecord } from "../content/store.js";
 import { newDataKey, openJson, sealJson, unwrapDataKey } from "./envelope.js";
 
 /** Applied in order after schema_v0.sql; the store records each one it applies. */
@@ -55,6 +57,7 @@ const MIGRATIONS = [
   "010_points",
   "011_admin",
   "012_messages",
+  "013_content",
 ];
 const sql = (path: string) => readFileSync(new URL(`../../db/${path}`, import.meta.url), "utf8");
 
@@ -825,6 +828,75 @@ export class PgStore implements Store, UserStore {
       kind,
       locale,
     ]);
+    return (r.affectedRows ?? 0) > 0;
+  }
+  // ---- 内容管理 (v18.0.0, S29): staff's changes to the app's texts and images, plain ----
+
+  async listContentTexts() {
+    const rows = await this.db.query<Row>("SELECT * FROM content_texts ORDER BY key, locale");
+    return rows.rows.map((r): ContentTextRecord => ({
+      key: r.key as string,
+      locale: r.locale as ContentLocale,
+      text: r.text as string,
+      updated_at: iso(r.updated_at),
+      ...(r.updated_by != null && { updated_by: r.updated_by as string }),
+    }));
+  }
+
+  async putContentText(c: ContentTextRecord) {
+    await this.db.query(
+      `INSERT INTO content_texts (key, locale, text, updated_at, updated_by) VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (key, locale) DO UPDATE SET text = EXCLUDED.text, updated_at = EXCLUDED.updated_at,
+         updated_by = EXCLUDED.updated_by`,
+      [c.key, c.locale, c.text, c.updated_at, c.updated_by ?? null],
+    );
+  }
+
+  async deleteContentText(key: string, locale: ContentLocale) {
+    const r = await this.db.query("DELETE FROM content_texts WHERE key = $1 AND locale = $2", [
+      key,
+      locale,
+    ]);
+    return (r.affectedRows ?? 0) > 0;
+  }
+
+  async listContentImages() {
+    const rows = await this.db.query<Row>(
+      "SELECT key, type, updated_at, updated_by FROM content_images ORDER BY key",
+    );
+    return rows.rows.map((r) => ({
+      key: r.key as string,
+      type: r.type as string,
+      updated_at: iso(r.updated_at),
+      ...(r.updated_by != null && { updated_by: r.updated_by as string }),
+    }));
+  }
+
+  async getContentImage(key: string) {
+    const r = (await this.db.query<Row>("SELECT * FROM content_images WHERE key = $1", [key]))
+      .rows[0];
+    return (
+      r && {
+        key: r.key as string,
+        type: r.type as string,
+        data: Buffer.from(r.data as Uint8Array),
+        updated_at: iso(r.updated_at),
+        ...(r.updated_by != null && { updated_by: r.updated_by as string }),
+      }
+    );
+  }
+
+  async putContentImage(i: ContentImageRecord) {
+    await this.db.query(
+      `INSERT INTO content_images (key, type, data, updated_at, updated_by) VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (key) DO UPDATE SET type = EXCLUDED.type, data = EXCLUDED.data, updated_at = EXCLUDED.updated_at,
+         updated_by = EXCLUDED.updated_by`,
+      [i.key, i.type, i.data, i.updated_at, i.updated_by ?? null],
+    );
+  }
+
+  async deleteContentImage(key: string) {
+    const r = await this.db.query("DELETE FROM content_images WHERE key = $1", [key]);
     return (r.affectedRows ?? 0) > 0;
   }
 

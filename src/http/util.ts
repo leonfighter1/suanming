@@ -14,7 +14,8 @@ export class HttpError extends Error {
   }
 }
 
-export async function readJson(req: IncomingMessage, maxBytes = 64 * 1024): Promise<unknown> {
+/** A request's body as bytes; 413 past [maxBytes]. */
+export async function readBody(req: IncomingMessage, maxBytes = 64 * 1024): Promise<Buffer> {
   let size = 0;
   const chunks: Buffer[] = [];
   for await (const c of req) {
@@ -22,9 +23,14 @@ export async function readJson(req: IncomingMessage, maxBytes = 64 * 1024): Prom
     if (size > maxBytes) throw new HttpError(413, "request body too large");
     chunks.push(c as Buffer);
   }
-  if (!chunks.length) return {};
+  return Buffer.concat(chunks);
+}
+
+export async function readJson(req: IncomingMessage, maxBytes = 64 * 1024): Promise<unknown> {
+  const body = await readBody(req, maxBytes);
+  if (!body.length) return {};
   try {
-    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    return JSON.parse(body.toString("utf8"));
   } catch {
     throw new HttpError(400, "body must be JSON");
   }

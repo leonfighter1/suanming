@@ -408,7 +408,7 @@ describe("the 后台 roles", () => {
     expect(await json("boss", "/v1/admin/me")).toMatchObject({
       role: "admin",
       admin_by_config: true,
-      can: ["view", "assign", "user_data", "messages"],
+      can: ["view", "assign", "user_data", "messages", "content"],
       assignable_roles: ["user", "integrator", "manager", "admin"],
     });
     expect(await json("mgr", "/v1/admin/me")).toMatchObject({
@@ -418,7 +418,7 @@ describe("the 后台 roles", () => {
     });
     expect(await json("integ", "/v1/admin/me")).toMatchObject({
       role: "integrator",
-      can: ["messages"],
+      can: ["messages", "content"],
     });
     const no = await call("alice", "/v1/admin/me");
     expect([no.status, (await no.json()).code]).toEqual([403, "admin_only"]);

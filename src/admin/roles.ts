@@ -14,12 +14,13 @@ export type StaffRole = (typeof STAFF_ROLES)[number];
  * - user_data: what changes or takes a user's data: 增加积分, 在所有设备上退出, the exports;
  * - messages: the mail and SMS templates, their previews, test sends and the dispatch log.
  */
-export type Capability = "view" | "assign" | "user_data" | "messages";
+export type Capability = "view" | "assign" | "user_data" | "messages" | "content";
 
 export const CAPABILITIES: Record<StaffRole, readonly Capability[]> = {
-  admin: ["view", "assign", "user_data", "messages"],
+  admin: ["view", "assign", "user_data", "messages", "content"],
   manager: ["view", "assign"],
-  integrator: ["messages"],
+  // 内容管理 (S29) to begin with for admin and integrator, the roles that word what users read; the owner can change it.
+  integrator: ["messages", "content"],
 };
 
 /** The staff role of [u]: an admin by the server's MINGLI_ADMINS ([byConfig]) whatever the record says. */
