@@ -5,6 +5,7 @@ import 'package:mingli_app/presentation/buttons.dart';
 import 'package:mingli_app/presentation/design.dart';
 import 'package:mingli_app/presentation/keyboard.dart';
 import 'package:mingli_app/presentation/layout.dart';
+import 'package:mingli_app/presentation/tokens.dart';
 
 import '../../application/providers.dart';
 import '../messages.dart';
@@ -133,6 +134,43 @@ class Problem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// What is wrong, one line each, with its icon: the error's colour, or with [warning] the warning's, for what may be
+/// wrong but doesn't stop a save (内容's colours hard to read, S34).
+class ProblemList extends StatelessWidget {
+  const ProblemList(this.problems, {super.key, this.warning = false});
+  final List<String> problems;
+  final bool warning;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = ThemeTokens.of(context);
+    final colour = warning ? t.warning : t.danger;
+    final style = theme.textTheme.bodyMedium?.copyWith(color: colour);
+    const size = Space.l;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final p in problems)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: Space.xxs),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(top: firstLineInset(style, size)),
+                  child: Icon(warning ? Icons.warning_amber_outlined : Icons.error_outline, size: size, color: colour),
+                ),
+                const SizedBox(width: Space.s),
+                Expanded(child: Text(p, style: style)),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

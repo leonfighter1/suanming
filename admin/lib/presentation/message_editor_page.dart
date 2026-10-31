@@ -390,7 +390,7 @@ class _MessageEditorPageState extends ConsumerState<MessageEditorPage> {
         ),
         if (problems.isNotEmpty) ...[
           const SizedBox(height: Space.s),
-          _Problems(problems),
+          ProblemList(problems, key: const Key('template-problems')),
         ],
         const SizedBox(height: Space.l),
         // The main button last; on a phone it spans the column under the others (the ui-design skill's alignment).
@@ -492,41 +492,6 @@ class _MessageEditorPageState extends ConsumerState<MessageEditorPage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// What is wrong with the wording, one line each, the error's colour with its icon.
-class _Problems extends StatelessWidget {
-  const _Problems(this.problems);
-  final List<String> problems;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colour = ThemeTokens.of(context).danger;
-    final style = theme.textTheme.bodyMedium?.copyWith(color: colour);
-    const size = Space.l;
-    return Column(
-      key: const Key('template-problems'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final p in problems)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: Space.xxs),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: firstLineInset(style, size)),
-                  child: Icon(Icons.error_outline, size: size, color: colour),
-                ),
-                const SizedBox(width: Space.s),
-                Expanded(child: Text(p, style: style)),
-              ],
-            ),
-          ),
-      ],
     );
   }
 }
