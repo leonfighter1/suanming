@@ -81,6 +81,40 @@ abstract final class Motion {
   /// A switch's thumb travelling ([ElasticSwitch]): it overshoots its end by about a tenth of the way, then settles in
   /// about a third of a second.
   static const switchSpring = SpringDescription(mass: 1, stiffness: 400, damping: 22);
+
+  /// A number rolling to a new value ([RollingNumber]), and its curve: fast at first, slower and slower as it nears the
+  /// new value, until it stops there.
+  static const roll = Duration(milliseconds: 600);
+  static const rollCurve = Curves.decelerate;
+}
+
+/// 数字滚动 (S30; owner, 2026-10-30: 「数字从旧值滚动到新值，使用减速曲线，接近目标值时逐渐变慢后停下」): [value] shown through
+/// [format], rolling from the old value to a new one over [Motion.roll] on [Motion.rollCurve]. It shows its first
+/// value at once; a whole number ([T] int) rolls through whole numbers. Screen readers get the value it rolls to, not
+/// the ones on the way. [textKey] keys the text, so a test reads it as any. Reduce motion: it jumps.
+class RollingNumber<T extends num> extends StatelessWidget {
+  const RollingNumber(this.value, {super.key, required this.format, this.style, this.textKey});
+  final T value;
+  final String Function(T value) format;
+  final TextStyle? style;
+  final Key? textKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return Semantics(
+      label: format(value),
+      child: ExcludeSemantics(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: value.toDouble()),
+          duration: still ? Duration.zero : Motion.roll,
+          curve: Motion.rollCurve,
+          builder: (context, shown, _) =>
+              Text(format((T == int ? shown.round() : shown) as T), key: textKey, style: style),
+        ),
+      ),
+    );
+  }
 }
 
 /// Anything lying face down, a tarot card's back or a covered coin (v6.1.0): navy, with a gold edge and gold marks.

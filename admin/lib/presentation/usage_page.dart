@@ -35,7 +35,7 @@ class UsagePage extends ConsumerWidget {
               children: [
                 HeroFigure(
                   label: 'Tokens',
-                  value: compact(o.tokens),
+                  number: o.tokens, format: compact,
                   change: change(o.tokens, p?.tokens),
                   caption: '输入 ${count(o.inputTokens)} · 输出 ${count(o.outputTokens)}',
                   trend: [for (final d in days) d.tokens.toDouble()],
@@ -45,13 +45,13 @@ class UsagePage extends ConsumerWidget {
                   children: [
                     StatTile(
                       label: 'AI 请求',
-                      value: count(o.jobs),
+                      number: o.jobs, format: count,
                       change: change(o.jobs, p?.jobs),
                       detail: '完成 ${count(o.deliveredJobs)}',
                     ),
                     StatTile(
                       label: 'AI 成本',
-                      value: yuan(o.money.cost),
+                      number: o.money.cost, format: yuan,
                       change: change(o.money.cost, p?.money.cost, upIsGood: false),
                       detail: '${usd(o.costUsd)}（按各模型的公开价格）',
                     ),

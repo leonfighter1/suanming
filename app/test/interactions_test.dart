@@ -178,6 +178,37 @@ void main() {
     expect(turn('open-menu'), 0);
   });
 
+  group('数字滚动', () {
+    Widget number(int value, {bool still = false}) => host(
+          RollingNumber<int>(value, format: (v) => '$v 积分', textKey: k),
+          still: still,
+        );
+    int shown(WidgetTester tester) => int.parse(tester.widget<Text>(find.byKey(k)).data!.split(' ').first);
+
+    testWidgets('it starts at its value, then rolls to a new one, slowing down until it stops there', (tester) async {
+      await tester.pumpWidget(number(100));
+      expect(shown(tester), 100, reason: 'no roll at first');
+      await tester.pumpWidget(number(1100));
+      final seen = <int>[];
+      for (var t = 0; t < 700; t += 50) {
+        await tester.pump(const Duration(milliseconds: 50));
+        seen.add(shown(tester));
+      }
+      final steps = [for (var i = 1; i < seen.length; i++) seen[i] - seen[i - 1]];
+      expect(steps.every((s) => s >= 0), isTrue, reason: 'only up: $seen');
+      expect(steps.first, greaterThan(steps[steps.length ~/ 2]), reason: 'slower as it nears the end: $seen');
+      expect(seen.last, 1100);
+      expect(tester.getSemantics(find.byType(RollingNumber<int>)), isSemantics(label: '1100 积分'));
+    });
+
+    testWidgets('reduce motion: it jumps', (tester) async {
+      await tester.pumpWidget(number(100, still: true));
+      await tester.pumpWidget(number(1100, still: true));
+      await tester.pump();
+      expect(shown(tester), 1100);
+    });
+  });
+
   group('弹性开关', () {
     Widget tile({bool still = false, required ValueChanged<bool> changed, required bool Function() on}) => host(
           StatefulBuilder(

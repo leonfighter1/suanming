@@ -49,13 +49,13 @@ class _ActivePageState extends ConsumerState<ActivePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Who is on now leads (S24 WP24.3); the longer windows support it.
-              HeroFigure(label: '15 分钟内', value: count(a.inNow), caption: '此刻在用的账户'),
+              HeroFigure(label: '15 分钟内', number: a.inNow, format: count, caption: '此刻在用的账户'),
               StatGrid(
                 maxColumns: 3,
                 children: [
-                  StatTile(label: '24 小时内', value: count(a.inDay), icon: Icons.today_outlined),
-                  StatTile(label: '7 天内', value: count(a.inWeek), icon: Icons.date_range_outlined),
-                  StatTile(label: '30 天内', value: count(a.inMonth), icon: Icons.calendar_month_outlined),
+                  StatTile(label: '24 小时内', number: a.inDay, format: count, icon: Icons.today_outlined),
+                  StatTile(label: '7 天内', number: a.inWeek, format: count, icon: Icons.date_range_outlined),
+                  StatTile(label: '30 天内', number: a.inMonth, format: count, icon: Icons.calendar_month_outlined),
                 ],
               ),
               AppCard(

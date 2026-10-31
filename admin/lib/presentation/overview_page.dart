@@ -79,7 +79,7 @@ class _Figures extends StatelessWidget {
       children: [
         HeroFigure(
           label: '充值收入',
-          value: yuan(m.topup),
+          number: m.topup, format: yuan,
           change: change(m.topup, p?.money.topup),
           caption: '净收入 ${yuan(m.net)}（扣除支付手续费和增值税）',
           trend: [for (final d in days) d.money.topup],
@@ -89,11 +89,11 @@ class _Figures extends StatelessWidget {
           children: [
             StatTile(
               label: 'AI 成本',
-              value: yuan(m.cost),
+              number: m.cost, format: yuan,
               change: change(m.cost, p?.money.cost, upIsGood: false),
               detail: '${usd(o.costUsd)} · ${count(o.jobs)} 次 AI 请求',
             ),
-            StatTile(label: '毛利', value: yuan(m.profit), change: change(m.profit, p?.money.profit), detail: '净收入减 AI 成本'),
+            StatTile(label: '毛利', number: m.profit, format: yuan, change: change(m.profit, p?.money.profit), detail: '净收入减 AI 成本'),
             StatTile(
               label: '毛利率',
               value: percent(m.margin),
@@ -104,31 +104,31 @@ class _Figures extends StatelessWidget {
             ),
             StatTile(
               label: '新增账户',
-              value: count(o.newAccounts),
+              number: o.newAccounts, format: count,
               change: change(o.newAccounts, p?.newAccounts),
               detail: '共 ${count(o.accounts)} 个账户',
             ),
             StatTile(
               label: 'AI 请求',
-              value: count(o.jobs),
+              number: o.jobs, format: count,
               change: change(o.jobs, p?.jobs),
               detail: '完成 ${count(o.deliveredJobs)} 次',
             ),
             StatTile(
               label: 'Tokens',
-              value: compact(o.tokens),
+              number: o.tokens, format: compact,
               change: change(o.tokens, p?.tokens),
               detail: '输入 ${compact(o.inputTokens)} · 输出 ${compact(o.outputTokens)}',
             ),
             StatTile(
               label: '售出积分',
-              value: count(o.pointsSold),
+              number: o.pointsSold, format: count,
               change: change(o.pointsSold, p?.pointsSold),
               detail: '赠送 ${count(o.pointsGranted)}',
             ),
             StatTile(
               label: '消耗积分',
-              value: count(o.pointsUsed),
+              number: o.pointsUsed, format: count,
               change: change(o.pointsUsed, p?.pointsUsed),
               detail: '用户持有 ${count(o.pointsOutstanding)}',
             ),

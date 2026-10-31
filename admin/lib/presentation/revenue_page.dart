@@ -198,7 +198,7 @@ class _Figures extends StatelessWidget {
       children: [
         HeroFigure(
           label: '毛利',
-          value: yuan(m.profit),
+          number: m.profit, format: yuan,
           change: change(m.profit, p?.profit),
           caption: '净收入 ${yuan(m.net)} 减 AI 成本 ${yuan(m.cost)}',
           trend: [for (final d in days) d.money.profit],
@@ -207,9 +207,9 @@ class _Figures extends StatelessWidget {
         StatGrid(
           maxColumns: 3,
           children: [
-            StatTile(label: '充值收入', value: yuan(m.topup), change: change(m.topup, p?.topup)),
-            StatTile(label: '净收入', value: yuan(m.net), change: change(m.net, p?.net)),
-            StatTile(label: 'AI 成本', value: yuan(m.cost), change: change(m.cost, p?.cost, upIsGood: false)),
+            StatTile(label: '充值收入', number: m.topup, format: yuan, change: change(m.topup, p?.topup)),
+            StatTile(label: '净收入', number: m.net, format: yuan, change: change(m.net, p?.net)),
+            StatTile(label: 'AI 成本', number: m.cost, format: yuan, change: change(m.cost, p?.cost, upIsGood: false)),
             StatTile(
               label: '毛利率',
               value: percent(m.margin),
@@ -217,7 +217,7 @@ class _Figures extends StatelessWidget {
                   ? null
                   : Change(m.margin!, p!.margin!, against: against, points: true),
             ),
-            StatTile(label: '日均充值', value: yuan(o.days == 0 ? 0 : m.topup / o.days)),
+            StatTile(label: '日均充值', number: o.days == 0 ? 0 : m.topup / o.days, format: yuan),
             StatTile(
               label: '最多的一天',
               value: best == null ? '—' : yuan(best.money.topup),

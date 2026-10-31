@@ -70,9 +70,10 @@ class AppMenu extends ConsumerWidget {
               key: const Key('open-points'),
               leading: const Icon(Icons.toll_outlined),
               title: Text(l10n.pointsTitle),
-              trailing: Text(
-                '${points!.available}',
-                key: const Key('menu-points'),
+              trailing: RollingNumber<int>(
+                points!.available,
+                format: (v) => '$v',
+                textKey: const Key('menu-points'),
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.primary),
               ),
               onTap: () => _open(context, const PointsPage()),

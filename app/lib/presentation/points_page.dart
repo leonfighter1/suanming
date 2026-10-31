@@ -97,12 +97,14 @@ class _PointsPageState extends ConsumerState<PointsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.pointsAvailable, style: theme.textTheme.labelLarge),
-                    Text(
-                      '${p.available}',
-                      key: const Key('points-available'),
+                    // 数字滚动 (S30): after a 充值 or a charge the figures roll to their new values.
+                    RollingNumber<int>(
+                      p.available,
+                      format: (v) => '$v',
+                      textKey: const Key('points-available'),
                       style: theme.textTheme.headlineMedium?.copyWith(color: scheme.primary, fontWeight: FontWeight.w700),
                     ),
-                    Text(l10n.pointsBalanceLine(p.balance), style: theme.textTheme.bodyMedium),
+                    RollingNumber<int>(p.balance, format: l10n.pointsBalanceLine, style: theme.textTheme.bodyMedium),
                     if (p.held > 0)
                       Text(
                         l10n.pointsHeldLine(p.held),

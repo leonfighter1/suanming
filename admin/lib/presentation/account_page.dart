@@ -146,7 +146,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       children: [
         HeroFigure(
           label: '积分余额',
-          value: count(u.balance),
+          number: u.balance, format: count,
           valueKey: const Key('account-balance'),
           caption: u.held > 0 ? '其中 ${count(u.held)} 冻结在进行中的 AI 请求里' : '没有冻结的积分',
           // The ledger lists the newest first; the line runs oldest to newest.
@@ -155,10 +155,10 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         ),
         StatGrid(
           children: [
-            StatTile(label: '充值合计', value: yuan(u.topup)),
-            StatTile(label: '已用积分', value: count(u.pointsUsed)),
-            StatTile(label: 'AI 请求', value: count(u.jobs), detail: '${compact(u.tokens)} tokens'),
-            StatTile(label: 'AI 成本', value: yuan(u.cost)),
+            StatTile(label: '充值合计', number: u.topup, format: yuan),
+            StatTile(label: '已用积分', number: u.pointsUsed, format: count),
+            StatTile(label: 'AI 请求', number: u.jobs, format: count, detail: '${compact(u.tokens)} tokens'),
+            StatTile(label: 'AI 成本', number: u.cost, format: yuan),
           ],
         ),
         AppCard(

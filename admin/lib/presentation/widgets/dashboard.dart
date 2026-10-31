@@ -222,13 +222,22 @@ class ChangeLabel extends StatelessWidget {
   }
 }
 
+/// A figure's text, keyed `kpi-<label>` unless [key] says otherwise: [number] through [format], rolling to each new
+/// value (数字滚动, S30; RollingNumber), or else [value] as it is (a ratio, a dash).
+Widget _figure(String label, String value, num? number, String Function(num)? format, Key? key, TextStyle? style) =>
+    number != null && format != null
+        ? RollingNumber<num>(number, format: format, textKey: key ?? ValueKey<String>('kpi-$label'), style: style)
+        : Text(value, key: key ?? ValueKey<String>('kpi-$label'), style: style);
+
 /// The one number a page leads with (the dataviz skill's hero figure: 48 or more, the same face as all else): its
 /// label, the figure, its change, a line under it, and its days as a [Sparkline] beside it (below it on a narrow card).
 class HeroFigure extends StatelessWidget {
   const HeroFigure({
     super.key,
     required this.label,
-    required this.value,
+    this.value = '',
+    this.number,
+    this.format,
     this.valueKey,
     this.change,
     this.caption,
@@ -237,6 +246,10 @@ class HeroFigure extends StatelessWidget {
   });
   final String label;
   final String value;
+
+  /// A number that rolls to its new values (数字滚动, S30), shown through [format]; [value] is not used then.
+  final num? number;
+  final String Function(num)? format;
 
   /// The value's key; `kpi-<label>` by default.
   final Key? valueKey;
@@ -265,7 +278,7 @@ class HeroFigure extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text(value, key: valueKey ?? ValueKey<String>('kpi-$label'), style: theme.textTheme.displaySmall),
+          child: _figure(label, value, number, format, valueKey, theme.textTheme.displaySmall),
         ),
         if (change != null) ...[const SizedBox(height: Space.xs), ChangeLabel(change!)],
         if (caption != null) ...[
@@ -304,9 +317,23 @@ class HeroFigure extends StatelessWidget {
 
 /// A supporting figure (the dataviz skill's stat tile): its label, the value, its change, a line of detail.
 class StatTile extends StatelessWidget {
-  const StatTile({super.key, required this.label, required this.value, this.valueKey, this.change, this.detail, this.icon});
+  const StatTile({
+    super.key,
+    required this.label,
+    this.value = '',
+    this.number,
+    this.format,
+    this.valueKey,
+    this.change,
+    this.detail,
+    this.icon,
+  });
   final String label;
   final String value;
+
+  /// A number that rolls to its new values (数字滚动, S30), shown through [format]; [value] is not used then.
+  final num? number;
+  final String Function(num)? format;
 
   /// The value's key; `kpi-<label>` by default.
   final Key? valueKey;
@@ -336,7 +363,7 @@ class StatTile extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(value, key: valueKey ?? ValueKey<String>('kpi-$label'), style: theme.textTheme.headlineSmall),
+            child: _figure(label, value, number, format, valueKey, theme.textTheme.headlineSmall),
           ),
           if (change != null) ...[const SizedBox(height: Space.xs), ChangeLabel(change!)],
           if (detail != null) ...[
