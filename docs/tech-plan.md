@@ -58,6 +58,7 @@ finishing steps, when to push): [.claude/skills/dev-workflow/SKILL.md](../.claud
 | S29 内容管理与介绍页       | CMS; the introduction page; 2-day sessions; signing out     | big    | v18.0.0 + summary | done        |
 | S30 交互动效               | the owner's twelve interactions, where the app has them     | big    | v18.0.0 + summary | done        |
 | S31 设置、货币与收据       | settings in the panel; currencies and rates; receipts       | big    | v19.0.0 + summary | done        |
+| S32 更多设置               | sign-in, codes, limits, 内容 and 积分's packs in the panel  | big    | v20.0.0 + summary | in progress |
 
 **Owner (2026-10-30):** 「Lets do S30 first, the UI improvement first, then keep the design principles, then design the
 CMS after」, then 「you can do S29 and S30 all together, then do the full harness when you finish both steps」. S30's
@@ -2635,6 +2636,36 @@ choose the main displayed currencies for dashboard.」 Begun once v18.0.0 was pu
   used while the service can't be reached; tests never call it.
 - **充值 stays simulated** until the owner's Phase 4 payments (rule 9): a receipt is for the simulated purchase. 增加积分
   by an admin is no purchase and is never on a receipt.
+
+## S32 更多设置 (big → v20.0.0)
+
+**Owner request (2026-10-31, S31's, carried on):** 「Extract as much configurations as possible … we should be able to
+change it in the dashboard controlling panel」. S31 took out nine settings and named what was left: the captcha
+thresholds, the follow-up limit and 积分's packs. S32 takes those out and the limits beside them. Begun after v19.0.0
+was pushed (the owner: 「Continue」).
+
+| WP     | What                                                                                                                |
+| ------ | ------------------------------------------------------------------------------------------------------------------- |
+| WP32.1 | 登录: the failures before 人机验证, the failures before a pause, and the minutes they count over                    |
+| WP32.2 | 验证码: how long a code lasts, its tries, the wait for another, how many to one place an hour, to one account a day |
+| WP32.3 | 限额: 追问 per reading, records per mail, the 积分 an admin may add at once (the account page reads it)             |
+| WP32.4 | 内容: a text's length and an image's size in 内容                                                                   |
+| WP32.5 | 积分: the 充值 packs in the panel (a new kind of setting), checked as at start; prices follow at once               |
+| WP32.6 | records, the stage summary; pushed                                                                                  |
+
+- **Read live,** as S31's: each is read where it is used, so a change holds from the next request. The constants they
+  replace go, and config/settings.json is their one home (the packs' default stays in config/points.json).
+- **What stays out, and why:**
+  - the pricing terms (the margin of at least 50 %, the payment fee, VAT, the dollar rate): the owner's terms and the
+    tax rules;
+  - the password's and the questions' lengths: the app checks them before sending, so it would need them from the
+    server first;
+  - the 24 months reports are kept: docs/data-retention.md, the legal work;
+  - the review switch (CLAUDE.md rule 2) and the region rules (rule 3): the owner's;
+  - the server's own workings: the access token's 15 minutes, the online check every 5 minutes, the rates' retry.
+- **Acceptance:** each new setting has its default in config/settings.json, fits its range, and a change through
+  `/v1/admin/settings` changes what the server does on the next request (a test per WP); the 设置 page shows the new
+  groups; harness PASS.
 
 ## 阶段总结 (stage summaries)
 
