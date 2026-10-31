@@ -58,6 +58,28 @@ void main() {
     expect(inRow('maintenance.until', find.text(localTime(at))), findsOneWidget);
   });
 
+  // S36 (the owner: 「大师后台设置页面，在超大屏幕时，该grid 布局，目的：减少下滑试时间去查找。 UI friendly，更精准locate
+  // sections」).
+  testWidgets('a wide window shows the groups in two columns; 跳到 brings a group into view; narrower, one column', (tester) async {
+    await pumpAdmin(tester, size: const Size(1920, 900));
+    await go(tester, '设置');
+    expect(find.byKey(const ValueKey<String>('settings-column-1')), findsOneWidget);
+    final first = tester.getRect(find.byKey(const ValueKey<String>('group-maintenance')));
+    final second = tester.getRect(find.byKey(const ValueKey<String>('group-sessions')));
+    expect(second.left, greaterThan(first.right), reason: '登录 beside 维护');
+    // 跳到 is in the panel, which stays in view.
+    await tester.tap(find.byKey(const ValueKey<String>('jump-points')));
+    await tester.pumpAndSettle();
+    final points = tester.getRect(find.byKey(const ValueKey<String>('group-points')));
+    expect(points.top, inInclusiveRange(0, 900 - 100), reason: '积分 brought into view');
+
+    await tester.pumpWidget(const SizedBox());
+    await pumpAdmin(tester, size: const Size(1280, 900));
+    await go(tester, '设置');
+    expect(find.byKey(const ValueKey<String>('settings-column-1')), findsNothing);
+    expect(find.byKey(const Key('settings-jump')), findsOneWidget);
+  });
+
   testWidgets('a number kept with 保存; out of range, the server\'s words under it; 恢复默认 puts it back', (tester) async {
     final f = await openSettings(tester);
     await tester.enterText(find.byKey(const ValueKey<String>('setting-sessions.idle_days-field')), '0.5');

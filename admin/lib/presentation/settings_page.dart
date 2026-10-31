@@ -33,45 +33,118 @@ const _groups = [
 /// checkbox on different accepted currencies by admin … Admin can choose the main displayed currencies for
 /// dashboard」): every setting by group, each with its control, its default and 恢复默认. A change holds on the server
 /// from the next request on. In the panel: what answers AI calls now, and the day of the rates 充值 uses.
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  /// Where 跳到 takes each group (S36).
+  final _targets = {for (final (group, _) in _groups) group: JumpTarget()};
+
+  @override
+  void dispose() {
+    for (final t in _targets.values) {
+      t.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final listing = ref.watch(settingsProvider);
     void retry() => ref.invalidate(settingsProvider);
+    List<(String, String)> shown(SettingsListing l) => [for (final g in _groups) if (l.settings.any((s) => s.group == g.$1)) g];
+    Widget card(SettingsListing l, (String, String) g) => _targets[g.$1]!.wrap(
+          AppCard(
+            key: ValueKey<String>('group-${g.$1}'),
+            title: g.$2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final (i, s) in l.settings.where((s) => s.group == g.$1).indexed) ...[
+                  if (i > 0) const Divider(height: Space.xl),
+                  _SettingRow(s),
+                ],
+              ],
+            ),
+          ),
+        );
+    // S36 (the owner: 「大师后台设置页面，在超大屏幕时，该grid 布局，目的：减少下滑试时间去查找。 UI friendly，更精准locate
+    // sections」): 跳到 in the panel, which keeps in view as the groups scroll (under the header on a narrow window), and
+    // the groups in two columns where there is room.
     return DashboardLayout(
+      narrowAt: 1,
       main: [
         const PageHeader('设置', subtitle: 'config/settings.json 和 .env 里的设置。这里改了，服务器从下一个请求起就用新的值；可以恢复默认。'),
         AsyncView(
           listing,
           onRetry: retry,
-          data: (l) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final (group, name) in _groups)
-                if (l.settings.any((s) => s.group == group))
-                  AppCard(
-                    key: ValueKey<String>('group-$group'),
-                    title: name,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final (i, s) in l.settings.where((s) => s.group == group).indexed) ...[
-                          if (i > 0) const Divider(height: Space.xl),
-                          _SettingRow(s),
-                        ],
-                      ],
+          data: (l) => LayoutBuilder(
+            builder: (context, box) {
+              final groups = shown(l);
+              if (box.maxWidth < _twoColumnsFrom) {
+                return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final g in groups) card(l, g)]);
+              }
+              // Each group, in its order, to the shorter column.
+              final columns = [<(String, String)>[], <(String, String)>[]];
+              final rows = [0, 0];
+              for (final g in groups) {
+                final c = rows[0] <= rows[1] ? 0 : 1;
+                columns[c].add(g);
+                rows[c] += _rowsOf(l, g.$1);
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final (i, c) in columns.indexed) ...[
+                    if (i > 0) const SizedBox(width: Space.xl),
+                    Expanded(
+                      key: ValueKey<String>('settings-column-$i'),
+                      child: FocusTraversalGroup(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final g in c) card(l, g)]),
+                      ),
                     ),
-                  ),
-            ],
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ],
-      aside: [AsyncView(listing, onRetry: retry, data: (l) => _Now(l))],
+      aside: [
+        AsyncView(
+          listing,
+          onRetry: retry,
+          data: (l) => PanelSection(
+            first: true,
+            title: '跳到',
+            child: Wrap(
+              key: const Key('settings-jump'),
+              spacing: Space.s,
+              runSpacing: Space.s,
+              children: [
+                for (final (group, name) in shown(l))
+                  ActionChip(key: ValueKey<String>('jump-$group'), label: Text(name), onPressed: () => _targets[group]!.jump()),
+              ],
+            ),
+          ),
+        ),
+        AsyncView(listing, onRetry: retry, data: (l) => _Now(l)),
+      ],
     );
   }
 }
+
+/// The main column's width from which 设置's groups sit in two columns (S36; from a window of about 1440): each
+/// then at least as wide as a setting's field and its buttons, or the packs' editor (400), need.
+const _twoColumnsFrom = 880.0;
+
+/// How tall a group is, near enough to share them out: a setting a row, the packs' editor four.
+int _rowsOf(SettingsListing l, String group) =>
+    l.settings.where((s) => s.group == group).fold(0, (n, s) => n + (s.type == 'packs' ? 4 : 1));
 
 /// What answers AI calls now, and the day of the rates 充值 uses.
 class _Now extends StatelessWidget {
@@ -96,7 +169,6 @@ class _Now extends StatelessWidget {
     final mock = l.serving == null || l.serving == 'mock';
     final date = l.ratesDate;
     return PanelSection(
-      first: true,
       title: '现在',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
