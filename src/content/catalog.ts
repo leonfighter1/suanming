@@ -51,10 +51,8 @@ export function looksLike(type: string, data: Buffer): boolean {
   return false;
 }
 
-/** The types and the size an image may have. */
+/** The types an image may have; its size and a text's length are 设置's (content.*, S32). */
 export const CONTENT_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
-export const CONTENT_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
-export const CONTENT_TEXT_MAX = 2000;
 
 /** A message's placeholders, {name} …, each once, in order. */
 export function placeholdersOf(text: string): string[] {

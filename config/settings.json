@@ -25,6 +25,10 @@
     "followups_per_reading": 20,
     "grant_max": 1000000
   },
+  "content": {
+    "text_max": 2000,
+    "image_max_mb": 2
+  },
   "currencies": {
     "accepted": ["CNY", "HKD", "TWD", "SGD", "MYR", "USD"],
     "service_charge_percent": 5,

@@ -2619,7 +2619,7 @@ components:
           type: string
         group:
           type: string
-          enum: [sessions, codes, ai, limits, currencies]
+          enum: [sessions, codes, ai, limits, content, currencies]
         type:
           type: string
           enum: [number, boolean, choice, choices]

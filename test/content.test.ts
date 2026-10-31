@@ -206,6 +206,38 @@ describe("the CMS's API", () => {
       (await call("integ", "/v1/admin/content/images/poster", "PUT", PNG, "image/png")).status,
     ).toBe(404);
   });
+
+  it("takes a text's length and an image's size from 设置, from the next request (S32 WP32.4)", async () => {
+    const put = (key: string, value: number) =>
+      call("boss", `/v1/admin/settings/${key}`, "PUT", { value });
+    await put("content.text_max", 50);
+    await put("content.image_max_mb", 0.1);
+    try {
+      const listing = (await (await call("integ", "/v1/admin/content")).json()) as {
+        image_max_bytes: number;
+      };
+      expect(listing.image_max_bytes).toBe(Math.round(0.1 * 1024 * 1024));
+      const text = (n: number) =>
+        call("integ", "/v1/admin/content/texts/homeTarot/zh-Hans", "PUT", { text: "塔".repeat(n) });
+      expect((await text(51)).status).toBe(400);
+      expect((await text(50)).status).toBe(200);
+      const image = (bytes: number) =>
+        call(
+          "integ",
+          "/v1/admin/content/images/banner",
+          "PUT",
+          Buffer.concat([PNG, Buffer.alloc(bytes)]),
+          "image/png",
+        );
+      expect((await image(200 * 1024)).status).toBe(413);
+      expect((await image(50 * 1024)).status).toBe(200);
+    } finally {
+      for (const key of ["content.text_max", "content.image_max_mb"])
+        await call("boss", `/v1/admin/settings/${key}`, "DELETE");
+      await call("integ", "/v1/admin/content/texts/homeTarot/zh-Hans", "DELETE");
+      await call("integ", "/v1/admin/content/images/banner", "DELETE");
+    }
+  });
 });
 
 describe("the database keeps them", () => {

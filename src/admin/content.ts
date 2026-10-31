@@ -6,11 +6,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { UserRecord } from "../auth/service.js";
 import {
-  CONTENT_IMAGE_MAX_BYTES,
   CONTENT_IMAGE_TYPES,
   CONTENT_IMAGES,
   CONTENT_LOCALES,
-  CONTENT_TEXT_MAX,
   contentImageUrl,
   contentText,
   contentTexts,
@@ -22,6 +20,12 @@ import {
 import { HttpError, readBody, readJson, send } from "../http/util.js";
 import type { AdminContext } from "./routes.js";
 import { loginOf } from "./stats.js";
+
+/** What 内容管理 takes now (设置, S32): a text's characters, an image's bytes. */
+const limits = (ctx: AdminContext) => ({
+  text: ctx.settings.number("content.text_max"),
+  imageBytes: Math.round(ctx.settings.number("content.image_max_mb") * 1024 * 1024),
+});
 
 /** The CMS's routes; false for any other path. */
 export async function contentAdminRoute(
@@ -38,7 +42,7 @@ export async function contentAdminRoute(
       locales: CONTENT_LOCALES,
       // What an image may be, for the dashboard to say before one is picked.
       image_types: CONTENT_IMAGE_TYPES,
-      image_max_bytes: CONTENT_IMAGE_MAX_BYTES,
+      image_max_bytes: limits(ctx).imageBytes,
       texts: contentTexts().map((t) => ({
         ...t,
         changed: Object.fromEntries(
@@ -65,8 +69,9 @@ export async function contentAdminRoute(
       const body = (await readJson(req)) as Record<string, unknown>;
       const value = typeof body.text === "string" ? body.text.trim() : "";
       if (!value) throw new HttpError(400, "text is required");
-      if ([...value].length > CONTENT_TEXT_MAX) {
-        throw new HttpError(400, `text must be at most ${CONTENT_TEXT_MAX} characters`);
+      const most = limits(ctx).text;
+      if ([...value].length > most) {
+        throw new HttpError(400, `text must be at most ${most} characters`);
       }
       // The app fills its placeholders in: a text without one, or with one it doesn't know, would show wrong.
       const want = [...known.placeholders].sort().join();
@@ -105,7 +110,7 @@ export async function contentAdminRoute(
       if (!(CONTENT_IMAGE_TYPES as readonly string[]).includes(type)) {
         throw new HttpError(415, `an image is ${CONTENT_IMAGE_TYPES.join(", ")}`, "image_type");
       }
-      const data = await readBody(req, CONTENT_IMAGE_MAX_BYTES);
+      const data = await readBody(req, limits(ctx).imageBytes);
       if (!looksLike(type, data)) throw new HttpError(400, `this is not a ${type} picture`, "image_type");
       const at = ctx.now().toISOString();
       await ctx.store.putContentImage({ key, type, data, updated_at: at, updated_by: me.id });

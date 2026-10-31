@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { MODELS } from "../ai/models.js";
 import { CURRENCY_CODES } from "../currency/catalog.js";
 
-export type SettingGroup = "sessions" | "codes" | "ai" | "limits" | "currencies";
+export type SettingGroup = "sessions" | "codes" | "ai" | "limits" | "content" | "currencies";
 
 interface Common {
   /** `group.name`, as config/settings.json nests it. */
@@ -204,6 +204,28 @@ export const SETTINGS = [
     unit: "积分",
     label: "一次最多增加的积分",
     about: "管理后台给一个账户增加积分时，一次最多加这么多。",
+  },
+  // 内容 (S32 WP32.4): what 内容管理 takes (src/admin/content.ts).
+  {
+    key: "content.text_max",
+    group: "content",
+    type: "number",
+    integer: true,
+    min: 50,
+    max: 20_000,
+    unit: "字",
+    label: "一段文字最长几个字",
+    about: "在内容里改一段文字时，最多这么多个字。",
+  },
+  {
+    key: "content.image_max_mb",
+    group: "content",
+    type: "number",
+    min: 0.1,
+    max: 10,
+    unit: "MB",
+    label: "一张图片最大多少",
+    about: "在内容里换的横幅和标志图片，一张最大这么多 MB；图片越大，应用打开时显示得越慢。",
   },
   // The owner's AI switches (CLAUDE.md rule 5): unset, .env's, read live (src/service/runtime.ts withPanel).
   {

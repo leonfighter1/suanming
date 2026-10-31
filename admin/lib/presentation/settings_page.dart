@@ -13,7 +13,14 @@ import 'widgets/common.dart';
 import 'widgets/dashboard.dart';
 
 /// The groups, in the page's order, with their names.
-const _groups = [('sessions', '登录'), ('codes', '验证码'), ('ai', 'AI'), ('limits', '限额'), ('currencies', '货币')];
+const _groups = [
+  ('sessions', '登录'),
+  ('codes', '验证码'),
+  ('ai', 'AI'),
+  ('limits', '限额'),
+  ('content', '内容'),
+  ('currencies', '货币'),
+];
 
 /// 设置 (tech plan S31; the owner: 「Move all the configurations into separate files, CMS controlling panel is able to
 /// read and adjust those values … we can switch the AI modal in the panel as well. turn on or off the Modal mocking.
